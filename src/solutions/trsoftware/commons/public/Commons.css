@@ -1,0 +1,3 @@
+.ImageButton {cursor:pointer; display:block;} /* if display:block; isn't set here, and if the widget is inside a td, Chrome makes the td height 3 pixels taller than the image */
+/* NOTE: unable to control the opacity in IE when using ImageBundle (IE6 crashes and IE8 puts an ugly gray border around the image if we apply filter:alpha(opacity=50) ) */
+.ImageButton:hover {opacity:.5;}

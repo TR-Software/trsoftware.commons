@@ -1,0 +1,38 @@
+<module>
+  <inherits name='com.google.gwt.user.User'/>
+  <inherits name="com.google.gwt.json.JSON"/>
+  <inherits name="com.google.common.collect.Collect"/>
+  <inherits name="solutions.trsoftware.gwt.stacktrace.StackTraceDeobfuscator"/>
+
+  <!-- TODO: attempting to make styles for all Commons widgets available to all inheriting modules-->
+  <stylesheet src="Commons.css"/>
+
+  <!-- TODO: remove this after upgrading to GWT 1.6, see: http://code.google.com/p/google-web-toolkit/issues/detail?id=2862 -->
+  <set-property name="gwt.suppressNonStaticFinalFieldWarnings" value="true" />
+
+  <!-- Enable support for bridge types (see BridgeTypeFactory) -->
+  <super-source path="translatable" />
+  <!-- The source path doesn't default to "client" in the presence of the "bridge" package -->
+  <source path="client"/>
+  <!--TODO: move all the non-client (i.e. non UI) code from "client" to "shared" (and maybe exclude the "client" package from server-side build?) -->
+  <source path="shared"/>
+
+  <generate-with class="solutions.trsoftware.commons.rebind.util.template.TemplateBundleGenerator" >
+    <when-type-assignable class="solutions.trsoftware.commons.client.util.template.TemplateBundle"/>
+  </generate-with>
+
+  <generate-with class="solutions.trsoftware.commons.rebind.UserAgentPermutationOracleGenerator" >
+    <when-type-assignable class="solutions.trsoftware.commons.client.useragent.UserAgentPermutationOracle"/>
+  </generate-with>
+
+  <replace-with class="solutions.trsoftware.commons.client.event.BackspaceBlockerFirefoxImpl">
+		<when-type-is class="solutions.trsoftware.commons.client.event.BackspaceBlocker"/>
+    <when-property-is name="user.agent" value="gecko1_8"/>
+  </replace-with>
+
+  <!-- The implementation for the global event bus in solutions.trsoftware.commons.client.event.Events.BUS (might want to replace with a different implementation for unit tests)-->
+  <replace-with class="com.google.web.bindery.event.shared.SimpleEventBus">
+    <when-type-is class="com.google.web.bindery.event.shared.EventBus"/>
+  </replace-with>
+
+</module>

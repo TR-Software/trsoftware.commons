@@ -1,0 +1,115 @@
+package solutions.trsoftware.commons.server.util.persistence;
+
+import solutions.trsoftware.commons.client.util.callables.Function1;
+import solutions.trsoftware.commons.server.io.ServerIOUtils;
+import solutions.trsoftware.commons.server.testutil.TempFileTestCase;
+
+import java.io.File;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+
+/**
+ * Nov 4, 2009
+ *
+ * @author Alex
+ */
+public class SmartStringListResourceTest extends TempFileTestCase {
+
+  private static final String colonSeparatedFilename = "colonSeparatedStringsMultiline.txt";
+  /**
+   * All of these files conain the strings "foo", "bar", "baz", but formatted
+   * differenly
+   */
+  private static final String[] defaultSeparatorFilenames = new String[]{
+      "commaSeparatedStrings.txt",
+      "commaAndSpaceSeparatedStrings.txt",
+      "commaSeparatedStringsMultiline.txt"
+  };
+
+  public void testCommaSeparatedStringResources() throws Exception {
+    for (String filename : defaultSeparatorFilenames) {
+      SmartStringListResource<List<String>> slr = newStringListResource(filename);
+      assertContains(slr, "foo", "bar", "baz");  // the whitespace got trimmed from the second line
+    }
+  }
+
+  public void testCommaSeparatedStringResourceWithParser() throws Exception {
+    for (String filename : defaultSeparatorFilenames) {
+      SmartStringListResource<Set<String>> slr = new SmartStringListResource<Set<String>>(
+          getFile(filename),
+          new Function1<List<String>, Set<String>>() {
+            public Set<String> call(List<String> arg) {
+              return new HashSet<String>(arg);
+            }
+          });
+      assertContains(slr, "foo", "bar", "baz");  // the whitespace got trimmed from the second line
+    }
+  }
+
+  public void testColonSeparatedStringResources() throws Exception {
+    SmartStringListResource<List<String>> slr = newStringListResource(colonSeparatedFilename, ":");
+    assertContains(slr, "foo", "bar", "  baz");  // the whitespace didn't get trimmed from the second line because space isn't a separator here
+  }
+
+  public void testAdd() throws Exception {
+    String lineSeparator = System.getProperty("line.separator");
+    String tempFileContent = "foo, bar, baz" + lineSeparator + "asdf" + lineSeparator + "a,s,d, f";
+    writeTempFile(tempFileContent);
+    SmartStringListResource<List<String>> slr = new SmartStringListResource<List<String>>(tempFile);
+    assertContains(slr, "foo", "bar", "baz", "asdf", "a", "s", "d", "f");
+    // add another string to the resource
+    slr.add("qwer");
+    // make sure the change has been reflected in memory
+    assertContains(slr, "foo", "bar", "baz", "asdf", "a", "s", "d", "f", "qwer");
+    // and persisted to disk
+    assertEquals("foo, bar, baz" + lineSeparator + "asdf" + lineSeparator + "a,s,d, f,qwer", readTempFile());
+  }
+
+  public void testRemove() throws Exception {
+    String lineSeparator = System.getProperty("line.separator");
+    String tempFileContent = "foo, bar, baz" + lineSeparator + "asdf" + lineSeparator + "a,s,d, f";
+    writeTempFile(tempFileContent);
+    SmartStringListResource<List<String>> slr = new SmartStringListResource<List<String>>(tempFile);
+    assertContains(slr, "foo", "bar", "baz", "asdf", "a", "s", "d", "f");
+
+    // remove a string from the resource
+    slr.remove("bar");
+    // make sure the change has been persisted to disk
+    // (platform specific line breaks will be inserted)
+    assertEquals("foo, baz" + lineSeparator + "asdf" + lineSeparator + "a,s,d, f", readTempFile());
+    // and reflected in memory
+    assertContains(slr, "foo", "baz", "asdf", "a", "s", "d", "f");
+
+    // removing a string that doesn't exist should have no effect
+    slr.remove("as");
+    assertEquals("foo, baz" + lineSeparator + "asdf" + lineSeparator + "a,s,d, f", readTempFile());
+    assertContains(slr, "foo", "baz", "asdf", "a", "s", "d", "f");
+
+    // removing a string that's a substring of another should not modify the superstring
+    slr.remove("a");
+    assertEquals("foo, baz" + lineSeparator + "asdf" + lineSeparator + "s,d, f", readTempFile());
+    assertContains(slr, "foo", "baz", "asdf", "s", "d", "f");
+  }
+
+  private SmartStringListResource<List<String>> newStringListResource(String filename, String separators) {
+    return new SmartStringListResource<List<String>>(getFile(filename), null, separators);
+  }
+
+  private File getFile(String filename) {
+    return new File(ServerIOUtils.filenameInPackageOf(filename, getClass()));
+  }
+
+  private SmartStringListResource<List<String>> newStringListResource(String filename) {
+    return new SmartStringListResource<List<String>>(getFile(filename), null);
+  }
+
+  private void assertContains(SmartStringListResource<? extends Collection<String>> slr, String... strings) {
+    Collection<String> value = slr.getStrings();
+    assertEquals(strings.length, value.size());
+    for (String string : strings) {
+      assertTrue(value.contains(string));
+    }
+  }
+}

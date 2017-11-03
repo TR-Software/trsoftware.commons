@@ -1,0 +1,56 @@
+package solutions.trsoftware.commons.client.cache;
+
+import solutions.trsoftware.commons.Slow;
+import solutions.trsoftware.commons.client.bridge.util.RandomGen;
+import solutions.trsoftware.commons.server.testutil.MultithreadedTestHarness;
+import junit.framework.TestCase;
+
+import java.util.Map;
+import java.util.Set;
+import java.util.concurrent.atomic.AtomicInteger;
+
+/**
+ * Feb 20, 2009
+ *
+ * @author Alex
+ */
+public class FixedSizeLruCacheJavaTest extends TestCase {
+
+  public void testCache() throws Exception {
+    final FixedSizeLruCache<String, Integer> cache = new FixedSizeLruCache<String, Integer>(3);
+    FixedSizeLruCacheGwtTest.checkLruConsistency(cache, cache.getSizeLimit());
+  }
+
+  @Slow
+  public void testCacheMultithreaded() throws Exception {
+    checkCacheMultithreading(3, 2, 10000);
+    checkCacheMultithreading(3, 32, 10000);
+    checkCacheMultithreading(1000, 32, 10000);
+  }
+
+  public static void checkCacheMultithreading(int sizeLimit, int nThreads, int iterationsPerThread) throws Exception {
+    // make sure that no exceptions arise from multithreading
+    final Map<Integer, Integer> cache = new FixedSizeLruCache<Integer, Integer>(sizeLimit);
+    final int nKeys = sizeLimit * 2;
+    final AtomicInteger[] lastValueForEachKey = new AtomicInteger[nKeys];
+    for (int i = 0; i < nKeys; i++) {
+      lastValueForEachKey[i] = new AtomicInteger();
+    }
+    assertTrue(
+        new MultithreadedTestHarness(new Runnable() {
+          public void run() {
+            int idx = RandomGen.getInstance().nextInt(nKeys);
+            synchronized (cache) {
+              cache.put(idx, lastValueForEachKey[idx].incrementAndGet());
+            }
+          }
+        }).run(nThreads, iterationsPerThread).isEmpty());
+    // check consistency: make sure that for each key in the cache, it's the last value that was put in there
+    synchronized (cache) {
+      Set<Map.Entry<Integer, Integer>> cacheEntries = cache.entrySet();
+      for (Map.Entry<Integer, Integer> entry : cacheEntries) {
+        assertEquals(lastValueForEachKey[entry.getKey()].get(), (int)entry.getValue());
+      }
+    }
+  }
+}

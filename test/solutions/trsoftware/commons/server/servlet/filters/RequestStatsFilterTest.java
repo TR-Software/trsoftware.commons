@@ -1,0 +1,71 @@
+package solutions.trsoftware.commons.server.servlet.filters;
+
+import junit.framework.TestCase;
+import solutions.trsoftware.commons.client.util.stats.HashCounter;
+import solutions.trsoftware.commons.server.servlet.testutil.DummyFilterChain;
+import solutions.trsoftware.commons.server.servlet.testutil.DummyHttpServletRequest;
+import solutions.trsoftware.commons.server.servlet.testutil.DummyHttpServletResponse;
+import solutions.trsoftware.commons.server.stats.HierarchicalCounter;
+import solutions.trsoftware.commons.server.stats.HierarchicalCounterTest;
+import solutions.trsoftware.commons.shared.util.RandomUtils;
+import solutions.trsoftware.commons.shared.util.text.Alphabet;
+
+import javax.servlet.FilterChain;
+
+import java.util.Random;
+
+import static solutions.trsoftware.commons.shared.util.RandomUtils.randString;
+
+/**
+ * Unit tests for {@link RequestStatsFilter}
+ *
+ * @author Alex, 10/31/2017
+ */
+public class RequestStatsFilterTest extends TestCase {
+
+  private RequestStatsFilter filter;
+  private DummyFilterChain filterChain;
+
+  public void setUp() throws Exception {
+    super.setUp();
+    filter = new RequestStatsFilter();
+    filterChain = new DummyFilterChain();
+  }
+
+  public void tearDown() throws Exception {
+    filter = null;
+    filterChain = null;
+    super.tearDown();
+  }
+
+  public void testDoHttpFilter() throws Exception {
+    // generate some random URIs
+    String[] uris = new String[10];
+    for (int i = 0; i < uris.length; i++) {
+      uris[i] = "";
+      int nPathFragmets = RandomUtils.nextIntInRange(1, 4);
+      for (int j = 0; j < nPathFragmets; j++) {
+        String pathFragment = randString(RandomUtils.nextIntInRange(3, 5), Alphabet.LETTERS_AND_NUMBERS.getChars());
+        uris[i] += "/" + pathFragment;
+      }
+    }
+    HashCounter<String> ourCounts = new HashCounter<>(); // will be used to verify the counters produced by our RequestStatsFilter
+    int n = 1000;
+    for (int i = 0; i < n; i++) {
+      String uri = RandomUtils.randomElement(uris);
+      ourCounts.increment(uri);
+      filter.doHttpFilter(new DummyHttpServletRequest(uri), new DummyHttpServletResponse(), filterChain);
+    }
+    assertEquals(n, filterChain.getInvocationCount());  // the filter chain should have been invoked every time
+    HierarchicalCounter requestCounts = filter.getRequestCounts();
+    // print the counter hierarchy
+    HierarchicalCounterTest.printCounters(requestCounts, null);
+    assertEquals(n, requestCounts.getCount());  // the root contain should contain the sum of all the per-URI counts
+    assertEquals(uris.length, requestCounts.getNumChildren());
+    // now verify the counts for each URI
+    for (String uri : uris) {
+      assertEquals(ourCounts.get(uri), requestCounts.getChild(uri).getCount());
+    }
+  }
+
+}

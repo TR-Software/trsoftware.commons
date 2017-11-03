@@ -1,0 +1,21 @@
+.TypingLogReplayPlayer .lblSectionHeading {font-weight: bold; text-decoration: underline;}
+.TypingLogReplayPlayer .lblStatusIndicator {font-weight: bold;}
+.TypingLogReplayPlayer .statusIndicator {font-style: italic; margin: 0 5px;}
+.TypingLogReplayPlayer .AnimationSpeedSelector {cursor: pointer;}
+.TypingLogReplayPlayer .TypingDisplaySection {border: 1px solid darkgray; border-radius: 4px;}
+.TypingLogReplayPlayer .TextDisplay {cursor: text; font-family: monospace; font-size: 125%;}
+.TypingLogReplayPlayer .TypingEditDisplay {font-family: monospace; font-size: 125%;}
+/* add a border-right style to the acceptedChars span to show a cursor of where the replay is in the overall text */
+.TypingLogReplayPlayer .TextDisplay .acceptedChars {border-right: 1px blue solid; color: #99cc00}
+.TypingLogReplayPlayer .TypingEditDisplay .errChar-ins {border-left: 1px red solid;}
+.TypingLogReplayPlayer .TypingEditDisplay .errChar-del {background-color: #f0a3a3;}
+.TypingLogReplayPlayer .TypingEditDisplay .errChar-sub {background-color: #f0a3a3;}
+.TypingLogReplayPlayer .WordsWithErrors .replayWord {cursor: pointer;}
+.TypingLogReplayPlayer .ImageButton {
+  margin: 0 2px;
+  border: 1px solid darkgray;
+  border-radius: 4px;
+}
+/* TODO: move the .ImageButton styles to Commons.css */
+.ImageButton {cursor:pointer; display:block;}
+.ImageButton:hover {opacity:.5;}

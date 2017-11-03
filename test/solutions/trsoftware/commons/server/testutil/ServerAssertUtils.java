@@ -1,0 +1,133 @@
+package solutions.trsoftware.commons.server.testutil;
+
+import solutions.trsoftware.commons.server.util.reflect.MemberSet;
+import solutions.trsoftware.commons.server.util.reflect.ObjectDiffs;
+
+import static solutions.trsoftware.commons.client.util.StringUtils.join;
+import static junit.framework.Assert.*;
+
+import java.lang.reflect.*;
+import java.util.List;
+import java.util.function.BiConsumer;
+import java.util.function.BiFunction;
+import java.util.regex.Pattern;
+
+/**
+ * Date: Nov 28, 2008 Time: 6:25:03 PM
+ *
+ * @author Alex
+ */
+public abstract class ServerAssertUtils {
+
+  /**
+   * Asserts that the given instances have equal values for all public members of their class.
+   */
+  public static <T> void assertEqualsByReflection(T expected, T actual) throws Exception {
+    assertEqualsByReflection(expected, actual, new MemberSet<T>(assertSameType(expected, actual)).excludeMethodsInheritedFromObject());
+  }
+
+  /**
+   * Asserts that the given instances have equal values for all public instance fields members matching the given spec.
+   */
+  public static <T> void assertEqualsByReflection(T expected, T actual, MemberSet<T> memberSpec) throws Exception {
+    assertEqualsByReflection(expected, actual, new ObjectDiffs().addReflectionSpec(memberSpec));
+  }
+
+  /**
+   * Asserts that the given instances have equal values for all public instance fields members matching the given spec.
+   */
+  public static <T> void assertEqualsByReflection(T expected, T actual, ObjectDiffs differ) throws Exception {
+    Class<T> type = assertSameType(expected, actual);
+    MemberSet reflectionSpecForType = differ.getReflectionSpecFor(type);
+    assertEquals(type, reflectionSpecForType.getType());
+    assertFalse(reflectionSpecForType.getFilteredMembers().isEmpty());
+    ObjectDiffs.Result diffs = differ.diffValues(expected, actual);
+    assertTrue(diffs.toString(), diffs.isEmpty());
+  }
+
+  public static <T> Class<T> assertSameType(T expected, T actual) {
+    assertNotNull(expected);
+    assertNotNull(actual);
+    final Class<T> expectedClass = (Class<T>)expected.getClass();
+    assertEquals(expectedClass, actual.getClass());
+    return expectedClass;
+  }
+
+  /**
+   * Specifies how two instances of a class should be compared by reflection.
+   *
+   * By default, matches all instance fields and all non-void 0-arg instance methods, but that behavior can be adjusted
+   * with methods like {@link #includeFieldsMatching(Pattern)} or {@link #excludeAllMethods()}).
+   */
+  public static class EqualsByReflectionSpec {
+    public static final Pattern NOTHING = Pattern.compile("a^");  // see http://stackoverflow.com/a/940840/1965404
+    public static final Pattern EVERYTHING = Pattern.compile(".*");
+
+    private Pattern fieldsToInclude = EVERYTHING;
+    private Pattern fieldsToExclude = NOTHING;
+    private Pattern methodsToInclude = EVERYTHING;
+    private Pattern methodsToExclude = NOTHING;
+
+    private boolean matches(Field field) {
+      return memberNotStaticAndNameMatches(field, fieldsToInclude, fieldsToExclude);
+    }
+
+    private boolean matches(Method method) {
+      return method.getParameterTypes().length == 0
+          && method.getReturnType() != Void.TYPE
+          && memberNotStaticAndNameMatches(method, methodsToInclude, methodsToExclude);
+    }
+
+    private static boolean memberNotStaticAndNameMatches(Member member, Pattern namesToInclude, Pattern namesToExclude) {
+      return !Modifier.isStatic(member.getModifiers())
+          && namesToInclude.matcher(member.getName()).matches()
+          && !namesToExclude.matcher(member.getName()).matches();
+    }
+
+    public EqualsByReflectionSpec includeFieldsMatching(Pattern pattern) {
+      assertNotNull(pattern);
+      fieldsToInclude = pattern;
+      return this; // for method chaining
+    }
+
+    public EqualsByReflectionSpec excludeFieldsMatching(Pattern pattern) {
+      assertNotNull(pattern);
+      fieldsToExclude = pattern;
+      return this; // for method chaining
+    }
+
+    public EqualsByReflectionSpec includeMethodsMatching(Pattern pattern) {
+      assertNotNull(pattern);
+      methodsToInclude = pattern;
+      return this; // for method chaining
+    }
+
+    public EqualsByReflectionSpec excludeMethodsMatching(Pattern pattern) {
+      assertNotNull(pattern);
+      methodsToExclude = pattern;
+      return this; // for method chaining
+    }
+
+    public EqualsByReflectionSpec excludeAllMethods() {
+      return includeMethodsMatching(NOTHING);
+    }
+
+    public EqualsByReflectionSpec excludeAllFields() {
+      return includeFieldsMatching(NOTHING);
+    }
+  }
+
+  public static <T> void assertListsEqual(List<T> expected, List<T> actual, BiConsumer<T, T> equalityAssertertion) {
+    assertEquals(expected.size(), actual.size());
+    for (int i = 0; i < expected.size(); i++) {
+      T a = expected.get(i);
+      T b = actual.get(i);
+      try {
+        equalityAssertertion.accept(a, b);
+      }
+      catch (AssertionError ex) {
+        throw new AssertionError(String.format("Lists differ on element %d: expected:<%s> but was:<%s>", i, expected, actual), ex);
+      }
+    }
+  }
+}

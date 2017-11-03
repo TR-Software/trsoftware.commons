@@ -1,0 +1,96 @@
+package solutions.trsoftware.commons.client.widgets;
+
+import com.google.gwt.user.client.ui.Widget;
+
+/**
+ * Uses the builder pattern to set properties on a {@link Widget}, to provide method chaining.
+ * @author Alex, 3/6/2016
+ */
+public class WidgetBuilder<T extends Widget> {
+
+  // TODO: replace as much of the GWT-unclutter lib as possible with this class (e.g. WidgetDecorator and Widgets)
+
+  private final T widget;
+
+  public WidgetBuilder(T widget) {
+    this.widget = widget;
+  }
+
+  /** Factory method to avoid explicitly specifying the type parameter value */
+  public static <T extends Widget> WidgetBuilder<T> build(T widget) {
+    return new WidgetBuilder<T>(widget);
+  }
+
+  /**
+   * Call this at the end of the method chain.
+   *
+   * @return The widget passed to the constructor.
+   */
+  public T get() {
+    return widget;
+  }
+  
+  // provide chained versions of Widget's mutators whose return type is void 
+  // (it doesn't make sense to include those whose return type isn't void):
+
+  public WidgetBuilder<T> addStyleDependentName(String styleSuffix) {
+    widget.addStyleDependentName(styleSuffix);
+    return this;
+  }
+
+  public WidgetBuilder<T> addStyleName(String style) {
+    widget.addStyleName(style);
+    return this;
+  }
+
+  public WidgetBuilder<T> setHeight(String height) {
+    widget.setHeight(height);
+    return this;
+  }
+
+  public WidgetBuilder<T> setPixelSize(int width, int height) {
+    widget.setPixelSize(width, height);
+    return this;
+  }
+
+  public WidgetBuilder<T> setSize(String width, String height) {
+    widget.setSize(width, height);
+    return this;
+  }
+
+  public WidgetBuilder<T> setStyleDependentName(String styleSuffix, boolean add) {
+    widget.setStyleDependentName(styleSuffix, add);
+    return this;
+  }
+
+  public WidgetBuilder<T> setStyleName(String style, boolean add) {
+    widget.setStyleName(style, add);
+    return this;
+  }
+
+  public WidgetBuilder<T> setStyleName(String style) {
+    widget.setStyleName(style);
+    return this;
+  }
+
+  public WidgetBuilder<T> setStylePrimaryName(String style) {
+    widget.setStylePrimaryName(style);
+    return this;
+  }
+
+  public WidgetBuilder<T> setTitle(String title) {
+    widget.setTitle(title);
+    return this;
+  }
+
+  public WidgetBuilder<T> setVisible(boolean visible) {
+    widget.setVisible(visible);
+    return this;
+  }
+
+  public WidgetBuilder<T> setWidth(String width) {
+    widget.setWidth(width);
+    return this;
+  }
+
+}

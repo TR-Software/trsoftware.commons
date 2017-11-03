@@ -1,0 +1,15 @@
+<module>
+  <inherits name="solutions.trsoftware.commons.Commons"/>
+  <inherits name="com.google.gwt.benchmarks.Benchmarks"/>
+
+  <source path="client">
+    <!-- All tests that don't extend GWTTestCase and use code that's not Java-compatible
+     should end in .*JavaTest.java, to be excluded from the GWT compile -->
+    <exclude name="**/*JavaTest.java"/>
+  </source>
+
+  <!-- These servlets are used by unit tests to run code in a JVM instead of GWT -->
+  <servlet path="/numberFormatterServlet"
+           class="solutions.trsoftware.commons.server.bridge.rpc.NumberFormatTestServiceImpl"/>
+  
+</module>

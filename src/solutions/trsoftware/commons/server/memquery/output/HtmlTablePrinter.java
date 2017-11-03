@@ -1,3 +1,20 @@
+/*
+ *  Copyright 2017 TR Software Inc.
+ *
+ *  Licensed under the Apache License, Version 2.0 (the "License"); you may not
+ *  use this file except in compliance with the License. You may obtain a copy of
+ *  the License at
+ *
+ *  http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+ * License for the specific language governing permissions and limitations under
+ * the License.
+ *
+ */
+
 package solutions.trsoftware.commons.server.memquery.output;
 
 import solutions.trsoftware.commons.client.util.StringUtils;
@@ -15,7 +32,7 @@ public class HtmlTablePrinter extends ResultSetPrinter<HtmlTablePrinter> {
    * The values will be used to add a {@code style} attribute to each header cell ({@code <th>} ) corresponding
    * to that column number.
    */
-  private Map<Integer, String> colStyles = new LinkedHashMap<Integer, String>();
+  private Map<Integer, String> colStyles = new LinkedHashMap<>();
 
   /**
    * This will be the value of the {@code style} attribute for the {@code <table>} element.

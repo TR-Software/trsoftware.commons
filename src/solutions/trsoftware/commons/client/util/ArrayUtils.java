@@ -1,8 +1,24 @@
+/*
+ *  Copyright 2017 TR Software Inc.
+ *
+ *  Licensed under the Apache License, Version 2.0 (the "License"); you may not
+ *  use this file except in compliance with the License. You may obtain a copy of
+ *  the License at
+ *
+ *  http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+ * License for the specific language governing permissions and limitations under
+ * the License.
+ *
+ */
+
 package solutions.trsoftware.commons.client.util;
 
-import solutions.trsoftware.commons.shared.util.RandomUtils;
-
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -16,15 +32,14 @@ public class ArrayUtils {
 
   // TODO: change the order of the args and make array a vararg
   /**
-   * Similar to a string "join" operation in dynamic languages.
-   * @deprecated use join(delimiter, array) instead.
+   * @deprecated use {@link StringUtils#join(String, Object[])} instead.
    */
   public static <T> String toString(T[] array, String delimiter) {
     return StringUtils.join(delimiter, array);
   }
 
   public static String toString(int[] array, String delimiter) {
-    StringBuffer str = new StringBuffer();
+    StringBuilder str = new StringBuilder();
     for (int i = 0; i < array.length; i++) {
       str.append(array[i]);
       if (i < array.length-1)
@@ -284,9 +299,7 @@ public class ArrayUtils {
    */
   public static <T> List<T> slice(T[] arr, int startIndex, int endIndex) {
     ArrayList<T> ret = new ArrayList<T>(endIndex - startIndex + 1);
-    for (int i = startIndex; i <= endIndex; i++) {
-      ret.add(arr[i]);
-    }
+    ret.addAll(Arrays.asList(arr).subList(startIndex, endIndex + 1));
     return ret;
   }
 

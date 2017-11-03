@@ -1,3 +1,20 @@
+/*
+ *  Copyright 2017 TR Software Inc.
+ *
+ *  Licensed under the Apache License, Version 2.0 (the "License"); you may not
+ *  use this file except in compliance with the License. You may obtain a copy of
+ *  the License at
+ *
+ *  http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+ * License for the specific language governing permissions and limitations under
+ * the License.
+ *
+ */
+
 package solutions.trsoftware.commons.server.memquery.util;
 
 import solutions.trsoftware.commons.server.memquery.Formatter;
@@ -15,11 +32,7 @@ import java.util.Map;
 public abstract class Formatters {
 
   /** Simply delegates to the each value object's own toString method */
-  public static final Formatter DEFAULT = new Formatter() {
-    @Override
-    public String format(Object value) {
-      return value.toString();    }
-  };
+  public static final Formatter DEFAULT = Object::toString;
 
   /**
    * Registry of formatters for each of the basic printable types (CharSequences and primitives);
@@ -44,13 +57,8 @@ public abstract class Formatters {
 
   private static Formatter getOrCreateSprintfDefault(Class cls, SprintfColFormatter formatter) {
     if (defaults == null)
-      defaults = new HashMap<Class, Formatter>();
-    Formatter ret = defaults.get(cls);
-    if (ret == null) {
-      ret = formatter;
-      defaults.put(cls, ret);
-    }
-    return ret;
+      defaults = new HashMap<>();
+    return defaults.computeIfAbsent(cls, k -> formatter);
   }
 
   private static class AggregationFormatter implements Formatter {
@@ -68,7 +76,7 @@ public abstract class Formatters {
 
   private static Formatter getOrCreateAggregationDefault(Class valueType) {
     if (aggregationDefaults == null)
-      aggregationDefaults = new HashMap<Class, Formatter>();
+      aggregationDefaults = new HashMap<>();
     Formatter ret = aggregationDefaults.get(valueType);
     if (ret == null) {
       ret = new AggregationFormatter(getFor(valueType));

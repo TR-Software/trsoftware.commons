@@ -1,3 +1,20 @@
+/*
+ *  Copyright 2017 TR Software Inc.
+ *
+ *  Licensed under the Apache License, Version 2.0 (the "License"); you may not
+ *  use this file except in compliance with the License. You may obtain a copy of
+ *  the License at
+ *
+ *  http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+ * License for the specific language governing permissions and limitations under
+ * the License.
+ *
+ */
+
 package solutions.trsoftware.commons.client.styles;
 
 import com.google.gwt.user.client.ui.CellPanel;
@@ -24,7 +41,7 @@ public class CellPanelStyle extends WidgetStyle {
   }
 
   /** Applies the style to the given cell panel */
-  public Widget apply(Widget widget) {
+  public <T extends Widget> T apply(T widget) {
     CellPanel targetPanel = (CellPanel) widget;
 
     // apply general widget styles
@@ -34,7 +51,7 @@ public class CellPanelStyle extends WidgetStyle {
     if (spacing != 0)
       targetPanel.setSpacing(spacing);
 
-    return targetPanel;
+    return widget;
   }
 
   public CellPanelStyle setSpacing(int spacing) {

@@ -1,3 +1,20 @@
+/*
+ *  Copyright 2017 TR Software Inc.
+ *
+ *  Licensed under the Apache License, Version 2.0 (the "License"); you may not
+ *  use this file except in compliance with the License. You may obtain a copy of
+ *  the License at
+ *
+ *  http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+ * License for the specific language governing permissions and limitations under
+ * the License.
+ *
+ */
+
 package solutions.trsoftware.commons.server.io;
 
 import solutions.trsoftware.commons.client.util.StringUtils;
@@ -38,7 +55,6 @@ public class ServerIOUtils {
    *
    * @return A writer which outputs to the given file.  This writer
    * must be closed explicitly by the caller.
-   * @throws FileNotFoundException
    */
   public static Writer writeFileUTF8(File file) throws FileNotFoundException {
     return writeFileUTF8(file, false);
@@ -48,7 +64,6 @@ public class ServerIOUtils {
    * Opens a writer that will append to the given file.
    * @return A writer which outputs to the given file.  This writer
    * must be closed explicitly by the caller.
-   * @throws FileNotFoundException
    */
   public static Writer writeFileUTF8(File file, boolean append) throws FileNotFoundException {
     try {
@@ -129,7 +144,7 @@ public class ServerIOUtils {
   /**
    * Can be used for reading a text file into a String.  Closes the reader when finished.
    * Uses an 8K buffer to reduce CPU usage.
-   * WARNING: if given a file reader, the result will contain platform-sepcific
+   * WARNING: if given a file reader, the result will contain platform-specific
    * line break characters (e.g. "\r\n" on Windows)
    */
   public static String readCharactersIntoString(Reader in) throws IOException {
@@ -316,7 +331,7 @@ public class ServerIOUtils {
   }
 
   public static ArrayList<String> readLines(Reader reader, boolean ignoreBlankLines) {
-    ArrayList<String> lines = new ArrayList<String>(2048);
+    ArrayList<String> lines = new ArrayList<>(2048);
     BufferedReader br = null;
     try {
       br = new BufferedReader(reader);

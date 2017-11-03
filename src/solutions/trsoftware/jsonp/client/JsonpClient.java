@@ -1,10 +1,26 @@
+/*
+ *  Copyright 2017 TR Software Inc.
+ *
+ *  Licensed under the Apache License, Version 2.0 (the "License"); you may not
+ *  use this file except in compliance with the License. You may obtain a copy of
+ *  the License at
+ *
+ *  http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+ * License for the specific language governing permissions and limitations under
+ * the License.
+ *
+ */
+
 package solutions.trsoftware.jsonp.client;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.core.client.JavaScriptObject;
 import com.google.gwt.user.client.Random;
 import com.google.gwt.user.client.Timer;
-import solutions.trsoftware.commons.client.exceptions.CommonsUncaughtExceptionHandler;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -69,7 +85,6 @@ public class JsonpClient {
    * be used in the next JSONP call (via JsonpClient.callRemote).
    * This method is needed by users of this class in order to encode
    * the name of the callback into the URL for the JSONP request.
-   * @return
    */
   public String reserveCallbackName() {
     // using a random positive integer to avoid function name clashes
@@ -86,9 +101,9 @@ public class JsonpClient {
     window[jsFunctionName] = function(result) {
       // wrap primitive results so they can be treated as JavaScriptObject instances
       if (typeof result == "number")
-        result = new Number(result)
+        result = new Number(result);
       else if (typeof result == "boolean")
-        result = new Boolean(result)
+        result = new Boolean(result);
       instance.@solutions.trsoftware.jsonp.client.JsonpClient::handleResult(Ljava/lang/String;Lsolutions/trsoftware/jsonp/client/JsonpCallback;Lcom/google/gwt/core/client/JavaScriptObject;)(jsFunctionName, callback, result);
       // clean up - remove the function after it's been called
       window[jsFunctionName] = null;
@@ -115,8 +130,6 @@ public class JsonpClient {
    * This method is called by the native JS callback function.
    * It simply forwards the JSON result to the registered JsonpCallback instance.
    * and cleans up.
-   * @param callbackFunctionName
-   * @param callback
    */
   private void handleResult(String callbackFunctionName, JsonpCallback callback, JavaScriptObject result) {
     // Since this method is not called from GWT we must explicitly catch and handle all
@@ -133,13 +146,12 @@ public class JsonpClient {
       }
     }
     catch (Throwable e) {
-      ((CommonsUncaughtExceptionHandler)GWT.getUncaughtExceptionHandler()).handleException(e, false);
+      GWT.getUncaughtExceptionHandler().onUncaughtException(e);
     }
   }
 
   /**
    * Called by a timer to check if the call is still outstanding.
-   * @param callbackFunctionName
    */
   private void checkForTimeout(String callbackFunctionName) {
     JsonpCallback outstandingCallback = outstandingCallbacks.get(callbackFunctionName);

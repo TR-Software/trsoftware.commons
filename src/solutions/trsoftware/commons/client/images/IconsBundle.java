@@ -1,3 +1,20 @@
+/*
+ *  Copyright 2017 TR Software Inc.
+ *
+ *  Licensed under the Apache License, Version 2.0 (the "License"); you may not
+ *  use this file except in compliance with the License. You may obtain a copy of
+ *  the License at
+ *
+ *  http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+ * License for the specific language governing permissions and limitations under
+ * the License.
+ *
+ */
+
 package solutions.trsoftware.commons.client.images;
 
 import com.google.gwt.core.client.GWT;
@@ -29,11 +46,11 @@ public interface IconsBundle extends ImageBundle {
   AbstractImagePrototype clipboard24();
   AbstractImagePrototype warn24();
   AbstractImagePrototype help24();
-  /** Original: http://commons.wikimedia.org/wiki/File:Pin.JPG */
+//  /** Original: http://commons.wikimedia.org/wiki/File:Pin.JPG */
 //  AbstractImagePrototype pin16();
   /** Original: http://commons.wikimedia.org/wiki/File:Pin.JPG */
   AbstractImagePrototype pin24();
-  /** Original: http://commons.wikimedia.org/wiki/File:Pin.JPG */
+//  /** Original: http://commons.wikimedia.org/wiki/File:Pin.JPG */
 //  AbstractImagePrototype pin32();
   /** Source: http://commons.wikimedia.org/wiki/File:Flag_icon_red_4.svg */
   AbstractImagePrototype red_flag24();

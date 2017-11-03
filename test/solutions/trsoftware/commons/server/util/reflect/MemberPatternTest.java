@@ -1,9 +1,26 @@
+/*
+ *  Copyright 2017 TR Software Inc.
+ *
+ *  Licensed under the Apache License, Version 2.0 (the "License"); you may not
+ *  use this file except in compliance with the License. You may obtain a copy of
+ *  the License at
+ *
+ *  http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+ * License for the specific language governing permissions and limitations under
+ * the License.
+ *
+ */
+
 package solutions.trsoftware.commons.server.util.reflect;
 
 import com.google.common.collect.LinkedHashMultimap;
 import com.google.common.collect.Multimap;
-import solutions.trsoftware.commons.shared.util.collections.DefaultMap;
 import junit.framework.TestCase;
+import solutions.trsoftware.commons.shared.util.collections.DefaultMap;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Member;
@@ -15,12 +32,12 @@ import java.util.regex.Pattern;
 import static solutions.trsoftware.commons.server.util.reflect.MemberPattern.*;
 
 public class MemberPatternTest extends TestCase {
-  protected static interface IFoo {
+  protected interface IFoo {
      int getFoo();
 
-     public static IFoo IMPL = new Foo(0, "xyz");
+     IFoo IMPL = new Foo(0, "xyz");
 
-     public boolean equals(Object o);
+     boolean equals(Object o);
    }
 
    protected static class Foo implements IFoo {
@@ -78,9 +95,9 @@ public class MemberPatternTest extends TestCase {
 
    public void setUp() throws Exception {
      super.setUp();
-     allFields = new ArrayList<Field>();
-     allMethods = new ArrayList<Method>();
-     allMembers = new ArrayList<Member>();
+     allFields = new ArrayList<>();
+     allMethods = new ArrayList<>();
+     allMembers = new ArrayList<>();
      for (Class cls : classes) {
        for (Field field : cls.getFields()) {
          allFields.add(field);
@@ -91,7 +108,7 @@ public class MemberPatternTest extends TestCase {
          allMembers.add(method);
        }
      }
-     results = new DefaultMap<MemberPattern, Multimap<Boolean, Member>>(new HashMap<MemberPattern, Multimap<Boolean, Member>>()) {
+     results = new DefaultMap<MemberPattern, Multimap<Boolean, Member>>(new HashMap<>()) {
        @Override
        public Multimap<Boolean, Member> computeDefault(MemberPattern key) {
          return LinkedHashMultimap.create();

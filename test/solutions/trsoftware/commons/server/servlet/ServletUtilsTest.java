@@ -1,30 +1,40 @@
-package solutions.trsoftware.commons.server.servlet;
-/**
+/*
+ *  Copyright 2017 TR Software Inc.
  *
- * Date: Nov 21, 2008
- * Time: 2:51:45 PM
- * @author Alex
+ *  Licensed under the Apache License, Version 2.0 (the "License"); you may not
+ *  use this file except in compliance with the License. You may obtain a copy of
+ *  the License at
+ *
+ *  http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+ * License for the specific language governing permissions and limitations under
+ * the License.
+ *
  */
 
-import static solutions.trsoftware.commons.client.testutil.AssertUtils.assertSameSequence;
-import static solutions.trsoftware.commons.client.testutil.AssertUtils.assertThrows;
-import solutions.trsoftware.commons.client.util.MapUtils;
-import static solutions.trsoftware.commons.server.servlet.ServletUtils.*;
+package solutions.trsoftware.commons.server.servlet;
 
-import solutions.trsoftware.commons.server.servlet.testutil.DummyHttpServletRequest;
 import junit.framework.TestCase;
 import solutions.trsoftware.commons.client.testutil.AssertUtils;
+import solutions.trsoftware.commons.client.util.MapUtils;
+import solutions.trsoftware.commons.server.servlet.testutil.DummyHttpServletRequest;
 
 import java.util.Arrays;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Map;
 
+import static solutions.trsoftware.commons.client.testutil.AssertUtils.assertSameSequence;
+import static solutions.trsoftware.commons.server.servlet.ServletUtils.*;
+
 public class ServletUtilsTest extends TestCase {
 
   public void testRequestParametersAsSortedStringMap() throws Exception {
     {
-      Map<String, String[]> goodMap = new HashMap<String, String[]>();
+      Map<String, String[]> goodMap = new HashMap<>();
       goodMap.put("foo", new String[]{"a"});
       goodMap.put("bar", new String[]{"b"});
       assertEquals(
@@ -32,14 +42,10 @@ public class ServletUtilsTest extends TestCase {
           requestParametersAsSortedStringMap(goodMap));
     }
     {
-      final Map<String, String[]> badMap = new HashMap<String, String[]>();
+      final Map<String, String[]> badMap = new HashMap<>();
       badMap.put("foo", new String[]{"a"});
       badMap.put("bar", new String[]{"b", "c"});
-      AssertUtils.assertThrows(IllegalArgumentException.class, new Runnable() {
-        public void run() {
-          requestParametersAsSortedStringMap(badMap);
-        }
-      });
+      AssertUtils.assertThrows(IllegalArgumentException.class, (Runnable)() -> requestParametersAsSortedStringMap(badMap));
     }
   }
 
@@ -71,11 +77,7 @@ public class ServletUtilsTest extends TestCase {
     assertSameSequence(asEnumeration(), extractAllPathElements(new DummyHttpServletRequest("/")));
     assertSameSequence(asEnumeration(), extractAllPathElements(new DummyHttpServletRequest("")));
     AssertUtils.assertThrows(NullPointerException.class,
-        new Runnable() {
-          public void run() {
-            extractAllPathElements(new DummyHttpServletRequest((String)null));
-          }
-        });
+        (Runnable)() -> extractAllPathElements(new DummyHttpServletRequest((String)null)));
     assertSameSequence(asEnumeration("foo"), extractAllPathElements(new DummyHttpServletRequest("/foo/")));
     assertSameSequence(asEnumeration("foo"), extractAllPathElements(new DummyHttpServletRequest("/foo/")));
     assertSameSequence(asEnumeration("foo", "gameserv"), extractAllPathElements(new DummyHttpServletRequest("/foo/gameserv")));
@@ -87,7 +89,7 @@ public class ServletUtilsTest extends TestCase {
     assertSameSequence(asEnumeration("foo", "bar", "gameserv"), extractAllPathElements(new DummyHttpServletRequest("//foo/bar//gameserv//")));
   }
 
-  public Enumeration asEnumeration(final Object... items) {
+  public static Enumeration asEnumeration(final Object... items) {
     return new Enumeration() {
       int i = 0;
 
@@ -150,17 +152,17 @@ public class ServletUtilsTest extends TestCase {
     assertEquals(
         Arrays.asList("a", "25", "foo"),
         readIndexedMultivaluedParams(
-            new DummyHttpServletRequest(MapUtils.<String,String>hashMap("foo", "bar", "x2", "foo", "x0", "a", "x1", "25")),
+            new DummyHttpServletRequest(MapUtils.hashMap("foo", "bar", "x2", "foo", "x0", "a", "x1", "25")),
             "x"));
     assertEquals(
         Arrays.<String>asList(),  // missing "x0", so returns nothing
         readIndexedMultivaluedParams(
-            new DummyHttpServletRequest(MapUtils.<String,String>hashMap("foo", "bar", "x2", "foo", "x1", "25")),
+            new DummyHttpServletRequest(MapUtils.hashMap("foo", "bar", "x2", "foo", "x1", "25")),
             "x"));
     assertEquals(
         Arrays.<String>asList("a"),  // missing "x1", so returns just the value for x0
         readIndexedMultivaluedParams(
-            new DummyHttpServletRequest(MapUtils.<String,String>hashMap("foo", "bar", "x2", "foo", "x0", "a")),
+            new DummyHttpServletRequest(MapUtils.hashMap("foo", "bar", "x2", "foo", "x0", "a")),
             "x"));
   }
 

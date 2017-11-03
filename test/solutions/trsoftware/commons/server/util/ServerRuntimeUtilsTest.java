@@ -1,10 +1,21 @@
-package solutions.trsoftware.commons.server.util;
-/**
+/*
+ *  Copyright 2017 TR Software Inc.
  *
- * Date: Sep 17, 2008
- * Time: 6:34:59 PM
- * @author Alex
+ *  Licensed under the Apache License, Version 2.0 (the "License"); you may not
+ *  use this file except in compliance with the License. You may obtain a copy of
+ *  the License at
+ *
+ *  http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+ * License for the specific language governing permissions and limitations under
+ * the License.
+ *
  */
+
+package solutions.trsoftware.commons.server.util;
 
 import junit.framework.TestCase;
 
@@ -16,15 +27,10 @@ public class ServerRuntimeUtilsTest extends TestCase {
     // this thread is running in JUnit
     assertTrue(ServerRuntimeUtils.runningInJUnit());
 
-    final AtomicReference<Boolean> innerThreadInJunit = new AtomicReference<Boolean>(null);
+    final AtomicReference<Boolean> innerThreadInJunit = new AtomicReference<>(null);
 
     // the inner thread is also consider "in JUnit" because it's enclosing class is a test case
-    Thread innerThread = new Thread() {
-      @Override
-      public void run() {
-        innerThreadInJunit.set(ServerRuntimeUtils.runningInJUnit());
-      }
-    };
+    Thread innerThread = new Thread(() -> innerThreadInJunit.set(ServerRuntimeUtils.runningInJUnit()));
     innerThread.start();
     innerThread.join();
     assertNotNull(innerThreadInJunit.get());

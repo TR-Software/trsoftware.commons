@@ -1,3 +1,20 @@
+/*
+ *  Copyright 2017 TR Software Inc.
+ *
+ *  Licensed under the Apache License, Version 2.0 (the "License"); you may not
+ *  use this file except in compliance with the License. You may obtain a copy of
+ *  the License at
+ *
+ *  http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+ * License for the specific language governing permissions and limitations under
+ * the License.
+ *
+ */
+
 package solutions.trsoftware.commons.server.servlet.testutil;
 
 import javax.servlet.*;
@@ -21,7 +38,7 @@ public class DummyHttpServletRequest implements HttpServletRequest {
   private String uri;
   private String url;
   private String queryString;
-  private Map<String,String> paramMap = new HashMap<String, String>();
+  private Map<String,String> paramMap = new HashMap<>();
   private String remoteAddr = "127.0.0.1";
   private Locale locale = Locale.getDefault();
   private String method;
@@ -105,12 +122,12 @@ public class DummyHttpServletRequest implements HttpServletRequest {
     return null;
   }
 
-  public Enumeration getHeaders(String val) {
+  public Enumeration<String> getHeaders(String val) {
     System.err.println("Method DummyHttpServletRequest.getHeaders has not been fully implemented yet.");
     return null;
   }
 
-  public Enumeration getHeaderNames() {
+  public Enumeration<String> getHeaderNames() {
     System.err.println("Method DummyHttpServletRequest.getHeaderNames has not been fully implemented yet.");
     return null;
   }
@@ -312,7 +329,7 @@ public class DummyHttpServletRequest implements HttpServletRequest {
     return paramMap.put(name, value);
   }
 
-  public Enumeration getParameterNames() {
+  public Enumeration<String> getParameterNames() {
     System.err.println("Method DummyHttpServletRequest.getParameterNames has not been fully implemented yet.");
     return null;
   }
@@ -322,9 +339,9 @@ public class DummyHttpServletRequest implements HttpServletRequest {
     return new String[0];
   }
 
-  public Map getParameterMap() {
+  public Map<String, String[]> getParameterMap() {
     // must return a map with array values to match the Servlet API spec
-    Map<String, String[]> arrayMap = new HashMap<String, String[]>();
+    Map<String, String[]> arrayMap = new HashMap<>();
     for (Map.Entry<String, String> entry : paramMap.entrySet()) {
       arrayMap.put(entry.getKey(), new String[]{entry.getValue()});
     }
@@ -379,7 +396,7 @@ public class DummyHttpServletRequest implements HttpServletRequest {
     return locale;
   }
 
-  public Enumeration getLocales() {
+  public Enumeration<Locale> getLocales() {
     System.err.println("Method DummyHttpServletRequest.getLocales has not been fully implemented yet.");
     return null;
   }

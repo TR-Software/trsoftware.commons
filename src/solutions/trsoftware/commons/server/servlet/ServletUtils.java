@@ -1,3 +1,20 @@
+/*
+ *  Copyright 2017 TR Software Inc.
+ *
+ *  Licensed under the Apache License, Version 2.0 (the "License"); you may not
+ *  use this file except in compliance with the License. You may obtain a copy of
+ *  the License at
+ *
+ *  http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+ * License for the specific language governing permissions and limitations under
+ * the License.
+ *
+ */
+
 package solutions.trsoftware.commons.server.servlet;
 
 import javax.servlet.http.HttpServletRequest;
@@ -14,7 +31,7 @@ import java.util.*;
  */
 public abstract class ServletUtils {
 
-  private static final ThreadLocal<RequestCopy> threadLocalRequest = new ThreadLocal<RequestCopy>();
+  private static final ThreadLocal<RequestCopy> threadLocalRequest = new ThreadLocal<>();
 
   public static void setThreadLocalRequestCopy(RequestCopy request) {
     if (request == null)
@@ -82,7 +99,7 @@ public abstract class ServletUtils {
    * given map contains more than one element.
    */
   public static SortedMap<String, String> requestParametersAsSortedStringMap(Map<String, String[]> requestParamMap) {
-    SortedMap<String, String> singleValueMap = new TreeMap<String, String>();
+    SortedMap<String, String> singleValueMap = new TreeMap<>();
     for (Map.Entry<String, String[]> entry : requestParamMap.entrySet()) {
       String[] valueArr = entry.getValue();
       if (valueArr.length > 1)
@@ -230,7 +247,7 @@ public abstract class ServletUtils {
    * in the request.
    */
   public static ArrayList<String> readIndexedMultivaluedParams(HttpServletRequest request, String paramNamePrefix) {
-    ArrayList<String> ret = new ArrayList<String>();
+    ArrayList<String> ret = new ArrayList<>();
     for (int i = 0; i < Integer.MAX_VALUE; i++) {
       String value = request.getParameter(paramNamePrefix + i);
       if (value == null)

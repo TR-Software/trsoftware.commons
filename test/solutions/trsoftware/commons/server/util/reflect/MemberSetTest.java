@@ -1,35 +1,47 @@
+/*
+ *  Copyright 2017 TR Software Inc.
+ *
+ *  Licensed under the Apache License, Version 2.0 (the "License"); you may not
+ *  use this file except in compliance with the License. You may obtain a copy of
+ *  the License at
+ *
+ *  http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+ * License for the specific language governing permissions and limitations under
+ * the License.
+ *
+ */
+
 package solutions.trsoftware.commons.server.util.reflect;
 
-import com.google.common.base.Predicate;
 import com.google.common.collect.Collections2;
 import junit.framework.TestCase;
 import solutions.trsoftware.commons.client.testutil.AssertUtils;
 
-import javax.annotation.Nullable;
 import java.lang.reflect.Field;
 import java.lang.reflect.Member;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
-import java.util.*;
+import java.util.Collection;
 
 import static solutions.trsoftware.commons.client.util.SetUtils.newSet;
 import static solutions.trsoftware.commons.server.util.reflect.MemberPatternTest.*;
 
 public class MemberSetTest extends TestCase {
 
-  private final Predicate<Member> isNonStaticFieldOrGetter = new Predicate<Member>() {
-    @Override
-    public boolean apply(@Nullable Member member) {
-      if (Modifier.isStatic(member.getModifiers()))
-        return false;
-      if (member instanceof Field)
-        return true;
-      else {
-        assertTrue(member instanceof Method);
-        Method method = (Method)member;
-        // we consider any non-void 0-arg method as a getter
-        return method.getReturnType() != void.class && method.getParameterTypes().length == 0;
-      }
+  private final java.util.function.Predicate<Member> isNonStaticFieldOrGetter = member -> {
+    if (Modifier.isStatic(member.getModifiers()))
+      return false;
+    if (member instanceof Field)
+      return true;
+    else {
+      assertTrue(member instanceof Method);
+      Method method = (Method)member;
+      // we consider any non-void 0-arg method as a getter
+      return method.getReturnType() != void.class && method.getParameterTypes().length == 0;
     }
   };
 
@@ -40,7 +52,7 @@ public class MemberSetTest extends TestCase {
   public void testDefaultFilters() throws Exception {
     // the default MemberQuery.Builder should match any instance (non-static) member that's either a field or a getter (a non-void 0-arg method)
     for (Class<?> cls : classes) {
-      assertQueryResults(new MemberSet(cls), Collections2.filter(ReflectionUtils.listMembersAccessibleFrom(cls), isNonStaticFieldOrGetter));
+      assertQueryResults(new MemberSet(cls), Collections2.filter(ReflectionUtils.listMembersAccessibleFrom(cls), isNonStaticFieldOrGetter::test));
     }
   }
 
@@ -58,28 +70,18 @@ public class MemberSetTest extends TestCase {
     for (Class<?> cls : classes) {
       MemberSet query = new MemberSet(cls, false, false);
       query.addFilter(MemberPattern.isField());
-      assertQueryResults(query, Collections2.filter(ReflectionUtils.listMembersAccessibleFrom(cls), new Predicate<Member>() {
-        @Override
-        public boolean apply(@Nullable Member input) {
-          return input instanceof Field;
-        }
-      }));
+      assertQueryResults(query, Collections2.filter(ReflectionUtils.listMembersAccessibleFrom(cls), input -> input instanceof Field));
       query.addFilter(MemberPattern.valueTypeIs(String.class));
-      assertQueryResults(query, Collections2.filter(ReflectionUtils.listMembersAccessibleFrom(cls), new Predicate<Member>() {
-        @Override
-        public boolean apply(@Nullable Member input) {
-          return input instanceof Field && ((Field)input).getType() == String.class;
-        }
-      }));
+      assertQueryResults(query, Collections2.filter(ReflectionUtils.listMembersAccessibleFrom(cls), input -> input instanceof Field && ((Field)input).getType() == String.class));
     }
   }
 
   public void testFiltersCommutativeAndEquals() throws Exception {
-    MemberSet<Foo> fooA = new MemberSet<Foo>(Foo.class, false, false);
-    MemberSet<Foo> fooB = new MemberSet<Foo>(Foo.class, false, false);
+    MemberSet<Foo> fooA = new MemberSet<>(Foo.class, false, false);
+    MemberSet<Foo> fooB = new MemberSet<>(Foo.class, false, false);
     assertMemberSetsEqual(fooA, fooB);  // the sets should contain the same elements
-    MemberSet<Bar> barA = new MemberSet<Bar>(Bar.class, false, false);
-    MemberSet<Bar> barB = new MemberSet<Bar>(Bar.class, false, false);
+    MemberSet<Bar> barA = new MemberSet<>(Bar.class, false, false);
+    MemberSet<Bar> barB = new MemberSet<>(Bar.class, false, false);
     assertMemberSetsEqual(barA, barB);
     assertMemberSetsNotEqual(fooA, barB);
 

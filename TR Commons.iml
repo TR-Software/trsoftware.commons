@@ -29,6 +29,7 @@
       <sourceFolder url="file://$MODULE_DIR$/src" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/web" type="java-resource" />
       <sourceFolder url="file://$MODULE_DIR$/test" isTestSource="true" />
+      <excludeFolder url="file://$MODULE_DIR$/gwtHostedModeTests" />
       <excludeFolder url="file://$MODULE_DIR$/src/solutions/trsoftware/commons/translatable" />
       <excludeFolder url="file://$MODULE_DIR$/test/solutions/trsoftware/commons/translatable" />
     </content>

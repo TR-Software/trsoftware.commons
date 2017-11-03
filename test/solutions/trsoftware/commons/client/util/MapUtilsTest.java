@@ -1,21 +1,33 @@
-package solutions.trsoftware.commons.client.util;
-/**
+/*
+ *  Copyright 2017 TR Software Inc.
  *
- * Date: Oct 20, 2008
- * Time: 6:18:51 PM
- * @author Alex
+ *  Licensed under the Apache License, Version 2.0 (the "License"); you may not
+ *  use this file except in compliance with the License. You may obtain a copy of
+ *  the License at
+ *
+ *  http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+ * License for the specific language governing permissions and limitations under
+ * the License.
+ *
  */
 
-import static solutions.trsoftware.commons.client.util.MapUtils.*;
+package solutions.trsoftware.commons.client.util;
+
+import junit.framework.TestCase;
 import solutions.trsoftware.commons.client.util.callables.Function0;
 import solutions.trsoftware.commons.client.util.callables.Function1;
 import solutions.trsoftware.commons.client.util.callables.Function2;
 import solutions.trsoftware.commons.client.util.mutable.MutableFloat;
 import solutions.trsoftware.commons.client.util.mutable.MutableInteger;
 import solutions.trsoftware.commons.client.util.mutable.MutableNumber;
-import junit.framework.TestCase;
 
 import java.util.*;
+
+import static solutions.trsoftware.commons.client.util.MapUtils.*;
 
 public class MapUtilsTest extends TestCase {
 

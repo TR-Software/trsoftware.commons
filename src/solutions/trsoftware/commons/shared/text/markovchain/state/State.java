@@ -107,11 +107,11 @@ public abstract class State<V> {
 
   @Override
   public boolean equals(Object obj) {
-    throw new AbstractMethodError("Subclasses must override equals.");
+    throw new UnsupportedOperationException("Subclasses must override equals.");
   }
 
   public int hashCode() {
-    throw new AbstractMethodError("Subclasses must override hashCode.");
+    throw new UnsupportedOperationException("Subclasses must override hashCode.");
   }
 
 }

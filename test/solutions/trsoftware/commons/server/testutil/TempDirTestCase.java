@@ -19,8 +19,8 @@ package solutions.trsoftware.commons.server.testutil;
 
 import junit.framework.TestCase;
 import org.apache.commons.io.FileUtils;
-import solutions.trsoftware.commons.client.util.callables.Function1_t;
 import solutions.trsoftware.commons.server.util.ThreadUtils;
+import solutions.trsoftware.commons.shared.util.callables.Function1_t;
 
 import java.io.File;
 import java.io.IOException;

@@ -17,13 +17,13 @@
 
 package solutions.trsoftware.commons.server.memquery.eval;
 
-import solutions.trsoftware.commons.client.util.Predicate;
-import solutions.trsoftware.commons.client.util.iterators.PredicatedIterator;
-import solutions.trsoftware.commons.client.util.iterators.TransformingIterator;
+import com.google.common.base.Predicate;
 import solutions.trsoftware.commons.server.memquery.Relation;
 import solutions.trsoftware.commons.server.memquery.Row;
 import solutions.trsoftware.commons.server.memquery.StreamingRelation;
 import solutions.trsoftware.commons.server.memquery.algebra.Selection;
+import solutions.trsoftware.commons.shared.util.iterators.PredicatedIterator;
+import solutions.trsoftware.commons.shared.util.iterators.TransformingIterator;
 
 /**
  * An evaluator that can be used in a pipeline that doesn't produce any intermediate materialized relations.

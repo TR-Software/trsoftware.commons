@@ -24,7 +24,7 @@ import solutions.trsoftware.commons.server.memquery.Row;
 import java.io.PrintStream;
 import java.util.Iterator;
 
-import static solutions.trsoftware.commons.client.util.StringUtils.repeat;
+import static solutions.trsoftware.commons.shared.util.StringUtils.repeat;
 
 /** Uses printf to print the data as fixed-width columns of text */
 public class FixedWidthPrinter extends ResultSetPrinter<FixedWidthPrinter> {

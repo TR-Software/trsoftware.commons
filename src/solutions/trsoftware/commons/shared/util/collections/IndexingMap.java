@@ -19,7 +19,7 @@ package solutions.trsoftware.commons.shared.util.collections;
 
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Multimap;
-import solutions.trsoftware.commons.client.util.Assert;
+import solutions.trsoftware.commons.shared.util.Assert;
 
 import java.util.*;
 

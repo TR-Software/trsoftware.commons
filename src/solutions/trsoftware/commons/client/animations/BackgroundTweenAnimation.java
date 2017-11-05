@@ -20,7 +20,7 @@ package solutions.trsoftware.commons.client.animations;
 import com.google.gwt.animation.client.Animation;
 import com.google.gwt.user.client.DOM;
 import com.google.gwt.user.client.ui.Widget;
-import solutions.trsoftware.commons.client.util.Color;
+import solutions.trsoftware.commons.shared.util.Color;
 
 /**
  * Gradually fades the color of the given component between the given start and end

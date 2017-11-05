@@ -18,10 +18,10 @@
 package solutions.trsoftware.commons.server.util.reflect;
 
 import junit.framework.TestCase;
-import solutions.trsoftware.commons.client.util.SetUtils;
-import solutions.trsoftware.commons.client.util.StringUtils;
 import solutions.trsoftware.commons.server.io.FileSet;
 import solutions.trsoftware.commons.server.io.ServerIOUtils;
+import solutions.trsoftware.commons.shared.util.SetUtils;
+import solutions.trsoftware.commons.shared.util.StringUtils;
 
 import java.io.File;
 import java.io.Serializable;

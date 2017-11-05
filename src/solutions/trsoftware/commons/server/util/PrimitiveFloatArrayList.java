@@ -17,7 +17,7 @@
 
 package solutions.trsoftware.commons.server.util;
 
-import solutions.trsoftware.commons.client.util.ArrayUtils;
+import solutions.trsoftware.commons.shared.util.ArrayUtils;
 
 import java.util.AbstractList;
 import java.util.List;

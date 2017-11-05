@@ -17,8 +17,8 @@
 
 package solutions.trsoftware.commons.client.useragent;
 
+import com.google.common.base.Predicate;
 import junit.framework.TestCase;
-import solutions.trsoftware.commons.client.util.Predicate;
 import solutions.trsoftware.commons.server.io.ServerIOUtils;
 
 import java.util.ArrayList;

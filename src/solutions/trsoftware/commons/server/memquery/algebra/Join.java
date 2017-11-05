@@ -17,13 +17,13 @@
 
 package solutions.trsoftware.commons.server.memquery.algebra;
 
-import solutions.trsoftware.commons.client.util.SetUtils;
-import solutions.trsoftware.commons.client.util.callables.Function2;
 import solutions.trsoftware.commons.server.memquery.RelationSchema;
 import solutions.trsoftware.commons.server.memquery.Row;
 import solutions.trsoftware.commons.server.memquery.RowImpl;
 import solutions.trsoftware.commons.server.memquery.schema.ColSpec;
 import solutions.trsoftware.commons.server.memquery.schema.NameAccessorColSpec;
+import solutions.trsoftware.commons.shared.util.SetUtils;
+import solutions.trsoftware.commons.shared.util.callables.Function2;
 
 import static solutions.trsoftware.commons.server.memquery.util.NameUtils.getUniqueNames;
 

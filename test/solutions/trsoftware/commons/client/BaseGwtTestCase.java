@@ -19,8 +19,8 @@ package solutions.trsoftware.commons.client;
 
 import com.google.gwt.junit.JUnitShell;
 import com.google.gwt.junit.client.GWTTestCase;
-import solutions.trsoftware.commons.client.util.MapUtils;
 import solutions.trsoftware.commons.server.testutil.TempDirTestCase;
+import solutions.trsoftware.commons.shared.util.MapUtils;
 
 import java.io.File;
 import java.io.IOException;

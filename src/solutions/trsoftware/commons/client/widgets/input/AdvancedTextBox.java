@@ -24,7 +24,7 @@ import com.google.gwt.event.dom.client.FocusHandler;
 import com.google.gwt.user.client.Command;
 import com.google.gwt.user.client.ui.TextBox;
 import solutions.trsoftware.commons.client.event.EventHandlers;
-import solutions.trsoftware.commons.client.util.StringUtils;
+import solutions.trsoftware.commons.shared.util.StringUtils;
 
 /**
  * A text box containing some prompt text which disappears when the box

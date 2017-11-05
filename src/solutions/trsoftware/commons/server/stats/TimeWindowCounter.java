@@ -17,11 +17,11 @@
 
 package solutions.trsoftware.commons.server.stats;
 
-import solutions.trsoftware.commons.client.util.MapUtils;
-import solutions.trsoftware.commons.client.util.callables.Function0;
-import solutions.trsoftware.commons.client.util.mutable.MutableInteger;
 import solutions.trsoftware.commons.server.cache.FixedTimeCache;
 import solutions.trsoftware.commons.server.util.Clock;
+import solutions.trsoftware.commons.shared.util.MapUtils;
+import solutions.trsoftware.commons.shared.util.callables.Function0;
+import solutions.trsoftware.commons.shared.util.mutable.MutableInteger;
 
 /**
  * A counter that keeps its entries for a limited amount of time.

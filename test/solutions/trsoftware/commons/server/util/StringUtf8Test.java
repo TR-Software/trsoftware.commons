@@ -19,9 +19,9 @@ package solutions.trsoftware.commons.server.util;
 
 import junit.framework.TestCase;
 import solutions.trsoftware.commons.Slow;
-import solutions.trsoftware.commons.client.util.StringUtils;
-import solutions.trsoftware.commons.client.util.callables.Function0;
 import solutions.trsoftware.commons.server.testutil.TestUtils;
+import solutions.trsoftware.commons.shared.util.StringUtils;
+import solutions.trsoftware.commons.shared.util.callables.Function0;
 
 /**
  * Oct 21, 2009

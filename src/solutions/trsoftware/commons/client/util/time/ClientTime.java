@@ -18,6 +18,7 @@
 package solutions.trsoftware.commons.client.util.time;
 
 import com.google.gwt.core.client.Duration;
+import solutions.trsoftware.commons.shared.util.time.Time;
 
 /**
  * @author Alex, 3/24/2015

@@ -18,7 +18,7 @@
 package solutions.trsoftware.commons.server.util;
 
 import junit.framework.TestCase;
-import solutions.trsoftware.commons.client.util.CollectionUtils;
+import solutions.trsoftware.commons.shared.util.CollectionUtils;
 
 import java.util.Arrays;
 import java.util.Calendar;

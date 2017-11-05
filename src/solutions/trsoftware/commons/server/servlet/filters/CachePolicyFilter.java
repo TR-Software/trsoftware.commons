@@ -25,8 +25,8 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 
-import static solutions.trsoftware.commons.client.util.TimeUnit.SECONDS;
-import static solutions.trsoftware.commons.client.util.TimeUnit.YEARS;
+import static solutions.trsoftware.commons.shared.util.TimeUnit.SECONDS;
+import static solutions.trsoftware.commons.shared.util.TimeUnit.YEARS;
 
 /**
  * Sets the HTTP response headers for GWT's .nocache.js files to

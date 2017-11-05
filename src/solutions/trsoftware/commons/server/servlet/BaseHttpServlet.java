@@ -23,7 +23,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 
-import static solutions.trsoftware.commons.client.util.StringUtils.isBlank;
+import static solutions.trsoftware.commons.shared.util.StringUtils.isBlank;
 
 /**
  * Provides basic utility methods that can be helpful when writing a new {@link HttpServlet}

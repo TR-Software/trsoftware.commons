@@ -18,7 +18,7 @@
 package solutions.trsoftware.commons.client.widgets.input;
 
 import com.google.gwt.user.client.ui.PasswordTextBox;
-import solutions.trsoftware.commons.client.util.StringUtils;
+import solutions.trsoftware.commons.shared.util.StringUtils;
 
 /**
  * Jan 18, 2010

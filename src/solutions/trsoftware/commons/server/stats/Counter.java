@@ -17,7 +17,7 @@
 
 package solutions.trsoftware.commons.server.stats;
 
-import solutions.trsoftware.commons.client.util.JsonBuilder;
+import solutions.trsoftware.commons.shared.util.JsonBuilder;
 
 /**
  * A named counter data type.

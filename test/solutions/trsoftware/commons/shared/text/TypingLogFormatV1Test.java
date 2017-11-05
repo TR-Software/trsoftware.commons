@@ -18,8 +18,8 @@
 package solutions.trsoftware.commons.shared.text;
 
 import junit.framework.TestCase;
-import solutions.trsoftware.commons.client.util.ArrayUtils;
-import solutions.trsoftware.commons.client.util.Levenshtein;
+import solutions.trsoftware.commons.shared.util.ArrayUtils;
+import solutions.trsoftware.commons.shared.util.Levenshtein;
 
 import java.util.Arrays;
 import java.util.List;

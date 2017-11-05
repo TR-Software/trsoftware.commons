@@ -19,8 +19,8 @@ package solutions.trsoftware.commons.client.event;
 
 
 import com.google.web.bindery.event.shared.HandlerRegistration;
-import solutions.trsoftware.commons.client.util.callables.Function1_;
-import solutions.trsoftware.commons.client.util.callables.Functions;
+import solutions.trsoftware.commons.shared.util.callables.Function1_;
+import solutions.trsoftware.commons.shared.util.callables.Functions;
 
 import java.util.Arrays;
 

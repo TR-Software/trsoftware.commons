@@ -19,9 +19,9 @@ package solutions.trsoftware.commons.server.testutil;
 
 import junit.framework.AssertionFailedError;
 import junit.framework.TestCase;
-import solutions.trsoftware.commons.client.util.callables.Function0_t;
 import solutions.trsoftware.commons.server.util.reflect.MemberPattern;
 import solutions.trsoftware.commons.server.util.reflect.MemberSet;
+import solutions.trsoftware.commons.shared.util.callables.Function0_t;
 
 import java.util.regex.Pattern;
 

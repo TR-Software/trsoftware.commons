@@ -19,22 +19,22 @@ package solutions.trsoftware.commons.server.memquery;
 
 import com.google.common.collect.LinkedHashMultimap;
 import com.google.common.collect.Multimap;
-import solutions.trsoftware.commons.client.util.ArrayUtils;
-import solutions.trsoftware.commons.client.util.iterators.TransformingIterator;
 import solutions.trsoftware.commons.server.memquery.aggregations.Aggregation;
 import solutions.trsoftware.commons.server.memquery.algebra.*;
 import solutions.trsoftware.commons.server.memquery.expressions.Expression;
 import solutions.trsoftware.commons.server.memquery.schema.FieldAccessorColSpec;
 import solutions.trsoftware.commons.server.memquery.schema.MethodAccessorColSpec;
 import solutions.trsoftware.commons.server.memquery.schema.ReflectionAccessorColSpec;
+import solutions.trsoftware.commons.shared.util.ArrayUtils;
+import solutions.trsoftware.commons.shared.util.iterators.TransformingIterator;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.*;
 
 import static java.util.Collections.addAll;
-import static solutions.trsoftware.commons.client.util.StringUtils.*;
 import static solutions.trsoftware.commons.server.memquery.util.NameUtils.mapNamesToValues;
+import static solutions.trsoftware.commons.shared.util.StringUtils.*;
 
 /**
  * @author Alex, 1/11/14

@@ -26,7 +26,7 @@ import solutions.trsoftware.commons.server.memquery.util.Formatters;
 import java.io.PrintStream;
 import java.util.Iterator;
 
-import static solutions.trsoftware.commons.client.util.StringUtils.capitalize;
+import static solutions.trsoftware.commons.shared.util.StringUtils.capitalize;
 
 /** Defines a result set printing configuration.  Instances may be reused to print multiple result sets. */
 public abstract class ResultSetPrinter<T extends ResultSetPrinter> {

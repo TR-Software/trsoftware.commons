@@ -18,7 +18,7 @@
 package solutions.trsoftware.commons.server.stats;
 
 import junit.framework.TestCase;
-import solutions.trsoftware.commons.client.util.StringUtils;
+import solutions.trsoftware.commons.shared.util.StringUtils;
 import solutions.trsoftware.commons.shared.util.trees.AbstractVisitor;
 import solutions.trsoftware.commons.shared.util.trees.Node;
 import solutions.trsoftware.commons.shared.util.trees.TraversalStrategy;

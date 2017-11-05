@@ -17,7 +17,7 @@
 
 package solutions.trsoftware.commons.server.util.text;
 
-import solutions.trsoftware.commons.client.util.stats.HashCounter;
+import solutions.trsoftware.commons.shared.util.stats.HashCounter;
 
 import java.io.Serializable;
 import java.util.ArrayList;

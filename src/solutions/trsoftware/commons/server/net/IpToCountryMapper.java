@@ -17,11 +17,11 @@
 
 package solutions.trsoftware.commons.server.net;
 
-import solutions.trsoftware.commons.client.data.CountryCodes;
-import solutions.trsoftware.commons.client.util.IpAddress;
 import solutions.trsoftware.commons.server.io.ServerIOUtils;
 import solutions.trsoftware.commons.server.io.csv.CSVReader;
 import solutions.trsoftware.commons.server.util.Duration;
+import solutions.trsoftware.commons.shared.data.CountryCodes;
+import solutions.trsoftware.commons.shared.util.IpAddress;
 
 import java.io.BufferedReader;
 import java.io.IOException;

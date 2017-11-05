@@ -17,8 +17,8 @@
 
 package solutions.trsoftware.commons.server.testutil;
 
-import solutions.trsoftware.commons.client.util.MemoryUnit;
-import solutions.trsoftware.commons.client.util.callables.Function0;
+import solutions.trsoftware.commons.shared.util.MemoryUnit;
+import solutions.trsoftware.commons.shared.util.callables.Function0;
 
 /**
  * Jul 29, 2009

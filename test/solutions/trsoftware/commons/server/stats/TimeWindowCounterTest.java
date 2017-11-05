@@ -19,10 +19,10 @@ package solutions.trsoftware.commons.server.stats;
 
 import solutions.trsoftware.commons.Slow;
 import solutions.trsoftware.commons.client.testutil.AssertUtils;
-import solutions.trsoftware.commons.client.util.callables.Function0_t;
 import solutions.trsoftware.commons.server.TestCaseCanStopClock;
 import solutions.trsoftware.commons.server.testutil.MultithreadedTestHarness;
 import solutions.trsoftware.commons.server.util.Clock;
+import solutions.trsoftware.commons.shared.util.callables.Function0_t;
 
 import java.util.Collection;
 import java.util.concurrent.BrokenBarrierException;

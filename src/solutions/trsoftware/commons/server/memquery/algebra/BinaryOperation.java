@@ -17,8 +17,8 @@
 
 package solutions.trsoftware.commons.server.memquery.algebra;
 
-import solutions.trsoftware.commons.client.util.SetUtils;
 import solutions.trsoftware.commons.server.memquery.RelationSchema;
+import solutions.trsoftware.commons.shared.util.SetUtils;
 
 import java.util.Map;
 import java.util.Set;

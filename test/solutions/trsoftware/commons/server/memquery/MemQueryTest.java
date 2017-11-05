@@ -17,7 +17,6 @@
 
 package solutions.trsoftware.commons.server.memquery;
 
-import solutions.trsoftware.commons.client.util.ComparisonOperator;
 import solutions.trsoftware.commons.server.memquery.aggregations.Avg;
 import solutions.trsoftware.commons.server.memquery.aggregations.Count;
 import solutions.trsoftware.commons.server.memquery.algebra.Join;
@@ -25,6 +24,7 @@ import solutions.trsoftware.commons.server.memquery.expressions.BooleanBinaryOpe
 import solutions.trsoftware.commons.server.memquery.expressions.ColValueComparison;
 import solutions.trsoftware.commons.server.memquery.expressions.CompoundRowPredicate;
 import solutions.trsoftware.commons.server.memquery.expressions.RowExpression;
+import solutions.trsoftware.commons.shared.util.ComparisonOperator;
 
 /**
  * @author Alex, 1/9/14

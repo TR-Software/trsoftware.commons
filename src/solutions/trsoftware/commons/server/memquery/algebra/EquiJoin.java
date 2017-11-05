@@ -17,8 +17,8 @@
 
 package solutions.trsoftware.commons.server.memquery.algebra;
 
-import solutions.trsoftware.commons.client.util.LogicUtils;
 import solutions.trsoftware.commons.server.memquery.Row;
+import solutions.trsoftware.commons.shared.util.LogicUtils;
 
 import java.util.Map;
 

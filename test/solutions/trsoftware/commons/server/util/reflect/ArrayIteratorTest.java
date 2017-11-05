@@ -19,7 +19,7 @@ package solutions.trsoftware.commons.server.util.reflect;
 
 import junit.framework.TestCase;
 import solutions.trsoftware.commons.client.testutil.AssertUtils;
-import solutions.trsoftware.commons.client.util.CollectionUtils;
+import solutions.trsoftware.commons.shared.util.CollectionUtils;
 
 import java.lang.reflect.Array;
 import java.util.Arrays;

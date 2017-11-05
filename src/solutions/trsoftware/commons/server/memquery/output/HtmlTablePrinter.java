@@ -17,8 +17,8 @@
 
 package solutions.trsoftware.commons.server.memquery.output;
 
-import solutions.trsoftware.commons.client.util.StringUtils;
 import solutions.trsoftware.commons.server.memquery.ResultSet;
+import solutions.trsoftware.commons.shared.util.StringUtils;
 
 import java.io.PrintStream;
 import java.util.LinkedHashMap;

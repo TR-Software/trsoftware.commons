@@ -17,7 +17,7 @@
 
 package solutions.trsoftware.commons.server.util.reflect;
 
-import solutions.trsoftware.commons.client.util.iterators.IndexedIterator;
+import solutions.trsoftware.commons.shared.util.iterators.IndexedIterator;
 
 import java.lang.reflect.Array;
 import java.util.Arrays;

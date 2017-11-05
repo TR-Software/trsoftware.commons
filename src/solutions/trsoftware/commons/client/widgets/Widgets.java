@@ -26,7 +26,7 @@ import solutions.trsoftware.commons.client.event.EventHandlers;
 import solutions.trsoftware.commons.client.styles.CellPanelStyle;
 import solutions.trsoftware.commons.client.styles.HtmlTableStyle;
 import solutions.trsoftware.commons.client.styles.WidgetStyle;
-import solutions.trsoftware.commons.client.util.HtmlUtils;
+import solutions.trsoftware.commons.shared.util.HtmlUtils;
 
 /** A collections of convenience factory methods for creating widgets */
 public class Widgets {

@@ -17,11 +17,11 @@
 
 package solutions.trsoftware.commons.server.memquery.eval;
 
-import solutions.trsoftware.commons.client.util.iterators.FilteringIterator;
 import solutions.trsoftware.commons.server.memquery.MaterializedRelation;
 import solutions.trsoftware.commons.server.memquery.Relation;
 import solutions.trsoftware.commons.server.memquery.Row;
 import solutions.trsoftware.commons.server.memquery.algebra.Join;
+import solutions.trsoftware.commons.shared.util.iterators.FilteringIterator;
 
 import java.util.Iterator;
 

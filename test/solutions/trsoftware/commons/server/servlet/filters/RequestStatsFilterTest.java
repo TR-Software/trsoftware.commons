@@ -18,13 +18,13 @@
 package solutions.trsoftware.commons.server.servlet.filters;
 
 import junit.framework.TestCase;
-import solutions.trsoftware.commons.client.util.stats.HashCounter;
 import solutions.trsoftware.commons.server.servlet.testutil.DummyFilterChain;
 import solutions.trsoftware.commons.server.servlet.testutil.DummyHttpServletRequest;
 import solutions.trsoftware.commons.server.servlet.testutil.DummyHttpServletResponse;
 import solutions.trsoftware.commons.server.stats.HierarchicalCounter;
 import solutions.trsoftware.commons.server.stats.HierarchicalCounterTest;
 import solutions.trsoftware.commons.shared.util.RandomUtils;
+import solutions.trsoftware.commons.shared.util.stats.HashCounter;
 import solutions.trsoftware.commons.shared.util.text.Alphabet;
 
 import static solutions.trsoftware.commons.shared.util.RandomUtils.randString;

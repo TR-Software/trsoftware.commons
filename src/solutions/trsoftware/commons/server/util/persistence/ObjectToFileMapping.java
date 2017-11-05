@@ -18,9 +18,9 @@
 package solutions.trsoftware.commons.server.util.persistence;
 
 import com.google.gson.GsonBuilder;
-import solutions.trsoftware.commons.client.util.MapUtils;
-import solutions.trsoftware.commons.client.util.callables.Function2;
 import solutions.trsoftware.commons.server.io.ServerIOUtils;
+import solutions.trsoftware.commons.shared.util.MapUtils;
+import solutions.trsoftware.commons.shared.util.callables.Function2;
 
 import java.io.File;
 import java.io.IOException;

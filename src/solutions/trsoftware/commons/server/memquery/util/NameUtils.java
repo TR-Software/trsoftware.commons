@@ -17,10 +17,10 @@
 
 package solutions.trsoftware.commons.server.memquery.util;
 
-import solutions.trsoftware.commons.client.util.Pair;
 import solutions.trsoftware.commons.server.memquery.HasName;
 import solutions.trsoftware.commons.server.memquery.HasValue;
 import solutions.trsoftware.commons.server.memquery.RelationSchema;
+import solutions.trsoftware.commons.shared.util.Pair;
 
 import java.util.*;
 

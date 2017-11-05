@@ -18,14 +18,14 @@
 package solutions.trsoftware.commons.server.util.reflect;
 
 import junit.framework.TestCase;
-import solutions.trsoftware.commons.client.util.MapUtils;
-import solutions.trsoftware.commons.client.util.SetUtils;
+import solutions.trsoftware.commons.shared.util.MapUtils;
+import solutions.trsoftware.commons.shared.util.SetUtils;
 
 import java.lang.reflect.InvocationTargetException;
 import java.util.*;
 
-import static solutions.trsoftware.commons.client.util.LogicUtils.eq;
 import static solutions.trsoftware.commons.server.util.reflect.ObjectDiffs.*;
+import static solutions.trsoftware.commons.shared.util.LogicUtils.eq;
 
 public class ObjectDiffsTest extends TestCase {
 

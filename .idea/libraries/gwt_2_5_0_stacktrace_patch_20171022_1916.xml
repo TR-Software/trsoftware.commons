@@ -1,0 +1,11 @@
+<component name="libraryTable">
+  <library name="gwt-2.5.0-stacktrace_patch-20171022_1916">
+    <CLASSES>
+      <root url="jar://$PROJECT_DIR$/../gwt-stack-trace-kit/patch/build/gwt-2.5.0-stacktrace_patch-20171022_1916.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES>
+      <root url="jar://$PROJECT_DIR$/../gwt-stack-trace-kit/patch/build/gwt-2.5.0-stacktrace_patch-20171022_1916.jar!/" />
+    </SOURCES>
+  </library>
+</component>

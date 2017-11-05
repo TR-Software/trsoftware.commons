@@ -18,9 +18,9 @@
 package solutions.trsoftware.commons.server.io;
 
 import junit.framework.TestCase;
-import solutions.trsoftware.commons.client.util.StringUtils;
-import solutions.trsoftware.commons.client.util.TimeUnit;
 import solutions.trsoftware.commons.server.util.Duration;
+import solutions.trsoftware.commons.shared.util.StringUtils;
+import solutions.trsoftware.commons.shared.util.TimeUnit;
 
 import java.io.PrintWriter;
 import java.io.StringWriter;

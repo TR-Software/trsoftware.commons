@@ -19,7 +19,7 @@ package solutions.trsoftware.commons.client.util;
 
 import com.google.gwt.user.client.Command;
 import com.google.gwt.user.client.Timer;
-import solutions.trsoftware.commons.client.util.callables.Function0;
+import solutions.trsoftware.commons.shared.util.callables.Function0;
 
 /**
  * Runs the timer until a condition is satisfied, at which point the timer is
@@ -35,7 +35,7 @@ import solutions.trsoftware.commons.client.util.callables.Function0;
  */
 public class Waiter extends Timer {
 
-  // TODO: merge this class with RetriableCommand (use one to implement the other)
+  // TODO: merge this class with RetryableCommand (use one to implement the other)
 
   private Function0<Boolean> condition;
   private Command onConditionMet;

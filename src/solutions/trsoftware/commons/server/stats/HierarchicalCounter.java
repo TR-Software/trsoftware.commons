@@ -26,7 +26,7 @@ import java.util.Collections;
 import java.util.SortedMap;
 import java.util.concurrent.ConcurrentSkipListMap;
 
-import static solutions.trsoftware.commons.client.util.LogicUtils.firstNonNull;
+import static solutions.trsoftware.commons.shared.util.LogicUtils.firstNonNull;
 
 /**
  * An adapter for a {@link Counter} (i.e. the {@link #delegate}) that allows it to be used in a

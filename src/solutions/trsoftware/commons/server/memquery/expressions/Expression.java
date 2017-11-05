@@ -17,7 +17,7 @@
 
 package solutions.trsoftware.commons.server.memquery.expressions;
 
-import solutions.trsoftware.commons.client.util.callables.Function1;
+import solutions.trsoftware.commons.shared.util.callables.Function1;
 
 /**
  * @param <R> the result type of the expression.

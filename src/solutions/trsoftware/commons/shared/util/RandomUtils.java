@@ -17,8 +17,6 @@
 
 package solutions.trsoftware.commons.shared.util;
 
-import solutions.trsoftware.commons.client.util.CollectionUtils;
-import solutions.trsoftware.commons.client.util.ListUtils;
 import solutions.trsoftware.commons.shared.util.random.RandomCharGenerator;
 import solutions.trsoftware.commons.shared.util.text.Alphabet;
 
@@ -77,6 +75,18 @@ public class RandomUtils {
   public static int nextIntInRange(int lowerBound, int upperBound) {
     if (lowerBound >= upperBound)
       throw new IllegalArgumentException("lowerBound < upperBound must be true");
+    return rnd.nextInt(upperBound - lowerBound) + lowerBound;
+  }
+
+  /**
+   * Returns a random {@code int} in range {@code [lowerBound, upperBound)} from the
+   * given RNG.
+   *
+   * @param lowerBound inclusive
+   * @param upperBound exclusive
+   */
+  public static int nextIntInRange(Random rnd, int lowerBound, int upperBound) {
+    Assert.assertTrue(lowerBound < upperBound);
     return rnd.nextInt(upperBound - lowerBound) + lowerBound;
   }
 

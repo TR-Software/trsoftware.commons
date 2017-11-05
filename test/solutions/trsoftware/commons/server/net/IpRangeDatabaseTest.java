@@ -19,7 +19,7 @@ package solutions.trsoftware.commons.server.net;
 
 import junit.framework.TestCase;
 
-import static solutions.trsoftware.commons.client.util.MathUtils.packUnsignedInt;
+import static solutions.trsoftware.commons.shared.util.MathUtils.packUnsignedInt;
 
 /**
  * Nov 6, 2009

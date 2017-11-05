@@ -28,8 +28,8 @@ import com.google.gwt.core.ext.typeinfo.TypeOracle;
 import com.google.gwt.dev.generator.GenUtil;
 import com.google.gwt.user.rebind.ClassSourceFileComposerFactory;
 import com.google.gwt.user.rebind.SourceWriter;
-import solutions.trsoftware.commons.client.util.template.*;
 import solutions.trsoftware.commons.server.util.FileTemplateParser;
+import solutions.trsoftware.commons.shared.util.template.*;
 
 import java.io.PrintWriter;
 import java.net.URL;
@@ -114,16 +114,16 @@ public class TemplateBundleGenerator extends Generator {
 
   /* private */static final String MSG_NO_FILE_BASED_ON_METHOD_NAME = "No matching image resource was found; any of the following filenames would have matched had they been present:";
 
-  private static final String TEMPLATE_QNAME = "solutions.trsoftware.commons.client.util.template.Template";
-  private static final String TEMPLATEPART_QNAME = "solutions.trsoftware.commons.client.util.template.TemplatePart";
-  private static final String STRINGPART_QNAME = "solutions.trsoftware.commons.client.util.template.StringPart";
-  private static final String VARIABLEPART_QNAME = "solutions.trsoftware.commons.client.util.template.VariablePart";
+  private static final String TEMPLATE_QNAME = "solutions.trsoftware.commons.shared.util.template.Template";
+  private static final String TEMPLATEPART_QNAME = "solutions.trsoftware.commons.shared.util.template.TemplatePart";
+  private static final String STRINGPART_QNAME = "solutions.trsoftware.commons.shared.util.template.StringPart";
+  private static final String VARIABLEPART_QNAME = "solutions.trsoftware.commons.shared.util.template.VariablePart";
 
   private static final String GWT_QNAME = "com.google.gwt.core.client.GWT";
 
   private static final String[] TEMPLATE_FILE_EXTENSIONS = {"html", "txt"};
 
-  private static final String TEMPLATEBUNDLE_QNAME = "solutions.trsoftware.commons.client.util.template.TemplateBundle";
+  private static final String TEMPLATEBUNDLE_QNAME = "solutions.trsoftware.commons.shared.util.template.TemplateBundle";
 
   private static final String METADATA_TAG = "gwt.resource";
 

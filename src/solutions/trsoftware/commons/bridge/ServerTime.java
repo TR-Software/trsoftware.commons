@@ -18,8 +18,8 @@
 package solutions.trsoftware.commons.bridge;
 
 import solutions.trsoftware.commons.client.util.time.ServerTimeClientImpl;
-import solutions.trsoftware.commons.client.util.time.Time;
 import solutions.trsoftware.commons.server.util.Clock;
+import solutions.trsoftware.commons.shared.util.time.Time;
 
 /**
  * Singleton oracle for the time on the server.  This is the server-side version of this class, which uses the server's

@@ -21,7 +21,7 @@ import com.google.gwt.i18n.client.LocaleInfo;
 import com.google.gwt.i18n.client.NumberFormat;
 import com.google.gwt.i18n.client.constants.NumberConstants;
 import solutions.trsoftware.commons.client.bridge.text.AbstractNumberFormatter;
-import solutions.trsoftware.commons.client.util.StringUtils;
+import solutions.trsoftware.commons.shared.util.StringUtils;
 
 /**
  * A superclass for two different implementations: the GWT and Java serverside.

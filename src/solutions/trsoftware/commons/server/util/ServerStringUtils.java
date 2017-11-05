@@ -20,8 +20,8 @@ package solutions.trsoftware.commons.server.util;
 
 import org.apache.commons.codec.binary.Base64;
 import org.w3c.dom.Document;
-import solutions.trsoftware.commons.client.util.Levenshtein;
 import solutions.trsoftware.commons.server.io.ServerIOUtils;
+import solutions.trsoftware.commons.shared.util.Levenshtein;
 
 import javax.lang.model.SourceVersion;
 import javax.xml.transform.OutputKeys;
@@ -41,8 +41,8 @@ import java.util.regex.Pattern;
 import java.util.zip.DeflaterOutputStream;
 import java.util.zip.InflaterInputStream;
 
-import static solutions.trsoftware.commons.client.util.StringUtils.isBlank;
-import static solutions.trsoftware.commons.client.util.StringUtils.repeat;
+import static solutions.trsoftware.commons.shared.util.StringUtils.isBlank;
+import static solutions.trsoftware.commons.shared.util.StringUtils.repeat;
 
 /**
  * Date: May 13, 2008 Time: 6:18:12 PM

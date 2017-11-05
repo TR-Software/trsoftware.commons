@@ -24,7 +24,7 @@ import solutions.trsoftware.commons.client.CommonsGwtTestCase;
 import solutions.trsoftware.commons.client.event.DataChangeEvent;
 import solutions.trsoftware.commons.client.event.DataChangeListener;
 import solutions.trsoftware.commons.client.event.ListenerSet;
-import solutions.trsoftware.commons.client.util.mutable.MutableInteger;
+import solutions.trsoftware.commons.shared.util.mutable.MutableInteger;
 
 /**
  * Oct 31, 2009

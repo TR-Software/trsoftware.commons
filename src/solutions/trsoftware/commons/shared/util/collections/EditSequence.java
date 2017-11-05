@@ -17,10 +17,10 @@
 
 package solutions.trsoftware.commons.shared.util.collections;
 
-import solutions.trsoftware.commons.client.util.CollectionUtils;
-import solutions.trsoftware.commons.client.util.Levenshtein;
-import solutions.trsoftware.commons.client.util.ListUtils;
-import solutions.trsoftware.commons.client.util.LogicUtils;
+import solutions.trsoftware.commons.shared.util.CollectionUtils;
+import solutions.trsoftware.commons.shared.util.Levenshtein;
+import solutions.trsoftware.commons.shared.util.ListUtils;
+import solutions.trsoftware.commons.shared.util.LogicUtils;
 
 import java.util.ArrayList;
 import java.util.Collection;

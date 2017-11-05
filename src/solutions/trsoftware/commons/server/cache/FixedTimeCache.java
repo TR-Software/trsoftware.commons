@@ -27,12 +27,12 @@ import java.util.*;
  * time, that is, this cache is not LRU and doesn't care about any of its
  * entries being touched before expiring them.
  *
- * The eviction is ammortized - performed on every get and put operation.
+ * The eviction is amortized - performed on every get and put operation.
  *
- * This class decorates LinkedHashMap with fixed-time logic.
+ * This class decorates {@link LinkedHashMap} with fixed-time logic.
  *
  * This class must be synchronized externally.  There is no way to avoid
- * locking, because a cache cannot be built using the java.util.concurrent
+ * locking, because a cache cannot be built using the {@link java.util.concurrent}
  * classes. (Trust me, I spent a lot of time trying).
  *
  * @author Alex

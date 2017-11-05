@@ -34,10 +34,10 @@ import solutions.trsoftware.commons.client.event.Events;
 import solutions.trsoftware.commons.client.event.KeyHoldDetector;
 import solutions.trsoftware.commons.client.event.MultiHandlerRegistration;
 import solutions.trsoftware.commons.client.styles.WidgetStyle;
-import solutions.trsoftware.commons.client.util.Assert;
 import solutions.trsoftware.commons.client.util.SmartTimer;
 import solutions.trsoftware.commons.client.widgets.FocusTrap;
 import solutions.trsoftware.commons.client.widgets.Widgets;
+import solutions.trsoftware.commons.shared.util.Assert;
 
 import java.util.LinkedList;
 

@@ -24,7 +24,7 @@ import com.google.gwt.user.client.DOM;
 import com.google.gwt.user.client.Element;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.*;
-import solutions.trsoftware.commons.client.util.mutable.MutableInteger;
+import solutions.trsoftware.commons.shared.util.mutable.MutableInteger;
 
 /**
  * @author Alex, 9/25/2017

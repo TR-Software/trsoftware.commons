@@ -29,9 +29,9 @@ import solutions.trsoftware.commons.client.bridge.text.NumberFormatter;
 import solutions.trsoftware.commons.client.bridge.text.impl.NumberFormatterGwtImpl;
 import solutions.trsoftware.commons.client.bridge.util.RandomGen;
 import solutions.trsoftware.commons.client.util.IncrementalForLoop;
-import solutions.trsoftware.commons.client.util.mutable.MutableInteger;
+import solutions.trsoftware.commons.shared.util.mutable.MutableInteger;
 
-import static solutions.trsoftware.commons.client.util.StringUtils.template;
+import static solutions.trsoftware.commons.shared.util.StringUtils.template;
 
 /**
  * This class uses NumberFormatterTestBridge as a delegate (which provides a way

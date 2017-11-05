@@ -17,7 +17,7 @@
 
 package solutions.trsoftware.commons.server.memquery.aggregations;
 
-import solutions.trsoftware.commons.client.util.stats.MaxComparable;
+import solutions.trsoftware.commons.shared.util.stats.MaxComparable;
 
 /**
  * @author Alex, 1/9/14

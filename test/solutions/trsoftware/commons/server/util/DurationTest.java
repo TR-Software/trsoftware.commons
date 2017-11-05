@@ -56,7 +56,7 @@ public class DurationTest extends TestCase {
     Duration duration = new Duration();
     Thread.sleep(500);
     System.out.println("Speed: ");
-    for (solutions.trsoftware.commons.client.util.TimeUnit timeUnit : solutions.trsoftware.commons.client.util.TimeUnit.values()) {
+    for (solutions.trsoftware.commons.shared.util.TimeUnit timeUnit : solutions.trsoftware.commons.shared.util.TimeUnit.values()) {
       System.out.printf("  %s: %.8f%n", timeUnit, duration.computeSpeed(1000, timeUnit));
     }
   }

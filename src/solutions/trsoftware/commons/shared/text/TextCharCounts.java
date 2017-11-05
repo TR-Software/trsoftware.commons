@@ -17,7 +17,7 @@
 
 package solutions.trsoftware.commons.shared.text;
 
-import solutions.trsoftware.commons.client.util.ArrayUtils;
+import solutions.trsoftware.commons.shared.util.ArrayUtils;
 
 import java.util.Arrays;
 

@@ -17,8 +17,8 @@
 
 package solutions.trsoftware.commons.server.memquery;
 
-import solutions.trsoftware.commons.client.util.Resettable;
-import solutions.trsoftware.commons.client.util.iterators.ResettableCachingIterator;
+import solutions.trsoftware.commons.shared.util.Resettable;
+import solutions.trsoftware.commons.shared.util.iterators.ResettableCachingIterator;
 
 import java.util.Iterator;
 

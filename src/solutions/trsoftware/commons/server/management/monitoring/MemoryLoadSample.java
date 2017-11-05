@@ -17,7 +17,7 @@
 
 package solutions.trsoftware.commons.server.management.monitoring;
 
-import solutions.trsoftware.commons.client.util.MemoryUnit;
+import solutions.trsoftware.commons.shared.util.MemoryUnit;
 
 import java.lang.management.ManagementFactory;
 import java.lang.management.MemoryMXBean;

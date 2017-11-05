@@ -20,7 +20,7 @@ package solutions.trsoftware.commons.client.widgets;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.Widget;
-import solutions.trsoftware.commons.client.util.Assert;
+import solutions.trsoftware.commons.shared.util.Assert;
 
 import static java.lang.Math.max;
 import static java.lang.Math.min;

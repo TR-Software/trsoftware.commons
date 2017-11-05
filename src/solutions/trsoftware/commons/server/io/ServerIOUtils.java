@@ -17,8 +17,8 @@
 
 package solutions.trsoftware.commons.server.io;
 
-import solutions.trsoftware.commons.client.util.StringUtils;
 import solutions.trsoftware.commons.server.util.ServerStringUtils;
+import solutions.trsoftware.commons.shared.util.StringUtils;
 
 import java.io.*;
 import java.net.URL;

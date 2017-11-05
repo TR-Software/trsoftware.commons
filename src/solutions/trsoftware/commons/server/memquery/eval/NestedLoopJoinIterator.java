@@ -17,14 +17,14 @@
 
 package solutions.trsoftware.commons.server.memquery.eval;
 
-import solutions.trsoftware.commons.client.util.iterators.FilteringIterator;
-import solutions.trsoftware.commons.client.util.iterators.NonMutatingIterator;
-import solutions.trsoftware.commons.client.util.iterators.SingletonIterator;
 import solutions.trsoftware.commons.server.memquery.MaterializedRelation;
 import solutions.trsoftware.commons.server.memquery.Row;
 import solutions.trsoftware.commons.server.memquery.RowImpl;
 import solutions.trsoftware.commons.server.memquery.algebra.Join;
 import solutions.trsoftware.commons.server.util.Duration;
+import solutions.trsoftware.commons.shared.util.iterators.FilteringIterator;
+import solutions.trsoftware.commons.shared.util.iterators.NonMutatingIterator;
+import solutions.trsoftware.commons.shared.util.iterators.SingletonIterator;
 
 import java.util.Iterator;
 import java.util.LinkedHashSet;
@@ -51,7 +51,7 @@ abstract class NestedLoopJoinIterator<J extends Join<? extends Join.Params>> ext
   private Row nextResult;
   private LinkedHashSet<Row> matchedRightRows;
   private Iterator<Row> unmatchedRightIter;
-  private boolean reachedEnd;  // NOTE: might want to extract a superclass that handles this logic (could replace solutions.trsoftware.commons.client.util.iterators.AdvancingIterator with this type of implementation)
+  private boolean reachedEnd;  // NOTE: might want to extract a superclass that handles this logic (could replace solutions.trsoftware.commons.shared.util.iterators.AdvancingIterator with this type of implementation)
 
   // verbose output support:
   protected boolean verbose = true;  // TODO: use this in all nontrivial evaluators and provide a way to set its value

@@ -18,10 +18,10 @@
 package solutions.trsoftware.commons.server.auth;
 
 import solutions.trsoftware.commons.client.testutil.AssertUtils;
-import solutions.trsoftware.commons.client.util.MapUtils;
 import solutions.trsoftware.commons.server.TestCaseCanStopClock;
 import solutions.trsoftware.commons.server.servlet.testutil.DummyHttpServletRequest;
 import solutions.trsoftware.commons.server.util.Clock;
+import solutions.trsoftware.commons.shared.util.MapUtils;
 
 import javax.servlet.http.HttpServletRequest;
 import java.util.SortedMap;

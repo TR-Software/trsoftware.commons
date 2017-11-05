@@ -18,8 +18,8 @@
 package solutions.trsoftware.commons.server.util;
 
 import solutions.trsoftware.commons.Slow;
-import solutions.trsoftware.commons.client.util.StringUtils;
 import solutions.trsoftware.commons.server.TestCaseCanStopClock;
+import solutions.trsoftware.commons.shared.util.StringUtils;
 
 import java.util.concurrent.TimeUnit;
 

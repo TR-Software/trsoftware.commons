@@ -17,7 +17,7 @@
 
 package solutions.trsoftware.commons.server.util;
 
-import solutions.trsoftware.commons.client.util.iterators.NonMutatingIterator;
+import solutions.trsoftware.commons.shared.util.iterators.NonMutatingIterator;
 
 import java.text.DateFormat;
 import java.util.Calendar;

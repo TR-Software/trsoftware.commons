@@ -17,7 +17,7 @@
 
 package solutions.trsoftware.commons.shared.util.text;
 
-import solutions.trsoftware.commons.client.util.StringUtils;
+import solutions.trsoftware.commons.shared.util.StringUtils;
 
 import java.util.LinkedHashSet;
 import java.util.Set;
@@ -36,7 +36,12 @@ public enum Alphabet {
   NUMBERS("0123456789"),
   HOME_ROW("asdfghjkl;'"),
   LETTERS(getAllLowercaseAsciiSymbols('a', 'z')),
-  LETTERS_NUMBERS_AND_SYMBOLS(getAllLowercaseAsciiSymbols(StringUtils.MIN_PRINTABLE_ASCII_CHAR, StringUtils.MAX_PRINTABLE_ASCII_CHAR)),
+  LETTERS_NUMBERS_AND_SYMBOLS(getAllLowercaseAsciiSymbols(StringUtils.MIN_PRINTABLE_ASCII_CHAR, StringUtils.MAX_PRINTABLE_ASCII_CHAR)) {
+    @Override
+    public String getPrettyName() {
+      return "Letters, numbers, and symbols";
+    }
+  },
   LETTERS_AND_NUMBERS(LETTERS.chars + NUMBERS.chars)
   ; // WARNING: if adding new enum values, add them at the end, so to not affect the values persisted in DB under the Score table `alphabet` column
 

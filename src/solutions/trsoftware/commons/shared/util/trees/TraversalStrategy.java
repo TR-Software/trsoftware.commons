@@ -17,7 +17,7 @@
 
 package solutions.trsoftware.commons.shared.util.trees;
 
-import solutions.trsoftware.commons.client.util.Assert;
+import solutions.trsoftware.commons.shared.util.Assert;
 
 import java.util.Collection;
 import java.util.Iterator;

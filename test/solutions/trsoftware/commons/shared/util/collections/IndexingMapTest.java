@@ -19,7 +19,7 @@ package solutions.trsoftware.commons.shared.util.collections;
 
 import com.google.common.collect.Sets;
 import junit.framework.TestCase;
-import solutions.trsoftware.commons.client.util.StringUtils;
+import solutions.trsoftware.commons.shared.util.StringUtils;
 
 import java.util.*;
 

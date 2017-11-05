@@ -17,7 +17,6 @@
 
 package solutions.trsoftware.commons.server.memquery;
 
-import solutions.trsoftware.commons.client.util.iterators.CountingIterator;
 import solutions.trsoftware.commons.server.memquery.algebra.RelationalExpression;
 import solutions.trsoftware.commons.server.memquery.eval.EvalPipelineBuilder;
 import solutions.trsoftware.commons.server.memquery.eval.RelationalEvaluator;
@@ -25,6 +24,7 @@ import solutions.trsoftware.commons.server.memquery.output.FixedWidthPrinter;
 import solutions.trsoftware.commons.server.memquery.output.HtmlTablePrinter;
 import solutions.trsoftware.commons.server.memquery.schema.ColSpec;
 import solutions.trsoftware.commons.server.memquery.util.CompositeComparator;
+import solutions.trsoftware.commons.shared.util.iterators.CountingIterator;
 
 import java.io.PrintStream;
 import java.util.*;

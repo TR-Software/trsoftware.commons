@@ -18,7 +18,7 @@
 package solutions.trsoftware.commons.shared.text;
 
 import com.google.gwt.core.client.Duration;
-import solutions.trsoftware.commons.client.util.Levenshtein;
+import solutions.trsoftware.commons.shared.util.Levenshtein;
 
 import java.util.ArrayList;
 import java.util.List;

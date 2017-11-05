@@ -18,11 +18,11 @@
 package solutions.trsoftware.commons.server.memquery;
 
 import junit.framework.TestCase;
-import solutions.trsoftware.commons.client.util.StringUtils;
 import solutions.trsoftware.commons.server.io.StringPrintStream;
 import solutions.trsoftware.commons.server.io.csv.CSVWriter;
 import solutions.trsoftware.commons.server.memquery.output.CsvPrinter;
 import solutions.trsoftware.commons.server.memquery.output.FixedWidthPrinter;
+import solutions.trsoftware.commons.shared.util.StringUtils;
 
 import java.util.Arrays;
 import java.util.List;

@@ -19,8 +19,7 @@ package solutions.trsoftware.commons.client;
 
 import com.google.gwt.user.client.rpc.StatusCodeException;
 import solutions.trsoftware.commons.client.useragent.UserAgent;
-import solutions.trsoftware.commons.client.util.MessageFormatter;
-import solutions.trsoftware.commons.client.util.StringUtils;
+import solutions.trsoftware.commons.shared.util.StringUtils;
 
 /**
  * Singleton that can be used to generate certain common UI messages for the webapp.
@@ -54,6 +53,22 @@ public class Messages {
   }
 
   private Messages() {
+  }
+
+  public static String exceptionTypeAndMessageToString(Throwable ex) {
+    return StringUtils.template("$1 ($2)", ex.getMessage(), exceptionTypeToString(ex));
+  }
+
+  /** Convenience method for getting the name of the class of the given Exception */
+  public static String exceptionTypeToString(Throwable ex) {
+    String type = "Unknown";
+    // these null checks are probably not necessary, but just in case...
+    if (ex.getClass() != null) {
+      String className = ex.getClass().getName();
+      if (StringUtils.notBlank(className))
+        type = className;
+    }
+    return type;
   }
 
   /**
@@ -120,7 +135,7 @@ public class Messages {
     }
     return message
         + "\n\nError message: " + StringUtils.abbreviate(exMsg, 100)  // some exceptions contain the HTML of the full page, so we must abbreviate in cases like that
-        + "\n\nError type: " + MessageFormatter.exceptionTypeToString(ex)
+        + "\n\nError type: " + exceptionTypeToString(ex)
         + "\n\n" + message2 + supportMsg;
   }
 

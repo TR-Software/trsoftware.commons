@@ -21,7 +21,7 @@ import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.DeckPanel;
 import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.Widget;
-import solutions.trsoftware.commons.client.util.ArrayUtils;
+import solutions.trsoftware.commons.shared.util.ArrayUtils;
 
 /**
  * A lightweight version of {@link DeckPanel}, that has the same support for showing one widget at the time, but doesn't

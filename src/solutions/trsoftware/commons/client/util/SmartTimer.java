@@ -23,9 +23,10 @@ import static com.google.gwt.core.client.Duration.currentTimeMillis;
 
 /**
  * A subclass of {@link com.google.gwt.user.client.Timer} with the following embellishments:
- * 1) can tell you its current status (via {@link #isScheduled()}, {@link #isRepeating()}, and {@link #getPeriodMillis})
- * 2) can tell you when it will fire next (via {@link #getNextFiringTime()})
- *
+ * <ol>
+ *   <li>can tell you its current status (via {@link #isScheduled()}, {@link #isRepeating()}, and {@link #getPeriodMillis})</li>
+ *   <li>can tell you when it will fire next (via {@link #getNextFiringTime()})</li>
+ * </ol>
  * @author Alex
  */
 public abstract class SmartTimer extends Timer {

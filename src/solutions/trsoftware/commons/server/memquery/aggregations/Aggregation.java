@@ -17,8 +17,8 @@
 
 package solutions.trsoftware.commons.server.memquery.aggregations;
 
-import solutions.trsoftware.commons.client.util.stats.Updatable;
 import solutions.trsoftware.commons.server.memquery.HasValue;
+import solutions.trsoftware.commons.shared.util.stats.Updatable;
 
 /**
  * Marker interface for all aggregation functions, which encapsulate their state for all input values processed

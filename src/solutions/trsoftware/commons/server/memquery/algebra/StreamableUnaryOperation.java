@@ -17,9 +17,9 @@
 
 package solutions.trsoftware.commons.server.memquery.algebra;
 
-import solutions.trsoftware.commons.client.util.callables.Function1;
 import solutions.trsoftware.commons.server.memquery.Row;
 import solutions.trsoftware.commons.server.memquery.RowImpl;
+import solutions.trsoftware.commons.shared.util.callables.Function1;
 
 /**
  * An unary operation that can be evaluated one row at a time.  Implements {@link Function1} to do

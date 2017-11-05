@@ -38,7 +38,7 @@ public class Assert {
 
 
   public static void assertTrue(boolean condition) {
-    solutions.trsoftware.commons.client.util.Assert.assertTrue(condition);
+    solutions.trsoftware.commons.shared.util.Assert.assertTrue(condition);
   }
 
 

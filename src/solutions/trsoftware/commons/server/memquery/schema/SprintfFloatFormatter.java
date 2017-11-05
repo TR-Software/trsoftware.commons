@@ -17,7 +17,7 @@
 
 package solutions.trsoftware.commons.server.memquery.schema;
 
-import solutions.trsoftware.commons.client.util.StringUtils;
+import solutions.trsoftware.commons.shared.util.StringUtils;
 
 /**
  * Enhances {@link SprintfColFormatter} for floating-point numbers: strips trailing zeroes and decimal point if necessary.

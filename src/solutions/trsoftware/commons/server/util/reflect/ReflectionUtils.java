@@ -17,10 +17,10 @@
 
 package solutions.trsoftware.commons.server.util.reflect;
 
-import solutions.trsoftware.commons.client.util.StringUtils;
-import solutions.trsoftware.commons.client.util.callables.Function0;
-import solutions.trsoftware.commons.client.util.callables.FunctionN;
 import solutions.trsoftware.commons.server.io.ServerIOUtils;
+import solutions.trsoftware.commons.shared.util.StringUtils;
+import solutions.trsoftware.commons.shared.util.callables.Function0;
+import solutions.trsoftware.commons.shared.util.callables.FunctionN;
 
 import java.io.File;
 import java.lang.reflect.*;

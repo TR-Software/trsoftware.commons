@@ -22,9 +22,9 @@ import com.google.gwt.event.logical.shared.AttachEvent;
 import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.user.client.ui.Widget;
 import solutions.trsoftware.commons.client.event.MultiHandlerRegistration;
-import solutions.trsoftware.commons.client.util.callables.Function0;
 import solutions.trsoftware.commons.client.util.geometry.Alignment;
 import solutions.trsoftware.commons.client.util.geometry.RelativePosition;
+import solutions.trsoftware.commons.shared.util.callables.Function0;
 
 /**
  * Encapsulates the logic associated with showing a popup in response to a click or mouse hover event on a widget

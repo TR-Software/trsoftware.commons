@@ -19,10 +19,9 @@ package solutions.trsoftware.commons.shared.util;
 
 import junit.framework.TestCase;
 import solutions.trsoftware.commons.client.testutil.AssertUtils;
-import solutions.trsoftware.commons.client.util.MathUtils;
-import solutions.trsoftware.commons.client.util.callables.Function1;
-import solutions.trsoftware.commons.client.util.mutable.MutableInteger;
-import solutions.trsoftware.commons.client.util.stats.HashCounter;
+import solutions.trsoftware.commons.shared.util.callables.Function1;
+import solutions.trsoftware.commons.shared.util.mutable.MutableInteger;
+import solutions.trsoftware.commons.shared.util.stats.HashCounter;
 
 import java.util.*;
 

@@ -23,9 +23,9 @@ import com.google.gwt.event.dom.client.MouseEvent;
 import com.google.gwt.user.client.Event;
 import com.google.gwt.user.client.ui.MenuBar;
 import com.google.web.bindery.event.shared.EventBus;
-import solutions.trsoftware.commons.client.util.StringUtils;
+import solutions.trsoftware.commons.shared.util.StringUtils;
 
-import static solutions.trsoftware.commons.client.util.StringUtils.methodCallToString;
+import static solutions.trsoftware.commons.shared.util.StringUtils.methodCallToString;
 
 /**
  * Event-handling utils.

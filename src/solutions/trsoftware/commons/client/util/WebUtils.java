@@ -20,11 +20,13 @@ package solutions.trsoftware.commons.client.util;
 import com.google.gwt.http.client.UrlBuilder;
 import com.google.gwt.user.client.Window;
 import solutions.trsoftware.commons.client.bridge.util.UrlEncoder;
+import solutions.trsoftware.commons.shared.util.ArrayUtils;
+import solutions.trsoftware.commons.shared.util.MapUtils;
 
 import java.util.*;
 
-import static solutions.trsoftware.commons.client.util.StringUtils.join;
-import static solutions.trsoftware.commons.client.util.StringUtils.notBlank;
+import static solutions.trsoftware.commons.shared.util.StringUtils.join;
+import static solutions.trsoftware.commons.shared.util.StringUtils.notBlank;
 
 /**
  * Date: Jun 19, 2008 Time: 11:34:55 AM

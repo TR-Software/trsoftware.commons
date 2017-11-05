@@ -17,14 +17,14 @@
 
 package solutions.trsoftware.commons.server.util;
 
-import solutions.trsoftware.commons.client.util.LazyInitFactory;
+import solutions.trsoftware.commons.shared.util.LazyReference;
 
 /**
  * Mar 10, 2011
  *
  * @author Alex
  */
-public class LazyInitFactoryReflectionImpl<T> extends LazyInitFactory<T> {
+public class LazyInitFactoryReflectionImpl<T> extends LazyReference<T> {
 
   private final Class<T> type;
 

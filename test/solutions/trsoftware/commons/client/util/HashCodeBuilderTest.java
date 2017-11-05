@@ -18,6 +18,7 @@
 package solutions.trsoftware.commons.client.util;
 
 import junit.framework.TestCase;
+import solutions.trsoftware.commons.shared.util.HashCodeBuilder;
 
 /**
  * Oct 17, 2012

@@ -17,7 +17,7 @@
 
 package solutions.trsoftware.commons.server.io.csv;
 
-import solutions.trsoftware.commons.client.util.callables.Function1;
+import solutions.trsoftware.commons.shared.util.callables.Function1;
 
 import java.util.Map;
 

@@ -25,9 +25,9 @@ import solutions.trsoftware.commons.client.Settings;
 import solutions.trsoftware.commons.client.jso.JsConsole;
 import solutions.trsoftware.commons.client.logging.Log;
 import solutions.trsoftware.commons.client.useragent.UserAgent;
-import solutions.trsoftware.commons.client.util.LazyInitFactory;
 import solutions.trsoftware.commons.client.widgets.popups.ErrorMessagePopup;
 import solutions.trsoftware.commons.client.widgets.popups.PopupDialog;
+import solutions.trsoftware.commons.shared.util.LazyReference;
 import solutions.trsoftware.gwt.stacktrace.client.StackTraceDeobfuscatorClient;
 
 /**
@@ -38,7 +38,7 @@ import solutions.trsoftware.gwt.stacktrace.client.StackTraceDeobfuscatorClient;
 public class CommonsUncaughtExceptionHandler implements GWT.UncaughtExceptionHandler {
 
   private PopupDialog exceptionNoticePopup;
-  private LazyInitFactory<StackTraceDeobfuscatorClient> deobfuscatorClient = new LazyInitFactory<StackTraceDeobfuscatorClient>() {
+  private LazyReference<StackTraceDeobfuscatorClient> deobfuscatorClient = new LazyReference<StackTraceDeobfuscatorClient>() {
     @Override
     protected StackTraceDeobfuscatorClient create() {
       Settings settings = Settings.get();

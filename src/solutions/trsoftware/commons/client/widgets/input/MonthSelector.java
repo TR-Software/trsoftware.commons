@@ -18,7 +18,7 @@
 package solutions.trsoftware.commons.client.widgets.input;
 
 import com.google.gwt.i18n.client.DateTimeFormat;
-import solutions.trsoftware.commons.client.util.TimeUnit;
+import solutions.trsoftware.commons.shared.util.TimeUnit;
 
 import java.util.Date;
 

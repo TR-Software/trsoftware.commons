@@ -18,7 +18,7 @@
 package solutions.trsoftware.commons.shared.util.text;
 
 import solutions.trsoftware.commons.client.bridge.text.AbstractNumberFormatter;
-import solutions.trsoftware.commons.client.util.StringUtils;
+import solutions.trsoftware.commons.shared.util.StringUtils;
 
 import java.text.DecimalFormat;
 import java.text.ParseException;

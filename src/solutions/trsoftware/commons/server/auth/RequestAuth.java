@@ -18,12 +18,12 @@
 package solutions.trsoftware.commons.server.auth;
 
 import org.apache.commons.codec.binary.Base64;
-import solutions.trsoftware.commons.client.util.StringUtils;
 import solutions.trsoftware.commons.client.util.WebUtils;
 import solutions.trsoftware.commons.server.servlet.ServletUtils;
 import solutions.trsoftware.commons.server.util.Duration;
 import solutions.trsoftware.commons.server.util.ServerStringUtils;
 import solutions.trsoftware.commons.server.util.UrlSafeBase64;
+import solutions.trsoftware.commons.shared.util.StringUtils;
 
 import javax.crypto.Mac;
 import javax.crypto.SecretKey;

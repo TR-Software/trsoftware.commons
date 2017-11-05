@@ -23,7 +23,7 @@ import solutions.trsoftware.commons.client.CommonsGwtTestCase;
 import java.util.ArrayList;
 
 import static com.google.gwt.core.client.Duration.currentTimeMillis;
-import static solutions.trsoftware.commons.client.util.ListUtils.last;
+import static solutions.trsoftware.commons.shared.util.ListUtils.last;
 
 public class SmartTimerTest extends CommonsGwtTestCase {
 

@@ -22,7 +22,7 @@ import solutions.trsoftware.commons.client.CommonsGwtTestCase;
 import solutions.trsoftware.commons.client.bridge.util.RandomGen;
 import solutions.trsoftware.commons.client.bridge.util.impl.RandomGenGwtImpl;
 import solutions.trsoftware.commons.client.util.IncrementalForLoop;
-import solutions.trsoftware.commons.client.util.callables.Function0;
+import solutions.trsoftware.commons.shared.util.callables.Function0;
 
 /**
  * This class uses RandomGenTestBridge as a delegate (which provides a way to

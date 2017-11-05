@@ -17,7 +17,7 @@
 
 package solutions.trsoftware.commons.server.memquery.aggregations;
 
-import solutions.trsoftware.commons.client.util.stats.NumberSampleOnlineDouble;
+import solutions.trsoftware.commons.shared.util.stats.NumberSampleOnlineDouble;
 
 /**
  * @author Alex, 6/4/2014

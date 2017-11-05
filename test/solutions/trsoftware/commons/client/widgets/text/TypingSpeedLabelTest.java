@@ -21,10 +21,10 @@ import com.google.gwt.user.client.Element;
 import com.google.gwt.user.client.ui.RootPanel;
 import solutions.trsoftware.commons.client.CommonsGwtTestCase;
 import solutions.trsoftware.commons.client.testutil.AssertUtils;
-import solutions.trsoftware.commons.client.util.StringUtils;
-import solutions.trsoftware.commons.client.util.callables.Function1_t;
 import solutions.trsoftware.commons.shared.text.Language;
 import solutions.trsoftware.commons.shared.text.TypingSpeed;
+import solutions.trsoftware.commons.shared.util.StringUtils;
+import solutions.trsoftware.commons.shared.util.callables.Function1_t;
 
 import java.util.List;
 

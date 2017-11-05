@@ -18,9 +18,9 @@
 package solutions.trsoftware.commons.server.cache;
 
 import solutions.trsoftware.commons.client.testutil.AssertUtils;
-import solutions.trsoftware.commons.client.util.stats.NumberSample;
 import solutions.trsoftware.commons.server.TestCaseCanStopClock;
 import solutions.trsoftware.commons.server.util.Clock;
+import solutions.trsoftware.commons.shared.util.stats.NumberSample;
 
 import java.util.Iterator;
 import java.util.NoSuchElementException;

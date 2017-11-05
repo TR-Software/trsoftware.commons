@@ -17,7 +17,7 @@
 
 package solutions.trsoftware.commons.server.servlet.testutil;
 
-import solutions.trsoftware.commons.client.util.StringUtils;
+import solutions.trsoftware.commons.shared.util.StringUtils;
 
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpSession;

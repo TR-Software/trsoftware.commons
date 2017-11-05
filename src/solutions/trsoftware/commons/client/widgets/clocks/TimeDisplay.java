@@ -20,8 +20,8 @@ package solutions.trsoftware.commons.client.widgets.clocks;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.Label;
-import solutions.trsoftware.commons.client.util.StringUtils;
 import solutions.trsoftware.commons.client.util.time.CountdownTimer;
+import solutions.trsoftware.commons.shared.util.StringUtils;
 
 import static solutions.trsoftware.commons.client.widgets.WidgetDecorator.setVisibilityHidden;
 import static solutions.trsoftware.commons.client.widgets.Widgets.flowPanel;

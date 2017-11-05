@@ -27,8 +27,8 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.Collection;
 
-import static solutions.trsoftware.commons.client.util.SetUtils.newSet;
 import static solutions.trsoftware.commons.server.util.reflect.MemberPatternTest.*;
+import static solutions.trsoftware.commons.shared.util.SetUtils.newSet;
 
 public class MemberSetTest extends TestCase {
 

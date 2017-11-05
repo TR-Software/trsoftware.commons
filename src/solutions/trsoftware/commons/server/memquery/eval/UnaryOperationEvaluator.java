@@ -17,9 +17,9 @@
 
 package solutions.trsoftware.commons.server.memquery.eval;
 
-import solutions.trsoftware.commons.client.util.callables.Function1;
 import solutions.trsoftware.commons.server.memquery.Relation;
 import solutions.trsoftware.commons.server.memquery.algebra.RelationalExpression;
+import solutions.trsoftware.commons.shared.util.callables.Function1;
 
 /**
  * Evaluates a single relational algebra operation on an input relation to produce an output relation.

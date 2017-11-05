@@ -17,7 +17,7 @@
 
 package solutions.trsoftware.commons.shared.text;
 
-import solutions.trsoftware.commons.client.util.stats.ArgMin;
+import solutions.trsoftware.commons.shared.util.stats.ArgMin;
 
 import java.util.ArrayList;
 import java.util.List;

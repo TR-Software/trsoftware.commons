@@ -17,13 +17,13 @@
 
 package solutions.trsoftware.commons.server.util;
 
-import solutions.trsoftware.commons.client.util.template.Template;
 import solutions.trsoftware.commons.server.testutil.TempFileTestCase;
+import solutions.trsoftware.commons.shared.util.template.Template;
 
 import java.io.FileOutputStream;
 import java.io.PrintStream;
 
-import static solutions.trsoftware.commons.client.util.MapUtils.hashMap;
+import static solutions.trsoftware.commons.shared.util.MapUtils.hashMap;
 
 public class FileTemplateParserTest extends TempFileTestCase {
 

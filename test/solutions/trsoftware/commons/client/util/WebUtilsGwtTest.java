@@ -23,8 +23,8 @@ import solutions.trsoftware.commons.client.CommonsGwtTestCase;
 import solutions.trsoftware.commons.client.bridge.util.UrlEncoder;
 import solutions.trsoftware.commons.client.testutil.AssertUtils;
 
-import static solutions.trsoftware.commons.client.util.MapUtils.stringLinkedHashMap;
 import static solutions.trsoftware.commons.client.util.WebUtils.*;
+import static solutions.trsoftware.commons.shared.util.MapUtils.stringLinkedHashMap;
 
 /**
  *

@@ -21,7 +21,7 @@ import com.google.gwt.event.logical.shared.OpenEvent;
 import com.google.gwt.event.logical.shared.OpenHandler;
 import com.google.gwt.user.client.ui.DisclosurePanel;
 import com.google.gwt.user.client.ui.Widget;
-import solutions.trsoftware.commons.client.util.callables.Function0;
+import solutions.trsoftware.commons.shared.util.callables.Function0;
 
 /**
  * Creates a DiscolosurePanel which instantiates its body widget only when opened.

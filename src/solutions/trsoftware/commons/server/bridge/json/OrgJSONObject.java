@@ -20,7 +20,7 @@ package solutions.trsoftware.commons.server.bridge.json;
 import org.json.JSONException;
 import solutions.trsoftware.commons.client.bridge.json.JSONArray;
 import solutions.trsoftware.commons.client.bridge.json.JSONObject;
-import solutions.trsoftware.commons.client.util.CollectionUtils;
+import solutions.trsoftware.commons.shared.util.CollectionUtils;
 
 import java.util.Collection;
 

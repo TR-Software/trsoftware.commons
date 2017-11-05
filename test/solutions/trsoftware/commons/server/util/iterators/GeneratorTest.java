@@ -19,8 +19,8 @@ package solutions.trsoftware.commons.server.util.iterators;
 
 import junit.framework.TestCase;
 import solutions.trsoftware.commons.Slow;
-import solutions.trsoftware.commons.client.util.CollectionUtils;
 import solutions.trsoftware.commons.server.util.Duration;
+import solutions.trsoftware.commons.shared.util.CollectionUtils;
 
 import java.util.Arrays;
 import java.util.Iterator;

@@ -19,16 +19,16 @@ package solutions.trsoftware.commons.server.net;
 
 import junit.framework.TestCase;
 import solutions.trsoftware.commons.Slow;
-import solutions.trsoftware.commons.client.data.CountryCodes;
-import solutions.trsoftware.commons.client.util.Box;
-import solutions.trsoftware.commons.client.util.IpAddress;
-import solutions.trsoftware.commons.client.util.callables.Function0;
 import solutions.trsoftware.commons.server.testutil.TestUtils;
+import solutions.trsoftware.commons.shared.data.CountryCodes;
+import solutions.trsoftware.commons.shared.util.Box;
+import solutions.trsoftware.commons.shared.util.IpAddress;
+import solutions.trsoftware.commons.shared.util.callables.Function0;
 
 import java.util.HashSet;
 import java.util.Set;
 
-import static solutions.trsoftware.commons.client.util.IpAddressUtils.randomIpAddress;
+import static solutions.trsoftware.commons.shared.util.IpAddressUtils.randomIpAddress;
 
 /**
  * Nov 6, 2009

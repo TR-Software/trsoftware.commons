@@ -17,7 +17,7 @@
 
 package solutions.trsoftware.commons.shared.util.trees;
 
-import static solutions.trsoftware.commons.client.util.LogicUtils.firstNonNull;
+import static solutions.trsoftware.commons.shared.util.LogicUtils.firstNonNull;
 
 /**
  *

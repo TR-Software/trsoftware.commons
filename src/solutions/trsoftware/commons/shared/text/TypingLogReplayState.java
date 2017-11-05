@@ -17,8 +17,8 @@
 
 package solutions.trsoftware.commons.shared.text;
 
-import solutions.trsoftware.commons.client.util.Levenshtein;
-import solutions.trsoftware.commons.client.util.StringUtils;
+import solutions.trsoftware.commons.shared.util.Levenshtein;
+import solutions.trsoftware.commons.shared.util.StringUtils;
 
 import java.util.*;
 

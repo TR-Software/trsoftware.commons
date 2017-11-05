@@ -20,8 +20,8 @@ package solutions.trsoftware.commons.server.testutil;
 import com.dumbster.smtp.SimpleSmtpServer;
 import com.dumbster.smtp.SmtpMessage;
 import org.apache.commons.codec.binary.Base64;
-import solutions.trsoftware.commons.client.util.Assert;
-import solutions.trsoftware.commons.client.util.CollectionUtils;
+import solutions.trsoftware.commons.shared.util.Assert;
+import solutions.trsoftware.commons.shared.util.CollectionUtils;
 
 import java.util.Date;
 import java.util.Iterator;

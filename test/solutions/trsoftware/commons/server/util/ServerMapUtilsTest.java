@@ -18,9 +18,9 @@
 package solutions.trsoftware.commons.server.util;
 
 import junit.framework.TestCase;
-import solutions.trsoftware.commons.client.util.callables.Function0;
-import solutions.trsoftware.commons.client.util.callables.Function1;
-import solutions.trsoftware.commons.client.util.callables.Function2;
+import solutions.trsoftware.commons.shared.util.callables.Function0;
+import solutions.trsoftware.commons.shared.util.callables.Function1;
+import solutions.trsoftware.commons.shared.util.callables.Function2;
 
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;

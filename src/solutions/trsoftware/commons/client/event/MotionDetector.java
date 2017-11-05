@@ -21,7 +21,7 @@ import com.google.gwt.event.shared.EventHandler;
 import com.google.gwt.user.client.Event;
 import com.google.web.bindery.event.shared.HandlerRegistration;
 import solutions.trsoftware.commons.client.util.SmartTimer;
-import solutions.trsoftware.commons.client.util.TimeUtils;
+import solutions.trsoftware.commons.shared.util.TimeUtils;
 
 import java.util.HashSet;
 import java.util.Iterator;

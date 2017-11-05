@@ -19,7 +19,7 @@ package solutions.trsoftware.commons.server.util.reflect;
 
 import com.google.common.base.Predicate;
 import com.google.common.base.Predicates;
-import solutions.trsoftware.commons.client.util.Assert;
+import solutions.trsoftware.commons.shared.util.Assert;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;

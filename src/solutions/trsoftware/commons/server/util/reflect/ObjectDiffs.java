@@ -17,8 +17,8 @@
 
 package solutions.trsoftware.commons.server.util.reflect;
 
-import solutions.trsoftware.commons.client.util.StringUtils;
 import solutions.trsoftware.commons.shared.util.SimplePair;
+import solutions.trsoftware.commons.shared.util.StringUtils;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
@@ -26,8 +26,8 @@ import java.lang.reflect.Member;
 import java.lang.reflect.Method;
 import java.util.*;
 
-import static solutions.trsoftware.commons.client.util.Assert.assertNotNull;
-import static solutions.trsoftware.commons.client.util.Assert.assertTrue;
+import static solutions.trsoftware.commons.shared.util.Assert.assertNotNull;
+import static solutions.trsoftware.commons.shared.util.Assert.assertTrue;
 
 
 /**

@@ -18,8 +18,8 @@
 package solutions.trsoftware.commons.server.util.iterators;
 
 import com.google.common.collect.UnmodifiableIterator;
-import solutions.trsoftware.commons.client.util.Box;
-import solutions.trsoftware.commons.client.util.iterators.ResettableIterator;
+import solutions.trsoftware.commons.shared.util.Box;
+import solutions.trsoftware.commons.shared.util.iterators.ResettableIterator;
 
 import java.util.Iterator;
 import java.util.NoSuchElementException;

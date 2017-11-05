@@ -18,7 +18,7 @@
 package solutions.trsoftware.commons.client;
 
 import junit.framework.TestCase;
-import solutions.trsoftware.commons.client.util.MapUtils;
+import solutions.trsoftware.commons.shared.util.MapUtils;
 
 /**
  * Tests {@link BaseGwtTestCase}

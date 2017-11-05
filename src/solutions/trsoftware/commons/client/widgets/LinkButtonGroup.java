@@ -18,7 +18,7 @@
 package solutions.trsoftware.commons.client.widgets;
 
 import com.google.gwt.user.client.ui.*;
-import solutions.trsoftware.commons.client.util.ArrayUtils;
+import solutions.trsoftware.commons.shared.util.ArrayUtils;
 
 import java.util.HashMap;
 import java.util.Map;

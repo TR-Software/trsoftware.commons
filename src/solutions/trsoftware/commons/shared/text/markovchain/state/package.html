@@ -1,0 +1,13 @@
+A state in a MarkovChain is a set of tokens from the natural language being modeled
+and a probabilistic transition table for the possible next tokens.
+
+The various implementations of State support various ways of representing language
+tokens: StringState subclasses support representing tokens as Strings and
+the ShortState sublcasses support short integers as tokens.  The latter
+is optimized for minimal memory usage when representing large MarkovChains.
+
+Note: the benefits of supporting string representations didn't prove to be that
+great (see docs for the markovchain.dict package in package.html).  Therefore,
+in the future, can delete everything but NgramStringState.
+
+

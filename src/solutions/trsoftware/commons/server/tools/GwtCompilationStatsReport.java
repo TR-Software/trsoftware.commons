@@ -17,10 +17,10 @@
 
 package solutions.trsoftware.commons.server.tools;
 
-import solutions.trsoftware.commons.client.util.MemoryUnit;
-import solutions.trsoftware.commons.client.util.stats.MaxComparable;
-import solutions.trsoftware.commons.client.util.stats.NumberSample;
 import solutions.trsoftware.commons.server.io.SplitterOutputStream;
+import solutions.trsoftware.commons.shared.util.MemoryUnit;
+import solutions.trsoftware.commons.shared.util.stats.MaxComparable;
+import solutions.trsoftware.commons.shared.util.stats.NumberSample;
 
 import java.io.*;
 import java.util.*;

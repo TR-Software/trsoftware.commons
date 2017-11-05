@@ -23,6 +23,7 @@ import com.google.web.bindery.event.shared.Event;
 import com.google.web.bindery.event.shared.EventBus;
 import com.google.web.bindery.event.shared.HandlerRegistration;
 import com.google.web.bindery.event.shared.SimpleEventBus;
+import solutions.trsoftware.commons.shared.util.time.Time;
 
 /**
  * Every time it fires, the timer checks for changes in the referenced {@link Time}

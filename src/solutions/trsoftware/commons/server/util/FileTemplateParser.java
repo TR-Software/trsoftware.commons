@@ -17,11 +17,11 @@
 
 package solutions.trsoftware.commons.server.util;
 
-import solutions.trsoftware.commons.client.util.template.SimpleTemplateParser;
-import solutions.trsoftware.commons.client.util.template.Template;
-import solutions.trsoftware.commons.client.util.template.TemplateParser;
 import solutions.trsoftware.commons.server.io.ServerIOUtils;
 import solutions.trsoftware.commons.shared.util.collections.DefaultMap;
+import solutions.trsoftware.commons.shared.util.template.SimpleTemplateParser;
+import solutions.trsoftware.commons.shared.util.template.Template;
+import solutions.trsoftware.commons.shared.util.template.TemplateParser;
 
 import java.io.File;
 import java.io.IOException;

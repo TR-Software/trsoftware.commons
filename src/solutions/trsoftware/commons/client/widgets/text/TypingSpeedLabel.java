@@ -20,8 +20,8 @@ package solutions.trsoftware.commons.client.widgets.text;
 import com.google.gwt.text.shared.AbstractRenderer;
 import com.google.gwt.text.shared.Renderer;
 import com.google.gwt.user.client.ui.ValueLabel;
-import solutions.trsoftware.commons.client.util.Box;
 import solutions.trsoftware.commons.shared.text.TypingSpeed;
+import solutions.trsoftware.commons.shared.util.Box;
 import solutions.trsoftware.commons.shared.util.text.SharedNumberFormat;
 
 /**

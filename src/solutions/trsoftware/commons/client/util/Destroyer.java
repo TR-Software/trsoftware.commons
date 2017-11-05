@@ -23,7 +23,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * A delegate that facilitates other classes implementing the Destroyable interface.
+ * A delegate that facilitates other classes implementing the {@link Destroyable} interface.
  * Provides "mix-in" logic.
  * 
  * @author Alex

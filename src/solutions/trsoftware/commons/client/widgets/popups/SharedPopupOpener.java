@@ -20,9 +20,9 @@ package solutions.trsoftware.commons.client.widgets.popups;
 import com.google.common.collect.LinkedHashMultimap;
 import com.google.gwt.event.logical.shared.AttachEvent;
 import com.google.gwt.user.client.ui.Widget;
-import solutions.trsoftware.commons.client.util.Assert;
 import solutions.trsoftware.commons.client.util.geometry.Alignment;
 import solutions.trsoftware.commons.client.util.geometry.RelativePosition;
+import solutions.trsoftware.commons.shared.util.Assert;
 
 import java.util.HashMap;
 import java.util.Map;

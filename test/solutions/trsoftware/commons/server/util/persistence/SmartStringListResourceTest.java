@@ -17,9 +17,9 @@
 
 package solutions.trsoftware.commons.server.util.persistence;
 
-import solutions.trsoftware.commons.client.util.callables.Function1;
 import solutions.trsoftware.commons.server.io.ServerIOUtils;
 import solutions.trsoftware.commons.server.testutil.TempFileTestCase;
+import solutions.trsoftware.commons.shared.util.callables.Function1;
 
 import java.io.File;
 import java.util.Collection;

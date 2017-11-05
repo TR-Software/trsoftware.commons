@@ -17,11 +17,11 @@
 
 package solutions.trsoftware.commons.server.memquery.eval;
 
-import solutions.trsoftware.commons.client.util.StringUtils;
 import solutions.trsoftware.commons.server.memquery.algebra.BinaryOperation;
 import solutions.trsoftware.commons.server.memquery.algebra.RelationalExpressionVisitor;
 import solutions.trsoftware.commons.server.memquery.algebra.RelationalValue;
 import solutions.trsoftware.commons.server.memquery.algebra.UnaryOperation;
+import solutions.trsoftware.commons.shared.util.StringUtils;
 
 /**
 * @author Alex, 10/10/2016

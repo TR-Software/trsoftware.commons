@@ -17,7 +17,7 @@
 
 package solutions.trsoftware.commons.shared.text;
 
-import solutions.trsoftware.commons.client.util.MathUtils;
+import solutions.trsoftware.commons.shared.util.MathUtils;
 import solutions.trsoftware.commons.shared.util.text.SharedNumberFormat;
 
 import javax.validation.constraints.NotNull;

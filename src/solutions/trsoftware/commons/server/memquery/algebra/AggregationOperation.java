@@ -17,7 +17,6 @@
 
 package solutions.trsoftware.commons.server.memquery.algebra;
 
-import solutions.trsoftware.commons.client.util.CollectionUtils;
 import solutions.trsoftware.commons.server.memquery.AggregationSpec;
 import solutions.trsoftware.commons.server.memquery.aggregations.Aggregation;
 import solutions.trsoftware.commons.server.memquery.schema.AggregatedColSpec;
@@ -25,6 +24,7 @@ import solutions.trsoftware.commons.server.memquery.schema.ColSpec;
 import solutions.trsoftware.commons.server.memquery.schema.NameAccessorColSpec;
 import solutions.trsoftware.commons.server.memquery.util.NameUtils;
 import solutions.trsoftware.commons.server.util.reflect.ReflectionUtils;
+import solutions.trsoftware.commons.shared.util.CollectionUtils;
 
 import java.util.Collections;
 import java.util.LinkedHashMap;

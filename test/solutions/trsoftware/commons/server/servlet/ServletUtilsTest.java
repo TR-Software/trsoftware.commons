@@ -19,8 +19,8 @@ package solutions.trsoftware.commons.server.servlet;
 
 import junit.framework.TestCase;
 import solutions.trsoftware.commons.client.testutil.AssertUtils;
-import solutions.trsoftware.commons.client.util.MapUtils;
 import solutions.trsoftware.commons.server.servlet.testutil.DummyHttpServletRequest;
+import solutions.trsoftware.commons.shared.util.MapUtils;
 
 import java.util.Arrays;
 import java.util.Enumeration;

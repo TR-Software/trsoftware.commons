@@ -17,12 +17,12 @@
 
 package solutions.trsoftware.commons.shared.text;
 
-import solutions.trsoftware.commons.client.data.CountryCodes;
-import solutions.trsoftware.commons.client.util.MapUtils;
-import solutions.trsoftware.commons.client.util.StringUtils;
-import solutions.trsoftware.commons.client.util.text.LogographicTokenizer;
-import solutions.trsoftware.commons.client.util.text.TextTokenizer;
-import solutions.trsoftware.commons.client.util.text.WhitespaceTokenizer;
+import solutions.trsoftware.commons.shared.data.CountryCodes;
+import solutions.trsoftware.commons.shared.util.MapUtils;
+import solutions.trsoftware.commons.shared.util.StringUtils;
+import solutions.trsoftware.commons.shared.util.text.LogographicTokenizer;
+import solutions.trsoftware.commons.shared.util.text.TextTokenizer;
+import solutions.trsoftware.commons.shared.util.text.WhitespaceTokenizer;
 
 import java.util.*;
 

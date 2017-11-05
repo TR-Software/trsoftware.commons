@@ -18,6 +18,7 @@
 package solutions.trsoftware.commons.client.util;
 
 import solutions.trsoftware.commons.client.bridge.util.Duration;
+import solutions.trsoftware.commons.shared.util.TimeUnit;
 
 /**
  * Apr 29, 2011

@@ -17,12 +17,12 @@
 
 package solutions.trsoftware.commons.server.memquery.eval;
 
-import solutions.trsoftware.commons.client.util.iterators.MapEntryTransformingIterator;
 import solutions.trsoftware.commons.server.memquery.*;
 import solutions.trsoftware.commons.server.memquery.aggregations.Aggregation;
 import solutions.trsoftware.commons.server.memquery.aggregations.RowAggregation;
 import solutions.trsoftware.commons.server.memquery.algebra.AggregationOperation;
 import solutions.trsoftware.commons.server.util.Duration;
+import solutions.trsoftware.commons.shared.util.iterators.MapEntryTransformingIterator;
 
 import java.util.ArrayList;
 import java.util.LinkedHashMap;

@@ -18,7 +18,7 @@
 package solutions.trsoftware.commons.client.widgets;
 
 import com.google.gwt.user.client.ui.Composite;
-import solutions.trsoftware.commons.client.util.LogicUtils;
+import solutions.trsoftware.commons.shared.util.LogicUtils;
 
 import javax.annotation.Nonnull;
 

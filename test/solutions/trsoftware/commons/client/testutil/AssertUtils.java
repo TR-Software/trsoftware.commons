@@ -19,15 +19,15 @@ package solutions.trsoftware.commons.client.testutil;
 
 import com.google.gwt.user.client.Element;
 import junit.framework.AssertionFailedError;
-import solutions.trsoftware.commons.client.util.ComparisonOperator;
 import solutions.trsoftware.commons.client.util.GwtUtils;
-import solutions.trsoftware.commons.client.util.callables.Function0_t;
-import solutions.trsoftware.commons.client.util.template.Template;
+import solutions.trsoftware.commons.shared.util.ComparisonOperator;
+import solutions.trsoftware.commons.shared.util.callables.Function0_t;
+import solutions.trsoftware.commons.shared.util.template.Template;
 
 import java.util.*;
 
 import static junit.framework.Assert.*;
-import static solutions.trsoftware.commons.client.util.CollectionUtils.asList;
+import static solutions.trsoftware.commons.shared.util.CollectionUtils.asList;
 
 /**
  * Date: Nov 28, 2008 Time: 6:25:03 PM

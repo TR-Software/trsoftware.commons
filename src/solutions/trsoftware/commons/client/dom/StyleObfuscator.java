@@ -17,7 +17,7 @@
 
 package solutions.trsoftware.commons.client.dom;
 
-import solutions.trsoftware.commons.client.util.StringUtils;
+import solutions.trsoftware.commons.shared.util.StringUtils;
 
 /**
  * A lookup table of key-value pairs used for translating between human readable

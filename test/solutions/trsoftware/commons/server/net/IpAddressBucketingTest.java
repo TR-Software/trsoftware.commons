@@ -18,9 +18,9 @@
 package solutions.trsoftware.commons.server.net;
 
 import junit.framework.TestCase;
-import solutions.trsoftware.commons.client.util.IpAddress;
-import solutions.trsoftware.commons.client.util.stats.Mean;
 import solutions.trsoftware.commons.server.io.ServerIOUtils;
+import solutions.trsoftware.commons.shared.util.IpAddress;
+import solutions.trsoftware.commons.shared.util.stats.Mean;
 
 import java.io.FileReader;
 import java.util.ArrayList;

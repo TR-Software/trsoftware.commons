@@ -19,8 +19,8 @@ package solutions.trsoftware.commons.server.util;
 
 import junit.framework.TestCase;
 import solutions.trsoftware.commons.Slow;
-import solutions.trsoftware.commons.client.util.stats.NumberSample;
 import solutions.trsoftware.commons.server.testutil.PerformanceComparison;
+import solutions.trsoftware.commons.shared.util.stats.NumberSample;
 
 import java.math.BigInteger;
 import java.util.ArrayList;

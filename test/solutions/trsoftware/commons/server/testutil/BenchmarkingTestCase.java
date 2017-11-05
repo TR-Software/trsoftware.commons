@@ -19,12 +19,12 @@ package solutions.trsoftware.commons.server.testutil;
 
 import junit.framework.TestCase;
 import solutions.trsoftware.commons.Slow;
-import solutions.trsoftware.commons.client.util.CollectionUtils;
-import solutions.trsoftware.commons.client.util.MapUtils;
-import solutions.trsoftware.commons.client.util.MemoryUnit;
-import solutions.trsoftware.commons.client.util.callables.Function0;
-import solutions.trsoftware.commons.client.util.stats.MaxComparable;
 import solutions.trsoftware.commons.server.util.Duration;
+import solutions.trsoftware.commons.shared.util.CollectionUtils;
+import solutions.trsoftware.commons.shared.util.MapUtils;
+import solutions.trsoftware.commons.shared.util.MemoryUnit;
+import solutions.trsoftware.commons.shared.util.callables.Function0;
+import solutions.trsoftware.commons.shared.util.stats.MaxComparable;
 
 import java.io.PrintStream;
 import java.util.*;

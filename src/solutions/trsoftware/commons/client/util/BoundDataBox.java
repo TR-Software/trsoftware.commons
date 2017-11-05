@@ -17,6 +17,7 @@
 
 package solutions.trsoftware.commons.client.util;
 
+import solutions.trsoftware.commons.shared.util.Box;
 import solutions.trsoftware.commons.shared.util.TakesValue;
 
 import java.util.ArrayList;

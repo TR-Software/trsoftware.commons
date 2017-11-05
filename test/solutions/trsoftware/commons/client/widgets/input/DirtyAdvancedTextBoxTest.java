@@ -18,7 +18,7 @@
 package solutions.trsoftware.commons.client.widgets.input;
 
 import solutions.trsoftware.commons.client.CommonsGwtTestCase;
-import solutions.trsoftware.commons.client.util.StringUtils;
+import solutions.trsoftware.commons.shared.util.StringUtils;
 
 /**
  * Jan 17, 2010

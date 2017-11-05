@@ -17,7 +17,7 @@
 
 package solutions.trsoftware.commons.client.logging;
 
-import solutions.trsoftware.commons.client.util.MessageFormatter;
+import solutions.trsoftware.commons.client.Messages;
 
 /**
  * Defines a stub logging implementation, which by default
@@ -38,7 +38,7 @@ public class LogImpl {
 
   /** An error always needs to be logged, regardless of the "debug" flag in the URL */
   public final void error(String msg, Throwable ex) {
-    Console.instance.error(msg + ": " + MessageFormatter.exceptionTypeToString(ex) + ": " + ex.getMessage());
+    Console.instance.error(msg + ": " + Messages.exceptionTypeToString(ex) + ": " + ex.getMessage());
   }
 
 }

@@ -20,7 +20,7 @@ package solutions.trsoftware.commons.server.memquery;
 import java.util.ArrayList;
 import java.util.Iterator;
 
-import static solutions.trsoftware.commons.client.util.CollectionUtils.asList;
+import static solutions.trsoftware.commons.shared.util.CollectionUtils.asList;
 
 /**
  * A relation that is materialized as an ArrayList of rows.

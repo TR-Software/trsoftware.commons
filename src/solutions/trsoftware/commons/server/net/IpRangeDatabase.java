@@ -17,7 +17,8 @@
 
 package solutions.trsoftware.commons.server.net;
 
-import solutions.trsoftware.commons.client.util.MathUtils;
+import solutions.trsoftware.commons.shared.util.IpAddressUtils;
+import solutions.trsoftware.commons.shared.util.MathUtils;
 
 import java.util.Arrays;
 
@@ -89,7 +90,7 @@ public class IpRangeDatabase {
 
   /**
    * @param ip value obtained using
-   * {@link solutions.trsoftware.commons.client.util.IpAddressUtils#ip4StringToInt(String)}  }
+   * {@link IpAddressUtils#ip4StringToInt(String)}  }
    * @return the country code associated with the given ip address, or null
    * if no country code is associated with the address.
    */

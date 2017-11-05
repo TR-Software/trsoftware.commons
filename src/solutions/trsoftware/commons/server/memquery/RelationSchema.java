@@ -27,10 +27,10 @@ import java.util.Map;
 
 import static java.util.Collections.unmodifiableList;
 import static java.util.Collections.unmodifiableMap;
-import static solutions.trsoftware.commons.client.util.CollectionUtils.asList;
-import static solutions.trsoftware.commons.client.util.CollectionUtils.immutableList;
 import static solutions.trsoftware.commons.server.memquery.util.NameUtils.mapByName;
 import static solutions.trsoftware.commons.server.memquery.util.NameUtils.mapNamesToOrdinals;
+import static solutions.trsoftware.commons.shared.util.CollectionUtils.asList;
+import static solutions.trsoftware.commons.shared.util.CollectionUtils.immutableList;
 
 /**
 * @author Alex, 1/10/14

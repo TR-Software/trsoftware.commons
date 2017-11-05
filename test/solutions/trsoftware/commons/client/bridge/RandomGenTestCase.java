@@ -20,8 +20,8 @@ package solutions.trsoftware.commons.client.bridge;
 import junit.framework.TestCase;
 import solutions.trsoftware.commons.client.bridge.util.RandomGen;
 import solutions.trsoftware.commons.client.testutil.AssertUtils;
-import solutions.trsoftware.commons.client.util.callables.Function0;
-import solutions.trsoftware.commons.client.util.stats.HashCounter;
+import solutions.trsoftware.commons.shared.util.callables.Function0;
+import solutions.trsoftware.commons.shared.util.stats.HashCounter;
 
 import java.util.Set;
 import java.util.TreeSet;

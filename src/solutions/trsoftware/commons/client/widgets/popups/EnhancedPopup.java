@@ -29,10 +29,10 @@ import com.google.gwt.user.client.ui.Widget;
 import solutions.trsoftware.commons.client.animations.ShakePopupAnimation;
 import solutions.trsoftware.commons.client.jso.JsDocument;
 import solutions.trsoftware.commons.client.jso.JsWindow;
-import solutions.trsoftware.commons.client.util.StringUtils;
 import solutions.trsoftware.commons.client.util.geometry.Alignment;
 import solutions.trsoftware.commons.client.util.geometry.RelativePosition;
 import solutions.trsoftware.commons.client.util.geometry.WindowGeometry;
+import solutions.trsoftware.commons.shared.util.StringUtils;
 
 /**
  * Date: Apr 16, 2008 Time: 9:04:07 PM

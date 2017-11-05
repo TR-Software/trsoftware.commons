@@ -35,7 +35,7 @@
   <source path="shared"/>
 
   <generate-with class="solutions.trsoftware.commons.rebind.util.template.TemplateBundleGenerator" >
-    <when-type-assignable class="solutions.trsoftware.commons.client.util.template.TemplateBundle"/>
+    <when-type-assignable class="solutions.trsoftware.commons.shared.util.template.TemplateBundle"/>
   </generate-with>
 
   <generate-with class="solutions.trsoftware.commons.rebind.UserAgentPermutationOracleGenerator" >

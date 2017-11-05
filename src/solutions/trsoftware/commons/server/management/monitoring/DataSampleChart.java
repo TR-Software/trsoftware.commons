@@ -17,10 +17,10 @@
 
 package solutions.trsoftware.commons.server.management.monitoring;
 
-import solutions.trsoftware.commons.client.gchart.GoogleChart;
-import solutions.trsoftware.commons.client.util.StringUtils;
-import solutions.trsoftware.commons.client.util.TimeUtils;
 import solutions.trsoftware.commons.server.util.ServerStringUtils;
+import solutions.trsoftware.commons.shared.gchart.GoogleChart;
+import solutions.trsoftware.commons.shared.util.StringUtils;
+import solutions.trsoftware.commons.shared.util.TimeUtils;
 
 import java.util.ArrayList;
 import java.util.List;

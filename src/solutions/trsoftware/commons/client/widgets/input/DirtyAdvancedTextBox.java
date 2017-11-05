@@ -21,8 +21,8 @@ import com.google.gwt.event.dom.client.BlurEvent;
 import com.google.gwt.event.dom.client.FocusEvent;
 import com.google.gwt.user.client.Command;
 
-import static solutions.trsoftware.commons.client.util.StringUtils.isBlank;
-import static solutions.trsoftware.commons.client.util.StringUtils.notBlank;
+import static solutions.trsoftware.commons.shared.util.StringUtils.isBlank;
+import static solutions.trsoftware.commons.shared.util.StringUtils.notBlank;
 
 /**
  * A text box which has an initial value, which can be edited by focusing the box.

@@ -18,7 +18,7 @@
 package solutions.trsoftware.commons.shared.util.text;
 
 import junit.framework.TestCase;
-import solutions.trsoftware.commons.client.util.StringUtils;
+import solutions.trsoftware.commons.shared.util.StringUtils;
 
 /**
  * @author Alex, 9/20/2017
@@ -29,7 +29,8 @@ public class AlphabetTest extends TestCase {
     assertEquals("Numbers", Alphabet.NUMBERS.getPrettyName());
     assertEquals("Home row", Alphabet.HOME_ROW.getPrettyName());
     assertEquals("Letters", Alphabet.LETTERS.getPrettyName());
-    assertEquals("Letters and symbols", Alphabet.LETTERS_NUMBERS_AND_SYMBOLS.getPrettyName());
+    assertEquals("Letters and numbers", Alphabet.LETTERS_AND_NUMBERS.getPrettyName());
+    assertEquals("Letters, numbers, and symbols", Alphabet.LETTERS_NUMBERS_AND_SYMBOLS.getPrettyName());
   }
 
   public void testLookup() throws Exception {
@@ -39,6 +40,7 @@ public class AlphabetTest extends TestCase {
     assertLookupEquals(Alphabet.HOME_ROW, "asdfghjkl;'");
     assertLookupEquals(Alphabet.LETTERS, Alphabet.getAllLowercaseAsciiSymbols('a', 'z'));
     assertLookupEquals(Alphabet.LETTERS_NUMBERS_AND_SYMBOLS, Alphabet.getAllLowercaseAsciiSymbols(' ', '~'));
+    assertLookupEquals(Alphabet.LETTERS_AND_NUMBERS, Alphabet.getAllLowercaseAsciiSymbols('a', 'z') + Alphabet.getAllLowercaseAsciiSymbols('0', '9'));
   }
 
   private static void assertLookupEquals(Alphabet enumValue, String chars) {

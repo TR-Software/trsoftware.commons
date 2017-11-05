@@ -1,7 +1,7 @@
 package solutions.trsoftware.commons.bridge;
 
 import solutions.trsoftware.commons.client.util.time.ServerTimeClientImpl;
-import solutions.trsoftware.commons.client.util.time.Time;
+import solutions.trsoftware.commons.shared.util.time.Time;
 
 /**
  * Client-side version of {@link solutions.trsoftware.commons.bridge.ServerTime}.

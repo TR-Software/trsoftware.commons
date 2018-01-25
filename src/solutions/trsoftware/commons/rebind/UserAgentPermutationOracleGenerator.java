@@ -21,6 +21,7 @@ import com.google.gwt.core.ext.*;
 import com.google.gwt.core.ext.typeinfo.*;
 import com.google.gwt.user.rebind.ClassSourceFileComposerFactory;
 import com.google.gwt.user.rebind.SourceWriter;
+import com.google.gwt.useragent.rebind.UserAgentPropertyGenerator;
 
 import java.io.PrintWriter;
 
@@ -34,6 +35,10 @@ import java.io.PrintWriter;
  * <p>
  * This code is based on {@link com.google.gwt.useragent.rebind.UserAgentGenerator}.
  * </p>
+ * <p>
+ *   The possible values of the {@code user.agent} property are specified in {@link UserAgentPropertyGenerator#VALID_VALUES}
+ * </p>
+ * @see UserAgentPropertyGenerator
  */
 public class UserAgentPermutationOracleGenerator extends Generator {
 
@@ -63,10 +68,8 @@ public class UserAgentPermutationOracleGenerator extends Generator {
     PropertyOracle propertyOracle = context.getPropertyOracle();
 
     String userAgentValue;
-    SelectionProperty selectionProperty;
     try {
-      selectionProperty = propertyOracle.getSelectionProperty(logger, PROPERTY_USER_AGENT);
-      userAgentValue = selectionProperty.getCurrentValue();
+      userAgentValue = propertyOracle.getSelectionProperty(logger, PROPERTY_USER_AGENT).getCurrentValue();
     } catch (BadPropertyValueException e) {
       logger.log(TreeLogger.ERROR, "Unable to find value for '" + PROPERTY_USER_AGENT + "'", e);
       throw new UnableToCompleteException();

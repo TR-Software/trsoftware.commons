@@ -46,7 +46,7 @@ public abstract class BenchmarkingTestCase extends TestCase {
   /** Subclasses must implement this method to produce the set of tasks to be measured */
   protected abstract List<? extends Task> makeTasks();
 
-  public static enum BenchmarkType {
+  public enum BenchmarkType {
     TIME("CPU benchmarks") {
       @Override
       public String format(double value) {

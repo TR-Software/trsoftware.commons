@@ -20,14 +20,15 @@ package solutions.trsoftware.commons.client.widgets;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.dom.client.HasClickHandlers;
 import com.google.gwt.event.shared.HandlerRegistration;
-import com.google.gwt.user.client.DOM;
 import com.google.gwt.user.client.ui.AbstractImagePrototype;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.Image;
-import solutions.trsoftware.commons.shared.util.StringUtils;
+import solutions.trsoftware.commons.client.bundle.CommonsClientBundleFactory;
+import solutions.trsoftware.commons.client.bundle.CommonsCss;
 
 /**
- * Displays an image with a click listener and mouseover effects.
+ * Encapsulates an {@link Image} with a {@link ClickHandler}.  Uses the style defined by {@link CommonsCss#ImageButton()}
+ * to allow adding a {@code :hover} effect only when an image logically represents a button.
  *
  * @author Alex
  */
@@ -61,16 +62,16 @@ public class ImageButton extends Composite implements HasClickHandlers {
   public ImageButton(Image img) {
     initWidget(im = img);
     
-    // must explicitly set the size on the widget in order for its opacity style to work in IE6
+    /*// must explicitly set the size on the widget in order for its opacity style to work in IE6
     // hence we propagate whatever CSS width/height properties are present on the child image
     String imageStyleWidth = DOM.getStyleAttribute(img.getElement(), "width");
     String imageStyleHeight = DOM.getStyleAttribute(img.getElement(), "height");
     if (StringUtils.notBlank(imageStyleWidth) && StringUtils.notBlank(imageStyleHeight)) {
       setWidth(imageStyleWidth);
       setHeight(imageStyleHeight);
-    }
+    }*/
 
-    setStyleName("ImageButton");
+    setStyleName(CommonsClientBundleFactory.INSTANCE.getCommonsCss().ImageButton());
   }
 
   public Image getImage() {

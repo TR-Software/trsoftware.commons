@@ -34,4 +34,7 @@ public class SharedNumberFormatJavaTest extends TestCase {
     delegate.testParse();
   }
 
+  public void testPercentages() throws Exception {
+    delegate.testPercentages();
+  }
 }

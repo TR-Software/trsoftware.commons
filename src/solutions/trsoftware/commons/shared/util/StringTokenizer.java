@@ -22,7 +22,7 @@ import java.util.Iterator;
 import java.util.NoSuchElementException;
 
 /**
- * A GWT-compatible version of {@code java.util.StringTokenizer}.
+ * A GWT-compatible version of {@link java.util.StringTokenizer}.
  *
  * @author Alex
  */

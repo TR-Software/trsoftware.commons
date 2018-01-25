@@ -101,8 +101,8 @@ public class MutableIntegerTest extends TestCase {
   }
 
   public void testToPrimitive() throws Exception {
-    assertNotNull(one.toPrimitive());
-    assertTrue(one.toPrimitive() instanceof Integer);
+    assertNotNull(one.numberValue());
+    assertTrue(one.numberValue() instanceof Integer);
   }
 
   public void testEquals() throws Exception {

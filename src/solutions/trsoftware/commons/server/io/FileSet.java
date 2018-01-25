@@ -61,6 +61,16 @@ public class FileSet extends LinkedHashSet<File> {
   }
 
   /**
+   * Factory method. Equivalent to
+   * <pre>
+   *   new FileSet(baseDir, File::isFile)
+   * </pre>
+   */
+  public static FileSet allFiles(File baseDir) {
+    return new FileSet(baseDir, File::isFile);
+  }
+
+  /**
    * Recursively searches the directory tree starting with the given directory, adding all contained files and directories
    * to this set.  If {@link #fileFilter} or {@link #filenameFilter} are specified, they will be used to filter the results.
    * @param dir the root of the directory tree to be searched

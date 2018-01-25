@@ -17,6 +17,8 @@
 
 package solutions.trsoftware.commons.server.util;
 
+import solutions.trsoftware.commons.shared.util.RandomUtils;
+
 import java.util.Random;
 
 /**
@@ -26,8 +28,9 @@ import java.util.Random;
  */
 public class ServerMathUtils {
   /**
-   * Returns the next pseudorandom number in the generator's sequence
-   * drawn from a Gaussian with the given mean and stdev.
+   * @return the next pseudo-random number in the given generator's sequence,
+   * coerced into a Gaussian distribution with the given {@code mean} and {@code stdev}.
+   * @deprecated use {@link RandomUtils#nextGaussian(double, double)} or {@link RandomUtils#nextGaussian(int, int)}
    */
   public static double randomGaussian(Random rnd, double mean, double stdev) {
     return rnd.nextGaussian() * stdev + mean;

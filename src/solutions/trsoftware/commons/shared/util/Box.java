@@ -31,8 +31,7 @@ public class Box<T> implements TakesValue<T> {
   }
 
   public Box(T value) {
-    this.value = value;
-    initialized = true;
+    setValue(value);
   }
 
   public T getValue() {

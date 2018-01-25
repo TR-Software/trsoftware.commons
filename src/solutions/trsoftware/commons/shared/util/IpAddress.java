@@ -24,7 +24,11 @@ import static solutions.trsoftware.commons.shared.util.IpAddressUtils.*;
 /**
  * Wrapper class representing an IP address.  For now, only supports IPv4 addresses.
  * Internally stores them as 32-bit signed integers.
- * 
+ *
+ * <p>
+ * NOTE: when using this class in a webapp, the servlet container (e.g. Tomcat) should be started with the JVM arg
+ * {@code -Djava.net.preferIPv4Stack=true}
+ * </p>
  * @author Alex
  * @since Jun 29, 2013
  */

@@ -22,7 +22,7 @@ package solutions.trsoftware.commons.server.util.codec;
  *
  * @author Alex
  */
-public abstract class AlphabetAdapter implements Alphabet {
+public class AlphabetAdapter implements Alphabet {
 
   private int base;
   private final byte[] codingAlphabet;

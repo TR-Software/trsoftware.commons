@@ -33,7 +33,7 @@ import static solutions.trsoftware.commons.server.io.ServerIOUtils.joinPathAsFil
  * (all the .cache.html files in the output war directory).
  * Also saves a copy of the report in the war file's /WEB_INF/gwtExtras dir.
  *
- * NOTE: this class doesn't rezlly need to be shipped with the WAR distribution,
+ * NOTE: this class doesn't really need to be shipped with the WAR distribution,
  * but we're just doing that for convenience, to keep the Ant build script simple. 
  * 
  * @author Alex
@@ -105,7 +105,7 @@ public class GwtCompilationStatsReport {
     });
     Map<String, File[]> symbolMapsByModuleName = new HashMap<String, File[]>();
     String symbolMapFilenameSuffix = ".symbolMap";
-    MaxComparable<Integer> maxModuleNameLength = new MaxComparable<Integer>();
+    MaxComparable<Integer> maxModuleNameLength = new MaxComparable<>();
     for (File dir : moduleDirs) {
       String moduleName = dir.getName();
       maxModuleNameLength.update(moduleName.length());

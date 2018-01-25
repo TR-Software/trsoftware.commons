@@ -19,7 +19,7 @@ package solutions.trsoftware.commons.client.jso;
 import com.google.gwt.core.client.JavaScriptObject;
 
 /**
- * An overlay type similar to com.google.gwt.core.client.JsArray
+ * An overlay type similar to {@link com.google.gwt.core.client.JsArray}
  * except its elements are not restricted to types derived from JavaScriptObject
  *
  * @param <T> the concrete type of object contained in this array

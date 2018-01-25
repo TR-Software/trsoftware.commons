@@ -52,7 +52,7 @@ public class JsObject extends JavaScriptObject {
    * have the given property. If the property is defined but not a boolean, might return either {@code true} or {@code false},
    * depending on how JS converts the value to a boolean, e.g.
    * <nobr>{@code Boolean("foo") == true}</nobr> while <nobr>{@code Boolean("") == false}</nobr>.
-   * Use {@link #hasKey(String)} and {@link #typeOf(String)} to disambiguate.
+   * Use {@link #hasKey(String)} and {@link #nativeTypeOf(String)} to disambiguate.
    */
   public final native boolean getBoolean(String key)/*-{
     return Boolean(this[key])
@@ -65,7 +65,7 @@ public class JsObject extends JavaScriptObject {
    * have the given property or if its value is actually {@code NaN}.  Might even return an actual number
    * if {@code Number(this[key])} evaluates to something other than {@code NaN}, e.g.
    * <nobr> {@code Number("foo") == NaN}</nobr> while <nobr>{@code Number("") == 0}</nobr>.
-   * Use {@link #hasKey(String)} and {@link #typeOf(String)} to disambiguate.
+   * Use {@link #hasKey(String)} and {@link #nativeTypeOf(String)} to disambiguate.
    */
   public final native double getNumber(String key) /*-{
     return Number(this[key]);
@@ -80,12 +80,26 @@ public class JsObject extends JavaScriptObject {
 
   /**
    * Evaluates the JS expression {@code typeof this[key]}
-   * @return the JS type string for the value type of this property (e.g. {@code "number", "function", "object", "undefined"}, etc.)
-   * Would also return {@code "undefined"} if the property is missing. Use {@link #hasKey(String)} to disambiguate.
+   * @return the JS type string for the value type of this property (e.g. {@code "number", "function", "object", "undefined"}, etc.),
+   * or {@code null} if this object doesn't contain a property with the given name.
+   * @see <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Operators/typeof">typeof reference</a>
    */
-  public final native String typeOf(String key) /*-{
-    return typeof this[key];
+  public final native String nativeTypeOf(String key) /*-{
+    if (key in this)
+      return typeof this[key];
+    return null;
   }-*/;
+
+  /**
+   * @return the {@link JsType} constant corresponding to the result of the JS expression "{@code typeof this[key]}",
+   * or {@code null} if this object doesn't contain a property with the given name.
+   */
+  public final JsType typeOf(String key) {
+    String type = nativeTypeOf(key);
+    if (type != null)
+      return JsType.parse(type);
+    return null;
+  }
 
   public final native void set(String key, String value) /*-{
     this[key] = value;
@@ -103,7 +117,10 @@ public class JsObject extends JavaScriptObject {
     this[key] = value;
   }-*/;
 
-  /** Removes the given property from this native object */
+  /**
+   * Removes the given property from this native object.
+   * @param key the name of the property to be deleted, the call will succeed even if this property doesn't exist.
+   */
   public final native void delete(String key) /*-{
     delete this[key];
   }-*/;

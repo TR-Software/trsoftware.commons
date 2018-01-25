@@ -52,8 +52,14 @@ public class SpecificKeyDownHandler implements KeyDownHandler, Command {
       execute();
   }
 
-  /** Sublcasses should override this method if they don't pass a Command to the contructor */
+  /**
+   * Will be invoked when a {@code keydown} event with the given key code is received.
+   * Subclasses must override this method if they don't pass a {@link Command} to the constructor.
+   */
   public void execute() {
-    onKeyCodeMatch.execute();
+    if (onKeyCodeMatch != null)
+      onKeyCodeMatch.execute();
+    else
+      throw new UnsupportedOperationException();  // subclasses must override this method if they don't pass a Command to the constructor
   }
 }

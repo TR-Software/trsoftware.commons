@@ -19,6 +19,8 @@ package solutions.trsoftware.commons.shared.util;
 
 import junit.framework.TestCase;
 
+import java.util.ArrayList;
+
 import static solutions.trsoftware.commons.shared.util.LogicUtils.*;
 
 /**
@@ -62,6 +64,20 @@ public class LogicUtilsTest extends TestCase {
     assertFalse(eq("foo", "bar"));
     assertFalse(eq("foo", null));
     assertFalse(eq(null, "foo"));
+  }
+
+  public void testFirstNonNull() throws Exception {
+    assertNull(firstNonNull(null, null));
+    assertEquals("", firstNonNull(null, ""));
+    assertEquals("", firstNonNull("", null));
+    assertEquals("", firstNonNull("", "foo"));
+    assertEquals("foo", firstNonNull("foo", ""));
+    ArrayList<String> args = ListUtils.fill(new ArrayList<String>(), 5, null);
+    args.add("foo");
+    for (int i = 0; i < 100; i++) {
+      RandomUtils.shuffle(args);
+      assertEquals("foo", firstNonNull(args.toArray()));
+    }
   }
 
 }

@@ -46,6 +46,9 @@ public class EventHandlers {
       widget.addKeyDownHandler(new SpecificKeyDownHandler(KeyCodes.KEY_ESCAPE, onEscape));
   }
 
+  /**
+   * Creates a {@link ClickHandler} from the given {@link Command}
+   */
   public static ClickHandler clickHandler(final Command command) {
     return new ClickHandler() {
       public void onClick(ClickEvent event) {

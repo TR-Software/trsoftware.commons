@@ -21,8 +21,8 @@
   <inherits name="com.google.common.collect.Collect"/>
   <inherits name="solutions.trsoftware.gwt.stacktrace.StackTraceDeobfuscator"/>
 
-  <!-- TODO: attempting to make styles for all Commons widgets available to all inheriting modules-->
-  <stylesheet src="Commons.css"/>
+  <!-- TODO: attempting to replace ARI with CssResource; see CommonsCss interface -->
+  <!--<stylesheet src="Commons.css"/>-->
 
   <!-- TODO: remove this after upgrading to GWT 1.6, see: http://code.google.com/p/google-web-toolkit/issues/detail?id=2862 -->
   <set-property name="gwt.suppressNonStaticFinalFieldWarnings" value="true" />
@@ -50,6 +50,19 @@
   <!-- The implementation for the global event bus in solutions.trsoftware.commons.client.event.Events.BUS (might want to replace with a different implementation for unit tests)-->
   <replace-with class="com.google.web.bindery.event.shared.SimpleEventBus">
     <when-type-is class="com.google.web.bindery.event.shared.EventBus"/>
+  </replace-with>
+
+  <replace-with class="solutions.trsoftware.commons.client.logging.ConsoleFullImpl">
+    <when-type-is class="solutions.trsoftware.commons.client.logging.Console"/>
+  </replace-with>
+
+  <replace-with class="solutions.trsoftware.commons.client.bundle.CommonsClientBundleFactoryImpl">
+    <when-type-is class="solutions.trsoftware.commons.client.bundle.CommonsClientBundleFactory"/>
+  </replace-with>
+
+  <!-- TODO: temp: -->
+  <replace-with class="solutions.trsoftware.commons.client.bundle.MyClientBundleFactoryImpl">
+    <when-type-is class="solutions.trsoftware.commons.client.bundle.MyClientBundleFactory"/>
   </replace-with>
 
 </module>

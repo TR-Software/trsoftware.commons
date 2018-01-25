@@ -24,6 +24,7 @@ import solutions.trsoftware.commons.client.Messages;
 import solutions.trsoftware.commons.client.Settings;
 import solutions.trsoftware.commons.client.jso.JsConsole;
 import solutions.trsoftware.commons.client.logging.Log;
+import solutions.trsoftware.commons.client.templates.CommonTemplates;
 import solutions.trsoftware.commons.client.useragent.UserAgent;
 import solutions.trsoftware.commons.client.widgets.popups.ErrorMessagePopup;
 import solutions.trsoftware.commons.client.widgets.popups.PopupDialog;
@@ -60,10 +61,10 @@ public class CommonsUncaughtExceptionHandler implements GWT.UncaughtExceptionHan
   }
 
   public void handleException(final Throwable e, boolean uncaught) {
+    Log.error("Uncaught Exception", e); // for of all, print the exception in the GWT dev mode shell, or browser console
+
     // 1) Invoke the new exception reporting mechanism
     reportException(e, 0);
-
-    Log.error("Uncaught Exception", e); // also print the exception in the GWT dev mode or browser console
 
     // 2) Let the user know that a problem has occurred; this is done after the reporting step, just in case it causes
     // an exception (which would cause the reporting code not to run otherwise)
@@ -102,10 +103,10 @@ public class CommonsUncaughtExceptionHandler implements GWT.UncaughtExceptionHan
 
   /** Subclasses may override to return {@code null} if they don't want a popup to be shown to the user */
   protected ErrorMessagePopup createExceptionNoticePopup() {
-    return new ErrorMessagePopup(false,"Warning","exceptionNoticePopup",
-        new HTML("Something unexpected just happened.  You may need to <strong><em>"
-            + UserAgent.getInstance().getReloadPageVerb() + "</em></strong> the browser page if "
-            + Messages.get().getAppName() + " stops working."));
+    return new ErrorMessagePopup(false,"Warning",
+        new HTML(CommonTemplates.INSTANCE.uncaught_exception_warning().render(
+            "reloadPageVerb", UserAgent.getInstance().getReloadPageVerb(),
+            "appName", Messages.get().getAppName())));
   }
 
   /**
@@ -127,6 +128,6 @@ public class CommonsUncaughtExceptionHandler implements GWT.UncaughtExceptionHan
   }
 
   protected void onDeobfuscationResultAvailable(Throwable ex, String stackTrace) {
-    JsConsole.get().error(ex.toString() + ":\n" + stackTrace);
+    JsConsole.get().log(JsConsole.Level.ERROR, ex.toString() + ":\n" + stackTrace);
   }
 }

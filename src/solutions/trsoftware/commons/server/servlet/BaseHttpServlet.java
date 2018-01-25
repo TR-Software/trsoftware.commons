@@ -32,7 +32,6 @@ import static solutions.trsoftware.commons.shared.util.StringUtils.isBlank;
  */
 public abstract class BaseHttpServlet extends HttpServlet {
 
-  // TODO: extract this method to a base class
   protected static String getRequiredParameter(HttpServletRequest request, String paramName) throws IOException, RequestException {
     String value = request.getParameter(paramName);
     if (isBlank(value)) {

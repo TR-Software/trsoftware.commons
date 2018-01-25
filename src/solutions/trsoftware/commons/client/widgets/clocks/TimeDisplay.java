@@ -20,6 +20,7 @@ package solutions.trsoftware.commons.client.widgets.clocks;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.Label;
+import solutions.trsoftware.commons.client.bundle.CommonsClientBundleFactory;
 import solutions.trsoftware.commons.client.util.time.CountdownTimer;
 import solutions.trsoftware.commons.shared.util.StringUtils;
 
@@ -53,10 +54,10 @@ public class TimeDisplay extends Composite implements CountdownTimer.TickEvent.H
   public TimeDisplay() {
     initWidget(
         pnlMain = flowPanel(
-            lblTime = inlineLabel("", "time")
+            lblTime = inlineLabel("", CommonsClientBundleFactory.INSTANCE.getCommonsCss().time())
         )
     );
-    setStyleName("timeDisplay");
+    setStyleName(CommonsClientBundleFactory.INSTANCE.getCommonsCss().timeDisplay());
     setVisibilityHidden(this, true); // start invisible until the time value is set
   }
 
@@ -116,7 +117,7 @@ public class TimeDisplay extends Composite implements CountdownTimer.TickEvent.H
 
   private Label createOrUpdateCaptionLabel(Label lblCaption, String text, int beforeIndex) {
     if (lblCaption == null)
-      pnlMain.insert(lblCaption = inlineLabel(text, "caption"), beforeIndex);
+      pnlMain.insert(lblCaption = inlineLabel(text, CommonsClientBundleFactory.INSTANCE.getCommonsCss().timeDisplayCaption()), beforeIndex);
     else
       lblCaption.setText(text);
     return lblCaption;

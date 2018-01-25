@@ -19,6 +19,9 @@ package solutions.trsoftware.commons.client.util;
 
 import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.Window;
+import solutions.trsoftware.commons.shared.util.TimeUnit;
+
+import static com.google.gwt.core.client.Duration.currentTimeMillis;
 
 /**
  * Date: May 5, 2008 Time: 8:45:00 PM
@@ -27,52 +30,123 @@ import com.google.gwt.user.client.Window;
  */
 public class TitleBarFlasher {
 
-  private static final int FLASH_DELAY = 1000;  // milliseconds between flashes
+  /** Default milliseconds between flashes */
+  private static final int DEFAULT_FLASH_DELAY = 1000;  // milliseconds between flashes
+
+  /** Backs up the default page title in case it needs to be restored later */
+  public static String DEFAULT_WINDOW_TITLE = Window.getTitle();
+
+  /** To make sure that only one instance is flashing at any given time */
+  private static TitleBarFlasher activeInstance;
+
+  /** Milliseconds between flashes */
+  private int flashDelay = DEFAULT_FLASH_DELAY;
 
   /** This will constitute a "flash off" */
-  private static String defaultTitleText = Window.getTitle();
+  private String flashOffTitle = DEFAULT_WINDOW_TITLE;
 
   /** This will constitute a "flash on" */
-  private static String alternateTitleText = "";
+  private String flashOnTitle = "";
 
-  private static long flashEndTime;
+  private double flashEndTime;
 
-  private static boolean flashOn = false;
+  private boolean flashOn = false;
 
-  private static Timer flashingTimer = new Timer() {
+  private Timer flashingTimer = new Timer() {
     public void run() {
-      if (System.currentTimeMillis() > flashEndTime) {
+      if (currentTimeMillis() > flashEndTime)
         stopFlashing();
-        return;
-      }
-      if (flashOn)
-        Window.setTitle(alternateTitleText);
+      else if (flashOn)
+        Window.setTitle(flashOnTitle);
       else
-        Window.setTitle(defaultTitleText);
+        Window.setTitle(flashOffTitle);
       flashOn = !flashOn;
     }
   };
 
-  public static String getDefaultTitleText() {
-    return defaultTitleText;
+  public TitleBarFlasher() {
   }
 
-  public static void setDefaultTitleText(String defaultTitleText) {
-    TitleBarFlasher.defaultTitleText = defaultTitleText;
+  /**
+   * This constructor can be used to provide a custom delay between flashes.
+   *
+   * @param flashDelayMillis milliseconds between flashes
+   */
+  public TitleBarFlasher(int flashDelayMillis) {
+    this.flashDelay = flashDelayMillis;
   }
 
-  /** Flash the given text for the given duration of time */
-  public static void startFlashing(String textDuringFlash, int duration) {
-    stopFlashing();
-    alternateTitleText = textDuringFlash;
-    flashEndTime = System.currentTimeMillis() + duration;
-    flashingTimer.scheduleRepeating(FLASH_DELAY);
+  /**
+   * @return the default title bar text
+   */
+  public String getFlashOffTitle() {
+    return flashOffTitle;
   }
 
-  public static void stopFlashing() {
+  /**
+   * Sets the default title bar text.
+   * @param flashOffTitle the default title bar text
+   * @return this instance, for method chaining
+   */
+  public TitleBarFlasher setFlashOffTitle(String flashOffTitle) {
+    this.flashOffTitle = flashOffTitle;
+    return this;
+  }
+
+  /**
+   * @return the alternate title bar text
+   */
+  public String getFlashOnTitle() {
+    return flashOnTitle;
+  }
+
+  /**
+   * Sets the default title bar text.
+   * @param flashOnTitle the default title bar text
+   * @return this instance, for method chaining
+   */
+  public TitleBarFlasher setFlashOnTitle(String flashOnTitle) {
+    this.flashOnTitle = flashOnTitle;
+    return this;
+  }
+
+  /**
+   * Flashes the {@link #flashOnTitle} until {@link #stopFlashing()} is called
+   * (actually the flashing will be cancelled after 1 month, but that shouldn't matter in any practical usage scenario).
+   * @return this instance, for method chaining
+   */
+  public TitleBarFlasher startFlashing() {
+    return startFlashing(flashOnTitle);
+  }
+
+  /**
+   * Flash the given text until {@link #stopFlashing()} is called
+   * (actually the flashing will be cancelled after 1 month, but that shouldn't matter in any practical usage scenario).
+   * @return this instance, for method chaining
+   */
+  public TitleBarFlasher startFlashing(String textDuringFlash) {
+    return startFlashing(textDuringFlash, (int)TimeUnit.MONTHS.toMillis(1));
+  }
+
+  /**
+   * Flash the given text for the given duration of time
+   * @return this instance, for method chaining
+   */
+  public TitleBarFlasher startFlashing(String textDuringFlash, int durationMillis) {
+    // make sure that no other instance is currently active
+    if (activeInstance != null)
+      activeInstance.stopFlashing();
+    activeInstance = this;
+    flashOnTitle = textDuringFlash;
+    flashEndTime = currentTimeMillis() + durationMillis;
+    flashingTimer.scheduleRepeating(flashDelay);
+    return this;
+  }
+
+  public void stopFlashing() {
     flashingTimer.cancel();
-    Window.setTitle(defaultTitleText);
+    Window.setTitle(flashOffTitle);
     flashEndTime = 0;
-    alternateTitleText = "";
+    activeInstance = null;
   }
 }

@@ -19,7 +19,7 @@
       <configuration>
         <setting name="compilerMaxHeapSize" value="1024" />
         <setting name="gwtScriptOutputStyle" value="DETAILED" />
-        <setting name="gwtSdkUrl" value="file://C:/Programming/GWT/gwt-2.5.0" />
+        <setting name="gwtSdkUrl" value="file://C:/Programming/GWT/gwt-2.5.0-StackTracePatch" />
       </configuration>
     </facet>
   </component>
@@ -29,22 +29,25 @@
       <sourceFolder url="file://$MODULE_DIR$/src" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/web" type="java-resource" />
       <sourceFolder url="file://$MODULE_DIR$/test" isTestSource="true" />
+      <sourceFolder url="file://$MODULE_DIR$/tools" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/web/WEB-INF/resources" type="java-resource" />
       <excludeFolder url="file://$MODULE_DIR$/gwtHostedModeTests" />
+      <excludeFolder url="file://$MODULE_DIR$/out" />
       <excludeFolder url="file://$MODULE_DIR$/src/solutions/trsoftware/commons/translatable" />
       <excludeFolder url="file://$MODULE_DIR$/test/solutions/trsoftware/commons/translatable" />
     </content>
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />
-    <orderEntry type="library" name="gwt-2.5.0-stacktrace_patch-20171022_1916" level="application" />
-    <orderEntry type="library" name="gwt-stack-trace-kit-1.0" level="application" />
+    <orderEntry type="library" name="StackTraceDeobfuscator" level="application" />
     <orderEntry type="library" name="Apache Tomcat 8.5.23 (minus ECJ)" level="application" />
     <orderEntry type="library" scope="TEST" name="HtmlUnit 2.15" level="application" />
-    <orderEntry type="library" name="GWT 2.5.0" level="application" />
+    <orderEntry type="library" name="gwt-2.5.0-StackTracePatch" level="application" />
     <orderEntry type="library" name="guava-15.0" level="application" />
     <orderEntry type="library" name="gson-2.8.2" level="application" />
     <orderEntry type="library" scope="TEST" name="junit3.8.1" level="application" />
     <orderEntry type="library" name="Dumbster" level="application" />
     <orderEntry type="library" scope="TEST" name="HTTP Unit 1.7" level="application" />
     <orderEntry type="library" scope="TEST" name="JUnit Add-Ons" level="application" />
+    <orderEntry type="library" name="javapoet-1.9.0" level="application" />
   </component>
 </module>

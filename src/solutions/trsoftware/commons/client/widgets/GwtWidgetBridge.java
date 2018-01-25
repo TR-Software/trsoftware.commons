@@ -27,7 +27,7 @@ import solutions.trsoftware.commons.client.jso.JsObjectArray;
  * Usage:
  *
  * GwtWidgetBridge.init("foo") creates an object called foo in the hostpage,
- * which containts the following functions:
+ * which contains the following functions:
  *   - newHTML(String): returns a new GWT HTML widget with the given HTML content rendered
  *   - newVerticalPanel(Widget[])
  *   - newHorizontalPanel(Widget[])

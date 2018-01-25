@@ -18,8 +18,8 @@
 package solutions.trsoftware.commons.server.memquery;
 
 import junit.framework.TestCase;
+import solutions.trsoftware.commons.server.io.ServerIOUtils;
 import solutions.trsoftware.commons.server.io.StringPrintStream;
-import solutions.trsoftware.commons.server.io.csv.CSVWriter;
 import solutions.trsoftware.commons.server.memquery.output.CsvPrinter;
 import solutions.trsoftware.commons.server.memquery.output.FixedWidthPrinter;
 import solutions.trsoftware.commons.shared.util.StringUtils;
@@ -99,7 +99,7 @@ public abstract class MemQueryTestCase extends TestCase {
   }
 
   static String joinCsvRows(String...rows) {
-    return StringUtils.join(CSVWriter.DEFAULT_LINE_END, rows) + CSVWriter.DEFAULT_LINE_END;
+    return StringUtils.join(ServerIOUtils.LINE_SEPARATOR, rows) + ServerIOUtils.LINE_SEPARATOR;
   }
 
   static void assertResultSetEquals(ResultSet resultSet, String expectedCsv) {

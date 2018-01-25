@@ -38,29 +38,29 @@ public class MutableFloat extends MutableNumber {
     return n;
   }
 
-  public float incrementAndGet() {
+  public synchronized float incrementAndGet() {
     return ++n;
   }
 
-  public float getAndIncrement() {
+  public synchronized float getAndIncrement() {
     return n++;
   }
 
-  public float decrementAndGet() {
+  public synchronized float decrementAndGet() {
     return --n;
   }
 
-  public float getAndDecrement() {
+  public synchronized float getAndDecrement() {
     return n--;
   }
 
-  public float addAndGet(float delta) {
+  public synchronized float addAndGet(float delta) {
     return n += delta;
   }
 
   public float getAndAdd(float delta) {
     float old = n;
-    n += delta;
+    n = old + delta;
     return old;
   }
 
@@ -91,12 +91,17 @@ public class MutableFloat extends MutableNumber {
     return get();
   }
 
-  public Number toPrimitive() {
+  public Number numberValue() {
     return n;
   }
 
   @Override
   public void merge(MutableNumber other) {
     n += other.floatValue();
+  }
+  
+  @Override
+  public int compareTo(Number o) {
+    return Float.compare(floatValue(), o.floatValue());
   }
 }

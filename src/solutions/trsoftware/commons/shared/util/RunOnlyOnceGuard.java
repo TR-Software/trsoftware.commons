@@ -33,7 +33,7 @@ public class RunOnlyOnceGuard {
   private boolean locked = false;
 
   /**
-   * @throws IllegalStateException if this method has already been called.
+   * @throws IllegalStateException if this method has already been called on this instance.
    */
   public void check(String failureMessage) throws IllegalStateException {
     if (locked)  // this method should only be called once per lifetime of this instance

@@ -37,8 +37,8 @@ public class RegExTemplateParser implements TemplateParser {
   /**
    * Parses instances of {@link Template} based on a syntax similar to printf:
    * <ol>
-   *   <li><code>%variable</code>, where {@code variable} &isin; <code>([A-Za-z0-1]+)</code> and is terminated by a space.</li>
-   *   <li>{@code /*comment*}<code>/</code></code>, where {@code comment} &isin; <code>(.*)</code></li>
+   *   <li>{@code %variable}, where {@code variable} &isin; {@code ([A-Za-z0-1]+)} and is terminated by a space.</li>
+   *   <li>{@code /*comment*}<code>/</code>, where {@code comment} &isin; <code>(.*)</code></li>
    * </ol>
    */
   public static final TemplateParser PRINTF_SYNTAX = new RegExTemplateParser("%(\\w+)", null);

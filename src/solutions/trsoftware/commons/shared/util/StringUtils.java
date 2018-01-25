@@ -17,11 +17,11 @@
 
 package solutions.trsoftware.commons.shared.util;
 
-import solutions.trsoftware.commons.client.bridge.util.RandomGen;
 import solutions.trsoftware.commons.shared.util.iterators.CharSequenceIterator;
 import solutions.trsoftware.commons.shared.util.stats.MaxComparable;
 import solutions.trsoftware.commons.shared.util.template.SimpleTemplateParser;
 import solutions.trsoftware.commons.shared.util.template.Template;
+import solutions.trsoftware.commons.shared.util.text.CharRange;
 
 import java.util.*;
 
@@ -36,9 +36,15 @@ public class StringUtils {
   public static final char MIN_PRINTABLE_ASCII_CHAR = ' ';
   /** The highest printable ASCII char (code 126) */
   public static final char MAX_PRINTABLE_ASCII_CHAR = '~';
+  /** The alphabet {@code [A-Za-z]} */
+  public static final String ASCII_LETTERS = new CharRange('A', 'Z').toString() + new CharRange('a', 'z').toString();
+  /** The alphabet of all printable {@code ASCII} chars */
+  public static final String ASCII_PRINTABLE_CHARS = new CharRange(MIN_PRINTABLE_ASCII_CHAR, MAX_PRINTABLE_ASCII_CHAR).toString();
+
+  public static final String UTF8_CHARSET_NAME = "UTF-8";
 
   public static String capitalize(String str) {
-    if (str == null || str.isEmpty() || isCapitalized(str))
+    if (isBlank(str) || isCapitalized(str) || !Character.isLetter(str.charAt(0)))
       return str;
     return str.substring(0, 1).toUpperCase() + str.substring(1);
   }
@@ -63,11 +69,11 @@ public class StringUtils {
   }
 
   /**
-   * Checks whether given string is null, empty, or consists entirely of
-   * whitespace
+   * @return {@code true} iff the given string is {@code null}, empty, or consists entirely of whitespace
+   * (as determined by {@link String#trim()})
    */
   public static boolean isBlank(String str) {
-    return str == null || str.trim().length() == 0;
+    return str == null || str.trim().isEmpty();
   }
 
   /**
@@ -79,12 +85,36 @@ public class StringUtils {
   }
 
   /**
-   * @return the given string if it's not null, otherwise an empty string.
+   * @return the given string if it's not {@code null}, otherwise an empty string
    */
   public static String nonNull(String str) {
     return LogicUtils.firstNonNull(str, "");
   }
 
+  /**
+   * @return the first arg for which {@link #notBlank(String)} returns {@code true}.
+   * If neither arg satisfies {@link #notBlank(String)}, the second arg will be returned.
+   * @see LogicUtils#firstNonNull(Object, Object)
+   */
+  public static String firstNotBlank(String a, String b) {
+    return notBlank(a) ? a : b;
+  }
+
+  /**
+   * @return the first of the given strings for which {@link #notBlank(String)} returns {@code true}.
+   * If none of the strings satisfy {@link #notBlank(String)}, will return {@code null}
+   * (<b>NOTE</b>: this behavior is different from {@link #firstNotBlank(String, String)}, which returns its second
+   * argument when both strings are blank)
+   * @see LogicUtils#firstNonNull(Object, Object)
+   */
+  public static String firstNotBlank(String... strings) {
+    for (String str : strings) {
+      if (notBlank(str))
+        return str;
+    }
+    return null;
+  }
+  
   /**
    * @return the given string, trimmed by removing surrounding whitespace, if it's not null, otherwise an empty string.
    */
@@ -200,26 +230,16 @@ public class StringUtils {
     return s.substring(aEnd, bStart);
   }
 
-//  /**
-//   * Provides a very limited form of string templating. The symbols $1...$N
-//   * are replaced with the given args.
-//   * Warning: Not the fastest possible implementation.
-//   */
-//  public static String template(String format, Object... args) {
-//    String result = format;
-//    for (int i = 0; i < args.length; i++) {
-//      result = result.replaceAll("\\$"+(i+1), String.valueOf(args[i]));
-//    }
-//    return result;
-//  }
-
   /**
    * Provides a very limited form of string templating. The symbols {@code $1}...{@code $9}
-   * are replaced with the given args.  Supports at most 9 arguments to make parsing simpler.
+   * are replaced with the given args.  Supports at most 9 arguments (to make parsing simpler).
    * For a more powerful implementation can use {@link SimpleTemplateParser} instead.
    *
-   * This method exists because {@code String.format} is not available in GWT.
-   *
+   * This method exists because {@link String#format(String, Object...)} is not available in GWT.
+   * 
+   * @param format string which may contain symbols {@code $1}...{@code $9} to be substituted with the positional {@code args}
+   * @param args the replacements for the symbols {@code $1}...{@code $9} in the {@code format} string.
+   * @return the {@code format} string with symbols {@code $1}...{@code $9} replaced by the positional {@code args}
    * @see Template
    * @see SimpleTemplateParser
    */
@@ -275,14 +295,24 @@ public class StringUtils {
     return str.endsWith(suffix) ? str.substring(0, str.length() - suffix.length()) : str;
   }
 
-  /** Returns a string that contains #repetitions instances of fillChar */
+  /**
+   * Creates a string that contains some number of repetitions of a single character
+   * @param fillChar the {@code char} to be repeated
+   * @param repetitions the number of times to repeat the given {@code char}
+   * @return a string that contains the requested number of repetitions of {@code fillChar}
+   */
   public static String repeat(char fillChar, int repetitions) {
     char[] chars = new char[repetitions];
     Arrays.fill(chars, fillChar);
     return new String(chars);
   }
 
-  /** Returns a string that contains #repetitions of fillStr */
+  /**
+   * Creates a string that contains some number of repetitions of a substring
+   * @param fillStr the substring to be repeated
+   * @param repetitions the number of times to repeat the given substring
+   * @return a string that contains the requested number of repetitions of {@code fillStr}
+   */
   public static String repeat(String fillStr, int repetitions) {
     StringBuilder buf = new StringBuilder(fillStr.length()*repetitions);
     for (int i = 0; i < repetitions; i++) {
@@ -291,18 +321,9 @@ public class StringUtils {
     return buf.toString();
   }
 
-  /** Returns a random string over the alphabet [A-Za-z] */
+  /** @return a string of the given length using randomly-selected chars from the alphabet {@code [A-Za-z]} */
   public static String randString(int length) {
-    // can't use org.apache.commons.lang.RandomStringUtils here because this class
-    // will be used client-side in GWT unit tests
-    StringBuilder buf = new StringBuilder(length);
-    RandomGen rnd = RandomGen.getInstance();
-    for (int i = 0; i < length; i++) {
-      boolean uppercase = rnd.nextBoolean();
-      buf.append(uppercase ? (char)rnd.nextIntInRange((int)'A', (int)'Z'+1)
-          : (char)rnd.nextIntInRange((int)'a', (int)'z'+1));
-    }
-    return buf.toString();
+    return RandomUtils.randString(length, ASCII_LETTERS);
   }
 
   /**
@@ -310,31 +331,33 @@ public class StringUtils {
    * @return Given MY_STRING, returns myString 
    */
   public static String underscoresToCamelHumps(String str) {
+    return toCamelCase(str, "_");
+  }
+
+  /**
+   * Converts a string to camel-case, using the given word separator.
+   * Example:
+   * <pre>
+   *   toCamelCase("MY_STRING", "_") &rarr; "myString"
+   * </pre>
+   * @param str the string to convert
+   * @param wordSeparatorRegex the string will be split into words using this regex; <b>WARNING</b>: do not use values can't be used
+   * as a regex (e.g. passing {@code "*"} would trigger a "Dangling meta character" exception)
+   * @return a camel-case version of the given string
+   *
+   * Given MY_STRING, returns myString
+   */
+  public static String toCamelCase(String str, String wordSeparatorRegex) {
     if (isBlank(str))
       return str;
-    str = str.toLowerCase();
-    int nextUnderscore = str.indexOf("_");
-    if (nextUnderscore < 0)
-      return str;
+    String[] parts = str.split(wordSeparatorRegex);
     StringBuilder out = new StringBuilder(str.length());
-    int nextSubstringStart = 0;
-    while (nextUnderscore >= 0) {
-      out.append(str.substring(nextSubstringStart, nextUnderscore));
-      if (nextUnderscore == str.length()-1) {
-        // trailing underscore, ignore it and finish
-        nextSubstringStart = nextUnderscore+1;
-        break;
-      }
-      char nextCharAfterUnderscore = str.charAt(nextUnderscore+1);
-      if (Character.isLetter(nextCharAfterUnderscore)) {
-        out.append(Character.toUpperCase(nextCharAfterUnderscore));
-        nextSubstringStart = nextUnderscore+2;
-      } else {
-        nextSubstringStart = nextUnderscore+1;
-      }
-      nextUnderscore = str.indexOf("_", nextUnderscore+1);
+    for (int i = 0; i < parts.length; i++) {
+      String word = parts[i].toLowerCase();
+      if (i > 0)
+        word = capitalize(word);
+      out.append(word);
     }
-    out.append(str.substring(nextSubstringStart));
     return out.toString();
   }
 
@@ -356,18 +379,35 @@ public class StringUtils {
   }
 
   public static <T> String join(String delimiter, Iterator<T> iter) {
-    StringBuilder str = new StringBuilder(128);
-    while (iter.hasNext()) {
-      T item = iter.next();
-      str.append(item);
-      if (iter.hasNext())
-        str.append(delimiter);
-    }
-    return str.toString();
+    return join(delimiter, null, iter);
   }
 
   public static <T> String join(String delimiter, Iterable<T> iterable) {
     return join(delimiter, iterable.iterator());
+  }
+
+  /**
+   * Similar to {@link #join(String, Iterator)}, but can specify a different delimiter for the last element.
+   * This is useful for printing values such as {@code "a, b, and c"} or {@code "a, b, or c"}.
+   * @param delimiter the delimiter to use for concatenating the elements
+   * @param lastDelimiter the delimiter to use for concatenating the last element (pass {@code null} if the last delimiter
+   * should be the same as {@code delimiter}
+   * @param iter the elements to join
+   */
+  public static <T> String join(String delimiter, String lastDelimiter, Iterator<T> iter) {
+    StringBuilder str = new StringBuilder(128);
+    int iLastDelim = -1;
+    while (iter.hasNext()) {
+      T item = iter.next();
+      str.append(item);
+      if (iter.hasNext()) {
+        iLastDelim = str.length();
+        str.append(delimiter);
+      }
+    }
+    if (iLastDelim >= 0 && lastDelimiter != null)
+      str.replace(iLastDelim, iLastDelim + delimiter.length(), lastDelimiter);
+    return str.toString();
   }
 
   /**
@@ -538,6 +578,14 @@ public class StringUtils {
   }
 
   /**
+   * @return {@code str} surrounded by {@code "}.
+   * @see #surround(String, String)
+   */
+  public static String quote(String str) {
+    return surround(str, "\"");
+  }
+
+  /**
    * If {@code str} is not empty and neither is {@code token}, appends {@code delimiter} followed by {@code token}.
    * If only {@code str} is empty but {@code token}, simply appends {@code token}.  If both are empty, does nothing.
    * @return the given {@link StringBuilder}, for method chaining.
@@ -642,8 +690,96 @@ public class StringUtils {
     return ret;
   }
 
+  /**
+   * Similar to {@link String#split(String, int)} with a {@code limit} argument of {@code -1}, except the
+   * {@code separator} is not treated as a regex.  Since it doesn't compile and execute a regex, this method
+   * will probably run faster than {@link String#split(String, int)}.
+   *
+   * <p>
+   *  <b>NOTE:</b> this method differs from {@link String#split(String)} in that it includes the trailing empty strings,
+   *  therefore its behavior is more like the JavaScript version of {@code split} than the Java version.
+   * </p>
+   *
+   * @param str the string to split
+   * @param separator the string will be split on each occurrence of this exact argument, which is <b>not</b> treated as a regex
+   * @return the list of strings computed by splitting {@code str} string around exact matches of {@code separator}
+   * <p>Example: given the args {@code "__a___b___c___"} and {@code "_"}, returns
+   * <pre>["","","a","","","b","","","c","","",""]</pre>
+   *
+   * @see <a href="https://stackoverflow.com/q/31670822">StackOverflow: "Java vs JavaScript split behavior"</a>
+   */
+  public static List<String> split(String str, String separator) {
+    int start = 0;
+    int end = str.indexOf(separator, start);
+    if (end < 0)
+      return Collections.singletonList(str);  // string not empty and contains no delimiters: treat the whole string as a token
+    else {
+      ArrayList<String> ret = new ArrayList<String>();
+      while (end != -1) {
+        String token = str.substring(start, end);
+        ret.add(token);
+        start = end + separator.length();
+        end = str.indexOf(separator, start);
+      }
+      // might need to add the last token (after the last delimiter)
+      if (start <= str.length())
+        ret.add(str.substring(start));
+      /*
+        What should we do with empty tokens at the end of the string? Java and JavaScript differ in this regard.
+        Example: "__a___b___c___".split("_")
+          Java: [, , a, , , b, , , c]
+          JavaScript: [, , a, , , b, , , c, , , ]
+        However, Java's String also provides an overloaded method: String#split(String, int), which, when invoked
+        with limit = -1, produces the same result as the JS version with no limit:
+          "__a___b___c___".split("_", -1) --> [, , a, , , b, , , c, , , ]
+       */
+      return ret;
+    }
+  }
+
   public static List<Character> asList(CharSequence str) {
     return CollectionUtils.asList(new CharSequenceIterator(str));
   }
 
+  /**
+   * @return the characters in the given {@link String} sorted in alphabetical order.
+   */
+  public static String sorted(String str) {
+    Character[] chars = new Character[str.length()];
+    for (int i = 0; i < str.length(); i++) {
+      chars[i] = str.charAt(i);
+    }
+    Arrays.sort(chars);
+    StringBuilder ret = new StringBuilder(chars.length);
+    for (Character c : chars) {
+      ret.append(c);
+    }
+    return ret.toString();
+  }
+
+  /**
+   * @return a set of the unique characters in the given string, whose iterator will return the chars in the same
+   * order that they appeared in the sequence
+   */
+  public static Set<Character> toCharacterSet(CharSequence str) {
+    return toCharacterSet(str, new LinkedHashSet<Character>());
+  }
+
+  private static Set<Character> toCharacterSet(CharSequence str, Set<Character> charSet) {
+    for (int i = 0; i < str.length(); i++)
+      charSet.add(str.charAt(i));
+    return charSet;
+  }
+
+  /**
+   * Useful for printing field values in a {@link #toString()} method.
+   * @param value the value to print
+   * @return the result of {@link String#valueOf(Object)}, quoted if {@code value} is a string.
+   */
+  public static String valueToString(Object value) {
+    String valStr = String.valueOf(value);
+    if (value instanceof String)
+      return "\"" + value + "\"";
+    return valStr;
+  }
 }

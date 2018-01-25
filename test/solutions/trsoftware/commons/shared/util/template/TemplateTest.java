@@ -48,9 +48,4 @@ public class TemplateTest extends TestCase {
     assertEquals("5 is a type of number.", template.renderPositional(5, "number"));
   }
 
-  public void testPrintf() throws Exception {
-    assertEquals("5 is a type of number.", Template.printf("%d is a type of %s.", 5, "number"));
-    assertEquals("5 is a type of number", Template.printf("%foobar is a type of %bar", 5, "number"));
-  }
-
 }

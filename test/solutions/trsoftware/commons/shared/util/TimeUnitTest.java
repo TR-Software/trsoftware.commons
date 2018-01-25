@@ -94,4 +94,12 @@ public class TimeUnitTest extends TestCase {
       }
     }
   }
+
+  public void testGetPrettyName() throws Exception {
+    assertEquals("hour", HOURS.getPrettyName(1));
+    assertEquals("hours", HOURS.getPrettyName(0));
+    assertEquals("hours", HOURS.getPrettyName(.9));
+    assertEquals("hours", HOURS.getPrettyName(1.1));
+    assertEquals("hours", HOURS.getPrettyName(2));
+  }
 }

@@ -21,9 +21,13 @@ import com.google.gwt.user.client.DOM;
 import com.google.gwt.user.client.Element;
 import com.google.gwt.user.client.Event;
 import com.google.gwt.user.client.EventListener;
+import com.google.gwt.user.client.ui.Anchor;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.SimplePanel;
 
+/**
+ * @deprecated use {@link ImageButton}, {@link ImageButtonWithText}, or {@link Anchor}
+ */
 public class ImageHyperlink extends Composite {
 
   public ImageHyperlink(String href, final String imgSrc, final String imgSrcMouseover) {

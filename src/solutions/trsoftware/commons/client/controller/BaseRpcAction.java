@@ -24,8 +24,9 @@ import com.google.gwt.user.client.Command;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.rpc.IncompatibleRemoteServiceException;
+import com.google.gwt.user.client.ui.AbstractImagePrototype;
 import solutions.trsoftware.commons.client.Messages;
-import solutions.trsoftware.commons.client.images.IconsBundle;
+import solutions.trsoftware.commons.client.images.CommonsImages;
 import solutions.trsoftware.commons.client.logging.Log;
 import solutions.trsoftware.commons.client.widgets.popups.ModalDialog;
 import solutions.trsoftware.commons.client.widgets.popups.PleaseWaitPopup;
@@ -111,19 +112,17 @@ public abstract class BaseRpcAction<T> implements Command, AsyncCallback<T> {
       it's still an IncompatibleRemoteServiceException, so we just ignore the fact that its message is "The response could not be deserialized",
       and handle it as though it signifies that the client's app code version is incompatible. */
       suspendRPCsAndPromptToReloadPage();
-      // NOTE: we don't call failWithoutRetry/onGameServiceFailure (to avoid subclasses showing additional error messages),
-      // but we do call onFinally to allow the subclass to at least clean up after this action, to avoid
-      // the app from getting messed up any further in case the user chose not to reload the page
-      onFinally();
     }
     else {
       // for any other exception, let the subclass handle it
       handleFailure(caught);
     }
+    onFinally();
   }
 
+  /** Subclasses should override to provide handling for exceptions that might be thrown by their particular RPCs */
   protected void handleFailure(Throwable caught) {
-    // subclasses may override
+    throw new RuntimeException(caught); // this is a last resort; let the UncaughtExceptionHandler deal with it
   }
 
   protected abstract void handleSuccess(T result);
@@ -144,10 +143,8 @@ public abstract class BaseRpcAction<T> implements Command, AsyncCallback<T> {
    * that needs to happen regardless of success or failure of the action.
    */
   protected void onFinally() {
-    if (busyPopup != null) {
+    if (busyPopup != null)
       busyPopup.hide();
-      busyPopup = null;
-    }
   }
 
   /**
@@ -159,7 +156,7 @@ public abstract class BaseRpcAction<T> implements Command, AsyncCallback<T> {
       Scheduler.get().scheduleDeferred(new Scheduler.ScheduledCommand() {
         @Override
         public void execute() {
-          onFinally();  // since neither onSuccess nor onFailure will ever be called, we call onFinally to allow the subclass to clean up (e.g. hide the spinner it's showing while waiting for response to this RPC)
+          onFinally();  // since neither onSuccess nor onFailure will ever be called, we call onFinally to allow the subclass to clean up (e.g. hide a popup dialog that triggered this action)
         }
       });
     }
@@ -169,6 +166,8 @@ public abstract class BaseRpcAction<T> implements Command, AsyncCallback<T> {
       endTime = 0;  // reset the last value, if any
       if (Log.ENABLED)
         Log.write("Invoking " + name);
+      if (busyPopup != null)
+        busyPopup.showRelativeToWindow(.5, .333);
       executeRpcAction();
     }
   }
@@ -181,9 +180,13 @@ public abstract class BaseRpcAction<T> implements Command, AsyncCallback<T> {
    */
   public void showBusyMessage(String message) {
     if (busyPopup == null)
-      busyPopup = new PleaseWaitPopup(message, IconsBundle.Instance.get().info24());
+      busyPopup = new PleaseWaitPopup(message, AbstractImagePrototype.create(CommonsImages.INSTANCE.info24()));
     if (!busyPopup.isShowing())
       busyPopup.showRelativeToWindow(.5, .333);
   }
 
+  public void setBusyPopup(PleaseWaitPopup busyPopup, boolean modal) {
+    this.busyPopup = busyPopup;
+    busyPopup.setGlassEnabled(modal);
+  }
 }

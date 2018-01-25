@@ -28,7 +28,7 @@ import java.util.Map;
 /**
  * Implements a Huffman-like compression algorithm with a 256 degree tree
  * (byte encoding instead of binary).  The leftmost half of the nodes at
- * each level all contain subrees while the rightmost half are all leaf nodes.
+ * each level all contain subtrees while the rightmost half are all leaf nodes.
  * So we have the following levels:
  *
  * Level 0: implicit root
@@ -67,7 +67,7 @@ import java.util.Map;
  * (which hopefully account for 30% of all text, juding by the Brown Corpus),
  * will be coded using 1 byte.
  *
- * The compression will be effective if the quanity of text to compress is large
+ * The compression will be effective if the quantity of text to compress is large
  * enough to account for all this coding tree metadata storage.
  *
  *

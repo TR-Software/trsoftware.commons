@@ -21,8 +21,7 @@ import junit.framework.TestCase;
 
 import java.util.Map;
 
-import static solutions.trsoftware.commons.client.util.GwtUtils.getSimpleName;
-import static solutions.trsoftware.commons.client.util.GwtUtils.isAssignableFrom;
+import static solutions.trsoftware.commons.client.util.GwtUtilsGwtTest.InnerStatic;
 
 
 /**
@@ -32,26 +31,39 @@ import static solutions.trsoftware.commons.client.util.GwtUtils.isAssignableFrom
  */
 public class GwtUtilsJavaTest extends TestCase {
 
+  private GwtUtilsGwtTest delegate = new GwtUtilsGwtTest();
+
   public void testIsAssignableFrom() throws Exception {
-    Class<Number> number = Number.class;
-    Class<Integer> integer = Integer.class;
-
-    assertTrue(number.isAssignableFrom(integer));
-    assertTrue(isAssignableFrom(number, integer));
-
-    assertFalse(integer.isAssignableFrom(number));
-    assertFalse(isAssignableFrom(integer, number));
+    delegate.testIsAssignableFrom();
   }
 
-  public void testGetClassSimpleName() throws Exception {
-    Class<Integer> integer = Integer.class;
-    assertEquals("java.lang.Integer", integer.getName());
-    assertEquals("Integer", integer.getSimpleName());
-    assertEquals("Integer", getSimpleName(integer));
-
-    Class<Map.Entry> mapEntry = Map.Entry.class;
-    assertEquals("java.util.Map$Entry", mapEntry.getName());
-    assertEquals("Entry", mapEntry.getSimpleName());
-    assertEquals("Entry", getSimpleName(mapEntry));
+  public void testGetSimpleName() throws Exception {
+    delegate.testGetSimpleName();
+    System.out.println("\n\n\n");
+    // upper-level class:
+    assertSimpleNameMatchesJRE(Integer.class);
+    // inner classes:
+    assertSimpleNameMatchesJRE(Map.Entry.class);
+    assertSimpleNameMatchesJRE(GwtUtilsGwtTest.Inner.class);
+    assertSimpleNameMatchesJRE(InnerStatic.class);
+    // nested inner classes
+    assertSimpleNameMatchesJRE(InnerStatic.InnerStaticA.class);
+    assertSimpleNameMatchesJRE(InnerStatic.InnerStaticB.class);
+    assertSimpleNameMatchesJRE(InnerStatic.InnerStaticA.InnerStaticAa.class);
+    assertSimpleNameMatchesJRE(InnerStatic.InnerStaticA.InnerStaticAb.class);
   }
+
+  /**
+   * Asserts that the result of {@link GwtUtils#getSimpleName(Class)}
+   * matches {@link Class#getSimpleName()} for the same class.
+   */
+  private static void assertSimpleNameMatchesJRE(Class cls) {
+    String name = cls.getName();
+    String jreSimpleName = cls.getSimpleName();
+    String gwtUtilsSimpleName = GwtUtils.getSimpleName(cls);
+    System.out.println(name);
+    System.out.printf("  jreSimpleName: '%s'; gwtUtilsSimpleName: '%s'%n", jreSimpleName, gwtUtilsSimpleName);
+    assertEquals(jreSimpleName, gwtUtilsSimpleName);
+  }
+
 }

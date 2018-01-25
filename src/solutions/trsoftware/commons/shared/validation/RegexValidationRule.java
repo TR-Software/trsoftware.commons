@@ -22,7 +22,7 @@ package solutions.trsoftware.commons.shared.validation;
  *
  * @author Alex
  */
-public class RegexValidationRule extends ValidationRule {
+public class RegexValidationRule extends BaseStringValidationRule {
 
   private String[] regExps;
   private String errorMsg;

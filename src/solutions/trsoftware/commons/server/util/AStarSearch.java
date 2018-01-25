@@ -55,7 +55,7 @@ public abstract class AStarSearch<T> {
         double newCost = costSoFar.get(current) + cost(current, next);
         if (Double.isFinite(newCost) && (!costSoFar.containsKey(next) || newCost < costSoFar.get(next))) {
           /*
-           NOTE: this if-stmt adds the node for further examination iff:
+           NOTE: this if stmt adds the node for further examination iff:
              1) It's reachable, as checked by Double.isFinite(newCost)
              2) wasn't already evaluated or has a lower cost than what we've seen before
            */

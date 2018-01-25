@@ -18,20 +18,19 @@
 package solutions.trsoftware.commons.client.jso;
 
 import com.google.gwt.core.client.JavaScriptObject;
+import com.google.gwt.core.client.JsArrayMixed;
 
 /**
  * A JSNI overlay type for the <a href="https://developer.mozilla.org/en-US/docs/Web/API/Console">window.console</a> object.
  *
- * Supports a subset of the methods provided by the various browser implementations
- * of window.console (log, time, timeEnd, etc.)
- *
- * NOTE: {@link elemental.js.html.JsConsole} is a more full-featured implementation
- * of this concept and is part of GWT's experimental new "Elemental" package.
+ * Supports a subset of the methods provided by the various browser implementations of {@code window.console}
+ * (e.g. {@link #log}, {@link #time}, {@link #timeEnd}, etc.)
+ * <p style="font-style:italic;">
+ * NOTE: {@link elemental.js.html.JsConsole} is a more full-featured implementation of this concept and is part of GWT's experimental new "Elemental" package.
  * However, that class doesn't compensate for lack of functionality of certain methods, and also Elemental only
- * works with SuperDevMode (will produce a GWT compiler error when running under the regular DevMode, see
- * http://stackoverflow.com/questions/17428265/adding-elemental-to-gwt )
- *
- * NOTE: most of the Javadoc comments in this class were copied from the Firebug console
+ * works with SuperDevMode (<a href="http://stackoverflow.com/questions/17428265/adding-elemental-to-gwt">GWT compiler
+ * error in normal DevMode</a>)
+ * </p>
  *
  * @see <a href="http://getfirebug.com/wiki/index.php/Console_API">Firebug Console Reference</a>
  * @see <a href="https://developers.google.com/chrome-developer-tools/docs/console-api">Chrome Dev Tools Console Reference</a>
@@ -40,6 +39,19 @@ import com.google.gwt.core.client.JavaScriptObject;
  * @author Alex
  */
 public class JsConsole extends JavaScriptObject {
+
+  /**
+   * The available verbosity levels, can be used to select the output method to be invoked.
+   * @see #log(Level, String)
+   * @see #log(Level, JsArrayMixed)
+   */
+  public enum Level {
+    DEBUG, INFO, WARN, ERROR;
+
+    public String getJsMethodName() {
+      return name().toLowerCase();
+    }
+  }
 
   // Overlay types always have protected, zero-arg constructors, because the object must have been instantiated in javascript
   protected JsConsole() { }
@@ -77,12 +89,69 @@ public class JsConsole extends JavaScriptObject {
     return !!this.count;
   }-*/;
 
-  /** For general output of logging information. We assume that all implementations of window.console provide at least a {@code log} method */
+  /**
+   * For general output of logging information. We assume that all implementations of {@code window.console} provide at least a {@code log} method
+   * @deprecated Use {@link #log(Level, String)} instead.
+   */
   public final native void log(Object arg) /*-{
     this.log && this.log(arg);
   }-*/;
 
-  /** "Writes a message to the console with the visual "error" icon and color coding and a hyperlink to the line where it was called." */
+  /**
+   * For general output of logging information. We assume that all implementations of {@code window.console} provide at least a {@code log} method.
+   * @param args can pass a {@link JsArrayMixed} to take advantage of {@code console.log}'s vararg capability. Example:
+   * <pre>
+   *   {@link #log(JsArrayMixed) log}(JsMixedArray.create().add("Event object: ").add(event))
+   * </pre>
+   * @deprecated Use {@link #log(Level, JsArrayMixed)} instead.
+   */
+  public final native <A extends JsArrayMixed> void log(A args) /*-{
+    this.log && this.log.apply(this, args);
+  }-*/;
+
+  public final void log(Level level, String arg) {
+    log(level, JsMixedArray.create().add(arg));
+  }
+
+  /**
+   * Selects the output method to call based on the given {@link Level}, and calls it with the given args.
+   * This method takes advantage of the console's vararg capability, unlike {@link #log(Level, String)}
+   * @param level the verbosity level
+   * @param args can pass a {@link JsMixedArray} to construct the args array using method chaining.
+   * Example:
+   * <pre>
+   *   {@link #log(JsArrayMixed) log}(JsMixedArray.create().add("Event object: ").add(event))
+   * </pre>
+   */
+  public final <A extends JsArrayMixed> void log(Level level, A args) {
+    log(level.getJsMethodName(), args);
+  }
+
+  /**
+   * @return {@code true} iff this browser's console implementation supports the logging method corresponding the given verbosity level.
+   */
+  public final boolean supports(Level level) {
+    return supports(level.getJsMethodName());
+  }
+
+  /**
+   * @return {@code true} iff this browser's console implementation supports the logging method corresponding the given verbosity level.
+   */
+  private final native boolean supports(String level) /*-{
+    return !!this[level];
+  }-*/;
+
+  private final native <A extends JsArrayMixed> void log(String level, A args) /*-{
+    var method = this[level] ? this[level] : this.log; // fall back on the log method
+    method && method.apply(this, args);  // NOTE: we use method.apply because in Chromium 35 can't invoke console methods through a variable (see https://gist.github.com/euank/7523581)
+  }-*/;
+
+  /**
+   * Writes a message to the console with the visual "error" icon and color coding and a hyperlink to the line where it was called.
+   * <p>Equivalent to calling {@link #log(Level, String)} with {@link Level#ERROR}.
+   * To pass multiple arguments, call {@link #log(Level, JsArrayMixed)}
+   * @deprecated Use {@link #log(Level, String)} or {@link #log(Level, JsArrayMixed)} instead.
+   */
   public final native void error(Object arg) /*-{
     this.error && this.error(arg);
   }-*/;
@@ -91,7 +160,12 @@ public class JsConsole extends JavaScriptObject {
     return !!this.error;
   }-*/;
   
-  /** Informative logging information. */
+  /**
+   * Informative logging information.  There's no real difference between this method and {@link #log} in most browsers.
+   * <p>Equivalent to calling {@link #log(Level, String)} with {@link Level#INFO}.
+   * To pass multiple arguments, call {@link #log(Level, JsArrayMixed)}
+   * @deprecated Use {@link #log(Level, String)} or {@link #log(Level, JsArrayMixed)} instead.
+   */
   public final native void info(Object arg) /*-{
     this.info && this.info(arg);
   }-*/;
@@ -100,7 +174,28 @@ public class JsConsole extends JavaScriptObject {
     return !!this.info;
   }-*/;
 
-  /** "Writes a message to the console with the visual "warning" icon and color coding and a hyperlink to the line where it was called." */
+  
+  /**
+   * Prints debugging info.  This is the lowest logging output level, and will likely not be displayed by default.
+   * In Chrome, you can make these messages visible by selecting the "Verbose" filter level.
+   * <p>Equivalent to calling {@link #log(Level, String)} with {@link Level#DEBUG}.
+   * To pass multiple arguments, call {@link #log(Level, JsArrayMixed)}
+   * @deprecated Use {@link #log(Level, String)} or {@link #log(Level, JsArrayMixed)} instead.
+   */
+  public final native void debug(Object arg) /*-{
+    this.debug && this.debug(arg);
+  }-*/;
+
+  public final native boolean implementsDebug() /*-{
+    return !!this.debug;
+  }-*/;
+
+  /**
+   * Writes a message to the console with the visual "warning" icon and color coding and a hyperlink to the line where it was called.
+   * <p>Equivalent to calling {@link #log(Level, String)} with {@link Level#WARN}.
+   * To pass multiple arguments, call {@link #log(Level, JsArrayMixed)}
+   * @deprecated Use {@link #log(Level, String)} or {@link #log(Level, JsArrayMixed)} instead.
+   */
   public final native void warn(Object arg) /*-{
     this.warn && this.warn(arg);
   }-*/;
@@ -140,7 +235,7 @@ public class JsConsole extends JavaScriptObject {
   }-*/;
 
   /**
-   * Some window.console implementations (like WebKit) support a markTimeline
+   * Some {@code window.console} implementations (like WebKit) support a markTimeline
    * method, by which an app can add an annotation to the Timeline section
    * of the browser's developer tools.  This is particularly useful for the
    * Speed Tracer chrome extension (see: https://developers.google.com/web-toolkit/speedtracer/logging-api )

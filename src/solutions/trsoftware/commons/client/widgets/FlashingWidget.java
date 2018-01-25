@@ -18,6 +18,7 @@
 package solutions.trsoftware.commons.client.widgets;
 
 import com.google.gwt.user.client.ui.Widget;
+import solutions.trsoftware.commons.client.bundle.CommonsClientBundleFactory;
 
 
 /**
@@ -30,7 +31,7 @@ import com.google.gwt.user.client.ui.Widget;
  */
 public class FlashingWidget<T extends Widget> extends AbstractFlashingWidget<T> {
 
-  private String flashOnStyle = "flashOn";
+  private String flashOnStyle = CommonsClientBundleFactory.INSTANCE.getCommonsCss().flashOn();
 
   public FlashingWidget(T widget, int flashingDelay) {
     super(widget, flashingDelay);

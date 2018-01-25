@@ -30,14 +30,16 @@ import java.util.ArrayList;
  * @author Alex
  */
 public class ServerIOUtils {
-  public static final String UTF8_CHARSET_NAME = "UTF-8";
 
   /** The size of the buffer used by the stream reading and copying methods in this class */
   public static final int BUFFER_SIZE = 8192;  // this is the default value from Java's BufferedReader class
 
+  /** Value of the {@code line.separator} system property */
+  public static final String LINE_SEPARATOR = System.getProperty("line.separator");
+
   public static Reader readFileUTF8(File file) throws FileNotFoundException {
     try {
-      return new InputStreamReader(new FileInputStream(file), UTF8_CHARSET_NAME);
+      return new InputStreamReader(new FileInputStream(file), StringUtils.UTF8_CHARSET_NAME);
     }
     catch (UnsupportedEncodingException e) {
       // will never happen - all java VM's support UTF-8
@@ -67,7 +69,7 @@ public class ServerIOUtils {
    */
   public static Writer writeFileUTF8(File file, boolean append) throws FileNotFoundException {
     try {
-      return new OutputStreamWriter(new FileOutputStream(file, append), ServerIOUtils.UTF8_CHARSET_NAME);
+      return new OutputStreamWriter(new FileOutputStream(file, append), StringUtils.UTF8_CHARSET_NAME);
     }
     catch (UnsupportedEncodingException e) {
       // will never happen - all java VM's support UTF-8
@@ -118,7 +120,7 @@ public class ServerIOUtils {
    * Closes the input stream when finished.
    */
   public static String readCharacterStreamIntoStringUtf8(InputStream in) throws IOException {
-    return readCharacterStreamIntoString(in, UTF8_CHARSET_NAME);
+    return readCharacterStreamIntoString(in, StringUtils.UTF8_CHARSET_NAME);
   }
 
   /**
@@ -423,8 +425,13 @@ public class ServerIOUtils {
 
   /** Copies everything from input to output, closing both streams when finished */
   public static void copyInputToOutput(InputStream from, OutputStream to) throws IOException {
+    copyInputToOutput(from, to, BUFFER_SIZE);
+  }
+
+  /** Copies everything from input to output, closing both streams when finished */
+  public static void copyInputToOutput(InputStream from, OutputStream to, int bufferSize) throws IOException {
     try {
-      byte[] buf = new byte[BUFFER_SIZE];
+      byte[] buf = new byte[bufferSize];
       int n;
       do {
         n = from.read(buf);

@@ -20,7 +20,7 @@ package solutions.trsoftware.commons.shared.util.stats;
 import java.io.Serializable;
 
 /**
- * Combines MinComparable and MaxComparable under one data structure.
+ * Combines {@link MinComparable} and {@link MaxComparable} under one data structure.
  * 
  * Oct 11, 2012
  *

@@ -26,6 +26,7 @@ import com.google.gwt.core.ext.typeinfo.JMethod;
 import com.google.gwt.core.ext.typeinfo.NotFoundException;
 import com.google.gwt.core.ext.typeinfo.TypeOracle;
 import com.google.gwt.dev.generator.GenUtil;
+import com.google.gwt.user.client.ui.ImageBundle;
 import com.google.gwt.user.rebind.ClassSourceFileComposerFactory;
 import com.google.gwt.user.rebind.SourceWriter;
 import solutions.trsoftware.commons.server.util.FileTemplateParser;
@@ -38,21 +39,19 @@ import java.util.Iterator;
 import java.util.List;
 
 /**
- * Just like an ImageBundle, except each resource file defines a string template.
- * (Lots of this code is borrowed from ImageBundleGenerator), so lots
- * of it could be extracted into a superclass if this code ever makes it
- * into GWT core.
+ * Generates an implementation of a user-defined interface {@code T} that extends {@link TemplateBundle}.
  *
- * Generates an implementation of a user-defined interface <code>T</code> that
- * extends {@link TemplateBundle}.
+ * A {@link TemplateBundle} is similar to an {@link ImageBundle}
+ * (in fact, much of this generator code was borrowed from {@link com.google.gwt.user.rebind.ui.ImageBundleGenerator}),
+ * except each resource file defines a template instead of an image.
  *
- * Each method in <code>T</code> must be declared to return
- * {@link com.google.gwt.user.client.ui.AbstractImagePrototype}, take no
- * parameters, and optionally specify the metadata tag <code>gwt.resource</code>
- * as the name of an image that can be found in the classpath. In the absence of
- * the metatadata tag, the method name with an extension of
- * <code>.png, .jpg, or .gif</code> defines the name of the image, and the
- * image file must be located in the same package as <code>T</code>.
+ *<p>
+ * Each method in {@code T} must be declared to return {@link Template}, take no parameters,
+ * and optionally specify the filename as metadata (either a {@link TemplateBundle.Resource} annotation
+ * or a <code>@gwt.resource</code> Javadoc tag giving the name of a template file that can be found on the classpath).
+ * In the absence of the metadata, the file will be assumed to be located in the same package as {@code T} and
+ * to have the same name as the method, with an extension of either {@code .txt} or {@code .html}.
+ *</p>
  */
 public class TemplateBundleGenerator extends Generator {
 
@@ -112,7 +111,7 @@ public class TemplateBundleGenerator extends Generator {
 
   /* private */static final String MSG_MULTIPLE_ANNOTATIONS = "You are using both the @Resource annotation and the deprecated @gwt.resource in javadoc; @Resource will be used, and @gwt.resource will be ignored";
 
-  /* private */static final String MSG_NO_FILE_BASED_ON_METHOD_NAME = "No matching image resource was found; any of the following filenames would have matched had they been present:";
+  /* private */static final String MSG_NO_FILE_BASED_ON_METHOD_NAME = "No matching template resource was found; any of the following filenames would have matched had they been present:";
 
   private static final String TEMPLATE_QNAME = "solutions.trsoftware.commons.shared.util.template.Template";
   private static final String TEMPLATEPART_QNAME = "solutions.trsoftware.commons.shared.util.template.TemplatePart";
@@ -127,14 +126,14 @@ public class TemplateBundleGenerator extends Generator {
 
   private static final String METADATA_TAG = "gwt.resource";
 
-  /* private */static String msgCannotFindImageFromMetaData(String imgResName) {
-    return "Unable to find image resource '" + imgResName + "'";
+  /* private */static String msgCannotFindTemplateFromMetaData(String resName) {
+    return "Unable to find template resource '" + resName + "'";
   }
 
   private final ResourceLocator resLocator;
 
   /**
-   * Default constructor for image bundle. Locates resources using this class's
+   * Default constructor for template bundle. Locates resources using this class's
    * own class loader.
    */
   public TemplateBundleGenerator() {
@@ -164,33 +163,33 @@ public class TemplateBundleGenerator extends Generator {
     JClassType userType = getValidUserType(logger, typeName, typeOracle);
 
     // Write the new class.
-    JMethod[] imgMethods = userType.getOverridableMethods();
-    String resultName = generateImplClass(logger, context, userType, imgMethods);
+    JMethod[] templateMethods = userType.getOverridableMethods();
+    String resultName = generateImplClass(logger, context, userType, templateMethods);
 
     // Return the complete name of the generated class.
     return resultName;
   }
 
   /**
-   * Gets the resource name of the image associated with the specified image
+   * Gets the resource name of the template associated with the specified template
    * bundle method in a form that can be passed to
    * <code>ClassLoader.getResource()</code>.
    *
    * @param logger the main logger
-   * @param method the image bundle method whose image name is being sought
+   * @param method the template bundle method whose template name is being sought
    * @return a resource name that is suitable to be passed into
    *         <code>ClassLoader.getResource()</code>; never returns
    *         <code>null</code>
    * @throws UnableToCompleteException thrown if a resource was specified but
    *           could not be found on the classpath
    */
-  /* private */String getImageResourceName(TreeLogger logger,
+  /* private */String getTemplateResourceName(TreeLogger logger,
       JMethodOracle method) throws UnableToCompleteException {
-    String imgName = tryGetImageNameFromMetaData(logger, method);
-    if (imgName != null) {
-      return imgName;
+    String templateName = tryGetFileNameFromMetaData(logger, method);
+    if (templateName != null) {
+      return templateName;
     } else {
-      return getImageNameFromMethodName(logger, method);
+      return getFileNameFromMethodName(logger, method);
     }
   }
 
@@ -250,18 +249,16 @@ public class TemplateBundleGenerator extends Generator {
   }
 
   /**
-   * Generates the image bundle implementation class, checking each method for
+   * Generates the template bundle implementation class, checking each method for
    * validity as it is encountered.
    */
   private String generateImplClass(TreeLogger logger, GeneratorContext context,
-      JClassType userType, JMethod[] imageMethods)
+      JClassType userType, JMethod[] templateMethods)
       throws UnableToCompleteException {
-    // Lookup the type info for AbstractImagePrototype so that we can check for
-    // the proper return type
-    // on image bundle methods.
-    final JClassType abstractImagePrototype;
+    // Lookup the type info for Template so that we can check for the proper return type on the TemplateBundle methods.
+    final JClassType templateClass;
     try {
-      abstractImagePrototype = userType.getOracle().getType(
+      templateClass = userType.getOracle().getType(
           TEMPLATE_QNAME);
     } catch (NotFoundException e) {
       logger.log(TreeLogger.ERROR, TEMPLATE_QNAME
@@ -287,17 +284,16 @@ public class TemplateBundleGenerator extends Generator {
     if (pw != null) {
       SourceWriter sw = f.createSourceWriter(context, pw);
 
-      // Store the computed image names so that we don't have to lookup them up
-      // again.
-      List<String> imageResNames = new ArrayList<String>();
+      // Store the computed template names so that we don't have to lookup them up again.
+      List<String> templateResNames = new ArrayList<String>();
 
-      for (JMethod method : imageMethods) {
+      for (JMethod method : templateMethods) {
         String branchMsg = "Analyzing method '" + method.getName()
             + "' in type " + userType.getQualifiedSourceName();
         TreeLogger branch = logger.branch(TreeLogger.DEBUG, branchMsg, null);
 
-        // Verify that this method is valid on an image bundle.
-        if (method.getReturnType() != abstractImagePrototype) {
+        // Verify that this method is valid on an template bundle.
+        if (method.getReturnType() != templateClass) {
           branch.log(TreeLogger.ERROR, "Return type must be "
               + TEMPLATE_QNAME, null);
           throw new UnableToCompleteException();
@@ -308,11 +304,11 @@ public class TemplateBundleGenerator extends Generator {
           throw new UnableToCompleteException();
         }
 
-        // Find the associated imaged resource.
-        String imageResName = getImageResourceName(branch,
+        // Find the associated templated resource.
+        String templateResName = getTemplateResourceName(branch,
             new JMethodOracleImpl(method));
-        assert (imageResName != null);
-        imageResNames.add(imageResName);
+        assert (templateResName != null);
+        templateResNames.add(templateResName);
       }
 
       // create a cache for all the instances of Template (these are immutable,
@@ -321,9 +317,9 @@ public class TemplateBundleGenerator extends Generator {
       sw.println();
 
       // Generate an implementation of each method.
-      int imageResNameIndex = 0;
-      for (JMethod method : imageMethods) {
-        generateTemplateMethod(sw, method, imageResNames.get(imageResNameIndex++));
+      int templateResNameIndex = 0;
+      for (JMethod method : templateMethods) {
+        generateTemplateMethod(sw, method, templateResNames.get(templateResNameIndex++));
       }
 
       // Finish.
@@ -334,22 +330,22 @@ public class TemplateBundleGenerator extends Generator {
   }
 
   /**
-   * Attempts to get the image name from the name of the method itself by
-   * speculatively appending various image-like file extensions in a prioritized
-   * order. The first image found, if any, is used.
+   * Attempts to get the template name from the name of the method itself by
+   * speculatively appending various template-like file extensions in a prioritized
+   * order. The first template found, if any, is used.
    *
-   * @param logger if no matching image resource is found, an explanatory
+   * @param logger if no matching template resource is found, an explanatory
    *          message will be logged
-   * @param method the method whose name is being examined for matching image
+   * @param method the method whose name is being examined for matching template
    *          resources
    * @return a resource name that is suitable to be passed into
    *         <code>ClassLoader.getResource()</code>; never returns
    *         <code>null</code>
-   * @throws UnableToCompleteException thrown when no image can be found based
+   * @throws UnableToCompleteException thrown when no template can be found based
    *           on the method name
    */
-  private String getImageNameFromMethodName(TreeLogger logger,
-      JMethodOracle method) throws UnableToCompleteException {
+  private String getFileNameFromMethodName(TreeLogger logger,
+                                           JMethodOracle method) throws UnableToCompleteException {
     String pkgName = method.getPackageName();
     String pkgPrefix = pkgName.replace('.', '/');
     if (pkgPrefix.length() > 0) {
@@ -357,19 +353,19 @@ public class TemplateBundleGenerator extends Generator {
     }
     String methodName = method.getName();
     String pkgAndMethodName = pkgPrefix + methodName;
-    List<String> testImgNames = new ArrayList<String>();
+    List<String> testFileNames = new ArrayList<String>();
     for (int i = 0; i < TEMPLATE_FILE_EXTENSIONS.length; i++) {
-      String testImgName = pkgAndMethodName + '.' + TEMPLATE_FILE_EXTENSIONS[i];
-      if (resLocator.isResourcePresent(testImgName)) {
-        return testImgName;
+      String testFileName = pkgAndMethodName + '.' + TEMPLATE_FILE_EXTENSIONS[i];
+      if (resLocator.isResourcePresent(testFileName)) {
+        return testFileName;
       }
-      testImgNames.add(testImgName);
+      testFileNames.add(testFileName);
     }
 
     TreeLogger branch = logger.branch(TreeLogger.ERROR,
         MSG_NO_FILE_BASED_ON_METHOD_NAME, null);
-    for (String testImgName : testImgNames) {
-      branch.log(TreeLogger.ERROR, testImgName, null);
+    for (String testFileName : testFileNames) {
+      branch.log(TreeLogger.ERROR, testFileName, null);
     }
 
     throw new UnableToCompleteException();
@@ -408,46 +404,46 @@ public class TemplateBundleGenerator extends Generator {
   }
 
   /**
-   * Attempts to get the image name (verbatim) from an annotation.
+   * Attempts to get the template name (verbatim) from an annotation.
    *
    * @return the string specified in in the {@link TemplateBundle.Resource}
    *         annotation, or <code>null</code>
    */
-  private String tryGetImageNameFromAnnotation(JMethodOracle method) {
-    TemplateBundle.Resource imgResAnn = method.getAnnotation(TemplateBundle.Resource.class);
-    String imgName = null;
-    if (imgResAnn != null) {
-      imgName = imgResAnn.value();
+  private String tryGetFileNameFromAnnotation(JMethodOracle method) {
+    TemplateBundle.Resource resAnn = method.getAnnotation(TemplateBundle.Resource.class);
+    String fileName = null;
+    if (resAnn != null) {
+      fileName = resAnn.value();
     }
-    return imgName;
+    return fileName;
   }
 
   /**
-   * Attempts to get the image name (verbatim) from old-school javadoc metadata.
+   * Attempts to get the template name (verbatim) from old-school javadoc metadata.
    *
    * @return the string specified in "resource" javadoc metdata tag; never
    *         returns <code>null</code>
    */
-  private String tryGetImageNameFromJavaDoc(JMethodOracle method) {
-    String imgName = null;
+  private String tryGetFileNameFromJavaDoc(JMethodOracle method) {
+    String fileName = null;
     String[][] md = method.getMetaData(METADATA_TAG);
     if (md.length == 1) {
       int lastTagIndex = md.length - 1;
       int lastValueIndex = md[lastTagIndex].length - 1;
-      imgName = md[lastTagIndex][lastValueIndex];
+      fileName = md[lastTagIndex][lastValueIndex];
     }
-    return imgName;
+    return fileName;
   }
 
   /**
-   * Attempts to get the image name from either an annotation or from pre-1.5
+   * Attempts to get the template name from either an annotation or from pre-1.5
    * javadoc metadata, logging warnings to educate the user about deprecation
    * and behaviors in the face of conflicting metadata (for example, if both
    * forms of metadata are present).
    *
    * @param logger if metadata is found but the specified resource isn't
    *          available, a warning is logged
-   * @param method the image bundle method whose associated image resource is
+   * @param method the template bundle method whose associated template resource is
    *          being sought
    * @return a resource name that is suitable to be passed into
    *         <code>ClassLoader.getResource()</code>, or <code>null</code>
@@ -455,30 +451,30 @@ public class TemplateBundleGenerator extends Generator {
    * @throws UnableToCompleteException thrown when metadata is provided but the
    *           resource cannot be found
    */
-  private String tryGetImageNameFromMetaData(TreeLogger logger,
+  private String tryGetFileNameFromMetaData(TreeLogger logger,
       JMethodOracle method) throws UnableToCompleteException {
-    String imgFileName = null;
-    String imgNameAnn = tryGetImageNameFromAnnotation(method);
-    String imgNameJavaDoc = tryGetImageNameFromJavaDoc(method);
-    if (imgNameJavaDoc != null) {
-      if (imgNameAnn == null) {
+    String fileName = null;
+    String fileNameAnn = tryGetFileNameFromAnnotation(method);
+    String fileNameJavaDoc = tryGetFileNameFromJavaDoc(method);
+    if (fileNameJavaDoc != null) {
+      if (fileNameAnn == null) {
         // There is JavaDoc metadata but no annotation.
-        imgFileName = imgNameJavaDoc;
+        fileName = fileNameJavaDoc;
         if (GenUtil.warnAboutMetadata()) {
           logger.log(TreeLogger.WARN, MSG_JAVADOC_FORM_DEPRECATED, null);
         }
       } else {
         // There is both JavaDoc metadata and an annotation.
         logger.log(TreeLogger.WARN, MSG_MULTIPLE_ANNOTATIONS, null);
-        imgFileName = imgNameAnn;
+        fileName = fileNameAnn;
       }
-    } else if (imgNameAnn != null) {
+    } else if (fileNameAnn != null) {
       // There is only an annotation.
-      imgFileName = imgNameAnn;
+      fileName = fileNameAnn;
     }
-    assert (imgFileName == null || (imgNameAnn != null || imgNameJavaDoc != null));
+    assert (fileName == null || (fileNameAnn != null || fileNameJavaDoc != null));
 
-    if (imgFileName == null) {
+    if (fileName == null) {
       // Exit early because neither an annotation nor javadoc was found.
       return null;
     }
@@ -486,22 +482,22 @@ public class TemplateBundleGenerator extends Generator {
     // If the name has no slashes (that is, it isn't a fully-qualified resource
     // name), then prepend the enclosing package name automatically, being
     // careful about the default package.
-    if (imgFileName.indexOf("/") == -1) {
+    if (fileName.indexOf("/") == -1) {
       String pkgName = method.getPackageName();
       if (!"".equals(pkgName)) {
-        imgFileName = pkgName.replace('.', '/') + "/" + imgFileName;
+        fileName = pkgName.replace('.', '/') + "/" + fileName;
       }
     }
 
-    if (!resLocator.isResourcePresent(imgFileName)) {
+    if (!resLocator.isResourcePresent(fileName)) {
       // Not found.
-      logger.log(TreeLogger.ERROR, msgCannotFindImageFromMetaData(imgFileName),
+      logger.log(TreeLogger.ERROR, msgCannotFindTemplateFromMetaData(fileName),
           null);
       throw new UnableToCompleteException();
     }
 
     // Success.
-    return imgFileName;
+    return fileName;
   }
 
 }

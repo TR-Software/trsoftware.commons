@@ -22,8 +22,10 @@ import java.util.Iterator;
 /**
  * Base class for iterators that don't support the {@link #remove()} operation.
  * 
- * Jan 15, 2010
+ * @since Jan 15, 2010
  * @author Alex
+ * @deprecated This class duplicates {@link com.google.common.collect.UnmodifiableIterator},
+ * and might be removed in the future.
  */
 public abstract class NonMutatingIterator<T> implements Iterator<T> {
 
@@ -33,6 +35,6 @@ public abstract class NonMutatingIterator<T> implements Iterator<T> {
   }
 
   public static void throwRemoveNotSupported(Class cls) {
-    throw new UnsupportedOperationException(cls.getName() + " does not support Iterator.remove");
+    throw new UnsupportedOperationException(cls.getName() + "#remove()");
   }
 }

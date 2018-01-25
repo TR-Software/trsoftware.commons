@@ -18,13 +18,11 @@
 package solutions.trsoftware.commons.shared.util;
 
 import com.google.common.base.Predicate;
+import com.google.common.base.Predicates;
 import junit.framework.TestCase;
 import solutions.trsoftware.commons.shared.util.callables.Function1;
 
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import static solutions.trsoftware.commons.shared.util.CollectionUtils.*;
 
@@ -185,4 +183,19 @@ public class CollectionUtilsTest extends TestCase {
     assertEquals(strList("a", "b", "c"), concat(strList("a"), strList(), strList("b", "c"), strList()));
   }
 
+  public void testFilter() {
+    assertEquals(new ArrayList(), filter(new ArrayList<Integer>(), Predicates.alwaysTrue()));
+    assertEquals(Arrays.asList("foo", "bar", "baz"), filter(Arrays.asList("foo", "bar", "baz"), Predicates.alwaysTrue()));
+    assertEquals(new ArrayList(), filter(new ArrayList<Integer>(), Predicates.alwaysFalse()));
+    assertEquals(new ArrayList(), filter(Arrays.asList("foo", "bar", "baz"), Predicates.alwaysFalse()));
+    assertEquals(
+        Arrays.asList("foo", "bar", "baz"),
+        filter(Arrays.asList("foo", "a", "bar", "cigar", "baz"),
+            new Predicate<String>() {
+              public boolean apply(String item) {
+                return item.length() == 3;
+              }
+            })
+    );
+  }
 }

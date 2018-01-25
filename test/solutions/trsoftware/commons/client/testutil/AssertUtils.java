@@ -21,8 +21,8 @@ import com.google.gwt.user.client.Element;
 import junit.framework.AssertionFailedError;
 import solutions.trsoftware.commons.client.util.GwtUtils;
 import solutions.trsoftware.commons.shared.util.ComparisonOperator;
+import solutions.trsoftware.commons.shared.util.StringUtils;
 import solutions.trsoftware.commons.shared.util.callables.Function0_t;
-import solutions.trsoftware.commons.shared.util.template.Template;
 
 import java.util.*;
 
@@ -113,6 +113,7 @@ public abstract class AssertUtils {
     }
     assertNotNull(expectedThrowableClass.getName() + " expected but wasn't thrown.", caught);
     assertTrue(GwtUtils.isAssignableFrom(expectedThrowableClass, caught.getClass()));
+    System.out.println("Caught expected exception: " + caught);
     return (T)caught;  // this cast should succeed because we've asserted that the class we expect is assignable from the exception
   }
 
@@ -346,7 +347,7 @@ public abstract class AssertUtils {
   }
 
   public static void assertEqualsAndHashCode(Object a, Object b) throws Exception {
-    assertTrue(a.equals(b));
+    assertEquals(a, b);
     assertTrue(a.hashCode() == b.hashCode());
   }
 
@@ -445,7 +446,7 @@ public abstract class AssertUtils {
     }
 
     private ComparableAssertionBuilder<T> compare(ComparisonOperator op, T arg) {
-      assertTrue(Template.printf("%value %op %arg", value, op, arg), op.compare(value, arg));
+      assertTrue(StringUtils.template("$1 $2 $3", value, op, arg), op.compare(value, arg));
       return this;
     }
 
@@ -477,7 +478,7 @@ public abstract class AssertUtils {
 
     /** Assert that {@link #value} is in the range {@code [lowerBound, upperBound]} */
     public ComparableAssertionBuilder<T> isBetween(T lowerBound, T upperBound) {
-      assertTrue(Template.printf("Invalid interval: [%a, %b]", lowerBound, upperBound), lowerBound.compareTo(upperBound) <= 0);
+      assertTrue(StringUtils.template("Invalid interval: [$1, $2]", lowerBound, upperBound), lowerBound.compareTo(upperBound) <= 0);
       return isGreaterThanOrEqualTo(lowerBound).isLessThanOrEqualTo(upperBound);
     }
   }
@@ -495,11 +496,11 @@ public abstract class AssertUtils {
     }
 
     public StringAssertionBuilder matchesRegex(String regex) {
-      assertTrue(Template.printf("The string \"%s\" doesn't match pattern /%regex/", value, regex),
+      assertTrue(StringUtils.template("The string \"$1\" doesn't match pattern /$2/", value, regex),
           value.matches(regex));
       return this;
     }
-
+    
     public StringAssertionBuilder isNotEmpty() {
       assertFalse(value.isEmpty());
       return this;
@@ -507,6 +508,18 @@ public abstract class AssertUtils {
 
     public StringAssertionBuilder isEmpty() {
       assertTrue(value.isEmpty());
+      return this;
+    }
+
+    public StringAssertionBuilder startsWith(String prefix) {
+      assertTrue(StringUtils.template("The string \"$1\" doesn't start with \"$2\"", value, prefix),
+          value.startsWith(prefix));
+      return this;
+    }
+    
+    public StringAssertionBuilder endsWith(String suffix) {
+      assertTrue(StringUtils.template("The string \"$1\" doesn't end with \"$2\"", value, suffix),
+          value.endsWith(suffix));
       return this;
     }
 

@@ -27,6 +27,8 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import static solutions.trsoftware.commons.server.io.ServerIOUtils.LINE_SEPARATOR;
+
 /**
  * Nov 4, 2009
  *
@@ -71,7 +73,7 @@ public class SmartStringListResourceTest extends TempFileTestCase {
   }
 
   public void testAdd() throws Exception {
-    String lineSeparator = System.getProperty("line.separator");
+    String lineSeparator = LINE_SEPARATOR;
     String tempFileContent = "foo, bar, baz" + lineSeparator + "asdf" + lineSeparator + "a,s,d, f";
     writeTempFile(tempFileContent);
     SmartStringListResource<List<String>> slr = new SmartStringListResource<List<String>>(tempFile);
@@ -85,7 +87,7 @@ public class SmartStringListResourceTest extends TempFileTestCase {
   }
 
   public void testRemove() throws Exception {
-    String lineSeparator = System.getProperty("line.separator");
+    String lineSeparator = LINE_SEPARATOR;
     String tempFileContent = "foo, bar, baz" + lineSeparator + "asdf" + lineSeparator + "a,s,d, f";
     writeTempFile(tempFileContent);
     SmartStringListResource<List<String>> slr = new SmartStringListResource<List<String>>(tempFile);

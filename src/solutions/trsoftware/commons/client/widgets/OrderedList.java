@@ -27,6 +27,7 @@ import com.google.gwt.user.client.ui.*;
 import solutions.trsoftware.commons.shared.util.mutable.MutableInteger;
 
 /**
+ * A panel that renders its children in a {@code <ol>} element.
  * @author Alex, 9/25/2017
  */
 public class OrderedList extends ComplexPanel {

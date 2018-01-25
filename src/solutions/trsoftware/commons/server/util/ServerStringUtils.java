@@ -22,6 +22,7 @@ import org.apache.commons.codec.binary.Base64;
 import org.w3c.dom.Document;
 import solutions.trsoftware.commons.server.io.ServerIOUtils;
 import solutions.trsoftware.commons.shared.util.Levenshtein;
+import solutions.trsoftware.commons.shared.util.StringUtils;
 
 import javax.lang.model.SourceVersion;
 import javax.xml.transform.OutputKeys;
@@ -74,7 +75,7 @@ public class ServerStringUtils {
   /** Returns the UTF-8 encoding of the given string. */
   public static byte[] stringToBytesUtf8(String str) {
     try {
-      return str.getBytes(ServerIOUtils.UTF8_CHARSET_NAME);
+      return str.getBytes(StringUtils.UTF8_CHARSET_NAME);
     }
     catch (UnsupportedEncodingException e) {
       // will never happen - all Java VMs support UTF-8
@@ -85,7 +86,7 @@ public class ServerStringUtils {
   /** Returns a String represented by the give UTF-8 bytes. */
   public static String bytesToStringUtf8(byte[] utf8Bytes) {
     try {
-      return new String(utf8Bytes, ServerIOUtils.UTF8_CHARSET_NAME);
+      return new String(utf8Bytes, StringUtils.UTF8_CHARSET_NAME);
     }
     catch (UnsupportedEncodingException e) {
       // will never happen - all java VM's support UTF-8
@@ -108,6 +109,12 @@ public class ServerStringUtils {
     return UrlSafeBase64.decodeBase64(stringToBytesUtf8(str));
   }
 
+  /**
+   * @return {@code true} iff the given string can be safely used in a URL without having to be escaped.
+   */
+  public static boolean isUrlSafe(String str) {
+    return str.equals(urlEncode(str));
+  }
 
   /**
    * @return the base64 encoding of the input encrypted with SHA one-way hash.
@@ -119,7 +126,7 @@ public class ServerStringUtils {
   /** URL-decodes the given string as UTF-8 */
   public static String urlDecode(String str) {
     try {
-      return URLDecoder.decode(str, ServerIOUtils.UTF8_CHARSET_NAME);
+      return URLDecoder.decode(str, StringUtils.UTF8_CHARSET_NAME);
     }
     catch (UnsupportedEncodingException e) {
       // will never happen - all Java VMs support UTF-8
@@ -133,7 +140,7 @@ public class ServerStringUtils {
   /** URL-encodes the given string as UTF-8 */
   public static String urlEncode(String str) {
     try {
-      return URLEncoder.encode(str, ServerIOUtils.UTF8_CHARSET_NAME);
+      return URLEncoder.encode(str, StringUtils.UTF8_CHARSET_NAME);
     }
     catch (UnsupportedEncodingException e) {
       // will never happen - all Java VMs support UTF-8
@@ -243,7 +250,7 @@ public class ServerStringUtils {
     try {
       return ServerIOUtils.readCharactersIntoString(new InputStreamReader(
           new InflaterInputStream(new ByteArrayInputStream(gzippedBytes)),
-          ServerIOUtils.UTF8_CHARSET_NAME));
+          StringUtils.UTF8_CHARSET_NAME));
     }
     catch (IOException e) {
       e.printStackTrace();

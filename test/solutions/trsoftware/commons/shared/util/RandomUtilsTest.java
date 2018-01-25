@@ -25,6 +25,8 @@ import solutions.trsoftware.commons.shared.util.stats.HashCounter;
 
 import java.util.*;
 
+import static solutions.trsoftware.commons.shared.util.RandomUtils.*;
+
 /**
  * @author Alex, 11/1/2017
  */
@@ -49,7 +51,7 @@ public class RandomUtilsTest extends TestCase {
     String[] arr = new String[]{"a", "b", "c", "d", "e", "f"};
     int n = 100000;
     for (int i = 0; i < n; i++) {
-      elementCount.increment(RandomUtils.randomElement(arr));
+      elementCount.increment(randomElement(arr));
     }
     assertEquals(6, elementCount.size());
     assertEquals(n, elementCount.sumOfAllEntries());
@@ -74,16 +76,16 @@ public class RandomUtilsTest extends TestCase {
 
   public void testRandomSampleWithoutReplacement() throws Exception {
     // corner cases:
-    assertEquals(Collections.<Integer>emptyList(), RandomUtils.randomSampleWithoutReplacement(Arrays.<Integer>asList(), 0));
+    assertEquals(Collections.<Integer>emptyList(), randomSampleWithoutReplacement(Arrays.<Integer>asList(), 0));
     // Can't have a sample without replacement that's larger than the original list:
     AssertUtils.assertThrows(IllegalArgumentException.class, new Runnable() {
       public void run() {
-        RandomUtils.randomSampleWithoutReplacement(Arrays.<Integer>asList(), 1);
+        randomSampleWithoutReplacement(Arrays.<Integer>asList(), 1);
       }
     });
     AssertUtils.assertThrows(IllegalArgumentException.class, new Runnable() {
       public void run() {
-        RandomUtils.randomSampleWithoutReplacement(Arrays.<Integer>asList(1, 2), 3);
+        randomSampleWithoutReplacement(Arrays.<Integer>asList(1, 2), 3);
       }
     });
 
@@ -92,7 +94,7 @@ public class RandomUtilsTest extends TestCase {
       final int r = i;
       checkPermutations(list, (int)MathUtils.nPr(list.size(), r), new Function1<List<Integer>, List<Integer>>() {
         public List<Integer> call(List<Integer> arg) {
-          return RandomUtils.randomSampleWithoutReplacement(list, r);
+          return randomSampleWithoutReplacement(list, r);
         }
       }, r);
     }
@@ -100,16 +102,16 @@ public class RandomUtilsTest extends TestCase {
 
   public void testRandomSampleWithReplacement() throws Exception {
     // corner cases:
-    assertEquals(Collections.<Integer>emptyList(), RandomUtils.randomSampleWithReplacement(Arrays.<Integer>asList(), 0));
+    assertEquals(Collections.<Integer>emptyList(), randomSampleWithReplacement(Arrays.<Integer>asList(), 0));
     // Can't have a negative sample size
     AssertUtils.assertThrows(IllegalArgumentException.class, new Runnable() {
       public void run() {
-        RandomUtils.randomSampleWithReplacement(Arrays.<Integer>asList(), -1);
+        randomSampleWithReplacement(Arrays.<Integer>asList(), -1);
       }
     });
     AssertUtils.assertThrows(IllegalArgumentException.class, new Runnable() {
       public void run() {
-        RandomUtils.randomSampleWithReplacement(Arrays.<Integer>asList(1, 2), -1);
+        randomSampleWithReplacement(Arrays.<Integer>asList(1, 2), -1);
       }
     });
 
@@ -120,7 +122,7 @@ public class RandomUtilsTest extends TestCase {
       checkPermutations(list, (int)Math.pow(list.size(), i), new Function1<List<Integer>, List<Integer>>() {
         public List<Integer> call(List<Integer> arg) {
           c.incrementAndGet();
-          return RandomUtils.randomSampleWithReplacement(list, r);
+          return randomSampleWithReplacement(list, r);
         }
       }, r);
     }
@@ -169,7 +171,7 @@ public class RandomUtilsTest extends TestCase {
     int iterations = nPermutations * 1000; // do enough iterations to generate all possible permutations and smaller % differences
     HashCounter<List<Integer>> permutationCounts = new HashCounter<List<Integer>>(nPermutations);
     for (int i = 0; i < iterations; i++) {
-      RandomUtils.shuffle(list);
+      shuffle(list);
       // 1) should still have the same size and all the same elements
       assertEquals(n, list.size());
       // check that the list still contains integers 1..n
@@ -190,6 +192,32 @@ public class RandomUtilsTest extends TestCase {
       assertEquals(expectedPct, pct, .02);
     }
     System.out.println("");
+  }
+
+  public void testNextGaussian() throws Exception {
+    System.out.println("Random Gaussian:");
+    for (int i = 0; i < 20; i++) {
+      System.out.println(rnd.nextGaussian());
+    }
+    System.out.println();
+    printGaussians(50, 25);
+    System.out.println();
+    printGaussians(5000, 5000/2);
+    fail("TODO"); // TODO verify some assertions
+  }
+
+  private void printGaussians(double mean, double stdev) {
+    System.out.println(StringUtils.methodCallToString("nextGaussian", mean, stdev));
+    for (int i = 0; i < 20; i++) {
+      System.out.println(nextGaussian(mean, stdev));
+    }
+  }
+
+  private void printGaussians(int mean, int stdev) {
+    System.out.println(StringUtils.methodCallToString("nextGaussian", mean, stdev));
+    for (int i = 0; i < 20; i++) {
+      System.out.println(MathUtils.restrict((int)nextGaussian(mean, stdev), 0, Integer.MAX_VALUE));
+    }
   }
 
 }

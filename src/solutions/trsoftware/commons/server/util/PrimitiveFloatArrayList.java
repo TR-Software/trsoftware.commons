@@ -26,13 +26,13 @@ import java.util.RandomAccess;
 /**
  * A Java Collections adapter for a primitive {@code float[]} array, which uses 5x less space than {@code ArrayList<Float>}.
  * <p>
- * Some basic testing shows that a primitive {@code float[]}  of size 1000000 used up 3880.688 KB of memory, while the
- * equivalent wrapper {@code Float[]} of size 1000000 used up 19531.086 KB of memory.
+ * Some basic testing showed that a primitive {@code float[]} with a million elements used up 3,880.688 KB of memory, while the
+ * equivalent wrapper {@code Float[]} of the same size used up 19,531.086 KB of memory.
  * </p>
  *
- * Oct 22, 2012
- *
  * @author Alex
+ * @since Oct 22, 2012
+ * @see <a href="https://commons.apache.org/dormant/commons-primitives/">Apache Commons Primitives</a>
  */
 public class PrimitiveFloatArrayList extends AbstractList<Float>
     implements List<Float>, RandomAccess, Cloneable, java.io.Serializable {

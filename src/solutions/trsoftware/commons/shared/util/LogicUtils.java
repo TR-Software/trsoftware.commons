@@ -17,6 +17,8 @@
 
 package solutions.trsoftware.commons.shared.util;
 
+import com.google.common.base.Objects;
+
 /**
  * Can be used to shorten some if statements that are too long.
  *
@@ -51,8 +53,10 @@ public class LogicUtils {
 
   // TODO: unit test these new methods
   /**
-   * Similar to a the Javascript expression {@code o1 || o2} when applied to non-boolean objects.
+   * Similar to the Javascript expression {@code o1 || o2} when applied to non-boolean objects.
    * @return o1 if it's not null, otherwise o2.
+   *
+   * @see Objects#firstNonNull(Object, Object)
    */
   public static <T> T firstNonNull(T o1, T o2) {
     if (o1 != null)

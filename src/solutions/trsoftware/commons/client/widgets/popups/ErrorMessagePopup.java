@@ -17,16 +17,18 @@
 
 package solutions.trsoftware.commons.client.widgets.popups;
 
+import com.google.gwt.user.client.ui.AbstractImagePrototype;
 import com.google.gwt.user.client.ui.Widget;
-import solutions.trsoftware.commons.client.images.IconsBundle;
+import solutions.trsoftware.commons.client.bundle.CommonsClientBundleFactory;
+import solutions.trsoftware.commons.client.images.CommonsImages;
 
 /**
  * @author Alex, 9/26/2017
  */
 public class ErrorMessagePopup extends PopupDialog {
 
-  public ErrorMessagePopup(boolean autoHide, String headingText, String styleName, Widget bodyWidget) {
-    super(autoHide, IconsBundle.Instance.get().warn24(), headingText, styleName, bodyWidget);
+  public ErrorMessagePopup(boolean autoHide, String headingText, Widget bodyWidget) {
+    super(autoHide, AbstractImagePrototype.create(CommonsImages.INSTANCE.warn24()), headingText, CommonsClientBundleFactory.INSTANCE.getCommonsCss().ErrorMessagePopup(), bodyWidget);
   }
 
   @Override

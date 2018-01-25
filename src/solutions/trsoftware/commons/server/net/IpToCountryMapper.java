@@ -31,21 +31,27 @@ import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 
 // License for the underlying CSV database: DonationWare (i.e. completely open, see the ZIP file for more info)
-
 // Update Instructions: Download the latest version by running
 // wget software77.net/geo-ip/?DL=2 -O /path/IpToCountry.csv.zip
-
 // NOTE: Run IpToCountryMapperTest after updating
 
+// TODO: switch to the gzip format of the database (wget software77.net/geo-ip/?DL=1 -O /path/IpToCountry.csv.gz): this will allow using a GZIPInputStream to read the file, which is probably more efficient than using a ZipFile
+
 /**
- * Uses the CSV data downloaded from http://software77.net/geo-ip/
+ * Maps IPv4 addresses (represented by {@link IpAddress}) to country
+ * Uses the CSV data downloaded from <a href="http://software77.net/geo-ip/">http://software77.net/geo-ip/</a> with
+ * <pre>wget software77.net/geo-ip/?DL=2 -O /path/IpToCountry.csv.zip</pre>
  *
- * Assumes that the classloader will be able to resolve "/IpToCountry.csv.zip"
+ * Assumes that the classloader will be able to resolve {@code "/IpToCountry.csv.zip"}
  * to a ZIP file containing a CSV of IP ranges.
  *
- * Nov 6, 2009
+ * <p style="font-style: italic;">
+ *   The database bundled with this library was last updated on
+ *   Sun Nov 19 12:40:01 2017 UTC
+ * </P>
  *
  * @author Alex
+ * @since Nov 6, 2009
  */
 public class IpToCountryMapper {
 
@@ -54,16 +60,18 @@ public class IpToCountryMapper {
 
   private IpRangeDatabase database = new IpRangeDatabase(100000);
 
-  private static IpToCountryMapper instance = new IpToCountryMapper();
+  private static IpToCountryMapper instance;
 
-  public static IpToCountryMapper getInstance() {
+  public static IpToCountryMapper get() {
+    if (instance == null)
+      instance = new IpToCountryMapper(); // lazy init
     return instance;
   }
 
   /**
    * Loads the IP-to-Country data from the CSV zip file.
    *
-   * Exposed ith package visibility for unit testing
+   * Exposed with package visibility for unit testing
    */
   IpToCountryMapper() {
     Duration loadingTime = new Duration();
@@ -114,6 +122,11 @@ public class IpToCountryMapper {
     };
   }
 
+  /**
+   * @return the 2-char ISO code for the country associated with the given ip address, if a match was found in the database
+   * (and the code is present in {@link CountryCodes}), otherwise {@code null}
+   * @see <a href="https://en.wikipedia.org/wiki/ISO_3166-1_alpha-2">ISO 3166-1 alpha-2</a>
+   */
   public String ipToCountry(IpAddress ip) {
     if (ip == null)
       return null;

@@ -18,6 +18,7 @@
 package solutions.trsoftware.commons.server.util;
 
 import solutions.trsoftware.commons.server.util.codec.Base64Alphabet;
+import solutions.trsoftware.commons.server.util.codec.UrlSafeBase64Alphabet;
 
 import java.security.SecureRandom;
 
@@ -32,7 +33,9 @@ public abstract class SecureRandomUtils {
    * @return A string of {@code length} chars chosen at random from {@link Base64Alphabet#CHARS}
    */
   public static String randString(int length) {
-    byte[] chars = Base64Alphabet.CHARS;
+    if (length <= 0)
+      return "";
+    byte[] chars = UrlSafeBase64Alphabet.CHARS;
     StringBuilder buf = new StringBuilder(length);
     for (int i = 0; i < length; i++) {
       buf.append((char)chars[rnd.nextInt(chars.length)]);
@@ -40,8 +43,33 @@ public abstract class SecureRandomUtils {
     return buf.toString();
   }
 
+  /**
+   * @param n the number of bytes to generate
+   * @return A url-safe base64-encoded string generated from {@code n} random bytes.
+   */
+  public static String randBytes(int n) {
+    if (n <= 0)
+      return "";
+    byte[] bytes = new byte[n];
+    rnd.nextBytes(bytes);
+    return ServerStringUtils.urlSafeBase64Encode(bytes);
+  }
+
+  /**
+   * Generates a code that can be used for things like email verification tokens, etc.  We use 12 random bytes because:
+   * <ol>
+   *   <li>it's long-enough to make collisions extremely rare</li>
+   *   <li>it's short-enough to be used in a URL</li>
+   *   <li>its base64 encoding doesn't contain any padding chars</li>
+   * </ol>
+   * @return 12 random bytes encoded with url-safe base64.
+   */
+  public static String randomCode() {
+    // we use 12 bytes, because its base64 encoding is 16 chars long without any padding chars
+    return randBytes(12);
+  }
+
   public static void main(String[] args) {
     System.out.println(randString(64));
   }
-
 }

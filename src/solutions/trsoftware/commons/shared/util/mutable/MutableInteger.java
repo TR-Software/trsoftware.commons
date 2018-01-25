@@ -18,12 +18,11 @@
 package solutions.trsoftware.commons.shared.util.mutable;
 
 /**
- * A GWT-compatible immitation of java.util.concurrent's {@code AtomicInteger}
+ * A GWT-compatible replacement for {@link java.util.concurrent.atomic.AtomicInteger AtomicInteger}
  * and {@code org.apache.commons.lang3.mutable.MutableInt}.
  *
- * This class isn't really threadsafe, but that doesn't matter for
- * client-side GWT code.  In pure Java code, it's better to use {@code AtomicInteger},
- * or to externally synchronize operations on this class.
+ * This class uses locking to synchronize updates, so in pure Java code it's more efficient to use {@code AtomicInteger}
+ * (in client-side GWT code the {@code synchronized} keyword is simply ignored).
  *
  * @author Alex
  */
@@ -43,33 +42,33 @@ public class MutableInteger extends MutableNumber {
     return n;
   }
 
-  public int incrementAndGet() {
+  public synchronized int incrementAndGet() {
     return ++n;
   }
 
-  public void increment() {
+  public synchronized void increment() {
     ++n;
   }
 
-  public int getAndIncrement() {
+  public synchronized int getAndIncrement() {
     return n++;
   }
 
-  public int decrementAndGet() {
+  public synchronized int decrementAndGet() {
     return --n;
   }
 
-  public int getAndDecrement() {
+  public synchronized int getAndDecrement() {
     return n--;
   }
 
-  public int addAndGet(int delta) {
+  public synchronized int addAndGet(int delta) {
     return n += delta;
   }
 
   public int getAndAdd(int delta) {
     int old = n;
-    n += delta;
+    n = old + delta;
     return old;
   }
 
@@ -100,12 +99,17 @@ public class MutableInteger extends MutableNumber {
     return get();
   }
 
-  public Number toPrimitive() {
-    return n;
+  public Number numberValue() {
+    return get();
   }
 
   @Override
-  public void merge(MutableNumber other) {
+  public synchronized void merge(MutableNumber other) {
     n += other.intValue();
+  }
+
+  @Override
+  public int compareTo(Number o) {
+    return intValue() - o.intValue();
   }
 }

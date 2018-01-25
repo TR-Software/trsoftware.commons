@@ -25,18 +25,12 @@ package solutions.trsoftware.commons.shared.util.stats;
  *
  * @author Alex
  */
-public class AbstractArgMinMax<A, V extends Comparable<V>> {
+public abstract class AbstractArgMinMax<A, V extends Comparable<V>> {
   /** The current max or min value of all the samples that have been given */
   private V bestValue;
 
   /** The current argument associated with the best value */
   private A bestArg;
-
-  private int multiplier;
-
-  public AbstractArgMinMax(int multiplier) {
-    this.multiplier = multiplier;
-  }
 
   /** Updates the mean with a new sample, returning the new argmax */
   public V update(A arg, V value) {
@@ -44,12 +38,14 @@ public class AbstractArgMinMax<A, V extends Comparable<V>> {
       bestValue = value;
       bestArg = arg;
     }
-    else if ((multiplier * bestValue.compareTo(value)) < 0) {
+    else if (getMultiplier() * bestValue.compareTo(value) < 0) {
       bestValue = value;
       bestArg = arg;
     }
     return bestValue;
   }
+
+  protected abstract int getMultiplier();
 
   public A get() {
     return bestArg;

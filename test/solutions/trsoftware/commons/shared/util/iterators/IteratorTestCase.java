@@ -31,10 +31,11 @@ import java.util.NoSuchElementException;
 public abstract class IteratorTestCase extends TestCase {
 
   /**
-   * Asserts that the given iterator returns all of the elements in the given list.
+   * Asserts that the given iterator returns all of the elements in the given list,
+   * and throws {@link NoSuchElementException} when there are no more elements left
    */
-  public <T> void assertIteratedElements(List<T> elements, final Iterator<T> testIter) {
-    assertEquals(elements, CollectionUtils.asList(testIter));
+  public static <T> void assertIteratedElements(List<T> expectedElements, final Iterator<T> testIter) {
+    assertEquals(expectedElements, CollectionUtils.asList(testIter));
     assertFalse(testIter.hasNext());
     AssertUtils.assertThrows(NoSuchElementException.class, new Runnable() {
       @Override

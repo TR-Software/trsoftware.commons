@@ -17,7 +17,7 @@
 
 package solutions.trsoftware.commons.server.util;
 
-import solutions.trsoftware.commons.shared.util.iterators.NonMutatingIterator;
+import com.google.common.collect.UnmodifiableIterator;
 
 import java.text.DateFormat;
 import java.util.Calendar;
@@ -223,7 +223,7 @@ public class CalDate {
   /**
    * Iterates over all the possible CalDate instances between the two endpoints, using the given field and increment.
    */
-  public static class RangeIterator extends NonMutatingIterator<CalDate> implements Iterable<CalDate> {
+  public static class RangeIterator extends UnmodifiableIterator<CalDate> implements Iterable<CalDate> {
     private final int field;
     private final int increment;
     private final CalDate limit;

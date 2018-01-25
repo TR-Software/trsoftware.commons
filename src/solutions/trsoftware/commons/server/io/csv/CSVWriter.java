@@ -17,6 +17,8 @@
 
 package solutions.trsoftware.commons.server.io.csv;
 
+import solutions.trsoftware.commons.server.io.ServerIOUtils;
+
 import java.io.*;
 import java.util.List;
 import java.util.regex.Pattern;
@@ -62,9 +64,6 @@ public class CSVWriter implements Flushable, Closeable {
    */
   public static final char DEFAULT_QUOTE_CHARACTER = '"';
 
-  /** Default line terminator uses platform encoding. */
-  public static final String DEFAULT_LINE_END = System.getProperty("line.separator");
-
   /**
    * Constructs CSVWriter using a comma for the separator.
    *
@@ -105,7 +104,7 @@ public class CSVWriter implements Flushable, Closeable {
    * escapechars
    */
   public CSVWriter(Writer writer, char separator, char quotechar, char escapechar) {
-    this(writer, separator, quotechar, escapechar, DEFAULT_LINE_END);
+    this(writer, separator, quotechar, escapechar, ServerIOUtils.LINE_SEPARATOR);
   }
 
 

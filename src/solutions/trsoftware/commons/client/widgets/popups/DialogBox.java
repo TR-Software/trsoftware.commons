@@ -26,11 +26,13 @@ import com.google.gwt.user.client.Element;
 import com.google.gwt.user.client.Event;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.*;
+import solutions.trsoftware.commons.client.bundle.CommonsClientBundleFactory;
 import solutions.trsoftware.commons.client.event.MultiHandlerRegistration;
 import solutions.trsoftware.commons.client.event.NativeEvents;
 import solutions.trsoftware.commons.client.event.PageVisibility;
 import solutions.trsoftware.commons.client.jso.JsWindow;
 import solutions.trsoftware.commons.client.widgets.CompositeHasAllMouseHandlers;
+import solutions.trsoftware.commons.client.widgets.Widgets;
 
 /**
  * A form of popup that has a caption area at the top which can be dragged by the user.
@@ -53,15 +55,16 @@ public class DialogBox extends EnhancedPopup {
    *
    */
   public interface Caption extends HasAllMouseHandlers, IsWidget {
+    String DEFAULT_STYLE = CommonsClientBundleFactory.INSTANCE.getCommonsCss().Caption();
   }
 
   /**
-   * Default implementation of Caption. This will be created as the header if
-   * there isn't a header specified.
+   * Default implementation of {@link Caption} that simply extends {@link HTML}.
+   * Will be used if header isn't specified.
    */
-  public static class CaptionImpl extends HTML implements Caption {
-    public CaptionImpl() {
-      setStyleName("Caption");
+  public static class HtmlCaption extends HTML implements Caption {
+    public HtmlCaption() {
+      setStyleName(Caption.DEFAULT_STYLE);
     }
   }
 
@@ -72,7 +75,16 @@ public class DialogBox extends EnhancedPopup {
     @Override
     protected void initWidget(Widget widget) {
       super.initWidget(widget);
-      setStyleName("Caption");
+      setStyleName(Caption.DEFAULT_STYLE);
+    }
+  }
+
+  public static class CaptionWithIcon extends CompositeCaption {
+    public CaptionWithIcon(AbstractImagePrototype icon, String text) {
+      Image img = icon.createImage();
+      img.setStyleName("icon");
+      initWidget(Widgets.flowPanel(img, Widgets.inlineLabel(text, "text")));
+      addStyleName(CommonsClientBundleFactory.INSTANCE.getCommonsCss().CaptionWithIcon());
     }
   }
 
@@ -126,7 +138,7 @@ public class DialogBox extends EnhancedPopup {
   /**
    * The default style name.
    */
-  private static final String DEFAULT_STYLENAME = "DialogBox";
+  private static final String DEFAULT_STYLENAME = CommonsClientBundleFactory.INSTANCE.getCommonsCss().DialogBox();
   private FlowPanel pnlMain = new FlowPanel();
   private PopupCloserButton btnClose;
   private Caption caption;
@@ -181,7 +193,7 @@ public class DialogBox extends EnhancedPopup {
    *          contained by the dialog should be ignored
    */
   public DialogBox(boolean autoHide, boolean modal) {
-    this(autoHide, modal, new CaptionImpl());
+    this(autoHide, modal, new HtmlCaption());
   }
 
   /**
@@ -206,7 +218,7 @@ public class DialogBox extends EnhancedPopup {
     pnlMain.add(content);
 
     super.setWidget(pnlMain);
-    content.setStyleName("dialogContent", true);
+    content.addStyleName(CommonsClientBundleFactory.INSTANCE.getCommonsCss().dialogContent());
     setStyleName(DEFAULT_STYLENAME);
 
     // register for the events we need on the widget itself (these don't need to be removed for the lifetime of the widget)
@@ -440,7 +452,7 @@ public class DialogBox extends EnhancedPopup {
   }
 
   /**
-   * We override this method to simply to preclude the possibility of ever enabling {@link ResizeAnimation},
+   * We override this method simply to preclude the possibility of ever enabling {@link ResizeAnimation},
    * because it contains a bug (actually more like a slight oversight on behalf of the GWT developers): it uses the
    * deprecated CSS <a href="https://developer.mozilla.org/en-US/docs/Web/CSS/clip">clip</a> property to adjust the
    * size of the popup element (at the end of its run, it sets {@code clip: rect(auto auto auto auto);}),

@@ -19,6 +19,7 @@ package solutions.trsoftware.commons.client.widgets.popups;
 
 import com.google.gwt.user.client.ui.AbstractImagePrototype;
 import com.google.gwt.user.client.ui.Widget;
+import solutions.trsoftware.commons.client.bundle.CommonsClientBundleFactory;
 
 /**
  * All dialogs in the web app should extend this class.  It simply ensures a consistent
@@ -32,7 +33,7 @@ import com.google.gwt.user.client.ui.Widget;
 public class PopupDialog extends PopupWithIcon {
 
   /** Defines a consistent CSS class name to use for all dialog popup within our app. */
-  public static final String STYLE_NAME = "trPopupDialog";
+  public static final String STYLE_NAME = CommonsClientBundleFactory.INSTANCE.getCommonsCss().trPopupDialog();
 
   @Override
   protected String getSecondaryStyleName() {

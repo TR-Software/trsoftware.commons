@@ -19,9 +19,10 @@ package solutions.trsoftware.commons.client.widgets.popups;
 
 import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.PopupPanel;
+import solutions.trsoftware.commons.client.bundle.CommonsClientBundleFactory;
 
 /**
- * A simple "x" button used to hide a popup.
+ * A simple "x" button used to hide a popup, implemented with SVG.
  *
  * @author Alex
  */
@@ -36,10 +37,11 @@ public class PopupCloserButton extends PopupCloser<HTML> {
      */
     super(popup, new HTML("<svg viewBox=\"0 0 20 20\">\n" +
         "&times;" +  // unicode multiplication symbol to support IE8 and older
-        "<g class=\"xShape\">\n" +  // we group both strokes of the X under the style name "xShape" (its stroke color and width are defined in CSS)
+        // we group both strokes of the X under the style name "xShape" (its stroke color and width are defined in CSS)
+        "<g class=\"" + CommonsClientBundleFactory.INSTANCE.getCommonsCss().xShape() + "\">\n" +
         "  <line x1=\"5\" y1=\"5\" x2=\"15\" y2=\"15\"/>\n" +
         "  <line x1=\"5\" y1=\"15\" x2=\"15\" y2=\"5\"/>\n" +
         "</g>\n</svg>"));
-    setStyleName("xButton");
+    setStyleName(CommonsClientBundleFactory.INSTANCE.getCommonsCss().xButton());
   }
 }

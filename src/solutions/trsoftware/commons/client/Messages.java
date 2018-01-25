@@ -71,6 +71,10 @@ public class Messages {
     return type;
   }
 
+  public String requestFailed() {
+    return "There was an error processing your request.  Please try again later.\n\n" + notifySupportIfProblemPersists();
+  }
+
   /**
    * @return the value defined by {@link Settings#getSupportEmail()}
    */

@@ -17,21 +17,22 @@
 
 package solutions.trsoftware.commons.shared.util.stats;
 
-import java.io.Serializable;
-
 /**
  * Keeps track of the minimum in a sequence of Comparable objects.
  *
  * @author Alex
  */
-public class MinComparable<T extends Comparable<T>> extends MinMaxComparableBase<T> implements Serializable {
+public class MinComparable<T extends Comparable<T>> extends AbstractMinMaxComparable<T> {
 
-  public MinComparable() {
-    super(-1);
-  }
+  public MinComparable() {}
 
   public MinComparable(Iterable<T> candidates) {
-    super(-1, candidates);
+    super(candidates);
+  }
+
+  @Override
+  protected int getMultiplier() {
+    return -1;
   }
 
   public boolean equals(Object o) {

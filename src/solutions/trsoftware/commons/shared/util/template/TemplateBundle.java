@@ -26,10 +26,10 @@ import java.lang.annotation.*;
  */
 public interface TemplateBundle {
   /**
-   * Explicitly specifies a file name or path to the image resource to be
-   * associated with a method in an {@link TemplateBundle}. If the path is
+   * Explicitly specifies a filename or path to the template resource to be
+   * associated with a method in a {@link TemplateBundle}. If the path is
    * unqualified (that is, if it contains no slashes), then it is sought in the
-   * package enclosing the image bundle to which the annotation is attached. If
+   * package enclosing the template bundle to which the annotation is attached. If
    * the path is qualified, then it is expected that the string can be passed
    * verbatim to <code>ClassLoader.getResource()</code>.
    */

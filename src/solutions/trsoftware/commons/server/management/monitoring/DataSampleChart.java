@@ -177,7 +177,7 @@ public class DataSampleChart {
   private String generateRelativeTimeLabel(double millis) {
     if (millis < 1000)
       return "now";
-    return ServerStringUtils.urlEncode(TimeUtils.generateRelativeTimeElapsedString(millis, "s", "s", "m", "m", "h", "h", "d", "d", "m", "m", "y", "y").replaceAll(" ago", ""));
+    return ServerStringUtils.urlEncode(TimeUtils.timeIntervalToString(millis, "s", "s", "m", "m", "h", "h", "d", "d", "m", "m", "y", "y"));
   }
 
   public String getTitle() {

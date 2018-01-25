@@ -48,12 +48,8 @@ public class StringUtilsGwtTest extends CommonsGwtTestCase {
     delegate.testRandString();
   }
 
-  public void testRandStringExhaustive() throws Exception {
-    delegate.testRandStringExhaustive();
-  }
-
-  public void testUnderscoresToCamelHumps() throws Exception {
-    delegate.testUnderscoresToCamelHumps();
+  public void testToCamelCase() throws Exception {
+    delegate.testToCamelCase();
   }
 
   public void testNotBlank() throws Exception {
@@ -132,7 +128,23 @@ public class StringUtilsGwtTest extends CommonsGwtTestCase {
     delegate.testSplitAndTrim();
   }
 
+  public void testSplit() throws Exception {
+    delegate.testSplit();
+  }
+
   public void testAsList() throws Exception {
     delegate.testAsList();
+  }
+
+  public void testSorted() throws Exception {
+    delegate.testSorted();
+  }
+
+  public void testToCharacterSet() throws Exception {
+    delegate.testToCharacterSet();
+  }
+
+  public void testValueToString() throws Exception {
+    delegate.testValueToString();
   }
 }

@@ -17,12 +17,15 @@
 
 package solutions.trsoftware.commons.shared.util;
 
+import com.google.common.collect.AbstractSequentialIterator;
+
 import java.util.Iterator;
+import java.util.List;
 import java.util.SortedSet;
 import java.util.TreeSet;
 
 /**
- * Immutable number range, capable of generating random numbers within the
+ * Immutable numeric range, capable of generating random numbers within the
  * range.  The endpoints of the range MUST BE either Integer, Long, Double, or Float.
  * and their values must fit into the double range for this class to function correctly.
  *
@@ -69,7 +72,7 @@ public class NumberRange<T extends Number & Comparable> implements Iterable<T> {
     else
       lowerBound = min.intValue();
     upperBound = max.intValue();
-    return RandomUtils.nextIntInRange(lowerBound, upperBound);
+    return RandomUtils.nextIntInRange(lowerBound, upperBound+1);
   }
 
   public boolean contains(T number) {
@@ -87,6 +90,13 @@ public class NumberRange<T extends Number & Comparable> implements Iterable<T> {
   /**
    * Coerces the number into the range, i.e. if the number is in the range,
    * returns it unchanged, otherwise returns the closest endpoint of the range.
+   * 
+   * For primitive numbers, the same thing can be accomplished with {@link MathUtils}
+   * 
+   * @see MathUtils#restrict(int, int, int) 
+   * @see MathUtils#restrict(long, long, long) 
+   * @see MathUtils#restrict(double, double, double) 
+   * @see MathUtils#restrict(float, float, float) 
    */
   public T coerce(T number) {
     if (contains(number))
@@ -97,7 +107,7 @@ public class NumberRange<T extends Number & Comparable> implements Iterable<T> {
   }
 
   /**
-   * @returns how many whole numbers are contained within this range (which
+   * @return how many whole numbers are contained within this range (which
    * is equivalent to asking how many numbers will be returned by iterator()).
    */
   public int size() {
@@ -105,10 +115,10 @@ public class NumberRange<T extends Number & Comparable> implements Iterable<T> {
   }
 
   public String toString() {
-    return new StringBuilder().append(min).append("..").append(max).toString();
+    return String.valueOf(min) + ".." + max;
   }
 
-// This beatiful code, alas, would only work on the server side, not GWT-side
+// This beautiful code, alas, would only work on the server side, not GWT-side
 //
 //  /**
 //   * @param str A string in the form of "1..5"
@@ -128,24 +138,23 @@ public class NumberRange<T extends Number & Comparable> implements Iterable<T> {
 //  }
 
   /**
-   * @param str A string in the form of "1..5"
+   * @param str a string specifying the {@code int} endpoints of a range separated by {@code ".."} (e.g. {@code "1..5"})
    */
   public static NumberRange<Integer> fromStringIntRange(String str) {
-    String[] parts = splitRangeString(str);
-    return new NumberRange<Integer>(Integer.valueOf(parts[0]), Integer.valueOf(parts[1]));
+    List<String> endpoints = splitRangeString(str);
+    return new NumberRange<Integer>(Integer.valueOf(endpoints.get(0)), Integer.valueOf(endpoints.get(1)));
   }
 
   /**
-   * @param str A string in the form of "1.523..5.1324"
+   * @param str a string specifying the {@code double} endpoints of a range separated by {@code ".."} (e.g. "1.523..5.1324")
    */
   public static NumberRange<Double> fromStringDoubleRange(String str) {
-    String[] parts = splitRangeString(str);
-    return new NumberRange<Double>(Double.valueOf(parts[0]), Double.valueOf(parts[1]));
+    List<String> endpoints = splitRangeString(str);
+    return new NumberRange<Double>(Double.valueOf(endpoints.get(0)), Double.valueOf(endpoints.get(1)));
   }
 
-  private static String[] splitRangeString(String str) {
-    int idx = str.indexOf("..");
-    return new String[]{str.substring(0, idx), str.substring(idx+2)};
+  private static List<String> splitRangeString(String str) {
+    return StringUtils.split(str, "..");
   }
 
   /**
@@ -172,33 +181,19 @@ public class NumberRange<T extends Number & Comparable> implements Iterable<T> {
   }
 
   public Iterator<T> iterator(final T step) {
-    return new Iterator<T>() {
-      T next = min;
-      public boolean hasNext() {
-        return next.compareTo(max) <= 0;
-      }
-      public T next() {
-        T ret = next;
-        next = fromDouble(ret.doubleValue() + step.doubleValue());
-        return ret;
-      }
-
-      public void remove() {
-        throw new UnsupportedOperationException();
+    return new AbstractSequentialIterator<T>(min) {
+      @Override
+      protected T computeNext(T previous) {
+        T next = fromDouble(previous.doubleValue() + step.doubleValue());
+        if (next.compareTo(max) <= 0)
+          return next;
+        return null;
       }
     };
   }
 
   private T fromDouble(double v) {
-    if (min instanceof Double)
-      return (T)Double.valueOf(v);
-    else if (min instanceof Integer)
-      return (T)Integer.valueOf((int)v);
-    else if (min instanceof Long)
-      return (T)Long.valueOf((long)v);
-    else if (min instanceof Float)
-      return (T)Float.valueOf((float)v);
-    throw new NumberFormatException("NumberRange " + toString() + " must be either Double/Float/Integer/Long");
+    return (T)NumberUtils.fromDouble(min.getClass(), v);
   }
 
   private static SortedSet emptySortedSet;

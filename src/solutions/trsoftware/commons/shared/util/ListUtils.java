@@ -17,6 +17,8 @@
 
 package solutions.trsoftware.commons.shared.util;
 
+import com.google.common.base.Predicate;
+
 import java.util.*;
 
 /**
@@ -74,8 +76,9 @@ public class ListUtils {
   }
 
   /**
-   * Inserts the element into the list in ascending order.
-   * @return A reference to the passed in list, to allow method chaining.
+   * Inserts an element into the given list, in ascending order.
+   * @param list should already be sorted
+   * @return A reference to the given list, to allow method chaining.
    */
   public static <T extends Comparable> List<T> insertInOrder(List<T> list, T newElement) {
     ListIterator<T> listIterator = list.listIterator();
@@ -96,7 +99,7 @@ public class ListUtils {
   }
 
   /**
-   * @return {@code true} iff the given list is sorted in the order imposed by its comparator.
+   * @return {@code true} iff the given list is sorted in ascending order (as defined by its comparator).
    */
   public static <T extends Comparable> boolean isSorted(List<T> list) {
     T lastElt = null;
@@ -178,4 +181,11 @@ public class ListUtils {
     return list;
   }
 
+  /**
+   * @return the subset of elements satisfying the given predicate
+   * @see CollectionUtils#filter(Iterable, Predicate)
+   */
+  public static <T> ArrayList<T> filter(List<T> list, Predicate<T> predicate) {
+    return CollectionUtils.filter(list, predicate);
+  }
 }

@@ -23,10 +23,12 @@ package solutions.trsoftware.commons.shared.util.stats;
  *
  * Similar to the mathematical <a href="https://en.wikipedia.org/wiki/Arg_max#Arg_min">argmin</a> function.
  *
- * @author Alex Mar 2, 2010
+ * @author Alex
+ * @since Mar 2, 2010
  */
-public class ArgMin<A, T extends Comparable<T>> extends AbstractArgMinMax<A,T> {
-  public ArgMin() {
-    super(-1);
+public class ArgMin<A, V extends Comparable<V>> extends AbstractArgMinMax<A, V> {
+  @Override
+  protected int getMultiplier() {
+    return -1;
   }
 }

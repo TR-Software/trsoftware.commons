@@ -23,12 +23,13 @@ import solutions.trsoftware.commons.Slow;
 import java.util.*;
 
 import static solutions.trsoftware.commons.shared.util.NumberRange.*;
+import static solutions.trsoftware.commons.shared.util.iterators.IteratorTestCase.assertIteratedElements;
 
 public class NumberRangeJavaTest extends TestCase {
 
   private Random rnd = new Random();
   private int numValidRangesToTest = 1000;
-  private int numRandomsWithinRange = 5000;  // should be enougth to generate every number within a range
+  private int numRandomsWithinRange = 5000;  // should be enough to generate every number within a range
 
   public void testCornerCases() throws Exception {
     assertEquals(4.5d, new NumberRange<Double>(4.5d, 4.5d).random());
@@ -233,48 +234,18 @@ public class NumberRangeJavaTest extends TestCase {
     // int range
     {
       NumberRange<Integer> range = new NumberRange<Integer>(2, 5);
-
       // test iteration by ones
-      ArrayList<Integer> list = new ArrayList<Integer>();
-      for (Integer n : range) {
-        list.add(n);
-      }
-      assertEquals(4, list.size());
-      assertEquals(new Integer(2), list.get(0));
-      assertEquals(new Integer(3), list.get(1));
-      assertEquals(new Integer(4), list.get(2));
-      assertEquals(new Integer(5), list.get(3));
-
+      assertIteratedElements(Arrays.asList(2, 3, 4, 5), range.iterator());
       // test iteration by twos
-      Iterator<Integer> iter = range.iterator(2);
-      assertTrue(iter.hasNext());
-      assertEquals(new Integer(2), iter.next());
-      assertTrue(iter.hasNext());
-      assertEquals(new Integer(4), iter.next());
-      assertFalse(iter.hasNext());
+      assertIteratedElements(Arrays.asList(2, 4), range.iterator(2));
     }
     // double range
     {
       NumberRange<Double> range = new NumberRange<Double>(2.23, 5.89);
-
       // test iteration by ones
-      ArrayList<Double> list = new ArrayList<Double>();
-      for (Double n : range) {
-        list.add(n);
-      }
-      assertEquals(4, list.size());
-      assertEquals(new Double(2.23), list.get(0));
-      assertEquals(new Double(3.23), list.get(1));
-      assertEquals(new Double(4.23), list.get(2));
-      assertEquals(new Double(5.23), list.get(3));
-
+      assertIteratedElements(Arrays.asList(2.23, 3.23, 4.23, 5.23), range.iterator());
       // test iteration by twos
-      Iterator<Double> iter = range.iterator(2.0);
-      assertTrue(iter.hasNext());
-      assertEquals(new Double(2.23), iter.next());
-      assertTrue(iter.hasNext());
-      assertEquals(new Double(4.23), iter.next());
-      assertFalse(iter.hasNext());
+      assertIteratedElements(Arrays.asList(2.23, 4.23), range.iterator(2.0));
     }
   }
 

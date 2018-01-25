@@ -42,7 +42,7 @@ public class IpToCountryMapperTest extends TestCase {
    * the database, and that
    */
   public void testLoadingFromCsv() throws Exception {
-    IpToCountryMapper db = IpToCountryMapper.getInstance();
+    IpToCountryMapper db = IpToCountryMapper.get();
     // sanity check: there should be over 100K entries in the database
     assertTrue(db.getDatabaseSize() > 100000);
     // check a few values from the CSV file
@@ -59,7 +59,7 @@ public class IpToCountryMapperTest extends TestCase {
    */
   @Slow
   public void testRandomAddresses() throws Exception {
-    IpToCountryMapper db = IpToCountryMapper.getInstance();
+    IpToCountryMapper db = IpToCountryMapper.get();
     int n = 100000;
     int hits = 0;
     Set<String> uniqueCountries = new HashSet<String>();

@@ -26,13 +26,12 @@ import java.security.Principal;
 import java.util.*;
 
 /**
- * Saves the parts of the underlying HttpServletRequest to make them available after the response has been committed
- * (e.g. from an asynchronous thread). We can't save the underlying request in a ThreadLocal - it's highly unsafe
- * because Tomcat will reuse the underlying object after the response has been comitted.
+ * Saves the parts of the underlying {@link HttpServletRequest} to make them available after the response has been committed
+ * (e.g. from an asynchronous thread). It's probably not a good idea to refer to the original request object outside of
+ * the request processing sequence because Tomcat will reuse the underlying object after the response has been committed.
  *
- * Nov 14, 2009
- *
- * @author Alex
+ * @author Alex, Nov 14, 2009
+ * @see <a href="https://stackoverflow.com/a/25626998">StackOverflow question about request reuse</a>
  */
 public class RequestCopy implements HttpServletRequest {
   private static final String UOE_MSG = "RequestCopy doesn't support this method.";
@@ -43,14 +42,28 @@ public class RequestCopy implements HttpServletRequest {
   private Map<String, String[]> params;
   private String method;
   private StringBuffer requestURL;
+  private HttpServletRequest originalRequest;
 
   public RequestCopy(HttpServletRequest originalRequest) {
+    this.originalRequest = originalRequest;
     remoteAddr = originalRequest.getRemoteAddr();
     queryString = originalRequest.getQueryString();
     locale = originalRequest.getLocale();
     params = originalRequest.getParameterMap();
     method = originalRequest.getMethod();
     requestURL = new StringBuffer(originalRequest.getRequestURL());  // defensive copy, since the original buffer likely to get reused
+  }
+
+  /**
+   * @deprecated This deprecation warning is simply to inform the programmer that it's probably not a good idea to use
+   * the original request object outside of the request processing sequence because Tomcat will reuse the underlying
+   * object after the response has been committed.  However, referring to it from the thread that's still processing
+   * the request is probably OK.
+   * @return the original request that was passed to the constructor
+   * @see <a href="https://stackoverflow.com/a/25626998">StackOverflow question about request reuse</a>
+   */
+  public HttpServletRequest getOriginalRequest() {
+    return originalRequest;
   }
 
   public Object getAttribute(String s) {

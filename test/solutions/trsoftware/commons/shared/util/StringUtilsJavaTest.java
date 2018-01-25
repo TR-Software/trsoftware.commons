@@ -20,10 +20,7 @@ package solutions.trsoftware.commons.shared.util;
 import junit.framework.TestCase;
 import solutions.trsoftware.commons.client.testutil.AssertUtils;
 
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.SortedSet;
-import java.util.TreeSet;
+import java.util.*;
 
 import static solutions.trsoftware.commons.shared.util.StringUtils.*;
 
@@ -93,52 +90,44 @@ public class StringUtilsJavaTest extends TestCase {
         assertEquals(len, result.length());
         // make sure the string characters are mostly different and are all letters in [A-Za-z]
         assertTrue(result.matches("[A-Za-z]*"));
-        if (len > 5) {
-          assertTrue(charSet(result).size() >= result.length() / 2);
-        }
+        if (len > 5)
+          assertTrue(toCharacterSet(result).size() >= result.length() / 2);
       }
     }
-  }
-
-  /** Returns a sorted set of the unique characters in the given string */
-  private SortedSet<Character> charSet(String result) {
-    TreeSet<Character> charSet = new TreeSet<Character>();
-    char[] chars = result.toCharArray();
-    for (int j = 0; j < chars.length; j++) {
-      charSet.add(chars[j]);
-    }
-    return charSet;
-  }
-
-  /**
-   * Make sure that randomString(int) generates all possible characters in
-   * [A-Za-z]
-   */
-  public void testRandStringExhaustive() throws Exception {
+    // Make sure that randomString(int) generates all possible characters in [A-Za-z]
     SortedSet<Character> charSet = new TreeSet<Character>();
     // there are 26*2 characters in this range; 10K iterations should be enough to generate them all
     for (int i = 0; i < 10000; i++) {
-      charSet.addAll(charSet(randString(10)));
+      charSet.addAll(toCharacterSet(randString(10)));
     }
     assertEquals(26 * 2, charSet.size());
     System.out.println("Successfully generated all possible characters in [A-Za-z]: " + charSet.toString());
   }
 
-  public void testUnderscoresToCamelHumps() throws Exception {
-    assertEquals(null, underscoresToCamelHumps(null));
-    assertEquals("", underscoresToCamelHumps(""));
-    assertEquals("mystring", underscoresToCamelHumps("MYSTRING"));
-    assertEquals("myString", underscoresToCamelHumps("MY_STRING"));
-    assertEquals("myString", underscoresToCamelHumps("my_string"));
-    assertEquals("myStringHere", underscoresToCamelHumps("MY_STRING_HERE"));
-    assertEquals("myStringHere", underscoresToCamelHumps("MY_STRING_HERE_"));
-    assertEquals("MyStringHere", underscoresToCamelHumps("_MY_STRING_HERE"));
-    assertEquals("MyStringHere", underscoresToCamelHumps("_MY_STRING_HERE_"));
-    assertEquals("MyStringHere", underscoresToCamelHumps("_MY_STRING__HERE_"));
-    assertEquals("MyStringHere", underscoresToCamelHumps("_MY_STRING__HERE__"));
-    assertEquals("MyStringHere", underscoresToCamelHumps("_MY___STRING__HERE__"));
-    assertEquals("MyStringHere", underscoresToCamelHumps("____MY___STRING__HERE____"));
-    assertEquals("myStringHere", underscoresToCamelHumps("MY______STRING__HERE__"));
+  public void testToCamelCase() throws Exception {
+    assertEquals(null, toCamelCase(null, "_"));
+    assertEquals("", toCamelCase("", "_"));
+    assertEquals("mystring", toCamelCase("MYSTRING", "_"));
+    assertEquals("myString", toCamelCase("MY_STRING", "_"));
+    assertEquals("myString", toCamelCase("my_string", "_"));
+    assertEquals("myStringHere", toCamelCase("MY_STRING_HERE", "_"));
+    assertEquals("myStringHere", toCamelCase("MY_STRING_HERE_", "_"));
+    assertEquals("MyStringHere", toCamelCase("_MY_STRING_HERE", "_"));
+    assertEquals("MyStringHere", toCamelCase("_MY_STRING_HERE_", "_"));
+    assertEquals("MyStringHere", toCamelCase("_MY_STRING__HERE_", "_"));
+    assertEquals("MyStringHere", toCamelCase("_MY_STRING__HERE__", "_"));
+    assertEquals("MyStringHere", toCamelCase("_MY___STRING__HERE__", "_"));
+    assertEquals("MyStringHere", toCamelCase("____MY___STRING__HERE____", "_"));
+    assertEquals("myStringHere", toCamelCase("MY______STRING__HERE__", "_"));
+    // now try some other word separators:
+    assertEquals("myString", toCamelCase("my-string", "-"));
+    assertEquals("myString", toCamelCase("my%string", "%"));
+    assertEquals("myString", toCamelCase("my---string", "---"));
+    assertEquals("myStr-ing", toCamelCase("my---str-ing", "---"));
+    // now try using a regex as the word separator:
+    assertEquals("myStrIng", toCamelCase("my0str1ing", "\\d"));
+    assertEquals("myStrIng", toCamelCase("myXstrYing", "X|Y"));
+    assertEquals("myStrIng", toCamelCase("myXstrYYYYing", "X+|Y+"));
   }
 
   public void testNotBlank() throws Exception {
@@ -240,12 +229,18 @@ public class StringUtilsJavaTest extends TestCase {
   }
 
   public void testJoin() throws Exception {
-    assertEquals("a,b,c,d", StringUtils.<String>join(",", new String[]{"a", "b", "c", "d"}));
+    assertEquals("a,b,c,d", StringUtils.<String>join(",", "a", "b", "c", "d"));
     assertEquals("a,b,c,d", join(",", Arrays.asList("a", "b", "c", "d")));
     assertEquals("a - b - c - d", join(" - ", "a", "b", "c", "d"));
     assertEquals("a", join(" - ", "a"));
     assertEquals("", join(" - ", ""));
     assertEquals("One,Two,Three, Two,Two,Three, Three,Two,Three, One", join(",Two,Three, ", "One", "Two", "Three", "One"));  // musical counting in 3/4 ;)
+    // test optionally specifying a different delimiter for the last element
+    assertEquals("a, b, c, and d", join(", ", ", and ", Arrays.asList("a", "b", "c", "d").iterator()));
+    assertEquals("a, b, or c", join(", ", ", or ", Arrays.asList("a", "b", "c").iterator()));
+    assertEquals("a, and b", join(", ", ", and ", Arrays.asList("a", "b").iterator()));
+    assertEquals("a", join(", ", ", and ", Collections.singletonList("a").iterator()));
+    assertEquals("", join(", ", ", and ", Collections.emptyList().iterator()));
   }
 
   public void testLastIntegerInString() throws Exception {
@@ -447,11 +442,68 @@ public class StringUtilsJavaTest extends TestCase {
     assertEquals(Collections.<String>emptyList(), splitAndTrim("  , , ,,, ", ","));
   }
 
+  public void testSplit() throws Exception {
+    // test a delimiter of length 1
+    checkSplitResult(Arrays.asList("a", "b", "c"), "a,b,c", ",");
+    // test a delimiter that is not a valid regex (String#split would either not work or throw exception in this case)
+    checkSplitResult(Arrays.asList("a", "b", "c"), "a$b$c", "$", false);
+    checkSplitResult(Arrays.asList("a", "b", "c"), "a(.b(.c", "(.", false);
+    // test some delimiters of length > 1
+    checkSplitResult(Arrays.asList("a", "b", "c"), "a__b__c", "__");
+    checkSplitResult(Arrays.asList("a", "b", "c"), "a___b___c", "___");
+    // test no delimiters
+    checkSplitResult(Collections.singletonList(""), "", "_");
+    checkSplitResult(Collections.singletonList("foo"), "foo", "_");
+    // test repeated delimiters
+    // (empty tokens should be returned in-between the delimiters, to match the functionality of String#split)
+    checkSplitResult(Arrays.asList("a","","","b","","","c"), "a___b___c", "_");
+    // test delimiters in the beginning and end of the string
+    // (empty tokens should be returned at the beginning, but not at the end, to match the functionality of String#split)
+    checkSplitResult(Arrays.asList("","","a","","","b","","","c","","",""), "__a___b___c___", "_");
+  }
+
+  /**
+   * Asserts the expected result of {@link StringUtils#split(String, String)}
+   * and optionally compares it against {@link String#split(String, int)} (with {@code limit = -1})
+   * @param compareWithRegex whether to check the result against {@link String#split(String, int)} (with {@code limit = -1})
+   */
+  private static void checkSplitResult(List<String> expected, String str, String separator, boolean compareWithRegex) {
+    assertEquals(expected, split(str, separator));
+    if (compareWithRegex)
+      assertEquals(expected, Arrays.asList(str.split(separator, -1)));
+  }
+
+  /**
+   * Asserts the expected result of {@link StringUtils#split(String, String)}
+   * and compares it against {@link String#split(String, int)} (with {@code limit = -1})
+   */
+  private static void checkSplitResult(List<String> expected, String str, String separator) {
+    checkSplitResult(expected, str, separator, true);
+  }
+
   public void testAsList() throws Exception {
     assertEquals(Collections.<Character>emptyList(), asList(""));
     assertEquals(Arrays.asList('a'), asList("a"));
     assertEquals(Arrays.asList('a', 'b'), asList("ab"));
     assertEquals(Arrays.asList('a', 'b', 'c'), asList("abc"));
+  }
+
+  public void testSorted() throws Exception {
+    assertEquals("", sorted(""));
+    assertEquals("x", sorted("x"));
+    assertEquals("adfs", sorted("asdf"));
+    assertEquals("eiopqrtuwy", sorted("qwertyuiop"));
+  }
+
+  public void testToCharacterSet() throws Exception {
+    assertEquals(new ArrayList<Character>(toCharacterSet("asdfasdf")), Arrays.asList('a', 's', 'd', 'f'));
+    assertEquals(new ArrayList<Character>(toCharacterSet("fasdfasdf")), Arrays.asList('f', 'a', 's', 'd'));
+  }
+
+  public void testValueToString() throws Exception {
+    assertEquals("null", valueToString(null));
+    assertEquals("123", valueToString(123));
+    assertEquals("\"foo\"", valueToString("foo"));
   }
 
 }

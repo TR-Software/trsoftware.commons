@@ -95,7 +95,7 @@ public class CountdownTimer extends Timer {
   /** Base class for all events defined by {@link CountdownTimer}. */
   private static abstract class CountdownEvent<H extends CountdownEvent.Handler> extends Event<H> {
     /** Marker interface for handlers of event subclasses */
-    static interface Handler extends EventHandler { }
+    interface Handler extends EventHandler { }
 
     private double timeRemaining;
 
@@ -117,7 +117,7 @@ public class CountdownTimer extends Timer {
    */
   public static class TickEvent extends CountdownEvent<TickEvent.Handler> {
 
-    public static interface Handler extends CountdownEvent.Handler {
+    public interface Handler extends CountdownEvent.Handler {
       void onTick(TickEvent event);
     }
 
@@ -141,7 +141,7 @@ public class CountdownTimer extends Timer {
   /** Signals that the countdown has started (or restarted). */
   public static class StartedEvent extends CountdownEvent<StartedEvent.Handler> {
 
-    public static interface Handler extends CountdownEvent.Handler {
+    public interface Handler extends CountdownEvent.Handler {
       void onCountdownStarted(StartedEvent event);
     }
 
@@ -165,7 +165,7 @@ public class CountdownTimer extends Timer {
   /** Signals that the countdown has reached its target and the timer will be cancelled. */
   public static class FinishedEvent extends CountdownEvent<FinishedEvent.Handler> {
 
-    public static interface Handler extends CountdownEvent.Handler {
+    public interface Handler extends CountdownEvent.Handler {
       void onCountdownFinished(FinishedEvent event);
     }
 

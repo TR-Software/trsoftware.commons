@@ -22,12 +22,17 @@ import com.google.gwt.user.client.ui.AbstractImagePrototype;
 import com.google.gwt.user.client.ui.ImageBundle;
 
 /**
- * Date: Dec 18, 2007
- * Time: 10:09:03 PM
  *
+ * @deprecated use the newer {@link CommonsImages} bundle to avoid downloading a composite image of all the sprites
+ * defined in this interface.
+ *
+ * @since Dec 18, 2007
  * @author Alex
  */
 public interface IconsBundle extends ImageBundle {
+
+//  TODO: move all of the images not used by Commons back to TypeRacer (and replace with ClientBundle)
+
 //  AbstractImagePrototype user();
   AbstractImagePrototype user32();
   AbstractImagePrototype user24();

@@ -30,14 +30,15 @@ import static solutions.trsoftware.commons.client.widgets.Widgets.html;
  *
  * @author Alex, 10/17/2017
  */
-public class FormWithUsernameAndPassword extends Composite {
+public abstract class FormWithUsernameAndPassword extends BasicInputForm implements HasFocusTarget {
 
-  protected PasswordTextBox txtPassword = new PasswordTextBox();
-  protected Label lblCapsLockWarning = html("Your <em>Caps Lock</em> key is on", "fieldErrorMsg");
-  protected final FlowPanel passwordInputWidget = flowPanel(txtPassword, lblCapsLockWarning);
   protected TextBox txtUsername = new TextBox();
+  protected PasswordTextBox txtPassword = new PasswordTextBox();
+  protected Label lblCapsLockWarning = html("Your <em>Caps Lock</em> key is on", FIELD_ERROR_STYLE);
+  protected final FlowPanel passwordInputWidget = flowPanel(txtPassword, lblCapsLockWarning);
 
-  public FormWithUsernameAndPassword() {
+  public FormWithUsernameAndPassword(Layout layout) {
+    super(layout);
     // show a "Caps Lock" warning when entering password
     txtPassword.addKeyPressHandler(new CapsLockDetector() {
       @Override
@@ -48,9 +49,11 @@ public class FormWithUsernameAndPassword extends Composite {
     lblCapsLockWarning.setVisible(false);
   }
 
+
   /**
    * @return the widget that should be focused when this form is displayed.
    */
+  @Override
   public FocusWidget getFocusTarget() {
     return txtUsername;
   }

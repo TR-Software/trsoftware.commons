@@ -30,6 +30,15 @@ import java.net.URL;
 public abstract class CookieUtils {
   public static final String JSESSIONID_COOKIE_NAME = "JSESSIONID";
 
+  /**
+   * Adds a cookie to the {@link HttpServletResponse response}.
+   * @param domain should prefix the domain name with a dot to support subdomains (this should only be necessary to support older browsers)
+   * @see
+   *   <a href="https://stackoverflow.com/questions/9618217/what-does-the-dot-prefix-in-the-cookie-domain-mean">Stack Overflow</a>,
+   *   <a href="https://www.mxsasha.eu/blog/2014/03/04/definitive-guide-to-cookie-domains/">The definitive guide to cookie domains</a>,
+   *   <a href="https://tools.ietf.org/html/rfc6265#section-4.1.2.3">RFC 6265</a>,
+   *   <a href="https://tools.ietf.org/html/rfc2965">RFC 2965</a>
+   */
   public static void addCookie(HttpServletRequest request, HttpServletResponse response, String domain, String cookieName, String cookieValue, long maxAgeMillis) {
     // SECURITY: the only way to secure the cookies is to send them over SSL (Secure=True) and set http-only=True so they cannot be accessed from  malicious injected javascript
     // a partial solution without SSL is to check the IP address of every request (but will not work if the attacker has the same IP address, such as at a coffee shop, and will be a nuisance to people)
@@ -67,13 +76,7 @@ public abstract class CookieUtils {
   }
 
   /**
-   * Although we have tomcat configured not to set cookies, as a precaution we
-   * check to see if the browser is submitting a JSESSIONID cooke, and if
-   * so, we have to clear it (otherwise the cookie will trump whatever session
-   * id is used in the servlet URL).
-   *
-   * This scenario is most likely to happen on localhost, when a different
-   * server could have been bound to the same port on localhost in the past.
+   * If the request contains a {@code JSESSIONID} cooke, deletes it by setting its {@code Max-Age=0}.
    */
   public static void deleteJsessionidCookieIfPresent(HttpServletRequest request, HttpServletResponse response) {
     Cookie[] requestCookies = request.getCookies();

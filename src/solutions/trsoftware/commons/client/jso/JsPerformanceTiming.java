@@ -28,6 +28,7 @@ import com.google.gwt.core.client.JavaScriptObject;
  * under the regular DevMode, see http://stackoverflow.com/questions/17428265/adding-elemental-to-gwt )
  *
  * @author Alex
+ * @see <a href="https://developer.mozilla.org/en-US/docs/Web/API/PerformanceTiming">PerformanceTiming (MDN)</a>
  * @see <a href="http://msdn.microsoft.com/en-us/ff975075(v=vs.85)">MSDN Reference</a>
  * @see <a href="http://caniuse.com/#search=performance">List of browser versions that support this API</a>
  * @since 11/5/2014

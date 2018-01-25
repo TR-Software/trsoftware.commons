@@ -135,4 +135,13 @@ public class ServerStringUtilsTest extends TestCase {
       assertEquals("qwer", match[2]);
     }
   }
+
+  public void test_isUrlSafe() throws Exception {
+    assertTrue(isUrlSafe(""));
+    assertTrue(isUrlSafe("asdf"));
+    assertTrue(isUrlSafe("_asdf_-asdf_"));
+    assertFalse(isUrlSafe("asdf/"));
+    assertFalse(isUrlSafe("asdf="));
+    assertFalse(isUrlSafe("asdf+asdf"));
+  }
 }

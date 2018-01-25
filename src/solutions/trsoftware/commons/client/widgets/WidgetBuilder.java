@@ -20,12 +20,12 @@ package solutions.trsoftware.commons.client.widgets;
 import com.google.gwt.user.client.ui.Widget;
 
 /**
- * Uses the builder pattern to set properties on a {@link Widget}, to provide method chaining.
+ * Uses the builder pattern to provide method chaining for setting properties on a {@link Widget}.
  * @author Alex, 3/6/2016
  */
 public class WidgetBuilder<T extends Widget> {
 
-  // TODO: replace as much of the GWT-unclutter lib as possible with this class (e.g. WidgetDecorator and Widgets)
+  // TODO: try to replace some usages of WidgetDecorator and Widgets with this class, or perhaps move this functionality to WidgetDecorator; can also extract some duplicated code from CellPanelEntry and WidgetStyle
 
   private final T widget;
 

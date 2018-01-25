@@ -24,7 +24,7 @@ import solutions.trsoftware.commons.shared.util.stats.MaxComparable;
  */
 public class MaxInteger extends ColAggregation<Integer, Integer> {
 
-  private MaxComparable<Integer> delegate = new MaxComparable<Integer>();
+  private MaxComparable<Integer> delegate = new MaxComparable<>();
 
   @Override
   public Integer get() {

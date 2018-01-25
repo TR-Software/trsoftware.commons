@@ -17,14 +17,27 @@
 
 package solutions.trsoftware.commons.client;
 
+import com.google.gwt.core.client.EntryPoint;
+
 /**
  * Singleton defining the settings to be used by the various components of the TR Commons library.
+ *
+ * <p>
+ * Inheriting modules should provide their own values in their {@link EntryPoint#onModuleLoad()} method.
+ * Example:
+ * <pre>
+ *     Settings.get()
+ *       .setAppName("My App")
+ *       .setSupportEmail("support@example.com")
+ *       .setStackTraceSizeLimit(32)
+ *       .setStackTraceDeobfuscatorServletUrl("/stackTraceServlet");
+ * </pre>
+ * </p>
  *
  * @author Alex, 10/25/2017
  */
 public class Settings {
 
-  // TODO: cont here:
   private static Settings instance;
 
   public static Settings get() {

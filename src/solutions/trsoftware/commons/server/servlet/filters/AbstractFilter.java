@@ -17,6 +17,10 @@
 
 package solutions.trsoftware.commons.server.servlet.filters;
 
+import solutions.trsoftware.commons.server.servlet.filters.config.FilterConfigParser;
+import solutions.trsoftware.commons.server.servlet.filters.config.FilterParameters;
+import solutions.trsoftware.commons.server.servlet.filters.config.ParseException;
+
 import javax.servlet.Filter;
 import javax.servlet.FilterConfig;
 import javax.servlet.ServletException;
@@ -29,11 +33,29 @@ import javax.servlet.ServletException;
  */
 public abstract class AbstractFilter implements Filter {
 
+  protected static FilterConfigParser configParser = new FilterConfigParser();
+
+  protected FilterConfig filterConfig;
+
   public void init(FilterConfig filterConfig) throws ServletException {
     // subclasses may override
+    this.filterConfig = filterConfig;
   }
 
   public void destroy() {
     // subclasses may override
+  }
+
+  protected <P extends FilterParameters> P parse(P parameters) throws ServletException {
+    try {
+      P parsedParams = configParser.parse(filterConfig, parameters);
+      System.out.printf("Filter '%s' (%s) init-params: %s", filterConfig.getFilterName(), getClass(), parsedParams);
+      return parsedParams;
+    }
+    catch (ParseException e) {
+      throw new ServletException(String.format("Invalid configuration for filter '%s' (%s): %s",
+          filterConfig.getFilterName(), getClass(), e.getMessage()),
+          e);
+    }
   }
 }

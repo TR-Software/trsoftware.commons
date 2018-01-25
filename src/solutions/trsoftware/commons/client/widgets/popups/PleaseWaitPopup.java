@@ -18,7 +18,7 @@
 package solutions.trsoftware.commons.client.widgets.popups;
 
 import com.google.gwt.user.client.ui.AbstractImagePrototype;
-import solutions.trsoftware.commons.client.widgets.LoadingMessage2;
+import solutions.trsoftware.commons.client.widgets.LoadingMessage;
 
 /**
  * @author Alex, 10/18/2017
@@ -26,7 +26,12 @@ import solutions.trsoftware.commons.client.widgets.LoadingMessage2;
 public class PleaseWaitPopup extends PopupDialog {
   public PleaseWaitPopup(String message, AbstractImagePrototype icon) {
     super(true, icon, "Please Wait", null,
-        new LoadingMessage2(message + "...", LoadingMessage2.SpinnerPosition.RIGHT),
+        new LoadingMessage(message + "...", LoadingMessage.SpinnerPosition.RIGHT),
         null);
+  }
+
+  @Override
+  public PopupBuilder<PleaseWaitPopup> configure() {
+    return new PopupBuilder<PleaseWaitPopup>(this);
   }
 }

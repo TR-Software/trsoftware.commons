@@ -32,27 +32,36 @@ import java.util.*;
  */
 public class MapUtils {
 
-  /** Creates a hash map of the given the args in order key1, value2, key2, value2, ... */
+  /**
+   * Creates a {@link TreeMap} from the given args (treated as {@code key1, value1, key2, value2, ...})
+   * @deprecated use {@link MapBuilder} for type-safety
+   */
   public static <K,V> SortedMap<K, V> sortedMap(Object... keyValuePairs) {
     return putAll(new TreeMap<K, V>(), keyValuePairs);
   }
 
-  /** Creates a hash map of the given the args in order key1, value2, key2, value2, ... */
+  /**
+   * Creates a {@link HashMap} from the given args (treated as {@code key1, value1, key2, value2, ...})
+   * @deprecated use {@link MapBuilder} for type-safety
+   */
   public static <K,V> HashMap<K, V> hashMap(Object... keyValuePairs) {
     return putAll(new HashMap<K, V>(), keyValuePairs);
   }
 
-  /** Creates a linked hash map of the given the args in order key1, value2, key2, value2, ... */
+  /**
+   * Creates a {@link LinkedHashMap} from the given args (treated as {@code key1, value1, key2, value2, ...})
+   * @deprecated use {@link MapBuilder} for type-safety
+   */
   public static <K,V> LinkedHashMap<K, V> linkedHashMap(Object... keyValuePairs) {
     return putAll(new LinkedHashMap<K, V>(), keyValuePairs);
   }
 
-  /** This a frequently-used special case of hashMap, for String keys and values */
+  /** This a frequently-used special case of {@link #hashMap(Object...)}, for String keys and values */
   public static HashMap<String, String> stringMap(String... keyValuePairs) {
     return hashMap(keyValuePairs);
   }
 
-  /** This a frequently-used special case of linkedHashMap, for String keys and values */
+  /** This a frequently-used special case of {@link #linkedHashMap(Object...)}, for String keys and values */
   public static LinkedHashMap<String, String> stringLinkedHashMap(String... keyValuePairs) {
     return linkedHashMap(keyValuePairs);
   }

@@ -40,4 +40,22 @@ public class SharedNumberFormatGwtTest extends CommonsGwtTestCase {
     assertEquals(.555, format.parse(".555").doubleValue());
   }
 
+  public void testPercentages() throws Exception {
+    SharedNumberFormat format = new SharedNumberFormat("#.##%");
+    assertEquals("0%", format.format(0));
+    assertEquals("12.34%", format.format(.1234));
+    assertEquals("12.35%", format.format(.123456789));
+    assertEquals("55%", format.format(.55));
+    assertEquals("55.5%", format.format(.555));
+    assertEquals("55.56%", format.format(.55556));
+    assertEquals("100000%", format.format(1000));
+    assertEquals(0L, format.parse("0%"));
+    assertEquals(.1234, format.parse("12.34%"));
+    assertEquals(.1235, format.parse("12.35%"));
+    assertEquals(.55, format.parse("55%"));
+    assertEquals(.555, format.parse("55.5%"));
+    assertEquals(.5556, format.parse("55.56%"));
+    assertEquals(1000L, format.parse("100000%"));
+  }
+
 }

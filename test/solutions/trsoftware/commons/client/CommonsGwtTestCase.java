@@ -25,8 +25,10 @@ package solutions.trsoftware.commons.client;
  */
 public abstract class CommonsGwtTestCase extends BaseGwtTestCase {
 
+  public static final String MODULE_NAME = "solutions.trsoftware.commons.TestCommons";
+
   public String getModuleName() {
-    return "solutions.trsoftware.commons.TestCommons";
+    return MODULE_NAME;
   }
 
 }

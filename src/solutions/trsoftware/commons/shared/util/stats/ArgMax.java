@@ -26,8 +26,9 @@ package solutions.trsoftware.commons.shared.util.stats;
  * @author Alex
  * @since Mar 2, 2010
  */
-public class ArgMax<A, T extends Comparable<T>> extends AbstractArgMinMax<A, T> {
-  public ArgMax() {
-    super(1);
+public class ArgMax<A, V extends Comparable<V>> extends AbstractArgMinMax<A, V> {
+  @Override
+  protected int getMultiplier() {
+    return 1;
   }
 }

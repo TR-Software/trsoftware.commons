@@ -23,20 +23,26 @@ import java.awt.*;
 
 /**
  * Generates a random sequence of unique colors, such that each color has a distinct hue.
- * Uses the "golden ratio" algorithm (described in the blog post linked below)
- * to select consecutive hues as far apart on the color wheel as possible (which maximizes the difference between colors
- * when the number of items is small, while evenly distributing colors around the spectrum otherwise, and ensuring
- * that the same color never repeats twice.
-
+ * <p>
+ * Uses the "golden ratio" algorithm (described in the blog post linked below) to select consecutive hues to
+ * maximize contrast when the number of items is small, while evenly distributing colors around the spectrum otherwise,
+ * and ensuring that the same color never repeats twice.
+ * </p>
  * @see <a href="http://martin.ankerl.com/2009/12/09/how-to-create-random-colors-programmatically/">http://martin.ankerl.com/2009/12/09/how-to-create-random-colors-programmatically/</a>
  * @see <a href="http://devmag.org.za/2012/07/29/how-to-choose-colours-procedurally-algorithms/">http://devmag.org.za/2012/07/29/how-to-choose-colours-procedurally-algorithms/</a>
  * @see <a href="https://en.wikipedia.org/wiki/HSL_and_HSV">https://en.wikipedia.org/wiki/HSL_and_HSV</a>
+ *
+ * TODO: could make this class GWT-compatible either by converting HSV to RGB either (1) without relying on {@link java.awt.Color} or (2) using HSL, since most browsers now support HSL values in CSS (see https://www.w3schools.com/cssref/css_colors_legal.asp)
  *
  * @author Alex, 8/3/2017
  */
 public class ColorSequence {
 
-  private static double addend = 0.618033988749895;  // will be added (mod 1) to generate the next color hue in the sequence (default value is the "golden ratio conjugate")
+  /**
+   * The "golden ratio conjugate."  Will be added (mod 1) to generate the next color hue in the sequence.
+   *
+   */
+  private static final double addend = 0.618033988749895;
   private double nextHue;
 
   public ColorSequence() {

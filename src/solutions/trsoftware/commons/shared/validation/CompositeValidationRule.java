@@ -17,31 +17,52 @@
 
 package solutions.trsoftware.commons.shared.validation;
 
+import solutions.trsoftware.commons.shared.util.CollectionUtils;
+
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.List;
 
+import static solutions.trsoftware.commons.shared.validation.ValidationResult.success;
+
 /**
- * Date: Oct 24, 2007
- * Time: 12:09:43 PM
+ * Composes several {@link ValidationRule}s for the same field.
  *
+ * @since Oct 24, 2007
  * @author Alex
  */
-public class CompositeValidationRule extends ValidationRule {
+public class CompositeValidationRule<V> implements ValidationRule<V> {
 
-  List<ValidationRule> rules = new ArrayList<ValidationRule>();
+  private List<ValidationRule<V>> rules = new ArrayList<ValidationRule<V>>();
 
-  public CompositeValidationRule(List<ValidationRule> rules) {
+  public CompositeValidationRule(Collection<ValidationRule<V>> rules) {
+    if (CollectionUtils.isEmpty(rules))
+      throw new IllegalArgumentException("no rules given");
     this.rules.addAll(rules);
   }
 
-  public CompositeValidationRule(ValidationRule... rules) {
-    this.rules.addAll(Arrays.asList(rules));
+  public CompositeValidationRule(ValidationRule<V>... rules) {
+    this(Arrays.asList(rules));
   }
 
-  protected ValidationResult applyValidationLogic(String value) {
-    for (ValidationRule rule : rules) {
-      ValidationResult validationResult = rule.applyValidationLogic(value);
+  /**
+   * @return the first non-null name in {@link #rules}, or {@code null}
+   */
+  @Override
+  public String getFieldName() {
+    for (ValidationRule<V> rule : rules) {
+      String fieldName = rule.getFieldName();
+      if (fieldName != null)
+        return fieldName;
+    }
+    return null;
+  }
+
+  @Override
+  public ValidationResult validate(V value) {
+    for (ValidationRule<V> rule : rules) {
+      ValidationResult validationResult = rule.validate(value);
       if (!validationResult.isValid())
         return validationResult;
     }

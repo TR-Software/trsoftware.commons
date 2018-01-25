@@ -22,22 +22,22 @@ package solutions.trsoftware.commons.shared.util.iterators;
 */
 public class CharSequenceIterator extends IndexedIterator<Character> {
 
-  private final CharSequence str;
+  private final CharSequence charSequence;
 
-  public CharSequenceIterator(CharSequence str) {
-    super(str.length());
-    this.str = str;
+  public CharSequenceIterator(CharSequence charSequence) {
+    super(charSequence.length());
+    this.charSequence = charSequence;
   }
 
-  public CharSequenceIterator(CharSequence str, int start) {
-    super(start, str.length());
-    this.str = str;
+  public CharSequenceIterator(CharSequence charSequence, int start) {
+    super(start, charSequence.length());
+    this.charSequence = charSequence;
     get(start); // trigger IndexOutOfBoundsException if the starting index isn't valid
   }
 
   @Override
   protected Character get(int idx) {
-    return str.charAt(idx);
+    return charSequence.charAt(idx);
   }
 
 }

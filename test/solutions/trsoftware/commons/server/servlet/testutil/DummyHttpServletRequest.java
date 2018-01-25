@@ -102,6 +102,11 @@ public class DummyHttpServletRequest implements HttpServletRequest {
     return this;
   }
 
+  public DummyHttpServletRequest setRemoteAddr(String remoteAddr) {
+    this.remoteAddr = remoteAddr;
+    return this;
+  }
+
   public String getAuthType() {
     System.err.println("Method DummyHttpServletRequest.getAuthType has not been fully implemented yet.");
     return null;

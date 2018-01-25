@@ -244,4 +244,16 @@ public class CollectionUtils {
   }
 
 
+  /**
+   * @return the subset of elements satisfying the given predicate
+   */
+  public static <T> ArrayList<T> filter(Iterable<T> elements, Predicate<T> predicate) {
+    ArrayList<T> ret = new ArrayList<T>();
+    for (T elt : elements) {
+      if (predicate.apply(elt))
+        ret.add(elt);
+    }
+    return ret;
+  }
+
 }

@@ -31,17 +31,17 @@ import java.util.*;
  */
 public abstract class ServletUtils {
 
-  private static final ThreadLocal<RequestCopy> threadLocalRequest = new ThreadLocal<>();
+  private static final ThreadLocal<RequestCopy> threadLocalRequestCopy = new ThreadLocal<>();
 
   public static void setThreadLocalRequestCopy(RequestCopy request) {
     if (request == null)
-      threadLocalRequest.remove();
+      threadLocalRequestCopy.remove();
     else
-      threadLocalRequest.set(request);
+      threadLocalRequestCopy.set(request);
   }
 
   public static RequestCopy getThreadLocalRequestCopy() {
-    return threadLocalRequest.get();
+    return threadLocalRequestCopy.get();
   }
 
   /** Adds response headers that tell the browser not to cache this response */
@@ -111,12 +111,11 @@ public abstract class ServletUtils {
   }
 
   /**
-   * HttpServletRequest.getParameterMap returns a Map<String, String[]>,
-   * which is reduntant, because most of the time there is only one value for
-   * every parameter.
+   * {@link HttpServletRequest#getParameterMap} returns a {@code Map<String, String[]>},
+   * which is redundant, because most of the time there is only one value for every parameter.
+   *
    * @return The a key value mapping of the parameters to their values.
-   * @throws IllegalArgumentException if one of the String value arrays in the
-   * given map contains more than one element.
+   * @throws IllegalArgumentException if one of the value arrays in the given map contains more than one element.
    */
   public static SortedMap<String, String> requestParametersAsSortedStringMap(HttpServletRequest request) {
     return requestParametersAsSortedStringMap(request.getParameterMap());
@@ -202,13 +201,32 @@ public abstract class ServletUtils {
     return replaceQueryStringParameter(queryString, paramName, originalValue, paramName, newValue);
   }
 
+  /**
+   * @return an instance of {@link URL}, derived from invoking {@link HttpServletRequest#getRequestURL()} on the given
+   * {@code request}
+   */
   public static URL getRequestURL(HttpServletRequest request) {
     try {
       return new URL(request.getRequestURL().toString());
     }
     catch (MalformedURLException e) {
+      // this should never happen, because the request presumably contains a valid URL string
       throw new RuntimeException(e);
     }
+  }
+
+  /**
+   * @return an instance of {@link URL}, derived from invoking {@link HttpServletRequest#getRequestURL()} on
+   * {@link #threadLocalRequestCopy}
+   *
+   * @throws IllegalStateException if {@link #setThreadLocalRequestCopy(RequestCopy)} hasn't
+   * been invoked by the thread handling the current request.
+   */
+  public static URL getThreadLocalRequestURL() throws IllegalStateException {
+    RequestCopy threadLocalRequest = threadLocalRequestCopy.get();
+    if (threadLocalRequest == null)
+      throw new IllegalStateException("thread-local RequestCopy not available");
+    return getRequestURL(threadLocalRequest);
   }
 
   /** @return the requested URL minus the path (e.g. http://example.com/foo -> http://example.com) */

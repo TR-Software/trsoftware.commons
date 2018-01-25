@@ -326,5 +326,55 @@ public class ArrayUtils {
     System.arraycopy(srcArr, 0, destArr, 0, length);
     return destArr;
   }
-  
+
+  public static int[] grow(int[] original, int newLen) {
+    assert newLen > original.length;
+    return copyOf(original, newLen);
+  }
+
+  /**
+   * Provided for older versions of GWT where {@link Arrays#copyOf(int[], int)} isn't implemented.
+   * @see Arrays#copyOf(int[], int)
+   *
+   * @param original the array to be copied
+   * @param newLength the length of the copy to be returned
+   * @return a copy of the original array, truncated or padded with zeros
+   *     to obtain the specified length
+   * @throws NegativeArraySizeException if <tt>newLength</tt> is negative
+   * @throws NullPointerException if <tt>original</tt> is null
+   * @since 1.6
+   */
+  public static int[] copyOf(int[] original, int newLength) {
+      int[] copy = new int[newLength];
+      System.arraycopy(original, 0, copy, 0,
+                       Math.min(original.length, newLength));
+      return copy;
+  }
+
+  /**
+   * Provided for older versions of GWT where {@link Arrays#copyOfRange(int[], int, int)} isn't implemented.
+   * @see Arrays#copyOfRange(int[], int, int)
+   *
+   * @param original the array from which a range is to be copied
+   * @param from the initial index of the range to be copied, inclusive
+   * @param to the final index of the range to be copied, exclusive.
+   *     (This index may lie outside the array.)
+   * @return a new array containing the specified range from the original array,
+   *     truncated or padded with zeros to obtain the required length
+   * @throws ArrayIndexOutOfBoundsException if {@code from < 0}
+   *     or {@code from > original.length}
+   * @throws IllegalArgumentException if <tt>from &gt; to</tt>
+   * @throws NullPointerException if <tt>original</tt> is null
+   * @since 1.6
+   */
+  public static int[] copyOfRange(int[] original, int from, int to) {
+      int newLength = to - from;
+      if (newLength < 0)
+          throw new IllegalArgumentException(from + " > " + to);
+      int[] copy = new int[newLength];
+      System.arraycopy(original, from, copy, 0,
+                       Math.min(original.length - from, newLength));
+      return copy;
+  }
+
 }

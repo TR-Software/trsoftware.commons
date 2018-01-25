@@ -3,7 +3,8 @@ package java.text;
 import com.google.gwt.i18n.client.NumberFormat;
 
 /**
- * The purpose of this class is to allow Decimal format to exist in Shared code, even though it is never called.
+ * The purpose of this class is to allow client/shared code referring to {@link java.text.DecimalFormat} to compile
+ * with the GWT compiler.  The only usage of this is from {@link solutions.trsoftware.commons.shared.util.text.SharedNumberFormat}
  */
 public class DecimalFormat {
 

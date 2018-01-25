@@ -58,19 +58,16 @@ public abstract class RequestAuth {
   private final String publicKey;
   private final String secretKey;
 
-  /**
-   * The name to the messeage authentication code (MAC) algorithm to be used
-   * (e.g. "HmacSHA1")
-   */
-  private final String macAlogorithm;
+  /** The name of the message authentication code (MAC) algorithm to be used (e.g. "HmacSHA1") */
+  private final String macAlgorithm;
 
   public static final String PARAM_NAME_ACCESS_KEY = "access_key";
   public static final String PARAM_NAME_SIGNATURE = "sig";
 
-  public RequestAuth(String macAlogorithm, String publicKey, String secretKey) {
+  public RequestAuth(String macAlgorithm, String publicKey, String secretKey) {
     this.publicKey = publicKey;
     this.secretKey = secretKey;
-    this.macAlogorithm = macAlogorithm;
+    this.macAlgorithm = macAlgorithm;
   }
 
   public void addSigningParams(String method, String url, SortedMap<String, String> paramMap) {
@@ -122,10 +119,10 @@ public abstract class RequestAuth {
    * @return a Base64-encoded representation of the signature
    */
   private String sign(String baseString) {
-    SecretKey key = new SecretKeySpec(ServerStringUtils.stringToBytesUtf8(secretKey), macAlogorithm);
+    SecretKey key = new SecretKeySpec(ServerStringUtils.stringToBytesUtf8(secretKey), macAlgorithm);
     Mac mac = null;
     try {
-      mac = Mac.getInstance(macAlogorithm);
+      mac = Mac.getInstance(macAlgorithm);
       mac.init(key);
     }
     catch (NoSuchAlgorithmException e) {

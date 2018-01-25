@@ -53,6 +53,7 @@ public class ShakePopupAnimation extends SmartAnimation {
 
   @Override
   protected void onUpdate(double progress) {
+    super.onUpdate(progress);
     // animation starts and ends at 0 oscillating twice in range +/- 3px (sin(2pi) = 0)
     int newLeft = (int)(startLeft + 3 * (float)Math.sin(4 * Math.PI * progress));
     popup.setPopupPosition(newLeft, startTop);

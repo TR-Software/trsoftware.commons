@@ -280,6 +280,14 @@ public class Widgets {
   public static FlowPanel flowPanel(WidgetStyle style, Widget... widgets) {
     return initPanel(new FlowPanel(), style, widgets);
   }
+
+  public static InlineFlowPanel inlineFlowPanel(Widget... widgets) {
+    return initPanel(new InlineFlowPanel(), null, widgets);
+  }
+
+  public static InlineFlowPanel inlineFlowPanel(WidgetStyle style, Widget... widgets) {
+    return initPanel(new InlineFlowPanel(), style, widgets);
+  }
   
   public static DeckPanel deckPanel(Widget... widgets) {
     return deckPanel(null, widgets);
@@ -335,6 +343,14 @@ public class Widgets {
   }
 
   public static TabPanel tabPanel(Widget[] widgets, String[] captions) {
+    TabPanel tp = new TabPanel();
+    for (int i = 0; i < widgets.length; i++) {
+      tp.add(widgets[i], captions[i]);
+    }
+    return tp;
+  }
+
+  public static TabPanel tabPanel(IsWidget[] widgets, String[] captions) {
     TabPanel tp = new TabPanel();
     for (int i = 0; i < widgets.length; i++) {
       tp.add(widgets[i], captions[i]);

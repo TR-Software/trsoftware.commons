@@ -17,25 +17,44 @@
 
 package solutions.trsoftware.commons.client.widgets;
 
+import com.google.gwt.dom.client.Style;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.Label;
-import solutions.trsoftware.commons.client.styles.CellPanelStyle;
+import com.google.gwt.user.client.ui.LabelBase;
+import solutions.trsoftware.commons.client.bundle.CommonsClientBundleFactory;
 
 /**
- * Date: Dec 18, 2007
- * Time: 9:37:13 PM
+ * A lighter, experimental version of {@link HeavyLoadingMessage}, that does not use tables.  Instead the spinner image is
+ * configured via the CSS background property.
+ *
+ * TODO: try to replace all the usages HeavyLoadingMessage with this widget (however, that will be challenging, since there will certainly be layout problems in some cases)
  *
  * @author Alex
  */
 public class LoadingMessage extends Composite {
-  
-  public LoadingMessage(String message, boolean startVisible) {
-    initWidget(Widgets.horizontalPanel(new CellPanelStyle().setSpacing(5),
-        new LoadingImage(),
-        new Label(message)));
-    setStyleName("loading-message");
+
+  public enum SpinnerPosition { LEFT, RIGHT }
+
+  public LoadingMessage(LabelBase label, boolean startVisible, SpinnerPosition spinnerPosition) {
+    initWidget(label);
+    setStyleName(CommonsClientBundleFactory.INSTANCE.getCommonsCss().loadingMessage());
+    Style style = getStyleElement().getStyle();
+    if (spinnerPosition == SpinnerPosition.RIGHT) {
+      style.setPaddingRight(20, Style.Unit.PX);  /* 16px for spinner image width, and another 4px for spacing */
+      style.setProperty("backgroundPosition", "right");
+    }
+    else
+      style.setPaddingLeft(20, Style.Unit.PX);  /* 16px for spinner image width, and another 4px for spacing */
     if (!startVisible)
       setVisible(false);
+  }
+
+  public LoadingMessage(String message, boolean startVisible, SpinnerPosition spinnerPosition) {
+    this(new Label(message), startVisible, spinnerPosition);
+  }
+
+  public LoadingMessage(String message, boolean startVisible) {
+    this(message, startVisible, SpinnerPosition.LEFT);
   }
 
   public LoadingMessage(boolean startVisible) {
@@ -48,6 +67,10 @@ public class LoadingMessage extends Composite {
 
   public LoadingMessage(String message) {
     this(message, true);
+  }
+
+  public LoadingMessage(String message, SpinnerPosition spinnerPosition) {
+    this(message, true, spinnerPosition);
   }
 
 }

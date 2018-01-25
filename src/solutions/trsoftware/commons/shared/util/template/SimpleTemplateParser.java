@@ -91,7 +91,7 @@ public class SimpleTemplateParser implements TemplateParser {
     return DEFAULT_SYNTAX.parseTemplate(str);
   }
 
-  static enum State {
+  enum State {
     IN_TEXT,
     IN_VARIABLE,
     IN_COMMENT

@@ -17,8 +17,10 @@
 
 package solutions.trsoftware.commons.shared.util;
 
+import com.google.gwt.core.shared.GWT;
 import solutions.trsoftware.commons.shared.util.random.RandomCharGenerator;
 import solutions.trsoftware.commons.shared.util.text.Alphabet;
+import solutions.trsoftware.commons.shared.util.text.CharRange;
 
 import java.util.*;
 
@@ -41,19 +43,25 @@ public class RandomUtils {
   /**
    * @return a random string over all printable ASCII chars
    * @see #randString(int, String)
-   * @see Alphabet#getAllPrintableAsciiChars()
+   * @see StringUtils#ASCII_PRINTABLE_CHARS
    */
   public static String randString(int length) {
-    return randString(length, Alphabet.getAllPrintableAsciiChars());
+    return randString(length, StringUtils.ASCII_PRINTABLE_CHARS);
   }
 
   /**
-   * @return a random string over the given alphabet
+   * Creates a string of the given length, with chars chosen at random from the given alphabet
+   * @param length the result will contain this number of chars
+   * @param alphabet the chars to choose from; some presets are defined in {@link Alphabet} and {@link StringUtils},
+   * and custom alphabets can be easily constructed using {@link CharRange}
+   * @return a random string of the given length over the given alphabet
    * @see RandomCharGenerator
+   * @see StringUtils#ASCII_LETTERS
+   * @see StringUtils#ASCII_PRINTABLE_CHARS
+   * @see Alphabet
+   * @see CharRange
    */
   public static String randString(int length, String alphabet) {
-    // can't use org.apache.commons.lang.RandomStringUtils here because this class
-    // will be used client-side in GWT unit tests
     StringBuilder buf = new StringBuilder(length);
     for (int i = 0; i < length; i++) {
       buf.append(alphabet.charAt(rnd.nextInt(alphabet.length())));
@@ -62,19 +70,30 @@ public class RandomUtils {
   }
 
   /**
-   * Returns a random <code>int</code> between lowerBound (inclusive) and
-   * <code>upperBound</code> (exclusive) with roughly equal probability of
-   * returning any particular <code>int</code> in this range.
-   *
-   * This is not a standard method provided by a typical RNG, we just provide it
-   * for convenience here.
+   * Creates a string containing {@code n} &isin; {@code [minLen, maxLen]} chars chosen at random from the given alphabet.
+   * @param alphabet the chars to choose from; some useful values are defined in {@link Alphabet}
+   * and {@link StringUtils#ASCII_LETTERS}
+   * @param minLen the result should contain at least this number of chars
+   * @param maxLen the result should contain at most this number of chars (inclusive)
+   * @return a random string of {@code n} &isin; {@code [minLen, maxLen]} chars over the given alphabet
+   * @see #randString(int, String)
+   */
+  public static String randString(String alphabet, int minLen, int maxLen) {
+    return randString(nextIntInRange(minLen, maxLen+1), alphabet);
+  }
+
+  /**
+   * Generates a random integer between 2 endpoints.
    *
    * @param lowerBound inclusive
    * @param upperBound exclusive
+   * @return a random <code>int</code> between lowerBound (inclusive) and
+   * <code>upperBound</code> (exclusive) with roughly equal probability of
+   * returning any particular <code>int</code> in this range.
    */
   public static int nextIntInRange(int lowerBound, int upperBound) {
     if (lowerBound >= upperBound)
-      throw new IllegalArgumentException("lowerBound < upperBound must be true");
+      throw new IllegalArgumentException("lowerBound >= upperBound");
     return rnd.nextInt(upperBound - lowerBound) + lowerBound;
   }
 
@@ -88,6 +107,31 @@ public class RandomUtils {
   public static int nextIntInRange(Random rnd, int lowerBound, int upperBound) {
     Assert.assertTrue(lowerBound < upperBound);
     return rnd.nextInt(upperBound - lowerBound) + lowerBound;
+  }
+
+  /**
+   * @return the next pseudo-random number in the given generator's sequence,
+   * drawn from a Gaussian distribution with the given {@code mean} and {@code stdev}.
+   */
+  public static double nextGaussian(Random rnd, double mean, double stdev) {
+    return rnd.nextGaussian() * stdev + mean;
+  }
+
+  /**
+   * @return the next pseudo-random number in the sequence,
+   * drawn from a Gaussian distribution with the given {@code mean} and {@code stdev}.
+   * @see #nextGaussian(Random, double, double)
+   */
+  public static double nextGaussian(double mean, double stdev) {
+    return rnd.nextGaussian() * stdev + mean;
+  }
+
+  /**
+   * @return the next pseudo-random integer in the sequence,
+   * drawn from a Gaussian distribution with the given {@code mean} and {@code stdev}.
+   */
+  public static int nextGaussian(int mean, int stdev) {
+    return (int)(rnd.nextGaussian() * stdev + mean);
   }
 
   /**
@@ -119,7 +163,7 @@ public class RandomUtils {
 
   public static <T> List<T> randomSampleWithoutReplacement(Collection<T> collection, int sampleSize) {
     if (sampleSize > collection.size())
-      throw new IllegalArgumentException("Can't have a sample without replacement that's larger than the original list.");
+      throw new IllegalArgumentException("sampleSize > collection.size()");
 
     ArrayList<T> copy = new ArrayList<T>(collection);
     shuffle(copy);
@@ -141,5 +185,21 @@ public class RandomUtils {
 
   public static <T> T randomElement(T[] arr) {
     return arr[rnd.nextInt(arr.length)];
+  }
+
+  public static <T> T randomElement(List<T> list) {
+    if (!(list instanceof RandomAccess) && !GWT.isClient())
+      System.err.println("WARNING: RandomUtils.randomElement received a non-random-access list (" + list.getClass().getName() + ")");
+    return list.get(rnd.nextInt(list.size()));
+  }
+
+  /**
+   * @param n the number of bytes to generate
+   * @return {@code n} random bytes
+   */
+  public static byte[] randBytes(int n) {
+    byte[] bytes = new byte[n];
+    rnd.nextBytes(bytes);
+    return bytes;
   }
 }

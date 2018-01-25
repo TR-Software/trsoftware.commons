@@ -20,7 +20,7 @@ package solutions.trsoftware.commons.shared.util.stats;
 import java.io.Serializable;
 
 /**
- * Base class for MinDouble and MaxDouble, which keep track of the min/max of a sequence of double values.
+ * Base class for {@link MinDouble} and {@link MaxDouble}, which keep track of the min/max of a sequence of double values.
  *
  * @author Alex
  */

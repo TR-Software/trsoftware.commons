@@ -51,6 +51,9 @@ public class RegExTemplateParserTest extends TestCase {
     // now try parsing a template that has neither comments nor variables
     assertEquals("Bonobo and Gorilla are types of Great Ape",
         parse("Bonobo and Gorilla are types of Great Ape").render(substitutions));
+    // now try parsing a template that has only a comment with no other parts
+    assertEquals("",
+        parse("/*Bonobo and Gorilla are types of Great Ape*/").render(substitutions));
 
     // now test with null variable and/or comment patterns
     assertEquals("Bonobo and Gorilla /* this is a comment */are types of Great Ape", new RegExTemplateParser(variablePattern, null)

@@ -80,7 +80,7 @@ public class IpAddressBucketingTest extends TestCase {
         // calculate % of users in the USA to make sure that some buckets aren't seeing more expensive ads than others
         double nUSA = 0;
         for (String ip : bucket) {
-          if ("us".equals(IpToCountryMapper.getInstance().ipToCountry(new IpAddress(ip)))) {
+          if ("us".equals(IpToCountryMapper.get().ipToCountry(new IpAddress(ip)))) {
             nUSA++;
           }
         }

@@ -26,7 +26,7 @@ import solutions.trsoftware.commons.client.CommonsGwtTestCase;
  */
 public abstract class ValidationRuleGwtTestCase extends CommonsGwtTestCase {
 
-  protected void assertValidity(ValidationRule validator, String testString, boolean valid) throws Exception {
+  protected void assertValidity(BaseValidationRule validator, String testString, boolean valid) throws Exception {
     String msg = "Asserting that " + validator.getFieldName() + " = " + testString + " is " + (valid ? "accepted" : "rejected");
     System.out.println(msg);
 

@@ -17,18 +17,17 @@
 
 package solutions.trsoftware.commons.client.util;
 
+import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.user.client.Timer;
 
 /**
- * A timer that automatically stops after some condition is met.  Similar
- * to an IncrementalCommand, but takes a user-specified time interval between
- * successive iterations.
+ * A timer that automatically stops after some condition is met.  Similar to a {@link Scheduler.RepeatingCommand},
+ * but takes a user-specified time interval between successive iterations. Also stops when the maximum number of retries
+ * has been exceeded.
  *
  * @author Alex
  */
 public abstract class RetryableCommand {
-
-  // TODO: merge this class with Waiter (use one to implement the other)
 
   private int attemptsRemaining;
   private Timer timer;

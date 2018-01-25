@@ -383,6 +383,26 @@ public class MathUtilsJavaTest extends TestCase {
     }
   }
 
+  public void testRestrict() throws Exception {
+    // double version
+    assertEquals(5d, restrict(5d, 0d, 10d));
+    assertEquals(0d, restrict(-.01d, 0d, 10d));
+    assertEquals(10d, restrict(10.01d, 0d, 10d));
+    // float version
+    assertEquals(5f, restrict(5f, 0f, 10f));
+    assertEquals(0f, restrict(-.01f, 0f, 10f));
+    assertEquals(10f, restrict(10.01f, 0f, 10f));
+    // int version
+    assertEquals(5, restrict(5, -10, 10));
+    assertEquals(-10, restrict(-11, -10, 10));
+    assertEquals(10, restrict(11, -10, 10));
+    // long version
+    assertEquals(5L, restrict(5L, -10L, 10L));
+    assertEquals(-10L, restrict(-11L, -10L, 10L));
+    assertEquals(10L, restrict(11L, -10L, 10L));
+  }
+
+
   public void testRound() throws Exception {
     for (int i = 0; i < 100; i++) {
       for (int j = 0; j < 100; j++) {

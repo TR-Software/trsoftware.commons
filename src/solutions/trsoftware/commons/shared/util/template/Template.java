@@ -71,8 +71,8 @@ public final class Template extends AbstractRenderer<Map<String, String>> {
    * Renders the template by applying each value contained in an odd-numbered elements of the arg array to a variable
    * whose name is given by the element preceding it.
    */
-  public String render(String... keyValuePairs) {
-    return render(MapUtils.stringMap(keyValuePairs));
+  public String render(String... nameValuePairs) {
+    return render(MapUtils.stringMap(nameValuePairs));
   }
 
   /**
@@ -91,6 +91,7 @@ public final class Template extends AbstractRenderer<Map<String, String>> {
   /**
    * Renders the template by applying each given value to the next available variable, ignoring the names of the variables
    * defined in the template.
+   * @deprecated should use this method with caution when the template contains multiple instances of a variable with the same name (the second arg might overwrite the first)
    */
   public String renderPositional(Object... values) {
     // TODO: throw an exception if the number of args doesn't match the number of variables?
@@ -121,15 +122,4 @@ public final class Template extends AbstractRenderer<Map<String, String>> {
     return SimpleTemplateParser.parseDefault(template);
   }
 
-  /**
-   * Mimics the behavior of {@code String.format() or PrintStream.printf}, which are not included by GWT's JRE emulation.
-   * <br><b>Example:</b>
-   * <pre>
-   *   printf("%s is %d", "foo", 5) // returns "foo is 5"
-   * </pre>
-   * The names of the template variables don't matter, so for example, {@code "%s %d"} is equivalent to {@code "%foo %bar"}.
-   */
-  public static String printf(String template, Object... values) {
-    return RegExTemplateParser.parsePrintf(template).renderPositional(values);
-  }
 }

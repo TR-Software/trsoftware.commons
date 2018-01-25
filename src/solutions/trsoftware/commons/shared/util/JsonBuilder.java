@@ -281,7 +281,7 @@ public class JsonBuilder implements Jsonizable {
 
   private boolean isNumberFloatingPoint(Number n) {
     if (n instanceof MutableNumber)
-      n = ((MutableNumber)n).toPrimitive();
+      n = ((MutableNumber)n).numberValue();
     return n instanceof Float || n instanceof Double;
   }
 

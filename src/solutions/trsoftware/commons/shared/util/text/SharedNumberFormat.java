@@ -49,28 +49,28 @@ public class SharedNumberFormat {
   }
 
   /**
-   * Creates a {@link DecimalFormat} from a pattern string obtained by invoking {@link #buildPattern(int, int, int)}
+   * Creates a {@link DecimalFormat} from a pattern string obtained by invoking {@link #buildPattern(int, int, int, boolean)}
    * with the given parameters.
-   * @see #buildPattern(int, int, int)
+   * @see #buildPattern(int, int, int, boolean)
    */
-  public SharedNumberFormat(int minIntegerDigits, int minFractionDigits, int maxFractionDigits) {
-    this(buildPattern(minIntegerDigits, minFractionDigits, maxFractionDigits));
+  public SharedNumberFormat(int minIntegerDigits, int minFractionDigits, int maxFractionDigits, boolean percent) {
+    this(buildPattern(minIntegerDigits, minFractionDigits, maxFractionDigits, percent));
   }
 
   /**
    * Creates a {@link DecimalFormat} from a pattern string obtained by invoking
-   * {@link #buildPattern(int, int, int) <code>buildPattern(0, 0, maxFractionDigits)</code>}
-   * @see #buildPattern(int, int, int)
+   * {@link #buildPattern(int, int, int, boolean) <code>buildPattern(0, 0, maxFractionDigits, false)</code>}
+   * @see #buildPattern(int, int, int, boolean)
    */
   public SharedNumberFormat(int maxFractionDigits) {
-    this(buildPattern(0, 0, maxFractionDigits));
+    this(buildPattern(0, 0, maxFractionDigits, false));
   }
 
   /**
    * Creates a format pattern string suitable for the {@link DecimalFormat} constructor based on the given parameters.
    * @return a string suitable for {@link DecimalFormat#DecimalFormat(String)}
    */
-  public static String buildPattern(int minIntegerDigits, int minFractionDigits, int maxFractionDigits) {
+  public static String buildPattern(int minIntegerDigits, int minFractionDigits, int maxFractionDigits, boolean percent) {
     StringBuilder patternBuffer = new StringBuilder();
     if (minIntegerDigits <= 0)
       patternBuffer.append('#');
@@ -83,6 +83,8 @@ public class SharedNumberFormat {
       patternBuffer.append(requiredDigitsPattern(minFractionDigits));
     if (maxFractionDigits > 0)
       patternBuffer.append(optionalDigitsPattern(maxFractionDigits - minFractionDigits));
+    if (percent)
+      patternBuffer.append('%');
     return patternBuffer.toString();
   }
 

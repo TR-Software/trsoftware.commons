@@ -28,9 +28,9 @@ import static java.lang.Math.*;
  * @author Alex
  */
 public class MathUtils {
+
   /**
-   * Converts a 128-bit integer represented by the two given long components
-   * to a byte array.
+   * Converts a 128-bit integer represented by the two given {@code long} components to a {@code byte} array.
    */
   public static byte[] int128ToByteArray(long msb, long lsb) {
     byte[] bytes = new byte[16];
@@ -43,7 +43,7 @@ public class MathUtils {
 
   /**
    * Maps the given unsigned 32-bit number into the range of a signed int.
-   * 0 maps to Integer.MIN_VALUE and 0xFFFFFFFF maps to Integer.MAX_VALUE
+   * {@code 0} maps to {@link Integer#MIN_VALUE} and {@code 0xFFFFFFFF} maps to {@link Integer#MAX_VALUE}
    * This ensures that the values will still be comparable by their natural ordering.
    */
   public static int packUnsignedInt(long unsigned) {
@@ -199,6 +199,14 @@ public class MathUtils {
   }
 
   /**
+   * Casts {@code x} to {@code float} and invokes {@link Math#round(float)} on it. This is preferable to using
+   * {@link Math#round(double)} when we want to avoid {@code long} emulation in compiled GWT code.
+   */
+  public static int round(double x) {
+    return Math.round((float)x);
+  }
+
+  /**
    * The equivalent of Python's {@code %} operator, which always returns a number with the same sign as the divisor {@code b}.
    * This is useful for things like wrapping array indices.
    *
@@ -210,4 +218,37 @@ public class MathUtils {
   public static int floorMod(int a, int b) {
     return (a % b + b) % b;
   }
+
+  /**
+   * @return the number closest to {@code value} in the range {@code [a, b]}
+   * @see NumberRange#coerce(Number)
+   */
+  public static double restrict(double value, double a, double b) {
+    return min(max(value, a), b);
+  }
+
+  /**
+   * @return the number closest to {@code value} in the range {@code [a, b]}
+   * @see NumberRange#coerce(Number)
+   */
+  public static float restrict(float value, float a, float b) {
+    return min(max(value, a), b);
+  }
+
+  /**
+   * @return the number closest to {@code value} in the range {@code [a, b]}
+   * @see NumberRange#coerce(Number)
+   */
+  public static int restrict(int value, int a, int b) {
+    return min(max(value, a), b);
+  }
+
+  /**
+   * @return the number closest to {@code value} in the range {@code [a, b]}
+   * @see NumberRange#coerce(Number)
+   */
+  public static long restrict(long value, long a, long b) {
+    return min(max(value, a), b);
+  }
+
 }

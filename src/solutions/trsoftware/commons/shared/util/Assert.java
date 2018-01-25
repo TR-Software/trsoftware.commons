@@ -85,6 +85,13 @@ public class Assert {
     return str.toString();
   }
 
-
+  /**
+   * @param size a size for an array
+   * @throws NegativeArraySizeException iff {@code size < 0}
+   */
+  public static void checkArraySize(int size) {
+    if (size < 0)
+      throw new NegativeArraySizeException("Negative array size: " + size);
+  }
 
 }

@@ -19,13 +19,15 @@ package solutions.trsoftware.commons.server.testutil;
 
 import java.util.concurrent.TimeUnit;
 
+import static solutions.trsoftware.commons.shared.util.StringUtils.firstNotBlank;
+
 /**
  * Compares the performance of a number of iterations of each Runnable task specified.
  */
 public abstract class PerformanceComparison {
 
   /**
-   * @return the multiplier of running time of task 1 compared to task 2
+   * @return the multiplier of running time of {@code task1} compared to {@code task2}
    * (i.e. how many times is task1 faster than task2.
    */
   public static double compare(Runnable task1, String task1Name, Runnable task2, String task2Name, int iterations) {
@@ -60,6 +62,21 @@ public abstract class PerformanceComparison {
     }
     return (double)task2Ns / task1Ns;
   }
+
+  /**
+   * @return the multiplier of running time of {@code task1} compared to {@code task2}
+   * (i.e. how many times is task1 faster than task2.
+   */
+  public static double compare(Runnable task1, Runnable task2, int iterations) {
+    return compare(task1, getTaskName(task1, "task1"),
+        task2, getTaskName(task2, "task2"),
+        iterations);
+  }
+
+  private static String getTaskName(Runnable task, String defaultName) {
+    return firstNotBlank(task.getClass().getSimpleName(), defaultName);
+  }
+
 //
 //  /**
 //   * @return the multiplier of running time of task 1 compared to task 2

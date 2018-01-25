@@ -21,7 +21,7 @@ import solutions.trsoftware.commons.client.Messages;
 
 /**
  * Defines a stub logging implementation, which by default
- * supresses all client-side logging information, except errors, but can be replaced
+ * suppresses all client-side logging information, except errors, but can be replaced
  * with a real implementation using deferred binding.
  *
  * @author Alex

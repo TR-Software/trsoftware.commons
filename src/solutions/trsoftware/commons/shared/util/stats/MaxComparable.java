@@ -17,20 +17,22 @@
 
 package solutions.trsoftware.commons.shared.util.stats;
 
-import java.io.Serializable;
-
 /**
  * Keeps track of the maximum in a sequence of Comparable objects.
  *
  * @author Alex
  */
-public class MaxComparable<T extends Comparable<T>> extends MinMaxComparableBase<T> implements Serializable {
-  public MaxComparable() {
-    super(1);
-  }
+public class MaxComparable<T extends Comparable<T>> extends AbstractMinMaxComparable<T> {
+
+  public MaxComparable() {}
 
   public MaxComparable(Iterable<T> candidates) {
-    super(1, candidates);
+    super(candidates);
+  }
+
+  @Override
+  protected int getMultiplier() {
+    return 1;
   }
 
   public boolean equals(Object o) {

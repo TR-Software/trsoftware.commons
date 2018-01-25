@@ -23,6 +23,7 @@ import com.google.gwt.user.client.Element;
 import com.google.gwt.user.client.EventListener;
 import com.google.gwt.user.client.ui.Widget;
 import solutions.trsoftware.commons.client.jso.JsDocument;
+import solutions.trsoftware.commons.shared.util.reflect.ClassNameParser;
 
 /**
  * Dec 27, 2009
@@ -30,11 +31,20 @@ import solutions.trsoftware.commons.client.jso.JsDocument;
  * @author Alex
  */
 public class GwtUtils {
-  /* A command that does nothing */
-  public static final Command EMPTY_COMMAND = new Command() {
-    public void execute() {
-    }
-  };
+
+  /** Caches the return value of {@link #emptyCommand()} */
+  private static Command emptyCommand;
+
+  /**
+   * @return A command that does nothing.
+   */
+  public static Command emptyCommand() {
+    if (emptyCommand == null)
+      emptyCommand = new Command() {
+        public void execute() {}
+      };
+    return emptyCommand;
+  }
 
   /**
    * Imitates the functionality of {@link Class#isAssignableFrom(Class)}, which isn't emulated by GWT.
@@ -53,24 +63,53 @@ public class GwtUtils {
   }
 
   /**
-   * Imitates the functionality of {@link Class#getSimpleName()} which isn't emulated by older versions of GWT
-   * (at least not in 2.5.0, which is the version we need to enable stack traces using the gwt-stack-trace-kit patch)
-   * @return The name of the given class without the preceding package path (if any).
+   * Imitates the functionality of {@link Class#getSimpleName()} (which isn't emulated by older versions of GWT)
+   * with the following differences:
+   * <ul>
+   *   <li>
+   *   If the class is anonymous, we return a string containing the "complex" name (see {@link ClassNameParser#getComplexName()})
+   *   followed by {@code "::"} and the simple name of the superclass (whereas {@link Class#getSimpleName()} would return
+   *   an empty string).  If the anonymous class simply implements an interface (like {@link Runnable}) instead of a
+   *   base class, the result would be something like {@code "Foo$1::Object"}
+   *   (since GWT doesn't provide a way to get the implemented interfaces of a class).
+   *   </li>
+   * </ul>
+   * @see Class#getSimpleName()
+   * @see ClassNameParser
    */
   public static String getSimpleName(Class c) {
-    // TODO: cont here: unit test this impl, by comparing the results against the native Java impl (try various combinations of inner/anonymous classes)
-    // TODO: then extract it to gwt-stack-trace-kit\patch\src\com\google\gwt\emul\java\lang\Class.java, and see if that works
-    // running in Javascript - extract the name manually
-    int lastSeparator;
-    String name = c.getName();
-    {
-      int lastDot = name.lastIndexOf('.');
-      int lastDollar = name.lastIndexOf('$');
-      lastSeparator = Math.max(lastDollar, lastDot);
+    ClassNameParser parser = new ClassNameParser(c);
+    if (!parser.isAnonymous())
+      return parser.getSimpleName();
+    else {
+      /*
+       Class.getSimpleName returns an empty string for anonymous classes, but we want to provide some debugging info,
+       so we return the "complex name" as well as the simple name of the superclass.  This should work fine,
+       because there isn't any way for a superclass to be anonymous.
+        */
+      Class sup = c.getSuperclass();
+      if (sup == Object.class)
+        return parser.getComplexName();
+      else {
+        String supSimpleName = getSimpleName(sup); // NOTE: this will not cause infinite recursion, since a superclass cannot be anonymous
+        return parser.getComplexName() + "::" + supSimpleName;
+      }
     }
-    if (lastSeparator < 0)
-      return name;
-    return name.substring(lastSeparator+1);
+  }
+
+  /**
+   * Same as the default implementation of {@link Object#toString()}, but prints only the simple name of the object's
+   * class (obtained via {@link #getSimpleName(Class)}).
+   *
+   * TODO: unit test this
+   *
+   * @param obj the object to print
+   * @return {@code "<SimpleName>@<hashCode>"} or {@code "null"} if the argument is {@code null}
+   */
+  public static String toString(Object obj) {
+    if (obj == null)
+      return "null";
+    return getSimpleName(obj.getClass()) + "@" + Integer.toHexString(obj.hashCode());
   }
 
   public static Widget elementToWidget(Element element) {

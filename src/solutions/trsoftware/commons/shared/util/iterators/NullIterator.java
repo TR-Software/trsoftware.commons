@@ -17,6 +17,8 @@
 
 package solutions.trsoftware.commons.shared.util.iterators;
 
+import com.google.common.collect.UnmodifiableIterator;
+
 import java.util.NoSuchElementException;
 
 /**
@@ -24,7 +26,7 @@ import java.util.NoSuchElementException;
  *
  * @author Alex, 4/17/2015
  */
-public class NullIterator<T> extends NonMutatingIterator<T> {
+public class NullIterator<T> extends UnmodifiableIterator<T> {
 
   private static NullIterator instance;
 

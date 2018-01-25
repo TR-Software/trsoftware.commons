@@ -17,6 +17,8 @@
 
 package solutions.trsoftware.commons.shared.util.iterators;
 
+import com.google.common.collect.UnmodifiableIterator;
+
 import java.util.NoSuchElementException;
 
 /**
@@ -24,13 +26,15 @@ import java.util.NoSuchElementException;
  *
  * @author Alex, 4/17/2015
  */
-public class SingletonIterator<T> extends NonMutatingIterator<T> {
+public class SingletonIterator<T> extends UnmodifiableIterator<T> {
 
   private T next;
 
   public SingletonIterator(T elt) {
     next = elt;
   }
+
+  // TODO: the current implementation doesn't support null values; should we support them?
 
   @Override
   public boolean hasNext() {

@@ -43,7 +43,7 @@ public class TimeUtils {
    * from the given millisecond time difference value.
    */
   public static String generateRelativeTimeElapsedString(double millis) {
-    return generateRelativeTimeElapsedString(millis, "second", "seconds", "minute", "minutes", "hour", "hours", "day", "days", "month", "months", "year", "years");
+    return timeIntervalToString(millis, "second", "seconds", "minute", "minutes", "hour", "hours", "day", "days", "month", "months", "year", "years") + " ago";
   }
 
   /**
@@ -55,8 +55,7 @@ public class TimeUtils {
   }
 
   /**
-   * Generates a human-readable relative time value like "15 minutes ago"
-   * from the given millisecond time difference value.
+   * Generates a human-readable relative time interval value like "15 minutes" from the given milliseconds value.
    */
   public static String timeIntervalToString(double millis) {
     return timeIntervalToString(millis, "second", "seconds", "minute", "minutes", "hour", "hours", "day", "days", "month", "months", "year", "years");
@@ -181,4 +180,18 @@ public class TimeUtils {
     return millisToSeconds(date.getTime());
   }
 
+  /**
+   * @return {@code true} iff the difference between {@code startTime} and {@code currentTime} is greater than {@code duration}
+   */
+  public static boolean isElapsed(double duration, double startTime, double currentTime) {
+    return (currentTime - startTime) > duration;
+  }
+
+  /**
+   * WARNING: it's preferable to use {@link #isElapsed(double, double, double)} in client-side GWT code to avoid the performance penalty of GWT's {@code long} emulation.
+   * @return {@code true} iff the difference between {@code startTime} and {@code currentTime} is greater than {@code duration}
+   */
+  public static boolean isElapsed(long duration, long startTime, long currentTime) {
+    return (currentTime - startTime) > duration;
+  }
 }

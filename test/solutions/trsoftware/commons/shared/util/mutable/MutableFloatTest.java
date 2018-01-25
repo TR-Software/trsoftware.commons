@@ -101,8 +101,8 @@ public class MutableFloatTest extends TestCase {
   }
 
   public void testToPrimitive() throws Exception {
-    assertNotNull(one.toPrimitive());
-    assertTrue(one.toPrimitive() instanceof Float);
+    assertNotNull(one.numberValue());
+    assertTrue(one.numberValue() instanceof Float);
   }
 
   public void testEquals() throws Exception {

@@ -26,5 +26,5 @@ public interface Updatable<T> {
   /**
    * Updates itself with the given value.
    */
-  public void update(T x);
+  void update(T x);
 }

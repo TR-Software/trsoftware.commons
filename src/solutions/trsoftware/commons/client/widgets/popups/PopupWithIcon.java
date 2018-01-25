@@ -19,6 +19,7 @@ package solutions.trsoftware.commons.client.widgets.popups;
 
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.user.client.ui.*;
+import solutions.trsoftware.commons.client.bundle.CommonsClientBundleFactory;
 import solutions.trsoftware.commons.client.widgets.Widgets;
 
 /**
@@ -31,10 +32,16 @@ public class PopupWithIcon extends DialogBox {
   private FlowPanel pnlMain;
   private SimplePanel bodyWidgetHolder = new SimplePanel();
   {
-    bodyWidgetHolder.setStyleName("bodyWidgetHolder");
+    bodyWidgetHolder.setStyleName(CommonsClientBundleFactory.INSTANCE.getCommonsCss().bodyWidgetHolder());
   }
 
   private PopupCloserLink popupCloserLink;
+
+  /**
+   * Passing this value to constructor shows the SVG close button in the top right corner
+   * instead of a link in the bottom right corner
+   * @see PopupCloserButton
+   */
   public static final String CLOSE_LINK_TEXT_DEFAULT = "close";
   public static final String CLOSE_LINK_TEXT_CANCEL = "Cancel";
   public static final String CLOSE_LINK_TEXT_OK = "OK";
@@ -49,12 +56,6 @@ public class PopupWithIcon extends DialogBox {
 
   public PopupWithIcon(boolean autoHide, AbstractImagePrototype icon, String headingText, String styleName, Widget bodyWidget) {
     this(autoHide, icon, headingText, styleName, bodyWidget, CLOSE_LINK_TEXT_DEFAULT);
-  }
-
-  private static class CaptionWithIcon extends CompositeCaption {
-    private CaptionWithIcon(AbstractImagePrototype icon, String text) {
-      initWidget(Widgets.flowPanel(icon.createImage(), Widgets.inlineLabel(text, "captionText")));
-    }
   }
 
   /** Creates a popup with the given body widget and a link that closes the popup */

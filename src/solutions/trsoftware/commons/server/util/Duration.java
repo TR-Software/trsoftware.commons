@@ -23,8 +23,8 @@ import java.util.Date;
 import java.util.concurrent.TimeUnit;
 
 /**
- * Similar to GWT's Duration class (a utility class for measuring elapsed time).
- * Implemented in simple Java code so it can be used on both client and server.
+ * Similar to GWT's {@link com.google.gwt.core.client.Duration} class (a utility class for measuring elapsed time).
+ * Our version is implemented in simple Java code so it can be used on both client and server.
  * NOTE: this is not very accurate because most operating systems return time
  * in tens of millis (when you call System.currentTimeMillis).  For better
  * precision use the server-side counterpart NanoDuration.

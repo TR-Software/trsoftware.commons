@@ -22,10 +22,10 @@ import junit.framework.TestCase;
 public class ColorTest extends TestCase {
 
   public void testColor() throws Exception {
-    Color c = new Color(115, 255, 45);
+    ColorRGB c = new ColorRGB(115, 255, 45);
     System.out.println(c.toString());
     assertEquals("#73ff2d", c.toString());
-    Color parsedColor = Color.valueOf("#73ff2d");
+    ColorRGB parsedColor = ColorRGB.valueOf("#73ff2d");
     assertEquals(115, parsedColor.r);
     assertEquals(255, parsedColor.g);
     assertEquals(45, parsedColor.b);
@@ -35,7 +35,7 @@ public class ColorTest extends TestCase {
     assertEquals(c, parsedColor);
     assertNotSame(c, parsedColor);
 
-    Color parsedColor2 = Color.valueOf("73ff2d");  // without the # prefix
+    ColorRGB parsedColor2 = ColorRGB.valueOf("73ff2d");  // without the # prefix
     assertEquals(115, parsedColor2.r);
     assertEquals(255, parsedColor2.g);
     assertEquals(45, parsedColor2.b);
@@ -45,7 +45,7 @@ public class ColorTest extends TestCase {
     assertNotSame(parsedColor2, parsedColor);
 
     // make sure that all components will be automatically coerced to the range 0..255
-    assertEquals("#0000ff", new Color(-25, 0, 256).toString());
+    assertEquals("#0000ff", new ColorRGB(-25, 0, 256).toString());
   }
 
 }

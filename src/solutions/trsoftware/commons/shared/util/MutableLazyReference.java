@@ -27,4 +27,8 @@ public abstract class MutableLazyReference<T> extends LazyReference<T> {
   public synchronized void set(T value) {
     this.value = value;
   }
+
+  public void refresh() {
+    set(create());
+  }
 }

@@ -17,13 +17,13 @@
 
 package solutions.trsoftware.commons.server.memquery.eval;
 
+import com.google.common.collect.UnmodifiableIterator;
 import solutions.trsoftware.commons.server.memquery.MaterializedRelation;
 import solutions.trsoftware.commons.server.memquery.Row;
 import solutions.trsoftware.commons.server.memquery.RowImpl;
 import solutions.trsoftware.commons.server.memquery.algebra.Join;
 import solutions.trsoftware.commons.server.util.Duration;
 import solutions.trsoftware.commons.shared.util.iterators.FilteringIterator;
-import solutions.trsoftware.commons.shared.util.iterators.NonMutatingIterator;
 import solutions.trsoftware.commons.shared.util.iterators.SingletonIterator;
 
 import java.util.Iterator;
@@ -39,7 +39,7 @@ import java.util.NoSuchElementException;
  *
  * @author Alex, 4/17/2015
  */
-abstract class NestedLoopJoinIterator<J extends Join<? extends Join.Params>> extends NonMutatingIterator<Row> {
+abstract class NestedLoopJoinIterator<J extends Join<? extends Join.Params>> extends UnmodifiableIterator<Row> {
 
   protected final J joinOp;
   protected final Join.Type joinType;

@@ -30,10 +30,12 @@ import com.google.gwt.event.logical.shared.ResizeHandler;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.*;
+import solutions.trsoftware.commons.client.bundle.CommonsClientBundleFactory;
 import solutions.trsoftware.commons.client.event.Events;
 import solutions.trsoftware.commons.client.event.KeyHoldDetector;
 import solutions.trsoftware.commons.client.event.MultiHandlerRegistration;
 import solutions.trsoftware.commons.client.styles.WidgetStyle;
+import solutions.trsoftware.commons.client.util.GwtUtils;
 import solutions.trsoftware.commons.client.util.SmartTimer;
 import solutions.trsoftware.commons.client.widgets.FocusTrap;
 import solutions.trsoftware.commons.client.widgets.Widgets;
@@ -47,7 +49,7 @@ import java.util.LinkedList;
  *   {@link Window#prompt(String, String)} for showing a message/prompt in a modal dialog box.
  * </p>
  * <p>
- *   Those native methods are unsafe because Chrome and Firefox give the the user a checkbox to
+ *   Those native methods are unreliable because Chrome and Firefox give the the user a checkbox to
  *   "<i>Prevent this page from creating additional dialogs</i>", and if the user opts out of dialogs that way,
  *   Javascript doesn't know about it, and all future calls to those methods will either
  *   <ol>
@@ -265,6 +267,13 @@ public class ModalDialog {
   }
 
   /**
+   * Same as {@link #softAlert(String, ResponseHandler)} but does not invoke a response handler when user responds to the dialog.
+   */
+  public static void softAlert(String msg) {
+    softAlert(msg, ResponseHandler.NOOP);
+  }
+
+  /**
    * Similar to {@link Window#alert(String)}, but uses a custom widget to display the message
    * instead of the browser-native dialog.
    *
@@ -275,10 +284,11 @@ public class ModalDialog {
   }
 
   /**
-   * Same as {@link #softAlert(String, ResponseHandler)} but does not invoke a response handler when user responds to the dialog.
+   * @param settings will be used to customize the dialog caption, and text/html for the "OK" button
+   * @see #softAlert(String, ResponseHandler)
    */
-  public static void softAlert(String msg) {
-    softAlert(msg, ResponseHandler.NOOP);
+  public static void softAlert(String msg, SoftDialogSettings settings, ResponseHandler<Void> responseHandler) {
+    enqueue(new SoftAlert(msg, settings, responseHandler));
   }
 
   /**
@@ -286,18 +296,22 @@ public class ModalDialog {
    * instead of the browser-native dialog.
    *
    * @param msg the message to be displayed
-   * @param responseHandler Will be invoked with the argument <code>true</code> if 'OK' is clicked, and
-   * <code>false</code> if 'Cancel' is clicked
+   * @param responseHandler Will be invoked with the argument {@code true} if the "OK" button is clicked, and
+   * {@code false} if the "Cancel" button is clicked
    */
   public static void softConfirm(String msg, ResponseHandler<Boolean> responseHandler) {
     enqueue(new SoftConfirm(msg, responseHandler));
   }
   
   /**
-   * Same as {@link #softConfirm(String, ResponseHandler)} but does not invoke a response handler when user responds to the dialog.
+   * Same as {@link #softAlert(String, ResponseHandler)}, but allows specifying custom labels for the "OK" and "Cancel" buttons.
+   * @param msg the message to be displayed
+   * @param settings will be used to customize the dialog caption, and text/html for the "OK" and "Cancel" buttons.
+   * @param responseHandler Will be invoked with the argument {@code true} if the "OK" button is clicked, and
+   * {@code false} if the "Cancel" button is clicked
    */
-  public static void softConfirm(String msg) {
-    softConfirm(msg, ResponseHandler.NOOP);
+  public static void softConfirm(String msg, SoftDialogSettings settings, ResponseHandler<Boolean> responseHandler) {
+    enqueue(new SoftConfirm(msg, responseHandler, settings));
   }
 
   /**
@@ -305,17 +319,27 @@ public class ModalDialog {
    * instead of the browser-native dialog.
    * @param msg the message to be displayed
    * @param initialValue the initial value in the dialog's text field
-   * @param responseHandler Will be invoked with the value entered by the user if 'OK' was pressed, or
+   * @param responseHandler Will be invoked with the value entered by the user if "OK" was pressed.
+   * <b style="color:red;">WARNING</b>: the value passed back to {@link ResponseHandler#handleDialogResponse(Object)}
+   * will be {@code null} if user clicked the "Cancel" button instead of "OK"
    */
   public static void softPrompt(String msg, String initialValue, ResponseHandler<String> responseHandler) {
     enqueue(new SoftPrompt(msg, initialValue, responseHandler));
   }
 
   /**
-   * Same as {@link #softPrompt(String, String, ResponseHandler)} but does not invoke a response handler when user responds to the dialog.
+   * Similar to {@link Window#prompt(String, String)}, but uses a custom widget to display the prompt
+   * instead of the browser-native dialog.
+   * @param msg the message to be displayed
+   * @param settings will be used to customize the initial value in the dialog's text field,
+   * the dialog caption, and text/html for the "OK" and "Cancel" buttons.
+   * @param settings the initial value in the dialog's text field
+   * @param responseHandler Will be invoked with the value entered by the user if "OK" was pressed.
+   * <b style="color:red;">WARNING</b>: the value passed back to {@link ResponseHandler#handleDialogResponse(Object)}
+   * will be {@code null} if user clicked the "Cancel" button instead of "OK"
    */
-  public static void softPrompt(String msg, String initialValue) {
-    softPrompt(msg, initialValue, ResponseHandler.NOOP);
+  public static void softPrompt(String msg, SoftDialogSettings settings, ResponseHandler<String> responseHandler) {
+    enqueue(new SoftPrompt(msg, responseHandler, settings));
   }
 
 
@@ -375,7 +399,7 @@ public class ModalDialog {
    * Calls {@link Window#prompt(String, String)} to display a request for information in a modal dialog box,
    * along with the standard 'OK' and 'Cancel' buttons.
    * <p>
-   * {@linkplain #alert(String, ResponseHandler) If that call fails}, falls back on {@link #softPrompt(String, String, ResponseHandler)}
+   * {@linkplain #alert(String, ResponseHandler) If that call fails}, falls back on {@link #softPrompt(String, SoftDialogSettings, ResponseHandler)}
    *
    * @param msg the message to be displayed
    * @param initialValue the initial value in the dialog's text field
@@ -401,10 +425,10 @@ public class ModalDialog {
 
   /** A callback invoked right after the user closes the dialog, with the user's response as the argument */
   public interface ResponseHandler<T> {
-    public void handleDialogResponse(T response);
+    void handleDialogResponse(T response);
 
     /** Use this singleton if you don't wish to handle the response.*/
-    public static final ResponseHandler NOOP = new ResponseHandler() {
+    ResponseHandler NOOP = new ResponseHandler() {
       @Override
       public void handleDialogResponse(Object response) { }
     };
@@ -468,9 +492,11 @@ public class ModalDialog {
 
     private SoftModalDialogBox<T> dialogBox;
     private Duration showingDuration;
+    protected SoftDialogSettings settings;
 
-    private SoftDialog(String msg, ResponseHandler<T> responseHandler) {
+    private SoftDialog(String msg, SoftDialogSettings settings, ResponseHandler<T> responseHandler) {
       super(msg, responseHandler);
+      this.settings = settings;
     }
 
     protected abstract SoftModalDialogBox<T> createDialogBox();
@@ -502,40 +528,102 @@ public class ModalDialog {
   }
 
   private static class SoftAlert extends SoftDialog<Void> {
-    private SoftAlert(String msg, ResponseHandler<Void> responseHandler) {
-      super(msg, responseHandler);
+
+    public SoftAlert(String msg, SoftDialogSettings settings, ResponseHandler<Void> responseHandler) {
+      super(msg, settings, responseHandler);
     }
+
+    public SoftAlert(String msg, ResponseHandler<Void> responseHandler) {
+      super(msg, new SoftDialogSettings(), responseHandler);
+    }
+
     @Override
     protected SoftModalDialogBox<Void> createDialogBox() {
-      return new SoftAlertBox(this);
+      return new SoftAlertBox(this, settings.caption);
     }
   }
   
   private static class SoftConfirm extends SoftDialog<Boolean> {
-    private SoftConfirm(String msg, ResponseHandler<Boolean> responseHandler) {
-      super(msg, responseHandler);
+
+    public SoftConfirm(String msg, ResponseHandler<Boolean> responseHandler, SoftDialogSettings settings) {
+      super(msg, settings, responseHandler);
     }
+
+    public SoftConfirm(String msg, ResponseHandler<Boolean> responseHandler) {
+      this(msg, responseHandler, new SoftDialogSettings());
+    }
+
     @Override
     protected SoftModalDialogBox<Boolean> createDialogBox() {
-      return new SoftConfirmBox(this);
+      return new SoftConfirmBox(this, settings.caption);
     }
   }
-  
+
   private static class SoftPrompt extends SoftDialog<String> {
-    private final String initialValue;
-    private SoftPrompt(String msg, String initialValue, ResponseHandler<String> responseHandler) {
-      super(msg, responseHandler);
-      this.initialValue = initialValue;
+
+    public SoftPrompt(String msg, ResponseHandler<String> responseHandler, SoftDialogSettings settings) {
+      super(msg, settings, responseHandler);
     }
+
+    private SoftPrompt(String msg, String initialValue, ResponseHandler<String> responseHandler) {
+      this(msg, responseHandler, new SoftDialogSettings().setInitialValue(initialValue));
+    }
+
     @Override
     protected SoftModalDialogBox<String> createDialogBox() {
       return new SoftPromptBox(this);
     }
+  }
+
+  public static class SoftDialogSettings {
+    private String okLabel;
+    private String cancelLabel;
+    private DialogBox.Caption caption;
+    private String initialValue;
+
+    /**
+     * Use chained setters to specify the settings
+     */
+    public SoftDialogSettings() {
+    }
+
+    public SoftDialogSettings setOkLabel(String okLabel) {
+      this.okLabel = okLabel;
+      return this;
+    }
+
+    public SoftDialogSettings setCancelLabel(String cancelLabel) {
+      this.cancelLabel = cancelLabel;
+      return this;
+    }
+
+    public SoftDialogSettings setCaption(DialogBox.Caption caption) {
+      this.caption = caption;
+      return this;
+    }
+
+    public SoftDialogSettings setInitialValue(String initialValue) {
+      this.initialValue = initialValue;
+      return this;
+    }
+
+    public String getOkLabel() {
+      return okLabel;
+    }
+
+    public String getCancelLabel() {
+      return cancelLabel;
+    }
+
+    public DialogBox.Caption getCaption() {
+      return caption;
+    }
+
     public String getInitialValue() {
       return initialValue;
     }
   }
-  
+
   /**
    * Invoke a native dialog method.
    */
@@ -642,44 +730,52 @@ public class ModalDialog {
    * @param <T> type of value returned by the dialog
    */
   private static abstract class SoftModalDialogBox<T> extends DialogBox implements PopupPanel.PositionCallback, CloseHandler<PopupPanel>, ClickHandler, KeyDownHandler, ResizeHandler, Window.ScrollHandler {
-    /**
-     *  We try to approximate the caption a browser might have shown for a native dialog
-     * (IE: "Message from webpage", Chrome: "The page at [URL] says:" FF: [no caption]; the browsers use the same caption for both alert and confirm)
-     */
-    public static final String DEFAULT_CAPTION_TEXT = "Message from webpage";
 
-    private final Dialog<T> invoker;
+    private final SoftDialog<T> invoker;
     protected final FlowPanel pnlBody;
     protected final HTML lblMessage;
     protected final FocusTrap leftFocusTrap;
     protected final FocusTrap rightFocusTrap;
-    protected final Button btnOK = new Button("OK", this);
-    protected final Button btnCancel = new Button("Cancel", this);
+    protected final Button btnOK;
+    protected final Button btnCancel;
     private MultiHandlerRegistration windowHandlersRegistration;
     private int naturalMessageWidth;
 
-
-    private SoftModalDialogBox(Dialog<T> invoker) {
-      super(false, true, new CaptionImpl());
+    private SoftModalDialogBox(SoftDialog<T> invoker) {
+      super(false, true, getOrCreateCaption(invoker));
       this.invoker = invoker;
-      ((CaptionImpl)getCaption()).setText(DEFAULT_CAPTION_TEXT);
-      addStyleName("SoftModalDialogBox");
+      addStyleName(CommonsClientBundleFactory.INSTANCE.getCommonsCss().SoftModalDialogBox());
+      SoftDialogSettings settings = invoker.settings;
+      String okLabel = settings.okLabel != null ? settings.okLabel : "OK";
+      String cancelLabel = settings.cancelLabel != null ? settings.cancelLabel : "Cancel";
+      btnOK = new Button(okLabel, this);
+      btnCancel = new Button(cancelLabel, this);
       pnlBody = Widgets.flowPanel(
           // sanitize the message (converting \n chars within the message to <br> elements)
           lblMessage = new HTML(new SafeHtmlBuilder().appendEscapedLines(invoker.getMessage()).toSafeHtml()),
-          Widgets.flowPanel(new WidgetStyle("dialogButtons"),
+          Widgets.flowPanel(new WidgetStyle(CommonsClientBundleFactory.INSTANCE.getCommonsCss().dialogButtons()),
               leftFocusTrap = new FocusTrap(btnCancel),
               btnOK,
               btnCancel,
               rightFocusTrap = new FocusTrap(btnOK))
       );
-      lblMessage.setStyleName("dialogMessage");
+      lblMessage.setStyleName(CommonsClientBundleFactory.INSTANCE.getCommonsCss().dialogMessage());
 
       btnCancel.getElement().getStyle().setMarginLeft(8, Style.Unit.PX);
       setWidget(pnlBody);
       setGlassEnabled(true);
       addCloseHandler(this);
       addDomHandler(this, KeyDownEvent.getType());  // handle the Esc key to close the dialog
+    }
+
+    private static Caption getOrCreateCaption(SoftDialog invoker) {
+      if (invoker.settings.caption != null)
+        return invoker.settings.caption;
+      else {
+        HtmlCaption defaultCaption = new HtmlCaption();
+        defaultCaption.addStyleName(CommonsClientBundleFactory.INSTANCE.getCommonsCss().DefaultCaption());
+        return defaultCaption;
+      }
     }
 
     /**
@@ -696,7 +792,7 @@ public class ModalDialog {
      * @return The widget that should be focused right after the dialog is displayed.
      */
     @Override
-    protected FocusWidget getFocusTarget() {
+    public FocusWidget getFocusTarget() {
       return btnOK;
     }
 
@@ -735,13 +831,11 @@ public class ModalDialog {
     public void setPosition(int offsetWidth, int offsetHeight) {
       // the first time this dialog is shown, we want to do the following:
       // 1) register handlers that will update the dialog's position when the browser window is scrolled or resized
-      // 2) give the "OK" button the same width as the "Cancel" button, to match the native browser look
-      // 3) save the "natural" width of the message (how the browser would render it if the dialog size is not constrained)
+      // 2) save the "natural" width of the message (how the browser would render it if the dialog size is not constrained)
       if (windowHandlersRegistration == null) {
         windowHandlersRegistration = new MultiHandlerRegistration(
             Window.addWindowScrollHandler(this),
             Window.addResizeHandler(this));
-        btnOK.setWidth(btnCancel.getOffsetWidth() + Style.Unit.PX.getType());
         naturalMessageWidth = lblMessage.getOffsetWidth() + 1;  // +1 pixel just in case, because the actual width might have been e.g. 179.46 but rounding it to an int would have shrunk it down to 179
         maybeAdjustMessageWidth();
       }
@@ -796,10 +890,12 @@ public class ModalDialog {
    * Emulates the browser dialog for {@code window.alert}
    */
   private static class SoftAlertBox extends SoftModalDialogBox<Void> {
-    private SoftAlertBox(SoftAlert invoker) {
+
+    private SoftAlertBox(SoftAlert invoker, Caption caption) {
       super(invoker);
       leftFocusTrap.setMaster(btnOK); // alert dialog has no Cancel button
     }
+
     @Override
     public void setVisible(boolean visible) {
       super.setVisible(visible);
@@ -821,7 +917,7 @@ public class ModalDialog {
    * Emulates the browser dialog for {@code window.confirm}
    */
   private static class SoftConfirmBox extends SoftModalDialogBox<Boolean> {
-    private SoftConfirmBox(SoftConfirm invoker) {
+    private SoftConfirmBox(SoftConfirm invoker, Caption caption) {
       super(invoker);
     }
     @Override
@@ -843,14 +939,16 @@ public class ModalDialog {
       super(invoker);
       // add the text input field to the standard dialog and adjust the focus traps accordingly
       txtInput = new TextBox();
-      txtInput.setStyleName("dialogInput");
-      txtInput.setText(invoker.getInitialValue());
+      txtInput.setStyleName(CommonsClientBundleFactory.INSTANCE.getCommonsCss().dialogInput());
+      String initialValue = invoker.settings.getInitialValue();
+      if (initialValue != null)
+        txtInput.setText(initialValue);
       pnlBody.insert(txtInput, 1);
       pnlBody.insert(leftFocusTrap, 1);
       rightFocusTrap.setMaster(txtInput);
     }
     @Override
-    protected FocusWidget getFocusTarget() {
+    public FocusWidget getFocusTarget() {
       return txtInput;
     }
     @Override
@@ -876,98 +974,143 @@ public class ModalDialog {
   }
 
   /**
-   * @return A widget containing buttons for manually testing {@link ModalDialog}.
+   * A widget containing buttons for manually testing {@link ModalDialog}.
    */
-  public static Widget createTestWidget() {
-    return Widgets.verticalPanel(
-        new Button("Test ModalDialog.softConfirm/softAlert", new ClickHandler() {
-          @Override
-          public void onClick(ClickEvent event) {
-            ModalDialog.softConfirm("ModalDialog.softConfirm 1 2 3 4 5 hello 1 2 3 4 5 hello 1 2 3 4 5 hello\nLine2\n\nLine3", new ResponseHandler<Boolean>() {
-              @Override
-              public void handleDialogResponse(Boolean response) {
-                ModalDialog.alert("ModalDialog.softConfirm response = " + response);
-                ModalDialog.softAlert("ModalDialog.softAlert\nLine2\n\nLine3", new ResponseHandler<Void>() {
-                  @Override
-                  public void handleDialogResponse(Void response) {
-                    ModalDialog.alert("ModalDialog.softAlert response = " + response);
-                  }
-                });
-              }
-            });
-          }
-        }),
-        new Button("Test ModalDialog.confirm/prompt", new ClickHandler() {
-          @Override
-          public void onClick(ClickEvent event) {
-            ModalDialog.confirm("ModalDialog 1 2 3 4 5 hello 1 2 3 4 5 hello 1 2 3 4 5 hello\nLine2\n\nLine3", new ResponseHandler<Boolean>() {
-              @Override
-              public void handleDialogResponse(Boolean response) {
-                ModalDialog.alert("ModalDialog.confirm response = " + response);
-                ModalDialog.setNativeDialogsEnabled(false);
-                ModalDialog.prompt("ModalDialog 1 2 3 4 5 hello 1 2 3 4 5 hello 1 2 3 4 5 hello\nLine2\n\nLine3", "foo", new ResponseHandler<String>() {
-                  @Override
-                  public void handleDialogResponse(String response) {
-                    ModalDialog.alert("ModalDialog.prompt response = " + response);
-                  }
-                });
-              }
-            });
-          }
-        }),
-        new Button("Test ModalDialog.alert fallback", new ClickHandler() {
-          @Override
-          public void onClick(ClickEvent event) {
-            class Alerter implements ResponseHandler<Void> {
-              private final int ordinal;
+  public static class TestWidget extends Composite {
+    private SoftDialogSettings softDialogSettings;
 
-              Alerter(int ordinal) {
-                this.ordinal = ordinal;
-                ModalDialog.alert("ModalDialog.alert " + ordinal, this);
-              }
+    public TestWidget() {
+      this(null);
+    }
 
-              @Override
-              public void handleDialogResponse(Void response) {
-                ModalDialog.alert("ModalDialog.alert " + ordinal + " response = " + response);
-              }
+    public TestWidget(SoftDialogSettings softDialogSettings) {
+      this.softDialogSettings = softDialogSettings;
+      // TODO: cont here: extract methods to use the settings (if not null)
+      initWidget(Widgets.verticalPanel(
+          new Label(getClass().getName() + " settings: " + printSettings(softDialogSettings)),
+          new Button("Test softConfirm/softAlert", new ClickHandler() {
+            @Override
+            public void onClick(ClickEvent event) {
+              softConfirm("softConfirm 1 2 3 4 5 hello 1 2 3 4 5 hello 1 2 3 4 5 hello\nLine2\n\nLine3", new ResponseHandler<Boolean>() {
+                @Override
+                public void handleDialogResponse(Boolean response) {
+                  ModalDialog.alert("softConfirm response = " + response);
+                  softAlert("softAlert\nLine2\n\nLine3", new ResponseHandler<Void>() {
+                    @Override
+                    public void handleDialogResponse(Void response) {
+                      ModalDialog.alert("softAlert response = " + response);
+                    }
+                  });
+                }
+              });
             }
-            new Alerter(1);
-            new Alerter(2);
-            new Alerter(3);
-            new Alerter(4);
-            new Alerter(5);
-            new Alerter(6);
-            new Alerter(7);
-            new Alerter(8);
-            new Alerter(9);
-            new Alerter(10);
-          }
-        }),
-        new Button("Test ModalDialog.prompt", new ClickHandler() {
-          @Override
-          public void onClick(ClickEvent event) {
-            ModalDialog.prompt("ModalDialog.prompt 1 2 3 4 5 hello 1 2 3 4 5 hello 1 2 3 4 5 hello\nLine2\n\nLine3", "foo",
-                new ResponseHandler<String>() {
-                  @Override
-                  public void handleDialogResponse(String response) {
-                    ModalDialog.alert("ModalDialog.prompt response = " + response);
-                  }
-                });
-          }
-        }),
-        new Button("Test ModalDialog.softPrompt", new ClickHandler() {
-          @Override
-          public void onClick(ClickEvent event) {
-            ModalDialog.softPrompt("ModalDialog.softPrompt 1 2 3 4 5 hello 1 2 3 4 5 hello 1 2 3 4 5 hello\nLine2\n\nLine3", "foo",
-                new ResponseHandler<String>() {
-                  @Override
-                  public void handleDialogResponse(String response) {
-                    ModalDialog.alert("ModalDialog.softPrompt response = " + response);
-                  }
-                });
-          }
-        })
-    );
+          }),
+          new Button("Test ModalDialog.confirm/prompt", new ClickHandler() {
+            @Override
+            public void onClick(ClickEvent event) {
+              ModalDialog.confirm("ModalDialog 1 2 3 4 5 hello 1 2 3 4 5 hello 1 2 3 4 5 hello\nLine2\n\nLine3", new ResponseHandler<Boolean>() {
+                @Override
+                public void handleDialogResponse(Boolean response) {
+                  ModalDialog.alert("ModalDialog.confirm response = " + response);
+                  ModalDialog.setNativeDialogsEnabled(false);
+                  ModalDialog.prompt("ModalDialog 1 2 3 4 5 hello 1 2 3 4 5 hello 1 2 3 4 5 hello\nLine2\n\nLine3", "foo", new ResponseHandler<String>() {
+                    @Override
+                    public void handleDialogResponse(String response) {
+                      ModalDialog.alert("ModalDialog.prompt response = " + response);
+                    }
+                  });
+                }
+              });
+            }
+          }),
+          new Button("Test ModalDialog.alert fallback", new ClickHandler() {
+            @Override
+            public void onClick(ClickEvent event) {
+              class Alerter implements ResponseHandler<Void> {
+                private final int ordinal;
+
+                Alerter(int ordinal) {
+                  this.ordinal = ordinal;
+                  ModalDialog.alert("ModalDialog.alert " + ordinal, this);
+                }
+
+                @Override
+                public void handleDialogResponse(Void response) {
+                  ModalDialog.alert("ModalDialog.alert " + ordinal + " response = " + response);
+                }
+              }
+              new Alerter(1);
+              new Alerter(2);
+              new Alerter(3);
+              new Alerter(4);
+              new Alerter(5);
+              new Alerter(6);
+              new Alerter(7);
+              new Alerter(8);
+              new Alerter(9);
+              new Alerter(10);
+            }
+          }),
+          new Button("Test ModalDialog.prompt", new ClickHandler() {
+            @Override
+            public void onClick(ClickEvent event) {
+              ModalDialog.prompt("ModalDialog.prompt 1 2 3 4 5 hello 1 2 3 4 5 hello 1 2 3 4 5 hello\nLine2\n\nLine3", "foo",
+                  new ResponseHandler<String>() {
+                    @Override
+                    public void handleDialogResponse(String response) {
+                      ModalDialog.alert("ModalDialog.prompt response = " + response);
+                    }
+                  });
+            }
+          }),
+          new Button("Test softPrompt", new ClickHandler() {
+            @Override
+            public void onClick(ClickEvent event) {
+              softPrompt("softPrompt 1 2 3 4 5 hello 1 2 3 4 5 hello 1 2 3 4 5 hello\nLine2\n\nLine3", "foo", new ResponseHandler<String>() {
+                @Override
+                public void handleDialogResponse(String response) {
+                  ModalDialog.alert("softPrompt response = " + response);
+                }
+              });
+            }
+          })
+      ));
+    }
+
+    private static String printSettings(SoftDialogSettings settings) {
+      if (settings == null)
+        return "null";
+      // we use a custom method here (instead of implementing SoftDialogSettings.toString) to allow dead code elimination
+      final StringBuilder sb = new StringBuilder("SoftDialogSettings{");
+      sb.append("okLabel='").append(settings.okLabel).append('\'');
+      sb.append(", cancelLabel='").append(settings.cancelLabel).append('\'');
+      sb.append(", caption=").append(GwtUtils.toString(settings.caption));
+      sb.append(", initialValue='").append(settings.initialValue).append('\'');
+      sb.append('}');
+      return sb.toString();
+    }
+
+    private void softPrompt(String msg, String initialValue, ResponseHandler<String> responseHandler) {
+      if (softDialogSettings != null) {
+        ModalDialog.softPrompt(msg, softDialogSettings, responseHandler);
+      }
+      else
+        ModalDialog.softPrompt(msg, initialValue, responseHandler);
+    }
+
+    private void softConfirm(String msg, ResponseHandler<Boolean> responseHandler) {
+      if (softDialogSettings != null)
+        ModalDialog.softConfirm(msg, softDialogSettings, responseHandler);
+      else
+        ModalDialog.softConfirm(msg, responseHandler);
+    }
+
+    private void softAlert(String msg, ResponseHandler<Void> responseHandler) {
+      if (softDialogSettings != null)
+        ModalDialog.softAlert(msg, softDialogSettings, responseHandler);
+      else
+        ModalDialog.softAlert(msg, responseHandler);
+    }
   }
 
 }

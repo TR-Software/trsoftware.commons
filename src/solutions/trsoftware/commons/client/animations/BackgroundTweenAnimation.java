@@ -20,7 +20,7 @@ package solutions.trsoftware.commons.client.animations;
 import com.google.gwt.animation.client.Animation;
 import com.google.gwt.user.client.DOM;
 import com.google.gwt.user.client.ui.Widget;
-import solutions.trsoftware.commons.shared.util.Color;
+import solutions.trsoftware.commons.shared.util.ColorRGB;
 
 /**
  * Gradually fades the color of the given component between the given start and end
@@ -32,7 +32,7 @@ public class BackgroundTweenAnimation extends Animation {
 
   private final Widget widget;
 
-  private final Color endColor;
+  private final ColorRGB endColor;
 
   private final int rDiff, gDiff, bDiff;
 
@@ -41,7 +41,7 @@ public class BackgroundTweenAnimation extends Animation {
   private final int g;
   private final int b;
 
-  public BackgroundTweenAnimation(Widget widget, Color startColor, Color endColor) {
+  public BackgroundTweenAnimation(Widget widget, ColorRGB startColor, ColorRGB endColor) {
     this.widget = widget;
     this.endColor = endColor;
 
@@ -56,7 +56,7 @@ public class BackgroundTweenAnimation extends Animation {
 
 
   protected void onUpdate(double progress) {
-    Color newColor = new Color(
+    ColorRGB newColor = new ColorRGB(
         r + (int)(progress * rDiff),
         g + (int)(progress * gDiff),
         b + (int)(progress * bDiff));
@@ -70,7 +70,7 @@ public class BackgroundTweenAnimation extends Animation {
     setBackgroundColor(endColor);
   }
 
-  private void setBackgroundColor(Color newColor) {
+  private void setBackgroundColor(ColorRGB newColor) {
     DOM.setStyleAttribute(widget.getElement(), "backgroundColor", newColor.toString());  // dashes are replaced with camelCase in DOM style manipulation (e.g. background-color becomes backgroundColor)
   }
 

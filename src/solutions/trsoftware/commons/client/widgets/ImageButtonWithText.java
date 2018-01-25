@@ -20,12 +20,15 @@ package solutions.trsoftware.commons.client.widgets;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.dom.client.HasClickHandlers;
 import com.google.gwt.event.shared.HandlerRegistration;
-import com.google.gwt.user.client.ui.*;
+import com.google.gwt.user.client.ui.AbstractImagePrototype;
+import com.google.gwt.user.client.ui.Anchor;
+import com.google.gwt.user.client.ui.Composite;
+import com.google.gwt.user.client.ui.FlowPanel;
+import solutions.trsoftware.commons.client.bundle.CommonsClientBundleFactory;
 import solutions.trsoftware.commons.client.event.MultiHandlerRegistration;
 
 /**
- * Displays an image with a click listener and mouseover effects, as well
- * as a link that does the same thing.
+ * Encapsulates an {@link ImageButton} and an {@link Anchor}, both using the same {@link ClickHandler}.
  *
  * @author Alex
  */
@@ -36,8 +39,7 @@ public class ImageButtonWithText extends Composite implements HasClickHandlers {
   private ImageButtonWithText(AbstractImagePrototype img, boolean imgFirst, String linkText, boolean lnkTextAsHtml) {
     imgButton = new ImageButton(img);
     link = new Anchor(linkText, lnkTextAsHtml);
-    HorizontalPanel panel = new HorizontalPanel();
-    panel.setVerticalAlignment(HasAlignment.ALIGN_MIDDLE);
+    FlowPanel panel = new FlowPanel();
     if (imgFirst) {
       panel.add(imgButton);
       panel.add(link);
@@ -46,7 +48,7 @@ public class ImageButtonWithText extends Composite implements HasClickHandlers {
       panel.add(imgButton);
     }
     initWidget(panel);
-    setStyleName("ImageButtonWithText");
+    setStyleName(CommonsClientBundleFactory.INSTANCE.getCommonsCss().ImageButtonWithText());
   }
 
   /** Simplified constructor, for convenience.  The image will be left of text. */
@@ -70,6 +72,9 @@ public class ImageButtonWithText extends Composite implements HasClickHandlers {
     this(text, img, false);
   }
 
+  /**
+   * Adds the given handler to both the {@link ImageButton} and the {@link Anchor}
+   */
   public HandlerRegistration addClickHandler(ClickHandler handler) {
     return new MultiHandlerRegistration(
         imgButton.addClickHandler(handler),
@@ -85,4 +90,16 @@ public class ImageButtonWithText extends Composite implements HasClickHandlers {
     addClickHandler(handler);
     return this;
   }
+
+  /**
+   * Allows setting the title using method chaining after the constructor.
+   * @return {@code this}, for method chaining
+   * @see #setTitle(String)
+   */
+  public ImageButtonWithText withTitle(String title) {
+    setTitle(title);
+    return this;
+  }
+
+
 }

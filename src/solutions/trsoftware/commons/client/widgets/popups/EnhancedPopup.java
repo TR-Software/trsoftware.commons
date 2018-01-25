@@ -32,6 +32,7 @@ import solutions.trsoftware.commons.client.jso.JsWindow;
 import solutions.trsoftware.commons.client.util.geometry.Alignment;
 import solutions.trsoftware.commons.client.util.geometry.RelativePosition;
 import solutions.trsoftware.commons.client.util.geometry.WindowGeometry;
+import solutions.trsoftware.commons.client.widgets.HasFocusTarget;
 import solutions.trsoftware.commons.shared.util.StringUtils;
 
 /**
@@ -42,7 +43,7 @@ import solutions.trsoftware.commons.shared.util.StringUtils;
  *
  * @author Alex
  */
-public class EnhancedPopup extends PopupPanel {
+public class EnhancedPopup extends PopupPanel implements HasFocusTarget {
 
   private ShakePopupAnimation shakingAnimation;
   private boolean closerControlsEnabled = true;
@@ -75,7 +76,8 @@ public class EnhancedPopup extends PopupPanel {
    * Subclasses may override this method to return a child widget that should receive focus
    * after the popup is shown.
    */
-  protected FocusWidget getFocusTarget() {
+  @Override
+  public FocusWidget getFocusTarget() {
     return null;
   }
 
@@ -118,6 +120,9 @@ public class EnhancedPopup extends PopupPanel {
     this.closerControlsEnabled = enabled;
   }
 
+  public PopupBuilder<? extends EnhancedPopup> configure() {
+    return new PopupBuilder<EnhancedPopup>(this);
+  }
 
   @Override
   public void setPopupPosition(int left, int top) {

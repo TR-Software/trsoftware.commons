@@ -25,14 +25,13 @@ import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicLong;
 
 /**
- * A ScheduledExecutorService that uses the mocked Clock class instead of the
+ * A {@link ScheduledExecutorService} that uses the mocked {@link Clock} class instead of the
  * System clock, so that the execution delays may be artificially manipulated
  * when running unit tests or simulations.
  *
- * Unlike typical scheduled executors, this class is event-driven, and
- * (single-threaded) and its event loop must be externally pumped
- * by repeatedly calling the pumpEvents() method.  The scheduled
- * tasks will be executed inline by this method. To immitate the behavior
+ * Unlike typical scheduled executors, this class is event-driven (single-threaded)
+ * and its event loop must be externally pumped by repeatedly calling the {@link #pumpEvents()} method.
+ * The scheduled tasks will be executed inline by this method. To immitate the behavior
  * of a multithreaded executor you can call pumpEvents() from an external timer.
  *
  * @author Alex
@@ -124,8 +123,8 @@ public class MockScheduledExecutorService implements ScheduledExecutorService {
 //    System.out.printf("Advanced clock over time gap of %d millis using %d ticks%n", timeGap, tickCount);
   }
 
+  /** Runs all the tasks whose time (as determined by {@link Clock#currentTimeMillis()}) has come (or passed) */
   public void pumpEvents() {
-    // run all the tasks whose time has come (or passed)
     long now = Clock.currentTimeMillis();
     while (!tasks.isEmpty() && tasks.first().time <= now) {
       // while there is a task whose time comes before now, keep running tasks

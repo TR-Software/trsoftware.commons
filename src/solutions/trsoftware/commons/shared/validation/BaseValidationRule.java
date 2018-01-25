@@ -78,12 +78,12 @@ public abstract class BaseValidationRule<V> implements ValidationRule<V> {
   }
 
   /** @return an error result indicating that the field value is missing (as defined by {@link #isNull(Object)}) */
-  protected ValidationResult errorMissing() {
+  public ValidationResult errorMissing() {
     return error("must be specified");
   }
 
   /** @return an error result with the given message */
-  protected ValidationResult error(String message) {
+  public ValidationResult error(String message) {
     return ValidationResult.error(formatErrorMessage(message));
   }
 

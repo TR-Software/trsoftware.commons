@@ -55,7 +55,7 @@ public class DialogBox extends EnhancedPopup {
    *
    */
   public interface Caption extends HasAllMouseHandlers, IsWidget {
-    String DEFAULT_STYLE = CommonsClientBundleFactory.INSTANCE.getCommonsCss().Caption();
+    String DEFAULT_STYLE = CommonsClientBundleFactory.INSTANCE.getCss().Caption();
   }
 
   /**
@@ -84,7 +84,7 @@ public class DialogBox extends EnhancedPopup {
       Image img = icon.createImage();
       img.setStyleName("icon");
       initWidget(Widgets.flowPanel(img, Widgets.inlineLabel(text, "text")));
-      addStyleName(CommonsClientBundleFactory.INSTANCE.getCommonsCss().CaptionWithIcon());
+      addStyleName(CommonsClientBundleFactory.INSTANCE.getCss().CaptionWithIcon());
     }
   }
 
@@ -138,7 +138,7 @@ public class DialogBox extends EnhancedPopup {
   /**
    * The default style name.
    */
-  private static final String DEFAULT_STYLENAME = CommonsClientBundleFactory.INSTANCE.getCommonsCss().DialogBox();
+  private static final String DEFAULT_STYLENAME = CommonsClientBundleFactory.INSTANCE.getCss().DialogBox();
   private FlowPanel pnlMain = new FlowPanel();
   private PopupCloserButton btnClose;
   private Caption caption;
@@ -218,7 +218,7 @@ public class DialogBox extends EnhancedPopup {
     pnlMain.add(content);
 
     super.setWidget(pnlMain);
-    content.addStyleName(CommonsClientBundleFactory.INSTANCE.getCommonsCss().dialogContent());
+    content.addStyleName(CommonsClientBundleFactory.INSTANCE.getCss().dialogContent());
     setStyleName(DEFAULT_STYLENAME);
 
     // register for the events we need on the widget itself (these don't need to be removed for the lifetime of the widget)

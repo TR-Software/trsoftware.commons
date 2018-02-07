@@ -112,8 +112,10 @@ public class CommonsUncaughtExceptionHandler implements GWT.UncaughtExceptionHan
   /**
    * This is the new exception reporting mechanism based on stack traces
    * provided with the following GWT config:
+   * <pre>{@code
    * <set-property name="compiler.stackMode" value="emulated" />
    * <set-configuration-property name="compiler.emulatedStack.recordLineNumbers" value="true"/>
+   * }</pre>
    * We deobfuscate the stack trace on the server using the GWT compiler-generated
    * symbolMaps files and log it with EventTracker
    */

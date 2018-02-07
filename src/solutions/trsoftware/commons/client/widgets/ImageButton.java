@@ -71,7 +71,7 @@ public class ImageButton extends Composite implements HasClickHandlers {
       setHeight(imageStyleHeight);
     }*/
 
-    setStyleName(CommonsClientBundleFactory.INSTANCE.getCommonsCss().ImageButton());
+    setStyleName(CommonsClientBundleFactory.INSTANCE.getCss().ImageButton());
   }
 
   public Image getImage() {

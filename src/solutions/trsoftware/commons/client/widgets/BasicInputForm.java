@@ -60,7 +60,7 @@ import static solutions.trsoftware.commons.client.widgets.Widgets.html;
  */
 public abstract class BasicInputForm extends FlowPanel {
 
-  public static final String FIELD_ERROR_STYLE = CommonsClientBundleFactory.INSTANCE.getCommonsCss().fieldErrorMsg();
+  public static final String FIELD_ERROR_STYLE = CommonsClientBundleFactory.INSTANCE.getCss().fieldErrorMsg();
   private Layout layout;
 
   private FlexTable tblForm = new FlexTable();
@@ -87,7 +87,7 @@ public abstract class BasicInputForm extends FlowPanel {
     };
     enterKeyHandler = new SpecificKeyDownHandler(KeyCodes.KEY_ENTER, submitCommand);
     add(tblForm);
-    setStyleName(CommonsClientBundleFactory.INSTANCE.getCommonsCss().BasicInputForm());
+    setStyleName(CommonsClientBundleFactory.INSTANCE.getCss().BasicInputForm());
   }
 
   /**

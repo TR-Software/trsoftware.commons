@@ -37,7 +37,7 @@ public class LoadingMessage extends Composite {
 
   public LoadingMessage(LabelBase label, boolean startVisible, SpinnerPosition spinnerPosition) {
     initWidget(label);
-    setStyleName(CommonsClientBundleFactory.INSTANCE.getCommonsCss().loadingMessage());
+    setStyleName(CommonsClientBundleFactory.INSTANCE.getCss().loadingMessage());
     Style style = getStyleElement().getStyle();
     if (spinnerPosition == SpinnerPosition.RIGHT) {
       style.setPaddingRight(20, Style.Unit.PX);  /* 16px for spinner image width, and another 4px for spacing */

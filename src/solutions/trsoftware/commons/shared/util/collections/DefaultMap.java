@@ -70,8 +70,14 @@ public abstract class DefaultMap<K, V> implements Map<K, V> {
   }
 
   private V getOrInsert(K key) {
-    if (!containsKey(key))
-      put(key, computeDefault(key));
+    if (!containsKey(key)) {
+      // double-checked locking
+      synchronized (this) {
+        if (!containsKey(key)) {
+          put(key, computeDefault(key));
+        }
+      }
+    }
     return delegate.get(key);
   }
 

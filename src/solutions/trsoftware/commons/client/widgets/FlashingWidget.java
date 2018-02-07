@@ -31,7 +31,7 @@ import solutions.trsoftware.commons.client.bundle.CommonsClientBundleFactory;
  */
 public class FlashingWidget<T extends Widget> extends AbstractFlashingWidget<T> {
 
-  private String flashOnStyle = CommonsClientBundleFactory.INSTANCE.getCommonsCss().flashOn();
+  private String flashOnStyle = CommonsClientBundleFactory.INSTANCE.getCss().flashOn();
 
   public FlashingWidget(T widget, int flashingDelay) {
     super(widget, flashingDelay);

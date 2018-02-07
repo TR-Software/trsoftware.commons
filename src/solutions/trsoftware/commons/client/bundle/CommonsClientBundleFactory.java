@@ -30,7 +30,7 @@ public abstract class CommonsClientBundleFactory {
     return commonsClientBundle;
   }
 
-  public CommonsCss getCommonsCss() {
+  public CommonsCss getCss() {
     return getCommonsClientBundle().css();
   }
 }

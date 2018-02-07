@@ -33,7 +33,7 @@ import solutions.trsoftware.commons.client.bundle.CommonsClientBundleFactory;
 public class PopupDialog extends PopupWithIcon {
 
   /** Defines a consistent CSS class name to use for all dialog popup within our app. */
-  public static final String STYLE_NAME = CommonsClientBundleFactory.INSTANCE.getCommonsCss().trPopupDialog();
+  public static final String STYLE_NAME = CommonsClientBundleFactory.INSTANCE.getCss().trPopupDialog();
 
   @Override
   protected String getSecondaryStyleName() {

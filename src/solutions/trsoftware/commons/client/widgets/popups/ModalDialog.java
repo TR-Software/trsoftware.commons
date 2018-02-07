@@ -744,7 +744,7 @@ public class ModalDialog {
     private SoftModalDialogBox(SoftDialog<T> invoker) {
       super(false, true, getOrCreateCaption(invoker));
       this.invoker = invoker;
-      addStyleName(CommonsClientBundleFactory.INSTANCE.getCommonsCss().SoftModalDialogBox());
+      addStyleName(CommonsClientBundleFactory.INSTANCE.getCss().SoftModalDialogBox());
       SoftDialogSettings settings = invoker.settings;
       String okLabel = settings.okLabel != null ? settings.okLabel : "OK";
       String cancelLabel = settings.cancelLabel != null ? settings.cancelLabel : "Cancel";
@@ -753,13 +753,13 @@ public class ModalDialog {
       pnlBody = Widgets.flowPanel(
           // sanitize the message (converting \n chars within the message to <br> elements)
           lblMessage = new HTML(new SafeHtmlBuilder().appendEscapedLines(invoker.getMessage()).toSafeHtml()),
-          Widgets.flowPanel(new WidgetStyle(CommonsClientBundleFactory.INSTANCE.getCommonsCss().dialogButtons()),
+          Widgets.flowPanel(new WidgetStyle(CommonsClientBundleFactory.INSTANCE.getCss().dialogButtons()),
               leftFocusTrap = new FocusTrap(btnCancel),
               btnOK,
               btnCancel,
               rightFocusTrap = new FocusTrap(btnOK))
       );
-      lblMessage.setStyleName(CommonsClientBundleFactory.INSTANCE.getCommonsCss().dialogMessage());
+      lblMessage.setStyleName(CommonsClientBundleFactory.INSTANCE.getCss().dialogMessage());
 
       btnCancel.getElement().getStyle().setMarginLeft(8, Style.Unit.PX);
       setWidget(pnlBody);
@@ -773,7 +773,7 @@ public class ModalDialog {
         return invoker.settings.caption;
       else {
         HtmlCaption defaultCaption = new HtmlCaption();
-        defaultCaption.addStyleName(CommonsClientBundleFactory.INSTANCE.getCommonsCss().DefaultCaption());
+        defaultCaption.addStyleName(CommonsClientBundleFactory.INSTANCE.getCss().DefaultCaption());
         return defaultCaption;
       }
     }
@@ -939,7 +939,7 @@ public class ModalDialog {
       super(invoker);
       // add the text input field to the standard dialog and adjust the focus traps accordingly
       txtInput = new TextBox();
-      txtInput.setStyleName(CommonsClientBundleFactory.INSTANCE.getCommonsCss().dialogInput());
+      txtInput.setStyleName(CommonsClientBundleFactory.INSTANCE.getCss().dialogInput());
       String initialValue = invoker.settings.getInitialValue();
       if (initialValue != null)
         txtInput.setText(initialValue);

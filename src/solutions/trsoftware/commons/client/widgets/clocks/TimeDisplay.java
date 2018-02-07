@@ -54,10 +54,10 @@ public class TimeDisplay extends Composite implements CountdownTimer.TickEvent.H
   public TimeDisplay() {
     initWidget(
         pnlMain = flowPanel(
-            lblTime = inlineLabel("", CommonsClientBundleFactory.INSTANCE.getCommonsCss().time())
+            lblTime = inlineLabel("", CommonsClientBundleFactory.INSTANCE.getCss().time())
         )
     );
-    setStyleName(CommonsClientBundleFactory.INSTANCE.getCommonsCss().timeDisplay());
+    setStyleName(CommonsClientBundleFactory.INSTANCE.getCss().timeDisplay());
     setVisibilityHidden(this, true); // start invisible until the time value is set
   }
 
@@ -117,7 +117,7 @@ public class TimeDisplay extends Composite implements CountdownTimer.TickEvent.H
 
   private Label createOrUpdateCaptionLabel(Label lblCaption, String text, int beforeIndex) {
     if (lblCaption == null)
-      pnlMain.insert(lblCaption = inlineLabel(text, CommonsClientBundleFactory.INSTANCE.getCommonsCss().timeDisplayCaption()), beforeIndex);
+      pnlMain.insert(lblCaption = inlineLabel(text, CommonsClientBundleFactory.INSTANCE.getCss().timeDisplayCaption()), beforeIndex);
     else
       lblCaption.setText(text);
     return lblCaption;

@@ -32,7 +32,7 @@ public class PopupWithIcon extends DialogBox {
   private FlowPanel pnlMain;
   private SimplePanel bodyWidgetHolder = new SimplePanel();
   {
-    bodyWidgetHolder.setStyleName(CommonsClientBundleFactory.INSTANCE.getCommonsCss().bodyWidgetHolder());
+    bodyWidgetHolder.setStyleName(CommonsClientBundleFactory.INSTANCE.getCss().bodyWidgetHolder());
   }
 
   private PopupCloserLink popupCloserLink;

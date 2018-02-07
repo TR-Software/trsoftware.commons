@@ -31,7 +31,7 @@ import java.util.List;
 public class BoundDataBox<V> extends Box<V> {
 
   /** These display widgets will be updated whenever the boxed value changes */
-  private List<TakesValue<V>> boundWidgets = new ArrayList<TakesValue<V>>();
+  private List<TakesValue<V>> boundWidgets;
 
   public BoundDataBox() {
   }
@@ -43,14 +43,19 @@ public class BoundDataBox<V> extends Box<V> {
   @Override
   public void setValue(V value) {
     super.setValue(value);
-    for (TakesValue<V> boundWidget : boundWidgets) {
+    for (TakesValue<V> boundWidget : getBoundWidgets()) {
       boundWidget.setValue(value);
     }
   }
 
   public void addBoundDisplayWidget(TakesValue<V> displayWidget) {
-    boundWidgets.add(displayWidget);
+    getBoundWidgets().add(displayWidget);
     displayWidget.setValue(getValue());
   }
 
+  public List<TakesValue<V>> getBoundWidgets() {
+    if (boundWidgets == null)
+      boundWidgets = new ArrayList<TakesValue<V>>();  // lazy init
+    return boundWidgets;
+  }
 }

@@ -11,7 +11,7 @@ import solutions.trsoftware.commons.client.bundle.CommonsClientBundleFactory;
  */
 public class ModalPromptPopup extends PopupDialog implements ClickHandler {
 
-  public static final String STYLE_NAME = CommonsClientBundleFactory.INSTANCE.getCommonsCss().ModalPromptPopup();
+  public static final String STYLE_NAME = CommonsClientBundleFactory.INSTANCE.getCss().ModalPromptPopup();
 
   public ModalPromptPopup(AbstractImagePrototype icon, String headingText, String bodyText, String closeLinkText, boolean glass) {
     super(false, icon, headingText, STYLE_NAME, closeLinkText);

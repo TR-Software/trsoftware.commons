@@ -28,7 +28,7 @@ import solutions.trsoftware.commons.client.images.CommonsImages;
 public class ErrorMessagePopup extends PopupDialog {
 
   public ErrorMessagePopup(boolean autoHide, String headingText, Widget bodyWidget) {
-    super(autoHide, AbstractImagePrototype.create(CommonsImages.INSTANCE.warn24()), headingText, CommonsClientBundleFactory.INSTANCE.getCommonsCss().ErrorMessagePopup(), bodyWidget);
+    super(autoHide, AbstractImagePrototype.create(CommonsImages.INSTANCE.warn24()), headingText, CommonsClientBundleFactory.INSTANCE.getCss().ErrorMessagePopup(), bodyWidget);
   }
 
   @Override

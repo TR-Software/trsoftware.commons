@@ -14,7 +14,8 @@
   ~ the License.
   ~
   -->
-
+<!DOCTYPE module PUBLIC "-//Google Inc.//DTD Google Web Toolkit 2.5.0//EN"
+    "http://gwtproject.org/doctype/2.5.0/gwt-module.dtd">
 <module>
   <inherits name='com.google.gwt.user.User'/>
   <inherits name="com.google.gwt.json.JSON"/>

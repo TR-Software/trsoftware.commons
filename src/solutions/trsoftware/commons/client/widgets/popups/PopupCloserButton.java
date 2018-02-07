@@ -38,10 +38,10 @@ public class PopupCloserButton extends PopupCloser<HTML> {
     super(popup, new HTML("<svg viewBox=\"0 0 20 20\">\n" +
         "&times;" +  // unicode multiplication symbol to support IE8 and older
         // we group both strokes of the X under the style name "xShape" (its stroke color and width are defined in CSS)
-        "<g class=\"" + CommonsClientBundleFactory.INSTANCE.getCommonsCss().xShape() + "\">\n" +
+        "<g class=\"" + CommonsClientBundleFactory.INSTANCE.getCss().xShape() + "\">\n" +
         "  <line x1=\"5\" y1=\"5\" x2=\"15\" y2=\"15\"/>\n" +
         "  <line x1=\"5\" y1=\"15\" x2=\"15\" y2=\"5\"/>\n" +
         "</g>\n</svg>"));
-    setStyleName(CommonsClientBundleFactory.INSTANCE.getCommonsCss().xButton());
+    setStyleName(CommonsClientBundleFactory.INSTANCE.getCss().xButton());
   }
 }

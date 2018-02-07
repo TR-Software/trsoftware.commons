@@ -48,7 +48,7 @@ public class ImageButtonWithText extends Composite implements HasClickHandlers {
       panel.add(imgButton);
     }
     initWidget(panel);
-    setStyleName(CommonsClientBundleFactory.INSTANCE.getCommonsCss().ImageButtonWithText());
+    setStyleName(CommonsClientBundleFactory.INSTANCE.getCss().ImageButtonWithText());
   }
 
   /** Simplified constructor, for convenience.  The image will be left of text. */

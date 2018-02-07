@@ -32,7 +32,7 @@ public abstract class CustomActionCell<C> extends AbstractCell<C> {
     this.delegate = delegate;
     // wrap the custom HTML with a div that sets its class attribute
     this.html = new SafeHtmlBuilder()
-        .appendHtmlConstant("<div class=\"" + CommonsClientBundleFactory.INSTANCE.getCommonsCss().CustomActionCell() + "\">")
+        .appendHtmlConstant("<div class=\"" + CommonsClientBundleFactory.INSTANCE.getCss().CustomActionCell() + "\">")
         .append(generateHtml())
         .appendHtmlConstant("</div>")
         .toSafeHtml();

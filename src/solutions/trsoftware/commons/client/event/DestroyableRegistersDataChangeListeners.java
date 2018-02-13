@@ -20,10 +20,8 @@ package solutions.trsoftware.commons.client.event;
 import solutions.trsoftware.commons.client.util.Destroyable;
 
 /**
- * Allows registered DataChangeListeners to be automatically removed when the
+ * Allows registered {@link DataChangeListener}s to be automatically removed when the
  * subclass is destroyed.
- *
- * Oct 31, 2009
  *
  * @author Alex
  */

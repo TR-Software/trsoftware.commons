@@ -34,4 +34,36 @@ public abstract class AbstractNode<T> implements Node<T> {
     (see https://en.wikipedia.org/wiki/Tree_traversal#Generic_tree and com.google.gwt.dev.js.ast.JsVisitor)
     */
   }
+
+  @Override
+  public int depth() {
+    return computeDepth(this);
+  }
+
+  /**
+   * Computes the depth of a tree node, which is formally defined as
+   * <em>the number of edges from the tree's root node to the node</em>
+   * @return the number of edges from the tree's root node to the node
+   * ({@code 0} for the root (i.e. 1st level node), {@code 1} for a 2nd-level node, etc.)
+   * @see <a href="https://en.wikipedia.org/wiki/Tree_(data_structure)">Tree Data Structure</a>
+   */
+  public static <N extends Node<?>> int computeDepth(N node) {
+    int depth = 0;
+    Node<?> parent = node.getParent();
+    while (parent != null) {
+      depth++;
+      parent = parent.getParent();
+    }
+    return depth;
+  }
+
+  /**
+   * This implementation simply checks whether the result of {@link #getChildren()} is empty.
+   * Subclasses may override to provide a more efficient implementation.
+   * @return {@code true} iff this node doesn't have any children
+   */
+  @Override
+  public boolean isLeaf() {
+    return getChildren().isEmpty();
+  }
 }

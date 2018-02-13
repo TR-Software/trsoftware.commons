@@ -22,7 +22,7 @@ package solutions.trsoftware.commons.shared.util.trees;
  *
  * @author Alex, 10/31/2017
  */
-public abstract class AbstractVisitor<T extends Node> implements Visitor<T> {
+public abstract class AbstractVisitor<N extends Node> implements Visitor<N> {
 
   protected final TraversalStrategy strategy;
 
@@ -37,5 +37,15 @@ public abstract class AbstractVisitor<T extends Node> implements Visitor<T> {
   @Override
   public TraversalStrategy getStrategy() {
     return strategy;
+  }
+
+  @Override
+  public void beginVisit(N node) {
+    // subclasses should override
+  }
+
+  @Override
+  public void endVisit(N node) {
+    // subclasses should override
   }
 }

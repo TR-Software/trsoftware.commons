@@ -56,7 +56,7 @@ public class ReflectionUtilsTest extends TestCase {
   }
 
 
-  public void test_getAllTypesAssignableFrom() throws Exception {
+  public void testGetAllTypesAssignableFrom() throws Exception {
     assertAllAssignableFrom(null,
         expectedSet());
 
@@ -85,7 +85,7 @@ public class ReflectionUtilsTest extends TestCase {
         expectedSet(FooSubABSub.class, IBar.class, FooSubAB.class, IFooSubA.class, IFoo.class, IFooSubB.class, Object.class));
   }
 
-  public void test_getAllTypesAssignableFromAll() throws Exception {
+  public void testGetAllTypesAssignableFromAll() throws Exception {
     assertAllAssignableFromAll(
         new Class[]{FooSubAB.class},
         expectedSet(FooSubAB.class, IFooSubA.class, IFoo.class, IFooSubB.class, Object.class));
@@ -119,7 +119,7 @@ public class ReflectionUtilsTest extends TestCase {
         expectedSet());  // no classes have anything in common with a null arg
   }
 
-  public void test_getCompilerOutputDir() throws Exception {
+  public void testGetCompilerOutputDir() throws Exception {
     Class<? extends ReflectionUtilsTest> thisClass = getClass();
     File result = getCompilerOutputDir(thisClass);
     System.out.println("result = " + result);
@@ -154,5 +154,12 @@ public class ReflectionUtilsTest extends TestCase {
     return SetUtils.newSet(args);
   }
 
-
+  public void testIsJavaKeyword() throws Exception {
+    // list obtained from https://docs.oracle.com/javase/specs/jls/se9/html/jls-3.html#jls-3.9
+    String[] keywordsFromJLS = {"abstract", "continue", "for", "new", "switch", "assert", "default", "if", "package", "synchronized", "boolean", "do", "goto", "private", "this", "break", "double", "implements", "protected", "throw", "byte", "else", "import", "public", "throws", "case", "enum", "instanceof", "return", "transient", "catch", "extends", "int", "short", "try", "char", "final", "interface", "static", "void", "class", "finally", "long", "strictfp", "volatile", "const", "float", "native", "super", "while", "_"};
+    for (String k : keywordsFromJLS) {
+      assertTrue(k, isJavaKeyword(k));
+      assertFalse(k, isJavaKeyword(k + "_"));
+    }
+  }
 }

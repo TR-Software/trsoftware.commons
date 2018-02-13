@@ -69,6 +69,11 @@ public class ServerIOUtilsTest extends TestCase {
     assertEquals("foo", filenamePrefix("foo.txt.gif"));
   }
 
+  public void testFilenameExtension() throws Exception {
+    assertEquals("txt", filenameExtension("foo.txt"));
+    assertEquals("gif", filenameExtension("foo.txt.gif"));
+  }
+
   public void testReadCharacterStreamIntoStringUtf8() throws Exception {
     int size = 1048576;
     byte[] inputSource = new byte[size];  // use a 1 meg size array filled with 'x'

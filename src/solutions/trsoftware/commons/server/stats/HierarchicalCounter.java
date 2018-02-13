@@ -17,6 +17,7 @@
 
 package solutions.trsoftware.commons.server.stats;
 
+import solutions.trsoftware.commons.shared.util.trees.AbstractNode;
 import solutions.trsoftware.commons.shared.util.trees.Node;
 import solutions.trsoftware.commons.shared.util.trees.TraversalStrategy;
 import solutions.trsoftware.commons.shared.util.trees.Visitor;
@@ -72,18 +73,6 @@ public class HierarchicalCounter extends Counter implements Node<Counter> {
     return delegate.getCount();
   }
 
-  /**
-   * @return the depth of this node within the hierarchy
-   */
-  public int getLevel() {
-    int level = 0;
-    HierarchicalCounter parent = getParent();
-    while (parent != null) {
-      level++;
-      parent = parent.getParent();
-    }
-    return level;
-  }
 
   /**
    * @return the number of nested {@link HierarchicalCounter counters}
@@ -126,8 +115,18 @@ public class HierarchicalCounter extends Counter implements Node<Counter> {
   }
 
   @Override
-  public Counter getValue() {
+  public boolean isLeaf() {
+    return children.isEmpty();
+  }
+
+  @Override
+  public Counter getData() {
     return delegate;
+  }
+
+  @Override
+  public int depth() {
+    return AbstractNode.computeDepth(this);
   }
 
   public HierarchicalCounter getParent() {

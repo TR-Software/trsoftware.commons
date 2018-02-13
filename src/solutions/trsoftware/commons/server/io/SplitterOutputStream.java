@@ -21,7 +21,7 @@ import java.io.IOException;
 import java.io.OutputStream;
 
 /**
- * Serves a similar purpose to the Unix tee utility.
+ * Serves a similar purpose to the Unix {@code tee} utility.
  *
  * @author Alex
  */

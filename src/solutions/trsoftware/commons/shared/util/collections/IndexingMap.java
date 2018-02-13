@@ -45,7 +45,7 @@ import java.util.*;
  */
 public class IndexingMap<K, V, I extends Enum<I>> extends AbstractMap<K, V> {
 
-  public static interface Indexer<K, V, I extends Enum<I>> {
+  public interface Indexer<K, V, I extends Enum<I>> {
     /** @return a new instance of the {@link Multimap} implementation to be used for storing the given index */
     Multimap<Object, K> createIndex(I indexSpec);
 

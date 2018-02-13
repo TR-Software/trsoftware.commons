@@ -20,7 +20,7 @@ package solutions.trsoftware.commons.shared.util.trees;
 import java.util.Collection;
 
 /**
- * The base type of a <a href="https://en.wikipedia.org/wiki/Tree_(data_structure)">tree</a> node which supports
+ * The base type for a <a href="https://en.wikipedia.org/wiki/Tree_(data_structure)">tree</a> node which supports
  * the <a href="https://en.wikipedia.org/wiki/Visitor_pattern">Visitor pattern</a>.
  *
  * @param <T> the type of the data stored in the node.
@@ -31,8 +31,26 @@ public interface Node<T> {
 
   <V extends Visitor> void accept(V visitor);
 
-  Collection<Node<T>> getChildren();
+  /**
+   * @return the parent of this node in the tree; {@code null} indicates that this node is the root.
+   */
+  Node<T> getParent();
+
+  Collection<? extends Node<T>> getChildren();
+
+  /**
+   * @return {@code true} iff this node doesn't have any children
+   */
+  boolean isLeaf();
 
   /** @return the value stored in this node */
-  T getValue();
+  T getData();
+
+  /**
+   * @return the depth of this node in the tree, which is formally defined as
+   * <em>the number of edges from the tree's root node to the node</em>
+   * ({@code 0} for the root (i.e. 1st level node), {@code 1} for a 2nd-level node, etc.)
+   * @see <a href="https://en.wikipedia.org/wiki/Tree_(data_structure)">Tree Data Structure</a>
+   */
+  int depth();
 }

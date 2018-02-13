@@ -35,13 +35,17 @@ public enum TraversalStrategy {
    */
   PRE_ORDER {
     @Override
-    public <T> void traverse(Node<T> node, Visitor visitor) {
-      Collection<Node<T>> children = node.getChildren();
-      // 1) visit self
-      visitor.visit(node);
-      // 2) visit the subtrees of all children
-      for (Node<T> child : children)
-        child.accept(visitor);
+    public <N extends Node<?>> void traverse(N node, Visitor<N> visitor) {
+      if (node != null) {
+        visitor.beginVisit(node);
+        // 1) visit self
+        visitor.visit(node);
+        // 2) visit the subtrees of all children
+        Collection<? extends Node<?>> children = node.getChildren();
+        for (Node<?> child : children)
+          child.accept(visitor);
+        visitor.endVisit(node);
+      }
     }
   },
   /**
@@ -51,21 +55,24 @@ public enum TraversalStrategy {
    */
   IN_ORDER {
     @Override
-    public <T> void traverse(Node<T> node, Visitor visitor) {
-      Collection<Node<T>> children = node.getChildren();
-      if (children.size() > 2)
-        throw new IllegalArgumentException(this + " traversal makes sense only for binary trees");
-      Iterator<Node<T>> childIter = children.iterator();
-      // visit the left sub-tree
-      if (childIter.hasNext())
-        childIter.next().accept(visitor);
-      // visit self
-      visitor.visit(node);
-      // visit the right sub-tree
-      if (childIter.hasNext())
-        childIter.next().accept(visitor);
-      Assert.assertFalse(childIter.hasNext());  // this should never happen because we already checked the size of the collection
-      throw new UnsupportedOperationException("Method .traverse has not been fully implemented yet.");
+    public <N extends Node<?>> void traverse(N node, Visitor<N> visitor) {
+      if (node != null) {
+        visitor.beginVisit(node);
+        Collection<? extends Node<?>> children = node.getChildren();
+        if (children.size() > 2)
+          throw new IllegalArgumentException(this + " traversal makes sense only for binary trees");
+        Iterator<? extends Node<?>> childIter = children.iterator();
+        // visit the left sub-tree
+        if (childIter.hasNext())
+          childIter.next().accept(visitor);
+        // visit self
+        visitor.visit(node);
+        // visit the right sub-tree
+        if (childIter.hasNext())
+          childIter.next().accept(visitor);
+        visitor.endVisit(node);
+        Assert.assertFalse(childIter.hasNext());  // this should never happen because we already checked the size of the collection
+      }
     }
   },
   /**
@@ -74,21 +81,25 @@ public enum TraversalStrategy {
    */
   POST_ORDER {
     @Override
-    public <T> void traverse(Node<T> node, Visitor visitor) {
-      Collection<Node<T>> children = node.getChildren();
-      // visit the subtrees of all children before visiting self
-      for (Node<T> child : children)
-        child.accept(visitor);
-      visitor.visit(node);
+    public <N extends Node<?>> void traverse(N node, Visitor<N> visitor) {
+      if (node != null) {
+        visitor.beginVisit(node);
+        Collection<? extends Node<?>> children = node.getChildren();
+        // visit the subtrees of all children before visiting self
+        for (Node<?> child : children)
+          child.accept(visitor);
+        visitor.visit(node);
+        visitor.endVisit(node);
+      }
     }
   },
   /** BFS <a href="https://en.wikipedia.org/wiki/Tree_traversal#Breadth-first_search">level-order</a> traversal */
   BFS {
     @Override
-    public <T> void traverse(Node<T> node, Visitor visitor) {
+    public <N extends Node<?>> void traverse(N node, Visitor<N> visitor) {
       throw new UnsupportedOperationException("Method BFS.traverse has not been fully implemented yet.");
     }
   };
 
-  public abstract <T> void traverse(Node<T> node, Visitor visitor);
+  public abstract <N extends Node<?>> void traverse(N node, Visitor<N> visitor);
 }

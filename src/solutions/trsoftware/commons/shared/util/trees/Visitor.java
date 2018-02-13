@@ -27,13 +27,15 @@ package solutions.trsoftware.commons.shared.util.trees;
  *   (see {@link com.google.gwt.dev.js.ast.JsSuperVisitor} for an example).
  * </p>
  *
- * @param <T> The supertype for the nodes in the type of tree on which this visitor operates.
+ * @param <N> The supertype for the nodes in the type of tree on which this visitor operates.
  * @see Node
  * @author Alex, 10/31/2017
  */
-public interface Visitor<T extends Node> {
+public interface Visitor<N extends Node> {
 
-  void visit(T node);
+  void beginVisit(N node);
+  void visit(N node);
+  void endVisit(N node);
 
   TraversalStrategy getStrategy();
 }

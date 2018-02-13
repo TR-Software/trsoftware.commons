@@ -277,7 +277,7 @@ public interface CountryFlagsBundle extends ImageBundle {
   AbstractImagePrototype zm();
   AbstractImagePrototype zw();
 
-  // NOTE: I made up the code "ct" for Catalonia to support the Catalan language - it reality there is no ISO code for it ("There is no separate ISO 3166-1 code for Catalonia. It is part of the Kingdom of Spain and its codes ES, ESP and 724 apply to Catalonia, too.")
+  // NOTE: I made up the code "ct" for Catalonia to support the Catalan language - in reality there is no ISO code for it ("There is no separate ISO 3166-1 code for Catalonia. It is part of the Kingdom of Spain and its codes ES, ESP and 724 apply to Catalonia, too.")
   // NOTE(2): CountryFlagsBundle.Lookup.getByName(language.getMainCountry("ct") won't work because "ct" isn't part of that lookup table
   AbstractImagePrototype ct();
 

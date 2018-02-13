@@ -401,6 +401,18 @@ public class ServerIOUtils {
     return filename.substring(0, extensionStartIndex);
   }
 
+  /**
+   * Returns the portion of the given filename that follows the last {@code .} (dot) char.
+   * @param filename (e.g. {@code "bar.txt"})
+   * @return the filename extension (e.g. {@code "txt"}), or the given string if the filename doesn't have an extension.
+   */
+  public static String filenameExtension(String filename) {
+    int extensionStartIndex = filename.lastIndexOf(".");
+    if (extensionStartIndex < 0)
+      return filename;  // the name doesn't have an extension
+    return filename.substring(extensionStartIndex + 1);
+  }
+
   /** Copies everything from the reader to the writer, closing both the reader and writer when finished */
   public static void copyReaderToWriter(Reader from, Writer to) throws IOException {
     try {

@@ -6,6 +6,8 @@ import solutions.trsoftware.commons.client.images.flags.CountryFlagsBundle;
 import java.util.List;
 import java.util.Locale;
 
+//import solutions.trsoftware.commons.client.images.flags_svg.CountryFlagsBundle2;
+
 /**
  * @author Alex
  * @since 11/20/2017
@@ -49,5 +51,29 @@ public class CountryCodesJavaTest extends TestCase {
     }
     System.out.printf("%s does not have flag images for %d/%d countries%n", CountryFlagsBundle.class.getSimpleName(), missCount, countryCodes.size());
   }
+
+/*  public void testFlagIcons2() throws Exception {
+    // check whether we have flag icons for all countries
+    int missCount = 0;
+    List<String> countryCodes = CountryCodes.listAllCodes();
+    // TODO: cont here: make this a relative path (based on package)
+    File baseDir = new File("C:\\Users\\Alex\\Documents\\Projects\\TR Commons\\src\\solutions\\trsoftware\\commons\\client\\images\\flags_svg");
+    for (String code : countryCodes) {
+      File flagFile = new File(baseDir, code + ".svg");
+      if (flagFile.exists()) {
+        System.out.printf("Flag for '%s': %s%n", code, flagFile.getName());
+      }
+      else {
+        missCount++;
+        System.out.printf("WARNING: No flag image available for %s (%s)%n", code, CountryCodes.getCountryName(code));
+      }
+    }
+    if (missCount > 0) {
+      System.out.printf("WARNING: %s does not have flag images for %d/%d countries%n", CountryFlagsBundle2.class.getSimpleName(), missCount, countryCodes.size());
+    }
+    else {
+      System.out.printf("%s has flag images for all %d countries%n", CountryFlagsBundle2.class.getSimpleName(), countryCodes.size());
+    }
+  }*/
 
 }

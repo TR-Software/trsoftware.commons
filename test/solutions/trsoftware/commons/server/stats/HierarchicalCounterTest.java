@@ -125,7 +125,7 @@ public class HierarchicalCounterTest extends TestCase {
 
     @Override
     public void visit(HierarchicalCounter node) {
-      System.out.println(StringUtils.repeat(' ', node.getLevel()*2) + "+ \"" + node.getName() + "\": " + node.getCount());
+      System.out.println(StringUtils.repeat(' ', node.depth()*2) + "+ \"" + node.getName() + "\": " + node.getCount());
     }
   }
 

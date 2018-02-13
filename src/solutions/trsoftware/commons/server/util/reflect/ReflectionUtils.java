@@ -31,6 +31,13 @@ import java.util.*;
  */
 public abstract class ReflectionUtils {
 
+  /**
+   * Sorted array of all reserved keywords in Java (these strings cannot be used as identifiers).
+   * @see <a href="https://docs.oracle.com/javase/specs/jls/se9/html/jls-3.html#jls-3.9">JLS</a>
+   */
+  public static final String[] JAVA_KEYWORDS = {"_", "abstract", "assert", "boolean", "break", "byte", "case", "catch", "char", "class", "const", "continue", "default", "do", "double", "else", "enum", "extends", "final", "finally", "float", "for", "goto", "if", "implements", "import", "instanceof", "int", "interface", "long", "native", "new", "package", "private", "protected", "public", "return", "short", "static", "strictfp", "super", "switch", "synchronized", "this", "throw", "throws", "transient", "try", "void", "volatile", "while"};
+
+
   // NOTE: the following 2 methods borrows from java.beans.ReflectionUtils, which unfortunately is not public
 
   /**
@@ -268,4 +275,12 @@ public abstract class ReflectionUtils {
     return rootDir;
   }
 
+  /**
+   * @return {@code true} if the argument is a reserved Java keyword.
+   *
+   * @see <a href="https://stackoverflow.com/a/24288335">StackOverflow</a>
+   */
+  public static boolean isJavaKeyword(String str) {
+    return Arrays.binarySearch(JAVA_KEYWORDS, str) >= 0;
+  }
 }

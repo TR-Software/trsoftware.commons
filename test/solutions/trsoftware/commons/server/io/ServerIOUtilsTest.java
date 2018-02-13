@@ -72,6 +72,7 @@ public class ServerIOUtilsTest extends TestCase {
   public void testFilenameExtension() throws Exception {
     assertEquals("txt", filenameExtension("foo.txt"));
     assertEquals("gif", filenameExtension("foo.txt.gif"));
+    assertEquals("", filenameExtension("foo"));
   }
 
   public void testReadCharacterStreamIntoStringUtf8() throws Exception {

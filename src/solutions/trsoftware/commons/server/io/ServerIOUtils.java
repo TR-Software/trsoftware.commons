@@ -404,12 +404,12 @@ public class ServerIOUtils {
   /**
    * Returns the portion of the given filename that follows the last {@code .} (dot) char.
    * @param filename (e.g. {@code "bar.txt"})
-   * @return the filename extension (e.g. {@code "txt"}), or the given string if the filename doesn't have an extension.
+   * @return the filename extension (e.g. {@code "txt"}), or an empty string if the filename doesn't have an extension.
    */
   public static String filenameExtension(String filename) {
     int extensionStartIndex = filename.lastIndexOf(".");
     if (extensionStartIndex < 0)
-      return filename;  // the name doesn't have an extension
+      return "";  // the name doesn't have an extension
     return filename.substring(extensionStartIndex + 1);
   }
 

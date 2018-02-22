@@ -19,7 +19,7 @@
       <configuration>
         <setting name="compilerMaxHeapSize" value="1024" />
         <setting name="gwtScriptOutputStyle" value="DETAILED" />
-        <setting name="gwtSdkUrl" value="file://C:/Programming/GWT/gwt-2.5.0-StackTracePatch" />
+        <setting name="gwtSdkUrl" value="file://$GWT_HOME$" />
       </configuration>
     </facet>
   </component>
@@ -38,7 +38,19 @@
     </content>
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />
-    <orderEntry type="library" name="StackTraceDeobfuscator" level="application" />
+    <orderEntry type="module-library">
+      <library name="StackTraceDeobfuscator">
+        <CLASSES>
+          <root url="jar://$MODULE_DIR$/../gwt-stack-trace-kit/stacktracedeobfuscator/build/gwt-stack-trace-kit-1.01/dist/gwt-stack-trace-kit-1.01-servlet.jar!/" />
+          <root url="jar://$MODULE_DIR$/../gwt-stack-trace-kit/stacktracedeobfuscator/build/gwt-stack-trace-kit-1.01/dist/gwt-stack-trace-kit-1.01.jar!/" />
+        </CLASSES>
+        <JAVADOC />
+        <SOURCES>
+          <root url="jar://$MODULE_DIR$/../gwt-stack-trace-kit/stacktracedeobfuscator/build/gwt-stack-trace-kit-1.01/dist/gwt-stack-trace-kit-1.01-src.jar!/" />
+          <root url="jar://$MODULE_DIR$/../gwt-stack-trace-kit/stacktracedeobfuscator/build/gwt-stack-trace-kit-1.01/dist/gwt-stack-trace-kit-1.01.jar!/" />
+        </SOURCES>
+      </library>
+    </orderEntry>
     <orderEntry type="library" name="Apache Tomcat 8.5.23 (minus ECJ)" level="application" />
     <orderEntry type="library" scope="TEST" name="HtmlUnit 2.15" level="application" />
     <orderEntry type="library" name="gwt-2.5.0-StackTracePatch" level="application" />
@@ -48,6 +60,6 @@
     <orderEntry type="library" name="Dumbster" level="application" />
     <orderEntry type="library" scope="TEST" name="HTTP Unit 1.7" level="application" />
     <orderEntry type="library" scope="TEST" name="JUnit Add-Ons" level="application" />
-    <orderEntry type="library" name="javapoet-1.9.0" level="application" />
+    <orderEntry type="library" name="javapoet-1.9.0" level="project" />
   </component>
 </module>

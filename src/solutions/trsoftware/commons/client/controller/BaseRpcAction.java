@@ -25,6 +25,9 @@ import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.rpc.IncompatibleRemoteServiceException;
 import com.google.gwt.user.client.ui.AbstractImagePrototype;
+import com.google.web.bindery.event.shared.EventBus;
+import com.google.web.bindery.event.shared.HandlerRegistration;
+import com.google.web.bindery.event.shared.SimpleEventBus;
 import solutions.trsoftware.commons.client.Messages;
 import solutions.trsoftware.commons.client.images.CommonsImages;
 import solutions.trsoftware.commons.client.logging.Log;
@@ -55,9 +58,11 @@ public abstract class BaseRpcAction<T> implements Command, AsyncCallback<T> {
   /** Name of the concrete action class */
   protected String name;
 
+  private EventBus eventBus;
+
   protected BaseRpcAction() {
     name = getClass().getName();
-    if (name.contains("$")) // add super's name to annonymous inner classes
+    if (name.contains("$")) // add super's name to anonymous inner classes
       name += " extends " + getClass().getSuperclass().getName();
   }
 
@@ -117,7 +122,7 @@ public abstract class BaseRpcAction<T> implements Command, AsyncCallback<T> {
       // for any other exception, let the subclass handle it
       handleFailure(caught);
     }
-    onFinally();
+    getEventBus().fireEventFromSource(new FailureEvent(caught), this);
   }
 
   /** Subclasses should override to provide handling for exceptions that might be thrown by their particular RPCs */
@@ -135,16 +140,18 @@ public abstract class BaseRpcAction<T> implements Command, AsyncCallback<T> {
     endTime = Duration.currentTimeMillis();
     Log.write("Call to " + name + " succeeded (" + getRoundTripTime() + " ms roundtrip).");
     handleSuccess(result);
-    onFinally();
+    getEventBus().fireEventFromSource(new SuccessEvent<T>(result), this);
+    onFinished();
   }
 
   /**
-   * Called after either onSuccess or onFailure to perform any cleanup task
+   * Called after either {@link #onSuccess(Object)} or {@link #onFailure(Throwable)} to perform any cleanup task
    * that needs to happen regardless of success or failure of the action.
    */
-  protected void onFinally() {
+  protected void onFinished() {
     if (busyPopup != null)
       busyPopup.hide();
+    getEventBus().fireEventFromSource(new FinishedEvent(), this);
   }
 
   /**
@@ -156,7 +163,7 @@ public abstract class BaseRpcAction<T> implements Command, AsyncCallback<T> {
       Scheduler.get().scheduleDeferred(new Scheduler.ScheduledCommand() {
         @Override
         public void execute() {
-          onFinally();  // since neither onSuccess nor onFailure will ever be called, we call onFinally to allow the subclass to clean up (e.g. hide a popup dialog that triggered this action)
+          onFinished();  // since neither onSuccess nor onFailure will ever be called, we call onFinally to allow the subclass to clean up (e.g. hide a popup dialog that triggered this action)
         }
       });
     }
@@ -168,6 +175,7 @@ public abstract class BaseRpcAction<T> implements Command, AsyncCallback<T> {
         Log.write("Invoking " + name);
       if (busyPopup != null)
         busyPopup.showRelativeToWindow(.5, .333);
+      getEventBus().fireEventFromSource(new ExecuteEvent(), this);
       executeRpcAction();
     }
   }
@@ -175,8 +183,8 @@ public abstract class BaseRpcAction<T> implements Command, AsyncCallback<T> {
   protected abstract void executeRpcAction();
 
   /**
-   * Subclasses that wish to show a "please wait" popup message while the RPC
-   * is executing should call this method with their customized message.
+   * Subclasses that wish to show a "please wait" popup message while the RPC is executing should call
+   * this method with their customized message.
    */
   public void showBusyMessage(String message) {
     if (busyPopup == null)
@@ -189,4 +197,38 @@ public abstract class BaseRpcAction<T> implements Command, AsyncCallback<T> {
     this.busyPopup = busyPopup;
     busyPopup.setGlassEnabled(modal);
   }
+
+  /**
+   * Lazy-inits {@link #eventBus} and returns it.
+   */
+  private EventBus getEventBus() {
+    if (eventBus == null)
+      eventBus = createEventBus();  // lazy init
+    return eventBus;
+  }
+
+  /**
+   * @return A new instance of {@link SimpleEventBus}.
+   * Subclasses may override to provide a different {@link EventBus} implementation.
+   */
+  protected EventBus createEventBus() {
+    return new SimpleEventBus();
+  }
+
+  public HandlerRegistration addExecuteHandler(ExecuteEvent.Handler handler) {
+    return getEventBus().addHandlerToSource(ExecuteEvent.TYPE, this, handler);
+  }
+
+  public HandlerRegistration addFinishedHandler(FinishedEvent.Handler handler) {
+    return getEventBus().addHandlerToSource(FinishedEvent.TYPE, this, handler);
+  }
+
+  public HandlerRegistration addSuccessHandler(SuccessEvent.Handler handler) {
+    return getEventBus().addHandlerToSource(SuccessEvent.TYPE, this, handler);
+  }
+
+  public HandlerRegistration addFailureHandler(FailureEvent.Handler handler) {
+    return getEventBus().addHandlerToSource(FailureEvent.TYPE, this, handler);
+  }
+
 }

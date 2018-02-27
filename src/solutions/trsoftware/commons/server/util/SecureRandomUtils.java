@@ -69,7 +69,13 @@ public abstract class SecureRandomUtils {
     return randBytes(12);
   }
 
+  /**
+   * Generates and prints some random values that can be used for auth codes, passwords, etc.
+   */
   public static void main(String[] args) {
-    System.out.println(randString(64));
+    System.out.println("randString(64): " + randString(64));
+    for (int i = 12; i < 40; i++) {
+      System.out.printf("randBytes(%d): %s%n", i, randBytes(i));
+    }
   }
 }

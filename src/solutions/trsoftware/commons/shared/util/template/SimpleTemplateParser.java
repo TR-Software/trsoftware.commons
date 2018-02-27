@@ -28,16 +28,16 @@ import static solutions.trsoftware.commons.shared.util.template.SimpleTemplatePa
  * <ol>
  *   <li><b>text</b> spans</li>
  *   <li>
- *     <b>variable</b> spans between opening and closing tags defined by {@link #v0} and {@link #v1}
+ *     <i>variable</i> spans between opening and closing tags defined by {@link #vO} and {@link #vC}
  *     (e.g. <code>${</code> and <code>}</code>)
  *   </li>
  *   <li>
- *     <i>comment</i> spans between opening and closing tags defined by {@link #c0} and {@link #c1}
+ *     <i>comment</i> spans between opening and closing tags defined by {@link #cO} and {@link #cC}
  *     (e.g. {@code <!--} and {@code -->})
  *   </li>
  * </ol>
- * Only the <b>text</b> and <b>variable</b> spans are kept, while the <i>comment</i> spans are discarded, as well as the
- * the {@link #v0}/{@link #v1} and {@link #c0}/{@link #c1} tags themselves (they won't appear in the rendered output of the template).
+ * Only the <b>text</b> and <i>variable</i> spans are kept, while the <i>comment</i> spans are discarded, as well as the
+ * the {@link #vO}/{@link #vC} and {@link #cO}/{@link #cC} tags themselves (they won't appear in the rendered output of the template).
  * <p>
  *   For example, suppose the variable {@code templateString} contains the following template string:
  *   <hr>
@@ -97,31 +97,31 @@ public class SimpleTemplateParser implements TemplateParser {
     IN_COMMENT
   }
 
-  /** <b>variable</b> opening tag (e.g. "<code>${</code>") */
-  private final String v0;
-  
-  /** <b>variable</b> closing tag (e.g. "<code>}</code>") */
-  private final String v1;
-  
+  /** <i>variable</i> opening tag (e.g. "<code>${</code>") */
+  private final String vO;
+
+  /** <i>variable</i> closing tag (e.g. "<code>}</code>") */
+  private final String vC;
+
   /** <i>comment</i> opening tag (e.g. "{@code <!--}") */
-  private final String c0;
-  
-  /** <i>comment</i> opening tag (e.g. "{@code <!--}") */
-  private final String c1;
+  private final String cO;
+
+  /** <i>comment</i> closing tag (e.g. "{@code -->"}) */
+  private final String cC;
 
   /**
    * Creates a parser for the template language with the given syntax.
    *
-   * @param v0 <b>variable</b> opening tag (e.g. "<code>${</code>")
-   * @param v1 <b>variable</b> closing tag (e.g. "<code>}</code>")
-   * @param c0 <i>comment</i> opening tag (e.g. "{@code <!--}")
-   * @param c1 <i>comment</i> opening tag (e.g. "{@code <!--}")
+   * @param vO <i>variable</i> opening tag (e.g. "<code>${</code>")
+   * @param vC <i>variable</i> closing tag (e.g. "<code>}</code>")
+   * @param cO <i>comment</i> opening tag (e.g. "{@code <!--}")
+   * @param cC <i>comment</i> closing tag (e.g. "{@code -->"})
    */
-  public SimpleTemplateParser(String v0, String v1, String c0, String c1) {
-    this.v0 = v0;
-    this.v1 = v1;
-    this.c0 = c0;
-    this.c1 = c1;
+  public SimpleTemplateParser(String vO, String vC, String cO, String cC) {
+    this.vO = vO;
+    this.vC = vC;
+    this.cO = cO;
+    this.cC = cC;
   }
 
   /**
@@ -140,17 +140,17 @@ public class SimpleTemplateParser implements TemplateParser {
       switch (state) {
         case IN_TEXT:
           String run;
-          int nextVO = templateString.indexOf(v0, next);
-          int nextCO = templateString.indexOf(c0, next);
+          int nextVO = templateString.indexOf(vO, next);
+          int nextCO = templateString.indexOf(cO, next);
           if (nextVO >= 0 && (nextCO < 0 || nextVO < nextCO)) {
             run = templateString.substring(next, nextVO);
             state = IN_VARIABLE;
-            next = nextVO + v0.length();
+            next = nextVO + vO.length();
           }
           else if (nextCO >= 0 && (nextVO < 0 || nextCO < nextVO)) {
             run = templateString.substring(next, nextCO);
             state = IN_COMMENT;
-            next = nextCO + c0.length();
+            next = nextCO + cO.length();
           } else {
             // reached the end of string
             run = templateString.substring(next, templateString.length());
@@ -162,29 +162,45 @@ public class SimpleTemplateParser implements TemplateParser {
           }
           break;
         case IN_COMMENT:
-          int nextCC = templateString.indexOf(c1, next);
+          int nextCC = templateString.indexOf(cC, next);
           if (nextCC < 0)
             throw syntaxError("unterminated comment", templateString, next);
-          next = nextCC + c1.length();
+          next = nextCC + cC.length();
           state = IN_TEXT;
           break;
         case IN_VARIABLE:
-          int nextVC = templateString.indexOf(v1, next);
+          int nextVC = templateString.indexOf(vC, next);
           if (nextVC < 0)
             throw syntaxError("unterminated variable", templateString, next);
           String varName = templateString.substring(next, nextVC);
-          // make sure the variable name matches [A-Za-z0-1_]+ (i.e. it doesn't span multiple lines, and stuff like that)
-          String varNameRegex = "[A-Za-z0-1_]+"; // TODO: allow dots and maybe other chars in the name (Ant variables use lots of dots)
+          // make sure the variable name is non-empty and doesn't contain any whitespace
+          String varNameRegex = "\\S+";
           if (!varName.matches(varNameRegex)) {
             throw syntaxError("'" + varName + "' is not a legal variable name (should match /" + varNameRegex + "/)", templateString, next);
           }
           parts.add(new VariablePart(varName));
-          next = nextVC + v1.length();
+          next = nextVC + vC.length();
           state = IN_TEXT;
           break;
       }
     }
     return new Template(parts, (int)(length*1.5));
+  }
+
+  public String getVarStartSyntax() {
+    return vO;
+  }
+
+  public String getVarEndSyntax() {
+    return vC;
+  }
+
+  public String getCommentStartSyntax() {
+    return cO;
+  }
+
+  public String getCommentEndSyntax() {
+    return cC;
   }
 
   private IllegalArgumentException syntaxError(String info, String templateString, int position) {

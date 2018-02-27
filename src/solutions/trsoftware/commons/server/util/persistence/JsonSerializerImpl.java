@@ -46,7 +46,7 @@ public class JsonSerializerImpl<T> implements JsonSerializer<T> {
   }
 
   /**
-   * Sublcasses can override this method to change the GSON output/parsing settings.
+   * Subclasses can override this method to change the GSON output/parsing settings.
    * See https://sites.google.com/site/gson/gson-user-guide
    */
   protected void configureGson(GsonBuilder gsonBuilder) {

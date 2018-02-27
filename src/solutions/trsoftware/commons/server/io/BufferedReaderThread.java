@@ -20,8 +20,8 @@ package solutions.trsoftware.commons.server.io;
 import java.io.*;
 
 /**
- * Thread that reads from a given input stream or reader using BufferedReader
- * line-by-line, terminating when the end of the input stream is reached.
+ * Thread that reads from a given input stream or reader line-by-line (using a {@link BufferedReader}, and
+ * terminates when the end of the input stream is reached.
  * Subclasses should override the method processLine to do something with the lines.
  *
  * Mar 8, 2011
@@ -39,11 +39,19 @@ public abstract class BufferedReaderThread extends Thread {
     this(new InputStreamReader(in));
   }
 
+  /**
+   * @param in the input to be read
+   * @param name name for this thread, which will be passed to {@link Thread#Thread(String)}
+   */
   public BufferedReaderThread(Reader in, String name) {
     super(name);
     br = new BufferedReader(in);
   }
 
+  /**
+   * @param in the input to be read
+   * @param name name for this thread, which will be passed to {@link Thread#Thread(String)}
+   */
   public BufferedReaderThread(InputStream in, String name) {
     this(new InputStreamReader(in), name);
   }
@@ -60,7 +68,7 @@ public abstract class BufferedReaderThread extends Thread {
     throw new RuntimeException(ex);
   }
 
-  /** Sublcasses may override */
+  /** Subclasses may override */
   protected void doneReading() {
     try {
       br.close();

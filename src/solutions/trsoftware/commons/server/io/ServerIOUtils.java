@@ -21,7 +21,9 @@ import solutions.trsoftware.commons.server.util.ServerStringUtils;
 import solutions.trsoftware.commons.shared.util.StringUtils;
 
 import java.io.*;
+import java.net.Socket;
 import java.net.URL;
+import java.nio.file.Path;
 import java.util.ArrayList;
 
 /**
@@ -29,7 +31,7 @@ import java.util.ArrayList;
  *
  * @author Alex
  */
-public class ServerIOUtils {
+public final class ServerIOUtils {
 
   /** The size of the buffer used by the stream reading and copying methods in this class */
   public static final int BUFFER_SIZE = 8192;  // this is the default value from Java's BufferedReader class
@@ -147,7 +149,7 @@ public class ServerIOUtils {
    * Can be used for reading a text file into a String.  Closes the reader when finished.
    * Uses an 8K buffer to reduce CPU usage.
    * WARNING: if given a file reader, the result will contain platform-specific
-   * line break characters (e.g. "\r\n" on Windows)
+   * line break characters (e.g. {@code "\r\n"} on Windows)
    */
   public static String readCharactersIntoString(Reader in) throws IOException {
     StringBuilder s = new StringBuilder(BUFFER_SIZE);
@@ -273,16 +275,17 @@ public class ServerIOUtils {
   }
 
   /**
-   * @return a fully-qualified path/filename given a simple filename in the package
-   * of the referenced class.
-   * Example: If "myfile.txt" and MyClass.java ar in the directory
-   * "/c:/projects/myproject/src/com/foo/", then
-   * filenameInPackageOf("myfile.txt", com.foo.MyClass.class) will return
-   * "/c:/projects/myproject/src/com/foo/myfile.txt"
+   * Computes an absolute path to a file in the same directory as the given reference class.
    *
-   * WARNING: this method should only be used in unit tests and local code,
-   * becuase the deployed WAR file will not include non-class files in its build output.
-   * (All such files go in the src/resources directory).
+   * <p><i>Example</i>: Suppose that {@code myfile.txt} and {@code MyClass.java} are in the directory
+   * {@code /projects/myproject/src/com/foo/}, then
+   * {@code filenameInPackageOf("myfile.txt", com.foo.MyClass.class)} will return
+   * {@code /projects/myproject/src/com/foo/myfile.txt}
+   * </p>
+   *
+   * @return the absolute path to a file in the same package as the referenced class
+   *
+   * @deprecated see deprecation warning for {@link #resourceNameFromFilenameInSamePackage(String, Class)}
    */
   public static String filenameInPackageOf(String filename, Class referenceClassInSamePackage) {
     return resourceNameToFilename(resourceNameFromFilenameInSamePackage(filename, referenceClassInSamePackage));
@@ -477,5 +480,50 @@ public class ServerIOUtils {
    */
   public static File getClassFile(Class cls) {
     return urlToFile(cls.getResource(cls.getSimpleName() + ".class"));
+  }
+
+  /**
+   * Spawns a {@link BufferedReaderThread} to print the given input stream, like the <i>stdout</i> of another process
+   * (obtained with {@link Process#getInputStream()}) to the given {@link PrintStream}
+   * @param from the input to read
+   * @param to where to print the input
+   * @param name will be passed to {@link Thread#Thread(String)}
+   * @return the spawned thread
+   */
+  public static BufferedReaderThread pipeStream(InputStream from, final PrintStream to, String name) {
+    BufferedReaderThread readerThread = new BufferedReaderThread(from, name) {
+      public boolean processLine(String line) {
+        to.println(line);
+        return true;
+      }
+    };
+    readerThread.start();
+    return readerThread;
+  }
+
+  /**
+   * Registers the given path to be deleted on JVM shutdown by invoking {@link File#deleteOnExit()}
+   * on {@link Path#toFile() path.toFile()}, which registers it with the {@link DeleteOnExitHook}
+   * @param path the path to be deleted
+   * @return the same object that was passed as the arg
+   */
+  public static Path deleteOnExit(Path path) {
+    path.toFile().deleteOnExit();
+    return path;
+  }
+
+  /**
+   * @return {@code true} iff a socket connection to the given port cannot be established
+   */
+  public static boolean isLocalPortAvailable(int port) {
+    // This solution suggested by http://stackoverflow.com/questions/434718/sockets-discover-port-availability-using-java
+    try {
+      Socket s = new Socket("localhost", port); // will throw exception if unable to connect
+      s.close();
+      return false;  // we were able to connect to the port, which means some process is listening on it
+    }
+    catch (IOException e) {
+      return true;  // unable to connect, so the port is most likely free
+    }
   }
 }

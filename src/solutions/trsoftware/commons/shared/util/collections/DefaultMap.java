@@ -27,6 +27,9 @@ import java.util.Set;
  * which inserts the result of {@link #computeDefault(Object)} for any key that's not already contained by the
  * encapsulated map.
  *
+ * NOTE: this is different form the new Java 8 method {@link Map#getOrDefault(Object, Object)}, which doesn't
+ * actually add the missing value to the map.
+ *
  * @author Alex, 2/24/2016
  */
 public abstract class DefaultMap<K, V> implements Map<K, V> {
@@ -65,6 +68,7 @@ public abstract class DefaultMap<K, V> implements Map<K, V> {
   }
 
   @Override
+  @SuppressWarnings("unchecked")
   public V get(Object key) {
     return getOrInsert((K)key);
   }

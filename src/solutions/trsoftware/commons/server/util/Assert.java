@@ -24,7 +24,7 @@ import solutions.trsoftware.commons.server.ServerConstants;
  *
  * @author Alex
  */
-public class Assert {
+public class Assert extends solutions.trsoftware.commons.shared.util.Assert {
 
   public static void assertInUnitTestOrCanStopClock() {
     if (!ServerConstants.IN_UNIT_TEST && !ServerConstants.IS_CLOCK_STOPPABLE)
@@ -35,11 +35,5 @@ public class Assert {
     if (ServerConstants.IN_UNIT_TEST)
       throw new IllegalStateException("This code is not intended for unit testing and should not be invoked from this context.");
   }
-
-
-  public static void assertTrue(boolean condition) {
-    solutions.trsoftware.commons.shared.util.Assert.assertTrue(condition);
-  }
-
 
 }

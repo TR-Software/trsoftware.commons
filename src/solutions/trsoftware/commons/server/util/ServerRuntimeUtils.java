@@ -17,6 +17,7 @@
 
 package solutions.trsoftware.commons.server.util;
 
+import java.util.concurrent.TimeoutException;
 import java.util.function.BooleanSupplier;
 
 /**
@@ -77,12 +78,13 @@ public class ServerRuntimeUtils {
   /**
    * Keeps retrying the given function until it either returns {@code true} or the given timeout is exceeded.
    * @param function a lambda expression that returns {@code true} when successful.
+   * @throws TimeoutException if the given function never returned {@code true} before the given timeout elapsed
    */
-  public static void retryWhileFalse(int timeoutMillis, BooleanSupplier function) {
+  public static void retryWhileFalse(int timeoutMillis, BooleanSupplier function) throws TimeoutException {
     Duration duration = new Duration();
     while (!function.getAsBoolean()) {
       if (duration.elapsedMillis() > timeoutMillis)
-        throw new RuntimeException("Operation timed out");
+        throw new TimeoutException(String.format("Condition not met within %d ms", timeoutMillis));
       try {
         Thread.sleep(100);
       }

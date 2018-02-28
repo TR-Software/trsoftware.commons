@@ -17,6 +17,7 @@
 
 package solutions.trsoftware.commons.server.testutil;
 
+import solutions.trsoftware.commons.server.util.function.ThrowingBiConsumer;
 import solutions.trsoftware.commons.server.util.reflect.MemberSet;
 import solutions.trsoftware.commons.server.util.reflect.ObjectDiffs;
 
@@ -25,7 +26,6 @@ import java.lang.reflect.Member;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.List;
-import java.util.function.BiConsumer;
 import java.util.regex.Pattern;
 
 import static junit.framework.Assert.*;
@@ -135,13 +135,13 @@ public abstract class ServerAssertUtils {
     }
   }
 
-  public static <T> void assertListsEqual(List<T> expected, List<T> actual, BiConsumer<T, T> equalityAssertertion) {
+  public static <T> void assertListsEqual(List<T> expected, List<T> actual, ThrowingBiConsumer<T, T, Exception> equalityAssertion) throws Exception {
     assertEquals(expected.size(), actual.size());
     for (int i = 0; i < expected.size(); i++) {
       T a = expected.get(i);
       T b = actual.get(i);
       try {
-        equalityAssertertion.accept(a, b);
+        equalityAssertion.accept(a, b);
       }
       catch (AssertionError ex) {
         throw new AssertionError(String.format("Lists differ on element %d: expected:<%s> but was:<%s>", i, expected, actual), ex);

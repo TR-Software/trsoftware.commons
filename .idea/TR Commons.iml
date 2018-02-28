@@ -60,6 +60,18 @@
     <orderEntry type="library" name="Dumbster" level="application" />
     <orderEntry type="library" scope="TEST" name="HTTP Unit 1.7" level="application" />
     <orderEntry type="library" scope="TEST" name="JUnit Add-Ons" level="application" />
-    <orderEntry type="library" name="javapoet-1.9.0" level="project" />
+    <orderEntry type="module-library">
+      <library name="javapoet-1.9.0">
+        <CLASSES>
+          <root url="jar://$PROGRAMMING_LIBS_DIR$/javapoet/1.9/javapoet-1.9.0.jar!/" />
+        </CLASSES>
+        <JAVADOC>
+          <root url="jar://$PROGRAMMING_LIBS_DIR$/javapoet/1.9/javapoet-1.9.0-javadoc.jar!/" />
+        </JAVADOC>
+        <SOURCES>
+          <root url="jar://$PROGRAMMING_LIBS_DIR$/javapoet/1.9/javapoet-1.9.0-sources.jar!/" />
+        </SOURCES>
+      </library>
+    </orderEntry>
   </component>
 </module>

@@ -19,10 +19,16 @@ public class GwtModuleFiles {
 
   // TODO: test this class
 
-  public static final LazyReference<Pattern> cacheDotHtmlFilenamePattern = new LazyReference<Pattern>() {
+  /**
+   * The filenames of modules compiled by the GWT compiler generally have the pattern
+   * {@code {moduleStrongName}.cache.html} or {@code {moduleStrongName}.cache.js}.  The file type depends
+   * on the <a href="http://www.gwtproject.org/doc/latest/DevGuideLinkers.html">linker</a> configured in the module XML.
+   * @see <a href="http://www.gwtproject.org/doc/latest/DevGuideLinkers.html">GWT Linkers guide</a>
+   */
+  public static final LazyReference<Pattern> permutationsFilenamePattern = new LazyReference<Pattern>() {
     @Override
     protected Pattern create() {
-      return Pattern.compile(".*([0-9A-F]{32})\\.cache\\.html");
+      return Pattern.compile(".*([0-9A-F]{32})\\.cache\\.(?:js|html)");
     }
   };
 
@@ -37,7 +43,7 @@ public class GwtModuleFiles {
     File[] files = baseDir.listFiles();
     for (File file : files) {
       if (file.isFile()) {
-        Matcher matcher = cacheDotHtmlFilenamePattern.get().matcher(file.getName());
+        Matcher matcher = permutationsFilenamePattern.get().matcher(file.getName());
         if (matcher.matches()) {
           cacheHtmlFiles.add(file);
           permutationStrongNames.add(matcher.group(1));

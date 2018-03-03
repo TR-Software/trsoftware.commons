@@ -37,7 +37,7 @@ public class GwtPermutationsIndex {
         if (permutations == null) {
           permutations = new LinkedHashSet<>();
           // load the names of module permutations available on the server
-          Pattern pattern = GwtModuleFiles.cacheDotHtmlFilenamePattern.get();
+          Pattern pattern = GwtModuleFiles.permutationsFilenamePattern.get();
           for (String resourcePath : servletContext.getResourcePaths(moduleBasePath)) {
             Matcher matcher = pattern.matcher(resourcePath);
             if (matcher.matches()) {

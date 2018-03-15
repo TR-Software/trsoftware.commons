@@ -7,10 +7,14 @@ import java.nio.file.attribute.BasicFileAttributes;
 import java.nio.file.attribute.FileAttribute;
 import java.util.EnumSet;
 import java.util.Set;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import static java.nio.file.FileVisitResult.CONTINUE;
 
 /**
+ * Provides utilities for working with files using the new Java 7 {@link java.nio.file} API.
+ *
  * @author Alex
  * @since 2/25/2018
  */
@@ -80,9 +84,11 @@ public class FileUtils {
   }
 
   /**
-   * Recursively copies the file tree rooted at {@code sourcePath} to {@code targetPath}.
+   * Recursively copies files.
+   * @param sourcePath the root directory of the file tree to be copied
+   * @param targetPath the destination directory
    * @return {@code targetPath}
-   * @throws IOException
+   *
    * @see Files#walkFileTree(Path, Set, int, FileVisitor)
    * @see Files#copy(Path, Path, CopyOption...)
    */
@@ -123,5 +129,68 @@ public class FileUtils {
       throw new IllegalArgumentException(path.toString() + " does not exist or not a directory");
   }
 
+  /**
+   * Provides the {@link File#deleteOnExit()} functionality for a {@link Path} object.
+   * @param file the file to be deleted on exit
+   * @return the same file that was passed in
+   */
+  public static Path deleteOnExit(Path file) {
+    file.toFile().deleteOnExit();
+    return file;
+  }
 
+
+  /**
+   * Base class for a {@link FileVisitor} that matches filenames against a regular expression.
+   * Intended to be used with {@link Files#walkFileTree}.
+   * <p>
+   * Implementations just have to provide the {@link #visitMatchedFile(Path, BasicFileAttributes, Matcher)} method,
+   * which will be invoked for every file matching the pattern.
+   * <p>
+   * <em>NOTE: {@link FileSystem#getPathMatcher(String)} (Path, String)} offers similar (but more limited) functionality
+   * using <a href="https://docs.oracle.com/javase/tutorial/essential/io/fileOps.html#glob">"glob" expressions</a></em>,
+   * which might be preferable (when full regex matching is not required), because glob matching is implemented natively
+   * by many filesystems and allows using the convenient "{@code /**}" syntax to "cross directory boundaries". This can
+   * be used with {@link Files#newDirectoryStream(Path, String)} (non-recursive) or {@link Files#walk(Path,
+   * FileVisitOption...)} (recursive)
+   * <p>
+   * Either way, using a regex ({@link Pattern}) allows for more precise matching than a glob and can be used to extract
+   * useful information from each match (via capturing groups).
+   *
+   * @see Files#walkFileTree
+   * @see Files#walk
+   * @see Files#newDirectoryStream(Path, String)
+   * @see <a href="https://stackoverflow.com/q/37383668">StackOverflow question illustrating PathMatcher usage</a>
+   * @see Pattern
+   */
+  public static abstract class FilenamePatternVisitor extends SimpleFileVisitor<Path> {
+    private final Pattern filenamePattern;
+
+    /**
+     * @param filenamePattern regex to be used for matching filenames.
+     */
+    public FilenamePatternVisitor(Pattern filenamePattern) {
+      this.filenamePattern = filenamePattern;
+    }
+
+    @Override
+    public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
+      Matcher matcher = filenamePattern.matcher(file.getFileName().toString());
+      if (matcher.matches()) {
+        return visitMatchedFile(file, attrs, matcher);
+      }
+      return CONTINUE;
+    }
+
+    /**
+     * Do something with a matched file.  Will be invoked for every file that matches the regular expression.
+     *
+     * @param file the {@code file} argument received by {@link #visitFile(Path, BasicFileAttributes)}
+     * @param attrs the {@code attrs} argument received by {@link #visitFile(Path, BasicFileAttributes)}
+     * @param match the {@link Matcher} that was used to match the filename. Can be used to extract info via
+     *     capturing groups
+     * @return how to proceed from this point
+     */
+    protected abstract FileVisitResult visitMatchedFile(Path file, BasicFileAttributes attrs, Matcher match);
+  }
 }

@@ -1,5 +1,7 @@
 package solutions.trsoftware.commons.server.gwt;
 
+import solutions.trsoftware.tools.gwt.artifacts.GwtCompilerArtifacts;
+
 import javax.servlet.ServletContext;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
@@ -37,7 +39,7 @@ public class GwtPermutationsIndex {
         if (permutations == null) {
           permutations = new LinkedHashSet<>();
           // load the names of module permutations available on the server
-          Pattern pattern = GwtModuleFiles.permutationsFilenamePattern.get();
+          Pattern pattern = Pattern.compile(".*" + GwtCompilerArtifacts.PERMUTATION_FILENAME_PATTERN.pattern());
           for (String resourcePath : servletContext.getResourcePaths(moduleBasePath)) {
             Matcher matcher = pattern.matcher(resourcePath);
             if (matcher.matches()) {

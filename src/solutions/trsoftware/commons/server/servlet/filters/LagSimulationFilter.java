@@ -1,6 +1,6 @@
 package solutions.trsoftware.commons.server.servlet.filters;
 
-import solutions.trsoftware.commons.server.servlet.filters.config.FilterParameters;
+import solutions.trsoftware.commons.server.servlet.config.InitParameters;
 import solutions.trsoftware.commons.server.util.ThreadUtils;
 import solutions.trsoftware.commons.shared.util.MathUtils;
 import solutions.trsoftware.commons.shared.util.RandomUtils;
@@ -48,7 +48,7 @@ public class LagSimulationFilter extends HttpFilterAdapter {
   /**
    * Specifies the {@code init-param} settings for this filter's {@link FilterConfig}
    */
-  private static class Config implements FilterParameters {
+  private static class Config implements InitParameters {
     @Param(required = true)
     private int lagMillis;
     private boolean random;

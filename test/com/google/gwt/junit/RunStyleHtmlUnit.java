@@ -33,8 +33,10 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.*;
 
-//TODO(alexe): This patch adds support for htmlunit-2.15 (instead of htmlunit-2.9, which is used by GWT 2.5.0 and included in gwt-dev.jar)
-//TODO(alexe): We don't want to use htmlunit-2.9 because it contains a memory leak that was fixed starting with htmlunit-2.10
+//NOTE(alexe): This patch adds support for htmlunit-2.15 (instead of htmlunit-2.9, which is used by GWT 2.5.0 and included in gwt-dev.jar)
+//NOTE(alexe): We don't want to use htmlunit-2.9 because it contains a memory leak that was fixed starting with htmlunit-2.10
+
+//TODO(alexe): GWT now bundles HtmlUnit 2.13, so now that we've upgraded to GWT 2.8.2 (on 3/4/2018), can probably delete this class
 
 /**
  * Launches a web-mode test via HTMLUnit.

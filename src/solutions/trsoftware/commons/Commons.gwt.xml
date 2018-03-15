@@ -20,7 +20,7 @@
   <inherits name='com.google.gwt.user.User'/>
   <inherits name="com.google.gwt.json.JSON"/>
   <inherits name="com.google.common.collect.Collect"/>
-  <inherits name="solutions.trsoftware.gwt.stacktrace.StackTraceDeobfuscator"/>
+  <inherits name="solutions.trsoftware.commons.StackTraceDeobfuscator"/>
 
   <!-- TODO: attempting to replace ARI with CssResource; see CommonsCss interface -->
   <!--<stylesheet src="Commons.css"/>-->

@@ -27,7 +27,7 @@ import java.util.Map;
  * Maps ISO country codes to their English names via {@link #getCountryName(String)}.
  *
  * <p>
- *   The mapping was generated with the help of {@link solutions.trsoftware.tools.gen.CountryCodesGenerator}
+ *   The mapping was generated with the help of {@link solutions.trsoftware.tools.gwt.gen.CountryCodesGenerator}
  *   using all the available {@link java.util.Locale} info from the JRE.
  * </p>
  * <p style="font-style: italic">

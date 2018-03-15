@@ -40,7 +40,7 @@ public class Rectangle {
   }
 
   /**
-   * Code adopted from java.awt.Rectangle:
+   * Code adopted from {@link java.awt.Rectangle}:
    * 
    * Computes the intersection of this <code>Rectangle</code> with the specified
    * <code>Rectangle</code>. Returns a new <code>Rectangle</code> that

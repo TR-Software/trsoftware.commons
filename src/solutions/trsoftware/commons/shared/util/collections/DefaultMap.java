@@ -23,9 +23,8 @@ import java.util.Map;
 import java.util.Set;
 
 /**
- * Decorates a {@link Map} such that {@link #get(Object)} invokes the private method {@link #getOrInsert(Object)},
- * which inserts the result of {@link #computeDefault(Object)} for any key that's not already contained by the
- * encapsulated map.
+ * Decorates a {@link Map} such that {@link #get(Object)} inserts the result of {@link #computeDefault(Object)}
+ * for any key that's not already contained by the encapsulated map.
  *
  * NOTE: this is different form the new Java 8 method {@link Map#getOrDefault(Object, Object)}, which doesn't
  * actually add the missing value to the map.
@@ -36,7 +35,7 @@ public abstract class DefaultMap<K, V> implements Map<K, V> {
 
   private final Map<K,V> delegate;
 
-  public DefaultMap() {
+  protected DefaultMap() {
     this(new LinkedHashMap<K, V>());
   }
 

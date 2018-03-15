@@ -17,9 +17,9 @@
 
 package solutions.trsoftware.commons.server.servlet.filters;
 
-import solutions.trsoftware.commons.server.servlet.filters.config.FilterConfigParser;
-import solutions.trsoftware.commons.server.servlet.filters.config.FilterParameters;
-import solutions.trsoftware.commons.server.servlet.filters.config.ParseException;
+import solutions.trsoftware.commons.server.servlet.config.InitParameters;
+import solutions.trsoftware.commons.server.servlet.config.WebConfigException;
+import solutions.trsoftware.commons.server.servlet.config.WebConfigParser;
 
 import javax.servlet.Filter;
 import javax.servlet.FilterConfig;
@@ -33,7 +33,7 @@ import javax.servlet.ServletException;
  */
 public abstract class AbstractFilter implements Filter {
 
-  protected static FilterConfigParser configParser = new FilterConfigParser();
+  protected static WebConfigParser configParser = new WebConfigParser();
 
   protected FilterConfig filterConfig;
 
@@ -46,13 +46,20 @@ public abstract class AbstractFilter implements Filter {
     // subclasses may override
   }
 
-  protected <P extends FilterParameters> P parse(P parameters) throws ServletException {
+  /**
+   * Sets the fields of the given {@link InitParameters} object from the {@code init-param} values present in the {@link FilterConfig}.
+   * @return the same instance that was passed as the argument, after its fields have been populated.
+   * @see WebConfigParser#parse(FilterConfig, InitParameters)
+   */
+  protected <P extends InitParameters> P parse(P parameters) throws ServletException {
     try {
       P parsedParams = configParser.parse(filterConfig, parameters);
-      System.out.printf("Filter '%s' (%s) init-params: %s", filterConfig.getFilterName(), getClass(), parsedParams);
+      filterConfig.getServletContext().log(
+          String.format("Filter config (filter-name '%s', filter-class %s) parsed from init-param values: %s%n",
+              filterConfig.getFilterName(), getClass().getSimpleName(), parsedParams));
       return parsedParams;
     }
-    catch (ParseException e) {
+    catch (WebConfigException e) {
       throw new ServletException(String.format("Invalid configuration for filter '%s' (%s): %s",
           filterConfig.getFilterName(), getClass(), e.getMessage()),
           e);

@@ -18,7 +18,7 @@
 package solutions.trsoftware.commons.server.io;
 
 import junit.framework.TestCase;
-import solutions.trsoftware.commons.shared.util.MapBuilder;
+import solutions.trsoftware.commons.shared.util.MapDecorator;
 
 import java.io.File;
 import java.util.LinkedHashMap;
@@ -44,7 +44,7 @@ public class FileIndexTest extends TestCase {
       2126bfa3aa041a9b1cc4a1f73eb8161b *clipboard24.png
       9f2078fa28a44277c5822c1a760c3ed4 *text.txt
      */
-    Map<String, File> expectedResults = new MapBuilder<String, File>(new LinkedHashMap<>())
+    Map<String, File> expectedResults = new MapDecorator<String, File>(new LinkedHashMap<>())
         .put(hexToBase64("2126bfa3aa041a9b1cc4a1f73eb8161b"), new File(testDir, "clipboard24.png"))
         .put(hexToBase64("9f2078fa28a44277c5822c1a760c3ed4"), new File(testDir, "text.txt"))
         .getMap();

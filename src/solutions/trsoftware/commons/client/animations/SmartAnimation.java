@@ -31,6 +31,12 @@ import com.google.web.bindery.event.shared.SimpleEventBus;
  *   <li>save the current progress of the animation (the last value passed to {@link #onUpdate(double)})</li>
  *   <li>adding event handlers to listen for progress updates</li>
  * </ol>
+ *
+ * <p style="color: orange; font-weight: bold;">
+ *   TODO(3/6/2018): it's no longer necessary for this class to keep track of whether the animation is running,
+ *   because the newer versions of GWT provide a public {@link #isRunning()} method.
+ * </p>
+ *
  * @see #isRunning()
  * @see #getProgress()
  * @see #addUpdateHandler(UpdateEvent.Handler)

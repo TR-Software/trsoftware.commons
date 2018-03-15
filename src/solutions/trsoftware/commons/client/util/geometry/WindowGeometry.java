@@ -91,11 +91,13 @@ public class WindowGeometry {
     Document doc = Document.get();
     StringBuilder msg = new StringBuilder(name)
         .append(" widget position (absolute[Left|Top]): ").append(Arrays.asList(widget.getAbsoluteLeft(), widget.getAbsoluteTop()))
-        .append("; widget size (offset[Width/Height]): ").append(Arrays.asList(widget.getOffsetWidth(), widget.getOffsetHeight()))
-        .append("; document scroll position (scroll[Left/Top]): ").append(Arrays.asList(doc.getScrollLeft(), doc.getScrollTop()))
-        .append("; document scroll size (scroll[Left/Top]): ").append(Arrays.asList(doc.getScrollWidth(), doc.getScrollHeight()))
-        .append("; document client size (client[Width/Height]): ").append(Arrays.asList(doc.getClientWidth(), doc.getClientHeight()))
-        .append("; document coordinate system (bodyOffset[Left/Top]): ").append(Arrays.asList(doc.getBodyOffsetLeft(), doc.getBodyOffsetTop()))
+        .append(";\n  widget size (offset[Width/Height]): ").append(Arrays.asList(widget.getOffsetWidth(), widget.getOffsetHeight()))
+        .append(";\n  document scroll position (scroll[Left/Top]): ").append(Arrays.asList(doc.getScrollLeft(), doc.getScrollTop()))
+        .append(";\n  document scroll size (scroll[Left/Top]): ").append(Arrays.asList(doc.getScrollWidth(), doc.getScrollHeight()))
+        .append(";\n  document client size (client[Width/Height]): ").append(Arrays.asList(doc.getClientWidth(), doc.getClientHeight()))
+        .append(";\n  document coordinate system (bodyOffset[Left/Top]): ").append(Arrays.asList(doc.getBodyOffsetLeft(), doc.getBodyOffsetTop()))
+        .append(";\n  document compatMode: ").append(doc.getCompatMode())
+        .append(";\n  document.[documentElement|body].scrollTop: ").append(Arrays.asList(doc.getDocumentElement().getScrollTop(), doc.getBody().getScrollTop()))
         ;
     return msg.toString();
   }

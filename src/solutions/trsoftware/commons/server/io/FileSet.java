@@ -116,7 +116,7 @@ public class FileSet extends LinkedHashSet<File> {
     }
   }
 
-  /** Delegatss to a {@link FilenameFilter} */
+  /** Delegates to a {@link FilenameFilter} */
   public static class FileFilterFromFilenameFilter implements FileFilter, FilenameFilter {
     private FilenameFilter delegate;
 

@@ -21,7 +21,12 @@
 
   <inherits name='com.google.gwt.user.User'/>
 
-  <entry-point class='solutions.trsoftware.gcharts.client.GoogleCharts'/>
-  <script src="https://www.gstatic.com/charts/loader.js"/>
+  <entry-point class='solutions.trsoftware.gcharts.client.GoogleChartsEntryPoint'/>
+
+  <!--
+    GWT's Super Dev Mode requires the "xsiframe" linker, which doesn't allow script tags in module config;
+    using a ScriptInjector in the entry point instead
+   -->
+  <!--<script src="https://www.gstatic.com/charts/loader.js"/>-->
 
 </module>

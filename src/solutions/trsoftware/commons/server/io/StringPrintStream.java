@@ -22,14 +22,14 @@ import java.io.PrintStream;
 import java.io.UnsupportedEncodingException;
 
 /**
- * A print stream (like System.out) that writes to a string buffer.
+ * A print stream (like {@link System#out}) that writes to a string buffer.
  *
  * @author Alex
  */
 public class StringPrintStream extends PrintStream {
 
   public StringPrintStream() {
-    super(new ByteArrayOutputStream(128));
+    super(new ByteArrayOutputStream());
   }
 
   public StringPrintStream(int bufferSize) {

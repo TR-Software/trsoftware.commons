@@ -25,12 +25,12 @@ import com.google.gwt.core.ext.typeinfo.JClassType;
 import com.google.gwt.core.ext.typeinfo.JMethod;
 import com.google.gwt.core.ext.typeinfo.NotFoundException;
 import com.google.gwt.core.ext.typeinfo.TypeOracle;
-import com.google.gwt.dev.generator.GenUtil;
 import com.google.gwt.user.client.ui.ImageBundle;
 import com.google.gwt.user.rebind.ClassSourceFileComposerFactory;
 import com.google.gwt.user.rebind.SourceWriter;
 import solutions.trsoftware.commons.server.util.FileTemplateParser;
 import solutions.trsoftware.commons.shared.util.template.*;
+import solutions.trsoftware.commons.shared.util.template.TemplateBundle.Resource;
 
 import java.io.PrintWriter;
 import java.net.URL;
@@ -47,7 +47,7 @@ import java.util.List;
  *
  *<p>
  * Each method in {@code T} must be declared to return {@link Template}, take no parameters,
- * and optionally specify the filename as metadata (either a {@link TemplateBundle.Resource} annotation
+ * and optionally specify the filename as metadata (either a {@link Resource} annotation
  * or a <code>@gwt.resource</code> Javadoc tag giving the name of a template file that can be found on the classpath).
  * In the absence of the metadata, the file will be assumed to be located in the same package as {@code T} and
  * to have the same name as the method, with an extension of either {@code .txt} or {@code .html}.
@@ -58,11 +58,10 @@ public class TemplateBundleGenerator extends Generator {
   /**
    * Simple wrapper around JMethod that allows for unit test mocking.
    */
-  /* private */interface JMethodOracle {
+  interface JMethodOracle {
 
-    TemplateBundle.Resource getAnnotation(Class<TemplateBundle.Resource> clazz);
-
-    String[][] getMetaData(String metadataTag);
+    @SuppressWarnings("deprecation")
+    Resource getAnnotation(Class<Resource> clazz);
 
     String getName();
 
@@ -83,25 +82,25 @@ public class TemplateBundleGenerator extends Generator {
     boolean isResourcePresent(String resName);
   }
 
-  private class JMethodOracleImpl implements JMethodOracle {
+  private static class JMethodOracleImpl implements JMethodOracle {
     private final JMethod delegate;
 
     public JMethodOracleImpl(JMethod delegate) {
       this.delegate = delegate;
     }
 
-    public TemplateBundle.Resource getAnnotation(Class<TemplateBundle.Resource> clazz) {
+    @Override
+    @SuppressWarnings("deprecation")
+    public Resource getAnnotation(Class<Resource> clazz) {
       return delegate.getAnnotation(clazz);
     }
 
-    public String[][] getMetaData(String metadataTag) {
-      return delegate.getMetaData(metadataTag);
-    }
-
+    @Override
     public String getName() {
       return delegate.getName();
     }
 
+    @Override
     public String getPackageName() {
       return delegate.getEnclosingType().getPackage().getName();
     }
@@ -123,8 +122,6 @@ public class TemplateBundleGenerator extends Generator {
   private static final String[] TEMPLATE_FILE_EXTENSIONS = {"html", "txt"};
 
   private static final String TEMPLATEBUNDLE_QNAME = "solutions.trsoftware.commons.shared.util.template.TemplateBundle";
-
-  private static final String METADATA_TAG = "gwt.resource";
 
   /* private */static String msgCannotFindTemplateFromMetaData(String resName) {
     return "Unable to find template resource '" + resName + "'";
@@ -406,11 +403,11 @@ public class TemplateBundleGenerator extends Generator {
   /**
    * Attempts to get the template name (verbatim) from an annotation.
    *
-   * @return the string specified in in the {@link TemplateBundle.Resource}
+   * @return the string specified in in the {@link Resource}
    *         annotation, or <code>null</code>
    */
   private String tryGetFileNameFromAnnotation(JMethodOracle method) {
-    TemplateBundle.Resource resAnn = method.getAnnotation(TemplateBundle.Resource.class);
+    Resource resAnn = method.getAnnotation(Resource.class);
     String fileName = null;
     if (resAnn != null) {
       fileName = resAnn.value();
@@ -419,31 +416,11 @@ public class TemplateBundleGenerator extends Generator {
   }
 
   /**
-   * Attempts to get the template name (verbatim) from old-school javadoc metadata.
+   * Attempts to get the template name from an annotation.
    *
-   * @return the string specified in "resource" javadoc metdata tag; never
-   *         returns <code>null</code>
-   */
-  private String tryGetFileNameFromJavaDoc(JMethodOracle method) {
-    String fileName = null;
-    String[][] md = method.getMetaData(METADATA_TAG);
-    if (md.length == 1) {
-      int lastTagIndex = md.length - 1;
-      int lastValueIndex = md[lastTagIndex].length - 1;
-      fileName = md[lastTagIndex][lastValueIndex];
-    }
-    return fileName;
-  }
-
-  /**
-   * Attempts to get the template name from either an annotation or from pre-1.5
-   * javadoc metadata, logging warnings to educate the user about deprecation
-   * and behaviors in the face of conflicting metadata (for example, if both
-   * forms of metadata are present).
-   *
-   * @param logger if metadata is found but the specified resource isn't
-   *          available, a warning is logged
-   * @param method the template bundle method whose associated template resource is
+   * @param logger if an annotation is found but the specified resource isn't
+   *          available, an error is logged
+   * @param method the image bundle method whose associated image resource is
    *          being sought
    * @return a resource name that is suitable to be passed into
    *         <code>ClassLoader.getResource()</code>, or <code>null</code>
@@ -451,28 +428,12 @@ public class TemplateBundleGenerator extends Generator {
    * @throws UnableToCompleteException thrown when metadata is provided but the
    *           resource cannot be found
    */
-  private String tryGetFileNameFromMetaData(TreeLogger logger,
-      JMethodOracle method) throws UnableToCompleteException {
-    String fileName = null;
-    String fileNameAnn = tryGetFileNameFromAnnotation(method);
-    String fileNameJavaDoc = tryGetFileNameFromJavaDoc(method);
-    if (fileNameJavaDoc != null) {
-      if (fileNameAnn == null) {
-        // There is JavaDoc metadata but no annotation.
-        fileName = fileNameJavaDoc;
-        if (GenUtil.warnAboutMetadata()) {
-          logger.log(TreeLogger.WARN, MSG_JAVADOC_FORM_DEPRECATED, null);
-        }
-      } else {
-        // There is both JavaDoc metadata and an annotation.
-        logger.log(TreeLogger.WARN, MSG_MULTIPLE_ANNOTATIONS, null);
-        fileName = fileNameAnn;
-      }
-    } else if (fileNameAnn != null) {
-      // There is only an annotation.
-      fileName = fileNameAnn;
+  private String tryGetFileNameFromMetaData(TreeLogger logger, JMethodOracle method) throws UnableToCompleteException {
+    String fileName = tryGetFileNameFromAnnotation(method);
+    if (fileName == null) {
+      // Exit early because no annotation was found.
+      return null;
     }
-    assert (fileName == null || (fileNameAnn != null || fileNameJavaDoc != null));
 
     if (fileName == null) {
       // Exit early because neither an annotation nor javadoc was found.
@@ -491,8 +452,7 @@ public class TemplateBundleGenerator extends Generator {
 
     if (!resLocator.isResourcePresent(fileName)) {
       // Not found.
-      logger.log(TreeLogger.ERROR, msgCannotFindTemplateFromMetaData(fileName),
-          null);
+      logger.log(TreeLogger.ERROR, msgCannotFindTemplateFromMetaData(fileName), null);
       throw new UnableToCompleteException();
     }
 

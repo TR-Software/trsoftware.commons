@@ -19,8 +19,8 @@ import solutions.trsoftware.commons.shared.util.MutableLazyReference;
  * </p>
  *
  * <p style="font-style: italic; font-size: .9em;">
- *   Generated on <em>Mon Feb 12 23:09:57 EST 2018</em> with {@link solutions.trsoftware.tools.gen.ClientBundleCodeGenerator}
- *   (invoked from {@link solutions.trsoftware.tools.gen.CountryFlagsSvgBundleGenerator})
+ *   Generated on <em>Mon Feb 12 23:09:57 EST 2018</em> with {@link solutions.trsoftware.tools.gwt.gen.ClientBundleCodeGenerator}
+ *   (invoked from {@link solutions.trsoftware.tools.gwt.gen.CountryFlagsSvgBundleGenerator})
  * </p> */
 public interface CountryFlagsSvgBundle extends ClientBundle {
   /**

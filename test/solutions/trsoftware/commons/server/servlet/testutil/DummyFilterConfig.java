@@ -2,42 +2,27 @@ package solutions.trsoftware.commons.server.servlet.testutil;
 
 import javax.servlet.FilterConfig;
 import javax.servlet.ServletContext;
-import java.util.Collections;
-import java.util.Enumeration;
 import java.util.Map;
 
 /**
  * @author Alex
  * @since 1/2/2018
  */
-public class DummyFilterConfig implements FilterConfig {
+public class DummyFilterConfig extends DummyWebConfigObject implements FilterConfig {
 
   private String filterName;
-  private ServletContext servletContext;
-  private Map<String, String> initParameters;
 
   public DummyFilterConfig(Map<String, String> initParameters) {
-    this.initParameters = initParameters;
+    this(initParameters, new DummyServletContext());
+  }
+
+  public DummyFilterConfig(Map<String, String> initParameterMap, ServletContext servletContext) {
+    super(initParameterMap, servletContext);
   }
 
   @Override
   public String getFilterName() {
     return filterName;
-  }
-
-  @Override
-  public ServletContext getServletContext() {
-    return servletContext;
-  }
-
-  @Override
-  public String getInitParameter(String name) {
-    return initParameters.get(name);
-  }
-
-  @Override
-  public Enumeration<String> getInitParameterNames() {
-    return Collections.enumeration(initParameters.keySet());
   }
 
   public DummyFilterConfig setFilterName(String filterName) {
@@ -47,11 +32,6 @@ public class DummyFilterConfig implements FilterConfig {
 
   public DummyFilterConfig setServletContext(ServletContext servletContext) {
     this.servletContext = servletContext;
-    return this;
-  }
-
-  public DummyFilterConfig setInitParameters(Map<String, String> initParameters) {
-    this.initParameters = initParameters;
     return this;
   }
 }

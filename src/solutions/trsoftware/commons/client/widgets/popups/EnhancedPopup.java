@@ -195,6 +195,8 @@ public class EnhancedPopup extends PopupPanel implements HasFocusTarget {
    * rectangle (scroll position) by (x, y) pixels.
    */
   public void setPopupPositionRelativeToWindowScroll(int leftOffset, int topOffset) {
+    //    return getScrollTopNative();
+    //    return getScrollLeftNative();
     setPopupPosition(
         Math.max(0, Window.getScrollLeft() + leftOffset),
         Math.max(0, Window.getScrollTop() + topOffset));

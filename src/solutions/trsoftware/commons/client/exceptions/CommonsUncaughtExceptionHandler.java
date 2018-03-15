@@ -29,7 +29,6 @@ import solutions.trsoftware.commons.client.useragent.UserAgent;
 import solutions.trsoftware.commons.client.widgets.popups.ErrorMessagePopup;
 import solutions.trsoftware.commons.client.widgets.popups.PopupDialog;
 import solutions.trsoftware.commons.shared.util.LazyReference;
-import solutions.trsoftware.gwt.stacktrace.client.StackTraceDeobfuscatorClient;
 
 /**
  * Oct 12, 2011

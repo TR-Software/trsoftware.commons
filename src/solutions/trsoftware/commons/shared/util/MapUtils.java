@@ -18,6 +18,7 @@
 package solutions.trsoftware.commons.shared.util;
 
 import com.google.common.base.Predicate;
+import com.google.common.collect.Multimap;
 import solutions.trsoftware.commons.shared.util.callables.Function0;
 import solutions.trsoftware.commons.shared.util.callables.Function1;
 import solutions.trsoftware.commons.shared.util.callables.Function2;
@@ -34,7 +35,7 @@ public class MapUtils {
 
   /**
    * Creates a {@link TreeMap} from the given args (treated as {@code key1, value1, key2, value2, ...})
-   * @deprecated use {@link MapBuilder} for type-safety
+   * @deprecated use {@link MapDecorator} for type-safety
    */
   public static <K,V> SortedMap<K, V> sortedMap(Object... keyValuePairs) {
     return putAll(new TreeMap<K, V>(), keyValuePairs);
@@ -42,7 +43,7 @@ public class MapUtils {
 
   /**
    * Creates a {@link HashMap} from the given args (treated as {@code key1, value1, key2, value2, ...})
-   * @deprecated use {@link MapBuilder} for type-safety
+   * @deprecated use {@link MapDecorator} for type-safety
    */
   public static <K,V> HashMap<K, V> hashMap(Object... keyValuePairs) {
     return putAll(new HashMap<K, V>(), keyValuePairs);
@@ -50,7 +51,7 @@ public class MapUtils {
 
   /**
    * Creates a {@link LinkedHashMap} from the given args (treated as {@code key1, value1, key2, value2, ...})
-   * @deprecated use {@link MapBuilder} for type-safety
+   * @deprecated use {@link MapDecorator} for type-safety
    */
   public static <K,V> LinkedHashMap<K, V> linkedHashMap(Object... keyValuePairs) {
     return putAll(new LinkedHashMap<K, V>(), keyValuePairs);
@@ -168,7 +169,7 @@ public class MapUtils {
    * Puts the given key, value pair into the given map and returns the map,
    * to allow method chaining.
    *
-   * @return the same map that was passed in; post-modificaiton
+   * @return the same map that was passed in; post-modification
    */
   public static <K,V> Map<K,V> put(Map<K,V> map, K key, V value) {
     map.put(key, value);
@@ -184,8 +185,7 @@ public class MapUtils {
    * This is useful because the Java Servlet API allows for multiple values
    * for all URL parameters and treats them all as arrays.
    *
-   * @return the first mapping for the given key, or none if the mapping
-   * doesn't exist.
+   * @return the first mapping for the given key, or {@code null} if the mapping doesn't exist.
    */
   public static String extractSingleValue(Map<String, String[]> paramMap, String key) {
     Object value = paramMap.get(key);
@@ -293,5 +293,18 @@ public class MapUtils {
         entryIterator.remove();
     }
     return map;
+  }
+
+  /**
+   * Adds all the entries in the given {@link Map} to the given {@link Multimap}.
+   * @param to the recipient of the data
+   * @param from the source of the data
+   * @return the same {@link Multimap} instance that was passed in
+   */
+  public static <K,V> Multimap<K, V> putAllToMultimap(Multimap<K, V> to, Map<K, V> from) {
+    for (Map.Entry<K, V> entry : from.entrySet()) {
+      to.put(entry.getKey(), entry.getValue());
+    }
+    return to;
   }
 }

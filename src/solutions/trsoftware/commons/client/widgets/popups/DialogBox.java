@@ -387,7 +387,8 @@ public class DialogBox extends EnhancedPopup {
       int absY = event.getY() + getAbsoluteTop();
       // If the mouse is off the screen to the left, right, or top, don't move the dialog box.
       // This would let users lose dialog boxes, which would be bad for modal popups.
-      if (absX < 0 || absY < 0 || absX >= Window.getClientWidth() + Window.getScrollLeft() ) {
+      //    return getScrollLeftNative();
+      if (absX < 0 || absY < 0 || absX >= Window.getClientWidth() + Window.getScrollLeft()) {
         if (!PageVisibility.isSupported()) {
           // we want to end dragging if we can't detect whether the window is no longer active (using the Page Visibility API),
           // otherwise, we would lose any mouseup events that happen after that

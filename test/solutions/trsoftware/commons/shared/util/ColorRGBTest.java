@@ -23,7 +23,7 @@ public class ColorRGBTest extends TestCase {
       new ColorRGB(255, 228, 196), new ColorHSL(32.54237288135594, 1, 0.884313725490196)
   );
 
-  private static final Map<String, ColorRGB> STRING_VALUES = new MapBuilder<String, ColorRGB>(new LinkedHashMap<String, ColorRGB>())
+  private static final Map<String, ColorRGB> STRING_VALUES = new MapDecorator<String, ColorRGB>(new LinkedHashMap<String, ColorRGB>())
       .put("#12afb1", new ColorRGB(0x12, 0xaf, 0xb1))
       .getMap();
 

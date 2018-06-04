@@ -9,29 +9,32 @@ import solutions.trsoftware.commons.client.bridge.util.RandomGen;
 import solutions.trsoftware.commons.client.bridge.util.UrlEncoder;
 import solutions.trsoftware.commons.client.bridge.util.UrlEncoderGwtImpl;
 import solutions.trsoftware.commons.client.bridge.util.impl.RandomGenGwtImpl;
+import solutions.trsoftware.commons.shared.util.text.SharedNumberFormat;
 
 import java.util.Random;
 
 /**
  * GWT Version -- GWT Version -- GWT Version -- GWT Version -- GWT Version
  *
- * IMPORTANT: This the GWT (non-Java version) of BridgeTypeFactory.java
- * Look in the src/gwt/... content root for the GWT version.
- *
- * This class serves to overcome the problem of having references to
- * non-GWT-compilable classes from those that are GWT compilable, by keeping
- * all occurrences of such in a central place - namely the
+ * IMPORTANT: This the "emulated" GWT (non-Java) version of this class.
+ * The Java version is located in the standard directory for this package.
+ * <p>
+ * This class serves to overcome the problem of having references to non-GWT-compilable classes from those that
+ * are GWT-compilable, by keeping all occurrences of such in a central place - namely the
  * implementation of this class.
- *
- * There are actually two different implementations of this class
- * in two different source roots - the Java version in /src/java/...
- * and the GWT version ins /src/gwt/..., which will replace all usages
- * of the Java version when running in web mode, the same way the JRE
- * emulation classes replace their original Java counterparts in web mode.
- * This is configured using the super-source module XML element.
+ * <p>
+ * There are actually two different implementations of this class in two different directories:
+ * <ol>
+ *   <li>The Java version in the normal directory for this package</li>
+ *   <li>
+ *     The GWT version in the {@code translatable} subdirectory of the module, which will replace all usages
+ *     of the Java version when running in web mode (the same way the JRE emulation classes replace their original Java
+ *     counterparts in web mode. This is configured using the {@code <super-source>} element of the module XML.
+ *   </li>
+ * </ol>
  *
  * Note that we could technically do away with this factory class and
- * instead emulate each class directly using the super-source technique,
+ * instead emulate each class directly using the {@code <super-source>} technique,
  * but this interface/factory approach seems easier - so that we just
  * have this emulation weirdness happening with one file instead of many.
  *
@@ -51,10 +54,9 @@ public class BridgeTypeFactory {
     return new GwtJSONParser();
   }
 
-  public static RandomGen newRandomGen() {
-    return new RandomGenGwtImpl();
-  }
-
+  /**
+   * @deprecated use {@link SharedNumberFormat} instead.
+   */
   public static NumberFormatter newNumberFormatter(int minIntegerDigits, int minFractionalDigits, int maxFractionalDigits, boolean digitGrouping, boolean percent) {
     return new NumberFormatterGwtImpl(minIntegerDigits, minFractionalDigits, maxFractionalDigits, digitGrouping, percent);
   }

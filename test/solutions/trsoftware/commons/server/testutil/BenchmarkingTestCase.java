@@ -1,11 +1,11 @@
 /*
- *  Copyright 2017 TR Software Inc.
+ * Copyright 2018 TR Software Inc.
  *
- *  Licensed under the Apache License, Version 2.0 (the "License"); you may not
- *  use this file except in compliance with the License. You may obtain a copy of
- *  the License at
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not
+ * use this file except in compliance with the License. You may obtain a copy of
+ * the License at
  *
- *  http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
@@ -18,8 +18,8 @@
 package solutions.trsoftware.commons.server.testutil;
 
 import junit.framework.TestCase;
-import solutions.trsoftware.commons.Slow;
 import solutions.trsoftware.commons.server.util.Duration;
+import solutions.trsoftware.commons.shared.annotations.Slow;
 import solutions.trsoftware.commons.shared.util.CollectionUtils;
 import solutions.trsoftware.commons.shared.util.MapUtils;
 import solutions.trsoftware.commons.shared.util.MemoryUnit;
@@ -31,7 +31,13 @@ import java.util.*;
 import java.util.concurrent.TimeUnit;
 
 /**
- * @author Alex, 1/2/14 n
+ * Convenience base class for unit tests wishing to run simple CPU and memory benchmarks.
+ *
+ * <p style="color: #6495ed; font-weight: bold;">
+ *   TODO: start using <a href="http://openjdk.java.net/projects/code-tools/jmh/">JMH</a> for accurate CPU benchmarks
+ * </p>
+ * @author Alex
+ * @since 1/2/14
  */
 public abstract class BenchmarkingTestCase extends TestCase {
 
@@ -217,7 +223,7 @@ public abstract class BenchmarkingTestCase extends TestCase {
   }
 
   private static long getHeapMemoryBytesUsed() {
-    return TestUtils.calcSystemMemoryUsage(2);
+    return TestUtils.calcSystemMemoryUsage(true);
   }
 
   /**

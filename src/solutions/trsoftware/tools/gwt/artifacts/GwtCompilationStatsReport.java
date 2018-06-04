@@ -1,11 +1,11 @@
 /*
- *  Copyright 2017 TR Software Inc.
+ * Copyright 2018 TR Software Inc.
  *
- *  Licensed under the Apache License, Version 2.0 (the "License"); you may not
- *  use this file except in compliance with the License. You may obtain a copy of
- *  the License at
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not
+ * use this file except in compliance with the License. You may obtain a copy of
+ * the License at
  *
- *  http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
@@ -17,8 +17,8 @@
 
 package solutions.trsoftware.tools.gwt.artifacts;
 
-import solutions.trsoftware.commons.server.io.FileUtils;
 import solutions.trsoftware.commons.server.io.SplitterOutputStream;
+import solutions.trsoftware.commons.server.io.file.FileUtils;
 import solutions.trsoftware.commons.shared.util.MemoryUnit;
 import solutions.trsoftware.commons.shared.util.stats.MaxComparable;
 import solutions.trsoftware.commons.shared.util.stats.NumberSample;
@@ -32,8 +32,8 @@ import java.util.regex.Pattern;
 
 import static picocli.CommandLine.Command;
 import static picocli.CommandLine.Option;
-import static solutions.trsoftware.commons.server.io.ServerIOUtils.joinPath;
-import static solutions.trsoftware.commons.server.io.ServerIOUtils.joinPathAsFile;
+import static solutions.trsoftware.commons.server.io.file.FileUtils.joinPath;
+import static solutions.trsoftware.commons.server.io.file.FileUtils.joinPathAsFile;
 
 /**
  * Prints a report about the sizes of the compiled GWT modules
@@ -42,7 +42,13 @@ import static solutions.trsoftware.commons.server.io.ServerIOUtils.joinPathAsFil
  *
  * NOTE: this class doesn't really need to be shipped with the WAR distribution,
  * but we're just doing that for convenience, to keep the Ant build script simple. 
- * 
+ *
+ * <p style="color: #6495ed; font-weight: bold;">
+ *   TODO: this code needs to be updated
+ *   NOTE: the newer versions of GWT also provide a file called compilation-mappings.txt in each module output directory.
+ *   This file contains the (strong) filenames of each permutation along with their selection props
+ * </p>
+ *
  * @author Alex
  * @since Apr 1, 2013
  */

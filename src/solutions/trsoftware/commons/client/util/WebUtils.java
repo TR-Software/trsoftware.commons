@@ -1,11 +1,11 @@
 /*
- *  Copyright 2017 TR Software Inc.
+ * Copyright 2018 TR Software Inc.
  *
- *  Licensed under the Apache License, Version 2.0 (the "License"); you may not
- *  use this file except in compliance with the License. You may obtain a copy of
- *  the License at
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not
+ * use this file except in compliance with the License. You may obtain a copy of
+ * the License at
  *
- *  http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
@@ -23,9 +23,10 @@ import solutions.trsoftware.commons.client.bridge.util.UrlEncoder;
 import solutions.trsoftware.commons.shared.util.ArrayUtils;
 import solutions.trsoftware.commons.shared.util.MapUtils;
 
-import java.util.*;
+import java.util.Iterator;
+import java.util.LinkedHashMap;
+import java.util.Map;
 
-import static solutions.trsoftware.commons.shared.util.StringUtils.join;
 import static solutions.trsoftware.commons.shared.util.StringUtils.notBlank;
 
 /**
@@ -77,22 +78,22 @@ public abstract class WebUtils {
   /**
    * Appends a query string in the form "?key1=value1&key2=value2..." to the
    * given URL.
-   * @param keyValueList key1, value1, ..., keyN, valueN
+   * @param nameValuePairs key1, value1, ..., keyN, valueN
    */
-  public static String urlWithQueryString(String url, String... keyValueList) {
+  public static String urlWithQueryString(String url, String... nameValuePairs) {
     // the given list should have an even number of args
-    if (ArrayUtils.isEmpty(keyValueList))
+    if (ArrayUtils.isEmpty(nameValuePairs))
       return "";
-    if (keyValueList.length % 2 != 0)
+    if (nameValuePairs.length % 2 != 0)
       throw new IllegalArgumentException("Uneven number of arguments.");
     boolean key = true;
     StringBuilder str = new StringBuilder(256);
     str.append(url);
-    for (int i = 0; i < keyValueList.length; i++) {
+    for (int i = 0; i < nameValuePairs.length; i++) {
       if (i % 2 == 0)
-        str.append(i == 0 ? "?" : "&").append(keyValueList[i]);
+        str.append(i == 0 ? "?" : "&").append(nameValuePairs[i]);
       else
-        str.append("=").append(keyValueList[i]);
+        str.append("=").append(nameValuePairs[i]);
     }
     return str.toString();
   }
@@ -106,29 +107,12 @@ public abstract class WebUtils {
    * obtained by calling {@link Window.Location#createUrlBuilder()}
    */
   public static String replaceUrlParameter(String paramName, String newValue) {
-    // 1) figure out what parameters we want in the new URL
-    Map<String, List<String>> originalParams = Window.Location.getParameterMap();
-    Map<String, String> newParams = new HashMap<String, String>();
-    if (newValue != null)
-      newParams.put(paramName, newValue);
-    // add all the other parameters
-    for (String p : originalParams.keySet()) {
-      if (!p.equals(paramName))
-        // TODO: this is probably a mistake: URL query params are not joined by ',' - they are listed separately
-        newParams.put(p, join(",", originalParams.get(p)));
-    }
-    // 2) construct a new query string
-    String newQS = urlQueryString(newParams);
-    // 3) build up the new URL
-    StringBuilder url = new StringBuilder().append(Window.Location.getProtocol())
-        .append("//")
-        .append(Window.Location.getHost())
-        .append(Window.Location.getPath());  // NOTE: the ;jsessionid=X part of the URL (if any) is considered part of the path
-    if (notBlank(newQS)) {
-      url.append("?").append(newQS);
-    }
-    url.append(Window.Location.getHash());
-    return url.toString();
+    UrlBuilder urlBuilder = Window.Location.createUrlBuilder();
+    if (newValue == null)
+      urlBuilder.removeParameter(paramName);
+    else
+      urlBuilder.setParameter(paramName, newValue);
+    return urlBuilder.buildString();
   }
 
   /**

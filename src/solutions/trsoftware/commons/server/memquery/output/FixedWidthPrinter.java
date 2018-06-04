@@ -1,11 +1,11 @@
 /*
- *  Copyright 2017 TR Software Inc.
+ * Copyright 2018 TR Software Inc.
  *
- *  Licensed under the Apache License, Version 2.0 (the "License"); you may not
- *  use this file except in compliance with the License. You may obtain a copy of
- *  the License at
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not
+ * use this file except in compliance with the License. You may obtain a copy of
+ * the License at
  *
- *  http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
@@ -69,14 +69,20 @@ public class FixedWidthPrinter extends ResultSetPrinter<FixedWidthPrinter> {
     return this;
   }
 
-  private static final char[][] CORNER_CHARS = {
+  /**
+   * <ul>
+   * <li><b>row indices</b>: 0 for top row, 1 for middle, and 2 for last</li>
+   * <li><b>col indices</b>: 0 for first col, 1 for middle, and 2 for last</li>
+   * </ul>
+   */
+  public static final char[][] CORNER_CHARS = {
       new char[]{'\u2554', '\u2566', '\u2557'},
       new char[]{'\u2560', '\u256C', '\u2563'},
       new char[]{'\u255A', '\u2569', '\u255D'}
   };
 
-  private static final char H_BORDER_CHAR = '\u2550';
-  private static final char V_BORDER_CHAR = '\u2551';
+  public static final char H_BORDER_CHAR = '\u2550';
+  public static final char V_BORDER_CHAR = '\u2551';
 
 
   protected class Impl extends PrinterImpl {

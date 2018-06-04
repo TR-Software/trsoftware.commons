@@ -1,11 +1,11 @@
 /*
- *  Copyright 2017 TR Software Inc.
+ * Copyright 2018 TR Software Inc.
  *
- *  Licensed under the Apache License, Version 2.0 (the "License"); you may not
- *  use this file except in compliance with the License. You may obtain a copy of
- *  the License at
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not
+ * use this file except in compliance with the License. You may obtain a copy of
+ * the License at
  *
- *  http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
@@ -18,8 +18,8 @@
 package solutions.trsoftware.commons.server.servlet;
 
 import junit.framework.TestCase;
-import solutions.trsoftware.commons.client.testutil.AssertUtils;
 import solutions.trsoftware.commons.server.servlet.testutil.DummyHttpServletRequest;
+import solutions.trsoftware.commons.shared.testutil.AssertUtils;
 import solutions.trsoftware.commons.shared.util.MapUtils;
 
 import java.util.Arrays;
@@ -27,8 +27,8 @@ import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Map;
 
-import static solutions.trsoftware.commons.client.testutil.AssertUtils.assertSameSequence;
 import static solutions.trsoftware.commons.server.servlet.ServletUtils.*;
+import static solutions.trsoftware.commons.shared.testutil.AssertUtils.assertSameSequence;
 
 public class ServletUtilsTest extends TestCase {
 
@@ -47,15 +47,6 @@ public class ServletUtilsTest extends TestCase {
       badMap.put("bar", new String[]{"b", "c"});
       AssertUtils.assertThrows(IllegalArgumentException.class, (Runnable)() -> requestParametersAsSortedStringMap(badMap));
     }
-  }
-
-  public void testExtractSubdomain() throws Exception {
-    assertEquals("special", extractSubdomain(new DummyHttpServletRequest("http://special.typeracer.com/foo/gameserv", "")));
-    assertEquals("play", extractSubdomain(new DummyHttpServletRequest("http://play.typeracer.com/", "")));
-    assertEquals("play", extractSubdomain(new DummyHttpServletRequest("http://play.typeracer.com", "")));
-    assertNull(extractSubdomain(new DummyHttpServletRequest("http://typeracer.com", "")));  // TODO: impl this
-    assertNull(extractSubdomain(new DummyHttpServletRequest("http://localhost", "")));
-    assertNull(extractSubdomain(new DummyHttpServletRequest("http://localhost/", "")));
   }
 
   public void testExtractFirstPathElement() throws Exception {
@@ -104,37 +95,19 @@ public class ServletUtilsTest extends TestCase {
   }
 
   public void testReplaceQueryStringParameter() throws Exception {
-    DummyHttpServletRequest dummyRequest = new DummyHttpServletRequest("http://example.com/page", "foo=bar&baz=1");
-    assertEquals("http://example.com/page?bar=foo&baz=1",
-        replaceQueryStringParameter(dummyRequest, "foo", "bar", "bar", "foo"));
-    assertEquals("http://example.com/page?baz=2&baz=1",
-        replaceQueryStringParameter(dummyRequest, "foo", "bar", "baz", "2"));
-    assertEquals("http://example.com/page?foo=bar&baz=2",
-        replaceQueryStringParameter(dummyRequest, "baz", "1", "baz", "2"));
-    assertEquals("http://example.com/page?foo=bar&baz=1",
-        replaceQueryStringParameter(dummyRequest, "baz", "2", "baz", "3"));  // param/value combination not present, so url returned unmodified
-    assertEquals("http://example.com/page?foo=bar&baz=1",
-        replaceQueryStringParameter(dummyRequest, "baz", "bar", "baz", "2")); // param/value combination not present, so url returned unmodified
-
-    // now test the overloaded version of this method
-    assertEquals("bar=foo&baz=1",
-        replaceQueryStringParameter("foo=bar&baz=1", "foo", "bar", "bar", "foo"));
-    assertEquals("baz=2&baz=1",
-        replaceQueryStringParameter("foo=bar&baz=1", "foo", "bar", "baz", "2"));
-    assertEquals("foo=bar&baz=2",
-        replaceQueryStringParameter("foo=bar&baz=1", "baz", "1", "baz", "2"));
-    assertEquals("foo=bar&baz=1",
-        replaceQueryStringParameter("foo=bar&baz=1", "baz", "2", "baz", "3"));  // param/value combination not present, so url returned unmodified
-    assertEquals("foo=bar&baz=1",
-        replaceQueryStringParameter("foo=bar&baz=1", "baz", "bar", "baz", "2")); // param/value combination not present, so url returned unmodified
-
-    // now test the other overloaded version of the method the same way
-    assertEquals("foo=foo&baz=1",
-        replaceQueryStringParameter("foo=bar&baz=1", "foo", "bar", "foo"));
-    assertEquals("foo=bar&baz=1",
-        replaceQueryStringParameter("foo=bar&baz=1", "baz", "2", "3"));  // param/value combination not present, so url returned unmodified
-    assertEquals("foo=bar&baz=1",
-        replaceQueryStringParameter("foo=bar&baz=1", "baz", "bar", "2")); // param/value combination not present, so url returned unmodified
+    for (String protocol : new String[]{"http", "https"}) {
+      DummyHttpServletRequest dummyRequest = new DummyHttpServletRequest(protocol + "://example.com/page", "foo=bar&baz=1");
+      assertEquals(protocol + "://example.com/page?bar=foo&baz=1",
+          replaceQueryStringParameter(dummyRequest, "foo", "bar", "bar", "foo"));
+      assertEquals(protocol + "://example.com/page?baz=2&baz=1",
+          replaceQueryStringParameter(dummyRequest, "foo", "bar", "baz", "2"));
+      assertEquals(protocol + "://example.com/page?foo=bar&baz=2",
+          replaceQueryStringParameter(dummyRequest, "baz", "1", "baz", "2"));
+      assertEquals(protocol + "://example.com/page?foo=bar&baz=1",
+          replaceQueryStringParameter(dummyRequest, "baz", "2", "baz", "3"));  // param/value combination not present, so url returned unmodified
+      assertEquals(protocol + "://example.com/page?foo=bar&baz=1",
+          replaceQueryStringParameter(dummyRequest, "baz", "bar", "baz", "2")); // param/value combination not present, so url returned unmodified
+    }
   }
 
   public void testAddIndexedMultivaluedParams() throws Exception {
@@ -167,12 +140,14 @@ public class ServletUtilsTest extends TestCase {
   }
 
   public void testGetBaseUrl() throws Exception {
-    assertEquals("http://localhost:8088", getBaseUrl(
-        new DummyHttpServletRequest().setUrl("http://localhost:8088/errorPage").setUri("/errorPage")).toString());
-    assertEquals("http://localhost:8088", getBaseUrl(
-        new DummyHttpServletRequest().setUrl("http://localhost:8088/").setUri("/")).toString());
-    assertEquals("http://example.com", getBaseUrl(
-        new DummyHttpServletRequest().setUrl("http://example.com/foo/bar").setUri("/")).toString());
+    for (String protocol : new String[]{"http", "https"}) {
+      assertEquals(protocol + "://localhost:8088", getBaseUrl(
+          new DummyHttpServletRequest().setUrl(protocol + "://localhost:8088/errorPage").setUri("/errorPage")).toString());
+      assertEquals(protocol + "://localhost:8088", getBaseUrl(
+          new DummyHttpServletRequest().setUrl(protocol + "://localhost:8088/").setUri("/")).toString());
+      assertEquals(protocol + "://example.com", getBaseUrl(
+          new DummyHttpServletRequest().setUrl(protocol + "://example.com/foo/bar").setUri("/")).toString());
+    }
   }
 
 }

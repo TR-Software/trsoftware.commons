@@ -1,11 +1,11 @@
 /*
- *  Copyright 2017 TR Software Inc.
+ * Copyright 2018 TR Software Inc.
  *
- *  Licensed under the Apache License, Version 2.0 (the "License"); you may not
- *  use this file except in compliance with the License. You may obtain a copy of
- *  the License at
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not
+ * use this file except in compliance with the License. You may obtain a copy of
+ * the License at
  *
- *  http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
@@ -18,11 +18,14 @@
 package solutions.trsoftware.commons.shared.util.stats;
 
 import junit.framework.TestCase;
-import solutions.trsoftware.commons.Slow;
 import solutions.trsoftware.commons.server.testutil.MultithreadedTestHarness;
 import solutions.trsoftware.commons.server.util.ServerArrayUtils;
+import solutions.trsoftware.commons.shared.annotations.Slow;
+import solutions.trsoftware.commons.shared.util.MapDecorator;
 
 import java.util.Collection;
+import java.util.LinkedHashMap;
+import java.util.Map;
 import java.util.Random;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -103,8 +106,7 @@ public class HashCounterJavaTest extends TestCase {
 
 
   public void testEquivalentEntrySorting() throws Exception {
-    // since the underlying implementation uses a SortedSet, we have to make
-    // sure that equivalent values don't get lost
+    // since the underlying implementation uses a SortedSet, we have to make sure that equivalent values don't get lost
 
     HashCounter<Integer> counter = new HashCounter<Integer>();
     counter.increment(1);
@@ -149,5 +151,29 @@ public class HashCounterJavaTest extends TestCase {
     System.out.println("errors = " + errors);
     
     assertTrue(errors.isEmpty());
+  }
+
+  /**
+   * Creates an instance pre-populated with the given counts.
+   */
+  public static <T> HashCounter<T> createCounter(Map<T, Integer> counts) {
+    HashCounter<T> counter = new HashCounter<T>();
+    for (Map.Entry<T, Integer> entry : counts.entrySet()) {
+      counter.add(entry.getKey(), entry.getValue());
+    }
+    return counter;
+  }
+
+  public void testProbabilityOf() throws Exception {
+    HashCounter<Character> counter = createCounter(new MapDecorator<>(new LinkedHashMap<Character, Integer>())
+        .put('a', 2)
+        .put('b', 4)
+        .put('c', 6)
+        .getMap());
+    System.out.println(counter);
+    assertEquals(2./12, counter.probabilityOf('a'), .001);
+    assertEquals(4./12, counter.probabilityOf('b'), .001);
+    assertEquals(6./12, counter.probabilityOf('c'), .001);
+    assertEquals(0., counter.probabilityOf('X'), .001);
   }
 }

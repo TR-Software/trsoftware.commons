@@ -1,3 +1,20 @@
+/*
+ * Copyright 2018 TR Software Inc.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not
+ * use this file except in compliance with the License. You may obtain a copy of
+ * the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+ * License for the specific language governing permissions and limitations under
+ * the License.
+ *
+ */
+
 package solutions.trsoftware.tools.gwt.gen;
 
 import com.google.common.collect.LinkedHashMultimap;
@@ -7,8 +24,8 @@ import com.google.gwt.resources.client.ClientBundle;
 import com.google.gwt.resources.client.DataResource;
 import com.google.gwt.resources.client.ResourcePrototype;
 import com.squareup.javapoet.*;
-import solutions.trsoftware.commons.server.io.FileSet;
-import solutions.trsoftware.commons.server.io.ServerIOUtils;
+import solutions.trsoftware.commons.server.io.file.FileSet;
+import solutions.trsoftware.commons.server.io.file.FileUtils;
 import solutions.trsoftware.commons.server.util.reflect.ReflectionUtils;
 import solutions.trsoftware.commons.shared.util.LogicUtils;
 import solutions.trsoftware.commons.shared.util.MutableLazyReference;
@@ -98,7 +115,7 @@ public class ClientBundleCodeGenerator {
   public void generateBundleClass(Writer out) throws IOException, NoSuchMethodException {
     for (File resourceFile : resourceFiles) {
       String filename = resourceFile.getName();
-      String filenamePrefix = ServerIOUtils.filenamePrefix(filename);
+      String filenamePrefix = FileUtils.filenamePrefix(filename);
       if (resourceMethodsByFilenamePrefix.containsKey(filenamePrefix))
         throw new IllegalStateException(String.format("Already have a method for '%s': %s", filenamePrefix, resourceMethodsByFilenamePrefix.get(filenamePrefix)));
       ResourceMethod resourceMethod = generateResourceMethod(filename, filenamePrefix);
@@ -208,7 +225,7 @@ public class ClientBundleCodeGenerator {
             .addMember("value", "$1S", filename)
             .build()
         );
-    String filenameExtension = ServerIOUtils.filenameExtension(filename);
+    String filenameExtension = FileUtils.filenameExtension(filename);
     Class<? extends ResourcePrototype> resourceType;
     switch (filenameExtension) {
       case "svg":

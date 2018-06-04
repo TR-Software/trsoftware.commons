@@ -1,9 +1,26 @@
+/*
+ * Copyright 2018 TR Software Inc.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not
+ * use this file except in compliance with the License. You may obtain a copy of
+ * the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+ * License for the specific language governing permissions and limitations under
+ * the License.
+ *
+ */
+
 package solutions.trsoftware.tools.gwt;
 
 import com.google.common.collect.LinkedHashMultimap;
 import com.google.common.collect.Multimap;
 import junit.framework.TestCase;
-import solutions.trsoftware.commons.server.io.FileUtils;
+import solutions.trsoftware.commons.server.io.file.FileUtils;
 import solutions.trsoftware.commons.shared.util.MultimapDecorator;
 import solutions.trsoftware.tools.gwt.artifacts.SymbolMapHeaderParser;
 
@@ -38,9 +55,9 @@ public class SymbolMapHeaderParserTest extends TestCase {
             "{ 'chromeWithColNumbers' : 'false' , 'debug' : 'on' , 'user.agent' : 'ie10' }"),
         parser.getSelectionPropertyLines());
     Multimap<String, String> expectedProps = new MultimapDecorator<String, String>(LinkedHashMultimap.create())
-        .put("chromeWithColNumbers", "false")
-        .put("debug", "off", "on")
-        .put("user.agent", "ie10")
+        .putAll("chromeWithColNumbers", "false")
+        .putAll("debug", "off", "on")
+        .putAll("user.agent", "ie10")
         .getMultimap();
     assertEquals(expectedProps, parser.getSelectionProperties());
 

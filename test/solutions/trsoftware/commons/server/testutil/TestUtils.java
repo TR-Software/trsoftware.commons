@@ -1,11 +1,11 @@
 /*
- *  Copyright 2017 TR Software Inc.
+ * Copyright 2018 TR Software Inc.
  *
- *  Licensed under the Apache License, Version 2.0 (the "License"); you may not
- *  use this file except in compliance with the License. You may obtain a copy of
- *  the License at
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not
+ * use this file except in compliance with the License. You may obtain a copy of
+ * the License at
  *
- *  http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
@@ -17,8 +17,13 @@
 
 package solutions.trsoftware.commons.server.testutil;
 
+import com.google.common.testing.GcFinalization;
+import junit.framework.TestCase;
 import solutions.trsoftware.commons.shared.util.MemoryUnit;
 import solutions.trsoftware.commons.shared.util.callables.Function0;
+
+import java.io.PrintStream;
+import java.util.Collection;
 
 /**
  * Jul 29, 2009
@@ -34,11 +39,6 @@ public class TestUtils {
         bytesToMegs(runtime.totalMemory() - runtime.freeMemory()));
   }
 
-  /** Prints out the memory still occupied after doing the given number of GCs */
-  public static String printMemoryUsage(int gcCount) {
-    return String.format("Memory used: %3.3f MB", bytesToMegs(calcSystemMemoryUsage(gcCount)));
-  }
-
   public static double bytesToMegs(long bytes) {
     return MemoryUnit.MEGABYTES.fromBytes(bytes);
   }
@@ -48,24 +48,23 @@ public class TestUtils {
   }
 
   /**
-   * Returns the difference in memory usage after the object
-   * is created the given factory.
+   * Attempts to measure the difference in memory usage before and after an object is created by the given factory.
+   * Will attempt to wait for a full-heap GC prior to making both measurements.
+   * @return the memory usage difference, in bytes
    */
   public static long measureMemoryDelta(Function0 factory) {
-    return measureMemoryDelta(1, factory);
+    return measureMemoryDelta(true, factory);
   }
 
   /**
-   * Returns the difference in memory usage after the object
-   * is created the given factory. 
-   * @param gcCount The number garbage collections to be run before and
-   * after each measurement: 1 is fastest, but a larger number, like 10 will
-   * give a better estimate of memory usage
+   * Attempts to measure the difference in memory usage before and after an object is created by the given factory.
+   * @param awaitFullGc if {@code true}, will attempt to wait for a full-heap GC prior to making the measurements
+   * @return the memory usage difference, in bytes
    */
-  public static long measureMemoryDelta(int gcCount, Function0 factory) {
-    long memBefore = calcSystemMemoryUsage(gcCount);
+  public static long measureMemoryDelta(boolean awaitFullGc, Function0 factory) {
+    long memBefore = calcSystemMemoryUsage(awaitFullGc);
     Object result = factory.call();
-    long memAfter = calcSystemMemoryUsage(gcCount);
+    long memAfter = calcSystemMemoryUsage(awaitFullGc);
     // the following statement is mainly just to make sure the JIT doesn't clear the
     // reference to result before memAfter gets calculated
     if (result == null)
@@ -74,34 +73,29 @@ public class TestUtils {
   }
 
   /**
-   * Prints the difference in memory usage after the object
-   * is created the given factory (e.g. {prefix} used up x.y KB of memory)
-   * @param factory
+   * Prints the difference in memory usage before and after an object is created by the given factory.
+   * Will attempt to wait for a full-heap GC prior to making both measurements.
+   * <p style="font-style: italic;">
+   *   Output example:
+   *   <pre>{prefix} used up 36.133 KB of memory and 0.18 ms avg. time</pre>
+   * </p>
    */
   public static void printMemoryDelta(String prefix, Function0 factory) {
-    printMemoryDelta(prefix, 2, factory);
-  }
-
-
-  /**
-   * Prints the difference in memory usage after the object
-   * is created the given factory (e.g. {prefix} used up x.y KB of memory)
-   * @param gcCount The number garbage collections to be run before and
-   * after each measurement: 1 is fastest, but a larger number, like 10 will
-   * give a better estimate of memory usage
-   */
-  public static void printMemoryDelta(String prefix, int gcCount, Function0 factory) {
     System.out.printf(
         "%s used up %3.3f KB of memory%n",
         prefix,
-        bytesToKilobytes(measureMemoryDelta(gcCount, factory)));
+        bytesToKilobytes(measureMemoryDelta(factory)));
   }
 
   /**
-   * Prints the difference in memory usage after the object
-   * is created the given factory (e.g. {prefix} used up x.y KB of memory)
-   * also measures and prints the time needed to construct the object.
-   * @param factory
+   * Prints the difference in time and memory usage before and after an object is created by the given factory.
+   *
+   * <p style="font-style: italic;">
+   *   Output example:
+   *   <pre>{prefix} used up 36.133 KB of memory and 0.18 ms avg. time</pre>
+   * </p>
+   * @param factory the code to be benchmarked (should produce a new object whose memory usage is to be measured)
+   * @param prefix a string describing the object being benchmarked, will be used in the
    */
   public static void printMemoryAndTimeUsage(String prefix, Function0 factory) {
     // first measure the memory usage (we don't time this because the GCs will use a lot of time)
@@ -123,23 +117,64 @@ public class TestUtils {
   }
 
   /**
-   * Measures current JVM memory usage as it is, without any GCs.
+   * Measures current JVM memory usage as it is, without performing any GC beforehand
    * @return The number of bytes of memory in use right now.
    */
   private static long calcSystemMemoryUsage() {
-    return calcSystemMemoryUsage(0);
+    return calcSystemMemoryUsage(false);
   }
 
   /**
-   * Measures current JVM memory usage.
-   * @param gcCount The number of GCs to run prior to measuring the memory usage.
-   * @return The number of bytes of used memory after running the desired GCs.
+   * Measures the current memory usage of the JVM, optionally waiting for a full-heap GC before making the measurement.
+   * @param awaitFullGc if {@code true}, will invoke {@link GcFinalization#awaitFullGc()} prior to the measurement
+   * @return The current memory usage in bytes
+   * @see GcFinalization#awaitFullGc()
+   * @see <a href="https://stackoverflow.com/a/27831908">StackOverflow discussion about Java memory benchmarking</a>
    */
-  public static long calcSystemMemoryUsage(int gcCount) {
+  public static long calcSystemMemoryUsage(boolean awaitFullGc) {
+    if (awaitFullGc)
+      GcFinalization.awaitFullGc(); // see https://stackoverflow.com/a/27831908
     Runtime rt = Runtime.getRuntime();
-    for (int i = 0; i < gcCount; i++) {
-      rt.gc();  // run enough GCs to get rid of temporary objects (like CSVReader) that were used for loading the object whose size we're interested in
-    }
     return rt.totalMemory() - rt.freeMemory();
+  }
+
+  /**
+   * Prefixes a test name with the full name of its class.
+   * @param testCase a test instance
+   * @return {@code "<className>.<testName>"}; example: {@code "com.example.FooTest.testFoo"}
+   */
+  public static String qualifiedTestName(TestCase testCase) {
+    return qualifiedTestName(testCase, false);
+  }
+
+  /**
+   * Prefixes a test name with the name of its class.
+   * @param testCase a test instance
+   * @param useSimpleClassName {@code true} to use {@link Class#getSimpleName()} else {@link Class#getName()}
+   * @return {@code "<className>.<testName>"}; example: {@code "FooTest.testFoo"} or {@code "com.example.FooTest.testFoo"}
+   */
+  public static String qualifiedTestName(TestCase testCase, boolean useSimpleClassName) {
+    Class<? extends TestCase> testClass = testCase.getClass();
+    String className = useSimpleClassName ? testClass.getSimpleName() : testClass.getName();
+    return className + "." + testCase.getName();
+  }
+
+  /**
+   * Prints the given collection to {@link System#out} such that every element is on a new line.
+   * Elements are printed using their default {@link Object#toString()} representation.
+   */
+  public static void printCollection(String name, Collection collection) {
+    PrintStream out = System.out;
+    if (name != null)
+      out.print(name + " = ");
+    if (collection.isEmpty()) {
+      out.println("[]");
+      return;
+    }
+    out.println("[");
+    for (Object elt : collection) {
+      out.printf("  %s%n", elt);
+    }
+    out.println("]");
   }
 }

@@ -1,11 +1,11 @@
 /*
- *  Copyright 2017 TR Software Inc.
+ * Copyright 2018 TR Software Inc.
  *
- *  Licensed under the Apache License, Version 2.0 (the "License"); you may not
- *  use this file except in compliance with the License. You may obtain a copy of
- *  the License at
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not
+ * use this file except in compliance with the License. You may obtain a copy of
+ * the License at
  *
- *  http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
@@ -19,10 +19,12 @@ package solutions.trsoftware.commons.client.useragent;
 
 import com.google.common.base.Predicate;
 import junit.framework.TestCase;
-import solutions.trsoftware.commons.server.io.ServerIOUtils;
+import solutions.trsoftware.commons.server.io.ResourceLocator;
 
 import java.util.ArrayList;
 import java.util.List;
+
+import static solutions.trsoftware.commons.server.io.ServerIOUtils.readLines;
 
 /**
  * Dec 14, 2008
@@ -31,10 +33,8 @@ import java.util.List;
  */
 public class UserAgentJavaTest extends TestCase {
 
-  private static List<String> readLinesFromFile(String filename) {
-    return ServerIOUtils.readLinesFromResource(
-        ServerIOUtils.resourceNameFromFilenameInSamePackage(filename, UserAgentJavaTest.class),
-        true);
+  private List<String> readLinesFromFile(String filename) {
+    return readLines(new ResourceLocator(filename, getClass()).getReaderUTF8(), true);
   }
 
   public void testIsIE() throws Exception {

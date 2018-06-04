@@ -1,11 +1,11 @@
 /*
- *  Copyright 2017 TR Software Inc.
+ * Copyright 2018 TR Software Inc.
  *
- *  Licensed under the Apache License, Version 2.0 (the "License"); you may not
- *  use this file except in compliance with the License. You may obtain a copy of
- *  the License at
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not
+ * use this file except in compliance with the License. You may obtain a copy of
+ * the License at
  *
- *  http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
@@ -21,7 +21,6 @@ import javax.servlet.*;
 import javax.servlet.http.*;
 import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.UnsupportedEncodingException;
 import java.security.Principal;
 import java.util.*;
 
@@ -36,13 +35,15 @@ import java.util.*;
 public class RequestCopy implements HttpServletRequest {
   private static final String UOE_MSG = "RequestCopy doesn't support this method.";
 
+  private transient HttpServletRequest originalRequest;
+
   private String remoteAddr;
   private String queryString;
   private Locale locale;
   private Map<String, String[]> params;
   private String method;
+  private String requestURI;
   private StringBuffer requestURL;
-  private HttpServletRequest originalRequest;
 
   public RequestCopy(HttpServletRequest originalRequest) {
     this.originalRequest = originalRequest;
@@ -52,6 +53,7 @@ public class RequestCopy implements HttpServletRequest {
     params = originalRequest.getParameterMap();
     method = originalRequest.getMethod();
     requestURL = new StringBuffer(originalRequest.getRequestURL());  // defensive copy, since the original buffer likely to get reused
+    requestURI = originalRequest.getRequestURI();
   }
 
   /**
@@ -70,7 +72,7 @@ public class RequestCopy implements HttpServletRequest {
     throw new UnsupportedOperationException(UOE_MSG);
   }
 
-  public Enumeration getAttributeNames() {
+  public Enumeration<String> getAttributeNames() {
     throw new UnsupportedOperationException(UOE_MSG);
   }
 
@@ -78,7 +80,7 @@ public class RequestCopy implements HttpServletRequest {
     throw new UnsupportedOperationException(UOE_MSG);
   }
 
-  public void setCharacterEncoding(String s) throws UnsupportedEncodingException {
+  public void setCharacterEncoding(String s) {
     throw new UnsupportedOperationException(UOE_MSG);
   }
 
@@ -103,7 +105,7 @@ public class RequestCopy implements HttpServletRequest {
     return params.get(s)[0];
   }
 
-  public Enumeration getParameterNames() {
+  public Enumeration<String> getParameterNames() {
     return Collections.enumeration(params.keySet());
   }
 
@@ -111,7 +113,7 @@ public class RequestCopy implements HttpServletRequest {
     return params.get(s);
   }
 
-  public Map getParameterMap() {
+  public Map<String, String[]> getParameterMap() {
     return params;
   }
 
@@ -155,7 +157,7 @@ public class RequestCopy implements HttpServletRequest {
     return locale;
   }
 
-  public Enumeration getLocales() {
+  public Enumeration<Locale> getLocales() {
     throw new UnsupportedOperationException(UOE_MSG);
   }
 
@@ -238,11 +240,11 @@ public class RequestCopy implements HttpServletRequest {
     throw new UnsupportedOperationException(UOE_MSG);
   }
 
-  public Enumeration getHeaders(String s) {
+  public Enumeration<String> getHeaders(String s) {
     throw new UnsupportedOperationException(UOE_MSG);
   }
 
-  public Enumeration getHeaderNames() {
+  public Enumeration<String> getHeaderNames() {
     throw new UnsupportedOperationException(UOE_MSG);
   }
 
@@ -287,7 +289,7 @@ public class RequestCopy implements HttpServletRequest {
   }
 
   public String getRequestURI() {
-    throw new UnsupportedOperationException(UOE_MSG);
+    return requestURI;
   }
 
   public StringBuffer getRequestURL() {

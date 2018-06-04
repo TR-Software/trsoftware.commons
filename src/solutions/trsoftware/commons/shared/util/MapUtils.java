@@ -1,11 +1,11 @@
 /*
- *  Copyright 2017 TR Software Inc.
+ * Copyright 2018 TR Software Inc.
  *
- *  Licensed under the Apache License, Version 2.0 (the "License"); you may not
- *  use this file except in compliance with the License. You may obtain a copy of
- *  the License at
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not
+ * use this file except in compliance with the License. You may obtain a copy of
+ * the License at
  *
- *  http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
@@ -51,20 +51,27 @@ public class MapUtils {
 
   /**
    * Creates a {@link LinkedHashMap} from the given args (treated as {@code key1, value1, key2, value2, ...})
-   * @deprecated use {@link MapDecorator} for type-safety
+   * @deprecated use {@link #linkedHashMapBuilder()} for type-safety
    */
   public static <K,V> LinkedHashMap<K, V> linkedHashMap(Object... keyValuePairs) {
     return putAll(new LinkedHashMap<K, V>(), keyValuePairs);
   }
 
+  /**
+   * @return a new {@link MapDecorator} instance for building a {@link LinkedHashMap} using method chaining.
+   */
+  public static <K, V> MapDecorator<K, V> linkedHashMapBuilder() {
+    return new MapDecorator<>(new LinkedHashMap<>());
+  }
+
   /** This a frequently-used special case of {@link #hashMap(Object...)}, for String keys and values */
   public static HashMap<String, String> stringMap(String... keyValuePairs) {
-    return hashMap(keyValuePairs);
+    return hashMap((Object[])keyValuePairs);
   }
 
   /** This a frequently-used special case of {@link #linkedHashMap(Object...)}, for String keys and values */
   public static LinkedHashMap<String, String> stringLinkedHashMap(String... keyValuePairs) {
-    return linkedHashMap(keyValuePairs);
+    return linkedHashMap((Object[])keyValuePairs);
   }
 
   /** Creates a sorted map of the given the args in order key1, value2, key2, value2, ... */

@@ -1,11 +1,11 @@
 /*
- *  Copyright 2017 TR Software Inc.
+ * Copyright 2018 TR Software Inc.
  *
- *  Licensed under the Apache License, Version 2.0 (the "License"); you may not
- *  use this file except in compliance with the License. You may obtain a copy of
- *  the License at
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not
+ * use this file except in compliance with the License. You may obtain a copy of
+ * the License at
  *
- *  http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
@@ -74,5 +74,13 @@ public class IpAddress implements Serializable {
 
   public long toLong() {
     return ip4IntToLong(packedInt);
+  }
+
+  /**
+   * Allows bucketing users into {@code N} categories based on IP address.  This is useful for A/B testing.
+   * @return an integer in the range {@code [0, N-1]}, classifying the given address into one of {@code N} buckets.
+   */
+  public int bucket(int nBuckets) {
+    return Math.abs(packedInt) % nBuckets;
   }
 }

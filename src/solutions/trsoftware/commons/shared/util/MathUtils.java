@@ -1,11 +1,11 @@
 /*
- *  Copyright 2017 TR Software Inc.
+ * Copyright 2018 TR Software Inc.
  *
- *  Licensed under the Apache License, Version 2.0 (the "License"); you may not
- *  use this file except in compliance with the License. You may obtain a copy of
- *  the License at
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not
+ * use this file except in compliance with the License. You may obtain a copy of
+ * the License at
  *
- *  http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
@@ -28,6 +28,11 @@ import static java.lang.Math.*;
  * @author Alex
  */
 public class MathUtils {
+
+  /**
+   * An arbitrarily small positive quantity that can be used to ignore precision loss with floating-point operations.
+   */
+  public static final double EPSILON = 0.0001;
 
   /**
    * Converts a 128-bit integer represented by the two given {@code long} components to a {@code byte} array.
@@ -163,38 +168,63 @@ public class MathUtils {
   }
 
   /**
-   * Compares two {@code double} values within the given {@code delta}.  This is preferable to {@link Double#compare(double, double)}
-   * when the values might come from a result of computation (which might be inexact).
-   * Example: {@code 32450.0 / 3.75 * 3.75} &rarr; {@code 32450.000000000004}, whereas we would expect {@code 32450.0}
-   * @param delta the accuracy limit for the comparison.
-   * @return {@code true} iff {@code expected == actual} or the difference between the two values is &lt;= {@code delta}
+   * Checks whether the given {@code double} values are "approximately" equal.  More specifically, compares them
+   * within the given margin of error.
+   * <p>
+   * This is preferable to using the {@code ==} operator or {@link Double#compare(double, double)}
+   * when one of the values might come from a result of a floating-point arithmetic
+   * (which could have precision error). For example:
+   * {@code 32450.0 / 3.75 * 3.75} &rarr; {@code 32450.000000000004} (whereas we would expect {@code 32450.0}).
+   *
+   * @param delta the margin of error for the comparison;
+   *              the {@link #EPSILON} constant is provided for this use-case
+   * @return {@code true} iff {@code expected == actual} or the difference between the two values is {@code <= delta}
+   * @throws IllegalArgumentException if {@code delta} is negative
+   * @see #EPSILON
+   * @see junit.framework.Assert#assertEquals(double, double, double)
    */
-  public static boolean equal(double expected, double actual, double delta) {
+  public static boolean equal(double a, double b, double delta) {
     // handle infinity specially since subtracting to infinite values gives NaN and the following test fails
-    if (Double.isInfinite(expected) || Double.isInfinite(actual)) {
-      return expected == actual;
+    if (Double.isInfinite(a) || Double.isInfinite(b)) {
+      return a == b;
     }
-    return Math.abs(expected-actual) <= delta;
+    return Math.abs(a-b) <= Math.abs(delta);
   }
 
   /**
-   * @return {@code value} rounded to {@code precision} decimal places using {@link BigDecimal#round(MathContext)},
-   * which seems to be the best way to do it for both clientside GWT and serverside Java.
+   * Attempts to use {@link BigDecimal} to round a {@code double} to the given number of decimal places, as suggested
+   * by <a href="http://www.baeldung.com/java-round-decimal-number">this article</a>.
    *
-   * @deprecated while the unit test is failing; TODO: this method needs to be fixed (could try using {@link solutions.trsoftware.commons.shared.util.text.SharedNumberFormat} instead of {@link BigDecimal#round(MathContext)}
+   * <p style="color: red; font-weight: bold;">
+   *   DO NOT USE this method because it often doesn't return the desired result.  Use string formatting instead.
+   * </p>
+   *
+   * @return {@code value} rounded to {@code nPlaces} decimal places.
+   *
+   * @deprecated this method still exists simply as a warning to never attempt to solve this problem again; it's pointless.
+   * It doesn't even make sense to attempt to round a {@code double} to a given number of decimal places because
+   * floating-point numbers are so imprecise.  Most of the solutions described on the web don't actually work well,
+   * and it seems that the only way to do it properly is to use the string formatting classes (e.g. DecimalFormat, printf, etc).
+   * It actually makes a lot more sense to use string formatting to achieve this kind of rounding,
+   * because the only real need for this operation is to pretty-print a number as text.
    */
-  public static double round(double value, int precision) {
-    if (precision < 0)
-      throw new IllegalArgumentException(String.valueOf(precision));
+  public static double round(double value, int nPlaces) {
+    if (nPlaces < 0)
+      throw new IllegalArgumentException(String.valueOf(nPlaces));
     double rint = Math.rint(value);
-    if (precision == 0 || rint == value)
+    if (nPlaces == 0 || rint == value)
       return rint;  // can't pass precision=0 to BigDecimal.round (this would cancel rounding)
     else {
-      // we can only use BigDecimal to round the fractional part of the number, because
-      // new BigDecimal(245.245678).round(new MathContext(2, RoundingMode.HALF_UP)) returns 250.0, whereas we want 245.25
+      /*
+      We can only use BigDecimal to round the fractional part of the number, because
+      new BigDecimal(245.245678).round(new MathContext(2, RoundingMode.HALF_UP)) returns 250.0, whereas we want 245.25
+      Furthermore, it won't even work for the fractional part some of the time, for example:
+      - round(0.04584203269100395, 1) = 0.05 // instead of 0.0
+      - round(0.013107220012424037, 3) = 0.0131  // instead of 0.013
+      */
       double floor = Math.floor(value);
       double fraction = value - floor;
-      return floor + new BigDecimal(fraction).round(new MathContext(precision)).doubleValue();
+      return floor + new BigDecimal(fraction).round(new MathContext(nPlaces)).doubleValue();
     }
   }
 

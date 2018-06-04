@@ -1,11 +1,11 @@
 /*
- *  Copyright 2017 TR Software Inc.
+ * Copyright 2018 TR Software Inc.
  *
- *  Licensed under the Apache License, Version 2.0 (the "License"); you may not
- *  use this file except in compliance with the License. You may obtain a copy of
- *  the License at
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not
+ * use this file except in compliance with the License. You may obtain a copy of
+ * the License at
  *
- *  http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
@@ -18,6 +18,7 @@
 package solutions.trsoftware.commons.shared.util;
 
 import com.google.common.collect.AbstractSequentialIterator;
+import com.google.common.collect.ImmutableSortedSet;
 
 import java.util.Iterator;
 import java.util.List;
@@ -56,15 +57,12 @@ public class NumberRange<T extends Number & Comparable> implements Iterable<T> {
     return max;
   }
 
-  // TODO: refactor this method using a new static randomDouble method (implemented the same way as the new static randomInt method)
-  /** Returns a random double in this range */
-  public double random() {
-    // using Math.random instead of java.util.Random for GWT compatibility
-    return Math.random() * (max.doubleValue() - min.doubleValue()) + min.doubleValue();
+  /** @return a random {@code double} in this range */
+  public double randomDouble() {
+    return RandomUtils.nextDoubleInRange(min.doubleValue(), max.doubleValue());
   }
 
-  // TODO: refactor this method using the new static randomInt method
-  /** Returns a random integer in this range */
+  /** @return a random integer in this range */
   public int randomInt() {
     int lowerBound, upperBound;
     if (min.intValue() < min.doubleValue())
@@ -196,8 +194,6 @@ public class NumberRange<T extends Number & Comparable> implements Iterable<T> {
     return (T)NumberUtils.fromDouble(min.getClass(), v);
   }
 
-  private static SortedSet emptySortedSet;
-
   /**
    * Parses a string of the form "1, 2, 6..10, 12, 19..23", where each entry
    * is either an integer or an integer range, and returns a sorted set of all the integers
@@ -207,7 +203,7 @@ public class NumberRange<T extends Number & Comparable> implements Iterable<T> {
    */
   public static SortedSet<Integer> parseIntRangeList(String str) {
     if (StringUtils.isBlank(str))
-      return emptySortedSet != null ? emptySortedSet : (emptySortedSet = new TreeSet()); 
+      return ImmutableSortedSet.of();  // using the Guava version because Collections.emptySortedSet() is not part of JRE emulation in GWT
     SortedSet<Integer> set = new TreeSet<Integer>();
     String[] parts = str.split(",");
     for (String part : parts) {

@@ -1,11 +1,11 @@
 /*
- *  Copyright 2017 TR Software Inc.
+ * Copyright 2018 TR Software Inc.
  *
- *  Licensed under the Apache License, Version 2.0 (the "License"); you may not
- *  use this file except in compliance with the License. You may obtain a copy of
- *  the License at
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not
+ * use this file except in compliance with the License. You may obtain a copy of
+ * the License at
  *
- *  http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
@@ -17,15 +17,19 @@
 
 package solutions.trsoftware.commons.server.testutil;
 
+import junit.framework.AssertionFailedError;
 import solutions.trsoftware.commons.server.util.function.ThrowingBiConsumer;
 import solutions.trsoftware.commons.server.util.reflect.MemberSet;
 import solutions.trsoftware.commons.server.util.reflect.ObjectDiffs;
+import solutions.trsoftware.commons.shared.util.StringUtils;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Member;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.List;
+import java.util.Map;
+import java.util.function.Function;
 import java.util.regex.Pattern;
 
 import static junit.framework.Assert.*;
@@ -135,17 +139,53 @@ public abstract class ServerAssertUtils {
     }
   }
 
-  public static <T> void assertListsEqual(List<T> expected, List<T> actual, ThrowingBiConsumer<T, T, Exception> equalityAssertion) throws Exception {
+  /**
+   * Tests two lists for equality using a custom comparison function to compare the elements.
+   * <p>
+   * This is similar to {@link junit.framework.Assert#assertEquals(Object, Object) assertEquals(List, List)}, but
+   * allows the elements to be tested for equality using something other than {@link Object#equals(Object)}
+   *
+   * @param equalityAssertion a function that takes a pair of elements and throws an exception if it doesn't consider
+   * them to be equal.
+   * @param <E> the type of elements in the given lists
+   * @throws AssertionFailedError if {@code equalityAssertion} throws an exception for any pair of elements
+   */
+  public static <E> void assertListsEqual(List<E> expected, List<E> actual, ThrowingBiConsumer<E, E, Exception> equalityAssertion) {
     assertEquals(expected.size(), actual.size());
     for (int i = 0; i < expected.size(); i++) {
-      T a = expected.get(i);
-      T b = actual.get(i);
+      E a = expected.get(i);
+      E b = actual.get(i);
       try {
         equalityAssertion.accept(a, b);
       }
-      catch (AssertionError ex) {
-        throw new AssertionError(String.format("Lists differ on element %d: expected:<%s> but was:<%s>", i, expected, actual), ex);
+      catch (Exception ex) {
+        ex.printStackTrace();
+        throw new AssertionFailedError(String.format("Lists differ on element %d: expected:<%s> but was:<%s>", i, expected, actual));
       }
     }
   }
+
+  /**
+   * Tests the given function against the expected results.
+   * <p>
+   * In other words, asserts that
+   * <pre>
+   *   r.equals(fcn(a)) // &forall;(a, r) &isin; expectedResults
+   * </pre>
+   * @param fcnName used for printing error messages
+   * @param fcn the function being tested
+   * @param expectedResults a mapping of function args to their expected results
+   * @param <A> the type of the input to the function
+   * @param <R> the type of the result of the function
+   */
+  public static <A, R> void assertFunctionResults(String fcnName, Function<A, R> fcn, Map<A, R> expectedResults) {
+    for (Map.Entry<A, R> entry : expectedResults.entrySet()) {
+      A arg = entry.getKey();
+      R result = fcn.apply(arg);
+      R expectedResult = entry.getValue();
+      assertEquals("Unexpected result from function call " + StringUtils.methodCallToString(fcnName, arg),
+          expectedResult, result);
+    }
+  }
+
 }

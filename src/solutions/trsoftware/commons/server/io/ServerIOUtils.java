@@ -1,11 +1,11 @@
 /*
- *  Copyright 2017 TR Software Inc.
+ * Copyright 2018 TR Software Inc.
  *
- *  Licensed under the Apache License, Version 2.0 (the "License"); you may not
- *  use this file except in compliance with the License. You may obtain a copy of
- *  the License at
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not
+ * use this file except in compliance with the License. You may obtain a copy of
+ * the License at
  *
- *  http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
@@ -17,13 +17,9 @@
 
 package solutions.trsoftware.commons.server.io;
 
-import solutions.trsoftware.commons.server.util.ServerStringUtils;
 import solutions.trsoftware.commons.shared.util.StringUtils;
 
 import java.io.*;
-import java.net.Socket;
-import java.net.URL;
-import java.nio.file.Path;
 import java.util.ArrayList;
 
 /**
@@ -39,9 +35,12 @@ public final class ServerIOUtils {
   /** Value of the {@code line.separator} system property */
   public static final String LINE_SEPARATOR = System.getProperty("line.separator");
 
-  public static Reader readFileUTF8(File file) throws FileNotFoundException {
+  /**
+   * @return an an {@link InputStreamReader} using the UTF-8 charset for the given input stream.
+   */
+  public static Reader readUTF8(InputStream input) {
     try {
-      return new InputStreamReader(new FileInputStream(file), StringUtils.UTF8_CHARSET_NAME);
+      return new InputStreamReader(input, StringUtils.UTF8_CHARSET_NAME);
     }
     catch (UnsupportedEncodingException e) {
       // will never happen - all java VM's support UTF-8
@@ -49,7 +48,14 @@ public final class ServerIOUtils {
     }
   }
 
-  /** Can be used for reading a resource text file into a String, using the platform-default encoding. */
+  /**
+   * @return a {@code UTF-8} reader for the given file
+   */
+  public static Reader readFileUTF8(File file) throws FileNotFoundException {
+    return readUTF8(new FileInputStream(file));
+  }
+
+  /** Can be used for reading a text file into a String, using the {@code UTF-8} charset */
   public static String readFileIntoStringUTF8(File file) throws IOException {
     return readCharactersIntoString(readFileUTF8(file));
   }
@@ -118,19 +124,18 @@ public final class ServerIOUtils {
 
   /**
    * Can be used for reading a text file or another input stream into a String,
-   * interpreting the input bytes as UTF-8 chars.  Uses an 8K buffer to reduce CPU usage. 
+   * interpreting the input bytes as {@code UTF-8} chars.  Uses an 8K buffer to reduce CPU usage.
    * Closes the input stream when finished.
    */
-  public static String readCharacterStreamIntoStringUtf8(InputStream in) throws IOException {
-    return readCharacterStreamIntoString(in, StringUtils.UTF8_CHARSET_NAME);
+  public static String readCharactersIntoString(InputStream in) throws IOException {
+    return readCharactersIntoString(in, StringUtils.UTF8_CHARSET_NAME);
   }
 
   /**
-   * Can be used for reading a text file or another input stream into a String,
-   * interpreting the input bytes as UTF-8 chars.  Uses an 8K buffer to reduce CPU usage.
+   * Can be used for reading a text file or another input stream into a String.  Uses an 8K buffer to reduce CPU usage.
    * Closes the input stream when finished.
    */
-  public static String readCharacterStreamIntoString(InputStream in, String charsetName) throws IOException {
+  public static String readCharactersIntoString(InputStream in, String charsetName) throws IOException {
     StringBuilder s = new StringBuilder(BUFFER_SIZE);
     byte[] buf = new byte[BUFFER_SIZE];
     try {
@@ -148,198 +153,28 @@ public final class ServerIOUtils {
   /**
    * Can be used for reading a text file into a String.  Closes the reader when finished.
    * Uses an 8K buffer to reduce CPU usage.
-   * WARNING: if given a file reader, the result will contain platform-specific
-   * line break characters (e.g. {@code "\r\n"} on Windows)
+   * <p>
+   *   WARNING: if given a file reader, the result will contain platform-specific line break characters
+   *   (e.g. {@code "\r\n"} on Windows).  If that's not desired, can use a {@link BufferedReader} instead
+   *   (whose {@link BufferedReader#readLine()} method omits the line-break chars.
+   * </p>
    */
-  public static String readCharactersIntoString(Reader in) throws IOException {
+  public static String readCharactersIntoString(Reader reader) throws IOException {
     StringBuilder s = new StringBuilder(BUFFER_SIZE);
     char[] buf = new char[BUFFER_SIZE];
-    try {
+    try (Reader in = reader) {
       int nRead = 0;
       while ((nRead = in.read(buf)) >= 0) {
         s.append(buf, 0, nRead);
       }
       return s.toString();
     }
-    finally {
-      in.close();
-    }
   }
 
-  /** Can be used for reading a resource text file into a String, using the platform-default encoding. */
-  public static String readResourceFileIntoString(String resourceName) throws IOException {
-    return readCharactersIntoString(readResourceFile(resourceName));
-  }
-
-  /** Can be used for reading a resource text file into a String, using UTF-8 encoding. */
-  public static String readResourceFileIntoStringUTF8(String resourceName) throws IOException {
-    return readCharactersIntoString(readResourceFileUTF8(resourceName));
-  }
-
-  /**
-   * @return a string that can be used to construct a {@code FileReader} or {@code File} for a resource
-   * (e.g. a file in a webapp's the WAR) or classpath, given its resource name (e.g. {@code "/example.txt"})
-   */
-  public static String resourceNameToFilename(String resourceName) {
-    return urlToFilepath(getResource(resourceName));
-  }
-
-  /**
-   * Resolves the given resource name to a file using {@link #getResource(String)}
-   * @return the {@link File} interface to the resource with the given name, or {@code null} if no resource with this name is found
-   * (e.g. {@code "/example.txt"} &rarr; {@code "/home/foo/bar/example.txt"})
-   */
-  public static File resourceNameToFile(String resourceName) {
-    URL fileUrl = getResource(resourceName);
-    if (fileUrl != null)
-      return new File(urlToFilepath(fileUrl));
-    return null;
-  }
-
-  /**
-   * Uses the given class to resolve the given resource name to a {@link URL} (which will most likely point to a
-   * file on the local system).  The name will be resolved using {@link Class#getResource(String)}.
-   * @return the resolved {@link URL} for the given resource name or {@code null} if no resource with this name is found.
-   * If the result is not {@code null}, it can be used to create a {@link File} interface for this resource by passing
-   * the value of {@link URL#getFile()} to {@link File#File(String)}.
-   */
-  public static URL getResource(String resourceName, Class refClass) {
-    // NOTE: for some reason ServerIOUtils.class.getResource(resourceName)
-    // behaves differently from ServerIOUtils.class.getClassLoader().getResource()
-    URL fileUrl = refClass.getResource(resourceName);
-    if (fileUrl == null)
-      fileUrl = refClass.getClassLoader().getResource(resourceName);  // fall back to using the ClassLoader
-    return fileUrl;
-  }
-
-  /**
-   * Uses this class to resolve the given resource name to a {@link URL}
-   * @return the resolved {@link URL} for the given resource name or {@code null} if no resource with this name is found
-   * @see #getResource(String, Class)
-   */
-  public static URL getResource(String resourceName) {
-    return getResource(resourceName, ServerIOUtils.class);
-  }
-
-  /**
-   * URL-decodes the result of {@link URL#getFile()}, so that it can be used as an argument to {@link File#File(String)}.
-   * This is necessary because the file path might contain spaces, which {@link URL#getFile()} would return as
-   * {@code %20}, and the file system won't recognize them.
-   *
-   * @return The URL-decoded result of {@link URL#getFile()}
-   *
-   */
-  public static String urlToFilepath(URL fileUrl) {
-    // there's a bug in the JVM that breaks on file paths with spaces b/c spaces are url-encoded
-    return ServerStringUtils.urlDecode(fileUrl.getFile());
-  }
-
-  /**
-   * @return A {@link File} created from the URL-decoded result of {@link URL#getFile()}
-   * @see #urlToFilepath(URL)
-   */
-  public static File urlToFile(URL fileUrl) {
-    // there's a bug in the JVM that breaks on file paths with spaces b/c spaces are url-encoded
-    return new File(urlToFilepath(fileUrl));
-  }
-
-
-  /**
-   * Converts a simple (un-prefixed) filename to a resource path relative to the path of the given class.
-   * This method is useful for unit testing, but should be used with caution in production code (see the deprecation warning)
-   *
-   * <p>
-   *   <b>Example:</b>
-   *   Given {@code "myfile.txt"} and {@code com.foo.MyClass}, will return {@code "/com/foo/myfile.txt"}
-   * </p>
-   *
-   * @param filename a simple, unqualified filename like {@code "myfile.txt"} (but not {@code "/foo/bar/myfile.txt"}),
-   * naming a file that presumably exists in the same package (or directory) as {@code referenceClass}
-   * @param referenceClass the given {@code filename} is presumed to reside in the
-   * @return a string that can be used to refer to the given file in the same package as the given class.
-   *
-   * @deprecated This deprecation warning exists simply to warn the user about a potential pitfall in using this method
-   * in production code. For example, when a webapp is packaged into a WAR using some kind of typical build script (like Ant),
-   * the compiler doesn't automatically copy non-java files to the bytecode directory (typically {@code /war/WEB-INF/classes/})
-   * It is therefore our recommendation that you explicitly add your static resources to some other directory inside the
-   * WAR, (e.g. {@code /war/WEB-INF/resources/}) and refer to those resources using resource names relative to the webapp's
-   * root instead of the package name of some compiled {@code .class} file.
-   */
-  public static String resourceNameFromFilenameInSamePackage(String filename, Class referenceClass) {
-    String pkgName = referenceClass.getPackage().getName();
-    String pkgPrefix = pkgName.replace('.', '/');
-    if (pkgPrefix.length() > 0) {
-      pkgPrefix += "/";
-    }
-    return  "/" + pkgPrefix + filename;
-  }
-
-  /**
-   * Computes an absolute path to a file in the same directory as the given reference class.
-   *
-   * <p><i>Example</i>: Suppose that {@code myfile.txt} and {@code MyClass.java} are in the directory
-   * {@code /projects/myproject/src/com/foo/}, then
-   * {@code filenameInPackageOf("myfile.txt", com.foo.MyClass.class)} will return
-   * {@code /projects/myproject/src/com/foo/myfile.txt}
-   * </p>
-   *
-   * @return the absolute path to a file in the same package as the referenced class
-   *
-   * @deprecated see deprecation warning for {@link #resourceNameFromFilenameInSamePackage(String, Class)}
-   */
-  public static String filenameInPackageOf(String filename, Class referenceClassInSamePackage) {
-    return resourceNameToFilename(resourceNameFromFilenameInSamePackage(filename, referenceClassInSamePackage));
-  }
-
-  /**
-   * Returns the lines in the given file in the WAR, given a resource name
-   * like "/example.txt"
-   */
-   public static ArrayList<String> readLinesFromResource(String resourceName, boolean ignoreBlankLines) {
-     try {
-       return readLines(readResourceFile(resourceName), ignoreBlankLines);
-     }
-     catch (FileNotFoundException e) {
-       e.printStackTrace();
-       throw new RuntimeException(e);
-     }
-   }
-
-  /**
-   * Returns the lines in the given file in the WAR, given a resource name
-   * like "/example.txt" using the UTF-8 file encoding.
-   */
-   public static ArrayList<String> readLinesFromResourceUTF8(String resourceName, boolean ignoreBlankLines) {
-     try {
-       return readLines(readResourceFileUTF8(resourceName), ignoreBlankLines);
-     }
-     catch (FileNotFoundException e) {
-       e.printStackTrace();
-       throw new RuntimeException(e);
-     }
-   }
-
-  /**
-   * Returns a Reader for a file in the WAR, given its resource name like "/example.txt",
-   * using the platform-default file encoding.
-   */
-  public static Reader readResourceFile(String resourceName) throws FileNotFoundException {
-    return new FileReader(resourceNameToFilename(resourceName));
-  }
-
-  /**
-   * Returns a Reader for a file in the WAR, given its resource name like "/example.txt",
-   * using the UTF8 file encoding.
-   */
-  public static Reader readResourceFileUTF8(String resourceName) throws FileNotFoundException {
-    return readFileUTF8(new File(resourceNameToFilename(resourceName)));
-  }
 
   public static ArrayList<String> readLines(Reader reader, boolean ignoreBlankLines) {
     ArrayList<String> lines = new ArrayList<>(2048);
-    BufferedReader br = null;
-    try {
-      br = new BufferedReader(reader);
+    try (BufferedReader br = new BufferedReader(reader)) {
       for (String line = br.readLine(); line != null; line = br.readLine()) {
         if (line.trim().length() > 0 || !ignoreBlankLines)
           lines.add(line);
@@ -349,71 +184,7 @@ public final class ServerIOUtils {
       e.printStackTrace();
       throw new RuntimeException(e);
     }
-    finally {
-      if (br != null) {
-        try {
-          br.close();
-        }
-        catch (IOException e) {
-          e.printStackTrace();
-        }
-      }
-    }
     return lines;
-  }
-
-  /**
-   * Creates a new file object by inserting the given suffix string before the
-   * extension of the original filename.
-   * @param originalFile (e.g. "/home/foo/bar.txt")
-   * @param suffix (e.g. "_bak")
-   * @return a file like "/home/foo/bar_bak.txt" (based on the above example)
-   */
-  public static File fileWithSuffix(File originalFile, String suffix) {
-    return new File(originalFile.getParent(), filenameWithSuffix(originalFile.getName(), suffix));
-  }
-
-  /**
-   * Creates a new filename by inserting the given suffix string before the extension
-   * of the original file.
-   * @param originalName (e.g. "bar.txt")
-   * @param suffix (e.g. "_bak")
-   * @return a filename like "bar_bak.txt" (based on the above example)
-   */
-  public static String filenameWithSuffix(String originalName, String suffix) {
-    StringBuilder name = new StringBuilder(originalName);
-    int extensionStartIndex = name.lastIndexOf(".");
-    if (extensionStartIndex >= 0) {
-      name.insert(extensionStartIndex, suffix);
-    }
-    else {
-      name.append(suffix);
-    }
-    return name.toString();
-  }
-
-  /**
-   * Returns the portion of the given filename preceding any dot characters.
-   * @param filename (e.g. "bar.txt")
-   * @return the prefix (e.g. "bar")
-   */
-  public static String filenamePrefix(String filename) {
-    int extensionStartIndex = filename.indexOf(".");
-    if (extensionStartIndex < 0)
-      return filename;  // the name doesn't have an extension
-    return filename.substring(0, extensionStartIndex);
-  }
-
-  /**
-   * Returns the portion of the given filename that follows the last {@code .} (dot) char.
-   * @param filename (e.g. {@code "bar.txt"})
-   * @return the filename extension (e.g. {@code "txt"}), or an empty string if the filename doesn't have an extension.
-   */
-  public static String filenameExtension(String filename) {
-    int extensionStartIndex = filename.lastIndexOf(".");
-    if (extensionStartIndex < 0)
-      return "";  // the name doesn't have an extension
-    return filename.substring(extensionStartIndex + 1);
   }
 
   /** Copies everything from the reader to the writer, closing both the reader and writer when finished */
@@ -465,30 +236,21 @@ public final class ServerIOUtils {
     }
   }
 
-  /** Given "a","b","c", returns "a/b/c", where '/' is the File.separator */
-  public static String joinPath(String... pathElements) {
-    return StringUtils.join(File.separator, pathElements);
-  }
-
-  /** Given "a","b","c", returns a File representing "a/b/c", where '/' is the File.separator */
-  public static File joinPathAsFile(String... pathElements) {
-    return new File(joinPath(pathElements));
-  }
-
-  /**
-   * @return the location of the compiled {@code .class} file for the given class.
-   */
-  public static File getClassFile(Class cls) {
-    return urlToFile(cls.getResource(cls.getSimpleName() + ".class"));
-  }
-
   /**
    * Spawns a {@link BufferedReaderThread} to print the given input stream, like the <i>stdout</i> of another process
    * (obtained with {@link Process#getInputStream()}) to the given {@link PrintStream}
+   *
+   * <p style="font-style: italic;">
+   *   NOTE: this functionality can't be easily replicated using Java's {@link PipedInputStream} and {@link PipedOutputStream}
+   * </p>
+   *
    * @param from the input to read
    * @param to where to print the input
    * @param name will be passed to {@link Thread#Thread(String)}
    * @return the spawned thread
+   *
+   * @see #pipeStreams(Process, PrintStream, PrintStream, String)
+   * @see #pipeStreams(Process, String)
    */
   public static BufferedReaderThread pipeStream(InputStream from, final PrintStream to, String name) {
     BufferedReaderThread readerThread = new BufferedReaderThread(from, name) {
@@ -502,28 +264,50 @@ public final class ServerIOUtils {
   }
 
   /**
-   * Registers the given path to be deleted on JVM shutdown by invoking {@link File#deleteOnExit()}
-   * on {@link Path#toFile() path.toFile()}, which registers it with the {@link DeleteOnExitHook}
-   * @param path the path to be deleted
-   * @return the same object that was passed as the arg
+   * Spawns threads that will print the <i>stdout</i> and <i>stderr</i> streams from another process, line-by-line,
+   * to the given print streams.
+   *
+   * If the {@code processName} argument is not {@code null}, each line of the output will be prefixed with
+   * <nobr><code>"[<i>processName</i> stdout] "</code></nobr> or
+   * <nobr><code>"[<i>processName</i> stderr] "</code></nobr>.
+   *
+   * @param process the process whose output will be read and printed
+   * @param stdout where to print the normal output
+   * @param stderr where to print the error output
+   * @param processName will be used to prefix the printed output; pass {@code null} to disable the prefixing
+   *
+   * @see #pipeStreams(Process, String)
+   * @see #pipeStream(InputStream, PrintStream, String)
    */
-  public static Path deleteOnExit(Path path) {
-    path.toFile().deleteOnExit();
-    return path;
+  public static void pipeStreams(Process process, PrintStream stdout, PrintStream stderr, String processName) {
+    if (processName != null) {
+      String stdoutPrefix = String.format("[%s stdout] ", processName);
+      String stderrPrefix = String.format("[%s stderr] ", processName);
+      pipeStream(process.getInputStream(), new PrefixedPrintStream(stdoutPrefix, stdout), stdoutPrefix + " reader thread");
+      pipeStream(process.getErrorStream(), new PrefixedPrintStream(stderrPrefix, stderr), stderrPrefix + " reader thread");
+    }
+    else {
+      pipeStream(process.getInputStream(), stdout, "external process stdout reader thread");
+      pipeStream(process.getErrorStream(), stderr, "external process stderr reader thread");
+    }
   }
 
   /**
-   * @return {@code true} iff a socket connection to the given port cannot be established
+   * Spawns threads that will print the <i>stdout</i> and <i>stderr</i> streams from another process, line-by-line,
+   * to {@link System#out} and {@link System#err}, respectively.
+   *
+   * If the {@code processName} argument is not {@code null}, each line of the output will be prefixed with
+   * <nobr><code>"[<i>processName</i> stdout] "</code></nobr> or
+   * <nobr><code>"[<i>processName</i> stderr] "</code></nobr>.
+   *
+   * @param process the process whose output will be read and printed
+   * @param processName will be used to prefix the printed output; pass {@code null} to disable the prefixing
+   *
+   * @see #pipeStreams(Process, PrintStream, PrintStream, String)
+   * @see #pipeStream(InputStream, PrintStream, String)
    */
-  public static boolean isLocalPortAvailable(int port) {
-    // This solution suggested by http://stackoverflow.com/questions/434718/sockets-discover-port-availability-using-java
-    try {
-      Socket s = new Socket("localhost", port); // will throw exception if unable to connect
-      s.close();
-      return false;  // we were able to connect to the port, which means some process is listening on it
-    }
-    catch (IOException e) {
-      return true;  // unable to connect, so the port is most likely free
-    }
+  public static void pipeStreams(Process process, String processName) {
+    pipeStreams(process, System.out, System.err, processName);
   }
+
 }

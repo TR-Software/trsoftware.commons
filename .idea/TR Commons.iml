@@ -31,6 +31,8 @@
       <sourceFolder url="file://$MODULE_DIR$/src" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/test" isTestSource="true" />
       <sourceFolder url="file://$MODULE_DIR$/resources" type="java-resource" />
+      <sourceFolder url="file://$MODULE_DIR$/test-resources" type="java-test-resource" />
+      <excludeFolder url="file://$MODULE_DIR$/build" />
       <excludeFolder url="file://$MODULE_DIR$/gwtHostedModeTests" />
       <excludeFolder url="file://$MODULE_DIR$/out" />
       <excludeFolder url="file://$MODULE_DIR$/src/solutions/trsoftware/commons/translatable" />
@@ -38,9 +40,18 @@
     </content>
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />
-    <orderEntry type="library" name="Apache Tomcat 8.5.23 (minus ECJ)" level="application" />
-    <orderEntry type="library" scope="TEST" name="HtmlUnit 2.15" level="application" />
+    <orderEntry type="module-library">
+      <library name="src">
+        <CLASSES>
+          <root url="file://$MODULE_DIR$/src" />
+        </CLASSES>
+        <JAVADOC />
+        <SOURCES />
+      </library>
+    </orderEntry>
     <orderEntry type="library" name="gson-2.8.2" level="project" />
+    <orderEntry type="library" name="bcel-6.2 (Byte Code Engineering Library from Apache Commons)" level="application" />
+    <orderEntry type="library" name="Apache Tomcat 8.5.23 (minus ECJ)" level="application" />
     <orderEntry type="module-library">
       <library name="gwt-2.8.2">
         <CLASSES>
@@ -60,12 +71,21 @@
           <root url="file://$GWT_HOME$/gwt-2.8.2/samples/Showcase/src" />
           <root url="file://$GWT_HOME$/gwt-2.8.2/samples/Validation/src/main/java" />
           <root url="file://$GWT_HOME$/gwt-2.8.2" />
+          <root url="jar://$PROGRAMMING_LIBS_DIR$/jetty-all-9.2.14.v20151106/jetty-all-9.2.14.v20151106-sources.jar!/" />
+          <root url="jar://$PROGRAMMING_LIBS_DIR$/jetty-all-9.2.14.v20151106/jetty-jsp-9.2.14.v20151106-sources.jar!/" />
+          <root url="jar://$PROGRAMMING_LIBS_DIR$/jetty-all-9.2.14.v20151106/apache-jsp-9.2.14.v20151106-sources.jar!/" />
+          <root url="jar://$PROGRAMMING_LIBS_DIR$/jetty-all-9.2.14.v20151106/jetty-http-9.2.14.v20151106-sources.jar!/" />
+          <root url="jar://$PROGRAMMING_LIBS_DIR$/jetty-all-9.2.14.v20151106/jetty-io-9.2.14.v20151106-sources.jar!/" />
+          <root url="jar://$PROGRAMMING_LIBS_DIR$/jetty-all-9.2.14.v20151106/jetty-server-9.2.14.v20151106-sources.jar!/" />
+          <root url="jar://$PROGRAMMING_LIBS_DIR$/jetty-all-9.2.14.v20151106/jetty-util-9.2.14.v20151106-sources.jar!/" />
+          <root url="file://$PROGRAMMING_LIBS_DIR$/htmlunit-2.19/src/main/java" />
         </SOURCES>
         <jarDirectory url="file://$GWT_HOME$/gwt-2.8.2" recursive="false" />
         <jarDirectory url="file://$GWT_HOME$/gwt-2.8.2" recursive="false" type="SOURCES" />
       </library>
     </orderEntry>
-    <orderEntry type="library" name="com.google.guava:guava-gwt:24.0-jre" level="application" />
+    <orderEntry type="library" scope="TEST" name="org.eclipse.jetty:jetty-all:9.2.14.v20151106" level="application" />
+    <orderEntry type="library" name="com.google.guava:guava-gwt:25.1-jre" level="application" />
     <orderEntry type="library" scope="TEST" name="junit3.8.1" level="application" />
     <orderEntry type="library" name="Dumbster" level="application" />
     <orderEntry type="library" scope="TEST" name="HTTP Unit 1.7" level="application" />
@@ -83,5 +103,7 @@
         </SOURCES>
       </library>
     </orderEntry>
+    <orderEntry type="library" scope="TEST" name="com.google.guava:guava-testlib:25.1-jre" level="application" />
+    <orderEntry type="library" name="org.apache.commons:commons-lang3:3.4" level="application" />
   </component>
 </module>

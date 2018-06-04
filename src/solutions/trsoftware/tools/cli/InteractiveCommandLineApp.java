@@ -1,11 +1,11 @@
 /*
- *  Copyright 2017 TR Software Inc.
+ * Copyright 2018 TR Software Inc.
  *
- *  Licensed under the Apache License, Version 2.0 (the "License"); you may not
- *  use this file except in compliance with the License. You may obtain a copy of
- *  the License at
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not
+ * use this file except in compliance with the License. You may obtain a copy of
+ * the License at
  *
- *  http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
@@ -19,34 +19,39 @@ package solutions.trsoftware.tools.cli;
 
 import com.google.common.collect.BiMap;
 import com.google.common.collect.HashBiMap;
+import solutions.trsoftware.tools.util.TablePrinter;
 
 import java.io.BufferedReader;
+import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintStream;
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.function.Function;
 
 /**
- * A simple framework for building a menu-driven interactive command line app.
+ * A simple framework for building a menu-driven interactive command line app with a text-based UI.
  *
- * To use it, simply extend this class, and for each menu command, define a public inner class that implements
+ * <h3>Usage:</h3>
+ * Simply extend this class, and for each menu command, define a {@code public static} inner class that implements
  * {@link CommandLineAction}.  All of these inner classes will be automatically glued together to produce the
  * interactive menu of the app.
  *
- * Feb 17, 2010
- *
+ * @since Feb 17, 2010
  * @author Alex
  */
-public abstract class InteractiveCommandLineApp {
+public abstract class InteractiveCommandLineApp implements Runnable {
 
   public interface CommandLineAction {
     String getLabel();
     void execute(BufferedReader in, PrintStream out) throws Exception;
   }
 
-
+  /**
+   * Abstract base class providing a skeleton implementation of {@link CommandLineAction}
+   */
   protected static abstract class BaseAction implements CommandLineAction {
     @Override
     public String getLabel() {
@@ -125,6 +130,7 @@ public abstract class InteractiveCommandLineApp {
     return getClass().getSimpleName();
   }
 
+  @Override
   public void run() {
     //  open up stdin
     BufferedReader in = new BufferedReader(new InputStreamReader(System.in));
@@ -134,11 +140,7 @@ public abstract class InteractiveCommandLineApp {
       onBeforeRun(in, out);
       // keep rendering the main menu in a loop
       while (true) {
-        out.println(getName() + " Main Menu:");
-        for (CommandLineAction action : actions) {
-          String label = action.getLabel().replaceFirst("(?i)("+shortcutChars.get(action)+")", "[$1]");
-          out.printf("%d - %s%n", selectorInts.get(action), label);
-        }
+        printMainMenu(out);
         String menuSelection = in.readLine().trim().toLowerCase();
         CommandLineAction selectedAction;
         if (menuSelection.matches("\\d+")) // a number was input
@@ -157,16 +159,72 @@ public abstract class InteractiveCommandLineApp {
       }
     }
     catch (Exception e) {
-      e.printStackTrace();
       throw new RuntimeException(e);
-    }
+      }
     finally {
       onAfterRun(in, out);
     }
   }
 
-  static class ActionAborted extends RuntimeException {
-    ActionAborted(String message) {
+  /**
+   *
+   *<pre>
+   * ╔════
+   * ║
+   *</pre>
+   * @param out
+   */
+  protected void printMainMenu(PrintStream out) {
+    ArrayList<String> lines = new ArrayList<>();
+    for (CommandLineAction action : actions) {
+      String label = action.getLabel().replaceFirst("(?i)("+shortcutChars.get(action)+")", "[$1]");
+      if (action.getClass().getAnnotation(Deprecated.class) != null)
+        label += " **DEPRECATED**";
+      lines.add(String.format("%d - %s", selectorInts.get(action), label));
+    }
+    TablePrinter.printMenu(out, getName() + " Main Menu:", lines);
+
+  }
+
+  /**
+   * Prints the given message and reads the next line of user input from the given reader.
+   * @param br the input reader
+   * @param prompt the prompt message to print
+   * @return input entered by the user in response to this prompt
+   */
+  public static String promptForInput(BufferedReader br, String prompt) throws IOException {
+    System.out.print(prompt);
+    return br.readLine().trim();
+  }
+
+  /**
+   * Prints the given message and reads the next line of user input from the given reader.
+   * @param br the input reader
+   * @param prompt the prompt message to print
+   * @param parser will be used to parse the input to the desired type
+   * @return input entered by the user in response to this prompt, parsed using the given parser function
+   */
+  public static <T> T promptForInput(BufferedReader br, String prompt, Function<String, T> parser) throws IOException {
+    return parser.apply(promptForInput(br, prompt));
+  }
+
+  /**
+   * Prints the given message followed by a prompt for a yes/no response.
+   * @param br the input reader
+   * @param message will be printed above the prompt
+   * @throws ActionAborted if the user enters anything except {@code "yes"} in response to this prompt
+   */
+  protected static void confirm(BufferedReader br, String message) throws IOException, ActionAborted {
+    System.out.println(message);
+    System.out.print("Are you sure you want to continue? (yes/no): ");
+
+    if (!"yes".equals(br.readLine())) {
+      throw new ActionAborted(message);
+    }
+  }
+
+  protected static class ActionAborted extends RuntimeException {
+    public ActionAborted(String message) {
       super(message);
     }
   }

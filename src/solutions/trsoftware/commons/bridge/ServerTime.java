@@ -1,11 +1,11 @@
 /*
- *  Copyright 2017 TR Software Inc.
+ * Copyright 2018 TR Software Inc.
  *
- *  Licensed under the Apache License, Version 2.0 (the "License"); you may not
- *  use this file except in compliance with the License. You may obtain a copy of
- *  the License at
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not
+ * use this file except in compliance with the License. You may obtain a copy of
+ * the License at
  *
- *  http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
@@ -25,15 +25,18 @@ import solutions.trsoftware.commons.shared.util.time.Time;
  * Singleton oracle for the time on the server.  This is the server-side version of this class, which uses the server's
  * actual clock ({@link Clock}).  The client-side version of this class is located in the "translatable" source tree,
  * and uses {@link ServerTimeClientImpl} to approximate the time on the server.
+ * <p>
+ * NOTE: There are actually two different implementations of this class in two different directories:
+ * <ol>
+ *   <li>The Java version in the normal directory for this package</li>
+ *   <li>
+ *     The GWT version in the {@code translatable} subdirectory of the module, which will replace all usages
+ *     of the Java version when running in web mode (the same way the JRE emulation classes replace their original Java
+ *     counterparts in web mode. This is configured using the {@code <super-source>} element of the module XML.
+ *   </li>
+ * </ol>
  *
- * NOTE: There are actually two different implementations of this class
- * in two different source roots - the Java version in /src/java/...
- * and the GWT version ins /src/gwt/..., which will replace all usages
- * of the Java version when running in web mode, the same way the JRE
- * emulation classes replace their original Java counterparts in web mode.
- * This is configured using the super-source module XML element.
- *
- * @see <a href="http://code.google.com/docreader/#p=google-web-toolkit-doc-1-5&s=google-web-toolkit-doc-1-5&t=DevGuideModuleXml">DevGuideModuleXml</a>
+ * @see <a href="http://www.gwtproject.org/doc/latest/DevGuideOrganizingProjects.html#DevGuideModuleXml">DevGuideModuleXml</a>
  *
  * @author Alex
  */

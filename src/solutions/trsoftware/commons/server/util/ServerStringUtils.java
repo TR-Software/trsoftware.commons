@@ -1,11 +1,11 @@
 /*
- *  Copyright 2017 TR Software Inc.
+ * Copyright 2018 TR Software Inc.
  *
- *  Licensed under the Apache License, Version 2.0 (the "License"); you may not
- *  use this file except in compliance with the License. You may obtain a copy of
- *  the License at
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not
+ * use this file except in compliance with the License. You may obtain a copy of
+ * the License at
  *
- *  http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
@@ -72,7 +72,10 @@ public class ServerStringUtils {
       }
   }
 
-  /** Returns the UTF-8 encoding of the given string. */
+  /**
+   * Returns the {@value StringUtils#UTF8_CHARSET_NAME} encoding of the given string (this charset should be supported
+   * by all JVMs).
+   */
   public static byte[] stringToBytesUtf8(String str) {
     try {
       return str.getBytes(StringUtils.UTF8_CHARSET_NAME);
@@ -80,6 +83,27 @@ public class ServerStringUtils {
     catch (UnsupportedEncodingException e) {
       // will never happen - all Java VMs support UTF-8
       throw new RuntimeException(e);
+    }
+  }
+
+  /**
+   * Attempts to convert a {@link String} to a byte array using {@link String#getBytes(String)}.  If the desired
+   * charset is not supported, will fall back to {@value StringUtils#UTF8_CHARSET_NAME}
+   * (which should be supported by all JVMs)
+   *
+   * @param str the string whose bytes you want
+   * @param charsetName the desired {@linkplain java.nio.charset.Charset charset} for encoding the bytes
+   * @return the resultant byte array
+   *
+   * @see <a href="https://docs.oracle.com/javase/8/docs/technotes/guides/intl/encoding.doc.html">Supported Encodings</a>
+   */
+  public static byte[] stringToBytes(String str, String charsetName) {
+    try {
+      return str.getBytes(charsetName);
+    }
+    catch (UnsupportedEncodingException e) {
+      e.printStackTrace();
+      return stringToBytesUtf8(str);
     }
   }
 

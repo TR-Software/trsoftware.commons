@@ -1,11 +1,11 @@
 /*
- *  Copyright 2017 TR Software Inc.
+ * Copyright 2018 TR Software Inc.
  *
- *  Licensed under the Apache License, Version 2.0 (the "License"); you may not
- *  use this file except in compliance with the License. You may obtain a copy of
- *  the License at
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not
+ * use this file except in compliance with the License. You may obtain a copy of
+ * the License at
  *
- *  http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
@@ -34,7 +34,7 @@ public class JsonSerializerImplTest extends TestCase {
   }
 
   private static <T> void verifySerialization(T instance) {
-    JsonSerializerImpl<T> jsonizer = new JsonSerializerImpl<T>((Class<T>)instance.getClass());
+    GsonSerializer<T> jsonizer = new GsonSerializer<T>((Class<T>)instance.getClass());
     String json = jsonizer.toJson(instance);
     System.out.printf("<%s> serialized as %s%n", instance, json);
     assertEquals(instance, jsonizer.parseJson(json));

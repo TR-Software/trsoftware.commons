@@ -1,11 +1,11 @@
 /*
- *  Copyright 2017 TR Software Inc.
+ * Copyright 2018 TR Software Inc.
  *
- *  Licensed under the Apache License, Version 2.0 (the "License"); you may not
- *  use this file except in compliance with the License. You may obtain a copy of
- *  the License at
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not
+ * use this file except in compliance with the License. You may obtain a copy of
+ * the License at
  *
- *  http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
@@ -18,10 +18,9 @@
 package solutions.trsoftware.commons.shared.util;
 
 import junit.framework.TestCase;
-import solutions.trsoftware.commons.client.bridge.util.RandomGen;
-import solutions.trsoftware.commons.client.testutil.AssertUtils;
 
 import static solutions.trsoftware.commons.shared.util.MemoryUnit.*;
+import static solutions.trsoftware.commons.shared.util.RandomUtils.rnd;
 
 /**
  * Dec 10, 2010
@@ -47,9 +46,9 @@ public class MemoryUnitTest extends TestCase {
     }
 
     // do some manual tests as a sanity check
-    assertEquals(2.1484375, KILOBYTES.from(BYTES, 2200), AssertUtils.EPSILON);
-    assertEquals(0.00209808349609375, MEGABYTES.from(KILOBYTES, 2.1484375), AssertUtils.EPSILON*1000);
-    assertEquals(0.000002048909664154052734375, GIGABYTES.from(MEGABYTES, 0.00209808349609375), AssertUtils.EPSILON*1000*1000);
+    assertEquals(2.1484375, KILOBYTES.from(BYTES, 2200), MathUtils.EPSILON);
+    assertEquals(0.00209808349609375, MEGABYTES.from(KILOBYTES, 2.1484375), MathUtils.EPSILON*1000);
+    assertEquals(0.000002048909664154052734375, GIGABYTES.from(MEGABYTES, 0.00209808349609375), MathUtils.EPSILON*1000*1000);
   }
 
   public void testTo() throws Exception {
@@ -69,13 +68,12 @@ public class MemoryUnitTest extends TestCase {
     }
 
     // do some manual tests as a sanity check
-    assertEquals(2200, BYTES.from(KILOBYTES, 2.1484375), AssertUtils.EPSILON);
-    assertEquals(2.1484375, KILOBYTES.from(MEGABYTES, 0.00209808349609375), AssertUtils.EPSILON*1000);
-    assertEquals(0.00209808349609375, MEGABYTES.from(GIGABYTES, 0.000002048909664154052734375), AssertUtils.EPSILON*1000*1000);
+    assertEquals(2200, BYTES.from(KILOBYTES, 2.1484375), MathUtils.EPSILON);
+    assertEquals(2.1484375, KILOBYTES.from(MEGABYTES, 0.00209808349609375), MathUtils.EPSILON*1000);
+    assertEquals(0.00209808349609375, MEGABYTES.from(GIGABYTES, 0.000002048909664154052734375), MathUtils.EPSILON*1000*1000);
   }
 
   public void testToBytes() throws Exception {
-    RandomGen rnd = RandomGen.getInstance();
     for (int i = 0; i < 1000; i++) {
       double value = rnd.nextDouble() * rnd.nextInt(20);
       for (MemoryUnit unit : values()) {
@@ -85,7 +83,6 @@ public class MemoryUnitTest extends TestCase {
   }
 
   public void testFromBytes() throws Exception {
-    RandomGen rnd = RandomGen.getInstance();
     for (int i = 0; i < 1000; i++) {
       double value = rnd.nextDouble() * rnd.nextInt(20);
       for (MemoryUnit unit : values()) {

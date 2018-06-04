@@ -1,11 +1,11 @@
 /*
- *  Copyright 2017 TR Software Inc.
+ * Copyright 2018 TR Software Inc.
  *
- *  Licensed under the Apache License, Version 2.0 (the "License"); you may not
- *  use this file except in compliance with the License. You may obtain a copy of
- *  the License at
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not
+ * use this file except in compliance with the License. You may obtain a copy of
+ * the License at
  *
- *  http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
@@ -17,10 +17,7 @@
 
 package solutions.trsoftware.commons.shared.util;
 
-import java.util.Collection;
-import java.util.Iterator;
-import java.util.LinkedHashSet;
-import java.util.Set;
+import java.util.*;
 
 /**
  * @author Alex, 1/9/14
@@ -28,7 +25,8 @@ import java.util.Set;
 public abstract class SetUtils {
 
   /**
-   * @return A new set that represents the "asymmetric set difference" of the two sets.  Neither arg is modified.
+   * @return A new set that represents the {@link Set#removeAll(Collection) <i>asymmetric set difference</i>}
+   * of the two sets.  Neither arg is modified.
    */
   public static <T> Set<T> difference(Set<T> s1, Set<T> s2) {
     s1 = newSet(s1);
@@ -37,7 +35,8 @@ public abstract class SetUtils {
   }
 
   /**
-   * @return A new set that represents the intersection of the two sets.  Neither arg is modified.
+   * @return A new set that represents the {@link Set#retainAll(Collection) <i>intersection</i>} of the two sets.
+   * Neither arg is modified.
    */
   public static <T> Set<T> intersection(Set<T> s1, Set<T> s2) {
     s1 = newSet(s1);
@@ -46,7 +45,8 @@ public abstract class SetUtils {
   }
   
   /**
-   * @return A new set that represents the union of the two sets.  Neither arg is modified.
+   * @return A new set that represents the {@link Set#addAll(Collection) <i>union</i>} of the two sets.
+   * Neither arg is modified.
    */
   public static <T> Set<T> union(Set<T> s1, Set<T> s2) {
     s1 = newSet(s1);
@@ -60,6 +60,7 @@ public abstract class SetUtils {
   }
 
   /** Returns a new set initialized from the given collection */
+  @SafeVarargs
   public static <T> LinkedHashSet<T> newSet(T... items) {
     return CollectionUtils.addAll(new LinkedHashSet<T>(), items);
   }
@@ -82,5 +83,27 @@ public abstract class SetUtils {
    */
   public static String print(Set set) {
     return StringUtils.join(",", set);
+  }
+
+  /**
+   * @return the powerset (the set of all subsets) of the given set
+   */
+  public static <T> Set<Set<T>> powerset(Set<T> set) {
+    // there is a simpler recursive alg, but we use iteration here for speed
+    ArrayList<T> elements = new ArrayList<>(set);
+    LinkedHashSet<Set<T>> powerset = new LinkedHashSet<>();
+
+    int powersetSize = 2 << set.size() - 1; // 2^n
+    for (int i = 0; i < powersetSize; i++) {
+      // take the binary for of i (e.g. 1001) and create a member set with those elts (e.g. {3, 0})
+      LinkedHashSet<T> memberSet = new LinkedHashSet<>();  // the i-th member set
+      for (int j = 0; j < elements.size(); j++) {
+        if (((i >> j) & 1) != 0)
+          memberSet.add(elements.get(j));
+      }
+      powerset.add(memberSet);
+    }
+
+    return powerset;
   }
 }

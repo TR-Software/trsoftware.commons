@@ -1,3 +1,20 @@
+/*
+ * Copyright 2018 TR Software Inc.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not
+ * use this file except in compliance with the License. You may obtain a copy of
+ * the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+ * License for the specific language governing permissions and limitations under
+ * the License.
+ *
+ */
+
 package solutions.trsoftware.commons.server.servlet.config;
 
 import junit.framework.TestCase;
@@ -9,10 +26,11 @@ import solutions.trsoftware.commons.shared.util.MapUtils;
 import solutions.trsoftware.commons.shared.util.NumberRange;
 import solutions.trsoftware.commons.shared.util.callables.Function0_t;
 
+import java.lang.reflect.Field;
 import java.util.*;
 
-import static solutions.trsoftware.commons.client.testutil.AssertUtils.assertThat;
-import static solutions.trsoftware.commons.client.testutil.AssertUtils.assertThrows;
+import static solutions.trsoftware.commons.shared.testutil.AssertUtils.assertThat;
+import static solutions.trsoftware.commons.shared.testutil.AssertUtils.assertThrows;
 
 /**
  * @author Alex
@@ -127,6 +145,44 @@ public class WebConfigParserTest extends TestCase {
     }
   }
 
+  public void testParserWithClassInstance() throws Exception {
+    for (DummyWebConfigObject config : configObjects) {
+      Map<String, String> newParamMap = replaceParams(config);
+      // 1) try naming a subclass of Set (as expected)
+      {
+        newParamMap.put("setImpl", HashSet.class.getName());
+        // parser should set this field to a new instance of HashSet (based on the given class name)
+        InitParamsWithClassInstance params = parser.parse(config, new InitParamsWithClassInstance());
+        assertNotNull(params.setImpl);
+        assertTrue(params.setImpl instanceof HashSet);
+      }
+      // 2) now try it with a name representing a class of the wrong type
+      {
+        newParamMap.put("setImpl", getClass().getName());  // this is not a subclass of Set
+        InitParameterParseException ex = assertThrows(InitParameterParseException.class,
+            (Function0_t<WebConfigException>)() -> parser.parse(config, new InitParamsWithClassInstance()));
+        Throwable cause = ex.getCause();
+        // the cause should be an IllegalArgumentException thrown by Field.set
+        // recreate the same exception and check that its message equals what we have
+        Field field = InitParamsWithClassInstance.class.getDeclaredField("setImpl");
+        field.setAccessible(true);
+        try {
+          field.set(new InitParamsWithClassInstance(), new WebConfigParserTest());
+        }
+        catch (IllegalArgumentException e) {
+          assertEquals(e.getClass(), cause.getClass());
+          assertEquals(e.getMessage(), cause.getMessage());
+        }
+      }
+
+//      InitParameterParserNotAvailable ex = assertThrows(
+//          InitParameterParserNotAvailable.class,
+//          (Function0_t<WebConfigException>)() -> parser.parse(config, new InitParamsWithIncompleteAnnotation()));
+//      assertThat(ex.getMessage()).startsWith(
+//          InitParamsWithIncompleteAnnotation.class.getSimpleName() + ".numberRange must contain a @Param annotation specifying a ParameterParser<NumberRange> subclass");
+    }
+  }
+
   private static class BasicInitParams implements InitParameters {
     private long foo;
     private boolean bar;
@@ -202,8 +258,22 @@ public class WebConfigParserTest extends TestCase {
 
   static class NumberRangeParser implements InitParameters.ParameterParser<NumberRange<Integer>> {
     @Override
-    public NumberRange<Integer> parse(String value) {
+    public NumberRange<Integer> parse(String value) throws Exception {
       return NumberRange.fromStringIntRange(value);
+    }
+  }
+
+  private class InitParamsWithClassInstance implements InitParameters {
+    /** Should be initialized from a class name */
+    @Param(parser = ClassNameParameterParser.class)
+    private Set setImpl;
+
+    @Override
+    public String toString() {
+      final StringBuilder sb = new StringBuilder("InitParamsWithClassInstance{");
+      sb.append("setImpl=").append(setImpl);
+      sb.append('}');
+      return sb.toString();
     }
   }
 }

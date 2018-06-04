@@ -1,11 +1,11 @@
 /*
- *  Copyright 2017 TR Software Inc.
+ * Copyright 2018 TR Software Inc.
  *
- *  Licensed under the Apache License, Version 2.0 (the "License"); you may not
- *  use this file except in compliance with the License. You may obtain a copy of
- *  the License at
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not
+ * use this file except in compliance with the License. You may obtain a copy of
+ * the License at
  *
- *  http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
@@ -23,6 +23,14 @@ package solutions.trsoftware.commons.shared.util;
  * @author Alex
  */
 public abstract class LazyReference<T> {
+
+  /**
+   * The value computed by {@link #create()}.
+   * <p style="color: #6495ed; font-weight: bold;">
+   *   TODO: perhaps init the value to some dummy object instead of {@code null}, to
+   *   disambiguate between a {@code null} value returned by {@link #create()} and the "not initialized" state?
+   * </p>
+   */
   protected volatile T value;
 
   public T get(boolean create) {

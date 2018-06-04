@@ -1,11 +1,11 @@
 /*
- *  Copyright 2017 TR Software Inc.
+ * Copyright 2018 TR Software Inc.
  *
- *  Licensed under the Apache License, Version 2.0 (the "License"); you may not
- *  use this file except in compliance with the License. You may obtain a copy of
- *  the License at
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not
+ * use this file except in compliance with the License. You may obtain a copy of
+ * the License at
  *
- *  http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
@@ -47,7 +47,7 @@ import solutions.trsoftware.gcharts.client.Chart;
 import solutions.trsoftware.gcharts.client.Chart.SelectionHandler;
 import solutions.trsoftware.gcharts.client.ColumnChart;
 import solutions.trsoftware.gcharts.client.DataTable;
-import solutions.trsoftware.gcharts.client.GoogleChartsApiLoader;
+import solutions.trsoftware.gcharts.client.GoogleCharts;
 import solutions.trsoftware.typinglog.client.replay.icons.PlayerIconsBundle;
 
 import java.util.List;
@@ -533,22 +533,22 @@ public class TypingLogReplayPlayer extends Composite {
       initWidget(new SimplePanel());
       TypingLogAnalyzer typingLogAnalyzer = new TypingLogAnalyzer(typingLog);
       dataPoints = typingLogAnalyzer.getSegmentWPMs(8);
-      GoogleChartsApiLoader.get().loadChartsApi(new String[]{"corechart", "bar"}, new Command() {
-        @Override
-        public void execute() {
-          columnChart = ColumnChart.create(getElement());
-          columnChart.addSelectionHandler(new SelectionHandler() {
-            @Override
-            public void onSelection(Chart.Selection selection) {
-              int row = selection.getRow();
-              if (row >= 0) {
-                seekToCharCursor(dataPoints.get(row).getStartPos());
+      GoogleCharts.get().runWhenLoaded(new Command() {
+          @Override
+          public void execute() {
+            columnChart = ColumnChart.create(getElement());
+            columnChart.addSelectionHandler(new SelectionHandler() {
+              @Override
+              public void onSelection(Chart.Selection selection) {
+                int row = selection.getRow();
+                if (row >= 0) {
+                  seekToCharCursor(dataPoints.get(row).getStartPos());
+                }
               }
-            }
-          });
-          drawChart();
-        }
-      });
+            });
+            drawChart();
+          }
+        });
     }
 
     private void drawChart() {

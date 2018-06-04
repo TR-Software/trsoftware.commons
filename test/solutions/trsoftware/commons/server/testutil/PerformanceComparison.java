@@ -1,11 +1,11 @@
 /*
- *  Copyright 2017 TR Software Inc.
+ * Copyright 2018 TR Software Inc.
  *
- *  Licensed under the Apache License, Version 2.0 (the "License"); you may not
- *  use this file except in compliance with the License. You may obtain a copy of
- *  the License at
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not
+ * use this file except in compliance with the License. You may obtain a copy of
+ * the License at
  *
- *  http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
@@ -27,20 +27,26 @@ import static solutions.trsoftware.commons.shared.util.StringUtils.firstNotBlank
 public abstract class PerformanceComparison {
 
   /**
+   * @param iterations the number of iterations of each task to perform
+   * <p style="color: #6495ed; font-weight: bold;">
+   *   TODO: Instead of doing a fixed number of iterations for each task, do as many as it takes to go over
+   *   some threshold value (e.g. 100ms), and a time-per-iteration metric instead of the total time.
+   *   This could significantly speed up unit tests that do too many unneeded iterations
+   * </p>
    * @return the multiplier of running time of {@code task1} compared to {@code task2}
    * (i.e. how many times is task1 faster than task2.
    */
   public static double compare(Runnable task1, String task1Name, Runnable task2, String task2Name, int iterations) {
     // warm up both tasks
-    runTask(task1, iterations);
-    runTask(task2, iterations);
+    measureNanoTime(task1, iterations);
+    measureNanoTime(task2, iterations);
 
-    // interleave the tasks (so that neither gets the advantage or disadvantage of going first)
-    long task1Ns = runTask(task1, iterations);
-    long task2Ns = runTask(task2, iterations);
+    // TODO: interleave the tasks (so that neither gets the advantage or disadvantage of going first)
+    long task1Ns = measureNanoTime(task1, iterations);
+    long task2Ns = measureNanoTime(task2, iterations);
 
     // will have to subtract the overhead of running an empty task for that number of iterations
-    long emptyTaskNs = runTask(new Runnable() {
+    long emptyTaskNs = measureNanoTime(new Runnable() {
       public void run() {
       }
     }, iterations);
@@ -71,6 +77,20 @@ public abstract class PerformanceComparison {
     return compare(task1, getTaskName(task1, "task1"),
         task2, getTaskName(task2, "task2"),
         iterations);
+  }
+
+  /**
+   * @return the multiplier of running time of {@code task1} compared to {@code task2}
+   * (i.e. how many times is task1 faster than task2.
+   */
+  public static double compare(NamedRunnable task1, NamedRunnable task2, int iterations) {
+    return compare(task1, task1.getName(),
+        task2, task2.getName(),
+        iterations);
+  }
+
+  public interface NamedRunnable extends Runnable {
+    String getName();
   }
 
   private static String getTaskName(Runnable task, String defaultName) {
@@ -127,8 +147,13 @@ public abstract class PerformanceComparison {
 //    return multiplier;
 //  }
 
-  /** Returns the nanos elapsed from running task for the given number of iterations */
-  private static long runTask(Runnable task, int iterations) {
+  /**
+   * Benchmarks a task
+   * @param task the task to perform
+   * @param iterations the number of times to repeat the task
+   * @return the nanos elapsed after running the given number of iterations of the task
+   */
+  public static long measureNanoTime(Runnable task, int iterations) {
     long start = System.nanoTime();
     for (int i = 0; i < iterations; i++) {
       task.run();

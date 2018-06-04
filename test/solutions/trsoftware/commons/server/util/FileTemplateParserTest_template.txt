@@ -1,0 +1,4 @@
+<!-- Example template -->
+Hello ${NAME},
+Your account number is ${ACCT_NUM}.
+Take care!

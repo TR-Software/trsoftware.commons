@@ -1,11 +1,11 @@
 /*
- *  Copyright 2017 TR Software Inc.
+ * Copyright 2018 TR Software Inc.
  *
- *  Licensed under the Apache License, Version 2.0 (the "License"); you may not
- *  use this file except in compliance with the License. You may obtain a copy of
- *  the License at
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not
+ * use this file except in compliance with the License. You may obtain a copy of
+ * the License at
  *
- *  http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
@@ -18,18 +18,30 @@
 package solutions.trsoftware.commons.server;
 
 import junit.framework.TestCase;
+import solutions.trsoftware.commons.server.testutil.SetUpTearDownDelegate;
+import solutions.trsoftware.commons.server.testutil.SetUpTearDownDelegateList;
 import solutions.trsoftware.commons.server.util.CanStopClock;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 
 /**
- * Since Java doesn't have multiple inheritance, it's not possible
- * to mix mulple superclasses each with a different setUp and and tearDown
- * behavior.  This class makes it easy to mix cusom setUp and tearDown
- * by letting subclasses specify them as command objects (instances of
- * SetUpTearDownDelegate).  These objects should be passed by the
- * constructor of the subclass using the addSetupTearDownDelegate method.
+ * A base {@link TestCase} that provides some additional functionality:
+ *
+ * <ul>
+ *   <li>
+ *     Allows specifying custom set-up and tear-down behavior with command objects, as an alternative to inheritance
+ *     of the {@link #setUp()} / {@link #tearDown()} methods. This is useful when something similar to multiple
+ *     inheritance is desired (e.g. to mix multiple test classes with different {@link #setUp()} / {@link #tearDown()}
+ *     behavior.
+ *     See {@link #addSetupTearDownDelegate(SetUpTearDownDelegate)}
+ *   </li>
+ *   <li>
+ *     Nulls out all instance fields upon {@link #tearDown()}, and prints a warning for any field that wasn't {@code null}
+ *     at the end of the test.
+ *     See <a href="https://stackoverflow.com/a/3653734">StackOverflow discussion on this subject</a>
+ *   </li>
+ * </ul>
  *
  * @author Alex
  */
@@ -75,7 +87,7 @@ public abstract class SuperTestCase extends TestCase implements CanStopClock {
    * So if we have some {@link TestCase} subclass or a custom suite that defines a lot of test methods, it's probably
    * best to null out those fields.
    * @throws Exception
-   * @see <a href="http://stackoverflow.com/questions/3653589/junit-should-i-assign-null-to-resources-in-teardown-that-were-instantiated-in">StackOverflow question</a>
+   * @see <a href="https://stackoverflow.com/a/3653734">StackOverflow discussion on this subject</a>
    */
   private void checkForNonNullFields() throws Exception {
     // see http://stackoverflow.com/questions/3653589/junit-should-i-assign-null-to-resources-in-teardown-that-were-instantiated-in

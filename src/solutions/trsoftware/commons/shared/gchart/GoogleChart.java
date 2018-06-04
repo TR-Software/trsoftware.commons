@@ -1,11 +1,11 @@
 /*
- *  Copyright 2017 TR Software Inc.
+ * Copyright 2018 TR Software Inc.
  *
- *  Licensed under the Apache License, Version 2.0 (the "License"); you may not
- *  use this file except in compliance with the License. You may obtain a copy of
- *  the License at
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not
+ * use this file except in compliance with the License. You may obtain a copy of
+ * the License at
  *
- *  http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
@@ -26,7 +26,7 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * Provides an abstraction for the Google Charts API.
+ * Provides an abstraction for the Google Charts (Image Charts) API.
  *
  * Provides custom setters for some of the complex parameters.
  * For all others, use the generic setParameter(key, value) method.
@@ -35,9 +35,9 @@ import java.util.Map;
  * @see <a href="https://developers.google.com/chart/image/">https://developers.google.com/chart/image/</a>
  */
 public class GoogleChart {
-  // Example: http://chart.apis.google.com/chart?cht=lc&chd=t:60,40,194,890&chds=0,1000&chs=500x300&chl=Oldest|Most%20Recent&chf=bg,s,FBFBFB
+  // Example: https://chart.apis.google.com/chart?cht=lc&chd=t:60,40,194,890&chds=0,1000&chs=500x300&chl=Oldest|Most%20Recent&chf=bg,s,FBFBFB
 
-  private static final String BASE_URL = "http://chart.apis.google.com/chart?";
+  public static final String BASE_URL = "https://chart.apis.google.com/chart?";
 
   // constants defining parameter names
   public static final String SIZE = "chs";

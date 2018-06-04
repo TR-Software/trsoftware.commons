@@ -1,11 +1,11 @@
 /*
- *  Copyright 2017 TR Software Inc.
+ * Copyright 2018 TR Software Inc.
  *
- *  Licensed under the Apache License, Version 2.0 (the "License"); you may not
- *  use this file except in compliance with the License. You may obtain a copy of
- *  the License at
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not
+ * use this file except in compliance with the License. You may obtain a copy of
+ * the License at
  *
- *  http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
@@ -20,11 +20,10 @@ package solutions.trsoftware.commons.shared.util;
 import com.google.gwt.core.client.JavaScriptException;
 import com.google.gwt.core.shared.GWT;
 import junit.framework.TestCase;
-import solutions.trsoftware.commons.Slow;
 import solutions.trsoftware.commons.bridge.BridgeTypeFactory;
 import solutions.trsoftware.commons.client.bridge.util.Duration;
-import solutions.trsoftware.commons.client.bridge.util.RandomGen;
-import solutions.trsoftware.commons.client.testutil.AssertUtils;
+import solutions.trsoftware.commons.shared.annotations.Slow;
+import solutions.trsoftware.commons.shared.testutil.AssertUtils;
 import solutions.trsoftware.commons.shared.util.callables.Function3_;
 
 import java.util.ArrayList;
@@ -191,6 +190,7 @@ public class LevenshteinTest extends TestCase {
     }
   }
 
+  @Slow
   public void testEditDistanceIncrementalPerformance() throws Exception {
     // generate strings that are long-enough to make an impact on performance in JVM but not take too long to compute
     String s = StringUtils.randString(14000);
@@ -374,7 +374,7 @@ public class LevenshteinTest extends TestCase {
   private String randString(int minLength, int maxLength) {
     if (maxLength == minLength)
       return "";
-    return StringUtils.randString(RandomGen.getInstance().nextIntInRange(minLength, maxLength));
+    return StringUtils.randString(RandomUtils.nextIntInRange(minLength, maxLength));
   }
 
   private void checkDistance(int expectedDistance, String s, String t) {

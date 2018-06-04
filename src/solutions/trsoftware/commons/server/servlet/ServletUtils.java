@@ -1,11 +1,11 @@
 /*
- *  Copyright 2017 TR Software Inc.
+ * Copyright 2018 TR Software Inc.
  *
- *  Licensed under the Apache License, Version 2.0 (the "License"); you may not
- *  use this file except in compliance with the License. You may obtain a copy of
- *  the License at
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not
+ * use this file except in compliance with the License. You may obtain a copy of
+ * the License at
  *
- *  http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
@@ -121,30 +121,6 @@ public abstract class ServletUtils {
     return requestParametersAsSortedStringMap(request.getParameterMap());
   }
 
-  /** @return the first subdomain from the url, or null if the URL doesn't have one */
-  public static String extractSubdomain(HttpServletRequest request) {
-    String subdomain = null;
-    String url = request.getRequestURL().toString();
-    // we use low-leve string operations because they're faster than regex
-    int startPos = "http://".length();
-    int dotCount = 0;
-    for (int i = startPos; i < url.length(); i++) {
-      char c = url.charAt(i);
-      if (c == '.') {
-        if (dotCount++ < 1)
-          subdomain = url.substring(startPos, i); // this is the first dot: we might have a subdomain ending with this dot, but can't know for sure until we see another dot (e.g. x.y.com has a sub, but x.com doesn't)
-        else
-          break;  // the second dot confirms that we actually do have a subdomain
-      }
-      else if (c == '/')
-        break;  // no subdomain or TLD (e.g. http://localhost/)
-    }
-    if (dotCount > 1)
-      return subdomain;
-    else
-      return null;
-  }
-
   /**
    * @return the first path element of the requested URL
    * (e.g. http://special.typeracer.com/foo/gameserv => "foo")
@@ -187,18 +163,8 @@ public abstract class ServletUtils {
 
   /** Generates a URL equivalent to the requested URL but with the given parameter replaced in the query string */
   public static String replaceQueryStringParameter(HttpServletRequest request, String originalParamName, String originalValue, String newParamName, String newValue) {
-    return request.getRequestURL().append('?').append(replaceQueryStringParameter(
+    return request.getRequestURL().append('?').append(UrlUtils.replaceQueryStringParameter(
         request.getQueryString(), originalParamName, originalValue, newParamName, newValue)).toString();
-  }
-
-  /** Replaces a name=value pair in the given URL query string with a new one */
-  public static String replaceQueryStringParameter(String queryString, String originalParamName, String originalValue, String newParamName, String newValue) {
-    return queryString.replaceFirst(originalParamName + "=" + originalValue, newParamName + "=" + newValue);
-  }
-
-  /** Replaces a parameter value in the given URL query string with a new value */
-  public static String replaceQueryStringParameter(String queryString, String paramName, String originalValue, String newValue) {
-    return replaceQueryStringParameter(queryString, paramName, originalValue, paramName, newValue);
   }
 
   /**

@@ -1,11 +1,11 @@
 /*
- *  Copyright 2017 TR Software Inc.
+ * Copyright 2018 TR Software Inc.
  *
- *  Licensed under the Apache License, Version 2.0 (the "License"); you may not
- *  use this file except in compliance with the License. You may obtain a copy of
- *  the License at
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not
+ * use this file except in compliance with the License. You may obtain a copy of
+ * the License at
  *
- *  http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
@@ -17,6 +17,9 @@
 
 package solutions.trsoftware.commons.server.servlet.testutil;
 
+import com.google.common.collect.LinkedHashMultimap;
+import com.google.common.collect.Multimap;
+
 import javax.servlet.ServletOutputStream;
 import javax.servlet.WriteListener;
 import javax.servlet.http.Cookie;
@@ -24,7 +27,13 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
+import java.util.Locale;
+import java.util.stream.Collectors;
+
+import static solutions.trsoftware.commons.shared.util.CollectionUtils.first;
 
 /**
  * Jul 8, 2009
@@ -35,11 +44,11 @@ public class DummyHttpServletResponse implements HttpServletResponse {
   private StringWriter output = new StringWriter();
   private int statusCode;
   private String statusMessage;
-  final HashMap<String,String> responseHeaders = new HashMap<>();
+  private Multimap<String, Object> headers = LinkedHashMultimap.create();
   private List<Cookie> cookies = new ArrayList<>();
   private String contentType;
 
-  public String getOutput() {
+  public String getOutputAsString() {
     output.flush();
     return output.toString();
   }
@@ -50,17 +59,19 @@ public class DummyHttpServletResponse implements HttpServletResponse {
 
   @Override
   public String getHeader(String name) {
-    throw new UnsupportedOperationException("Method solutions.trsoftware.commons.server.servlet.testutil.DummyHttpServletResponse.getHeader has not been fully implemented yet.");
+    if (headers.containsKey(name))
+      return String.valueOf(first(headers.get(name)));
+    return null;
   }
 
   @Override
   public Collection<String> getHeaders(String name) {
-    throw new UnsupportedOperationException("Method solutions.trsoftware.commons.server.servlet.testutil.DummyHttpServletResponse.getHeaders has not been fully implemented yet.");
+    return headers.get(name).stream().map(String::valueOf).collect(Collectors.toList());
   }
 
   @Override
   public Collection<String> getHeaderNames() {
-    throw new UnsupportedOperationException("Method solutions.trsoftware.commons.server.servlet.testutil.DummyHttpServletResponse.getHeaderNames has not been fully implemented yet.");
+    return headers.keySet();
   }
 
   public void setStatus(int i) {
@@ -87,7 +98,7 @@ public class DummyHttpServletResponse implements HttpServletResponse {
 
   @Override
   public boolean containsHeader(String name) {
-    throw new UnsupportedOperationException("Method solutions.trsoftware.commons.server.servlet.testutil.DummyHttpServletResponse.containsHeader has not been fully implemented yet.");
+    return headers.containsKey(name);
   }
 
   @Override
@@ -125,35 +136,41 @@ public class DummyHttpServletResponse implements HttpServletResponse {
 
   @Override
   public void setDateHeader(String name, long date) {
-    throw new UnsupportedOperationException("Method solutions.trsoftware.commons.server.servlet.testutil.DummyHttpServletResponse.setDateHeader has not been fully implemented yet.");
+    replaceHeader(name, date);
   }
 
   @Override
   public void addDateHeader(String name, long date) {
-    throw new UnsupportedOperationException("Method solutions.trsoftware.commons.server.servlet.testutil.DummyHttpServletResponse.addDateHeader has not been fully implemented yet.");
+    headers.put(name, date);
   }
 
   public void setHeader(String name, String value) {
-    responseHeaders.put(name, value);
+    // this replaces any existing values for this header
+    replaceHeader(name, value);
+  }
+
+  private void replaceHeader(String name, Object value) {
+    headers.removeAll(name);
+    headers.put(name, value);
   }
 
   @Override
   public void addHeader(String name, String value) {
-    throw new UnsupportedOperationException("Method solutions.trsoftware.commons.server.servlet.testutil.DummyHttpServletResponse.addHeader has not been fully implemented yet.");
+    headers.put(name, value);
   }
 
   @Override
   public void setIntHeader(String name, int value) {
-    throw new UnsupportedOperationException("Method solutions.trsoftware.commons.server.servlet.testutil.DummyHttpServletResponse.setIntHeader has not been fully implemented yet.");
+    replaceHeader(name, value);
   }
 
   @Override
   public void addIntHeader(String name, int value) {
-    throw new UnsupportedOperationException("Method solutions.trsoftware.commons.server.servlet.testutil.DummyHttpServletResponse.addIntHeader has not been fully implemented yet.");
+    headers.put(name, value);
   }
 
-  public HashMap<String, String> getResponseHeaders() {
-    return responseHeaders;
+  public Multimap<String, Object> getHeaders() {
+    return headers;
   }
 
   @Override

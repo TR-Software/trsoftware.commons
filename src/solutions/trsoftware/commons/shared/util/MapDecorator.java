@@ -1,11 +1,11 @@
 /*
- *  Copyright 2017 TR Software Inc.
+ * Copyright 2018 TR Software Inc.
  *
- *  Licensed under the Apache License, Version 2.0 (the "License"); you may not
- *  use this file except in compliance with the License. You may obtain a copy of
- *  the License at
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not
+ * use this file except in compliance with the License. You may obtain a copy of
+ * the License at
  *
- *  http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
@@ -21,9 +21,9 @@ import java.util.Map;
 
 /**
  * Wraps a {@link Map} to allow adding multiple new entries in one expression (via method chaining).
- *
+ * <p>
  * This is a type-safe alternative to the factory methods in {@link MapUtils}, e.g. {@link MapUtils#hashMap(Object...)}
- *
+ * @see MapUtils#linkedHashMapBuilder()
  * @author Alex
  * @since 11/11/2017
  */

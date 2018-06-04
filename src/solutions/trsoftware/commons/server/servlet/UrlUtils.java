@@ -1,3 +1,20 @@
+/*
+ * Copyright 2018 TR Software Inc.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not
+ * use this file except in compliance with the License. You may obtain a copy of
+ * the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+ * License for the specific language governing permissions and limitations under
+ * the License.
+ *
+ */
+
 package solutions.trsoftware.commons.server.servlet;
 
 import solutions.trsoftware.commons.shared.util.ArrayUtils;
@@ -39,6 +56,9 @@ public class UrlUtils {
 
   /**
    * Rewrites the path and query string of the given URL.
+   * <p style="color: #6495ed; font-weight: bold;">
+   *   TODO: use something like {@link com.google.gwt.http.client.UrlBuilder}
+   * </p>
    * @param url the URL to rewrite
    * @param newPath the new path
    * @param queryParams name-value array for the new query params, given as {@code ["param_i", "value_i", ...]}
@@ -59,4 +79,13 @@ public class UrlUtils {
     return ret.toString();
   }
 
+  /** Replaces a name=value pair in the given URL query string with a new one */
+  public static String replaceQueryStringParameter(String queryString, String originalParamName, String originalValue, String newParamName, String newValue) {
+    return queryString.replaceFirst(originalParamName + "=" + originalValue, newParamName + "=" + newValue);
+  }
+
+  /** Replaces a parameter value in the given URL query string with a new value */
+  public static String replaceQueryStringParameter(String queryString, String paramName, String originalValue, String newValue) {
+    return replaceQueryStringParameter(queryString, paramName, originalValue, paramName, newValue);
+  }
 }

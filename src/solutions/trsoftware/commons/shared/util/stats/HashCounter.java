@@ -1,11 +1,11 @@
 /*
- *  Copyright 2017 TR Software Inc.
+ * Copyright 2018 TR Software Inc.
  *
- *  Licensed under the Apache License, Version 2.0 (the "License"); you may not
- *  use this file except in compliance with the License. You may obtain a copy of
- *  the License at
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not
+ * use this file except in compliance with the License. You may obtain a copy of
+ * the License at
  *
- *  http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
@@ -149,5 +149,17 @@ public class HashCounter<K> implements Mergeable<HashCounter<K>> {
     for (K k : other.keySet()) {
       add(k, other.get(k));
     }
+  }
+
+  /**
+   * Computes the probability of the given key being selected from a statistical data sample represented by this counter:
+   * <pre>
+   *   P(k) = count(k) / count(*)
+   * </pre>
+   *
+   * @return the probability of the given key being selected from a statistical data sample represented by this counter
+   */
+  public synchronized double probabilityOf(K key) {
+    return ((double)get(key)) / sumOfAllEntries();
   }
 }

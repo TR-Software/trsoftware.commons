@@ -4,7 +4,7 @@ import solutions.trsoftware.commons.client.util.time.ServerTimeClientImpl;
 import solutions.trsoftware.commons.shared.util.time.Time;
 
 /**
- * Client-side version of {@link solutions.trsoftware.commons.bridge.ServerTime}.
+ * Client-side ("emulated") version of {@link solutions.trsoftware.commons.bridge.ServerTime}.
  *
  *  @author Alex
  */

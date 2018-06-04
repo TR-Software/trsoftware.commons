@@ -1,11 +1,11 @@
 /*
- *  Copyright 2017 TR Software Inc.
+ * Copyright 2018 TR Software Inc.
  *
- *  Licensed under the Apache License, Version 2.0 (the "License"); you may not
- *  use this file except in compliance with the License. You may obtain a copy of
- *  the License at
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not
+ * use this file except in compliance with the License. You may obtain a copy of
+ * the License at
  *
- *  http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
@@ -40,7 +40,7 @@ public class IpRangeDatabase {
   // will store the unsigned 32-bit IPs as signed ints to save space
   private int[] mins;
   private int[] maxs;
-  private String[] countries;  // NOTE: tried storing countries as a byte array flyweight, but that didn't offer any memory savings (quite surprisingly), on the contrary, more memory was used
+  private String[] countries;  // NOTE: tried storing countries as a byte array flyweight, but that (surprisingly) used even more memory
   private int n;  // the used size of each array
 
 
@@ -60,7 +60,7 @@ public class IpRangeDatabase {
     ensureCapacity(n+1);
     mins[n] = MathUtils.packUnsignedInt(min);
     maxs[n] = MathUtils.packUnsignedInt(max);
-    countries[n] = country;
+    countries[n] = country.intern(); // intern the short country codes to save memory
     n++;
   }
 

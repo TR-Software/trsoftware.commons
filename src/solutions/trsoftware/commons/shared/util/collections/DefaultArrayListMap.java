@@ -1,11 +1,11 @@
 /*
- *  Copyright 2017 TR Software Inc.
+ * Copyright 2018 TR Software Inc.
  *
- *  Licensed under the Apache License, Version 2.0 (the "License"); you may not
- *  use this file except in compliance with the License. You may obtain a copy of
- *  the License at
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not
+ * use this file except in compliance with the License. You may obtain a copy of
+ * the License at
  *
- *  http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
@@ -25,7 +25,11 @@ import java.util.Map;
 
 /**
  * An implementation of {@link DefaultMap} that inserts a new instance of {@link ArrayList} when {@link #get(Object)}
- * is invoked with a key that's not already present.  This is similar to (but not quite the same as) Guava's {@link Multimap}.
+ * is invoked for a key that's not already present.
+ *
+ * <p style="font-style: italic;">
+ *   NOTE: this is similar to (but not quite the same as) Guava's {@link Multimap}.
+ * </p>
  */
 public class DefaultArrayListMap<K, V> extends DefaultMap<K, List<V>> {
 

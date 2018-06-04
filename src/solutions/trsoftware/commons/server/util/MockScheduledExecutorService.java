@@ -1,11 +1,11 @@
 /*
- *  Copyright 2017 TR Software Inc.
+ * Copyright 2018 TR Software Inc.
  *
- *  Licensed under the Apache License, Version 2.0 (the "License"); you may not
- *  use this file except in compliance with the License. You may obtain a copy of
- *  the License at
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not
+ * use this file except in compliance with the License. You may obtain a copy of
+ * the License at
  *
- *  http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
@@ -31,7 +31,7 @@ import java.util.concurrent.atomic.AtomicLong;
  *
  * Unlike typical scheduled executors, this class is event-driven (single-threaded)
  * and its event loop must be externally pumped by repeatedly calling the {@link #pumpEvents()} method.
- * The scheduled tasks will be executed inline by this method. To immitate the behavior
+ * The scheduled tasks will be executed inline by this method. To imitate the behavior
  * of a multithreaded executor you can call pumpEvents() from an external timer.
  *
  * @author Alex

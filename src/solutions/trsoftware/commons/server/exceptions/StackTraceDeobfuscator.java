@@ -1,14 +1,5 @@
-package solutions.trsoftware.commons.server.exceptions;
-// TODO: cont here: GWT 2.5.0 actually provides this class gwt-user.jar as com.google.gwt.logging.server.StackTraceDeobfuscator; so we should move it there to allow code using unpatched GWT SDKs to compile
-
-// NOTE(alexe): Although the rest of the stack emulation patch applies to GWT 2.5.0, I've modified a version of this class from GWT 2.5.1 instead remove this class;
-// TODO(alex) after upgrading to GWT 2.5.1 or higher and just use the STD class from com.google.gwt.core.server.impl
-// This implementation is compeletely copied from the GWT trunk on Apr 5, 2013
-// it's better than the STD implementation in GWT 2.5.0 in terms of memory consumption
-
-
 /*
- * Copyright 2013 Google Inc.
+ * Copyright 2018 TR Software Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -21,7 +12,16 @@ package solutions.trsoftware.commons.server.exceptions;
  * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
  * License for the specific language governing permissions and limitations under
  * the License.
+ *
  */
+
+package solutions.trsoftware.commons.server.exceptions;
+// TODO: cont here: GWT 2.5.0 actually provides this class gwt-user.jar as com.google.gwt.logging.server.StackTraceDeobfuscator; so we should move it there to allow code using unpatched GWT SDKs to compile
+
+// NOTE(alexe): Although the rest of the stack emulation patch applies to GWT 2.5.0, I've modified a version of this class from GWT 2.5.1 instead remove this class;
+// TODO(alex) after upgrading to GWT 2.5.1 or higher and just use the STD class from com.google.gwt.core.server.impl
+// This implementation is compeletely copied from the GWT trunk on Apr 5, 2013
+// it's better than the STD implementation in GWT 2.5.0 in terms of memory consumption
 
 import com.google.gwt.thirdparty.debugging.sourcemap.SourceMapConsumerFactory;
 import com.google.gwt.thirdparty.debugging.sourcemap.SourceMapping;

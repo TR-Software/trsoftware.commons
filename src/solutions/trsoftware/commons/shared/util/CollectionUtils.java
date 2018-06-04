@@ -1,11 +1,11 @@
 /*
- *  Copyright 2017 TR Software Inc.
+ * Copyright 2018 TR Software Inc.
  *
- *  Licensed under the Apache License, Version 2.0 (the "License"); you may not
- *  use this file except in compliance with the License. You may obtain a copy of
- *  the License at
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not
+ * use this file except in compliance with the License. You may obtain a copy of
+ * the License at
  *
- *  http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
@@ -19,6 +19,8 @@ package solutions.trsoftware.commons.shared.util;
 
 import com.google.common.base.Predicate;
 import solutions.trsoftware.commons.shared.util.callables.Function1;
+import solutions.trsoftware.commons.shared.util.iterators.ArrayIterator;
+import solutions.trsoftware.commons.shared.util.iterators.ChainedIterator;
 
 import java.util.*;
 
@@ -161,8 +163,14 @@ public class CollectionUtils {
   /**
    * @return an iterable over all the elements in all the given iterables
    */
+  @SafeVarargs
   public static <A extends Iterable<T>, T> Iterable<T> concatIter(final A... iterables) {
-    return concatIter(Arrays.asList(iterables));
+    return new Iterable<T>() {
+          @Override
+          public Iterator<T> iterator() {
+            return ChainedIterator.fromIterables(new ArrayIterator<A>(iterables));
+          }
+        };
   }
 
   // TODO: unit test this version
@@ -174,39 +182,7 @@ public class CollectionUtils {
     return new Iterable<T>() {
       @Override
       public Iterator<T> iterator() {
-        return new Iterator<T>() {
-
-          private Iterator<A> cursor = iterables.iterator();
-          private Iterator<T> it = getNextIterator();
-
-          private Iterator<T> getNextIterator() {
-            while (cursor.hasNext()) {
-              Iterator<T> nextIt = cursor.next().iterator();
-              if (nextIt.hasNext())
-                return nextIt;
-              // skip empty iterators
-            }
-            return null;
-          }
-
-          @Override
-          public boolean hasNext() {
-            return it != null && it.hasNext();
-          }
-
-          @Override
-          public T next() {
-            T result = it.next();
-            if (!it.hasNext())
-              it = getNextIterator();
-            return result;
-          }
-
-          @Override
-          public void remove() {
-            it.remove();
-          }
-        };
+        return ChainedIterator.fromIterables(iterables);
       }
     };
   }
@@ -254,6 +230,49 @@ public class CollectionUtils {
         ret.add(elt);
     }
     return ret;
+  }
+
+  /**
+   * @param collection a collection of mutually-comparable elements
+   * @return a new list containing the same elements as the given collection, but sorted with {@link Collections#sort(List)}
+   */
+  public static <T extends Comparable<? super T>> ArrayList<T> sorted(Collection<T> collection) {
+    ArrayList<T> ret = new ArrayList<>(collection);
+    Collections.sort(ret);
+    return ret;
+  }
+
+  /**
+   * @param collection a collection of mutually-comparable elements
+   * @param cmp the comparator to determine the order of the result.
+   * A {@code null} value indicates that the elements' <i>natural ordering</i> should be used.
+   * @return a new list containing the same elements as the given collection, but sorted with {@link Collections#sort(List, Comparator)}
+   */
+  public static <T> ArrayList<T> sorted(Collection<T> collection, Comparator<? super T> cmp) {
+    ArrayList<T> ret = new ArrayList<>(collection);
+    Collections.sort(ret, cmp);
+    return ret;
+  }
+
+  /**
+   * Prints the elements of the given collection sorted according to its <i>natural ordering</i>, with the
+   * corresponding comparison operators between them.
+   * <p>
+   * <b>Example</b>: given {@code [5, 2, 4, 3, 3, 1]}, returns {@code "1 < 2 < 3 == 3 < 4 < 5"}
+   * @param collection a collection of mutually-comparable elements
+   * @return a string representation of the total ordering of the given collection
+   */
+  public static <T extends Comparable<? super T>> String printTotalOrdering(Collection<T> collection) {
+    if (collection.isEmpty())
+      return "";
+    ArrayList<T> ordering = sorted(collection);
+    StringBuilder out = new StringBuilder();
+    out.append(ordering.get(0));
+    for (int i = 1; i < ordering.size(); i++) {
+        out.append(' ').append(ComparisonOperator.lookup(ordering.get(i-1), ordering.get(i)))
+            .append(' ').append(ordering.get(i));
+    }
+    return out.toString();
   }
 
 }

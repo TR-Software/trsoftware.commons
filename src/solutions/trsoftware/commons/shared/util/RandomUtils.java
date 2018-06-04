@@ -1,11 +1,11 @@
 /*
- *  Copyright 2017 TR Software Inc.
+ * Copyright 2018 TR Software Inc.
  *
- *  Licensed under the Apache License, Version 2.0 (the "License"); you may not
- *  use this file except in compliance with the License. You may obtain a copy of
- *  the License at
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not
+ * use this file except in compliance with the License. You may obtain a copy of
+ * the License at
  *
- *  http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
@@ -52,7 +52,7 @@ public class RandomUtils {
   /**
    * Creates a string of the given length, with chars chosen at random from the given alphabet
    * @param length the result will contain this number of chars
-   * @param alphabet the chars to choose from; some presets are defined in {@link Alphabet} and {@link StringUtils},
+   * @param alphabet the chars to choose from; some useful presets are defined in {@link Alphabet} and {@link StringUtils},
    * and custom alphabets can be easily constructed using {@link CharRange}
    * @return a random string of the given length over the given alphabet
    * @see RandomCharGenerator
@@ -62,6 +62,10 @@ public class RandomUtils {
    * @see CharRange
    */
   public static String randString(int length, String alphabet) {
+    if (length < 0)
+      throw new IllegalArgumentException("Negative string length (" + length + ")");
+    else if (length == 0)
+      return "";
     StringBuilder buf = new StringBuilder(length);
     for (int i = 0; i < length; i++) {
       buf.append(alphabet.charAt(rnd.nextInt(alphabet.length())));
@@ -71,14 +75,17 @@ public class RandomUtils {
 
   /**
    * Creates a string containing {@code n} &isin; {@code [minLen, maxLen]} chars chosen at random from the given alphabet.
-   * @param alphabet the chars to choose from; some useful values are defined in {@link Alphabet}
-   * and {@link StringUtils#ASCII_LETTERS}
-   * @param minLen the result should contain at least this number of chars
-   * @param maxLen the result should contain at most this number of chars (inclusive)
+   * @param alphabet the chars to choose from; some useful presets are defined in {@link Alphabet} and {@link StringUtils},
+   * and custom alphabets can be easily constructed using {@link CharRange}
+   * @param minLen the result will contain at least this number of chars
+   * @param maxLen the result will contain at most this number of chars (inclusive)
    * @return a random string of {@code n} &isin; {@code [minLen, maxLen]} chars over the given alphabet
    * @see #randString(int, String)
+   * @see #randString(int)
    */
   public static String randString(String alphabet, int minLen, int maxLen) {
+    if (minLen < 0 || minLen >= maxLen)
+      throw new IllegalArgumentException("Expected 0 <= minLen < maxLen");
     return randString(nextIntInRange(minLen, maxLen+1), alphabet);
   }
 
@@ -87,26 +94,45 @@ public class RandomUtils {
    *
    * @param lowerBound inclusive
    * @param upperBound exclusive
-   * @return a random <code>int</code> between lowerBound (inclusive) and
-   * <code>upperBound</code> (exclusive) with roughly equal probability of
-   * returning any particular <code>int</code> in this range.
+   * @return a random {@code int} between {@code lowerBound} (inclusive) and {@code upperBound} (exclusive),
+   * with roughly equal probability of any particular {@code int} in this range
    */
   public static int nextIntInRange(int lowerBound, int upperBound) {
-    if (lowerBound >= upperBound)
-      throw new IllegalArgumentException("lowerBound >= upperBound");
+    return nextIntInRange(rnd, lowerBound, upperBound);
+  }
+
+  /**
+   * Generates a random {@code int} in the range {@code [lowerBound, upperBound)} from the given RNG.
+   *
+   * @param lowerBound inclusive
+   * @param upperBound exclusive
+   * @return a random {@code int} between {@code lowerBound} (inclusive) and {@code upperBound} (exclusive),
+   * with roughly equal probability of any particular {@code int} in this range
+   */
+  public static int nextIntInRange(Random rnd, int lowerBound, int upperBound) {
+    if (!(lowerBound < upperBound))
+      throw new IllegalArgumentException("Expected lowerBound < upperBound");
     return rnd.nextInt(upperBound - lowerBound) + lowerBound;
   }
 
   /**
-   * Returns a random {@code int} in range {@code [lowerBound, upperBound)} from the
-   * given RNG.
-   *
+   * Generates a random {@code double} in range {@code [lowerBound, upperBound]}.
    * @param lowerBound inclusive
-   * @param upperBound exclusive
+   * @param upperBound inclusive
+   * @return a random {@code double} between {@code lowerBound} and {@code upperBound}
    */
-  public static int nextIntInRange(Random rnd, int lowerBound, int upperBound) {
-    Assert.assertTrue(lowerBound < upperBound);
-    return rnd.nextInt(upperBound - lowerBound) + lowerBound;
+  public static double nextDoubleInRange(double lowerBound, double upperBound) {
+    return nextDoubleInRange(rnd, lowerBound, upperBound);
+  }
+
+  /**
+   * Returns a random {@code double} in range {@code [lowerBound, upperBound]} from the given RNG.
+   * @param lowerBound inclusive
+   * @param upperBound inclusive
+   * @return a random {@code double} between {@code lowerBound} and {@code upperBound}
+   */
+  public static double nextDoubleInRange(Random rnd, double lowerBound, double upperBound) {
+    return rnd.nextDouble() * (upperBound - lowerBound) + lowerBound;
   }
 
   /**
@@ -136,6 +162,10 @@ public class RandomUtils {
 
   /**
    * Intended as a GWT-compatible replacement for {@link Collections#shuffle(List)}.
+   * <p style="font-style: italic;">
+   *   NOTE: GWT now supports both {@link Collections#shuffle(List)} and {@link Collections#shuffle(List, Random)}
+   *   (at least as of GWT 2.8.x)
+   * </p>
    */
   public static <T> void shuffle(List<T> list) {
     int size = list.size();
@@ -193,6 +223,22 @@ public class RandomUtils {
     return list.get(rnd.nextInt(list.size()));
   }
 
+  /** Returns a random element from the collection */
+  public static <T> T randomElement(Collection<T> collection) {
+    int index = rnd.nextInt(collection.size());
+    if (collection instanceof List && collection instanceof RandomAccess)
+      return ((List<T>)collection).get(index);
+    // not a random access list - use this, slower seek
+    Iterator<T> iter = collection.iterator();
+    while (index > 0) {
+      iter.next();
+      index--;
+    }
+    return iter.next();
+    // NOTE: there's a more concise approach, but 50% slower:
+    //    return new ArrayList<T>(collection).get(rnd.nextInt(collection.size()));
+  }
+
   /**
    * @param n the number of bytes to generate
    * @return {@code n} random bytes
@@ -201,5 +247,33 @@ public class RandomUtils {
     byte[] bytes = new byte[n];
     rnd.nextBytes(bytes);
     return bytes;
+  }
+
+  /**
+   * @return a random positive integer.
+   */
+  public static int randPositiveInt() {
+    return randInt(Integer.MAX_VALUE);
+  }
+
+  /**
+   * @see Random#nextInt()
+   */
+  public static int randInt() {
+    return rnd.nextInt();
+  }
+
+  /**
+   * @see Random#nextInt(int)
+   */
+  public static int randInt(int n) {
+    return rnd.nextInt(n);
+  }
+
+  /**
+   * @see Random#nextDouble()
+   */
+  public static double randDouble() {
+    return rnd.nextDouble();
   }
 }

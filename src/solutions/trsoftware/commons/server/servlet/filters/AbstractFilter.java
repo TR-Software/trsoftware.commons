@@ -23,6 +23,7 @@ import solutions.trsoftware.commons.server.servlet.config.WebConfigParser;
 
 import javax.servlet.Filter;
 import javax.servlet.FilterConfig;
+import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 
 /**
@@ -64,5 +65,9 @@ public abstract class AbstractFilter implements Filter {
           filterConfig.getFilterName(), getClass(), e.getMessage()),
           e);
     }
+  }
+
+  protected ServletContext getServletContext() {
+    return filterConfig.getServletContext();
   }
 }

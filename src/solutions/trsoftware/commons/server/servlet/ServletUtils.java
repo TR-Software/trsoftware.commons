@@ -32,6 +32,7 @@ import java.util.*;
 public abstract class ServletUtils {
 
   private static final ThreadLocal<RequestCopy> threadLocalRequestCopy = new ThreadLocal<>();
+  public static final String USER_AGENT_HEADER = "User-Agent";
 
   public static void setThreadLocalRequestCopy(RequestCopy request) {
     if (request == null)
@@ -62,8 +63,12 @@ public abstract class ServletUtils {
     return userAgentString != null && userAgentString.toLowerCase().contains(str);
   }
 
+  /**
+   * @return The value of the request's {@value #USER_AGENT_HEADER} header, or {@code null} if the request
+   * doesn't have this header.
+   */
   public static String getUserAgentHeader(HttpServletRequest request) {
-    return request.getHeader("User-Agent");
+    return request.getHeader(USER_AGENT_HEADER);
   }
 
   public static boolean isIE6(HttpServletRequest request) {

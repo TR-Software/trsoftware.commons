@@ -64,7 +64,7 @@ public final class Template extends AbstractRenderer<Map<String, String>> {
 
   /** For templates that don't have any variables, this method can be used */
   public String render() {
-    return render(Collections.<String, String>emptyMap());
+    return render(Collections.emptyMap());
   }
 
   /**

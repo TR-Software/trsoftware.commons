@@ -51,7 +51,7 @@
     </orderEntry>
     <orderEntry type="library" name="gson-2.8.2" level="project" />
     <orderEntry type="library" name="bcel-6.2 (Byte Code Engineering Library from Apache Commons)" level="application" />
-    <orderEntry type="library" name="Apache Tomcat 8.5.23 (minus ECJ)" level="application" />
+    <orderEntry type="library" name="Apache Tomcat 8.5.31 (minus ECJ)" level="application" />
     <orderEntry type="module-library">
       <library name="gwt-2.8.2">
         <CLASSES>

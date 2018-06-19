@@ -30,4 +30,10 @@ public interface CommonTemplates extends TemplateBundle {
   CommonTemplates INSTANCE = GWT.create(CommonTemplates.class);
 
   Template uncaught_exception_warning();
+
+  /**
+   * SVG graphic containing a triangle, which can be styled with CSS.
+   */
+  @Resource("triangle.svg")
+  Template triangle();
 }

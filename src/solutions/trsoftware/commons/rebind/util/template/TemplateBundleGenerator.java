@@ -204,7 +204,7 @@ public class TemplateBundleGenerator extends Generator {
 
     // Create a singleton that this method can return. There is no need to
     // create a new instance every time this method is called, since
-    // Template is immutable; we just laziliy instantiate the field to amortize the cost
+    // Template is immutable; we just lazily instantiate the field to amortize the cost
     String name = method.getName();
     String fieldName = name + "_field";
     sw.println();

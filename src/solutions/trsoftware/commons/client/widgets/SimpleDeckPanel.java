@@ -33,13 +33,30 @@ import solutions.trsoftware.commons.shared.util.ArrayUtils;
  */
 public class SimpleDeckPanel extends Composite {
 
-  private final SimplePanel pnlContainer = new SimplePanel();
+  private SimplePanel pnlContainer;
   private final Widget[] widgets;
   private int visibleWidgetIndex;
 
+  /**
+   * Uses a new instance of {@link SimplePanel} ({@code div}) as the container for displaying the given widgets
+   * @param widgets the widget deck
+   */
   public SimpleDeckPanel(Widget... widgets) {
+    this(new SimplePanel(), widgets);
+  }
+
+  /**
+   * Uses a custom instance of {@link SimplePanel} as the container for displaying the given widgets.
+   * Can use this constructor to have a {@code span} rather than a {@code div} as the container (by passing an
+   * instance of {@link InlineSimplePanel}).
+   *
+   * @param container the widgets will be displayed one-at-a-time in this container.  Hint
+   * @param widgets the widget deck
+   */
+  public SimpleDeckPanel(SimplePanel container, Widget... widgets) {
+    pnlContainer = container;
     this.widgets = widgets;
-    initWidget(pnlContainer);
+    initWidget(container);
     setWidget(0);
   }
 

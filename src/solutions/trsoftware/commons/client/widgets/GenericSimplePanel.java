@@ -26,7 +26,8 @@ import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.Widget;
 
 /**
- * Allows any {@link Element} to become a {@link SimplePanel}.
+ * Allows any {@link Element} to become a {@link SimplePanel} (by exposing the {@link SimplePanel#SimplePanel(Element)}
+ * constructor).
  *
  * @author Alex, 3/24/2015
  */

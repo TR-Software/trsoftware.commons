@@ -50,8 +50,64 @@
       </library>
     </orderEntry>
     <orderEntry type="library" name="gson-2.8.2" level="project" />
-    <orderEntry type="library" name="bcel-6.2 (Byte Code Engineering Library from Apache Commons)" level="application" />
-    <orderEntry type="library" name="Apache Tomcat 8.5.31 (minus ECJ)" level="application" />
+    <orderEntry type="module-library">
+      <library name="bcel-6.2 (Byte Code Engineering Library from Apache Commons)">
+        <CLASSES>
+          <root url="file://$PROGRAMMING_LIBS_DIR$/bcel-6.2" />
+        </CLASSES>
+        <JAVADOC>
+          <root url="file://$PROGRAMMING_LIBS_DIR$/bcel-6.2/apidocs" />
+        </JAVADOC>
+        <SOURCES>
+          <root url="file://$PROGRAMMING_LIBS_DIR$/bcel-6.2/src/examples" />
+          <root url="file://$PROGRAMMING_LIBS_DIR$/bcel-6.2" />
+        </SOURCES>
+        <jarDirectory url="file://$PROGRAMMING_LIBS_DIR$/bcel-6.2" recursive="false" />
+        <jarDirectory url="file://$PROGRAMMING_LIBS_DIR$/bcel-6.2" recursive="false" type="SOURCES" />
+      </library>
+    </orderEntry>
+    <orderEntry type="module-library">
+      <library name="Apache Tomcat 8.5.31 (minus ECJ)">
+        <CLASSES>
+          <root url="file://$APACHE_TOMCAT_INSTALLATIONS$/apache-tomcat-8.5.31/bin" />
+          <root url="jar://$APACHE_TOMCAT_INSTALLATIONS$/apache-tomcat-8.5.31/lib/jasper-el.jar!/" />
+          <root url="jar://$APACHE_TOMCAT_INSTALLATIONS$/apache-tomcat-8.5.31/lib/tomcat-jdbc.jar!/" />
+          <root url="jar://$APACHE_TOMCAT_INSTALLATIONS$/apache-tomcat-8.5.31/lib/el-api.jar!/" />
+          <root url="jar://$APACHE_TOMCAT_INSTALLATIONS$/apache-tomcat-8.5.31/lib/tomcat-jni.jar!/" />
+          <root url="jar://$APACHE_TOMCAT_INSTALLATIONS$/apache-tomcat-8.5.31/lib/catalina-ha.jar!/" />
+          <root url="jar://$APACHE_TOMCAT_INSTALLATIONS$/apache-tomcat-8.5.31/lib/servlet-api.jar!/" />
+          <root url="jar://$APACHE_TOMCAT_INSTALLATIONS$/apache-tomcat-8.5.31/lib/catalina-tribes.jar!/" />
+          <root url="jar://$APACHE_TOMCAT_INSTALLATIONS$/apache-tomcat-8.5.31/lib/tomcat-util.jar!/" />
+          <root url="jar://$APACHE_TOMCAT_INSTALLATIONS$/apache-tomcat-8.5.31/lib/catalina.jar!/" />
+          <root url="jar://$APACHE_TOMCAT_INSTALLATIONS$/apache-tomcat-8.5.31/lib/tomcat-coyote.jar!/" />
+          <root url="jar://$APACHE_TOMCAT_INSTALLATIONS$/apache-tomcat-8.5.31/lib/tomcat-dbcp.jar!/" />
+          <root url="jar://$APACHE_TOMCAT_INSTALLATIONS$/apache-tomcat-8.5.31/lib/jsp-api.jar!/" />
+          <root url="jar://$APACHE_TOMCAT_INSTALLATIONS$/apache-tomcat-8.5.31/lib/catalina-ant.jar!/" />
+          <root url="jar://$APACHE_TOMCAT_INSTALLATIONS$/apache-tomcat-8.5.31/lib/websocket-api.jar!/" />
+          <root url="jar://$APACHE_TOMCAT_INSTALLATIONS$/apache-tomcat-8.5.31/lib/tomcat-util-scan.jar!/" />
+          <root url="jar://$APACHE_TOMCAT_INSTALLATIONS$/apache-tomcat-8.5.31/lib/annotations-api.jar!/" />
+          <root url="jar://$APACHE_TOMCAT_INSTALLATIONS$/apache-tomcat-8.5.31/lib/jaspic-api.jar!/" />
+          <root url="jar://$APACHE_TOMCAT_INSTALLATIONS$/apache-tomcat-8.5.31/lib/tomcat-websocket.jar!/" />
+          <root url="jar://$APACHE_TOMCAT_INSTALLATIONS$/apache-tomcat-8.5.31/lib/tomcat-api.jar!/" />
+          <root url="jar://$APACHE_TOMCAT_INSTALLATIONS$/apache-tomcat-8.5.31/lib/catalina-storeconfig.jar!/" />
+          <root url="jar://$APACHE_TOMCAT_INSTALLATIONS$/apache-tomcat-8.5.31/lib/jasper.jar!/" />
+        </CLASSES>
+        <JAVADOC />
+        <SOURCES>
+          <root url="file://$APACHE_TOMCAT_INSTALLATIONS$/apache-tomcat-8.5.31" />
+          <root url="jar://$APACHE_TOMCAT_INSTALLATIONS$/apache-tomcat-8.5.31/apache-tomcat-8.5.31-src.zip!/apache-tomcat-8.5.31-src/java" />
+          <root url="jar://$APACHE_TOMCAT_INSTALLATIONS$/apache-tomcat-8.5.31/apache-tomcat-8.5.31-src.zip!/apache-tomcat-8.5.31-src/modules/jdbc-pool/src/main/java" />
+          <root url="jar://$APACHE_TOMCAT_INSTALLATIONS$/apache-tomcat-8.5.31/apache-tomcat-8.5.31-src.zip!/apache-tomcat-8.5.31-src/modules/jdbc-pool/src/test/java" />
+          <root url="jar://$APACHE_TOMCAT_INSTALLATIONS$/apache-tomcat-8.5.31/apache-tomcat-8.5.31-src.zip!/apache-tomcat-8.5.31-src/test" />
+          <root url="jar://$APACHE_TOMCAT_INSTALLATIONS$/apache-tomcat-8.5.31/apache-tomcat-8.5.31-src.zip!/apache-tomcat-8.5.31-src/webapps/docs/appdev/sample/src" />
+          <root url="jar://$APACHE_TOMCAT_INSTALLATIONS$/apache-tomcat-8.5.31/apache-tomcat-8.5.31-src.zip!/apache-tomcat-8.5.31-src/webapps/examples/WEB-INF/classes" />
+          <root url="jar://$APACHE_TOMCAT_INSTALLATIONS$/apache-tomcat-8.5.31/apache-tomcat-8.5.31-src.zip!/apache-tomcat-8.5.31-src/webapps/examples/WEB-INF/jsp/applet" />
+          <root url="jar://$APACHE_TOMCAT_INSTALLATIONS$/apache-tomcat-8.5.31/apache-tomcat-8.5.31-src.zip!/apache-tomcat-8.5.31-src/webapps/examples/jsp/plugin/applet" />
+        </SOURCES>
+        <jarDirectory url="file://$APACHE_TOMCAT_INSTALLATIONS$/apache-tomcat-8.5.31/bin" recursive="false" />
+        <jarDirectory url="file://$APACHE_TOMCAT_INSTALLATIONS$/apache-tomcat-8.5.31" recursive="false" type="SOURCES" />
+      </library>
+    </orderEntry>
     <orderEntry type="module-library">
       <library name="gwt-2.8.2">
         <CLASSES>
@@ -84,11 +140,144 @@
         <jarDirectory url="file://$GWT_HOME$/gwt-2.8.2" recursive="false" type="SOURCES" />
       </library>
     </orderEntry>
-    <orderEntry type="library" scope="TEST" name="org.eclipse.jetty:jetty-all:9.2.14.v20151106" level="application" />
-    <orderEntry type="library" name="com.google.guava:guava-gwt:25.1-jre" level="application" />
-    <orderEntry type="library" scope="TEST" name="junit3.8.1" level="application" />
-    <orderEntry type="library" name="Dumbster" level="application" />
-    <orderEntry type="library" scope="TEST" name="HTTP Unit 1.7" level="application" />
+    <orderEntry type="module-library" scope="TEST">
+      <library name="org.eclipse.jetty:jetty-all:9.2.14.v20151106" type="repository">
+        <properties maven-id="org.eclipse.jetty:apache-jsp:9.2.14.v20151106" />
+        <CLASSES>
+          <root url="jar://$PROGRAMMING_LIBS_DIR$/jetty-all-9.2.14.v20151106/apache-jsp-9.2.14.v20151106.jar!/" />
+          <root url="jar://$PROGRAMMING_LIBS_DIR$/jetty-all-9.2.14.v20151106/jetty-util-9.2.14.v20151106.jar!/" />
+          <root url="jar://$PROGRAMMING_LIBS_DIR$/jetty-all-9.2.14.v20151106/jetty-server-9.2.14.v20151106.jar!/" />
+          <root url="jar://$PROGRAMMING_LIBS_DIR$/jetty-all-9.2.14.v20151106/jetty-http-9.2.14.v20151106.jar!/" />
+          <root url="jar://$PROGRAMMING_LIBS_DIR$/jetty-all-9.2.14.v20151106/jetty-io-9.2.14.v20151106.jar!/" />
+          <root url="jar://$PROGRAMMING_LIBS_DIR$/jetty-all-9.2.14.v20151106/jetty-schemas-3.1.M0.jar!/" />
+          <root url="jar://$PROGRAMMING_LIBS_DIR$/jetty-all-9.2.14.v20151106/javax.servlet-api-3.1.0.jar!/" />
+          <root url="jar://$PROGRAMMING_LIBS_DIR$/jetty-all-9.2.14.v20151106/apache-jsp-8.0.9.M3.jar!/" />
+          <root url="jar://$PROGRAMMING_LIBS_DIR$/jetty-all-9.2.14.v20151106/apache-el-8.0.9.M3.jar!/" />
+          <root url="jar://$PROGRAMMING_LIBS_DIR$/jetty-all-9.2.14.v20151106/org.eclipse.jdt.core-3.8.2.v20130121.jar!/" />
+          <root url="jar://$PROGRAMMING_LIBS_DIR$/jetty-all-9.2.14.v20151106/javax.el-3.0.0.jar!/" />
+          <root url="jar://$PROGRAMMING_LIBS_DIR$/jetty-all-9.2.14.v20151106/javax.servlet.jsp-2.3.2.jar!/" />
+          <root url="jar://$PROGRAMMING_LIBS_DIR$/jetty-all-9.2.14.v20151106/javax.servlet.jsp-api-2.3.1.jar!/" />
+          <root url="jar://$PROGRAMMING_LIBS_DIR$/jetty-all-9.2.14.v20151106/javax.servlet.jsp.jstl-1.2.0.v201105211821.jar!/" />
+          <root url="jar://$PROGRAMMING_LIBS_DIR$/jetty-all-9.2.14.v20151106/javax.servlet.jsp.jstl-1.2.2.jar!/" />
+          <root url="jar://$PROGRAMMING_LIBS_DIR$/jetty-all-9.2.14.v20151106/javax.websocket-api-1.0.jar!/" />
+          <root url="jar://$PROGRAMMING_LIBS_DIR$/jetty-all-9.2.14.v20151106/jetty-all-9.2.14.v20151106.jar!/" />
+          <root url="jar://$PROGRAMMING_LIBS_DIR$/jetty-all-9.2.14.v20151106/jetty-jsp-9.2.14.v20151106.jar!/" />
+        </CLASSES>
+        <JAVADOC>
+          <root url="jar://$PROGRAMMING_LIBS_DIR$/jetty-all-9.2.14.v20151106/apache-jsp-9.2.14.v20151106-javadoc.jar!/" />
+          <root url="jar://$PROGRAMMING_LIBS_DIR$/jetty-all-9.2.14.v20151106/jetty-util-9.2.14.v20151106-javadoc.jar!/" />
+          <root url="jar://$PROGRAMMING_LIBS_DIR$/jetty-all-9.2.14.v20151106/jetty-server-9.2.14.v20151106-javadoc.jar!/" />
+          <root url="jar://$PROGRAMMING_LIBS_DIR$/jetty-all-9.2.14.v20151106/jetty-http-9.2.14.v20151106-javadoc.jar!/" />
+          <root url="jar://$PROGRAMMING_LIBS_DIR$/jetty-all-9.2.14.v20151106/jetty-io-9.2.14.v20151106-javadoc.jar!/" />
+          <root url="jar://$PROGRAMMING_LIBS_DIR$/jetty-all-9.2.14.v20151106/javax.servlet-api-3.1.0-javadoc.jar!/" />
+          <root url="jar://$PROGRAMMING_LIBS_DIR$/jetty-all-9.2.14.v20151106/apache-jsp-8.0.9.M3-javadoc.jar!/" />
+          <root url="jar://$PROGRAMMING_LIBS_DIR$/jetty-all-9.2.14.v20151106/apache-el-8.0.9.M3-javadoc.jar!/" />
+          <root url="jar://$PROGRAMMING_LIBS_DIR$/jetty-all-9.2.14.v20151106/org.eclipse.jdt.core-3.8.2.v20130121-javadoc.jar!/" />
+          <root url="jar://$PROGRAMMING_LIBS_DIR$/jetty-all-9.2.14.v20151106/javax.el-3.0.0-javadoc.jar!/" />
+          <root url="jar://$PROGRAMMING_LIBS_DIR$/jetty-all-9.2.14.v20151106/javax.servlet.jsp-2.3.2-javadoc.jar!/" />
+          <root url="jar://$PROGRAMMING_LIBS_DIR$/jetty-all-9.2.14.v20151106/javax.servlet.jsp-api-2.3.1-javadoc.jar!/" />
+          <root url="jar://$PROGRAMMING_LIBS_DIR$/jetty-all-9.2.14.v20151106/javax.servlet.jsp.jstl-1.2.0.v201105211821-javadoc.jar!/" />
+          <root url="jar://$PROGRAMMING_LIBS_DIR$/jetty-all-9.2.14.v20151106/javax.servlet.jsp.jstl-1.2.2-javadoc.jar!/" />
+          <root url="jar://$PROGRAMMING_LIBS_DIR$/jetty-all-9.2.14.v20151106/javax.websocket-api-1.0-javadoc.jar!/" />
+          <root url="jar://$PROGRAMMING_LIBS_DIR$/jetty-all-9.2.14.v20151106/jetty-all-9.2.14.v20151106-javadoc.jar!/" />
+          <root url="jar://$PROGRAMMING_LIBS_DIR$/jetty-all-9.2.14.v20151106/jetty-jsp-9.2.14.v20151106-javadoc.jar!/" />
+        </JAVADOC>
+        <SOURCES>
+          <root url="jar://$PROGRAMMING_LIBS_DIR$/jetty-all-9.2.14.v20151106/apache-jsp-9.2.14.v20151106-sources.jar!/" />
+          <root url="jar://$PROGRAMMING_LIBS_DIR$/jetty-all-9.2.14.v20151106/jetty-util-9.2.14.v20151106-sources.jar!/" />
+          <root url="jar://$PROGRAMMING_LIBS_DIR$/jetty-all-9.2.14.v20151106/jetty-server-9.2.14.v20151106-sources.jar!/" />
+          <root url="jar://$PROGRAMMING_LIBS_DIR$/jetty-all-9.2.14.v20151106/jetty-http-9.2.14.v20151106-sources.jar!/" />
+          <root url="jar://$PROGRAMMING_LIBS_DIR$/jetty-all-9.2.14.v20151106/jetty-io-9.2.14.v20151106-sources.jar!/" />
+          <root url="jar://$PROGRAMMING_LIBS_DIR$/jetty-all-9.2.14.v20151106/jetty-schemas-3.1.M0-sources.jar!/" />
+          <root url="jar://$PROGRAMMING_LIBS_DIR$/jetty-all-9.2.14.v20151106/javax.servlet-api-3.1.0-sources.jar!/" />
+          <root url="jar://$PROGRAMMING_LIBS_DIR$/jetty-all-9.2.14.v20151106/apache-jsp-8.0.9.M3-sources.jar!/" />
+          <root url="jar://$PROGRAMMING_LIBS_DIR$/jetty-all-9.2.14.v20151106/apache-el-8.0.9.M3-sources.jar!/" />
+          <root url="jar://$PROGRAMMING_LIBS_DIR$/jetty-all-9.2.14.v20151106/org.eclipse.jdt.core-3.8.2.v20130121-sources.jar!/" />
+          <root url="jar://$PROGRAMMING_LIBS_DIR$/jetty-all-9.2.14.v20151106/javax.el-3.0.0-sources.jar!/" />
+          <root url="jar://$PROGRAMMING_LIBS_DIR$/jetty-all-9.2.14.v20151106/javax.servlet.jsp-2.3.2-sources.jar!/" />
+          <root url="jar://$PROGRAMMING_LIBS_DIR$/jetty-all-9.2.14.v20151106/javax.servlet.jsp-api-2.3.1-sources.jar!/" />
+          <root url="jar://$PROGRAMMING_LIBS_DIR$/jetty-all-9.2.14.v20151106/javax.servlet.jsp.jstl-1.2.0.v201105211821-sources.jar!/" />
+          <root url="jar://$PROGRAMMING_LIBS_DIR$/jetty-all-9.2.14.v20151106/javax.servlet.jsp.jstl-1.2.2-sources.jar!/" />
+          <root url="jar://$PROGRAMMING_LIBS_DIR$/jetty-all-9.2.14.v20151106/javax.websocket-api-1.0-sources.jar!/" />
+          <root url="jar://$PROGRAMMING_LIBS_DIR$/jetty-all-9.2.14.v20151106/jetty-all-9.2.14.v20151106-sources.jar!/" />
+          <root url="jar://$PROGRAMMING_LIBS_DIR$/jetty-all-9.2.14.v20151106/jetty-jsp-9.2.14.v20151106-sources.jar!/" />
+        </SOURCES>
+      </library>
+    </orderEntry>
+    <orderEntry type="module-library">
+      <library name="com.google.guava:guava-gwt:25.1-jre" type="repository">
+        <properties maven-id="com.google.guava:guava-gwt:25.1-jre" />
+        <CLASSES>
+          <root url="jar://$PROGRAMMING_LIBS_DIR$/guava-25.1/guava-gwt-25.1-jre.jar!/" />
+          <root url="jar://$PROGRAMMING_LIBS_DIR$/guava-25.1/guava-25.1-jre.jar!/" />
+          <root url="jar://$PROGRAMMING_LIBS_DIR$/guava-25.1/jsr305-3.0.2.jar!/" />
+          <root url="jar://$PROGRAMMING_LIBS_DIR$/guava-25.1/checker-qual-2.0.0.jar!/" />
+          <root url="jar://$PROGRAMMING_LIBS_DIR$/guava-25.1/error_prone_annotations-2.1.3.jar!/" />
+          <root url="jar://$PROGRAMMING_LIBS_DIR$/guava-25.1/j2objc-annotations-1.1.jar!/" />
+          <root url="jar://$PROGRAMMING_LIBS_DIR$/guava-25.1/animal-sniffer-annotations-1.14.jar!/" />
+        </CLASSES>
+        <JAVADOC>
+          <root url="jar://$PROGRAMMING_LIBS_DIR$/guava-25.1/guava-gwt-25.1-jre-javadoc.jar!/" />
+          <root url="jar://$PROGRAMMING_LIBS_DIR$/guava-25.1/guava-25.1-jre-javadoc.jar!/" />
+          <root url="jar://$PROGRAMMING_LIBS_DIR$/guava-25.1/jsr305-3.0.2-javadoc.jar!/" />
+          <root url="jar://$PROGRAMMING_LIBS_DIR$/guava-25.1/checker-qual-2.0.0-javadoc.jar!/" />
+          <root url="jar://$PROGRAMMING_LIBS_DIR$/guava-25.1/error_prone_annotations-2.1.3-javadoc.jar!/" />
+          <root url="jar://$PROGRAMMING_LIBS_DIR$/guava-25.1/j2objc-annotations-1.1-javadoc.jar!/" />
+          <root url="jar://$PROGRAMMING_LIBS_DIR$/guava-25.1/animal-sniffer-annotations-1.14-javadoc.jar!/" />
+        </JAVADOC>
+        <SOURCES>
+          <root url="jar://$PROGRAMMING_LIBS_DIR$/guava-25.1/guava-gwt-25.1-jre-sources.jar!/" />
+          <root url="jar://$PROGRAMMING_LIBS_DIR$/guava-25.1/guava-25.1-jre-sources.jar!/" />
+          <root url="jar://$PROGRAMMING_LIBS_DIR$/guava-25.1/jsr305-3.0.2-sources.jar!/" />
+          <root url="jar://$PROGRAMMING_LIBS_DIR$/guava-25.1/checker-qual-2.0.0-sources.jar!/" />
+          <root url="jar://$PROGRAMMING_LIBS_DIR$/guava-25.1/error_prone_annotations-2.1.3-sources.jar!/" />
+          <root url="jar://$PROGRAMMING_LIBS_DIR$/guava-25.1/j2objc-annotations-1.1-sources.jar!/" />
+          <root url="jar://$PROGRAMMING_LIBS_DIR$/guava-25.1/animal-sniffer-annotations-1.14-sources.jar!/" />
+        </SOURCES>
+      </library>
+    </orderEntry>
+    <orderEntry type="module-library" scope="TEST">
+      <library name="junit3.8.1">
+        <CLASSES>
+          <root url="jar://$PROGRAMMING_LIBS_DIR$/junit3.8.1/junit.jar!/" />
+        </CLASSES>
+        <JAVADOC />
+        <SOURCES>
+          <root url="jar://$PROGRAMMING_LIBS_DIR$/junit3.8.1/src.jar!/" />
+        </SOURCES>
+      </library>
+    </orderEntry>
+    <orderEntry type="module-library">
+      <library name="Dumbster">
+        <CLASSES>
+          <root url="jar://$PROGRAMMING_LIBS_DIR$/dumbster-1.6/dumbster1.6.jar!/" />
+        </CLASSES>
+        <JAVADOC />
+        <SOURCES>
+          <root url="file://$PROGRAMMING_LIBS_DIR$/dumbster-1.6/src" />
+        </SOURCES>
+      </library>
+    </orderEntry>
+    <orderEntry type="module-library" scope="TEST">
+      <library name="HTTP Unit 1.7">
+        <CLASSES>
+          <root url="jar://$PROGRAMMING_LIBS_DIR$/httpunit-1.7/lib/httpunit.jar!/" />
+          <root url="jar://$PROGRAMMING_LIBS_DIR$/httpunit-1.7/jars/xmlParserAPIs-2.6.1.jar!/" />
+          <root url="jar://$PROGRAMMING_LIBS_DIR$/httpunit-1.7/jars/jtidy-4aug2000r7-dev.jar!/" />
+          <root url="jar://$PROGRAMMING_LIBS_DIR$/httpunit-1.7/jars/activation-1.1.jar!/" />
+          <root url="jar://$PROGRAMMING_LIBS_DIR$/httpunit-1.7/jars/xercesImpl-2.6.1.jar!/" />
+          <root url="jar://$PROGRAMMING_LIBS_DIR$/httpunit-1.7/jars/nekohtml-0.9.5.jar!/" />
+          <root url="jar://$PROGRAMMING_LIBS_DIR$/httpunit-1.7/jars/mail-1.4.jar!/" />
+          <root url="jar://$PROGRAMMING_LIBS_DIR$/httpunit-1.7/jars/js-1.6R5.jar!/" />
+        </CLASSES>
+        <JAVADOC>
+          <root url="file://$PROGRAMMING_LIBS_DIR$/httpunit-1.7/doc/api" />
+        </JAVADOC>
+        <SOURCES>
+          <root url="file://$PROGRAMMING_LIBS_DIR$/httpunit-1.7/src" />
+        </SOURCES>
+      </library>
+    </orderEntry>
     <orderEntry type="library" scope="TEST" name="JUnit Add-Ons" level="application" />
     <orderEntry type="module-library">
       <library name="javapoet-1.9.0">
@@ -103,7 +292,57 @@
         </SOURCES>
       </library>
     </orderEntry>
-    <orderEntry type="library" scope="TEST" name="com.google.guava:guava-testlib:25.1-jre" level="application" />
-    <orderEntry type="library" name="org.apache.commons:commons-lang3:3.4" level="application" />
+    <orderEntry type="module-library" scope="TEST">
+      <library name="com.google.guava:guava-testlib:25.1-jre" type="repository">
+        <properties maven-id="com.google.guava:guava-testlib:25.1-jre" />
+        <CLASSES>
+          <root url="jar://$PROGRAMMING_LIBS_DIR$/guava-testlib-25.1-jre/guava-testlib-25.1-jre.jar!/" />
+          <root url="jar://$PROGRAMMING_LIBS_DIR$/guava-testlib-25.1-jre/jsr305-3.0.2.jar!/" />
+          <root url="jar://$PROGRAMMING_LIBS_DIR$/guava-testlib-25.1-jre/checker-qual-2.0.0.jar!/" />
+          <root url="jar://$PROGRAMMING_LIBS_DIR$/guava-testlib-25.1-jre/error_prone_annotations-2.1.3.jar!/" />
+          <root url="jar://$PROGRAMMING_LIBS_DIR$/guava-testlib-25.1-jre/j2objc-annotations-1.1.jar!/" />
+          <root url="jar://$PROGRAMMING_LIBS_DIR$/guava-testlib-25.1-jre/guava-25.1-jre.jar!/" />
+          <root url="jar://$PROGRAMMING_LIBS_DIR$/guava-testlib-25.1-jre/animal-sniffer-annotations-1.14.jar!/" />
+          <root url="jar://$PROGRAMMING_LIBS_DIR$/guava-testlib-25.1-jre/junit-4.11.jar!/" />
+          <root url="jar://$PROGRAMMING_LIBS_DIR$/guava-testlib-25.1-jre/hamcrest-core-1.3.jar!/" />
+        </CLASSES>
+        <JAVADOC>
+          <root url="jar://$PROGRAMMING_LIBS_DIR$/guava-testlib-25.1-jre/guava-testlib-25.1-jre-javadoc.jar!/" />
+          <root url="jar://$PROGRAMMING_LIBS_DIR$/guava-testlib-25.1-jre/jsr305-3.0.2-javadoc.jar!/" />
+          <root url="jar://$PROGRAMMING_LIBS_DIR$/guava-testlib-25.1-jre/checker-qual-2.0.0-javadoc.jar!/" />
+          <root url="jar://$PROGRAMMING_LIBS_DIR$/guava-testlib-25.1-jre/error_prone_annotations-2.1.3-javadoc.jar!/" />
+          <root url="jar://$PROGRAMMING_LIBS_DIR$/guava-testlib-25.1-jre/j2objc-annotations-1.1-javadoc.jar!/" />
+          <root url="jar://$PROGRAMMING_LIBS_DIR$/guava-testlib-25.1-jre/guava-25.1-jre-javadoc.jar!/" />
+          <root url="jar://$PROGRAMMING_LIBS_DIR$/guava-testlib-25.1-jre/animal-sniffer-annotations-1.14-javadoc.jar!/" />
+          <root url="jar://$PROGRAMMING_LIBS_DIR$/guava-testlib-25.1-jre/junit-4.11-javadoc.jar!/" />
+          <root url="jar://$PROGRAMMING_LIBS_DIR$/guava-testlib-25.1-jre/hamcrest-core-1.3-javadoc.jar!/" />
+        </JAVADOC>
+        <SOURCES>
+          <root url="jar://$PROGRAMMING_LIBS_DIR$/guava-testlib-25.1-jre/guava-testlib-25.1-jre-sources.jar!/" />
+          <root url="jar://$PROGRAMMING_LIBS_DIR$/guava-testlib-25.1-jre/jsr305-3.0.2-sources.jar!/" />
+          <root url="jar://$PROGRAMMING_LIBS_DIR$/guava-testlib-25.1-jre/checker-qual-2.0.0-sources.jar!/" />
+          <root url="jar://$PROGRAMMING_LIBS_DIR$/guava-testlib-25.1-jre/error_prone_annotations-2.1.3-sources.jar!/" />
+          <root url="jar://$PROGRAMMING_LIBS_DIR$/guava-testlib-25.1-jre/j2objc-annotations-1.1-sources.jar!/" />
+          <root url="jar://$PROGRAMMING_LIBS_DIR$/guava-testlib-25.1-jre/guava-25.1-jre-sources.jar!/" />
+          <root url="jar://$PROGRAMMING_LIBS_DIR$/guava-testlib-25.1-jre/animal-sniffer-annotations-1.14-sources.jar!/" />
+          <root url="jar://$PROGRAMMING_LIBS_DIR$/guava-testlib-25.1-jre/junit-4.11-sources.jar!/" />
+          <root url="jar://$PROGRAMMING_LIBS_DIR$/guava-testlib-25.1-jre/hamcrest-core-1.3-sources.jar!/" />
+        </SOURCES>
+      </library>
+    </orderEntry>
+    <orderEntry type="module-library">
+      <library name="org.apache.commons:commons-lang3:3.4" type="repository">
+        <properties maven-id="org.apache.commons:commons-lang3:3.4" />
+        <CLASSES>
+          <root url="jar://$PROGRAMMING_LIBS_DIR$/commons-lang3-3.4/commons-lang3-3.4.jar!/" />
+        </CLASSES>
+        <JAVADOC>
+          <root url="jar://$PROGRAMMING_LIBS_DIR$/commons-lang3-3.4/commons-lang3-3.4-javadoc.jar!/" />
+        </JAVADOC>
+        <SOURCES>
+          <root url="jar://$PROGRAMMING_LIBS_DIR$/commons-lang3-3.4/commons-lang3-3.4-sources.jar!/" />
+        </SOURCES>
+      </library>
+    </orderEntry>
   </component>
 </module>

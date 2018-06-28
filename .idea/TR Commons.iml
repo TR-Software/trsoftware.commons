@@ -278,7 +278,20 @@
         </SOURCES>
       </library>
     </orderEntry>
-    <orderEntry type="library" scope="TEST" name="JUnit Add-Ons" level="application" />
+    <orderEntry type="module-library" scope="TEST">
+      <library name="JUnit Add-Ons">
+        <CLASSES>
+          <root url="jar://$PROGRAMMING_LIBS_DIR$/junit-addons-1.4/junit-addons-1.4.jar!/" />
+        </CLASSES>
+        <JAVADOC>
+          <root url="file://$PROGRAMMING_LIBS_DIR$/junit-addons-1.4/api" />
+        </JAVADOC>
+        <SOURCES>
+          <root url="jar://$PROGRAMMING_LIBS_DIR$/junit-addons-1.4/src.jar!/src/example" />
+          <root url="jar://$PROGRAMMING_LIBS_DIR$/junit-addons-1.4/src.jar!/src/main" />
+        </SOURCES>
+      </library>
+    </orderEntry>
     <orderEntry type="module-library">
       <library name="javapoet-1.9.0">
         <CLASSES>

@@ -38,7 +38,7 @@ public class CsvRenderer<T> extends AbstractRenderer<List<T>> {
   }
 
   public CsvRenderer() {
-    this(new StringRenderer<T>());
+    this(StringRenderer.getInstance());
   }
 
   @Override

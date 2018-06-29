@@ -25,7 +25,9 @@ import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.event.shared.GwtEvent;
 import com.google.gwt.event.shared.HandlerRegistration;
+import com.google.gwt.text.shared.Renderer;
 import com.google.gwt.user.client.ui.*;
+import solutions.trsoftware.commons.shared.util.text.StringRenderer;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -53,21 +55,27 @@ public class RadioButtonGroup<V> implements HasValue<V>, ClickHandler, KeyPressH
   private final Widget parent;
   /** The set of values over which the radio buttons operate (allow selecting one of them) */
   private final Set<V> valueSet;
+  private final Renderer<V> valueRenderer;
   /** The current value of this radio group (selected from {@link #valueSet} */
   private V value;
 
   private Map<V, RadioButton> rbMap = new LinkedHashMap<V, RadioButton>();
 
   public RadioButtonGroup(Widget parent, Set<V> valueSet) {
+    this(parent, valueSet, StringRenderer.getInstance());
+  }
+
+  public RadioButtonGroup(Widget parent, Set<V> valueSet, Renderer<V> valueRenderer) {
     this.parent = parent;
     this.valueSet = valueSet;
+    this.valueRenderer = valueRenderer;
     createRadioButtons();
   }
 
   private void createRadioButtons() {
     String radioButtonGroupId = HTMLPanel.createUniqueId();
     for (V val : valueSet) {
-      RadioButton rb = new RadioButton(radioButtonGroupId, " " + val);
+      RadioButton rb = new RadioButton(radioButtonGroupId, " " + valueRenderer.render(val));
       /*
         NOTE: technically, RadioButton provides an addValueChangeHandler(ValueChangeHandler<Boolean>) method,
         but its implementation is buggy - for instance the value change is only fired in response to clicks

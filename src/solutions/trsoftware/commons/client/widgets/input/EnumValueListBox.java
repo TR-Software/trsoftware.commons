@@ -36,7 +36,7 @@ public class EnumValueListBox<E extends Enum<E>> extends ValueListBox<E> {
    * Should call {@link #setAcceptableValues(Collection)} or {@link #addValue(Object)} to add the selectable options.
    */
   public EnumValueListBox() {
-    this(new StringRenderer<E>());
+    this(StringRenderer.getInstance());
   }
 
   /**
@@ -81,7 +81,7 @@ public class EnumValueListBox<E extends Enum<E>> extends ValueListBox<E> {
    * @param elementType the enum class
    */
   public EnumValueListBox(Class<E> elementType) {
-    this(EnumSet.allOf(elementType), new StringRenderer<E>());
+    this(EnumSet.allOf(elementType), StringRenderer.getInstance());
   }
 
   /**
@@ -90,7 +90,7 @@ public class EnumValueListBox<E extends Enum<E>> extends ValueListBox<E> {
    * @param values the initial set of values to be displayed
      */
   public EnumValueListBox(EnumSet<E> values) {
-    this(values, new StringRenderer<E>());
+    this(values, StringRenderer.getInstance());
   }
 
 }

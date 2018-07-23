@@ -149,7 +149,9 @@ public class TimeUtils {
     return SECONDS.to(MILLISECONDS, seconds);
   }
 
-  /** Returns the time as a double to avoid slow GWT long emulation */
+  /**
+   * @return the system time as a {@code double} (to avoid slow {@code long} emulation in GWT)
+   */
   public static double currentTimeMillis() {
     if (GWT.isClient())
       return Duration.currentTimeMillis();
@@ -194,4 +196,5 @@ public class TimeUtils {
   public static boolean isElapsed(long duration, long startTime, long currentTime) {
     return (currentTime - startTime) > duration;
   }
+
 }

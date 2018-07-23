@@ -18,6 +18,7 @@
 package solutions.trsoftware.commons.server.util;
 
 import junit.framework.TestCase;
+import solutions.trsoftware.commons.shared.util.RandomUtils;
 
 import java.util.Collections;
 
@@ -144,4 +145,19 @@ public class ServerStringUtilsTest extends TestCase {
     assertFalse(isUrlSafe("asdf="));
     assertFalse(isUrlSafe("asdf+asdf"));
   }
+
+  /**
+   * Tests that the results of {@link ServerStringUtils#urlEncode(String)} can be converted back using
+   * {@link ServerStringUtils#urlDecode(String)}
+   */
+  public void testUrlEncode() throws Exception {
+    for (int i = 0; i < 10_000; i++) {
+      String original = RandomUtils.randString(40);
+      String encoded = urlEncode(original);
+      String decoded = urlDecode(encoded);
+      String msg = String.format("'%s' -> '%s' -> '%s'", original, encoded, decoded);
+      assertEquals(msg, original, decoded);
+    }
+  }
+
 }

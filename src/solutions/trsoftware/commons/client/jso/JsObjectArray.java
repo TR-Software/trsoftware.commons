@@ -31,6 +31,15 @@ public class JsObjectArray<T> extends JavaScriptObject {
   }
 
   /**
+   * Factory method.
+   * @return a new (empty) array
+   */
+  public static <T> JsObjectArray<T> create() {
+    return JavaScriptObject.createArray().cast();
+  }
+
+
+  /**
    * Gets the object at a given index.
    *
    * @param index the index to be retrieved

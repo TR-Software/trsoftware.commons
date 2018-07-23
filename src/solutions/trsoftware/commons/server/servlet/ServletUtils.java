@@ -17,6 +17,9 @@
 
 package solutions.trsoftware.commons.server.servlet;
 
+import solutions.trsoftware.commons.client.util.WebUtils;
+
+import javax.annotation.Nonnull;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.net.MalformedURLException;
@@ -96,14 +99,13 @@ public abstract class ServletUtils {
   }
 
   /**
-   * HttpServletRequest parameters are represented by a Map<String, String[]>,
-   * which is reduntant, because most of the time there is only one value for
-   * every parameter.
-   * @return The a key value mapping of the parameters to their values.
-   * @throws IllegalArgumentException if one of the String value arrays in the
-   * given map contains more than one element.
+   * The Servlet API represents {@link HttpServletRequest} parameters with a {@code Map<String, String[]>},
+   * which is often redundant, because most of the time there is only one value for every parameter.
+   *
+   * @return The a name-value mapping of the parameters, sorted by name
+   * @throws IllegalArgumentException if one of the {@code String[]} value arrays in the given map contains more than one element.
    */
-  public static SortedMap<String, String> requestParametersAsSortedStringMap(Map<String, String[]> requestParamMap) {
+  public static SortedMap<String, String> getRequestParametersAsSortedStringMap(Map<String, String[]> requestParamMap) {
     SortedMap<String, String> singleValueMap = new TreeMap<>();
     for (Map.Entry<String, String[]> entry : requestParamMap.entrySet()) {
       String[] valueArr = entry.getValue();
@@ -116,14 +118,38 @@ public abstract class ServletUtils {
   }
 
   /**
-   * {@link HttpServletRequest#getParameterMap} returns a {@code Map<String, String[]>},
-   * which is redundant, because most of the time there is only one value for every parameter.
+   * A more convenient version of {@link HttpServletRequest#getParameterMap()}, returning a {@code Map<String, String>}
+   * instead of {@code Map<String, String[]>}.  This is more convenient because most of the time there is only
+   * one value for any request parameter.
+   * <p>
+   * <strong>Warning:</strong> will throw {@link IllegalArgumentException} if the request actually does contain
+   * multi-valued parameters.
    *
-   * @return The a key value mapping of the parameters to their values.
-   * @throws IllegalArgumentException if one of the value arrays in the given map contains more than one element.
+   * @return The a name-value mapping of the parameters, sorted by name
+   * @throws IllegalArgumentException if one of the value arrays from {@link HttpServletRequest#getParameterMap()}
+   * contains more than one element.
    */
-  public static SortedMap<String, String> requestParametersAsSortedStringMap(HttpServletRequest request) {
-    return requestParametersAsSortedStringMap(request.getParameterMap());
+  public static SortedMap<String, String> getRequestParametersAsSortedStringMap(HttpServletRequest request) {
+    return getRequestParametersAsSortedStringMap(request.getParameterMap());
+  }
+
+  /**
+   * Retrieves a selected subset of request parameters.
+   *
+   * @param names the names of the parameters to return
+   * @return the name-value mapping for the selected parameters, in the same order they appear in the {@code names} arg.
+   * <b>Note:</b> if the request contains multiple values for any of these parameters, will include only the first value.
+   * @see WebUtils#getUrlParameterMap(Iterable)
+   */
+  @Nonnull
+  public static LinkedHashMap<String, String> getRequestParameters(HttpServletRequest request, Iterable<String> names) {
+    LinkedHashMap<String, String> ret = new LinkedHashMap<>();
+    for (String name : names) {
+      String value = request.getParameter(name);
+      if (value != null)
+        ret.put(name, value);
+    }
+    return ret;
   }
 
   /**
@@ -177,6 +203,7 @@ public abstract class ServletUtils {
    * {@code request}
    */
   public static URL getRequestURL(HttpServletRequest request) {
+    // TODO: as a perf optimization, could save the parsed URL object in a request attribute for future reference
     try {
       return new URL(request.getRequestURL().toString());
     }

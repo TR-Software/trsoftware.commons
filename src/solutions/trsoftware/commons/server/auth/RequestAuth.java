@@ -97,7 +97,7 @@ public abstract class RequestAuth {
     }
     String sigParam = getRequiredParam(request, PARAM_NAME_SIGNATURE);
     // generate and validate the base string
-    SortedMap<String, String> params = ServletUtils.requestParametersAsSortedStringMap(request);
+    SortedMap<String, String> params = ServletUtils.getRequestParametersAsSortedStringMap(request);
     // the base string should not include the signature parameter
     params.remove(PARAM_NAME_SIGNATURE);
     String baseString = generateBaseString(request.getMethod(), request.getRequestURL().toString(), params);

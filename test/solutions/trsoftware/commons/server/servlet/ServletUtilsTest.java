@@ -39,13 +39,13 @@ public class ServletUtilsTest extends TestCase {
       goodMap.put("bar", new String[]{"b"});
       assertEquals(
           MapUtils.stringMap("foo", "a", "bar", "b"),
-          requestParametersAsSortedStringMap(goodMap));
+          getRequestParametersAsSortedStringMap(goodMap));
     }
     {
       final Map<String, String[]> badMap = new HashMap<>();
       badMap.put("foo", new String[]{"a"});
       badMap.put("bar", new String[]{"b", "c"});
-      AssertUtils.assertThrows(IllegalArgumentException.class, (Runnable)() -> requestParametersAsSortedStringMap(badMap));
+      AssertUtils.assertThrows(IllegalArgumentException.class, (Runnable)() -> getRequestParametersAsSortedStringMap(badMap));
     }
   }
 

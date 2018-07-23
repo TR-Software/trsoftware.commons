@@ -25,7 +25,7 @@ import java.util.Date;
 import java.util.Iterator;
 
 /**
- * An immutable version of java.util.Calendar that represents month ordinals starting with 1 (as opposed to 0, which
+ * An immutable version of {@link java.util.Calendar} that represents month ordinals starting with 1 (as opposed to 0, which
  * is the way Calendar represents them).  Also supports iteration by increments.
  *
  * @author Alex, 1/2/14
@@ -80,6 +80,15 @@ public class CalDate {
 
   public Date getDate() {
     return cal.getTime();
+  }
+
+  /**
+   * @return the current time as UTC milliseconds from the epoch.
+   * @see Calendar#getTimeInMillis()
+   * @see Date#getTime()
+   */
+  public long getTime() {
+    return cal.getTimeInMillis();
   }
 
   public int getYear() {
@@ -192,6 +201,8 @@ public class CalDate {
 
   /**
    * Same as {@link Calendar#add(int, int)}, but preserves immutability.
+   * @param field the unit to add: one of the constants defined in {@link Calendar}
+   * @param offset the amount (of the unit) to add
    */
   public CalDate add(int field, int offset) {
     CalDate result = new CalDate(cal);

@@ -20,10 +20,10 @@ package solutions.trsoftware.commons.bridge;
 import solutions.trsoftware.commons.client.bridge.json.JSONParser;
 import solutions.trsoftware.commons.client.bridge.text.NumberFormatter;
 import solutions.trsoftware.commons.client.bridge.util.Duration;
-import solutions.trsoftware.commons.client.bridge.util.UrlEncoder;
+import solutions.trsoftware.commons.client.bridge.util.URIComponentEncoder;
 import solutions.trsoftware.commons.server.bridge.json.GsonJSONParser;
 import solutions.trsoftware.commons.server.bridge.text.NumberFormatterJavaImpl;
-import solutions.trsoftware.commons.server.bridge.util.UrlEncoderJavaImpl;
+import solutions.trsoftware.commons.server.bridge.util.URIComponentEncoderJavaImpl;
 import solutions.trsoftware.commons.shared.util.text.SharedNumberFormat;
 
 import java.security.SecureRandom;
@@ -93,8 +93,8 @@ public class BridgeTypeFactory {
     return new solutions.trsoftware.commons.server.util.Duration(action);
   }
 
-  public static UrlEncoder getUrlEncoder() {
-    return UrlEncoderJavaImpl.getInstance();
+  public static URIComponentEncoder getURIComponentEncoder() {
+    return URIComponentEncoderJavaImpl.getInstance();
   }
 
   public static Random newSecureRandom() {

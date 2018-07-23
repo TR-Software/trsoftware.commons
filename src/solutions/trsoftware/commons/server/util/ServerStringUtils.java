@@ -20,6 +20,7 @@ package solutions.trsoftware.commons.server.util;
 
 import org.apache.commons.codec.binary.Base64;
 import org.w3c.dom.Document;
+import solutions.trsoftware.commons.client.bridge.util.URIComponentEncoder;
 import solutions.trsoftware.commons.server.io.ServerIOUtils;
 import solutions.trsoftware.commons.shared.util.Levenshtein;
 import solutions.trsoftware.commons.shared.util.StringUtils;
@@ -147,7 +148,7 @@ public class ServerStringUtils {
     return hashSHA256(plaintext, 1);
   }
 
-  /** URL-decodes the given string as UTF-8 */
+  /** Decodes the given percent-encoded string using {@link java.net.URLDecoder} (UTF-8 encoding is assumed). */
   public static String urlDecode(String str) {
     try {
       return URLDecoder.decode(str, StringUtils.UTF8_CHARSET_NAME);
@@ -161,7 +162,13 @@ public class ServerStringUtils {
     }
   }
 
-  /** URL-encodes the given string as UTF-8 */
+  /**
+   * Percent-encodes the given string using {@link java.net.URLEncoder} (UTF-8 encoding is used).
+   * <p>
+   * <strong>Warning:</strong> Don't use this method for encoding cookie values that might be read client-side with
+   * {@link com.google.gwt.user.client.Cookies} -- use {@link URIComponentEncoder#encode(String)} instead.
+   * @see URIComponentEncoder#encode(String)
+   */
   public static String urlEncode(String str) {
     try {
       return URLEncoder.encode(str, StringUtils.UTF8_CHARSET_NAME);
@@ -242,7 +249,7 @@ public class ServerStringUtils {
     return groups;
   }
 
-  /** Compresses the string using java.zip.DeflaterOutputStream */
+  /** Compresses the string using {@link DeflaterOutputStream} */
   public static byte[] deflateString(String str) {
     // NOTE: DeflaterOutputStream provides better compression than GZIPOutputStream because the latter writes an additional 10-byte header
     DeflaterOutputStream zipOut = null;

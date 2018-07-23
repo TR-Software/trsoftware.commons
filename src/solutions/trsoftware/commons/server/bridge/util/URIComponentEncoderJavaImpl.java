@@ -17,40 +17,46 @@
 
 package solutions.trsoftware.commons.server.bridge.util;
 
-import solutions.trsoftware.commons.client.bridge.util.UrlEncoder;
+import com.google.common.net.PercentEscaper;
+import com.google.common.net.UrlEscapers;
+import solutions.trsoftware.commons.client.bridge.util.URIComponentEncoder;
 import solutions.trsoftware.commons.server.util.ServerStringUtils;
 
 /**
- * Jun 30, 2012
+ * Server-side implementation of {@link URIComponentEncoder}
  *
  * @author Alex
  */
-public class UrlEncoderJavaImpl extends UrlEncoder {
+public class URIComponentEncoderJavaImpl extends URIComponentEncoder {
 
+  private static URIComponentEncoderJavaImpl instance = new URIComponentEncoderJavaImpl();
 
-  private static UrlEncoderJavaImpl instance = new UrlEncoderJavaImpl();
-
-  public static UrlEncoderJavaImpl getInstance() {
+  public static URIComponentEncoderJavaImpl getInstance() {
     return instance;
   }
 
-  private UrlEncoderJavaImpl() {
+  /**
+   * This is similar to {@link UrlEscapers#urlFragmentEscaper()}, but uses a different set of {@code safeChars} to
+   * match the behavior of the JavaScript {@code encodeURIComponent} function.
+   */
+  private PercentEscaper escaper = new PercentEscaper(
+      "!'()*-._~",
+      false
+  );
+
+  private URIComponentEncoderJavaImpl() {
     // this class is a singleton
   }
 
   /**
-   * Encodes a value for use in a URI component.  Same as Javascript's {@code encodeURIComponent}  function and Java's
-   * {@link java.net.URLEncoder#encode(String, String)}. NOTE: it is not guaranteed that the aforementioned functions,
-   * used to implement this class on the client and server respectively, will produce the same results for the same
-   * inputs. The encoding used on the server will be UTF-8.
+   * {@inheritDoc}
    */
   public String encode(String value) {
-    // TODO: replace the method in ServerStringUtils with this class?
-    return ServerStringUtils.urlEncode(value);
+    return escaper.escape(value);
   }
 
   /**
-   * The opposite of {@link #encode(String)}.
+   * {@inheritDoc}
    */
   public String decode(String value) {
     return ServerStringUtils.urlDecode(value);

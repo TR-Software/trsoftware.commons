@@ -23,7 +23,7 @@ import solutions.trsoftware.commons.shared.util.time.Time;
 
 /**
  * Singleton oracle for the time on the server.  This is the server-side version of this class, which uses the server's
- * actual clock ({@link Clock}).  The client-side version of this class is located in the "translatable" source tree,
+ * actual clock ({@link Clock}).  The client-side version of this class is located in the {@code <super-source>} directory,
  * and uses {@link ServerTimeClientImpl} to approximate the time on the server.
  * <p>
  * NOTE: There are actually two different implementations of this class in two different directories:

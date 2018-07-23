@@ -30,7 +30,10 @@ import org.apache.tomcat.util.http.FastHttpDateFormat;
 import solutions.trsoftware.commons.server.io.ResourceLocator;
 import solutions.trsoftware.commons.server.net.NetUtils;
 import solutions.trsoftware.commons.server.servlet.config.InitParameterParseException;
-import solutions.trsoftware.commons.server.servlet.filters.CachePolicyFilter.*;
+import solutions.trsoftware.commons.server.servlet.filters.CachePolicyFilter.CachePolicy;
+import solutions.trsoftware.commons.server.servlet.filters.CachePolicyFilter.CachePolicyMatcher;
+import solutions.trsoftware.commons.server.servlet.filters.CachePolicyFilter.DfaScannerMatcher;
+import solutions.trsoftware.commons.server.servlet.filters.CachePolicyFilter.SimpleStringMatcher;
 import solutions.trsoftware.commons.server.servlet.testutil.DummyFilterChain;
 import solutions.trsoftware.commons.server.servlet.testutil.DummyFilterConfig;
 import solutions.trsoftware.commons.server.servlet.testutil.DummyHttpServletRequest;
@@ -54,8 +57,9 @@ import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import static solutions.trsoftware.commons.server.servlet.filters.CachePolicyFilter.*;
+import static solutions.trsoftware.commons.server.servlet.filters.CachePolicyFilter.CACHE_CONTROL_HEADER_VALUE_10YEARS;
 import static solutions.trsoftware.commons.server.servlet.filters.CachePolicyFilter.CachePolicy.*;
+import static solutions.trsoftware.commons.server.servlet.filters.CachePolicyFilter.TEN_YEARS_FROM_NOW_DATE;
 import static solutions.trsoftware.commons.shared.testutil.AssertUtils.*;
 import static solutions.trsoftware.commons.shared.util.RandomUtils.rnd;
 
@@ -441,20 +445,17 @@ public class CachePolicyFilterTest extends TestCase {
     return ret;
   }
 
-  private static class CachePolicyMatcherTester implements PerformanceComparison.NamedRunnable {
+  private static class CachePolicyMatcherTester extends PerformanceComparison.BenchmarkTask<String> {
     private CachePolicyMatcher algorithm;
-    private List<String> args;
 
     CachePolicyMatcherTester(CachePolicyMatcher algorithm, List<String> args) {
+      super(args);
       this.algorithm = algorithm;
-      this.args = args;
     }
 
     @Override
-    public void run() {
-      for (String arg : args) {
-        algorithm.inferCachePolicy(arg);
-      }
+    protected void doIteration(String arg) {
+      algorithm.inferCachePolicy(arg);
     }
 
     @Override

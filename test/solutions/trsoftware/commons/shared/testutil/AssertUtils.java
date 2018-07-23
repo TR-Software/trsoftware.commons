@@ -354,12 +354,17 @@ public abstract class AssertUtils {
       fail(comparisonFailedMessage("Arrays not equal.", Arrays.toString(a), Arrays.toString(a2)));
   }
 
-  public static void assertEqualsAndHashCode(Object a, Object b) throws Exception {
+  /**
+   * Asserts that the given args are equal and have the same hash code.
+   * @see Object#equals(Object)
+   * @see Object#hashCode()
+   */
+  public static void assertEqualsAndHashCode(Object a, Object b) {
     assertEquals(a, b);
     assertTrue(a.hashCode() == b.hashCode());
   }
 
-  public static void assertNotEqualsAndHashCode(Object a, Object b) throws Exception {
+  public static void assertNotEqualsAndHashCode(Object a, Object b) {
     assertNotEqual(a, b);
     assertFalse(a.hashCode() == b.hashCode());
   }
@@ -374,10 +379,17 @@ public abstract class AssertUtils {
     assertEquals(0, collection.size());
   }
 
+  /**
+   * Asserts that {@code a == b}, as defined by their {@link Comparable#compareTo(Object)} method.
+   */
   public static <C extends Comparable<C>> void assertComparablesEqual(C a, C b) {
     assertTrue(a.compareTo(b) == 0);
+    assertTrue(b.compareTo(a) == 0);
   }
 
+  /**
+   * Asserts that {@code a < b}, as defined by their {@link Comparable#compareTo(Object)} method.
+   */
   public static <C extends Comparable<C>> void assertLessThan(C a, C b) {
     assertTrue(a.compareTo(b) < 0);
     assertTrue(b.compareTo(a) > 0);

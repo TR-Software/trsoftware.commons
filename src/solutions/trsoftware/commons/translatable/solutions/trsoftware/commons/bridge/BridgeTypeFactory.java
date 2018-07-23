@@ -5,10 +5,8 @@ import solutions.trsoftware.commons.client.bridge.json.impl.GwtJSONParser;
 import solutions.trsoftware.commons.client.bridge.text.NumberFormatter;
 import solutions.trsoftware.commons.client.bridge.text.impl.NumberFormatterGwtImpl;
 import solutions.trsoftware.commons.client.bridge.util.Duration;
-import solutions.trsoftware.commons.client.bridge.util.RandomGen;
-import solutions.trsoftware.commons.client.bridge.util.UrlEncoder;
-import solutions.trsoftware.commons.client.bridge.util.UrlEncoderGwtImpl;
-import solutions.trsoftware.commons.client.bridge.util.impl.RandomGenGwtImpl;
+import solutions.trsoftware.commons.client.bridge.util.URIComponentEncoder;
+import solutions.trsoftware.commons.client.bridge.util.URIComponentEncoderGwtImpl;
 import solutions.trsoftware.commons.shared.util.text.SharedNumberFormat;
 
 import java.util.Random;
@@ -73,8 +71,8 @@ public class BridgeTypeFactory {
     return new solutions.trsoftware.commons.client.util.Duration(action);
   }
 
-  public static UrlEncoder getUrlEncoder() {
-    return UrlEncoderGwtImpl.getInstance();
+  public static URIComponentEncoder getURIComponentEncoder() {
+    return URIComponentEncoderGwtImpl.getInstance();
   }
 
   public static Random newSecureRandom() {

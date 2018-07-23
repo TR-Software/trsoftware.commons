@@ -111,7 +111,12 @@ public enum Language {
   POLISH("pl"),
   PORTUGUESE("pt"),
   ROMANIAN("ro"),
-  RUSSIAN("ru"),
+  RUSSIAN("ru") {
+    @Override
+    public String getAlphabet() {
+      return "абвгдеёжзийклмнопрстуфхцчшщъыьэюя";
+    }
+  },
   SERBIAN("sr") {
     @Override
     public String getEnglishPrettyName() {
@@ -434,5 +439,16 @@ public enum Language {
    */
   public String getMainCountry() {
     return languageToCountryMap.get(this);
+  }
+
+  /**
+   * @return the lowercase chars of the official alphabet for this language
+   * @throws UnsupportedOperationException if this language doesn't override this method, which could indicate that the
+   * alphabet hasn't been provided for this language yet, or not representable as a string of normal Java {@code char}s
+   * (i.e. it contains <a href="http://stn.audible.com/abcs-of-unicode/#java-and-unicode">supplementary characters</a>:
+   * Unicode code points above <i>U+FFFF</i>)
+   */
+  public String getAlphabet() {
+    throw new UnsupportedOperationException("No alphabet configured for " + name());
   }
 }

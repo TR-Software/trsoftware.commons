@@ -84,7 +84,7 @@ public class StringUtils {
   }
 
   /**
-   * Returns true if the given string is not null, empty, or consists entirely of
+   * @return {@code true} iff the given string is neither {@code null}, empty, nor consists entirely of
    * whitespace.
    */
   public static boolean notBlank(String str) {

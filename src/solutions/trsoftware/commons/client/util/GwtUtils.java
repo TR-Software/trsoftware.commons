@@ -17,6 +17,7 @@
 
 package solutions.trsoftware.commons.client.util;
 
+import com.google.gwt.core.shared.GWT;
 import com.google.gwt.user.client.Command;
 import com.google.gwt.user.client.DOM;
 import com.google.gwt.user.client.Element;
@@ -130,4 +131,12 @@ public class GwtUtils {
     return null;
   }
 
+  /**
+   * @throws UnsupportedOperationException if {@link GWT#isClient()} returns {@code false}.
+   */
+  public static void assertIsClient() {
+    if (!GWT.isClient()) {
+      throw new UnsupportedOperationException("GWT-only");
+    }
+  }
 }

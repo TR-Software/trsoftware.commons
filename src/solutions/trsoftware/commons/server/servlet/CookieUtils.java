@@ -60,15 +60,25 @@ public abstract class CookieUtils {
   }
 
   /**
-   * @return the login token value if the cookie is present or null if the
-   *         cookie isn't there
+   * @return the value of the HTTP cookie with the given name if the request contains such a cookie; otherwise {@code null}
+   * @see Cookie#getValue()
    */
-  public static String getCookie(HttpServletRequest request, String cookieName) {
+  public static String getCookieValue(HttpServletRequest request, String cookieName) {
+    Cookie cookie = getCookie(request, cookieName);
+    if (cookie != null)
+      return cookie.getValue();
+    return null;
+  }
+
+  /**
+   * @return the HTTP cookie with the given name if the request contains such a cookie; otherwise {@code null}
+   */
+  public static Cookie getCookie(HttpServletRequest request, String cookieName) {
     Cookie[] cookies = request.getCookies();
     if (cookies != null) {
       for (Cookie cookie : cookies) {
         if (cookieName.equals(cookie.getName())) {
-          return cookie.getValue();
+          return cookie;
         }
       }
     }

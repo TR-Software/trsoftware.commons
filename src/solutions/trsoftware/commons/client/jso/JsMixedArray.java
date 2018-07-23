@@ -21,8 +21,8 @@ import com.google.gwt.core.client.JsArrayMixed;
 
 /**
  * Extends {@link JsArrayMixed} to provide ability to construct an array of values via method chaining.
- *
- * Example:
+ * <p>
+ * <b>Example</b>:
  * <pre>
  *   {@link JsMixedArray#create() JsMixedArray.create()}.add("Event object: ").add(event)
  * </pre>

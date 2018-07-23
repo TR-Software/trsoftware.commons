@@ -20,17 +20,22 @@ package solutions.trsoftware.commons.client.bridge.util;
 import solutions.trsoftware.commons.bridge.BridgeTypeFactory;
 
 /**
- * Jun 30, 2012
+ * Provides string escaping logic compatible with the JavaScript
+ * {@code encodeURIComponent} and {@code decodeURIComponent} functions.
+ * <p>
+ * NOTE: This class should always be used instead of {@link java.net.URLEncoder} for encoding cookie values,
+ * to ensure they can be read client-side with {@link com.google.gwt.user.client.Cookies}.
  *
  * @author Alex
  */
-public abstract class UrlEncoder {
+public abstract class URIComponentEncoder {
 
   /**
-   * Encodes a value for use in a URI component.  Same as Javascript's {@code encodeURIComponent} function and Java's
-   * {@link java.net.URLEncoder#encode(String, String)}. NOTE: it is not guaranteed that the aforementioned functions,
-   * used to implement this class on the client and server respectively, will produce the same results for the same
-   * inputs. The encoding used on the server will be UTF-8.
+   * Encodes a value for use in a URI component. Produces the same output as the JavaScript {@code encodeURIComponent}
+   * function.
+   *
+   * @see BridgeTypeFactory#getURIComponentEncoder()
+   * @see solutions.trsoftware.tools.experiments.encoding.URLEncodingTester
    */
   public abstract String encode(String value);
 
@@ -41,9 +46,9 @@ public abstract class UrlEncoder {
   public abstract String decode(String value);
 
   /**
-   * Returns an instance of this class appropriate for the current execution environment.
+   * @return an instance of this class appropriate for the current execution environment.
    */
-  public static UrlEncoder get() {
-    return BridgeTypeFactory.getUrlEncoder();
+  public static URIComponentEncoder getInstance() {
+    return BridgeTypeFactory.getURIComponentEncoder();
   }
 }

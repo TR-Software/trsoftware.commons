@@ -29,6 +29,14 @@ public class JsObject extends JavaScriptObject {
   // Overlay types always have protected, zero-arg constructors, because the object must have been instantiated in javascript
   protected JsObject() { }
 
+  /**
+   * Factory method.
+   * @return a new (empty) object
+   */
+  public static JsObject create() {
+    return JavaScriptObject.createObject().cast();
+  }
+
 
   /**
    * @return A string property value of this native object or {@code null} if the property is missing or its value is

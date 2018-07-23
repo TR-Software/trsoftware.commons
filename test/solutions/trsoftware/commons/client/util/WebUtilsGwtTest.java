@@ -18,7 +18,7 @@
 package solutions.trsoftware.commons.client.util;
 
 import solutions.trsoftware.commons.client.CommonsGwtTestCase;
-import solutions.trsoftware.commons.client.bridge.util.UrlEncoder;
+import solutions.trsoftware.commons.client.bridge.util.URIComponentEncoder;
 import solutions.trsoftware.commons.shared.testutil.AssertUtils;
 
 import static solutions.trsoftware.commons.client.util.WebUtils.*;
@@ -50,7 +50,7 @@ public class WebUtilsGwtTest extends CommonsGwtTestCase {
     // the GWT version will encode space as %20, while the Java version will encode it as "+"
     // both forms are valid (see http://en.wikipedia.org/wiki/Percent-encoding)
     String expectedResult;
-    if ("+".equals(UrlEncoder.get().encode(" ")))
+    if ("+".equals(URIComponentEncoder.getInstance().encode(" ")))
       expectedResult = "size=3%2F4&phone%23%3D=617+123+4567";
     else
       expectedResult = "size=3%2F4&phone%23%3D=617%20123%204567";

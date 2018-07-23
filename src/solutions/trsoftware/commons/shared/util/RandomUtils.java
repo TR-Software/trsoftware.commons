@@ -51,6 +51,18 @@ public class RandomUtils {
 
   /**
    * Creates a string of the given length, with chars chosen at random from the given alphabet
+   * <p>
+   *   <strong>WARNING:</strong> Because this method relies on {@link String#charAt(int)} to generate chars from the
+   *   given alphabet, it will only work if the given alphabet string contains only ASCII chars or unicode
+   *   code points that can be represented a standard 16-bit Java {@code char}.  Unicode code points requiring more
+   *   than 16 bits are represented in a Java {@link String} as a <a href="http://stn.audible.com/abcs-of-unicode/#java-and-unicode">
+   *   surrogate pair</a> (i.e. 2 {@code char}s), and therefore {@link String#charAt(int)} could return invalid chars
+   * </p>
+   * <p style="color: #6495ed; font-weight: bold;">
+   *   TODO: rewrite this method using {@link java.text.BreakIterator#getCharacterInstance()} instead of
+   *   {@link String#charAt(int)} as suggested in <a href="http://stn.audible.com/abcs-of-unicode/#java-and-unicode">Java and Unicode (article)</a>.
+   * </p>
+   *
    * @param length the result will contain this number of chars
    * @param alphabet the chars to choose from; some useful presets are defined in {@link Alphabet} and {@link StringUtils},
    * and custom alphabets can be easily constructed using {@link CharRange}
@@ -60,6 +72,7 @@ public class RandomUtils {
    * @see StringUtils#ASCII_PRINTABLE_CHARS
    * @see Alphabet
    * @see CharRange
+   * @see <a href="http://stn.audible.com/abcs-of-unicode/#java-and-unicode">Java and Unicode (article)</a>
    */
   public static String randString(int length, String alphabet) {
     if (length < 0)

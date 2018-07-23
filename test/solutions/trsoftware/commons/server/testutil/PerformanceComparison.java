@@ -17,6 +17,7 @@
 
 package solutions.trsoftware.commons.server.testutil;
 
+import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 import static solutions.trsoftware.commons.shared.util.StringUtils.firstNotBlank;
@@ -43,7 +44,9 @@ public abstract class PerformanceComparison {
 
     // TODO: interleave the tasks (so that neither gets the advantage or disadvantage of going first)
     long task1Ns = measureNanoTime(task1, iterations);
+    System.out.printf("%s took %,d ns%n", task1Name, task1Ns);
     long task2Ns = measureNanoTime(task2, iterations);
+    System.out.printf("%s took %,d ns%n", task2Name, task2Ns);
 
     // will have to subtract the overhead of running an empty task for that number of iterations
     long emptyTaskNs = measureNanoTime(new Runnable() {
@@ -62,7 +65,7 @@ public abstract class PerformanceComparison {
       label = "slower";
       multiplier = (double)task1Ns / task2Ns;
     }
-    System.out.printf("%s is %s times %s than %s (%,d ns versus %,d ns)%n", task1Name, multiplier, label, task2Name, task1Ns, task2Ns);
+    System.out.printf("%s is %.3f times %s than %s (%,d ns versus %,d ns)%n", task1Name, multiplier, label, task2Name, task1Ns, task2Ns);
     if (Math.min(task1Ns, task2Ns) < TimeUnit.MILLISECONDS.toNanos(100)) {
       System.out.println("WARNING: One of the tasks ran for less than 100 milliseconds - increase the number of iterations.");
     }
@@ -162,4 +165,40 @@ public abstract class PerformanceComparison {
     return end - start;
   }
 
+  /**
+   * Can be used as an arg for {@link #compare(NamedRunnable, NamedRunnable, int)}: encapsulates a set of test inputs,
+   * to be processed in each iteration.
+   *
+   * @author Alex
+   * @since 7/20/2018
+   */
+  public abstract static class BenchmarkTask<E> implements NamedRunnable {
+
+    protected List<E> inputs;
+
+    public BenchmarkTask(List<E> inputs) {
+      this.inputs = inputs;
+    }
+
+    @Override
+    public void run() {
+      try {
+        for (E arg : inputs) {
+          doIteration(arg);
+        }
+      }
+      catch (Exception e) {
+        throw new RuntimeException(e);
+      }
+    }
+
+    /**
+     * Implements the actual benchmark logic for an iteration.  Subclasses should override this method if they
+     * don't override {@link #run()}.
+     *
+     * @param arg the next item from {@link #inputs}
+     */
+    protected void doIteration(E arg) throws Exception {
+    }
+  }
 }

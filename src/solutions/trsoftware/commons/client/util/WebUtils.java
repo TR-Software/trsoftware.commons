@@ -19,7 +19,7 @@ package solutions.trsoftware.commons.client.util;
 
 import com.google.gwt.http.client.UrlBuilder;
 import com.google.gwt.user.client.Window;
-import solutions.trsoftware.commons.client.bridge.util.UrlEncoder;
+import solutions.trsoftware.commons.client.bridge.util.URIComponentEncoder;
 import solutions.trsoftware.commons.shared.util.ArrayUtils;
 import solutions.trsoftware.commons.shared.util.MapUtils;
 
@@ -60,7 +60,7 @@ public abstract class WebUtils {
   public static String urlQueryStringEncode(Map<String, String> paramMap) {
     // 1) create an encoded version of the parameters
     LinkedHashMap<String, String> encodedParams = new LinkedHashMap<String, String>();  // using LHM to preserve the ordering of the parameters
-    UrlEncoder urlEncoder = UrlEncoder.get();
+    URIComponentEncoder urlEncoder = URIComponentEncoder.getInstance();
     for (Map.Entry<String, String> entry : paramMap.entrySet()) {
       encodedParams.put(urlEncoder.encode(entry.getKey()), urlEncoder.encode(entry.getValue()));
     }

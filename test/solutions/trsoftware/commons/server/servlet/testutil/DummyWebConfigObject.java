@@ -28,7 +28,7 @@ import java.util.Map;
  * @author Alex
  * @since 3/6/2018
  */
-public abstract class DummyWebConfigObject implements HasInitParameters {
+public abstract class DummyWebConfigObject<T> implements HasInitParameters<T> {
 
   protected Map<String, String> initParameterMap;
   protected ServletContext servletContext;
@@ -55,6 +55,12 @@ public abstract class DummyWebConfigObject implements HasInitParameters {
     return Collections.enumeration(initParameterMap.keySet());
   }
 
+  @Override
+  public T getSource() {
+    return (T)this;
+  }
+
+  @Override
   public ServletContext getServletContext() {
     if (this instanceof ServletContext)
       return (ServletContext)this;

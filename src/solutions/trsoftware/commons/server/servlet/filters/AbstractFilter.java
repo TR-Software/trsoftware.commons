@@ -34,8 +34,6 @@ import javax.servlet.ServletException;
  */
 public abstract class AbstractFilter implements Filter {
 
-  protected static WebConfigParser configParser = new WebConfigParser();
-
   protected FilterConfig filterConfig;
 
   public void init(FilterConfig filterConfig) throws ServletException {
@@ -54,7 +52,7 @@ public abstract class AbstractFilter implements Filter {
    */
   protected <P extends InitParameters> P parse(P parameters) throws ServletException {
     try {
-      P parsedParams = configParser.parse(filterConfig, parameters);
+      P parsedParams = WebConfigParser.parse(filterConfig, parameters);
       filterConfig.getServletContext().log(
           String.format("Filter config (filter-name: \"%s\", filter-class: %s) parsed from init-param values: %s",
               filterConfig.getFilterName(), getClass().getSimpleName(), parsedParams));

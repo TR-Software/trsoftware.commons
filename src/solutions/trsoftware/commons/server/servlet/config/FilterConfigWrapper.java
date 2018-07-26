@@ -18,6 +18,7 @@
 package solutions.trsoftware.commons.server.servlet.config;
 
 import javax.servlet.FilterConfig;
+import javax.servlet.ServletContext;
 import java.util.Enumeration;
 
 /**
@@ -27,16 +28,10 @@ import java.util.Enumeration;
  * @author Alex
  * @since 3/5/2018
  */
-public class FilterConfigWrapper implements HasInitParameters {
-
-  private FilterConfig filterConfig;
+public class FilterConfigWrapper extends WebConfigAdapter<FilterConfig> {
 
   public FilterConfigWrapper(FilterConfig filterConfig) {
-    this.filterConfig = filterConfig;
-  }
-
-  public FilterConfig getFilterConfig() {
-    return filterConfig;
+    super(filterConfig);
   }
 
   /**
@@ -53,7 +48,7 @@ public class FilterConfigWrapper implements HasInitParameters {
    */
   @Override
   public String getInitParameter(String name) {
-    return filterConfig.getInitParameter(name);
+    return getSource().getInitParameter(name);
   }
 
   /**
@@ -66,6 +61,12 @@ public class FilterConfigWrapper implements HasInitParameters {
    */
   @Override
   public Enumeration<String> getInitParameterNames() {
-    return filterConfig.getInitParameterNames();
+    return getSource().getInitParameterNames();
   }
+
+  @Override
+  public ServletContext getServletContext() {
+    return getSource().getServletContext();
+  }
+
 }

@@ -28,7 +28,6 @@ import org.apache.catalina.Context;
 import org.apache.catalina.core.ApplicationFilterFactory;
 import org.apache.tomcat.util.http.FastHttpDateFormat;
 import solutions.trsoftware.commons.server.io.ResourceLocator;
-import solutions.trsoftware.commons.server.net.NetUtils;
 import solutions.trsoftware.commons.server.servlet.config.InitParameterParseException;
 import solutions.trsoftware.commons.server.servlet.filters.CachePolicyFilter.CachePolicy;
 import solutions.trsoftware.commons.server.servlet.filters.CachePolicyFilter.CachePolicyMatcher;
@@ -140,7 +139,7 @@ public class CachePolicyFilterTest extends TestCase {
 
   @Slow
   public void testIntegration() throws Exception {
-    embeddedTomcatServer = new EmbeddedTomcatServer(NetUtils.findAvailableLocalPort(9001, 9200));
+    embeddedTomcatServer = new EmbeddedTomcatServer();
     ResourceLocator webAppDir = new ResourceLocator("/CachePolicyFilterTest_webapp", getClass());
     String contextPath = "/CachePolicyFilterTest";
     Context context = embeddedTomcatServer.addWebapp(contextPath, webAppDir.toFilepath());

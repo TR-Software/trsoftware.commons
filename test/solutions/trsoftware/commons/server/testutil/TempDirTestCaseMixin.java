@@ -30,7 +30,7 @@ import java.nio.file.Path;
  * @since Mar 4, 2010
  * @author Alex
  */
-public class TempDirDelegate extends SetUpTearDownDelegate {
+public class TempDirTestCaseMixin extends TestCaseMixin {
   /**
    * For convenience, readers and writers that manipulate files in this
    * directory can be registered here, to ensure they are closed at tear down

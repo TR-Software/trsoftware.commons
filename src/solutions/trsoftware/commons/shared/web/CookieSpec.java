@@ -17,12 +17,28 @@
 
 package solutions.trsoftware.commons.shared.web;
 
+import solutions.trsoftware.commons.client.bridge.util.URIComponentEncoder;
+import solutions.trsoftware.commons.shared.util.TimeUnit;
 import solutions.trsoftware.commons.shared.util.TimeValue;
+
+import javax.servlet.http.Cookie;
 
 /**
  * Encapsulates all the info needed to set a particular cookie.
+ * <p>
+ * This is an immutable version of {@link javax.servlet.http.Cookie}, intended to be used as a constant.
+ * For example, a servlet that needs to set a particular cookie could use a {@link CookieSpec} constant, call
+ * {@link #toCookie()} on it, followed by setting the value:
+ * <pre>{@code
+ *   private void setCookie(CookieSpec spec, String cookieValue, HttpServletResponse response) {
+ *     Cookie cookie = cookieSpec.toCookie();
+ *     cookie.setValue(cookieValue);
+ *     response.addCookie(cookie);
+ *   }
  *
- * @see javax.servlet.http.Cookie
+ * }</pre>
+ *
+ * @see Cookie
  * @see <a href="https://www.ietf.org/rfc/rfc2109.txt">RFC 2109</a>
  * @see <a href="https://www.quirksmode.org/js/cookies.html">https://www.quirksmode.org/js/cookies.html</a>
  * @see <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Cookies">HTTP cookies (MDN page)</a>
@@ -38,26 +54,41 @@ public class CookieSpec {
   private String name;
 
   /**
+   * Value (data) of the cookie. If you use a binary value, you may want to use BASE64 encoding.
+   * <p>
+   * With Version 0 cookies, values should not contain white space, brackets,
+   * parentheses, equals signs, commas, double quotes, slashes, question
+   * marks, at signs, colons, and semicolons. Empty values may not behave the
+   * same way on all browsers.
+   * <p>
+   * If the cookie might be read client-side with {@link com.google.gwt.user.client.Cookies}, the value
+   * should be escaped with {@link URIComponentEncoder#encode(String)}
+   *
+   * @see Cookie#setValue(String)
+   */
+  private String value;
+
+  /**
    * The version of the cookie protocol this cookie complies with:
    * <ol start=0>
    *   <li>version 0 complies with the original Netscape cookie specification.</li>
    *   <li>version 1 complies with <a href="https://www.ietf.org/rfc/rfc2109.txt">RFC 2109</a></li>
    * </ol>
-   * @see javax.servlet.http.Cookie#setVersion(int)
+   * @see Cookie#setVersion(int)
    */
   private int version;
 
   /**
    * How long the cookie should persist on the client.
    * If {@code null}, cookie will be removed after browser shutdown.
-   * @see javax.servlet.http.Cookie#getMaxAge()
+   * @see Cookie#getMaxAge()
    */
   private TimeValue maxAge;
 
   /**
    * Specifies the domain within which this cookie should be presented.
    * Defaults to the current request host if {@code null}.
-   * @see javax.servlet.http.Cookie#setDomain(java.lang.String)
+   * @see Cookie#setDomain(java.lang.String)
    */
   private String domain;
 
@@ -91,32 +122,36 @@ public class CookieSpec {
    */
   private boolean secure = false;
 
+  /**
+   * Flag that controls if this cookie will be hidden from scripts on the client side.
+   * <p>
+   * NOTE: this option is not part of RFC 2109, but most browsers do support it
+   */
+  private boolean httpOnly;
 
   /**
    * NOTE: might be easier to use {@link Builder} instead of this constructor.
    *
    * @param name {@link #name}
+   * @param value {@link #value}
    * @param version {@link #version}
    * @param maxAge {@link #maxAge}
    * @param domain {@link #domain}
    * @param path {@link #path}
    * @param secure {@link #secure}
-   *
-   * @see #builder()
+   * @param httpOnly {@link #httpOnly}
    * @see #builder(String)
-   *
+   * @see #builder()
    */
-  public CookieSpec(String name, int version, TimeValue maxAge, String domain, String path, boolean secure) {
+  public CookieSpec(String name, String value, int version, TimeValue maxAge, String domain, String path, boolean secure, boolean httpOnly) {
     this.name = name;
+    this.value = value;
     this.version = version;
     this.maxAge = maxAge;
     this.domain = domain;
     this.path = path;
     this.secure = secure;
-  }
-
-  public static Builder builder() {
-    return new Builder();
+    this.httpOnly = httpOnly;
   }
 
   /**
@@ -126,8 +161,36 @@ public class CookieSpec {
     return new Builder(name);
   }
 
+  /**
+   * @return a builder to create a copy of this {@link CookieSpec}, with some fields possibly modified.
+   */
+  public Builder builder() {
+    return new Builder(this);
+  }
+
+  /**
+   * @return a new instance of {@link Cookie}, initialized from this object.
+   */
+  public Cookie toCookie() {
+    Cookie cookie = new Cookie(name, value);
+    cookie.setVersion(version);
+    if (maxAge != null)
+      cookie.setMaxAge((int)maxAge.to(TimeUnit.SECONDS).getValue());
+    if (domain != null)
+      cookie.setDomain(domain);
+    if (path != null)
+      cookie.setPath(path);
+    cookie.setSecure(secure);
+    cookie.setHttpOnly(httpOnly);
+    return cookie;
+  }
+
   public String getName() {
     return name;
+  }
+
+  public String getValue() {
+    return value;
   }
 
   public int getVersion() {
@@ -150,6 +213,10 @@ public class CookieSpec {
     return secure;
   }
 
+  public boolean isHttpOnly() {
+    return httpOnly;
+  }
+
   /**
    * Builder for a {@link CookieSpec} instance.
    * @see #builder()
@@ -157,11 +224,13 @@ public class CookieSpec {
    */
   public static class Builder {
     private String name;
+    private String value;
     private int version;
     private TimeValue maxAge;
     private String domain;
     private String path;
     private boolean secure;
+    private boolean httpOnly;
 
     public Builder() {
     }
@@ -171,10 +240,32 @@ public class CookieSpec {
     }
 
     /**
+     * Inits builder to match the given spec.
+     */
+    public Builder(CookieSpec spec) {
+      name = spec.name;
+      version = spec.version;
+      maxAge = spec.maxAge;
+      domain = spec.domain;
+      path = spec.path;
+      secure = spec.secure;
+    }
+
+    /**
      * @param name the cookie name
+     * @see CookieSpec#name
      */
     public Builder setName(String name) {
       this.name = name;
+      return this;
+    }
+
+    /**
+     * @param value the cookie value
+     * @see CookieSpec#value
+     */
+    public Builder setValue(String value) {
+      this.value = value;
       return this;
     }
 
@@ -223,8 +314,17 @@ public class CookieSpec {
       return this;
     }
 
+    /**
+     * Optional flag that controls if this cookie will be hidden from scripts on the client side.
+     * @see CookieSpec#httpOnly
+     */
+    public Builder setHttpOnly(boolean httpOnly) {
+      this.httpOnly = httpOnly;
+      return this;
+    }
+
     public CookieSpec create() {
-      return new CookieSpec(name, version, maxAge, domain, path, secure);
+      return new CookieSpec(name, value, version, maxAge, domain, path, secure, httpOnly);
     }
   }
 }

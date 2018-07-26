@@ -28,16 +28,10 @@ import java.util.Enumeration;
  * @author Alex
  * @since 3/5/2018
  */
-public class ServletContextWrapper implements HasInitParameters {
-
-  private ServletContext servletContext;
+public class ServletContextWrapper extends WebConfigAdapter<ServletContext> {
 
   public ServletContextWrapper(ServletContext servletContext) {
-    this.servletContext = servletContext;
-  }
-
-  public ServletContext getServletContext() {
-    return servletContext;
+    super(servletContext);
   }
 
   /**
@@ -58,7 +52,7 @@ public class ServletContextWrapper implements HasInitParameters {
    */
   @Override
   public String getInitParameter(String name) {
-    return servletContext.getInitParameter(name);
+    return getSource().getInitParameter(name);
   }
 
   /**
@@ -72,6 +66,12 @@ public class ServletContextWrapper implements HasInitParameters {
    */
   @Override
   public Enumeration<String> getInitParameterNames() {
-    return servletContext.getInitParameterNames();
+    return getSource().getInitParameterNames();
   }
+
+  @Override
+  public ServletContext getServletContext() {
+    return getSource();
+  }
+
 }

@@ -17,6 +17,11 @@
 
 package solutions.trsoftware.commons.server.servlet;
 
+import solutions.trsoftware.commons.server.servlet.config.InitParameters;
+import solutions.trsoftware.commons.server.servlet.config.WebConfigException;
+import solutions.trsoftware.commons.server.servlet.config.WebConfigParser;
+
+import javax.servlet.ServletConfig;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
@@ -41,20 +46,23 @@ public abstract class BaseHttpServlet extends HttpServlet {
   }
 
   /**
-   * This override simply escalates the method visibility from {@code protected} to {@code public}, to facilitate
-   * unit testing outside of a servlet container.
+   * Sets the fields of the given {@link InitParameters} object from the {@code init-param} values present in the {@link ServletConfig}.
+   * @return the same instance that was passed as the argument, after its fields have been populated.
+   * @see WebConfigParser#parse(ServletConfig, InitParameters)
    */
-  @Override
-  public void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-    super.doGet(req, resp);
+  protected <P extends InitParameters> P parse(P parameters) throws ServletException {
+    ServletConfig servletConfig = getServletConfig();
+    try {
+      P parsedParams = WebConfigParser.parse(servletConfig, parameters);
+      servletConfig.getServletContext().log(
+          String.format("Servlet config (servlet-name: \"%s\", servlet-class: %s) parsed from init-param values: %s",
+              servletConfig.getServletName(), getClass().getSimpleName(), parsedParams));
+      return parsedParams;
+    }
+    catch (WebConfigException e) {
+      throw new ServletException(String.format("Invalid configuration for servlet '%s' (%s): %s",
+          servletConfig.getServletName(), getClass(), e.getMessage()), e);
+    }
   }
-
-  /**
-   * This override simply escalates the method visibility from {@code protected} to {@code public}, to facilitate
-   * unit testing outside of a servlet container.
-   */
-  @Override
-  public void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-    super.doPost(req, resp);
-  }
+  
 }

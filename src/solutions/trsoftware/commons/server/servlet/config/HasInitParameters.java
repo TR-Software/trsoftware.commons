@@ -39,13 +39,17 @@ import java.util.Enumeration;
  *   </ol>
  * </p>
  *
+ * @param <T> the type of the source where the init-params come from: typically either
+ *            {@link FilterConfig}, {@link ServletConfig}, or {@link ServletContext}
+ *
+ *
  * @see FilterConfigWrapper
  * @see ServletConfigWrapper
  * @see ServletContextWrapper
  * @author Alex
  * @since 3/5/2018
  */
-public interface HasInitParameters {
+public interface HasInitParameters<T> {
 
   /**
    * Returns a <code>String</code> containing the value of the named
@@ -59,7 +63,7 @@ public interface HasInitParameters {
    * @return <code>String</code> containing the value of the initialization
    *         parameter
    */
-  public String getInitParameter(String name);
+  String getInitParameter(String name);
 
   /**
    * Returns the names of the filter's initialization parameters as an
@@ -69,5 +73,20 @@ public interface HasInitParameters {
    * @return <code>Enumeration</code> of <code>String</code> objects
    *         containing the names of the filter's initialization parameters
    */
-  public Enumeration<String> getInitParameterNames();
+  Enumeration<String> getInitParameterNames();
+
+  /**
+   * @return the underlying object where the init-params come from: typically either a
+   *         {@link FilterConfig}, {@link ServletConfig}, or {@link ServletContext}
+   */
+  T getSource();
+
+  /**
+   * Returns a reference to the {@link ServletContext} of the underlying object.
+   *
+   * @return a {@link ServletContext} object, used by the caller to interact
+   *         with its servlet container
+   * @see #getSource()
+   */
+  ServletContext getServletContext();
 }

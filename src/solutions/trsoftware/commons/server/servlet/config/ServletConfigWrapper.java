@@ -18,6 +18,7 @@
 package solutions.trsoftware.commons.server.servlet.config;
 
 import javax.servlet.ServletConfig;
+import javax.servlet.ServletContext;
 import java.util.Enumeration;
 
 /**
@@ -27,16 +28,10 @@ import java.util.Enumeration;
  * @author Alex
  * @since 3/5/2018
  */
-public class ServletConfigWrapper implements HasInitParameters {
-
-  private ServletConfig servletConfig;
+public class ServletConfigWrapper extends WebConfigAdapter<ServletConfig> {
 
   public ServletConfigWrapper(ServletConfig servletConfig) {
-    this.servletConfig = servletConfig;
-  }
-
-  public ServletConfig getServletConfig() {
-    return servletConfig;
+    super(servletConfig);
   }
 
   /**
@@ -52,7 +47,7 @@ public class ServletConfigWrapper implements HasInitParameters {
    */
   @Override
   public String getInitParameter(String name) {
-    return servletConfig.getInitParameter(name);
+    return getSource().getInitParameter(name);
   }
 
   /**
@@ -65,6 +60,11 @@ public class ServletConfigWrapper implements HasInitParameters {
    */
   @Override
   public Enumeration<String> getInitParameterNames() {
-    return servletConfig.getInitParameterNames();
+    return getSource().getInitParameterNames();
+  }
+
+  @Override
+  public ServletContext getServletContext() {
+    return getSource().getServletContext();
   }
 }

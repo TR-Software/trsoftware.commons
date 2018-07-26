@@ -17,23 +17,30 @@
 
 package solutions.trsoftware.commons.server.testutil;
 
-import junit.framework.Assert;
+import javax.servlet.http.HttpServlet;
 
 /**
- * Since Java doesn't have multiple inheritance, it's not possible
- * to mix mulple TestCase superclasses each with a different setUp and and tearDown
- * behavior.
+ * Starts an instance of {@link EmbeddedJettyServer} on a given port with a given servlet.
  *
- * This class, in conjunction with SuperTestCase solves that problem.
- *
+ * @since Mar 8, 2010
  * @author Alex
  */
-public abstract class SetUpTearDownDelegate extends Assert {
+public class EmbeddedJettyServerMixin extends TestCaseMixin {
 
-  /** sublcasses should override to provide customized setUp logic */
-  public abstract void setUp() throws Exception;
+  private EmbeddedJettyServer server;
 
-  /** sublcasses should override to provide customized tearDown logic */
-  public abstract void tearDown() throws Exception;
+  public EmbeddedJettyServerMixin(Class<? extends HttpServlet> servletClass, int portNumber, String uri) {
+    server = new EmbeddedJettyServer(portNumber);
+    server.addServlet(servletClass, uri);
+  }
 
+  @Override
+  public void setUp() throws Exception {
+    server.start();
+  }
+
+  @Override
+  public void tearDown() throws Exception {
+    server.stop();
+  }
 }

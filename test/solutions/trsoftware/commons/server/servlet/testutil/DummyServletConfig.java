@@ -25,7 +25,7 @@ import java.util.Map;
  * @author Alex
  * @since 1/2/2018
  */
-public class DummyServletConfig extends DummyWebConfigObject implements ServletConfig {
+public class DummyServletConfig extends DummyWebConfigObject<ServletConfig> implements ServletConfig {
 
   private String servletName;
 

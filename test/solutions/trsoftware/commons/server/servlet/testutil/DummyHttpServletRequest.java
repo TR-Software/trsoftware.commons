@@ -42,6 +42,7 @@ public class DummyHttpServletRequest implements HttpServletRequest {
   private String remoteAddr = "127.0.0.1";
   private Locale locale = Locale.getDefault();
   private String method;
+  private List<Cookie> cookies = new ArrayList<>();
 
   public DummyHttpServletRequest() {
   }
@@ -107,14 +108,18 @@ public class DummyHttpServletRequest implements HttpServletRequest {
     return this;
   }
 
+  public DummyHttpServletRequest addCookie(Cookie cookie) {
+    cookies.add(cookie);
+    return this;
+  }
+
   public String getAuthType() {
     System.err.println("Method DummyHttpServletRequest.getAuthType has not been fully implemented yet.");
     return null;
   }
 
   public Cookie[] getCookies() {
-    System.err.println("Method DummyHttpServletRequest.getCookies has not been fully implemented yet.");
-    return new Cookie[0];
+    return cookies.toArray(new Cookie[0]);
   }
 
   public long getDateHeader(String val) {

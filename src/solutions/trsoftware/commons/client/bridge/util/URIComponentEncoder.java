@@ -25,6 +25,9 @@ import solutions.trsoftware.commons.bridge.BridgeTypeFactory;
  * <p>
  * NOTE: This class should always be used instead of {@link java.net.URLEncoder} for encoding cookie values,
  * to ensure they can be read client-side with {@link com.google.gwt.user.client.Cookies}.
+ * This is particularly important if the value contains a JSON object: since {@link java.net.URLEncoder} encodes
+ * spaces as {@code '+'} (e.g. {@code "{a: 1, b: 2}"} &rarr; {@code "%7Ba%3A+1%2C+b%3A+2%7D"}, and
+ * {@code decodeURIComponent("%7Ba%3A+1%2C+b%3A+2%7D")} &rarr; {@code "{a:+1,+b:+2}"} (invalid JSON).
  *
  * @author Alex
  */

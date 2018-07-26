@@ -15,33 +15,36 @@
  *
  */
 
-package solutions.trsoftware.commons.server.servlet.filters;
+package solutions.trsoftware.commons.server.servlet.listeners;
 
 import solutions.trsoftware.commons.server.servlet.RequestCopy;
 import solutions.trsoftware.commons.server.servlet.ServletUtils;
-import solutions.trsoftware.commons.server.servlet.listeners.CommonsRequestListener;
+import solutions.trsoftware.commons.server.servlet.filters.ServletUtilsFilter;
 
-import javax.servlet.FilterChain;
-import javax.servlet.ServletException;
+import javax.servlet.ServletRequestEvent;
 import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import java.io.IOException;
 
 /**
- * Saves a copy of the current request by calling {@link ServletUtils#setThreadLocalRequestCopy(RequestCopy)}
- * <p>
- * NOTE: this code is duplicated in {@link CommonsRequestListener}: so use one or the other, but not both!
- *
+ * Performs the same function as {@link ServletUtilsFilter}:
+ * <ol>
+ *   <li><i>request initialized</i>: sets {@link ServletUtils#threadLocalRequestCopy}</li>
+ *   <li><i>request destroyed</i>: nulls out {@link ServletUtils#threadLocalRequestCopy}</li>
+ * </ol>
+ * NOTE: this code is duplicated in {@link ServletUtilsFilter}: so use one or the other, but not both!
  * @author Alex
- * @since 11/14/2017
+ * @since 7/25/2018
  */
-public class ServletUtilsFilter extends HttpFilterAdapter {
+public class CommonsRequestListener extends HttpServletRequestListener {
 
   @Override
-  public void doHttpFilter(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws IOException, ServletException {
+  protected void onHttpRequestInitialized(HttpServletRequest request, ServletRequestEvent sre) {
     // CAUTION: don't try to save the original request in a ThreadLocal - it's highly unsafe because Tomcat will reuse the underlying object after the response has been committed
     ServletUtils.setThreadLocalRequestCopy(new RequestCopy(request));
-    filterChain.doFilter(request, response);
-    ServletUtils.setThreadLocalRequestCopy(null);  // clear the thread-local after the request
   }
+
+  @Override
+  protected void onHttpRequestDestroyed(HttpServletRequest request, ServletRequestEvent sre) {
+    ServletUtils.setThreadLocalRequestCopy(null);
+  }
+
 }

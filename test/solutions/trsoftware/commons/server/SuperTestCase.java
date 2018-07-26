@@ -18,12 +18,16 @@
 package solutions.trsoftware.commons.server;
 
 import junit.framework.TestCase;
-import solutions.trsoftware.commons.server.testutil.SetUpTearDownDelegate;
-import solutions.trsoftware.commons.server.testutil.SetUpTearDownDelegateList;
+import solutions.trsoftware.commons.server.io.file.FileUtils;
+import solutions.trsoftware.commons.server.testutil.TestCaseMixin;
+import solutions.trsoftware.commons.server.testutil.TestCaseMixinList;
 import solutions.trsoftware.commons.server.util.CanStopClock;
 
+import java.io.IOException;
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
+import java.nio.file.Files;
+import java.nio.file.Path;
 
 /**
  * A base {@link TestCase} that provides some additional functionality:
@@ -34,7 +38,7 @@ import java.lang.reflect.Modifier;
  *     of the {@link #setUp()} / {@link #tearDown()} methods. This is useful when something similar to multiple
  *     inheritance is desired (e.g. to mix multiple test classes with different {@link #setUp()} / {@link #tearDown()}
  *     behavior.
- *     See {@link #addSetupTearDownDelegate(SetUpTearDownDelegate)}
+ *     See {@link #addTestCaseMixin(TestCaseMixin)}
  *   </li>
  *   <li>
  *     Nulls out all instance fields upon {@link #tearDown()}, and prints a warning for any field that wasn't {@code null}
@@ -47,21 +51,21 @@ import java.lang.reflect.Modifier;
  */
 public abstract class SuperTestCase extends TestCase implements CanStopClock {
 
-  private SetUpTearDownDelegateList delegates;
+  private TestCaseMixinList mixins;
   
   @Override
   protected void setUp() throws Exception {
     super.setUp();
-    if (delegates != null)
-      delegates.setUpAll();
+    if (mixins != null)
+      mixins.setUpAll();
   }
 
   @Override
   protected void tearDown() throws Exception {
     try {
-      if (delegates != null) {
-        delegates.tearDownAll();
-        delegates = null;
+      if (mixins != null) {
+        mixins.tearDownAll();
+        mixins = null;
       }
       super.tearDown();
     }
@@ -73,10 +77,10 @@ public abstract class SuperTestCase extends TestCase implements CanStopClock {
   /**
    * @return The same instance that was passed in, to allow method chaining.
    */
-  public <T extends SetUpTearDownDelegate> T addSetupTearDownDelegate(T delegate) {
-    if (delegates == null)
-      delegates = new SetUpTearDownDelegateList();
-    delegates.add(delegate);
+  protected <T extends TestCaseMixin> T addTestCaseMixin(T delegate) {
+    if (mixins == null)
+      mixins = new TestCaseMixinList();
+    mixins.add(delegate);
     return delegate;
   }
 
@@ -105,6 +109,18 @@ public abstract class SuperTestCase extends TestCase implements CanStopClock {
       }
       cls = cls.getSuperclass();
     }
+  }
+
+  /**
+   * Creates a temp directory using the name of this test.
+   * This directory will be registered with {@link FileUtils#deleteOnExit(Path)}, so there's no need to delete it
+   * explicitly.
+   * @return the created directory
+   */
+  protected Path createTempDir() throws IOException {
+    Path tempDir = Files.createTempDirectory(String.format("%s.%s", getClass().getName(), getName()));
+    FileUtils.deleteOnExit(tempDir);
+    return tempDir;
   }
 
 }

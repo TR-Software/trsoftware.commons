@@ -25,7 +25,7 @@ import java.util.Map;
  * @author Alex
  * @since 1/2/2018
  */
-public class DummyFilterConfig extends DummyWebConfigObject implements FilterConfig {
+public class DummyFilterConfig extends DummyWebConfigObject<FilterConfig> implements FilterConfig {
 
   private String filterName;
 

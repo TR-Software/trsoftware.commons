@@ -38,7 +38,6 @@ import static solutions.trsoftware.commons.shared.testutil.AssertUtils.assertThr
  */
 public class WebConfigParserTest extends TestCase {
 
-  private WebConfigParser parser;
   private Map<String, String> paramMap;
   private List<DummyWebConfigObject> configObjects;
 
@@ -54,7 +53,6 @@ public class WebConfigParserTest extends TestCase {
         new DummyServletConfig(paramMap),
         new DummyServletContext(paramMap)
     );
-    parser = new WebConfigParser();
   }
 
   /**
@@ -73,7 +71,7 @@ public class WebConfigParserTest extends TestCase {
   public void testParserWithBasicFieldsOnly() throws Exception {
     for (DummyWebConfigObject config : configObjects) {
       {
-        BasicInitParams params = parser.parse(config, new BasicInitParams());
+        BasicInitParams params = WebConfigParser.parse(config, new BasicInitParams());
         System.out.println("Parse result: " + params);
         assertEquals(123L, params.foo);
         assertEquals(true, params.bar);
@@ -83,7 +81,7 @@ public class WebConfigParserTest extends TestCase {
       Map<String, String> newParamMap = replaceParams(config);
       {
         newParamMap.remove("foo");
-        BasicInitParams params = parser.parse(config, new BasicInitParams());
+        BasicInitParams params = WebConfigParser.parse(config, new BasicInitParams());
         System.out.println("Parse result: " + params);
         assertEquals(0L, params.foo);
         assertEquals(true, params.bar);
@@ -91,7 +89,7 @@ public class WebConfigParserTest extends TestCase {
       }
       {
         newParamMap.remove("bar");
-        BasicInitParams params = parser.parse(config, new BasicInitParams());
+        BasicInitParams params = WebConfigParser.parse(config, new BasicInitParams());
         System.out.println("Parse result: " + params);
         assertEquals(0L, params.foo);
         assertEquals(false, params.bar);
@@ -99,7 +97,7 @@ public class WebConfigParserTest extends TestCase {
       }
       newParamMap.remove("str");  // this is the only required parameter
       assertThrows(new RequiredInitParameterMissing("str", String.class, config),
-          (Function0_t<Throwable>)() -> parser.parse(config, new BasicInitParams()));
+          (Function0_t<Throwable>)() -> WebConfigParser.parse(config, new BasicInitParams()));
     }
   }
 
@@ -107,11 +105,11 @@ public class WebConfigParserTest extends TestCase {
     for (DummyWebConfigObject config : configObjects) {
       // 1) check that parsing a config with a required parameter missing throws an exception
       assertThrows(new RequiredInitParameterMissing("numRange", NumberRange.class, config),
-          (Function0_t<Throwable>)() -> parser.parse(config, new ComplexInitParams()));
+          (Function0_t<Throwable>)() -> WebConfigParser.parse(config, new ComplexInitParams()));
       // 2) now provide a value for that missing param and check that it parses correctly
       Map<String, String> newParamMap = replaceParams(config);
       newParamMap.put("numRange", "5..10");
-      ComplexInitParams params = parser.parse(config, new ComplexInitParams());
+      ComplexInitParams params = WebConfigParser.parse(config, new ComplexInitParams());
       System.out.println("Parse result: " + params);
       assertEquals(123L, params.foo);
       assertEquals(true, params.bar);
@@ -126,7 +124,7 @@ public class WebConfigParserTest extends TestCase {
       newParamMap.put("numberRange", "5..10");
       InitParameterParserNotAvailable ex = assertThrows(
           InitParameterParserNotAvailable.class,
-          (Function0_t<WebConfigException>)() -> parser.parse(config, new InitParamsWithMissingAnnotation()));
+          (Function0_t<WebConfigException>)() -> WebConfigParser.parse(config, new InitParamsWithMissingAnnotation()));
       assertThat(ex.getMessage()).startsWith(
           InitParamsWithMissingAnnotation.class.getSimpleName() + ".numberRange must contain a @Param annotation specifying a ParameterParser<NumberRange> subclass");
 
@@ -139,7 +137,7 @@ public class WebConfigParserTest extends TestCase {
       newParamMap.put("numRange", "5..10");
       InitParameterParserNotAvailable ex = assertThrows(
           InitParameterParserNotAvailable.class,
-          (Function0_t<WebConfigException>)() -> parser.parse(config, new InitParamsWithIncompleteAnnotation()));
+          (Function0_t<WebConfigException>)() -> WebConfigParser.parse(config, new InitParamsWithIncompleteAnnotation()));
       assertThat(ex.getMessage()).startsWith(
           InitParamsWithIncompleteAnnotation.class.getSimpleName() + ".numberRange must contain a @Param annotation specifying a ParameterParser<NumberRange> subclass");
     }
@@ -152,7 +150,7 @@ public class WebConfigParserTest extends TestCase {
       {
         newParamMap.put("setImpl", HashSet.class.getName());
         // parser should set this field to a new instance of HashSet (based on the given class name)
-        InitParamsWithClassInstance params = parser.parse(config, new InitParamsWithClassInstance());
+        InitParamsWithClassInstance params = WebConfigParser.parse(config, new InitParamsWithClassInstance());
         assertNotNull(params.setImpl);
         assertTrue(params.setImpl instanceof HashSet);
       }
@@ -160,7 +158,7 @@ public class WebConfigParserTest extends TestCase {
       {
         newParamMap.put("setImpl", getClass().getName());  // this is not a subclass of Set
         InitParameterParseException ex = assertThrows(InitParameterParseException.class,
-            (Function0_t<WebConfigException>)() -> parser.parse(config, new InitParamsWithClassInstance()));
+            (Function0_t<WebConfigException>)() -> WebConfigParser.parse(config, new InitParamsWithClassInstance()));
         Throwable cause = ex.getCause();
         // the cause should be an IllegalArgumentException thrown by Field.set
         // recreate the same exception and check that its message equals what we have

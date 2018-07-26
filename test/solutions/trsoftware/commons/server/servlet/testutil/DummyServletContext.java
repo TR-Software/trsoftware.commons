@@ -32,7 +32,7 @@ import java.util.*;
  * @author Alex
  * @since 1/2/2018
  */
-public class DummyServletContext extends DummyWebConfigObject implements ServletContext {
+public class DummyServletContext extends DummyWebConfigObject<ServletContext> implements ServletContext {
 
   /**
    * Records messages received by {@link #log(String)} and {@link #log(String, Throwable)}.

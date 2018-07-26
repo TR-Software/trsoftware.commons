@@ -355,5 +355,6 @@
         </SOURCES>
       </library>
     </orderEntry>
+    <orderEntry type="library" name="slf4j-1.7 - simple" level="application" />
   </component>
 </module>

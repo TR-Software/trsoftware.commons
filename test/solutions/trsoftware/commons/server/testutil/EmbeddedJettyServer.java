@@ -37,7 +37,7 @@ import javax.servlet.http.HttpServlet;
  *
  * @author Alex
  */
-public class EmbeddedServletContainer {
+public class EmbeddedJettyServer {
   /*
    NOTE: Caucho Resin was used in the past but it was slower, more cumbersome to set up, and produced
    strange mbean context errors.
@@ -50,7 +50,7 @@ public class EmbeddedServletContainer {
   private final int portNumber;
   //  private final ServletContextHandler rootContext;
 
-  public EmbeddedServletContainer(int portNumber) {
+  public EmbeddedJettyServer(int portNumber) {
     this.portNumber = portNumber;
     server = new Server(portNumber);
 //    rootContext = new ServletContextHandler();
@@ -120,7 +120,7 @@ public class EmbeddedServletContainer {
    * @param uri  The URI path to this servlet (e.g. "/foo/bar"
    */
   public static void with(Class<? extends HttpServlet> servletClass, int portNumber, String uri, RunnableWithWebServer code) throws Exception {
-    EmbeddedServletContainer instance = new EmbeddedServletContainer(portNumber);
+    EmbeddedJettyServer instance = new EmbeddedJettyServer(portNumber);
     instance.addServlet(servletClass, uri);
     try {
       instance.start();

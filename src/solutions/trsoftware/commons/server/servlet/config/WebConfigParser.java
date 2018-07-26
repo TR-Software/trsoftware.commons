@@ -52,6 +52,13 @@ import static solutions.trsoftware.commons.server.servlet.config.InitParameters.
 public class WebConfigParser {
 
   /**
+   * This class contains only static methods, hence it's not to be instantiated
+   */
+  private WebConfigParser() {
+
+  }
+
+  /**
    * Populates the fields of the given {@link InitParameters} instance from the {@code init-param} values
    * in a webapp config object such as {@link FilterConfig}, {@link ServletContext}, or {@link ServletConfig}.
    * @param config adapter for the webapp config object (e.g. {@link FilterConfigWrapper}, {@link ServletConfigWrapper},
@@ -63,7 +70,7 @@ public class WebConfigParser {
    * @throws WebConfigException if any {@code init-param} value could not be bound to a field
    * in the given {@link InitParameters} instance, or if a required {@code init-param} is missing
    */
-  public <P extends InitParameters> P parse(HasInitParameters config, P parseResult) throws WebConfigException {
+  public static <P extends InitParameters> P parse(HasInitParameters config, P parseResult) throws WebConfigException {
     try {
       return bindParamsToFields(config, parseResult);
     }
@@ -83,7 +90,7 @@ public class WebConfigParser {
    * @throws WebConfigException if any {@code init-param} value could not be bound to a field
    * in the given {@link InitParameters} instance, or if a required {@code init-param} is missing
    */
-  public <P extends InitParameters> P parse(FilterConfig config, P parseResult) throws WebConfigException {
+  public static <P extends InitParameters> P parse(FilterConfig config, P parseResult) throws WebConfigException {
     return parse(new FilterConfigWrapper(config), parseResult);
   }
   
@@ -98,7 +105,7 @@ public class WebConfigParser {
    * @throws WebConfigException if any {@code init-param} value could not be bound to a field
    * in the given {@link InitParameters} instance, or if a required {@code init-param} is missing
    */
-  public <P extends InitParameters> P parse(ServletConfig config, P parseResult) throws WebConfigException {
+  public static <P extends InitParameters> P parse(ServletConfig config, P parseResult) throws WebConfigException {
     return parse(new ServletConfigWrapper(config), parseResult);
   }
   
@@ -113,11 +120,11 @@ public class WebConfigParser {
    * @throws WebConfigException if any {@code context-param} value could not be bound to a field
    * in the given {@link InitParameters} instance, or if a required {@code context-param} is missing
    */
-  public <P extends InitParameters> P parse(ServletContext config, P parseResult) throws WebConfigException {
+  public static <P extends InitParameters> P parse(ServletContext config, P parseResult) throws WebConfigException {
     return parse(new ServletContextWrapper(config), parseResult);
   }
 
-  private <P extends InitParameters> P bindParamsToFields(HasInitParameters filterConfig, P parseResult) throws IllegalAccessException, WebConfigException {
+  private static <P extends InitParameters> P bindParamsToFields(HasInitParameters filterConfig, P parseResult) throws IllegalAccessException, WebConfigException {
     Field[] declaredFields = parseResult.getClass().getDeclaredFields();
     for (Field field : declaredFields) {
       String name = field.getName();

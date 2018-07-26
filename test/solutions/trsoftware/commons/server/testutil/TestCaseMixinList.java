@@ -17,30 +17,23 @@
 
 package solutions.trsoftware.commons.server.testutil;
 
-import javax.servlet.http.HttpServlet;
+import java.util.ArrayList;
 
 /**
- * Starts an instance of {@link EmbeddedServletContainer} on a given port with a given servlet.
- *
- * @since Mar 8, 2010
- * @author Alex
+ * @author Alex, 3/28/2016
  */
-public class EmbeddedServletContainerTestDelegate extends SetUpTearDownDelegate {
+public class TestCaseMixinList extends ArrayList<TestCaseMixin> {
 
-  private EmbeddedServletContainer server;
-
-  public EmbeddedServletContainerTestDelegate(Class<? extends HttpServlet> servletClass, int portNumber, String uri) {
-    server = new EmbeddedServletContainer(portNumber);
-    server.addServlet(servletClass, uri);
+  public void setUpAll() throws Exception {
+    for (TestCaseMixin delegate : this) {
+      delegate.setUp();
+    }
   }
 
-  @Override
-  public void setUp() throws Exception {
-    server.start();
+  public void tearDownAll() throws Exception {
+    for (TestCaseMixin delegate : this) {
+      delegate.tearDown();
+    }
   }
 
-  @Override
-  public void tearDown() throws Exception {
-    server.stop();
-  }
 }

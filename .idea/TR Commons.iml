@@ -355,6 +355,18 @@
         </SOURCES>
       </library>
     </orderEntry>
-    <orderEntry type="library" name="slf4j-1.7 - simple" level="application" />
+    <orderEntry type="module-library">
+      <library name="slf4j-1.7-simple">
+        <CLASSES>
+          <root url="jar://$PROGRAMMING_LIBS_DIR$/slf4j-1.7.25/slf4j-api-1.7.25.jar!/" />
+          <root url="jar://$PROGRAMMING_LIBS_DIR$/slf4j-1.7.25/slf4j-simple-1.7.25.jar!/" />
+        </CLASSES>
+        <JAVADOC />
+        <SOURCES>
+          <root url="jar://$PROGRAMMING_LIBS_DIR$/slf4j-1.7.25/slf4j-api-1.7.25-sources.jar!/" />
+          <root url="jar://$PROGRAMMING_LIBS_DIR$/slf4j-1.7.25/slf4j-simple-1.7.25-sources.jar!/" />
+        </SOURCES>
+      </library>
+    </orderEntry>
   </component>
 </module>

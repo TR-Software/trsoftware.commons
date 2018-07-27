@@ -65,6 +65,12 @@ public class RadioButtonGroup<V> implements HasValue<V>, ClickHandler, KeyPressH
     this(parent, valueSet, StringRenderer.getInstance());
   }
 
+  /**
+   * @param parent see {@link #parent}
+   * @param valueSet see {@link #valueSet}
+   * @param valueRenderer will be used to render each button's {@code <label>} (NOTE: the rendered string will be
+   *     interpreted as HTML)
+   */
   public RadioButtonGroup(Widget parent, Set<V> valueSet, Renderer<V> valueRenderer) {
     this.parent = parent;
     this.valueSet = valueSet;
@@ -75,7 +81,7 @@ public class RadioButtonGroup<V> implements HasValue<V>, ClickHandler, KeyPressH
   private void createRadioButtons() {
     String radioButtonGroupId = HTMLPanel.createUniqueId();
     for (V val : valueSet) {
-      RadioButton rb = new RadioButton(radioButtonGroupId, " " + valueRenderer.render(val));
+      RadioButton rb = new RadioButton(radioButtonGroupId, " " + valueRenderer.render(val), true);
       /*
         NOTE: technically, RadioButton provides an addValueChangeHandler(ValueChangeHandler<Boolean>) method,
         but its implementation is buggy - for instance the value change is only fired in response to clicks

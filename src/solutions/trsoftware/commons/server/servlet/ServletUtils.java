@@ -35,7 +35,14 @@ import java.util.*;
 public abstract class ServletUtils {
 
   private static final ThreadLocal<RequestCopy> threadLocalRequestCopy = new ThreadLocal<>();
+
   public static final String USER_AGENT_HEADER = "User-Agent";
+
+  /**
+   * {@link #getRequestURL(HttpServletRequest)} will save the parsed {@link URL} in the request under this attribute name.
+   */
+  public static final String PARSED_URL_ATTR = ServletUtils.class.getName() + ".requestURL";
+
 
   public static void setThreadLocalRequestCopy(RequestCopy request) {
     if (request == null)
@@ -199,16 +206,67 @@ public abstract class ServletUtils {
   }
 
   /**
+   * Parses the URL string given by {@link HttpServletRequest#getRequestURL()} into a {@link URL} object,
+   * and caches the result as a request attribute for future reference.  If a cached instance is already available,
+   * will return that instead of parsing the URL again.
+   * <p>
+   * NOTE: this is the same as calling {@link #getRequestURL(HttpServletRequest, boolean)} with {@code cache = true}.
+   *
    * @return an instance of {@link URL}, derived from invoking {@link HttpServletRequest#getRequestURL()} on the given
-   * {@code request}
+   *     {@code request}
+   * @see #PARSED_URL_ATTR
    */
   public static URL getRequestURL(HttpServletRequest request) {
-    // TODO: as a perf optimization, could save the parsed URL object in a request attribute for future reference
+    return getRequestURL(request, true);
+  }
+
+  /**
+   * Parses the URL string given by {@link HttpServletRequest#getRequestURL()} into a {@link URL} object,
+   * and optionally saves the result as a request attribute for future reference (as a performance optimization,
+   * to avoid the overhead of parsing it again later in the request lifecycle).
+   * <p>
+   * Some simple benchmarking shows that the cached version is about 10x faster (see {@code
+   * ServletUtilsTest.testGetRequestURLBenchmark()})
+   *
+   * @param cache if {@code true}, will save the result into a request attribute
+   *     (as a performance optimization, to avoid the overhead of parsing it multiple times);
+   *     otherwise will neither cache the result in a request attribute, nor attempt to use a cached result even if
+   *     it might be available (this might be slightly faster and save a bit of memory if a parsed {@link URL}
+   *     is needed only once throughout the request lifecycle)
+   * @return an instance of {@link URL}, derived from invoking {@link HttpServletRequest#getRequestURL()} on the given
+   *     {@code request}
+   * @see #PARSED_URL_ATTR
+   */
+  public static URL getRequestURL(HttpServletRequest request, boolean cache) {
+    if (cache) {
+      /*
+        perf optimization: we save the parsed URL object in a request attribute for future reference
+        (to avoid the overhead of parsing it multiple times)
+      */
+      Object parsedURL = request.getAttribute(PARSED_URL_ATTR);
+      if (parsedURL != null) {
+        if (parsedURL instanceof URL)
+          return (URL)parsedURL;
+        else if (parsedURL instanceof Throwable) {
+          // must have got a MalformedURLException last time we tried to parse it (which is very unlikely)
+          throw new RuntimeException((Throwable)parsedURL);
+        }
+      }
+    }
+
     try {
-      return new URL(request.getRequestURL().toString());
+      URL url = new URL(request.getRequestURL().toString());
+      if (cache) {
+        // save the parsed URL in the request, to avoid the parsing overhead next time it's needed
+        request.setAttribute(PARSED_URL_ATTR, url);
+      }
+      return url;
     }
     catch (MalformedURLException e) {
-      // this should never happen, because the request presumably contains a valid URL string
+      // this should never happen, because the request presumably contains a valid URL (otherwise it wouldn't have made it here)
+      if (cache) {
+        request.setAttribute(PARSED_URL_ATTR, e);
+      }
       throw new RuntimeException(e);
     }
   }
@@ -228,7 +286,7 @@ public abstract class ServletUtils {
   }
 
   /** @return the requested URL minus the path (e.g. http://example.com/foo -> http://example.com) */
-  public static StringBuffer getBaseUrl(HttpServletRequest request) {
+  public static StringBuffer getBaseURL(HttpServletRequest request) {
     StringBuffer url = request.getRequestURL();
     // NOTE: we don't simply strip off the query string because that creates a discrepancy between different versions of tomcat (see https://issues.apache.org/bugzilla/show_bug.cgi?id=28222 )
     // instead, we just strip off everything after the 3rd slash in the URL (which seems to work for all imaginable types of http urls)

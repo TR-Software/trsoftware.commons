@@ -43,6 +43,7 @@ public class DummyHttpServletRequest implements HttpServletRequest {
   private Locale locale = Locale.getDefault();
   private String method;
   private List<Cookie> cookies = new ArrayList<>();
+  private Map<String, Object> attributes = new LinkedHashMap<>();
 
   public DummyHttpServletRequest() {
   }
@@ -273,14 +274,12 @@ public class DummyHttpServletRequest implements HttpServletRequest {
     return null;
   }
 
-  public Object getAttribute(String val) {
-    System.err.println("Method DummyHttpServletRequest.getAttribute has not been fully implemented yet.");
-    return null;
+  public Object getAttribute(String name) {
+    return attributes.get(name);
   }
 
-  public Enumeration getAttributeNames() {
-    System.err.println("Method DummyHttpServletRequest.getAttributeNames has not been fully implemented yet.");
-    return null;
+  public Enumeration<String> getAttributeNames() {
+    return Collections.enumeration(attributes.keySet());
   }
 
   public String getCharacterEncoding() {
@@ -392,9 +391,8 @@ public class DummyHttpServletRequest implements HttpServletRequest {
     return null;
   }
 
-  public void setAttribute(String val, Object object) {
-    System.err.println("Method DummyHttpServletRequest.setAttribute has not been fully implemented yet.");
-
+  public void setAttribute(String name, Object object) {
+    attributes.put(name, object);
   }
 
   public void removeAttribute(String val) {

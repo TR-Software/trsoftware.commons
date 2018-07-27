@@ -41,9 +41,8 @@ import solutions.trsoftware.commons.server.testutil.EmbeddedTomcatServer;
 import solutions.trsoftware.commons.server.testutil.PerformanceComparison;
 import solutions.trsoftware.commons.shared.annotations.ExcludeFromSuite;
 import solutions.trsoftware.commons.shared.annotations.Slow;
+import solutions.trsoftware.commons.shared.testutil.TestData;
 import solutions.trsoftware.commons.shared.util.MultimapDecorator;
-import solutions.trsoftware.commons.shared.util.RandomUtils;
-import solutions.trsoftware.commons.shared.util.StringUtils;
 import solutions.trsoftware.commons.shared.util.TimeUnit;
 import solutions.trsoftware.commons.shared.util.callables.Function0_t;
 
@@ -60,7 +59,6 @@ import static solutions.trsoftware.commons.server.servlet.filters.CachePolicyFil
 import static solutions.trsoftware.commons.server.servlet.filters.CachePolicyFilter.CachePolicy.*;
 import static solutions.trsoftware.commons.server.servlet.filters.CachePolicyFilter.TEN_YEARS_FROM_NOW_DATE;
 import static solutions.trsoftware.commons.shared.testutil.AssertUtils.*;
-import static solutions.trsoftware.commons.shared.util.RandomUtils.rnd;
 
 /**
  * @author Alex
@@ -295,7 +293,7 @@ public class CachePolicyFilterTest extends TestCase {
       }
       // now check that it's equivalent to RegexMatcher for some random examples
       RegexMatcher regexMatcher = new RegexMatcher();
-      List<String> args = randomURIs(20);
+      List<String> args = TestData.randomURIs(20);
       for (String arg : args) {
         checkMatchResult(scannerMatcher, arg, regexMatcher.inferCachePolicy(arg));
       }
@@ -328,7 +326,7 @@ public class CachePolicyFilterTest extends TestCase {
   @ExcludeFromSuite
   public void testPerformance() throws Exception {
     int n = 200;
-    List<String> args = randomURIs(n);
+    List<String> args = TestData.randomURIs(n);
     CachePolicyMatcherTester[] taskRunners = new CachePolicyMatcherTester[]{
         new CachePolicyMatcherTester(new SimpleStringMatcher(), args),
         new CachePolicyMatcherTester(new DfaScannerMatcher(), args),
@@ -370,76 +368,20 @@ public class CachePolicyFilterTest extends TestCase {
         // matches everything that starts with a specific path
         String pathPrefix = pattern.substring(0, pattern.length() - 1);
         for (int i = 0; i < 2; i++) {
-          ret.put(DEFAULT, pathPrefix + randName());
-          ret.put(CACHE_FOREVER, pathPrefix + randFileName(".cache."));
-          ret.put(NO_CACHE, pathPrefix + randFileName(".nocache."));
+          ret.put(DEFAULT, pathPrefix + TestData.randName());
+          ret.put(CACHE_FOREVER, pathPrefix + TestData.randFileName(".cache."));
+          ret.put(NO_CACHE, pathPrefix + TestData.randFileName(".nocache."));
         }
       }
       else if (pattern.startsWith("*.")) {
         // extension match
         String extension = pattern.substring(2);
         for (int i = 0; i < 2; i++) {
-          ret.put(DEFAULT, randName() + "." + extension);
-          ret.put(CACHE_FOREVER, randName() + ".cache." + extension);
-          ret.put(NO_CACHE, randName() + ".nocache." + extension);
+          ret.put(DEFAULT, TestData.randName() + "." + extension);
+          ret.put(CACHE_FOREVER, TestData.randName() + ".cache." + extension);
+          ret.put(NO_CACHE, TestData.randName() + ".nocache." + extension);
         }
       }
-    }
-    return ret;
-  }
-
-  /**
-   * @return {@code n} random args for {@link CachePolicyFilter#inferCachePolicy(String)}
-   */
-  private List<String> randomURIs(int n) {
-    ArrayList<String> ret = new ArrayList<>();
-    for (int i = 0; i < n; i++) {
-      List<String> path = randomPath(RandomUtils.nextIntInRange(1, 10));
-      int outcome = rnd.nextInt(4);
-      switch (outcome) {
-        case 1:
-          // insert a .cache. string at the end
-          path.add(randFileName(".cache."));
-          break;
-        case 2:
-          // insert a .nocache. string at the end
-          path.add(randFileName(".nocache."));
-          break;
-      }
-      outcome = rnd.nextInt(5);
-      switch (outcome) {
-        case 1:
-          // insert a .cache. string somewhere in the middle
-          path.add(rnd.nextInt(path.size()), randFileName(".cache."));
-          break;
-        case 2:
-          // insert a .nocache. string somewhere in the middle
-          path.add(rnd.nextInt(path.size()), randFileName(".nocache."));
-          break;
-        case 3:
-          // insert both somewhere in the middle
-          path.add(rnd.nextInt(path.size()), randFileName(".cache."));
-          path.add(rnd.nextInt(path.size()), randFileName(".nocache."));
-          break;
-      }
-      ret.add("/" + String.join("/", path));
-    }
-    return ret;
-  }
-
-  private String randFileName(String innerString) {
-    return randName() + innerString + randName();
-  }
-
-  private String randName() {
-    return RandomUtils.randString(StringUtils.ASCII_LETTERS_AND_NUMBERS, 1, 10);
-  }
-
-  private List<String> randomPath(int length) {
-    ArrayList<String> ret = new ArrayList<>();
-    for (int i = 0; i < length; i++) {
-      String pathSegment = RandomUtils.randString(StringUtils.ASCII_LETTERS_AND_NUMBERS, 1, 15);
-      ret.add(pathSegment);
     }
     return ret;
   }
@@ -448,18 +390,13 @@ public class CachePolicyFilterTest extends TestCase {
     private CachePolicyMatcher algorithm;
 
     CachePolicyMatcherTester(CachePolicyMatcher algorithm, List<String> args) {
-      super(args);
+      super(algorithm.getClass().getSimpleName(), args);
       this.algorithm = algorithm;
     }
 
     @Override
     protected void doIteration(String arg) {
       algorithm.inferCachePolicy(arg);
-    }
-
-    @Override
-    public String getName() {
-      return algorithm.getClass().getSimpleName();
     }
 
     @Override

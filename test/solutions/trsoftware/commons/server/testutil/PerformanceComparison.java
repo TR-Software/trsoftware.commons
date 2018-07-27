@@ -92,8 +92,16 @@ public abstract class PerformanceComparison {
         iterations);
   }
 
-  public interface NamedRunnable extends Runnable {
-    String getName();
+  public static abstract class NamedRunnable implements Runnable {
+    private String name;
+
+    public NamedRunnable(String name) {
+      this.name = name;
+    }
+
+    public final String getName() {
+      return name;
+    }
   }
 
   private static String getTaskName(Runnable task, String defaultName) {
@@ -172,11 +180,12 @@ public abstract class PerformanceComparison {
    * @author Alex
    * @since 7/20/2018
    */
-  public abstract static class BenchmarkTask<E> implements NamedRunnable {
+  public abstract static class BenchmarkTask<E> extends NamedRunnable {
 
     protected List<E> inputs;
 
-    public BenchmarkTask(List<E> inputs) {
+    public BenchmarkTask(String name, List<E> inputs) {
+      super(name);
       this.inputs = inputs;
     }
 

@@ -85,34 +85,19 @@ public class URIComponentEncoderJavaImplTest extends TestCase {
       for (int i = 0; i < 1000; i++) {
         testStrings.add(RandomUtils.randString(ALPHABET, 20, 100));
       }
-      PerformanceComparison.BenchmarkTask<String> ourEncoderTask = new PerformanceComparison.BenchmarkTask<String>(testStrings) {
-        @Override
-        public String getName() {
-          return "UrlEncoderJavaImpl";
-        }
-
+      PerformanceComparison.BenchmarkTask<String> ourEncoderTask = new PerformanceComparison.BenchmarkTask<String>("UrlEncoderJavaImpl", testStrings) {
         @Override
         protected void doIteration(String arg) throws Exception {
           encoder.encode(arg);
         }
       };
-      PerformanceComparison.BenchmarkTask<String> encodeURIComponentTask = new PerformanceComparison.BenchmarkTask<String>(testStrings) {
-        @Override
-        public String getName() {
-          return "JavaScript encodeURIComponent";
-        }
-
+      PerformanceComparison.BenchmarkTask<String> encodeURIComponentTask = new PerformanceComparison.BenchmarkTask<String>("JavaScript encodeURIComponent", testStrings) {
         @Override
         protected void doIteration(String arg) throws Exception {
           encodeURIComponent(arg);
         }
       };
-      PerformanceComparison.BenchmarkTask<String> javaEncoderTask = new PerformanceComparison.BenchmarkTask<String>(testStrings) {
-        @Override
-        public String getName() {
-          return URLEncoder.class.getName();
-        }
-
+      PerformanceComparison.BenchmarkTask<String> javaEncoderTask = new PerformanceComparison.BenchmarkTask<String>(URLEncoder.class.getName(), testStrings) {
         @Override
         protected void doIteration(String arg) throws Exception {
           URLEncoder.encode(arg, "UTF-8");

@@ -31,17 +31,17 @@ import static solutions.trsoftware.commons.shared.util.StringUtils.join;
  * A lightweight string template abstraction.  Instances of this
  * class could be constructed programmatically, but it's really intended
  * to be constructed by a separate factory/parser object.
- *
+ * <p>
  * For instance, on the server, you'd want to construct templates by parsing
  * files, and on the client (GWT), you might want to construct templates
- * by extracting the contents of a div.
- *
+ * by extracting the contents of a {@code div}.
+ * <p>
  * Either way, the parsing is decoupled from representation and application
  * (this class is responsible for the representation and application).
  * Therefore the syntax of the template (language) is defined by the parser,
- * not by this class.  For example some parsers could treat ${var} as variables
- * while others could tread @@var@@ as variables.
- *
+ * not by this class.  For example some parsers could treat {@code ${var}} as variables
+ * while others could treat {@code @@var@@} as variables.
+ * <p>
  * This class is immutable, so instances may be cached and shared among threads.
  *
  * @author Alex

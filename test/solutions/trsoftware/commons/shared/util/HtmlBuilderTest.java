@@ -41,4 +41,33 @@ public class HtmlBuilderTest extends TestCase {
         "<a href=\"http://example.com\" title=\"Example link\">link 1</a><a href=\"http://example2.com\">link 2</a>",
         builder.toString());
   }
+
+  public void testInternalTextNodes() throws Exception {
+    {
+      HtmlBuilder builder = new HtmlBuilder()
+                .text("Bef")
+                .text("ore ")
+                .openTag("div")
+                  .text("Middle")
+                  .text("1")
+                  .openTag("span")
+                    .text("Middle")
+                    .text("2")
+                    .openTag("a").attr("href", "http://example.com").attr("title", "Example link")
+                      .openTag("img").attr("src", "foo.jpg").closeTag()
+                      .innerHtml("Test link")
+                .closeAll()
+                .text(" Af")
+                .text("ter");
+      assertEquals("Before <div>Middle1<span>Middle2<a href=\"http://example.com\" title=\"Example link\"><img src=\"foo.jpg\"/>Test link</a></span></div> After",
+          builder.toString());
+    }
+    {
+      HtmlBuilder builder = new HtmlBuilder()
+          .openTag("b").innerHtml("foo").closeTag()
+          .text(": ")
+          .openTag("span").innerHtml("bar").closeTag();
+      assertEquals("<b>foo</b>: <span>bar</span>", builder.toString());
+    }
+  }
 }

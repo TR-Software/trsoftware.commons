@@ -22,29 +22,49 @@ import com.google.web.bindery.event.shared.HandlerRegistration;
 import solutions.trsoftware.commons.shared.util.callables.Function1_;
 import solutions.trsoftware.commons.shared.util.callables.Functions;
 
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 
 /**
  * Combines several handler registrations into one.
  *
  * @author Alex, 10/6/2015
  */
-public class MultiHandlerRegistration implements com.google.gwt.event.shared.HandlerRegistration {
+public class MultiHandlerRegistration implements HandlerRegistration {
 
-  private final HandlerRegistration[] registrations;
+  private final List<HandlerRegistration> registrations = new ArrayList<>();
 
-  public MultiHandlerRegistration(HandlerRegistration...registrations) {
-    this.registrations = registrations;
+  public MultiHandlerRegistration(HandlerRegistration... registrations) {
+    this.registrations.addAll(Arrays.asList(registrations));
+  }
+
+  /**
+   * Add another handler reg.
+   * @return a reference to this object, for call chaining
+   */
+  public MultiHandlerRegistration addHandlerRegistration(HandlerRegistration handlerRegistration) {
+    registrations.add(handlerRegistration);
+    return this;
   }
 
   @Override
   public void removeHandler() {
-    Functions.tryCall(Arrays.asList(registrations), new Function1_<HandlerRegistration>() {
+    Functions.tryCall(registrations, new Function1_<HandlerRegistration>() {
       @Override
       public void call(HandlerRegistration reg) {
         if (reg != null)
           reg.removeHandler();
       }
     });
+  }
+
+  public com.google.gwt.event.shared.HandlerRegistration asLegacyGwtRegistration() {
+    return new com.google.gwt.event.shared.HandlerRegistration() {
+      @Override
+      public void removeHandler() {
+        MultiHandlerRegistration.this.removeHandler();
+      }
+    };
   }
 }

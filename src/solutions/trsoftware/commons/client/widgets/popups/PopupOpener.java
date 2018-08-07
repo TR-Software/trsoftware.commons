@@ -192,7 +192,7 @@ public abstract class PopupOpener<W extends Widget, P extends EnhancedPopup> imp
         return new MultiHandlerRegistration(
             addHoverShowHandler(),
             getWidget().addDomHandler(PopupOpener.this, MouseOutEvent.getType())
-        );
+        ).asLegacyGwtRegistration();
       }
     });
     return this;  // for method chaining

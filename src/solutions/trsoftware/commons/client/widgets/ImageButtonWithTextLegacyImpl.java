@@ -75,7 +75,8 @@ public class ImageButtonWithTextLegacyImpl extends Composite implements HasClick
   public HandlerRegistration addClickHandler(ClickHandler handler) {
     return new MultiHandlerRegistration(
         imgButton.addClickHandler(handler),
-        link.addClickHandler(handler));
+        link.addClickHandler(handler)
+    ).asLegacyGwtRegistration();
   }
 
   /**

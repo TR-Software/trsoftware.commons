@@ -32,7 +32,7 @@ import java.util.List;
  */
 public class CompositeWithDataChangeListeners extends Composite {
 
-  private interface DeferredRegistration {
+  public interface DeferredRegistration {
     /**
      * Register the event handler.
      */
@@ -44,7 +44,7 @@ public class CompositeWithDataChangeListeners extends Composite {
     void deactivate();
   }
 
-  private static class DeferredListenerRegistration<T> implements DeferredRegistration {
+  public static class DeferredListenerRegistration<T> implements DeferredRegistration {
     private ListenerSet<T> listenerSet;
     private DataChangeListener<T> listener;
 
@@ -64,7 +64,7 @@ public class CompositeWithDataChangeListeners extends Composite {
     }
   }
 
-  private static class DeferredEventHandlerRegistration<H> implements DeferredRegistration {
+  public static class DeferredEventHandlerRegistration<H> implements DeferredRegistration {
     private Event.Type<H> eventType;
     private H handler;
     private HandlerRegistration handlerRegistration;
@@ -75,8 +75,12 @@ public class CompositeWithDataChangeListeners extends Composite {
     }
 
     @Override
-    public void activate() {
-      handlerRegistration = Events.BUS.addHandler(eventType, handler);
+    public final void activate() {
+      handlerRegistration = registerHandler();
+    }
+
+    protected HandlerRegistration registerHandler() {
+      return Events.BUS.addHandler(eventType, handler);
     }
 
     @Override
@@ -89,14 +93,18 @@ public class CompositeWithDataChangeListeners extends Composite {
   private final List<DeferredRegistration> deferredRegistrations = new ArrayList<>();
 
 
-  public <T> void registerDataChangeListener(ListenerSet<T> listenerSet, final DataChangeListener<T> listener) {
+  protected <T> void registerDataChangeListener(ListenerSet<T> listenerSet, final DataChangeListener<T> listener) {
     DeferredListenerRegistration<T> reg = new DeferredListenerRegistration<T>(listenerSet, listener);
     reg.activate();
-    deferredRegistrations.add(reg);
+    addDeferredRegistration(reg);
   }
 
-  public <H> boolean registerEventHandler(Event.Type<H> eventType, H handler) {
-    return deferredRegistrations.add(new DeferredEventHandlerRegistration<H>(eventType, handler));
+  protected <H> boolean registerEventHandler(Event.Type<H> eventType, H handler) {
+    return addDeferredRegistration(new DeferredEventHandlerRegistration<H>(eventType, handler));
+  }
+
+  protected boolean addDeferredRegistration(DeferredRegistration deferredRegistration) {
+    return deferredRegistrations.add(deferredRegistration);
   }
 
   @Override

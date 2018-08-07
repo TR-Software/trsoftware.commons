@@ -58,7 +58,7 @@ public class HelloServlet extends BaseHttpServlet {
 
   @Override
   public void init() throws ServletException {
-    settings = parse(new Settings());
+    settings = parseInitParams(new Settings());
   }
 
   @Override

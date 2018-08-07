@@ -124,14 +124,14 @@ public class WebConfigParser {
     return parse(new ServletContextWrapper(config), parseResult);
   }
 
-  private static <P extends InitParameters> P bindParamsToFields(HasInitParameters filterConfig, P parseResult) throws IllegalAccessException, WebConfigException {
+  private static <P extends InitParameters> P bindParamsToFields(HasInitParameters webConfig, P parseResult) throws IllegalAccessException, WebConfigException {
     Field[] declaredFields = parseResult.getClass().getDeclaredFields();
     for (Field field : declaredFields) {
       String name = field.getName();
       if (name.startsWith("this$")) {
         continue;  // the parseResult class must be an inner class that's not static, and this field is a reference to its parent class instance
       }
-      new FieldParser(field, filterConfig, parseResult).parseAndSetValue();
+      new FieldParser(field, webConfig, parseResult).parseAndSetValue();
     }
     return parseResult;
   }

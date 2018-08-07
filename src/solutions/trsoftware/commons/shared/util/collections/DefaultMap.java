@@ -72,6 +72,7 @@ public abstract class DefaultMap<K, V> implements Map<K, V> {
   }
 
   private V getOrInsert(K key) {
+    // TODO: this locking isn't going to work unless the map itself is synchronized
     if (!containsKey(key)) {
       // double-checked locking
       synchronized (this) {

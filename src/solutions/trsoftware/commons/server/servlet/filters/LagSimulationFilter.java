@@ -96,7 +96,7 @@ public class LagSimulationFilter extends HttpFilterAdapter {
   @Override
   public void init(FilterConfig filterConfig) throws ServletException {
     super.init(filterConfig);
-    config = parse(new Config());
+    config = parseInitParams(new Config());
   }
 
   @Override

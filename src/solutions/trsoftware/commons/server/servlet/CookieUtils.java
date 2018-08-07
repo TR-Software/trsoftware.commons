@@ -45,9 +45,11 @@ public abstract class CookieUtils {
     // conclusion: without SSL, do not use cookie authentication for important functions (such as changing your email or password)
     Cookie cookie = new Cookie(cookieName, cookieValue);
     cookie.setVersion(0);  // IE7 & Safari don't recognize expiration dates in version 1, and hence don't retain the cookies past the session
-    URL requestURL = ServletUtils.getRequestURL(request);
-    if (!"localhost".equals(requestURL.getHost()))  // localhost is not a valid value of the cookie domain attribute
-      cookie.setDomain(domain);
+    if (domain != null) {
+      URL requestURL = ServletUtils.getRequestURL(request);
+      if (!"localhost".equals(requestURL.getHost()))  // localhost is not a valid value of the cookie domain attribute
+        cookie.setDomain(domain);
+    }
     cookie.setPath("/");  // send cookie to all URIs in the domain
     // NOTE: because we're using version 0 cookies, the server will actually output something like "Expires=Wed, 12-Jan-2011 22:00:21 GMT" instead of "Max-Age=12345"
     cookie.setMaxAge((int)(maxAgeMillis / 1000)); // delta seconds from now

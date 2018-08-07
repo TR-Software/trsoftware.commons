@@ -330,4 +330,23 @@ public abstract class ServletUtils {
     }
     return ret;
   }
+
+  /**
+   * Generates a string with info about the given GWT-RPC request for logging purposes.
+   *
+   * @return info about the given GWT-RPC request for logging purposes.
+   */
+  public static String printGwtRequestInfo(HttpServletRequest request, String permutationStrongName) {
+    return appendGwtRequestInfo(new StringBuilder(), request, permutationStrongName).toString();
+  }
+
+  /**
+   * Appends info about the given GWT-RPC request to the given {@link StringBuilder} for logging purposes.
+   *
+   * @return the given {@link StringBuilder} after appending the request info to it
+   */
+  public static StringBuilder appendGwtRequestInfo(StringBuilder str, HttpServletRequest request, String permutationStrongName) {
+    str.append("permutation ").append(permutationStrongName).append(" from ").append(request.getRemoteAddr()).append(" [").append(getUserAgentHeader(request)).append("]");
+    return str;
+  }
 }

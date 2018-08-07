@@ -21,6 +21,8 @@ import solutions.trsoftware.commons.server.servlet.config.InitParameters;
 import solutions.trsoftware.commons.server.servlet.config.WebConfigException;
 import solutions.trsoftware.commons.server.servlet.config.WebConfigParser;
 
+import javax.servlet.FilterConfig;
+import javax.servlet.Servlet;
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
@@ -86,23 +88,39 @@ public abstract class BaseHttpServlet extends HttpServlet {
   }
 
   /**
-   * Sets the fields of the given {@link InitParameters} object from the {@code init-param} values present in the {@link ServletConfig}.
+   * Sets the fields of the given {@link InitParameters} object from the {@code init-param} values present in this
+   * servlet's {@link ServletConfig}.
+   *
+   * @param parameters the object to be populated via {@link WebConfigParser#parse(FilterConfig, InitParameters)}
    * @return the same instance that was passed as the argument, after its fields have been populated.
    * @see WebConfigParser#parse(ServletConfig, InitParameters)
    */
-  protected <P extends InitParameters> P parse(P parameters) throws ServletException {
-    ServletConfig servletConfig = getServletConfig();
+  protected <P extends InitParameters> P parseInitParams(P parameters) throws ServletException {
+    return parseInitParams(parameters, getServletConfig(), getClass());
+  }
+
+  /**
+   * Sets the fields of the given {@link InitParameters} object from the {@code init-param} values present in the given
+   * {@link ServletConfig}.
+   *
+   * @param parameters the object to be populated via {@link WebConfigParser#parse(FilterConfig, InitParameters)}
+   * @param servletConfig contains the {@code init-param} values
+   * @param servletClass the servlet's class: will use its name for logging messages
+   * @return the same instance that was passed as the argument, after its fields have been populated.
+   * @see WebConfigParser#parse(ServletConfig, InitParameters)
+   */
+  public static <P extends InitParameters> P parseInitParams(P parameters, ServletConfig servletConfig, Class<? extends Servlet> servletClass) throws ServletException {
     try {
       P parsedParams = WebConfigParser.parse(servletConfig, parameters);
       servletConfig.getServletContext().log(
           String.format("Servlet config (servlet-name: \"%s\", servlet-class: %s) parsed from init-param values: %s",
-              servletConfig.getServletName(), getClass().getSimpleName(), parsedParams));
+              servletConfig.getServletName(), servletClass.getSimpleName(), parsedParams));
       return parsedParams;
     }
     catch (WebConfigException e) {
       throw new ServletException(String.format("Invalid configuration for servlet '%s' (%s): %s",
-          servletConfig.getServletName(), getClass(), e.getMessage()), e);
+          servletConfig.getServletName(), servletClass, e.getMessage()), e);
     }
   }
-  
+
 }

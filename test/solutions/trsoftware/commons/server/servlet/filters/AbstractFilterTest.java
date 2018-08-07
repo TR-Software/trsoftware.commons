@@ -33,7 +33,7 @@ import java.io.IOException;
 public class AbstractFilterTest extends TestCase {
 
   /**
-   * Tests parsing init parameters from the filter's {@link FilterConfig} with {@link AbstractFilter#parse(InitParameters)}
+   * Tests parsing init parameters from the filter's {@link FilterConfig} with {@link AbstractFilter#parseInitParams(InitParameters)}
    */
   public void testParse() throws Exception {
     TestFilter filter = new TestFilter();
@@ -78,7 +78,7 @@ public class AbstractFilterTest extends TestCase {
     @Override
     public void init(FilterConfig filterConfig) throws ServletException {
       super.init(filterConfig);
-      config = parse(new Config());
+      config = parseInitParams(new Config());
     }
 
     @Override

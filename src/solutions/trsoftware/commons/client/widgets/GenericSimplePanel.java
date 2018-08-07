@@ -34,6 +34,8 @@ import com.google.gwt.user.client.ui.Widget;
 public class GenericSimplePanel extends SimplePanel {
 
   /**
+   * Constructor exposed to allow any element to become a {@link GenericSimplePanel}.
+   *
    * @param elem the element to use for this widget.
    */
   public GenericSimplePanel(Element elem) {
@@ -41,6 +43,8 @@ public class GenericSimplePanel extends SimplePanel {
   }
 
   /**
+   * Constructor exposed to allow any element to become a {@link GenericSimplePanel}.
+   *
    * @param elem the element to use for this widget.
    * @param child the child widget to add to it
    */

@@ -30,6 +30,9 @@ import java.util.ListIterator;
 
 /**
  * Encapsulates the logic for contacting the server to deobfuscate a Javascript stack trace from compiled GWT code.
+ * <p>
+ * Intended to be instantiated with {@link GWT#create(Class)}, so that inheriting modules can provide a different
+ * implementation via deferred binding.
  *
  * @author Alex
  * @since Mar 30, 2013
@@ -75,16 +78,38 @@ public class StackTraceDeobfuscatorClient {
     }
   }
 
-  private int stackTraceSizeLimit;
+  protected StackTraceDeobfuscatorServiceAsync service;
+  protected int stackTraceSizeLimit;
 
   private static final String RESPONSE_PENDING = "__RP__";  // a cache entry will have this value until a response is received
-
-  private StackTraceDeobfuscatorServiceAsync service;
 
   private FixedSizeLruCache<List<String>, String> responseCache
       = new FixedSizeLruCache<List<String>, String>(10);
 
   public StackTraceDeobfuscatorClient(String servletUrl, int stackTraceSizeLimit) {
+    init(servletUrl, stackTraceSizeLimit);
+  }
+
+  public StackTraceDeobfuscatorClient(String servletUrl) {
+    this(servletUrl, Integer.MAX_VALUE);
+  }
+
+  /**
+   * Default constructor to be used with {@link GWT#create(Class)}.
+   * <p>
+   * <strong>Note:</strong> must call {@link #init(String, int)} afterwards
+   */
+  protected StackTraceDeobfuscatorClient() {
+  }
+
+  /**
+   * Subclass may override to customize the async proxy ({@link ServiceDefTarget} object)
+   *
+   * @param servletUrl will be passed to {@link ServiceDefTarget#setServiceEntryPoint(String)}
+   * @param stackTraceSizeLimit will truncate stack traces longer than this (to save bandwidth; can pass {@link
+   *     Integer#MAX_VALUE} to avoid truncation
+   */
+  protected void init(String servletUrl, int stackTraceSizeLimit) {
     if (servletUrl == null)
       throw new NullPointerException("StackTraceDeobfuscatorServlet URL cannot be null");
     service = GWT.create(StackTraceDeobfuscatorService.class);
@@ -92,11 +117,17 @@ public class StackTraceDeobfuscatorClient {
     this.stackTraceSizeLimit = stackTraceSizeLimit;
   }
 
-  public StackTraceDeobfuscatorClient(String servletUrl) {
-    this(servletUrl, Integer.MAX_VALUE);
+  /**
+   * @throws IllegalStateException if {@link #service} not initialized (which would happen if this instance was created
+   * via {@link GWT#create(Class)} and the {@link #init(String, int)} method wasn't called afterwards).
+   */
+  protected void assertInitialized() {
+    if (service == null || stackTraceSizeLimit == 0)
+      throw new IllegalStateException(getClass().getName() + " not initialized. Did you forget to call init(String, int)?");
   }
 
   public void deobfuscateStackTrace(final Throwable ex, final Callback callback) {
+    assertInitialized();
     List<StackTraceElement> stackTrace = Arrays.asList(ex.getStackTrace());
     // 1) clean up the stack trace to create a compact canonical representation (that can be used as a cache key)
     // 1.a) truncate the stack trace on the client side to save bandwidth (also have the client not send the stack trace if it's the same as the last one, but simply has one extra element at the end)

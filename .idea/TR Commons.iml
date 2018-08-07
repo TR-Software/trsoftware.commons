@@ -20,6 +20,7 @@
         <setting name="gwtScriptOutputStyle" value="DETAILED" />
         <setting name="gwtSdkUrl" value="file://$GWT_HOME$/gwt-2.8.2" />
         <packaging>
+          <module name="solutions.trsoftware.commons.Debug" enabled="false" />
           <module name="solutions.trsoftware.commons.PreserveStackTraces" enabled="false" />
         </packaging>
       </configuration>
@@ -47,7 +48,19 @@
         <SOURCES />
       </library>
     </orderEntry>
-    <orderEntry type="library" name="gson-2.8.2" level="project" />
+    <orderEntry type="module-library">
+      <library name="gson-2.8.2">
+        <CLASSES>
+          <root url="jar://$PROGRAMMING_LIBS_DIR$/gson-2.8.2/gson-2.8.2.jar!/" />
+        </CLASSES>
+        <JAVADOC>
+          <root url="jar://$PROGRAMMING_LIBS_DIR$/gson-2.8.2/gson-2.8.2-javadoc.jar!/" />
+        </JAVADOC>
+        <SOURCES>
+          <root url="jar://$PROGRAMMING_LIBS_DIR$/gson-2.8.2/gson-2.8.2-sources.jar!/" />
+        </SOURCES>
+      </library>
+    </orderEntry>
     <orderEntry type="module-library">
       <library name="bcel-6.2 (Byte Code Engineering Library from Apache Commons)">
         <CLASSES>
@@ -67,43 +80,43 @@
     <orderEntry type="module-library">
       <library name="Apache Tomcat 8.5.31 (minus ECJ)">
         <CLASSES>
-          <root url="file://$APACHE_TOMCAT_INSTALLATIONS$/apache-tomcat-8.5.31/bin" />
-          <root url="jar://$APACHE_TOMCAT_INSTALLATIONS$/apache-tomcat-8.5.31/lib/jasper-el.jar!/" />
-          <root url="jar://$APACHE_TOMCAT_INSTALLATIONS$/apache-tomcat-8.5.31/lib/tomcat-jdbc.jar!/" />
-          <root url="jar://$APACHE_TOMCAT_INSTALLATIONS$/apache-tomcat-8.5.31/lib/el-api.jar!/" />
-          <root url="jar://$APACHE_TOMCAT_INSTALLATIONS$/apache-tomcat-8.5.31/lib/tomcat-jni.jar!/" />
-          <root url="jar://$APACHE_TOMCAT_INSTALLATIONS$/apache-tomcat-8.5.31/lib/catalina-ha.jar!/" />
-          <root url="jar://$APACHE_TOMCAT_INSTALLATIONS$/apache-tomcat-8.5.31/lib/servlet-api.jar!/" />
-          <root url="jar://$APACHE_TOMCAT_INSTALLATIONS$/apache-tomcat-8.5.31/lib/catalina-tribes.jar!/" />
-          <root url="jar://$APACHE_TOMCAT_INSTALLATIONS$/apache-tomcat-8.5.31/lib/tomcat-util.jar!/" />
-          <root url="jar://$APACHE_TOMCAT_INSTALLATIONS$/apache-tomcat-8.5.31/lib/catalina.jar!/" />
-          <root url="jar://$APACHE_TOMCAT_INSTALLATIONS$/apache-tomcat-8.5.31/lib/tomcat-coyote.jar!/" />
-          <root url="jar://$APACHE_TOMCAT_INSTALLATIONS$/apache-tomcat-8.5.31/lib/tomcat-dbcp.jar!/" />
-          <root url="jar://$APACHE_TOMCAT_INSTALLATIONS$/apache-tomcat-8.5.31/lib/jsp-api.jar!/" />
-          <root url="jar://$APACHE_TOMCAT_INSTALLATIONS$/apache-tomcat-8.5.31/lib/catalina-ant.jar!/" />
-          <root url="jar://$APACHE_TOMCAT_INSTALLATIONS$/apache-tomcat-8.5.31/lib/websocket-api.jar!/" />
-          <root url="jar://$APACHE_TOMCAT_INSTALLATIONS$/apache-tomcat-8.5.31/lib/tomcat-util-scan.jar!/" />
-          <root url="jar://$APACHE_TOMCAT_INSTALLATIONS$/apache-tomcat-8.5.31/lib/annotations-api.jar!/" />
-          <root url="jar://$APACHE_TOMCAT_INSTALLATIONS$/apache-tomcat-8.5.31/lib/jaspic-api.jar!/" />
-          <root url="jar://$APACHE_TOMCAT_INSTALLATIONS$/apache-tomcat-8.5.31/lib/tomcat-websocket.jar!/" />
-          <root url="jar://$APACHE_TOMCAT_INSTALLATIONS$/apache-tomcat-8.5.31/lib/tomcat-api.jar!/" />
-          <root url="jar://$APACHE_TOMCAT_INSTALLATIONS$/apache-tomcat-8.5.31/lib/catalina-storeconfig.jar!/" />
-          <root url="jar://$APACHE_TOMCAT_INSTALLATIONS$/apache-tomcat-8.5.31/lib/jasper.jar!/" />
+          <root url="file://$TOMCAT_8_HOME$/bin" />
+          <root url="jar://$TOMCAT_8_HOME$/lib/jasper-el.jar!/" />
+          <root url="jar://$TOMCAT_8_HOME$/lib/tomcat-jdbc.jar!/" />
+          <root url="jar://$TOMCAT_8_HOME$/lib/el-api.jar!/" />
+          <root url="jar://$TOMCAT_8_HOME$/lib/tomcat-jni.jar!/" />
+          <root url="jar://$TOMCAT_8_HOME$/lib/catalina-ha.jar!/" />
+          <root url="jar://$TOMCAT_8_HOME$/lib/servlet-api.jar!/" />
+          <root url="jar://$TOMCAT_8_HOME$/lib/catalina-tribes.jar!/" />
+          <root url="jar://$TOMCAT_8_HOME$/lib/tomcat-util.jar!/" />
+          <root url="jar://$TOMCAT_8_HOME$/lib/catalina.jar!/" />
+          <root url="jar://$TOMCAT_8_HOME$/lib/tomcat-coyote.jar!/" />
+          <root url="jar://$TOMCAT_8_HOME$/lib/tomcat-dbcp.jar!/" />
+          <root url="jar://$TOMCAT_8_HOME$/lib/jsp-api.jar!/" />
+          <root url="jar://$TOMCAT_8_HOME$/lib/catalina-ant.jar!/" />
+          <root url="jar://$TOMCAT_8_HOME$/lib/websocket-api.jar!/" />
+          <root url="jar://$TOMCAT_8_HOME$/lib/tomcat-util-scan.jar!/" />
+          <root url="jar://$TOMCAT_8_HOME$/lib/annotations-api.jar!/" />
+          <root url="jar://$TOMCAT_8_HOME$/lib/jaspic-api.jar!/" />
+          <root url="jar://$TOMCAT_8_HOME$/lib/tomcat-websocket.jar!/" />
+          <root url="jar://$TOMCAT_8_HOME$/lib/tomcat-api.jar!/" />
+          <root url="jar://$TOMCAT_8_HOME$/lib/catalina-storeconfig.jar!/" />
+          <root url="jar://$TOMCAT_8_HOME$/lib/jasper.jar!/" />
         </CLASSES>
         <JAVADOC />
         <SOURCES>
-          <root url="file://$APACHE_TOMCAT_INSTALLATIONS$/apache-tomcat-8.5.31" />
-          <root url="jar://$APACHE_TOMCAT_INSTALLATIONS$/apache-tomcat-8.5.31/apache-tomcat-8.5.31-src.zip!/apache-tomcat-8.5.31-src/java" />
-          <root url="jar://$APACHE_TOMCAT_INSTALLATIONS$/apache-tomcat-8.5.31/apache-tomcat-8.5.31-src.zip!/apache-tomcat-8.5.31-src/modules/jdbc-pool/src/main/java" />
-          <root url="jar://$APACHE_TOMCAT_INSTALLATIONS$/apache-tomcat-8.5.31/apache-tomcat-8.5.31-src.zip!/apache-tomcat-8.5.31-src/modules/jdbc-pool/src/test/java" />
-          <root url="jar://$APACHE_TOMCAT_INSTALLATIONS$/apache-tomcat-8.5.31/apache-tomcat-8.5.31-src.zip!/apache-tomcat-8.5.31-src/test" />
-          <root url="jar://$APACHE_TOMCAT_INSTALLATIONS$/apache-tomcat-8.5.31/apache-tomcat-8.5.31-src.zip!/apache-tomcat-8.5.31-src/webapps/docs/appdev/sample/src" />
-          <root url="jar://$APACHE_TOMCAT_INSTALLATIONS$/apache-tomcat-8.5.31/apache-tomcat-8.5.31-src.zip!/apache-tomcat-8.5.31-src/webapps/examples/WEB-INF/classes" />
-          <root url="jar://$APACHE_TOMCAT_INSTALLATIONS$/apache-tomcat-8.5.31/apache-tomcat-8.5.31-src.zip!/apache-tomcat-8.5.31-src/webapps/examples/WEB-INF/jsp/applet" />
-          <root url="jar://$APACHE_TOMCAT_INSTALLATIONS$/apache-tomcat-8.5.31/apache-tomcat-8.5.31-src.zip!/apache-tomcat-8.5.31-src/webapps/examples/jsp/plugin/applet" />
+          <root url="file://$TOMCAT_8_HOME$" />
+          <root url="jar://$TOMCAT_8_HOME$/apache-tomcat-8.5.31-src.zip!/apache-tomcat-8.5.31-src/java" />
+          <root url="jar://$TOMCAT_8_HOME$/apache-tomcat-8.5.31-src.zip!/apache-tomcat-8.5.31-src/modules/jdbc-pool/src/main/java" />
+          <root url="jar://$TOMCAT_8_HOME$/apache-tomcat-8.5.31-src.zip!/apache-tomcat-8.5.31-src/modules/jdbc-pool/src/test/java" />
+          <root url="jar://$TOMCAT_8_HOME$/apache-tomcat-8.5.31-src.zip!/apache-tomcat-8.5.31-src/test" />
+          <root url="jar://$TOMCAT_8_HOME$/apache-tomcat-8.5.31-src.zip!/apache-tomcat-8.5.31-src/webapps/docs/appdev/sample/src" />
+          <root url="jar://$TOMCAT_8_HOME$/apache-tomcat-8.5.31-src.zip!/apache-tomcat-8.5.31-src/webapps/examples/WEB-INF/classes" />
+          <root url="jar://$TOMCAT_8_HOME$/apache-tomcat-8.5.31-src.zip!/apache-tomcat-8.5.31-src/webapps/examples/WEB-INF/jsp/applet" />
+          <root url="jar://$TOMCAT_8_HOME$/apache-tomcat-8.5.31-src.zip!/apache-tomcat-8.5.31-src/webapps/examples/jsp/plugin/applet" />
         </SOURCES>
-        <jarDirectory url="file://$APACHE_TOMCAT_INSTALLATIONS$/apache-tomcat-8.5.31/bin" recursive="false" />
-        <jarDirectory url="file://$APACHE_TOMCAT_INSTALLATIONS$/apache-tomcat-8.5.31" recursive="false" type="SOURCES" />
+        <jarDirectory url="file://$TOMCAT_8_HOME$/bin" recursive="false" />
+        <jarDirectory url="file://$TOMCAT_8_HOME$" recursive="false" type="SOURCES" />
       </library>
     </orderEntry>
     <orderEntry type="module-library">

@@ -19,8 +19,10 @@ package solutions.trsoftware.commons.server.exceptions;
 
 import com.google.gwt.user.server.rpc.RemoteServiceServlet;
 import solutions.trsoftware.commons.client.exceptions.StackTraceDeobfuscatorService;
+import solutions.trsoftware.commons.server.servlet.ServletUtils;
 import solutions.trsoftware.commons.server.servlet.config.WebConfigParser;
 
+import javax.servlet.ServletContext;
 import java.io.File;
 import java.util.HashMap;
 
@@ -78,7 +80,25 @@ public class StackTraceDeobfuscatorServlet extends RemoteServiceServlet implemen
     for (StackTraceElement ste : stackTrace) {
       str.append(ste).append("\n");
     }
-    return str.toString();
+    String result = str.toString();
+    logStackTrace(exceptionMessage, result);
+    return result;
+  }
+
+  /**
+   * Called by {@link #deobfuscateStackTrace(StackTraceElement[], String, String)} to log the de-obfuscated stack trace
+   * to the servlet context log.
+   * <p>
+   * Subclasses may override to provide a different logging mechanism (or to suppress logging).
+   *
+   * @see ServletContext#log(String)
+   */
+  protected void logStackTrace(String exceptionMessage, String deobfuscatedStackTrace) {
+    // record the stack trace before returning it
+    StringBuilder logMsgBuilder = ServletUtils.appendGwtRequestInfo(new StringBuilder("Client-side stack trace for "),
+        getThreadLocalRequest(), getPermutationStrongName());
+    logMsgBuilder.append('\n').append(exceptionMessage).append(":\n").append(deobfuscatedStackTrace);
+    getServletContext().log(logMsgBuilder.toString());
   }
 
   /**

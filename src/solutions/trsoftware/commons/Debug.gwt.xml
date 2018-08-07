@@ -1,0 +1,85 @@
+<!--
+  ~ Copyright 2018 TR Software Inc.
+  ~
+  ~ Licensed under the Apache License, Version 2.0 (the "License"); you may not
+  ~ use this file except in compliance with the License. You may obtain a copy of
+  ~ the License at
+  ~
+  ~ http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~ Unless required by applicable law or agreed to in writing, software
+  ~ distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+  ~ WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+  ~ License for the specific language governing permissions and limitations under
+  ~ the License.
+  ~
+  -->
+
+<!DOCTYPE module PUBLIC "-//Google Inc.//DTD Google Web Toolkit 2.5.0//EN"
+    "http://gwtproject.org/doctype/2.5.0/gwt-module.dtd">
+<module>
+  <!--
+  This module does the following:
+  1) defines the "debug" property for deferred binding
+  2) defines some deferred binding replacement rules based on this property
+     (for now, just toggles the logging behavior, but inheriting modules can specify additional rules)
+
+  NOTE: normally having two possible values for ase property doubles the number of compile permutations,
+  so we make it a "soft" permutation (with the <collapse-property> directive) to reduce its impact on compilation time
+  and amount of code to deploy.  However, having a "soft permutation" still increases the compiled code size,
+  so inherit this module judiciously, or restrict its value (with <set-property name="debug" value="on"/>
+  or <set-property name="debug" value="off"/>)
+
+  @see https://github.com/gwtproject/old_google_code_wiki/blob/master/ConditionalProperties.wiki.md
+  @see https://github.com/gwtproject/old_google_code_wiki/blob/master/SoftPermutations.wiki.md
+  -->
+  <define-property name="debug" values="on,off"/>
+  <!--
+    TODO(1): use console.error instead of alert in this property-provider JS
+    TODO(2): extract this property-provider JS into a standalone JS file (to allow static analysis & unit testing)
+             and use a generator (see UserAgent.gwt.xml and UserAgentPropertyGenerator)
+  -->
+  <property-provider name="debug">
+		<![CDATA[
+		try {
+          var value = null;
+
+          // get the property value from the "debug" url parameter
+          var match = /[?&]debug=(.*?)(?:&|$)/.exec(location.search);
+          if (match)
+            value = match[1];
+
+          if (value == null || !__gwt_isKnownPropertyValue("debug",  value)) {
+            // the url parameter was missing or its value is not valid
+            return "off";
+          }
+
+          return value;
+        } catch(e){
+          alert("Unexpected exception in debug mode detection, debug mode will be disabled: " + e);
+          return "off";
+        }
+		]]>
+	</property-provider>
+  <!--
+  We make it a "soft" permutation for faster compile times and less code to deploy
+  (https://github.com/gwtproject/old_google_code_wiki/blob/master/SoftPermutations.wiki.md)
+   -->
+  <collapse-property name="debug" values="*" />
+
+  <replace-with class="solutions.trsoftware.commons.client.logging.LogImplFull">
+    <when-type-is class="solutions.trsoftware.commons.client.logging.LogImpl"/>
+    <when-property-is name="debug" value="on"/>
+	</replace-with>
+
+  <replace-with class="solutions.trsoftware.commons.client.logging.ConsoleFullImpl">
+    <when-type-is class="solutions.trsoftware.commons.client.logging.Console"/>
+    <when-property-is name="debug" value="on"/>
+	</replace-with>
+
+  <replace-with class="solutions.trsoftware.commons.client.logging.ConsoleMinimalImpl">
+    <when-type-is class="solutions.trsoftware.commons.client.logging.Console"/>
+    <when-property-is name="debug" value="off"/>
+	</replace-with>
+
+</module>

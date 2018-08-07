@@ -65,8 +65,11 @@ public class TypingSpeedLabel extends ValueLabel<TypingSpeed> {
     if (unit == null)
       throw new NullPointerException();
     if (unitBox.replaceValue(unit) != unit) {
-      // update the displayed value if changing to a different unit
-      setValue(getValue());
+      // update the rendered value when changing to a different unit
+      TypingSpeed value = getValue();
+      // avoid NPE when the value hasn't already been set
+      if (value != null)
+        setValue(value);  // trigger re-rendering of the value
     }
   }
 

@@ -19,6 +19,7 @@ package solutions.trsoftware.commons.client.widgets;
 
 import com.google.gwt.user.client.Command;
 import com.google.gwt.user.client.ui.Composite;
+import com.google.web.bindery.event.shared.HandlerRegistration;
 import solutions.trsoftware.commons.client.event.DataChangeListener;
 import solutions.trsoftware.commons.client.event.DestroyableRegistersDataChangeListeners;
 import solutions.trsoftware.commons.client.event.ListenerSet;
@@ -58,6 +59,18 @@ public class DestroyableComposite extends Composite implements DestroyableRegist
     addCleanupAction(new Command() {
       public void execute() {
         listener.removeFromListenerSet();
+      }
+    });
+  }
+
+  /**
+   * Adds a "cleanup" action that will remove the given handler registration when this widget becomes detached.
+   */
+  public void addHandlerRegistration(HandlerRegistration handlerRegistration) {
+    addCleanupAction(new Command() {
+      @Override
+      public void execute() {
+        handlerRegistration.removeHandler();
       }
     });
   }

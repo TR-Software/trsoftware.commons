@@ -18,6 +18,8 @@
 package solutions.trsoftware.commons.client.event;
 
 import com.google.gwt.user.client.ui.Composite;
+import com.google.web.bindery.event.shared.Event;
+import com.google.web.bindery.event.shared.HandlerRegistration;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -30,36 +32,77 @@ import java.util.List;
  */
 public class CompositeWithDataChangeListeners extends Composite {
 
-  private static class ListenerRegistration<T> {
+  private interface DeferredRegistration {
+    /**
+     * Register the event handler.
+     */
+    void activate();
+
+    /**
+     * Unregister the event handler.
+     */
+    void deactivate();
+  }
+
+  private static class DeferredListenerRegistration<T> implements DeferredRegistration {
     private ListenerSet<T> listenerSet;
     private DataChangeListener<T> listener;
 
-    private ListenerRegistration(ListenerSet<T> listenerSet, DataChangeListener<T> listener) {
+    private DeferredListenerRegistration(ListenerSet<T> listenerSet, DataChangeListener<T> listener) {
       this.listenerSet = listenerSet;
       this.listener = listener;
     }
 
-    private void activate() {
+    @Override
+    public void activate() {
       listenerSet.add(listener);
     }
 
-    private void deactivate() {
+    @Override
+    public void deactivate() {
       listenerSet.remove(listener);
     }
   }
 
-  private final List<ListenerRegistration> listenerRegistrations = new ArrayList<ListenerRegistration>();
+  private static class DeferredEventHandlerRegistration<H> implements DeferredRegistration {
+    private Event.Type<H> eventType;
+    private H handler;
+    private HandlerRegistration handlerRegistration;
+
+    public DeferredEventHandlerRegistration(Event.Type<H> eventType, H handler) {
+      this.eventType = eventType;
+      this.handler = handler;
+    }
+
+    @Override
+    public void activate() {
+      handlerRegistration = Events.BUS.addHandler(eventType, handler);
+    }
+
+    @Override
+    public void deactivate() {
+      if (handlerRegistration != null)
+        handlerRegistration.removeHandler();
+    }
+  }
+
+  private final List<DeferredRegistration> deferredRegistrations = new ArrayList<>();
+
 
   public <T> void registerDataChangeListener(ListenerSet<T> listenerSet, final DataChangeListener<T> listener) {
-    ListenerRegistration<T> reg = new ListenerRegistration<T>(listenerSet, listener);
+    DeferredListenerRegistration<T> reg = new DeferredListenerRegistration<T>(listenerSet, listener);
     reg.activate();
-    listenerRegistrations.add(reg);
+    deferredRegistrations.add(reg);
+  }
+
+  public <H> boolean registerEventHandler(Event.Type<H> eventType, H handler) {
+    return deferredRegistrations.add(new DeferredEventHandlerRegistration<H>(eventType, handler));
   }
 
   @Override
   protected void onLoad() {
     super.onLoad();
-    for (ListenerRegistration reg : listenerRegistrations) {
+    for (DeferredRegistration reg : deferredRegistrations) {
       reg.activate();
     }
   }
@@ -71,7 +114,7 @@ public class CompositeWithDataChangeListeners extends Composite {
   @Override
   protected void onUnload() {
     super.onUnload();
-    for (ListenerRegistration reg : listenerRegistrations) {
+    for (DeferredRegistration reg : deferredRegistrations) {
       reg.deactivate();
     }
   }

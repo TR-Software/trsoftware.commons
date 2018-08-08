@@ -17,6 +17,7 @@
 package solutions.trsoftware.commons.client.widgets;
 
 import com.google.gwt.dom.client.Document;
+import com.google.gwt.dom.client.Element;
 import com.google.gwt.user.client.ui.*;
 
 /**
@@ -37,7 +38,7 @@ public class InlineFlowPanel extends ComplexPanel implements InsertPanel.ForIsWi
    */
   @Override
   public void add(Widget w) {
-    add(w, getElement());
+    add(w, (Element)getElement());
   }
 
 
@@ -54,7 +55,7 @@ public class InlineFlowPanel extends ComplexPanel implements InsertPanel.ForIsWi
    *           range
    */
   public void insert(Widget w, int beforeIndex) {
-    insert(w, getElement(), beforeIndex, true);
+    insert(w, (Element)getElement(), beforeIndex, true);
   }
 
 }

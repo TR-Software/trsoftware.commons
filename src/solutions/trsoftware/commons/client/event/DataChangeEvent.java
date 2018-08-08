@@ -18,11 +18,10 @@
 package solutions.trsoftware.commons.client.event;
 
 /**
- * Date: Nov 14, 2007
-* Time: 9:52:53 PM
-*
-* @author Alex
-*/
+ * @author Alex
+ * @since Nov 14, 2007
+ * @deprecated use GWT's new {@link com.google.web.bindery.event.shared.Event} paradigm instead.
+ */
 public class DataChangeEvent<T> {
   /** The old value for the piece of data that changed */
   private T oldData;

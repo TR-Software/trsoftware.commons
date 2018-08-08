@@ -24,9 +24,9 @@ import java.util.ArrayList;
 import java.util.LinkedHashSet;
 
 /**
- * Date: Nov 21, 2007 Time: 3:58:29 AM
- *
  * @author Alex
+ * @since Nov 21, 2007
+ * @deprecated use {@link Events#BUS} instead.
  */
 public class ListenerSet<T> extends LinkedHashSet<DataChangeListener<T>> {
 

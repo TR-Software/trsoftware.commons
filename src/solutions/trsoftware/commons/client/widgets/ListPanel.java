@@ -18,25 +18,55 @@
 package solutions.trsoftware.commons.client.widgets;
 
 import com.google.gwt.dom.client.Document;
-import com.google.gwt.event.dom.client.ClickEvent;
-import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.dom.client.LIElement;
 import com.google.gwt.user.client.DOM;
-import com.google.gwt.user.client.Element;
-import com.google.gwt.user.client.Window;
-import com.google.gwt.user.client.ui.*;
-import solutions.trsoftware.commons.shared.util.mutable.MutableInteger;
+import com.google.gwt.user.client.ui.ComplexPanel;
+import com.google.gwt.user.client.ui.Widget;
 
 /**
- * A panel that renders its children in a {@code <ol>} element.
+ * Panel that displays its children within {@code <li>} elements nested in a parent {@code <ol>} or {@code <ul>}
+ * (determined by the {@link Type} arg passed to the constructor).
+ *
  * @author Alex, 9/25/2017
  */
-public class OrderedList extends ComplexPanel {
+public class ListPanel extends ComplexPanel {
+
+  private final Type listType;
 
   /**
-   * Creates an empty flow panel.
+   * HTML list type ({@code <ol>} or {@code <ul>})
    */
-  public OrderedList() {
-    setElement(Document.get().createOLElement());
+  public enum Type {
+    /**
+     * Specifies using the HTML element {@code <ul>}
+     */
+    UL,
+    /**
+     * Specifies using the HTML element {@code <ol>}
+     */
+    OL;
+  }
+
+  /**
+   * @param listType determines whether to use {@code <ul>} or {@code <ol>} as the main element
+   */
+  public ListPanel(Type listType) {
+    this.listType = listType;
+    switch (listType) {
+      case UL:
+        setElement(Document.get().createULElement());
+        break;
+      case OL:
+        setElement(Document.get().createOLElement());
+        break;
+      default:
+        // should never happen
+        throw new IllegalArgumentException(listType.toString());
+    }
+  }
+
+  public Type getListType() {
+    return listType;
   }
 
   /**
@@ -46,7 +76,7 @@ public class OrderedList extends ComplexPanel {
    */
   @Override
   public void add(Widget w) {
-    Element li = Document.get().createLIElement().cast();
+    LIElement li = Document.get().createLIElement();
     DOM.appendChild(getElement(), li);
     add(w, li);
   }
@@ -57,10 +87,10 @@ public class OrderedList extends ComplexPanel {
      * Get the LI to be removed before calling super.remove() because
      * super.remove() will detach the child widget's element from its parent.
      */
-    Element li = DOM.getParent(w.getElement());
+    com.google.gwt.dom.client.Element li = w.getElement().getParentElement();
     boolean removed = super.remove(w);
     if (removed) {
-      DOM.removeChild(getElement(), li);
+      getElement().removeChild(li);
     }
     return removed;
   }
@@ -97,42 +127,4 @@ public class OrderedList extends ComplexPanel {
 //    insert(w, getElement(), beforeIndex, true);
 //  }
 
-  // TODO: temp
-  public static Widget createTestWidget() {
-    final MutableInteger next = new MutableInteger(1);
-    final OrderedList ol = new OrderedList();
-    return Widgets.flowPanel(
-        ol,
-        new Button("Add list item", new ClickHandler() {
-          @Override
-          public void onClick(ClickEvent event) {
-            Button btnRemove = new Button("Remove");
-            final FlowPanel item = Widgets.flowPanel(
-                new InlineLabel("Item " + next.getAndIncrement()),
-                btnRemove
-            );
-            btnRemove.addClickHandler(new ClickHandler() {
-              @Override
-              public void onClick(ClickEvent event) {
-                ol.remove(item);
-              }
-            });
-            ol.add(item);
-          }
-        }),
-        new Button("Remove Index", new ClickHandler() {
-          @Override
-          public void onClick(ClickEvent event) {
-            int idx = Integer.parseInt(Window.prompt("Enter item index", "1"));
-            ol.remove(idx);
-          }
-        }),
-        new Button("Clear", new ClickHandler() {
-          @Override
-          public void onClick(ClickEvent event) {
-            ol.clear();
-          }
-        })
-    );
-  }
 }

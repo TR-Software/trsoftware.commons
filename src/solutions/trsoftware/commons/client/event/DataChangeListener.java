@@ -18,10 +18,9 @@
 package solutions.trsoftware.commons.client.event;
 
 /**
- * Date: Nov 14, 2007
- * Time: 9:52:44 PM
- *
  * @author Alex
+ * @since Nov 14, 2007
+ * @deprecated use GWT's new {@link com.google.web.bindery.event.shared.Event} paradigm instead.
  */
 public abstract class DataChangeListener<T> {
 

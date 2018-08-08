@@ -16,7 +16,7 @@
  */
 package solutions.trsoftware.commons.client.widgets;
 
-import com.google.gwt.user.client.DOM;
+import com.google.gwt.dom.client.Document;
 import com.google.gwt.user.client.ui.*;
 
 /**
@@ -27,7 +27,7 @@ public class InlineFlowPanel extends ComplexPanel implements InsertPanel.ForIsWi
    * Creates an empty flow panel.
    */
   public InlineFlowPanel() {
-    setElement(DOM.createSpan());
+    setElement(Document.get().createSpanElement());
   }
 
   /**

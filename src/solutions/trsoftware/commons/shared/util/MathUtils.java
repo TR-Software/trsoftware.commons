@@ -281,4 +281,45 @@ public class MathUtils {
     return min(max(value, a), b);
   }
 
+  /**
+   * Computes the mathematical signum function, which is defined to return one of {@code -1},
+   * {@code 0}, or {@code 1} according to whether the argument is negative, zero or positive.
+   * <p>
+   * Note: this is the integer version of {@link Math#signum(float)} / {@link Math#signum(double)}, useful for
+   * testing results of {@link java.util.Comparator#compare(Object, Object)}.
+   *
+   * @return the signum function of the argument: zero if the argument is zero, {@code 1} if the argument is greater
+   *     than zero, {@code -1} if the argument is less than zero.
+   * @see Math#signum(float)
+   * @see Math#signum(double)
+   */
+  public static int signum(int x) {
+    if (x == 0)
+      return 0;
+    else if (x > 0)
+      return 1;
+    else
+      return -1;
+  }
+
+  /**
+   * Computes the mathematical signum function, which is defined to return one of {@code -1},
+   * {@code 0}, or {@code 1} according to whether the argument is negative, zero or positive.
+   * <p>
+   * Note: this is the integer version of {@link Math#signum(float)} / {@link Math#signum(double)}, useful for
+   * testing results of {@link java.util.Comparator#compare(Object, Object)}.
+   *
+   * @return the signum function of the argument: zero if the argument is zero, {@code 1} if the argument is greater
+   *     than zero, {@code -1} if the argument is less than zero.
+   * @see Math#signum(float)
+   * @see Math#signum(double)
+   */
+  public static int signum(long x) {
+    if (x == 0)
+      return 0;
+    else if (x > 0)
+      return 1;
+    else
+      return -1;
+  }
 }

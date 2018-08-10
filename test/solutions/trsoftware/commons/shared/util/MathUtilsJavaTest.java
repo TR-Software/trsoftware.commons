@@ -24,9 +24,7 @@ import solutions.trsoftware.commons.shared.testutil.AssertUtils;
 import solutions.trsoftware.commons.shared.util.stats.NumberSample;
 
 import java.math.BigInteger;
-import java.util.Arrays;
-import java.util.Random;
-import java.util.UUID;
+import java.util.*;
 
 import static solutions.trsoftware.commons.shared.util.MathUtils.*;
 
@@ -403,5 +401,20 @@ public class MathUtilsJavaTest extends TestCase {
     assertEquals(10L, restrict(11L, -10L, 10L));
   }
 
+
+  public void testSignum() throws Exception {
+    Map<Integer, int[]> testCases = new MapDecorator<Integer, int[]>(new LinkedHashMap<Integer, int[]>())
+        .put(0, new int[]{0})
+        .put(-1, new int[]{-123, -1})
+        .put(1, new int[]{123, 1})
+        .getMap();
+    for (Integer expected : testCases.keySet()) {
+      int[] args = testCases.get(expected);
+      for (int arg : args) {
+        assertEquals((int)expected, signum(arg));
+        assertEquals((int)expected, signum((long)arg));
+      }
+    }
+  }
 
 }

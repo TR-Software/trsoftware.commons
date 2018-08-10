@@ -15,7 +15,7 @@
  *
  */
 
-package solutions.trsoftware.commons.shared.util;
+package solutions.trsoftware.commons.shared.util.compare;
 
 /**
  * Provides an abstraction for numerical comparison operators.

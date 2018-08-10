@@ -41,13 +41,7 @@ public class ArrayUtils {
   }
 
   public static String toString(int[] array, String delimiter) {
-    StringBuilder str = new StringBuilder();
-    for (int i = 0; i < array.length; i++) {
-      str.append(array[i]);
-      if (i < array.length-1)
-        str.append(delimiter);
-    }
-    return str.toString();
+    return StringUtils.join(delimiter, array);
   }
 
   // TODO: document how the above toString methods differ from Arrays.toString (i.e. they omit brackets and allow specifying a custom delimiter

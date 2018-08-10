@@ -237,10 +237,11 @@ public class StringUtils {
    * Provides a very limited form of string templating. The symbols {@code $1}...{@code $9}
    * are replaced with the given args.  Supports at most 9 arguments (to make parsing simpler).
    * For a more powerful implementation can use {@link SimpleTemplateParser} instead.
-   *
+   * <p>
    * This method exists because {@link String#format(String, Object...)} is not available in GWT.
-   * 
-   * @param format string which may contain symbols {@code $1}...{@code $9} to be substituted with the positional {@code args}
+   *
+   * @param format string which may contain symbols {@code $1}...{@code $9} to be substituted with the positional
+   *     {@code args}
    * @param args the replacements for the symbols {@code $1}...{@code $9} in the {@code format} string.
    * @return the {@code format} string with symbols {@code $1}...{@code $9} replaced by the positional {@code args}
    * @see Template
@@ -378,9 +379,18 @@ public class StringUtils {
     return n;
   }
 
-  /** A var-arg version of the toString(array, delimiter) method */
   public static <T> String join(String delimiter, T... array) {
     return join(delimiter, Arrays.asList(array));
+  }
+
+  public static String join(String delimiter, int... array) {
+    StringBuilder str = new StringBuilder();
+    for (int i = 0; i < array.length; i++) {
+      str.append(array[i]);
+      if (i < array.length - 1)
+        str.append(delimiter);
+    }
+    return str.toString();
   }
 
   public static <T> String join(String delimiter, Iterator<T> iter) {

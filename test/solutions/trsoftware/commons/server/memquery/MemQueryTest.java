@@ -24,7 +24,7 @@ import solutions.trsoftware.commons.server.memquery.expressions.BooleanBinaryOpe
 import solutions.trsoftware.commons.server.memquery.expressions.ColValueComparison;
 import solutions.trsoftware.commons.server.memquery.expressions.CompoundRowPredicate;
 import solutions.trsoftware.commons.server.memquery.expressions.RowExpression;
-import solutions.trsoftware.commons.shared.util.ComparisonOperator;
+import solutions.trsoftware.commons.shared.util.compare.ComparisonOperator;
 
 /**
  * @author Alex, 1/9/14

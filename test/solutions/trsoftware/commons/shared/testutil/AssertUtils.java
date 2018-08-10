@@ -21,9 +21,9 @@ import com.google.common.collect.Multimap;
 import com.google.gwt.user.client.Element;
 import junit.framework.AssertionFailedError;
 import solutions.trsoftware.commons.client.util.GwtUtils;
-import solutions.trsoftware.commons.shared.util.ComparisonOperator;
 import solutions.trsoftware.commons.shared.util.StringUtils;
 import solutions.trsoftware.commons.shared.util.callables.Function0_t;
+import solutions.trsoftware.commons.shared.util.compare.ComparisonOperator;
 
 import java.util.*;
 
@@ -388,11 +388,35 @@ public abstract class AssertUtils {
   }
 
   /**
+   * Asserts that {@code a != b}, as defined by their {@link Comparable#compareTo(Object)} method.
+   */
+  public static <C extends Comparable<C>> void assertComparablesNotEqual(C a, C b) {
+    assertTrue(a.compareTo(b) != 0);
+    assertTrue(b.compareTo(a) != 0);
+  }
+
+  /**
+   * Asserts that each element in the given sequence is "less than" the next element
+   * according to the "natural ordering" defined by {@link Comparable#compareTo(Object)}
+   * @see Comparable
+   */
+  @SafeVarargs
+  public static <C extends Comparable<C>> void assertComparablesOrdering(C... comparables) {
+    if (comparables.length > 1) {
+      for (int i = 1; i < comparables.length; i++) {
+        C a = comparables[i - 1];
+        C b = comparables[i];
+        assertLessThan(a, b);
+      }
+    }
+  }
+
+  /**
    * Asserts that {@code a < b}, as defined by their {@link Comparable#compareTo(Object)} method.
    */
   public static <C extends Comparable<C>> void assertLessThan(C a, C b) {
-    assertTrue(a.compareTo(b) < 0);
-    assertTrue(b.compareTo(a) > 0);
+    assertTrue(StringUtils.template("Expected {$1}.compareTo({$2}) < 0, but was $3", a, b, a.compareTo(b)), a.compareTo(b) < 0);
+    assertTrue(StringUtils.template("Expected {$1}.compareTo({$2}) > 0, but was $3", a, b, b.compareTo(a)), b.compareTo(a) > 0);
   }
 
   // AssertionBuilder methods: --------------------------------------------------------------------------------

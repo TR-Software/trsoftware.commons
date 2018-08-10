@@ -17,7 +17,7 @@
 
 package solutions.trsoftware.commons.server.memquery.expressions;
 
-import solutions.trsoftware.commons.shared.util.ComparisonOperator;
+import solutions.trsoftware.commons.shared.util.compare.ComparisonOperator;
 
 /**
  * @author Alex, 4/17/2015

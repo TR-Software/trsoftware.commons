@@ -19,6 +19,7 @@ package solutions.trsoftware.commons.shared.util;
 
 import com.google.common.base.Predicate;
 import solutions.trsoftware.commons.shared.util.callables.Function1;
+import solutions.trsoftware.commons.shared.util.compare.ComparisonOperator;
 import solutions.trsoftware.commons.shared.util.iterators.ArrayIterator;
 import solutions.trsoftware.commons.shared.util.iterators.ChainedIterator;
 

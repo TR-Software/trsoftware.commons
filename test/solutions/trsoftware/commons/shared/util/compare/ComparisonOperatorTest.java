@@ -15,11 +15,11 @@
  *
  */
 
-package solutions.trsoftware.commons.shared.util;
+package solutions.trsoftware.commons.shared.util.compare;
 
 import junit.framework.TestCase;
 
-import static solutions.trsoftware.commons.shared.util.ComparisonOperator.*;
+import static solutions.trsoftware.commons.shared.util.compare.ComparisonOperator.*;
 
 /**
  * @author Alex

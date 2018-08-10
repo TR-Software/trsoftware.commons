@@ -20,7 +20,7 @@ package solutions.trsoftware.gwt;
 import com.google.gwt.junit.JUnitShell;
 import com.google.gwt.junit.client.GWTTestCase;
 import solutions.trsoftware.commons.shared.gwt.GwtVersion;
-import solutions.trsoftware.commons.shared.util.ComparisonOperator;
+import solutions.trsoftware.commons.shared.util.compare.ComparisonOperator;
 
 import java.util.ArrayList;
 import java.util.LinkedHashMap;

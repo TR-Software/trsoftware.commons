@@ -231,7 +231,7 @@ public class CachePolicyFilterTest extends TestCase {
       for (Map.Entry<CachePolicy, String> entry : expectedResults.get(matcherClass).entries()) {
         CachePolicy cachePolicy = entry.getKey();
         String uri = entry.getValue();
-        DummyHttpServletRequest request = new DummyHttpServletRequest(uri);
+        DummyHttpServletRequest request = new DummyHttpServletRequest().setRequestURI(uri);
         DummyHttpServletResponse response = new DummyHttpServletResponse();
         DummyFilterChain filterChain = new DummyFilterChain();
         cachePolicyFilter.doHttpFilter(request, response, filterChain);

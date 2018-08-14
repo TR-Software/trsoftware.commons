@@ -61,34 +61,34 @@ public class ServletUtilsTest extends TestCase {
   }
 
   public void testExtractFirstPathElement() throws Exception {
-    assertEquals("foo", extractFirstPathElement(new DummyHttpServletRequest("/foo/")));
-    assertEquals("foo", extractFirstPathElement(new DummyHttpServletRequest("/foo/gameserv")));
-    assertEquals("foo", extractFirstPathElement(new DummyHttpServletRequest("/foo/gameserv/")));
-    assertEquals("foo", extractFirstPathElement(new DummyHttpServletRequest("/foo/bar/gameserv")));
-    assertEquals("foo", extractFirstPathElement(new DummyHttpServletRequest("/foo/bar/gameserv/")));
+    assertEquals("foo", extractFirstPathElement(new DummyHttpServletRequest().setRequestURI("/foo/")));
+    assertEquals("foo", extractFirstPathElement(new DummyHttpServletRequest().setRequestURI("/foo/gameserv")));
+    assertEquals("foo", extractFirstPathElement(new DummyHttpServletRequest().setRequestURI("/foo/gameserv/")));
+    assertEquals("foo", extractFirstPathElement(new DummyHttpServletRequest().setRequestURI("/foo/bar/gameserv")));
+    assertEquals("foo", extractFirstPathElement(new DummyHttpServletRequest().setRequestURI("/foo/bar/gameserv/")));
 
-    assertEquals("bar", extractFirstPathElement(new DummyHttpServletRequest("foo/bar/gameserv/")));
+    assertEquals("bar", extractFirstPathElement(new DummyHttpServletRequest().setRequestURI("foo/bar/gameserv/")));
 
     // the following URIs don't have a first path element
-    assertNull("foo", extractFirstPathElement(new DummyHttpServletRequest("/")));
-    assertNull("foo", extractFirstPathElement(new DummyHttpServletRequest("/foo")));
-    assertNull("foo", extractFirstPathElement(new DummyHttpServletRequest("/foo.html")));
+    assertNull("foo", extractFirstPathElement(new DummyHttpServletRequest().setRequestURI("/")));
+    assertNull("foo", extractFirstPathElement(new DummyHttpServletRequest().setRequestURI("/foo")));
+    assertNull("foo", extractFirstPathElement(new DummyHttpServletRequest().setRequestURI("/foo.html")));
   }
 
   public void testExtractAllPathElements() throws Exception {
-    assertSameSequence(asEnumeration(), extractAllPathElements(new DummyHttpServletRequest("/")));
-    assertSameSequence(asEnumeration(), extractAllPathElements(new DummyHttpServletRequest("")));
+    assertSameSequence(asEnumeration(), extractAllPathElements(new DummyHttpServletRequest().setRequestURI("/")));
+    assertSameSequence(asEnumeration(), extractAllPathElements(new DummyHttpServletRequest().setRequestURI("")));
     AssertUtils.assertThrows(NullPointerException.class,
-        (Runnable)() -> extractAllPathElements(new DummyHttpServletRequest((String)null)));
-    assertSameSequence(asEnumeration("foo"), extractAllPathElements(new DummyHttpServletRequest("/foo/")));
-    assertSameSequence(asEnumeration("foo"), extractAllPathElements(new DummyHttpServletRequest("/foo/")));
-    assertSameSequence(asEnumeration("foo", "gameserv"), extractAllPathElements(new DummyHttpServletRequest("/foo/gameserv")));
-    assertSameSequence(asEnumeration("foo", "gameserv"), extractAllPathElements(new DummyHttpServletRequest("/foo/gameserv/")));
-    assertSameSequence(asEnumeration("foo", "bar", "gameserv"), extractAllPathElements(new DummyHttpServletRequest("/foo/bar/gameserv")));
-    assertSameSequence(asEnumeration("foo", "bar", "gameserv"), extractAllPathElements(new DummyHttpServletRequest("/foo/bar/gameserv/")));
-    assertSameSequence(asEnumeration("foo", "bar", "gameserv"), extractAllPathElements(new DummyHttpServletRequest("/foo/bar//gameserv/")));
-    assertSameSequence(asEnumeration("foo", "bar", "gameserv"), extractAllPathElements(new DummyHttpServletRequest("//foo/bar//gameserv/")));
-    assertSameSequence(asEnumeration("foo", "bar", "gameserv"), extractAllPathElements(new DummyHttpServletRequest("//foo/bar//gameserv//")));
+        (Runnable)() -> extractAllPathElements(new DummyHttpServletRequest().setRequestURI(null)));
+    assertSameSequence(asEnumeration("foo"), extractAllPathElements(new DummyHttpServletRequest().setRequestURI("/foo/")));
+    assertSameSequence(asEnumeration("foo"), extractAllPathElements(new DummyHttpServletRequest().setRequestURI("/foo/")));
+    assertSameSequence(asEnumeration("foo", "gameserv"), extractAllPathElements(new DummyHttpServletRequest().setRequestURI("/foo/gameserv")));
+    assertSameSequence(asEnumeration("foo", "gameserv"), extractAllPathElements(new DummyHttpServletRequest().setRequestURI("/foo/gameserv/")));
+    assertSameSequence(asEnumeration("foo", "bar", "gameserv"), extractAllPathElements(new DummyHttpServletRequest().setRequestURI("/foo/bar/gameserv")));
+    assertSameSequence(asEnumeration("foo", "bar", "gameserv"), extractAllPathElements(new DummyHttpServletRequest().setRequestURI("/foo/bar/gameserv/")));
+    assertSameSequence(asEnumeration("foo", "bar", "gameserv"), extractAllPathElements(new DummyHttpServletRequest().setRequestURI("/foo/bar//gameserv/")));
+    assertSameSequence(asEnumeration("foo", "bar", "gameserv"), extractAllPathElements(new DummyHttpServletRequest().setRequestURI("//foo/bar//gameserv/")));
+    assertSameSequence(asEnumeration("foo", "bar", "gameserv"), extractAllPathElements(new DummyHttpServletRequest().setRequestURI("//foo/bar//gameserv//")));
   }
 
   public static Enumeration asEnumeration(final Object... items) {
@@ -153,11 +153,11 @@ public class ServletUtilsTest extends TestCase {
   public void testGetBaseUrl() throws Exception {
     for (String protocol : new String[]{"http", "https"}) {
       assertEquals(protocol + "://localhost:8088", getBaseURL(
-          new DummyHttpServletRequest().setUrl(protocol + "://localhost:8088/errorPage").setUri("/errorPage")).toString());
+          new DummyHttpServletRequest().setRequestURL(protocol + "://localhost:8088/errorPage").setRequestURI("/errorPage")).toString());
       assertEquals(protocol + "://localhost:8088", getBaseURL(
-          new DummyHttpServletRequest().setUrl(protocol + "://localhost:8088/").setUri("/")).toString());
+          new DummyHttpServletRequest().setRequestURL(protocol + "://localhost:8088/").setRequestURI("/")).toString());
       assertEquals(protocol + "://example.com", getBaseURL(
-          new DummyHttpServletRequest().setUrl(protocol + "://example.com/foo/bar").setUri("/")).toString());
+          new DummyHttpServletRequest().setRequestURL(protocol + "://example.com/foo/bar").setRequestURI("/")).toString());
     }
   }
 
@@ -168,7 +168,7 @@ public class ServletUtilsTest extends TestCase {
             nextIntInRange(1, 5), nextIntInRange(3, 6));
         // 1) try without caching
         {
-          DummyHttpServletRequest request = new DummyHttpServletRequest().setUrl(url);
+          DummyHttpServletRequest request = new DummyHttpServletRequest().setRequestURL(url);
           URL parsedURL = ServletUtils.getRequestURL(request, false);
           assertEquals(url, parsedURL.toString());
           assertNull(request.getAttribute(ServletUtils.PARSED_URL_ATTR));
@@ -177,7 +177,7 @@ public class ServletUtilsTest extends TestCase {
         }
         // 2) try with caching
         {
-          DummyHttpServletRequest request = new DummyHttpServletRequest().setUrl(url);
+          DummyHttpServletRequest request = new DummyHttpServletRequest().setRequestURL(url);
           URL parsedURL = ServletUtils.getRequestURL(request, true);
           assertEquals(url, parsedURL.toString());
           assertSame(parsedURL, request.getAttribute(ServletUtils.PARSED_URL_ATTR));

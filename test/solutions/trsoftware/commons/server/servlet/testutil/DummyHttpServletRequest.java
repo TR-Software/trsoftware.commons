@@ -52,10 +52,6 @@ public class DummyHttpServletRequest implements HttpServletRequest {
     this(null, null, paramMap);
   }
 
-  public DummyHttpServletRequest(String uri) {
-    this.uri = uri;
-  }
-
   public DummyHttpServletRequest(String url, String queryString) {
     this.url = url;
     this.queryString = queryString;
@@ -94,12 +90,12 @@ public class DummyHttpServletRequest implements HttpServletRequest {
     return this;
   }
 
-  public DummyHttpServletRequest setUrl(String url) {
+  public DummyHttpServletRequest setRequestURL(String url) {
     this.url = url;
     return this;
   }
 
-  public DummyHttpServletRequest setUri(String uri) {
+  public DummyHttpServletRequest setRequestURI(String uri) {
     this.uri = uri;
     return this;
   }

@@ -67,7 +67,7 @@ public class RequestStatsFilterTest extends TestCase {
     for (int i = 0; i < n; i++) {
       String uri = RandomUtils.randomElement(uris);
       ourCounts.increment(uri);
-      filter.doHttpFilter(new DummyHttpServletRequest(uri), new DummyHttpServletResponse(), filterChain);
+      filter.doHttpFilter(new DummyHttpServletRequest().setRequestURI(uri), new DummyHttpServletResponse(), filterChain);
     }
     assertEquals(n, filterChain.getInvocationCount());  // the filter chain should have been invoked every time
     HierarchicalCounter requestCounts = filter.getRequestCounts();

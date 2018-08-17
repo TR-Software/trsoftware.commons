@@ -19,7 +19,7 @@ package solutions.trsoftware.commons.client.animations;
 
 import com.google.gwt.dom.client.Element;
 import solutions.trsoftware.commons.client.widgets.input.EnumValueListBox;
-import solutions.trsoftware.commons.shared.util.ColorHSL;
+import solutions.trsoftware.commons.shared.graphics.ColorHSL;
 
 /**
  * Gradually changes one of the HSL components of an element's {@code background-color} style between 2 values at a given rate.

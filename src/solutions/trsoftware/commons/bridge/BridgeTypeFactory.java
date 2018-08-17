@@ -90,7 +90,7 @@ public class BridgeTypeFactory {
   }
 
   public static Duration newDuration(String name, String action) {
-    return new solutions.trsoftware.commons.server.util.Duration(action);
+    return new solutions.trsoftware.commons.server.util.Duration(name, action);
   }
 
   public static URIComponentEncoder getURIComponentEncoder() {

@@ -20,8 +20,8 @@ package solutions.trsoftware.commons.client.util;
 import static com.google.gwt.core.client.Duration.currentTimeMillis;
 
 /**
- * Adapts GWT's Duration class (a utility class for measuring elapsed time)
- * for compatibility with the solutions.trsoftware.commons.client.bridge.util.Duration
+ * Adapts {@link com.google.gwt.core.client.Duration} class (a utility class for measuring elapsed time)
+ * for compatibility with the {@link solutions.trsoftware.commons.client.bridge.util.Duration}
  * interface (so the same interface can be used on both the client and server).
  */
 public class Duration extends AbstractDuration {

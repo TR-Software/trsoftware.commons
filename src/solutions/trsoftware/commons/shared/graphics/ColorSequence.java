@@ -15,14 +15,12 @@
  *
  */
 
-package solutions.trsoftware.commons.server.util;
+package solutions.trsoftware.commons.shared.graphics;
 
 import solutions.trsoftware.commons.shared.util.RandomUtils;
 
-import java.awt.*;
-
 /**
- * Generates a random sequence of unique colors, such that each color has a distinct hue.
+ * Generates a pseudo-random sequence of unique colors, such that each color has a distinct hue.
  * <p>
  * Uses the "golden ratio" algorithm (described in the blog post linked below) to select consecutive hues to
  * maximize contrast when the number of items is small, while evenly distributing colors around the spectrum otherwise,
@@ -31,8 +29,6 @@ import java.awt.*;
  * @see <a href="http://martin.ankerl.com/2009/12/09/how-to-create-random-colors-programmatically/">http://martin.ankerl.com/2009/12/09/how-to-create-random-colors-programmatically/</a>
  * @see <a href="http://devmag.org.za/2012/07/29/how-to-choose-colours-procedurally-algorithms/">http://devmag.org.za/2012/07/29/how-to-choose-colours-procedurally-algorithms/</a>
  * @see <a href="https://en.wikipedia.org/wiki/HSL_and_HSV">https://en.wikipedia.org/wiki/HSL_and_HSV</a>
- *
- * TODO: could make this class GWT-compatible either by converting HSV to RGB either (1) without relying on {@link java.awt.Color} or (2) using HSL, since most browsers now support HSL values in CSS (see https://www.w3schools.com/cssref/css_colors_legal.asp)
  *
  * @author Alex, 8/3/2017
  */
@@ -45,21 +41,44 @@ public class ColorSequence {
   private static final double addend = 0.618033988749895;
   private double nextHue;
 
+  /**
+   * The sequence will start at hue = 0
+   */
   public ColorSequence() {
+    this(0);
   }
 
   /**
-   * @return An HTML RGB color string representing the next color in the sequence.
+   * The sequence will be seeded with the given hue
+   *
+   * @param startingHue should be in range [0, 1]
    */
-  public String nextColor() {
+  public ColorSequence(double startingHue) {
+    this.nextHue = startingHue;
+  }
+
+  /**
+   * @return An HTML/CSS RGB color hex string representing the next color in the sequence.
+   * @see <a href="https://en.wikipedia.org/wiki/Web_colors#Hex_triplet">Wikipedia: Web colors &raquo; Hex triplet</a>
+   * @see ColorRGB#toString()
+   */
+  public String nextColorHex() {
+    return nextColor().toString();
+  }
+
+  /**
+   * @return the next color in the sequence.
+   * @see ColorRGB
+   */
+  public ColorRGB nextColor() {
     double hue = nextHue;
     nextHue = (hue + addend) % 1;
     // sat between 0.1 and 0.3
     double saturation = (RandomUtils.rnd.nextInt(2000) + 1000) / 10000d;
-    double luminance = 0.9d;
-    Color color = Color.getHSBColor((float)hue, (float)saturation, (float)luminance);
-    return '#' + Integer.toHexString(
-        (color.getRGB() & 0xffffff) | 0x1000000).substring(1);
+    double brightness = 0.9d;
+    // TODO: try using HSL instead of HSB?
+    int sRGB = ColorUtils.HSBtoRGB((float)hue, (float)saturation, (float)brightness);
+    return new ColorRGB(sRGB);
   }
 
 }

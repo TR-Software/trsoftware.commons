@@ -15,20 +15,25 @@
  *
  */
 
-package solutions.trsoftware.commons.shared.util;
+package solutions.trsoftware.commons.shared.graphics;
 
-import junit.framework.TestCase;
+import solutions.trsoftware.commons.client.CommonsGwtTestCase;
 
-public class ColorTest extends TestCase {
+/**
+ * A simplified version of {@link ColorRGBTest} to be run in a GWT environment
+ *
+ * @author Alex
+ */
+public class ColorRGBGwtTest extends CommonsGwtTestCase {
 
   public void testColor() throws Exception {
     ColorRGB c = new ColorRGB(115, 255, 45);
     System.out.println(c.toString());
     assertEquals("#73ff2d", c.toString());
     ColorRGB parsedColor = ColorRGB.valueOf("#73ff2d");
-    assertEquals(115, parsedColor.r);
-    assertEquals(255, parsedColor.g);
-    assertEquals(45, parsedColor.b);
+    assertEquals(115, parsedColor.getRed());
+    assertEquals(255, parsedColor.getGreen());
+    assertEquals(45, parsedColor.getBlue());
 
     // equals & hash code methods should be properly implemented
     assertEquals(c.hashCode(), parsedColor.hashCode());
@@ -36,9 +41,9 @@ public class ColorTest extends TestCase {
     assertNotSame(c, parsedColor);
 
     ColorRGB parsedColor2 = ColorRGB.valueOf("73ff2d");  // without the # prefix
-    assertEquals(115, parsedColor2.r);
-    assertEquals(255, parsedColor2.g);
-    assertEquals(45, parsedColor2.b);
+    assertEquals(115, parsedColor2.getRed());
+    assertEquals(255, parsedColor2.getGreen());
+    assertEquals(45, parsedColor2.getBlue());
 
     assertEquals(parsedColor2.hashCode(), parsedColor.hashCode());
     assertEquals(parsedColor2, parsedColor);
@@ -47,5 +52,4 @@ public class ColorTest extends TestCase {
     // make sure that all components will be automatically coerced to the range 0..255
     assertEquals("#0000ff", new ColorRGB(-25, 0, 256).toString());
   }
-
 }

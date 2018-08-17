@@ -20,7 +20,7 @@ package solutions.trsoftware.commons.server.servlet.filters;
 import junit.framework.TestCase;
 import solutions.trsoftware.commons.server.servlet.config.InitParameters;
 import solutions.trsoftware.commons.server.servlet.testutil.DummyFilterConfig;
-import solutions.trsoftware.commons.shared.util.ColorRGB;
+import solutions.trsoftware.commons.shared.graphics.ColorRGB;
 import solutions.trsoftware.commons.shared.util.MapUtils;
 
 import javax.servlet.*;

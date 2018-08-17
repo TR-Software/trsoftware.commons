@@ -15,7 +15,7 @@
  *
  */
 
-package solutions.trsoftware.commons.shared.util;
+package solutions.trsoftware.commons.shared.graphics;
 
 import com.google.common.collect.BiMap;
 import junit.framework.TestCase;

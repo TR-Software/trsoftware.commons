@@ -15,13 +15,15 @@
  *
  */
 
-package solutions.trsoftware.commons.shared.util;
+package solutions.trsoftware.commons.shared.graphics;
 
 import com.google.gwt.dom.client.Document;
 import com.google.gwt.regexp.shared.MatchResult;
 import com.google.gwt.regexp.shared.RegExp;
 import com.google.gwt.text.shared.AbstractRenderer;
 import com.google.gwt.user.client.ui.ValueBox;
+import solutions.trsoftware.commons.shared.util.MathUtils;
+import solutions.trsoftware.commons.shared.util.StringUtils;
 import solutions.trsoftware.commons.shared.util.text.SharedNumberFormat;
 
 import java.text.ParseException;

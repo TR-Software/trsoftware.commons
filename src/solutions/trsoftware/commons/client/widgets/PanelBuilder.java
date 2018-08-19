@@ -44,6 +44,11 @@ public class PanelBuilder<P extends Panel> extends WidgetBuilder<P> {
 
   // NOTE: we override all the methods defined by WidgetBuilder to change their return type to PanelBuilder (rather than WidgetBuilder)
 
+  /*
+    TODO: get rid of the methods overridden just for the sake of changing the return type;
+    @see how they did it in com.google.gwt.dom.builder.shared.HtmlElementBuilderBase
+  */
+
   @Override
   public PanelBuilder<P> addStyleDependentName(String styleSuffix) {
     super.addStyleDependentName(styleSuffix);

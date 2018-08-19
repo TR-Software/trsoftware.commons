@@ -20,8 +20,7 @@ package solutions.trsoftware.commons.shared.util.template;
 import java.lang.annotation.*;
 
 /**
- * Dec 11, 2008
- *
+ * @since Dec 11, 2008
  * @author Alex
  */
 public interface TemplateBundle {

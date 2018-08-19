@@ -23,9 +23,13 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * Date: Nov 4, 2008 Time: 3:46:29 PM
+ * A simple builder for HTML strings.
+ * <p>
+ * <i>Note</i>: newer versions of GWT now provide a more powerful implementation of this concept (see
+ * {@link com.google.gwt.dom.builder.shared.HtmlBuilderFactory})
  *
  * @author Alex
+ * @since Nov 4, 2008
  */
 public class HtmlBuilder {
 
@@ -146,6 +150,12 @@ public class HtmlBuilder {
     return this;
   }
 
+  /**
+   * Adds a {@code style} attribute to the current element.
+   *
+   * @param value the value for the {@code style} attribute (e.g. {@code "background-color: red; font-size: 2em;"}).
+   *     Suggestion: use {@link CssBuilder} to construct a string of CSS declarations.
+   */
   public HtmlBuilder style(String value) {
     return attr("style", value);
   }

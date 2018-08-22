@@ -22,6 +22,9 @@ import com.google.gwt.user.client.ui.*;
 
 /**
  * Works just like {@link FlowPanel}, but uses a {@code span} instead of a {@code div}.
+ *
+ * @deprecated GWT now provides the {@link FlowPanel#FlowPanel(String)} constructor, which allows any tag name,
+ * including {@code span}
  */
 public class InlineFlowPanel extends ComplexPanel implements InsertPanel.ForIsWidget {
   /**

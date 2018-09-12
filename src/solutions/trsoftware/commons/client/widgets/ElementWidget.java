@@ -11,13 +11,13 @@ import com.google.gwt.user.client.ui.Widget;
  * @author Alex
  * @since 8/22/2018
  */
-public class GenericWidget extends Widget implements HasHTML {
+public class ElementWidget extends Widget implements HasHTML {
 
   /**
    * Wraps an existing {@link Element}
    * @param element the HTML element to be wrapped.
    */
-  public GenericWidget(Element element) {
+  public ElementWidget(Element element) {
     setElement(element);
   }
 
@@ -25,7 +25,7 @@ public class GenericWidget extends Widget implements HasHTML {
    * Creates a new {@link Element} with the given tag name.
    * @param tagName HTML tag name (e.g. {@code div}, {@code h1}, etc.)
    */
-  public GenericWidget(String tagName) {
+  public ElementWidget(String tagName) {
     this(Document.get().createElement(tagName));
   }
 
@@ -33,10 +33,10 @@ public class GenericWidget extends Widget implements HasHTML {
    * Creates a new {@link Element} with the given tag name, and sets its {@code innerHTML} to the given string.
    * @param tagName HTML tag name (e.g. {@code div}, {@code h1}, etc.)
    * @param html the value to assign to the element's {@code innerHTML} property
-   * @see #GenericWidget(String)
+   * @see #ElementWidget(String)
    * @see #setHTML(String)
    */
-  public GenericWidget(String tagName, String html) {
+  public ElementWidget(String tagName, String html) {
     this(tagName);
     setHTML(html);
   }

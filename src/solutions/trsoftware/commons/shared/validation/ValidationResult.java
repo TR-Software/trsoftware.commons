@@ -17,6 +17,8 @@
 
 package solutions.trsoftware.commons.shared.validation;
 
+import solutions.trsoftware.commons.shared.util.StringUtils;
+
 import java.io.Serializable;
 
 /**
@@ -78,7 +80,7 @@ public class ValidationResult implements Serializable {
   public String toString() {
     final StringBuilder sb = new StringBuilder("ValidationResult{");
     sb.append("valid=").append(valid);
-    sb.append(", errorMessage='").append(errorMessage).append('\'');
+    sb.append(", errorMessage=").append(StringUtils.valueToString(errorMessage));
     sb.append('}');
     return sb.toString();
   }

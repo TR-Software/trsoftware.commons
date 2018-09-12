@@ -32,6 +32,7 @@ public abstract class ValidationRuleGwtTestCase extends CommonsGwtTestCase {
 
     // 1). check the validator
     ValidationResult validationResult = validator.validate(testString);
+    System.out.println("  -> " + validationResult);
     assertEquals(msg, valid, validationResult.isValid());
     if (valid)
       assertNull(validationResult.getErrorMessage());

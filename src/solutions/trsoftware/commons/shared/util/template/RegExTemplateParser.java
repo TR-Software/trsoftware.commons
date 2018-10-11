@@ -89,6 +89,30 @@ public class RegExTemplateParser implements TemplateParser {
     }
   }
 
+  /**
+   * Instances are considered equal iff they use the same parsing regexps
+   */
+  @Override
+  public boolean equals(Object o) {
+    if (this == o)
+      return true;
+    if (o == null || getClass() != o.getClass())
+      return false;
+
+    RegExTemplateParser that = (RegExTemplateParser)o;
+
+    if (variablePattern != null ? !variablePattern.equals(that.variablePattern) : that.variablePattern != null)
+      return false;
+    return commentPattern != null ? commentPattern.equals(that.commentPattern) : that.commentPattern == null;
+  }
+
+  @Override
+  public int hashCode() {
+    int result = variablePattern != null ? variablePattern.hashCode() : 0;
+    result = 31 * result + (commentPattern != null ? commentPattern.hashCode() : 0);
+    return result;
+  }
+
   /** Helper class that hides the awful API provided by {@link RegExp} */
   private class VariableParser {
     private final String input;

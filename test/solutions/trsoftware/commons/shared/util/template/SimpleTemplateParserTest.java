@@ -18,6 +18,7 @@
 package solutions.trsoftware.commons.shared.util.template;
 
 import junit.framework.TestCase;
+import solutions.trsoftware.commons.shared.testutil.AssertUtils;
 
 /**
  * Apr 13, 2010
@@ -26,12 +27,41 @@ import junit.framework.TestCase;
  */
 public class SimpleTemplateParserTest extends TestCase {
 
+  public void testWithCustomSyntax() throws Exception {
+    assertTemplateRenderResult(
+        new SimpleTemplateParser("{*", "*}", "/*", "*/"),
+        "{*name*} {*lastName*} is the number {*foo*} {*bar*} in the world/* this is a template */");
+  }
 
-  public void testCustomTemplateParser() throws Exception {
-    TemplateParser parser = new SimpleTemplateParser("{*", "*}", "/*", "*/");
+  public void testWithDefaultSyntax() throws Exception {
+    assertTemplateRenderResult(
+        SimpleTemplateParser.DEFAULT_SYNTAX,
+        "${name} ${lastName} is the number ${foo} ${bar} in the world<!-- this is a template -->");
+  }
+
+  public void testWithDjangoSyntax() throws Exception {
+    assertTemplateRenderResult(
+        SimpleTemplateParser.DJANGO_SYNTAX,
+        "{{name}} {{lastName}} is the number {{foo}} {{bar}} in the world{# this is a template#}");
+  }
+
+  private void assertTemplateRenderResult(TemplateParser parser, String templateString) {
     assertEquals(
-        "AdamLyons is the number 1 player in the world",
-        parser.parseTemplate("{*name*}{*lastName*} is the number {*foo*} {*bar*} in the world/* this is a template */")
+        "Adam Lyons is the number 1 player in the world",
+        parser.parseTemplate(templateString)
             .render("lastName", "Lyons", "name", "Adam", "foo", "1", "bar", "player"));
+  }
+
+  public void testEqualsAndHashCode() throws Exception {
+    // two instances are equal iff they represent the same syntax
+    SimpleTemplateParser a = new SimpleTemplateParser("{*", "*}", "/*", "*/");
+    SimpleTemplateParser b = new SimpleTemplateParser("{*", "*}", "<!--", "-->");
+    AssertUtils.assertEqualsAndHashCode(
+        a,
+        new SimpleTemplateParser("{*", "*}", "/*", "*/"));
+    AssertUtils.assertEqualsAndHashCode(
+        b,
+        new SimpleTemplateParser("{*", "*}", "<!--", "-->"));
+    AssertUtils.assertNotEqual(a, b);
   }
 }

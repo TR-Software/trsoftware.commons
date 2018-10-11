@@ -18,6 +18,7 @@
 package solutions.trsoftware.commons.shared.util.template;
 
 import junit.framework.TestCase;
+import solutions.trsoftware.commons.shared.testutil.AssertUtils;
 import solutions.trsoftware.commons.shared.util.MapUtils;
 
 import java.util.HashMap;
@@ -68,5 +69,20 @@ public class RegExTemplateParserTest extends TestCase {
 
   private Template parse(String templateString) {
     return new RegExTemplateParser(variablePattern, commentPattern).parseTemplate(templateString);
+  }
+
+  public void testEqualsAndHashCode() throws Exception {
+    // instances are considered equal iff they use the same parsing regexps
+    RegExTemplateParser a = new RegExTemplateParser(variablePattern, commentPattern);
+    RegExTemplateParser b = new RegExTemplateParser("\\{(\\w+)\\}", commentPattern);
+    AssertUtils.assertEqualsAndHashCode(
+        a,
+        new RegExTemplateParser(variablePattern, commentPattern)
+    );
+    AssertUtils.assertEqualsAndHashCode(
+        b,
+        new RegExTemplateParser("\\{(\\w+)\\}", commentPattern)
+    );
+    AssertUtils.assertNotEqual(a, b);
   }
 }

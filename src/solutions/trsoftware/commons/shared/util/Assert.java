@@ -47,6 +47,8 @@ public class Assert {
   }
 
   /**
+   * Same as {@link java.util.Objects#requireNonNull(Object)}.  Provided for compatibility with Java 1.6 and older.
+   *
    * @return The given arg if it's not null
    * @throws NullPointerException with no message if the arg is null
    */
@@ -55,6 +57,8 @@ public class Assert {
   }
 
   /**
+   * Same as {@link java.util.Objects#requireNonNull(Object, String)}.  Provided for compatibility with Java 1.6 and older.
+   *
    * @return The given arg if it's not null
    * @throws NullPointerException with the given message if the arg is null
    */

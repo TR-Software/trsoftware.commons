@@ -19,6 +19,7 @@ package solutions.trsoftware.commons.server.util;
 
 import junit.framework.TestCase;
 import solutions.trsoftware.commons.server.io.ResourceLocator;
+import solutions.trsoftware.commons.shared.util.template.SimpleTemplateParser;
 import solutions.trsoftware.commons.shared.util.template.Template;
 
 import java.io.File;
@@ -26,6 +27,26 @@ import java.io.File;
 import static solutions.trsoftware.commons.shared.util.MapUtils.hashMap;
 
 public class FileTemplateParserTest extends TestCase {
+
+  private FileTemplateParser defaultSyntaxInstance;
+  private FileTemplateParser djangoSyntaxInstance;
+
+  public void setUp() throws Exception {
+    super.setUp();
+    defaultSyntaxInstance = FileTemplateParser.getInstance();
+    djangoSyntaxInstance = FileTemplateParser.getInstance(new SimpleTemplateParser("{{ ", " }}", "{# ", " #}"));
+  }
+
+  public void testGetInstance() throws Exception {
+    // make sure the same instance of FileTemplateParser is returned for each equivalent instance of SimpleTemplateParser
+    assertSame(defaultSyntaxInstance, FileTemplateParser.getInstance());
+    assertSame(defaultSyntaxInstance, FileTemplateParser.getInstance(new SimpleTemplateParser(
+        SimpleTemplateParser.DEFAULT_SYNTAX.getVarStartSyntax(),
+        SimpleTemplateParser.DEFAULT_SYNTAX.getVarEndSyntax(),
+        SimpleTemplateParser.DEFAULT_SYNTAX.getCommentStartSyntax(),
+        SimpleTemplateParser.DEFAULT_SYNTAX.getCommentEndSyntax())));
+    assertSame(djangoSyntaxInstance, FileTemplateParser.getInstance(new SimpleTemplateParser("{{ ", " }}", "{# ", " #}")));
+  }
 
   /** Checks variable substitution in a template referenced by either resource name or {@link File} object */
   public void testGetTemplate() throws Exception {
@@ -65,5 +86,4 @@ public class FileTemplateParserTest extends TestCase {
         String.format("Hello %s,%nYour account number is %d.%nTake care!", name, number),
         result.trim());
   }
-
 }

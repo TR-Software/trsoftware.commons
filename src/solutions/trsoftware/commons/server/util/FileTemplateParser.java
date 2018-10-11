@@ -45,8 +45,27 @@ import java.io.IOException;
  */
 public final class FileTemplateParser implements TemplateParser {
 
-  private static final FileTemplateParser instance = new FileTemplateParser();
+  /**
+   * Caches parsed templates
+   */
+  private static final DefaultMap<TemplateParser, FileTemplateParser> instances = new DefaultMap<TemplateParser, FileTemplateParser>() {
+    @Override
+    public FileTemplateParser computeDefault(TemplateParser templateSyntax) {
+      return new FileTemplateParser(templateSyntax);
+    }
+  };
 
+  public static FileTemplateParser getInstance() {
+    return instances.get(SimpleTemplateParser.DEFAULT_SYNTAX);
+  }
+
+  public static FileTemplateParser getInstance(TemplateParser templateSyntax) {
+    return instances.get(templateSyntax);
+  }
+
+  /**
+   * Caches parsed templates
+   */
   private final DefaultMap<DataResource, Template> cache = new DefaultMap<DataResource, Template>() {
     @Override
     public Template computeDefault(DataResource key) {
@@ -54,12 +73,15 @@ public final class FileTemplateParser implements TemplateParser {
     }
   };
 
-  public static FileTemplateParser getInstance() {
-    return instance;
-  }
+  private final TemplateParser templateSyntax;
 
   /** This class should not be instantiated directly; use the {@link #getInstance()} method instead */
   private FileTemplateParser() {
+    templateSyntax = SimpleTemplateParser.DEFAULT_SYNTAX;
+  }
+
+  private FileTemplateParser(TemplateParser templateSyntax) {
+    this.templateSyntax = templateSyntax;
   }
 
   private Template parseTemplate(DataResource templateData) {
@@ -73,7 +95,7 @@ public final class FileTemplateParser implements TemplateParser {
 
   @Override
   public Template parseTemplate(String templateString) {
-    return SimpleTemplateParser.parseDefault(templateString);
+    return templateSyntax.parseTemplate(templateString);
   }
 
   /**

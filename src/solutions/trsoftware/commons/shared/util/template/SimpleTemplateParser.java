@@ -21,6 +21,7 @@ import solutions.trsoftware.commons.client.util.GwtUtils;
 
 import java.util.LinkedList;
 
+import static solutions.trsoftware.commons.shared.util.Assert.assertNotNull;
 import static solutions.trsoftware.commons.shared.util.template.SimpleTemplateParser.State.*;
 
 /**
@@ -82,14 +83,29 @@ public class SimpleTemplateParser implements TemplateParser {
    *   <li>{@code <!--comment-->}, where {@code comment} &isin; <code>(.*)</code></li>
    * </ol>
    *
-   * TODO: make this a factory method or a lazy-init field to save memory in case this object is never used
+   * <p style="color: #6495ed; font-weight: bold;">
+   *   TODO: make this a factory method or a lazy-init field to save memory in case this object is never used
+   * </p>
    */
-  public static final TemplateParser DEFAULT_SYNTAX = new SimpleTemplateParser("${", "}", "<!--", "-->");
+  public static final SimpleTemplateParser DEFAULT_SYNTAX = new SimpleTemplateParser("${", "}", "<!--", "-->");
 
   /** @return A template parsed from the argument based on {@link #DEFAULT_SYNTAX} */
   public static Template parseDefault(String str) {
     return DEFAULT_SYNTAX.parseTemplate(str);
   }
+
+  /**
+   * Parses instances of {@link Template} based on the following syntax:
+   * <ol>
+   *   <li><code>{{variable}}</code>, where {@code variable} &isin; <code>([A-Za-z0-1]+)</code></li>
+   *   <li><code>{#comment#}</code>, where {@code comment} &isin; <code>(.*)</code></li>
+   * </ol>
+   *
+   * <p style="color: #6495ed; font-weight: bold;">
+   *   TODO: make this a factory method or a lazy-init field to save memory in case this object is never used
+   * </p>
+   */
+  public static final SimpleTemplateParser DJANGO_SYNTAX = new SimpleTemplateParser("{{", "}}", "{#", "#}");
 
   enum State {
     IN_TEXT,
@@ -118,10 +134,10 @@ public class SimpleTemplateParser implements TemplateParser {
    * @param cC <i>comment</i> closing tag (e.g. "{@code -->"})
    */
   public SimpleTemplateParser(String vO, String vC, String cO, String cC) {
-    this.vO = vO;
-    this.vC = vC;
-    this.cO = cO;
-    this.cC = cC;
+    this.vO = assertNotNull(vO);
+    this.vC = assertNotNull(vC);
+    this.cO = assertNotNull(cO);
+    this.cC = assertNotNull(cC);
   }
 
   /**
@@ -208,4 +224,33 @@ public class SimpleTemplateParser implements TemplateParser {
     return new IllegalArgumentException(GwtUtils.getSimpleName(getClass()) + " parsing error at [" + position + "]: " + info + "; template: \"" + templateString + "\"");
   }
 
+  /**
+   * Two instances are considered equal iff they represent the same syntax.
+   */
+  @Override
+  public boolean equals(Object o) {
+    if (this == o)
+      return true;
+    if (o == null || getClass() != o.getClass())
+      return false;
+
+    SimpleTemplateParser that = (SimpleTemplateParser)o;
+
+    if (!vO.equals(that.vO))
+      return false;
+    if (!vC.equals(that.vC))
+      return false;
+    if (!cO.equals(that.cO))
+      return false;
+    return cC.equals(that.cC);
+  }
+
+  @Override
+  public int hashCode() {
+    int result = vO.hashCode();
+    result = 31 * result + vC.hashCode();
+    result = 31 * result + cO.hashCode();
+    result = 31 * result + cC.hashCode();
+    return result;
+  }
 }

@@ -28,24 +28,24 @@ import solutions.trsoftware.commons.shared.testutil.AssertUtils;
 public class SimpleTemplateParserTest extends TestCase {
 
   public void testWithCustomSyntax() throws Exception {
-    assertTemplateRenderResult(
+    verifyTemplateRenderResult(
         new SimpleTemplateParser("{*", "*}", "/*", "*/"),
         "{*name*} {*lastName*} is the number {*foo*} {*bar*} in the world/* this is a template */");
   }
 
   public void testWithDefaultSyntax() throws Exception {
-    assertTemplateRenderResult(
+    verifyTemplateRenderResult(
         SimpleTemplateParser.DEFAULT_SYNTAX,
         "${name} ${lastName} is the number ${foo} ${bar} in the world<!-- this is a template -->");
   }
 
   public void testWithDjangoSyntax() throws Exception {
-    assertTemplateRenderResult(
+    verifyTemplateRenderResult(
         SimpleTemplateParser.DJANGO_SYNTAX,
         "{{name}} {{lastName}} is the number {{foo}} {{bar}} in the world{# this is a template#}");
   }
 
-  private void assertTemplateRenderResult(TemplateParser parser, String templateString) {
+  private void verifyTemplateRenderResult(TemplateParser parser, String templateString) {
     assertEquals(
         "Adam Lyons is the number 1 player in the world",
         parser.parseTemplate(templateString)

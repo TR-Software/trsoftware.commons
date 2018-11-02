@@ -18,6 +18,7 @@
 package solutions.trsoftware.commons.client;
 
 import com.google.gwt.core.client.EntryPoint;
+import com.google.gwt.core.client.GWT;
 
 /**
  * Singleton defining the settings to be used by the various components of the TR Commons library.
@@ -42,7 +43,7 @@ public class Settings {
 
   public static Settings get() {
     if (instance == null)
-      instance = new Settings();
+      instance = GWT.create(Settings.class);
     return instance;
   }
 

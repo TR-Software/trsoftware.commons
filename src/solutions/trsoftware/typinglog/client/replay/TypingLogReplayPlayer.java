@@ -19,6 +19,7 @@ package solutions.trsoftware.typinglog.client.replay;
 
 import com.google.gwt.core.client.Duration;
 import com.google.gwt.core.client.JavaScriptObject;
+import com.google.gwt.core.client.JsArrayInteger;
 import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.core.shared.GWT;
 import com.google.gwt.dom.client.Element;
@@ -27,9 +28,12 @@ import com.google.gwt.event.dom.client.ChangeEvent;
 import com.google.gwt.event.dom.client.ChangeHandler;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.event.logical.shared.ResizeEvent;
+import com.google.gwt.event.logical.shared.ResizeHandler;
 import com.google.gwt.i18n.client.NumberFormat;
 import com.google.gwt.user.client.Command;
 import com.google.gwt.user.client.Timer;
+import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.*;
 import solutions.trsoftware.commons.client.jso.JsDocument;
 import solutions.trsoftware.commons.client.jso.JsObject;
@@ -524,6 +528,47 @@ public class TypingLogReplayPlayer extends Composite {
     }
   }
 
+  public static class IncrementSpeedChartPresenter {
+
+    private static IncrementSpeedChartPresenter instance;
+
+    public static IncrementSpeedChartPresenter get() {
+      if (instance == null)
+        instance = GWT.create(IncrementSpeedChartPresenter.class);
+      return instance;
+    }
+
+    /**
+     * Called from {@link IncrementSpeedChart#redrawChart(DataTable)} to modify the native chart options object
+     * (created by {@link IncrementSpeedChart#createChartOptions(int)}), if necessary.
+     * The default implementation sets {@code width = 400} and {@code height = 200}, but subclasses could override.
+     * For example, if overriding {@link #redrawChartOnWindowResize()} to make the chart
+     * <a href="http://flopreynat.com/blog/make-google-charts-responsive.html">responsive</a>, you probably also want to
+     * override this method not to set width/height.
+     *
+     * @param optionsObject created by {@link IncrementSpeedChart#createChartOptions(int)})
+     * @return the same object that was passed in
+     */
+    protected JavaScriptObject decorateOptions(JavaScriptObject optionsObject) {
+      JsObject options = optionsObject.cast();
+      options.set("width", 400);
+      options.set("height", 200);
+      return options;
+    }
+
+    /**
+     * Decides whether to attach a {@link ResizeHandler} to the {@link Window}, to redraw the chart when window size changes.
+     * This might be desired when overriding {@link #decorateOptions(JavaScriptObject)} to not assign an explicit
+     * width/height to the chart in order to make it
+     * <a href="http://flopreynat.com/blog/make-google-charts-responsive.html">responsive</a>.
+     *
+     * @return {@code true} iff the chart should be redrawn when window size changes.
+     */
+    protected boolean redrawChartOnWindowResize() {
+      return false;
+    }
+  }
+
   private class IncrementSpeedChart extends DestroyableComposite {
 
     private ColumnChart columnChart;
@@ -549,6 +594,7 @@ public class TypingLogReplayPlayer extends Composite {
             drawChart();
           }
         });
+      setStyleName("IncrementSpeedChart");
     }
 
     private void drawChart() {
@@ -564,31 +610,69 @@ public class TypingLogReplayPlayer extends Composite {
         double speedValue = TypingSpeed.Unit.WPM.to(speedFormat, textSegment.getWpm(), typingLog.getTextLanguage());
         dataTable.setCell(i, 1, speedValue, null);
       }
-      columnChart.draw(dataTable, createChartOptions());
+      redrawChart(dataTable);
+      if (IncrementSpeedChartPresenter.get().redrawChartOnWindowResize()) {
+        /*
+         * Redraw the chart if the window gets resized, to make it responsive
+         * @see http://flopreynat.com/blog/make-google-charts-responsive.html
+         */
+        addHandlerRegistration(Window.addResizeHandler(new ResizeHandler() {
+          @Override
+          public void onResize(ResizeEvent event) {
+            redrawChart(dataTable);
+          }
+        }));
+      }
+    }
+
+    private void redrawChart(DataTable dataTable) {
+      JavaScriptObject chartOptions = createChartOptions(dataPoints.size());
+      chartOptions = IncrementSpeedChartPresenter.get().decorateOptions(chartOptions);
+//      JsConsole.get().log(JsConsole.Level.DEBUG, JsMixedArray.create()
+//          .add(getClass().getName() + " options")
+//          .add(chartOptions));
+      columnChart.draw(dataTable, chartOptions);
     }
 
     /**
-     * Returns a new object.
+     * Creates the "options" object to be passed to the chart's {@link ColumnChart#draw(DataTable, JavaScriptObject)}
+     * method.
+     * @param nSegments the number of columns (will be used to set the x-axis range and tick marks)
      */
-    private native JavaScriptObject createChartOptions() /*-{
+    private native JavaScriptObject createChartOptions(int nSegments) /*-{
+      // NOTE: we make the hAxis go from 0 to n+1, but only put axis labels (ticks) on 1..n
       return {
         title: 'Speed Throughout the Race',
         hAxis: {
           title: 'Segment',
           viewWindow: {
             min: 0,
-            max: 9
+            max: nSegments+1
           },
-          ticks: [1,2,3,4,5,6,7,8]
+          ticks: this.@solutions.trsoftware.typinglog.client.replay.TypingLogReplayPlayer.IncrementSpeedChart::createTicks(*)(nSegments)
         },
         vAxis: {
-          title: 'Speed'
+          title: 'Speed',
+          viewWindow: {
+            min: 0
+          }
         },
-        legend: 'none',
-        width: 400,
-        height: 200
+        legend: 'none'
       };
     }-*/;
+
+    /**
+     * Creates an array of tick marks to be used by {@link #createChartOptions(int)}.
+     * @param nSegments the number of ticks to create
+     * @return an array of ticks; for example, given {@code nSegments = 4}, will return {@code [1, 2, 3, 4]}
+     */
+    private JsArrayInteger createTicks(int nSegments) {
+      JsArrayInteger ret = JavaScriptObject.createArray().cast();
+      for (int i = 1; i <= nSegments; i++) {
+        ret.push(i);
+      }
+      return ret;
+    }
   }
 
 }

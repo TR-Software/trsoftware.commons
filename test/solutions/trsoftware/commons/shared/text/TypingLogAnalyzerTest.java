@@ -90,6 +90,21 @@ public class TypingLogAnalyzerTest extends TestCase {
         lastSegment = segment;
       }
     }
+    {
+      // now try a text with only 4 words (it should only return 4 segments)
+      // TypingLog for "asdfasdf asdfasdf asdfasdf asdfasdf":
+      String typingLogStr = "TLv1,en,35,a658s198d137f173a370s266d0f211 200a591s0d110f125a332s93d233f0 212a396s96d0f141a567s0d80f145 232a236s137d88f106a458s207d0f96|0,8,658,0+a,198,1+s,137,2+d,173,3+f,370,4+a,266,5+s6+d,211,7+f,200,8+ ,9,7,591,0+a1+s,110,2+d,125,3+f,332,4+a,93,5+s,233,6+d7+f,212,8+ ,18,7,396,0+a,96,1+s2+d,141,3+f,567,4+a5+s,80,6+d,145,7+f,232,8+ ,27,7,236,0+a,137,1+s,88,2+d,106,3+f,458,4+a,207,5+s6+d,96,7+f,";
+      List<TypingLogAnalyzer.TextSegment> segments = new TypingLogAnalyzer(TypingLogFormatV1.parseTypingLog(typingLogStr)).getSegmentWPMs(8);
+      assertEquals(4, segments.size());
+      TypingLogAnalyzer.TextSegment lastSegment = null;
+      for (TypingLogAnalyzer.TextSegment segment : segments) {
+        assertTrue(segment.getWpm() > 0);
+        if (lastSegment != null) {
+          assertEquals(lastSegment.getEndPos(), segment.getStartPos());
+        }
+        lastSegment = segment;
+      }
+    }
   }
 
 }

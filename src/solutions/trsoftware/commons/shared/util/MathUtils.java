@@ -322,4 +322,15 @@ public class MathUtils {
     else
       return -1;
   }
+
+  /**
+   * Determines whether the arg is a (positive) power of 2.
+   *
+   * @param n the integer to test
+   * @return {@code true} iff {@code n} is a power of 2 (e.g. 1, 2, 4, 8, etc..)
+   */
+  public static boolean isPowerOf2(int n) {
+    // see https://stackoverflow.com/a/600306/1965404
+    return n > 0 && ((n & (n-1)) == 0);
+  }
 }

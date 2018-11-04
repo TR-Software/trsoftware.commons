@@ -417,4 +417,26 @@ public class MathUtilsJavaTest extends TestCase {
     }
   }
 
+  public void testIsPowerOf2() throws Exception {
+    // 1) compute all the actual powers of 2 that can be represented as int
+    Set<Integer> powersOf2 = new HashSet<>();
+    for (long i = 1; i <= Integer.MAX_VALUE; i*=2) {  // using long to avoid overflow
+      // test all ints between i and the next power of 2
+      int p = (int)i;
+      assertTrue(isPowerOf2(p));
+      powersOf2.add(p);
+    }
+    // 2) test some specific negative cases manually
+    assertFalse(isPowerOf2(0));
+    assertFalse(isPowerOf2(-1));
+    assertFalse(isPowerOf2(-2));
+    assertFalse(isPowerOf2(-3));
+    assertFalse(isPowerOf2(-4));
+    assertFalse(isPowerOf2(Integer.MIN_VALUE));
+    // 3) now test some random values (too slow to iterate over possible ints)
+    for (int i = 0; i < 100_000; i++) {
+      int x = RandomUtils.rnd.nextInt();
+      assertEquals(powersOf2.contains(x), isPowerOf2(x));
+    }
+  }
 }

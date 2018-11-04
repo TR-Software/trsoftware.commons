@@ -30,7 +30,7 @@ public class TextCharCounts {
   /**
    * The total number of characters in the text.  Tracked separately
    * from the text string because it considers all internal whitespace
-   * (e.g. btwn sentences) as a single char.
+   * (e.g. between sentences) as a single char.
    */
   private final int charCount;
   /** The total number of words in the text */

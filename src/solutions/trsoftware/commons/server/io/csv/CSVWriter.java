@@ -1,11 +1,11 @@
 /*
- *  Copyright 2017 TR Software Inc.
+ * Copyright 2018 TR Software Inc.
  *
- *  Licensed under the Apache License, Version 2.0 (the "License"); you may not
- *  use this file except in compliance with the License. You may obtain a copy of
- *  the License at
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not
+ * use this file except in compliance with the License. You may obtain a copy of
+ * the License at
  *
- *  http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
@@ -29,12 +29,14 @@ import java.util.regex.Pattern;
  * An entry is only quoted in the output when it needs to be (i.e. the string
  * contains a separator character).
  *
- * Code mostly borrowed from OpenCSV 2.0.1 (http://opencsv.sourceforge.net/), licensed under Apache 2.0
+ * Code mostly borrowed from <a href="http://opencsv.sourceforge.net/">OpenCSV 2.0.1</a> (Apache 2.0 license)
  *
- * Sep 28, 2009
- *
- * @see <a href=http://tools.ietf.org/html/rfc4180>RFC 4180</a>
+ * @see <a href=http://tools.ietf.org/html/rfc4180>RFC 4180: Common Format and MIME Type for Comma-Separated Values (CSV) Files</a>
+ * @since Sep 28, 2009
  * @author Alex
+ *
+ * @deprecated this implementation could contain bugs; we recommend using the
+ * <a href="http://commons.apache.org/proper/commons-csv/">Apache Commons CSV</a> library instead.
  */
 public class CSVWriter implements Flushable, Closeable {
 

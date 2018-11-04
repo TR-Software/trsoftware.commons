@@ -1,11 +1,11 @@
 /*
- *  Copyright 2017 TR Software Inc.
+ * Copyright 2018 TR Software Inc.
  *
- *  Licensed under the Apache License, Version 2.0 (the "License"); you may not
- *  use this file except in compliance with the License. You may obtain a copy of
- *  the License at
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not
+ * use this file except in compliance with the License. You may obtain a copy of
+ * the License at
  *
- *  http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
@@ -41,13 +41,7 @@ public class ArrayUtils {
   }
 
   public static String toString(int[] array, String delimiter) {
-    StringBuilder str = new StringBuilder();
-    for (int i = 0; i < array.length; i++) {
-      str.append(array[i]);
-      if (i < array.length-1)
-        str.append(delimiter);
-    }
-    return str.toString();
+    return StringUtils.join(delimiter, array);
   }
 
   // TODO: document how the above toString methods differ from Arrays.toString (i.e. they omit brackets and allow specifying a custom delimiter
@@ -375,6 +369,19 @@ public class ArrayUtils {
       System.arraycopy(original, from, copy, 0,
                        Math.min(original.length - from, newLength));
       return copy;
+  }
+
+  /**
+   * Forces an {@link ArrayIndexOutOfBoundsException} if the given index is not in range for the given array length.
+   * This method is useful for client-side GWT code, which might throw a generic {@link com.google.gwt.core.client.JavaScriptException}
+   * instead.
+   * @param arrayLength length of the array whose bounds are to be checked
+   * @param idx the index to check for being within the array's bounds
+   * @throws ArrayIndexOutOfBoundsException if the given index is not in the range {@code [0, arrayLength[}
+   */
+  public static void checkBounds(int arrayLength, int idx) {
+    if (idx < 0 || idx > arrayLength-1)
+      throw new ArrayIndexOutOfBoundsException(idx);
   }
 
 }

@@ -1,11 +1,11 @@
 /*
- *  Copyright 2017 TR Software Inc.
+ * Copyright 2018 TR Software Inc.
  *
- *  Licensed under the Apache License, Version 2.0 (the "License"); you may not
- *  use this file except in compliance with the License. You may obtain a copy of
- *  the License at
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not
+ * use this file except in compliance with the License. You may obtain a copy of
+ * the License at
  *
- *  http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
@@ -33,7 +33,10 @@ import java.text.ParseException;
  *  Our emulated version of {@link DecimalFormat} is located in our module's {@code super-source} directory
  *  ({@code src/solutions/trsoftware/commons/translatable})
  *</p>
- * <span color="green">TODO: use this class to replace {@link AbstractNumberFormatter}</span>
+ *
+ * <p style="color: #6495ed; font-weight: bold;">
+ *   TODO: use this class to replace {@link AbstractNumberFormatter}
+ * </p>
  * @author Alex, 10/31/2017
  */
 public class SharedNumberFormat {
@@ -100,7 +103,21 @@ public class SharedNumberFormat {
     return format.format(value);
   }
 
-  public Number parse(String source) throws ParseException {
-    return format.parse(source);
+  /**
+   * Parses the given string into a number according to this formatting pattern.
+   * Returns a {@code double} instead of {@link Number} (as in {@link DecimalFormat#parse(String)})
+   * because on the client-side, our emulated version of {@link DecimalFormat}
+   * ({@code src/solutions/trsoftware/commons/translatable/java/text/DecimalFormat.java})
+   * uses {@link com.google.gwt.i18n.client.NumberFormat#parse(String)}, which returns a {@code double}.
+   */
+  public double parse(String source) throws ParseException {
+    return format.parse(source).doubleValue();
+  }
+
+  /**
+   * @return the pattern used by this number format.
+   */
+  public String getPattern() {
+    return format.toPattern();
   }
 }

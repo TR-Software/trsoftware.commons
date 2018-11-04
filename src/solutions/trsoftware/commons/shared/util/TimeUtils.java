@@ -1,11 +1,11 @@
 /*
- *  Copyright 2017 TR Software Inc.
+ * Copyright 2018 TR Software Inc.
  *
- *  Licensed under the Apache License, Version 2.0 (the "License"); you may not
- *  use this file except in compliance with the License. You may obtain a copy of
- *  the License at
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not
+ * use this file except in compliance with the License. You may obtain a copy of
+ * the License at
  *
- *  http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
@@ -149,7 +149,9 @@ public class TimeUtils {
     return SECONDS.to(MILLISECONDS, seconds);
   }
 
-  /** Returns the time as a double to avoid slow GWT long emulation */
+  /**
+   * @return the system time as a {@code double} (to avoid slow {@code long} emulation in GWT)
+   */
   public static double currentTimeMillis() {
     if (GWT.isClient())
       return Duration.currentTimeMillis();
@@ -194,4 +196,5 @@ public class TimeUtils {
   public static boolean isElapsed(long duration, long startTime, long currentTime) {
     return (currentTime - startTime) > duration;
   }
+
 }

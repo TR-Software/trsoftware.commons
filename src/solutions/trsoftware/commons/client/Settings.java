@@ -1,11 +1,11 @@
 /*
- *  Copyright 2017 TR Software Inc.
+ * Copyright 2018 TR Software Inc.
  *
- *  Licensed under the Apache License, Version 2.0 (the "License"); you may not
- *  use this file except in compliance with the License. You may obtain a copy of
- *  the License at
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not
+ * use this file except in compliance with the License. You may obtain a copy of
+ * the License at
  *
- *  http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
@@ -18,6 +18,7 @@
 package solutions.trsoftware.commons.client;
 
 import com.google.gwt.core.client.EntryPoint;
+import com.google.gwt.core.client.GWT;
 
 /**
  * Singleton defining the settings to be used by the various components of the TR Commons library.
@@ -42,7 +43,7 @@ public class Settings {
 
   public static Settings get() {
     if (instance == null)
-      instance = new Settings();
+      instance = GWT.create(Settings.class);
     return instance;
   }
 

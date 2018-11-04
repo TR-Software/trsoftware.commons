@@ -1,11 +1,11 @@
 /*
- *  Copyright 2017 TR Software Inc.
+ * Copyright 2018 TR Software Inc.
  *
- *  Licensed under the Apache License, Version 2.0 (the "License"); you may not
- *  use this file except in compliance with the License. You may obtain a copy of
- *  the License at
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not
+ * use this file except in compliance with the License. You may obtain a copy of
+ * the License at
  *
- *  http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
@@ -19,10 +19,10 @@ package solutions.trsoftware.commons.shared.util;
 
 import com.google.common.base.Predicate;
 import junit.framework.TestCase;
-import solutions.trsoftware.commons.client.testutil.AssertUtils;
 
 import java.util.Arrays;
 
+import static solutions.trsoftware.commons.shared.testutil.AssertUtils.assertThrows;
 import static solutions.trsoftware.commons.shared.util.ArrayUtils.*;
 
 public class ArrayUtilsTest extends TestCase {
@@ -185,12 +185,12 @@ public class ArrayUtilsTest extends TestCase {
   }
 
   public void testGetLast() throws Exception {
-    AssertUtils.assertThrows(NullPointerException.class, new Runnable() {
+    assertThrows(NullPointerException.class, new Runnable() {
       public void run() {
         getLast(null);
       }
     });
-    AssertUtils.assertThrows(ArrayIndexOutOfBoundsException.class, new Runnable() {
+    assertThrows(ArrayIndexOutOfBoundsException.class, new Runnable() {
       public void run() {
         getLast(new Object[0]);
       }
@@ -198,6 +198,34 @@ public class ArrayUtilsTest extends TestCase {
     assertEquals("a", getLast(new String[]{"a"}));
     assertEquals("b", getLast(new String[]{"a", "b"}));
     assertEquals("c", getLast(new String[]{"a", "b", "c"}));
+  }
+
+  public void testCheckBounds() throws Exception {
+    // 1) check some cases that shouldn't throw an exception
+    for (int arrayLength = 1; arrayLength < 10; arrayLength++) {
+      for (int i = 0; i < arrayLength; i++) {
+        checkBounds(arrayLength, i);
+      }
+    }
+    // 2) check some cases that should throw an exception
+    assertThrows(new ArrayIndexOutOfBoundsException(0), new Runnable() {
+      @Override
+      public void run() {
+        checkBounds(0, 0);
+      }
+    });
+    assertThrows(new ArrayIndexOutOfBoundsException(1), new Runnable() {
+      @Override
+      public void run() {
+        checkBounds(1, 1);
+      }
+    });
+    assertThrows(new ArrayIndexOutOfBoundsException(-1), new Runnable() {
+      @Override
+      public void run() {
+        checkBounds(2, -1);
+      }
+    });
   }
 
 }

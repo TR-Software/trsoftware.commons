@@ -1,11 +1,11 @@
 /*
- *  Copyright 2017 TR Software Inc.
+ * Copyright 2018 TR Software Inc.
  *
- *  Licensed under the Apache License, Version 2.0 (the "License"); you may not
- *  use this file except in compliance with the License. You may obtain a copy of
- *  the License at
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not
+ * use this file except in compliance with the License. You may obtain a copy of
+ * the License at
  *
- *  http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
@@ -26,7 +26,7 @@ import java.io.Writer;
 
 /**
  * Splits a large CSV stream into multiple chunks each containing at most the
- * number of lines specified by chunkSizeLines.
+ * number of lines specified by {@link #chunkSizeLines}.
  *
  * The files are split along logical line boundaries (logical as opposed
  * to actual, which means taking care not to split on newline characters that
@@ -90,7 +90,7 @@ public class CSVSplitter extends AbstractIterator<String> {
         }
         if (out == null)
           out = newCSVWriter(buffer);
-        out.writeNext(nextLine);
+        out.writeNext((Object[])nextLine);
         if (i == chunkSizeLines)
           break;
       }

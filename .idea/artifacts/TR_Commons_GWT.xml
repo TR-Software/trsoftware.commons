@@ -1,8 +1,0 @@
-<component name="ArtifactManager">
-  <artifact name="TR Commons:GWT">
-    <output-path>$PROJECT_DIR$/out/artifacts/TR_Commons_GWT</output-path>
-    <root id="root">
-      <element id="gwt-compiler-output" facet="TR Commons/gwt/GWT" />
-    </root>
-  </artifact>
-</component>

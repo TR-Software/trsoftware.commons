@@ -1,6 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="CompilerConfiguration">
+    <excludeFromCompile>
+      <file url="file://$PROJECT_DIR$/src/solutions/trsoftware/commons/translatable/solutions/trsoftware/commons/bridge/BridgeTypeFactory.java" />
+      <file url="file://$PROJECT_DIR$/src/solutions/trsoftware/commons/translatable/solutions/trsoftware/commons/bridge/ServerTime.java" />
+      <file url="file://$PROJECT_DIR$/test/solutions/trsoftware/commons/translatable/solutions/trsoftware/commons/client/BaseGwtTestCase.java" />
+      <file url="file://$PROJECT_DIR$/test/solutions/trsoftware/gwt/junit/RunStyleHtmlUnit230.java" />
+      <file url="file://$PROJECT_DIR$/test/solutions/trsoftware/gwt/junit/RunStyleHtmlUnit215.java" />
+    </excludeFromCompile>
     <wildcardResourcePatterns>
       <entry name="!?*.java" />
       <entry name="!?*.form" />

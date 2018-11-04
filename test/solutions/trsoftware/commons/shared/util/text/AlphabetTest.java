@@ -1,11 +1,11 @@
 /*
- *  Copyright 2017 TR Software Inc.
+ * Copyright 2018 TR Software Inc.
  *
- *  Licensed under the Apache License, Version 2.0 (the "License"); you may not
- *  use this file except in compliance with the License. You may obtain a copy of
- *  the License at
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not
+ * use this file except in compliance with the License. You may obtain a copy of
+ * the License at
  *
- *  http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
@@ -24,14 +24,6 @@ import solutions.trsoftware.commons.shared.util.StringUtils;
  * @author Alex, 9/20/2017
  */
 public class AlphabetTest extends TestCase {
-
-  public void testGetPrettyName() throws Exception {
-    assertEquals("Numbers", Alphabet.NUMBERS.getPrettyName());
-    assertEquals("Home row", Alphabet.HOME_ROW_FULL.getPrettyName());
-    assertEquals("Letters", Alphabet.LETTERS.getPrettyName());
-    assertEquals("Letters and numbers", Alphabet.LETTERS_AND_NUMBERS.getPrettyName());
-    assertEquals("Letters, numbers, and symbols", Alphabet.LETTERS_NUMBERS_AND_SYMBOLS.getPrettyName());
-  }
 
   public void testLookup() throws Exception {
     assertLookupEquals(Alphabet.CUSTOM, "");

@@ -1,8 +1,24 @@
+/*
+ * Copyright 2018 TR Software Inc.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not
+ * use this file except in compliance with the License. You may obtain a copy of
+ * the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+ * License for the specific language governing permissions and limitations under
+ * the License.
+ *
+ */
+
 package solutions.trsoftware.commons.shared.text.markovchain;
 
 import junit.framework.TestCase;
-import solutions.trsoftware.commons.Slow;
-import solutions.trsoftware.commons.server.io.ServerIOUtils;
+import solutions.trsoftware.commons.shared.annotations.Slow;
 import solutions.trsoftware.commons.shared.testutil.TestData;
 import solutions.trsoftware.commons.shared.text.markovchain.dict.CodingDictionary;
 import solutions.trsoftware.commons.shared.text.markovchain.dict.ShortHashArrayCodingDictionary;
@@ -12,7 +28,6 @@ import solutions.trsoftware.commons.shared.util.text.TextTokenizer;
 import solutions.trsoftware.commons.shared.util.text.WhitespaceTokenizer;
 
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
@@ -23,7 +38,6 @@ import java.util.Random;
  * @author Alex
  */
 public class MarkovChainTest extends TestCase {
-  private static final String ENGLISH_CORPUS_RESOURCE_NAME = TestData.getAliceInWonderlandTextResourceName();
 
   private MarkovChain mc;
 
@@ -155,21 +169,17 @@ public class MarkovChainTest extends TestCase {
 
 
   public void testOrder1ChainOnAliceWonderlandCorpus() throws IOException {
-    testMarkovChainOnCorpus(ENGLISH_CORPUS_RESOURCE_NAME, 1);
+    testMarkovChainOnCorpus(TestData.getAliceInWonderlandText(), 1);
   }
 
   @Slow
   public void testOrder2ChainOnAliceWonderlandCorpus() throws IOException {
-    testMarkovChainOnCorpus(ENGLISH_CORPUS_RESOURCE_NAME, 2);
+    testMarkovChainOnCorpus(TestData.getAliceInWonderlandText(), 2);
   }
 
   @Slow
   public void testOrder3ChainOnAliceWonderlandCorpus() throws IOException {
-    testMarkovChainOnCorpus(ENGLISH_CORPUS_RESOURCE_NAME, 3);
-  }
-
-  private ArrayList<String> readLinesFromAliceCorpus() {
-    return  ServerIOUtils.readLinesFromResourceUTF8(ENGLISH_CORPUS_RESOURCE_NAME, true);
+    testMarkovChainOnCorpus(TestData.getAliceInWonderlandText(), 3);
   }
 
   private void testMarkovChainOnCorpus(String corpusFilename, int order) throws IOException {
@@ -186,7 +196,7 @@ public class MarkovChainTest extends TestCase {
    */
   public static void trainMarkovChainOnCorpus(MarkovChain markovChain, String corpusFileResource) {
     // TODO: cont here: why do this line-by-line instead of the whole text?
-    ArrayList<String> textLines = ServerIOUtils.readLinesFromResourceUTF8(corpusFileResource, true);
+    List<String> textLines = TestData.getAliceInWonderlandTextLines();
     for (String textLine : textLines) {
       markovChain.train(textLine);
     }

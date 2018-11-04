@@ -1,11 +1,11 @@
 /*
- *  Copyright 2017 TR Software Inc.
+ * Copyright 2018 TR Software Inc.
  *
- *  Licensed under the Apache License, Version 2.0 (the "License"); you may not
- *  use this file except in compliance with the License. You may obtain a copy of
- *  the License at
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not
+ * use this file except in compliance with the License. You may obtain a copy of
+ * the License at
  *
- *  http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
@@ -42,16 +42,14 @@ public class DummyHttpServletRequest implements HttpServletRequest {
   private String remoteAddr = "127.0.0.1";
   private Locale locale = Locale.getDefault();
   private String method;
+  private List<Cookie> cookies = new ArrayList<>();
+  private Map<String, Object> attributes = new LinkedHashMap<>();
 
   public DummyHttpServletRequest() {
   }
 
   public DummyHttpServletRequest(Map<String, String> paramMap) {
     this(null, null, paramMap);
-  }
-
-  public DummyHttpServletRequest(String uri) {
-    this.uri = uri;
   }
 
   public DummyHttpServletRequest(String url, String queryString) {
@@ -92,12 +90,12 @@ public class DummyHttpServletRequest implements HttpServletRequest {
     return this;
   }
 
-  public DummyHttpServletRequest setUrl(String url) {
+  public DummyHttpServletRequest setRequestURL(String url) {
     this.url = url;
     return this;
   }
 
-  public DummyHttpServletRequest setUri(String uri) {
+  public DummyHttpServletRequest setRequestURI(String uri) {
     this.uri = uri;
     return this;
   }
@@ -107,14 +105,18 @@ public class DummyHttpServletRequest implements HttpServletRequest {
     return this;
   }
 
+  public DummyHttpServletRequest addCookie(Cookie cookie) {
+    cookies.add(cookie);
+    return this;
+  }
+
   public String getAuthType() {
     System.err.println("Method DummyHttpServletRequest.getAuthType has not been fully implemented yet.");
     return null;
   }
 
   public Cookie[] getCookies() {
-    System.err.println("Method DummyHttpServletRequest.getCookies has not been fully implemented yet.");
-    return new Cookie[0];
+    return cookies.toArray(new Cookie[0]);
   }
 
   public long getDateHeader(String val) {
@@ -268,14 +270,12 @@ public class DummyHttpServletRequest implements HttpServletRequest {
     return null;
   }
 
-  public Object getAttribute(String val) {
-    System.err.println("Method DummyHttpServletRequest.getAttribute has not been fully implemented yet.");
-    return null;
+  public Object getAttribute(String name) {
+    return attributes.get(name);
   }
 
-  public Enumeration getAttributeNames() {
-    System.err.println("Method DummyHttpServletRequest.getAttributeNames has not been fully implemented yet.");
-    return null;
+  public Enumeration<String> getAttributeNames() {
+    return Collections.enumeration(attributes.keySet());
   }
 
   public String getCharacterEncoding() {
@@ -387,9 +387,8 @@ public class DummyHttpServletRequest implements HttpServletRequest {
     return null;
   }
 
-  public void setAttribute(String val, Object object) {
-    System.err.println("Method DummyHttpServletRequest.setAttribute has not been fully implemented yet.");
-
+  public void setAttribute(String name, Object object) {
+    attributes.put(name, object);
   }
 
   public void removeAttribute(String val) {

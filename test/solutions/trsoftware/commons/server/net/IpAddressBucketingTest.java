@@ -1,11 +1,11 @@
 /*
- *  Copyright 2017 TR Software Inc.
+ * Copyright 2018 TR Software Inc.
  *
- *  Licensed under the Apache License, Version 2.0 (the "License"); you may not
- *  use this file except in compliance with the License. You may obtain a copy of
- *  the License at
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not
+ * use this file except in compliance with the License. You may obtain a copy of
+ * the License at
  *
- *  http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
@@ -18,11 +18,12 @@
 package solutions.trsoftware.commons.server.net;
 
 import junit.framework.TestCase;
+import solutions.trsoftware.commons.server.io.ResourceLocator;
 import solutions.trsoftware.commons.server.io.ServerIOUtils;
+import solutions.trsoftware.commons.shared.annotations.Slow;
 import solutions.trsoftware.commons.shared.util.IpAddress;
 import solutions.trsoftware.commons.shared.util.stats.Mean;
 
-import java.io.FileReader;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -36,21 +37,23 @@ import static solutions.trsoftware.commons.server.net.IpAddressBucketing.bucketI
  */
 public class IpAddressBucketingTest extends TestCase {
 
-  /*
-   This list of IP addresses to use as test data was obtained with the following grep command:
-   grep -Eo "([0-9]{1,3})(\.[0-9]{1,3}){3}" catalina.out.2012_10_23_rimu2-tomcat | sort | uniq > ipAddrs.txt
+  /**
+   * This list of IP addresses to use as test data was obtained with the following grep command:
+   * <pre>
+   *   grep -Eo "([0-9]{1,3})(\.[0-9]{1,3}){3}" catalina.out.2012_10_23_rimu2-tomcat | sort | uniq > ipAddrs.txt
+   * </pre>
    */
-
-  private String ipAddrsFilename = ServerIOUtils.filenameInPackageOf("ipAddrs.txt", getClass());
+  private static final String ipAddrsFilename = "ipAddrs.txt";
 
   /**
    * Tests that the bucketing algorithm divides the test set of IP address into N
    * buckets with equal probability, and deterministically (an IP address always
    * maps to the same bucket).
    */
+  @Slow
   public void testBucketIpAddress() throws Exception {
-    ArrayList<String> ipAddrs = ServerIOUtils.readLines(new FileReader(ipAddrsFilename), true);
-    System.out.printf("Loaded %d IP addresses from file %s%n", ipAddrs.size(), ipAddrsFilename);
+    ArrayList<String> ipAddrs = ServerIOUtils.readLines(new ResourceLocator(ipAddrsFilename, getClass()).getReaderUTF8(), true);
+    System.out.printf("Loaded %d IP addresses from %s%n", ipAddrs.size(), ipAddrsFilename);
 
     // test splitting the ip addresses into N buckets, for various values of N
     for (int nBuckets = 1; nBuckets < 10; nBuckets++) {

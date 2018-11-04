@@ -1,11 +1,11 @@
 /*
- *  Copyright 2017 TR Software Inc.
+ * Copyright 2018 TR Software Inc.
  *
- *  Licensed under the Apache License, Version 2.0 (the "License"); you may not
- *  use this file except in compliance with the License. You may obtain a copy of
- *  the License at
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not
+ * use this file except in compliance with the License. You may obtain a copy of
+ * the License at
  *
- *  http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
@@ -19,10 +19,15 @@ package solutions.trsoftware.commons.client.useragent;
 
 import com.google.common.base.Predicate;
 import junit.framework.TestCase;
-import solutions.trsoftware.commons.server.io.ServerIOUtils;
+import solutions.trsoftware.commons.server.io.ResourceLocator;
 
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
+
+import static solutions.trsoftware.commons.client.useragent.UserAgent.parseVersionNumber;
+import static solutions.trsoftware.commons.server.io.ServerIOUtils.readLines;
 
 /**
  * Dec 14, 2008
@@ -31,10 +36,14 @@ import java.util.List;
  */
 public class UserAgentJavaTest extends TestCase {
 
-  private static List<String> readLinesFromFile(String filename) {
-    return ServerIOUtils.readLinesFromResource(
-        ServerIOUtils.resourceNameFromFilenameInSamePackage(filename, UserAgentJavaTest.class),
-        true);
+  /*
+    TODO: get an updated UA list from
+    - https://udger.com/resources/ua-list
+    - https://docs.microsoft.com/en-us/previous-versions/windows/internet-explorer/ie-developer/compatibility/hh869301(v=vs.85)
+  */
+
+  private List<String> readLinesFromFile(String filename) {
+    return readLines(new ResourceLocator(filename, getClass()).getReaderUTF8(), true);
   }
 
   public void testIsIE() throws Exception {
@@ -73,4 +82,33 @@ public class UserAgentJavaTest extends TestCase {
       assertFalse("UA expected to fail: " + str, predicate.apply(str));
     }
   }
+
+  public void testParseVersionNumber() throws Exception {
+    String uaString = "Mozilla/5.0 (Windows NT 6.3; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/67.0.3396.99 Safari/537.36";
+    UserAgent instance = new UserAgent(uaString);
+    Map<String, VersionNumber> expectations = new LinkedHashMap<String, VersionNumber>();
+    expectations.put("Mozilla", new VersionNumber(5, 0));
+    expectations.put("AppleWebKit", new VersionNumber(537, 36));
+    expectations.put("Chrome", new VersionNumber(67, 0, 3396, 99));
+    expectations.put("Safari", new VersionNumber(537, 36));
+    expectations.put("Edge", null);
+    expectations.put("Trident", null);
+
+    for (String browserName : expectations.keySet()) {
+      for (String arg : new String[]{browserName, browserName.toLowerCase()}) {
+        // 1) test the static version of the method
+        {
+          VersionNumber result = parseVersionNumber(uaString, arg);
+          System.out.printf("Parsed %s version %s from '%s'%n", browserName, result, uaString);
+          assertEquals(expectations.get(browserName), result);
+        }
+        // 2) test the instance version of the method
+        {
+          VersionNumber result = instance.parseVersionNumber(arg);
+          assertEquals(expectations.get(browserName), result);
+        }
+      }
+    }
+  }
+
 }

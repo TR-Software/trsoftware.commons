@@ -1,11 +1,11 @@
 /*
- *  Copyright 2017 TR Software Inc.
+ * Copyright 2018 TR Software Inc.
  *
- *  Licensed under the Apache License, Version 2.0 (the "License"); you may not
- *  use this file except in compliance with the License. You may obtain a copy of
- *  the License at
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not
+ * use this file except in compliance with the License. You may obtain a copy of
+ * the License at
  *
- *  http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
@@ -19,6 +19,7 @@ package solutions.trsoftware.commons.client.widgets;
 
 import com.google.gwt.user.client.Command;
 import com.google.gwt.user.client.ui.Composite;
+import com.google.web.bindery.event.shared.HandlerRegistration;
 import solutions.trsoftware.commons.client.event.DataChangeListener;
 import solutions.trsoftware.commons.client.event.DestroyableRegistersDataChangeListeners;
 import solutions.trsoftware.commons.client.event.ListenerSet;
@@ -58,6 +59,18 @@ public class DestroyableComposite extends Composite implements DestroyableRegist
     addCleanupAction(new Command() {
       public void execute() {
         listener.removeFromListenerSet();
+      }
+    });
+  }
+
+  /**
+   * Adds a "cleanup" action that will remove the given handler registration when this widget becomes detached.
+   */
+  public void addHandlerRegistration(HandlerRegistration handlerRegistration) {
+    addCleanupAction(new Command() {
+      @Override
+      public void execute() {
+        handlerRegistration.removeHandler();
       }
     });
   }

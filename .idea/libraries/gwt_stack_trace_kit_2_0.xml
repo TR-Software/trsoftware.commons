@@ -1,0 +1,13 @@
+<component name="libraryTable">
+  <library name="gwt-stack-trace-kit-2.0">
+    <CLASSES>
+      <root url="jar://$PROJECT_DIR$/lib/gwt-stack-trace-kit-2.0-servlet.jar!/" />
+      <root url="jar://$PROJECT_DIR$/lib/gwt-stack-trace-kit-2.0.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES>
+      <root url="jar://$PROJECT_DIR$/lib/gwt-stack-trace-kit-2.0-src.jar!/" />
+      <root url="jar://$PROJECT_DIR$/lib/gwt-stack-trace-kit-2.0.jar!/" />
+    </SOURCES>
+  </library>
+</component>

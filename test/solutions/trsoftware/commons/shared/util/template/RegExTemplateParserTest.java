@@ -1,11 +1,11 @@
 /*
- *  Copyright 2017 TR Software Inc.
+ * Copyright 2018 TR Software Inc.
  *
- *  Licensed under the Apache License, Version 2.0 (the "License"); you may not
- *  use this file except in compliance with the License. You may obtain a copy of
- *  the License at
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not
+ * use this file except in compliance with the License. You may obtain a copy of
+ * the License at
  *
- *  http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
@@ -18,6 +18,7 @@
 package solutions.trsoftware.commons.shared.util.template;
 
 import junit.framework.TestCase;
+import solutions.trsoftware.commons.shared.testutil.AssertUtils;
 import solutions.trsoftware.commons.shared.util.MapUtils;
 
 import java.util.HashMap;
@@ -68,5 +69,20 @@ public class RegExTemplateParserTest extends TestCase {
 
   private Template parse(String templateString) {
     return new RegExTemplateParser(variablePattern, commentPattern).parseTemplate(templateString);
+  }
+
+  public void testEqualsAndHashCode() throws Exception {
+    // instances are considered equal iff they use the same parsing regexps
+    RegExTemplateParser a = new RegExTemplateParser(variablePattern, commentPattern);
+    RegExTemplateParser b = new RegExTemplateParser("\\{(\\w+)\\}", commentPattern);
+    AssertUtils.assertEqualsAndHashCode(
+        a,
+        new RegExTemplateParser(variablePattern, commentPattern)
+    );
+    AssertUtils.assertEqualsAndHashCode(
+        b,
+        new RegExTemplateParser("\\{(\\w+)\\}", commentPattern)
+    );
+    AssertUtils.assertNotEqual(a, b);
   }
 }

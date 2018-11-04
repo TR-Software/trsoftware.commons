@@ -1,11 +1,11 @@
 /*
- *  Copyright 2017 TR Software Inc.
+ * Copyright 2018 TR Software Inc.
  *
- *  Licensed under the Apache License, Version 2.0 (the "License"); you may not
- *  use this file except in compliance with the License. You may obtain a copy of
- *  the License at
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not
+ * use this file except in compliance with the License. You may obtain a copy of
+ * the License at
  *
- *  http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
@@ -18,6 +18,7 @@
 package solutions.trsoftware.commons.shared.util.text;
 
 import solutions.trsoftware.commons.client.CommonsGwtTestCase;
+
 
 /**
  * @author Alex, 10/31/2017
@@ -34,10 +35,10 @@ public class SharedNumberFormatGwtTest extends CommonsGwtTestCase {
 
   public void testParse() throws Exception {
     SharedNumberFormat format = new SharedNumberFormat("#.##");
-    assertEquals(0d, format.parse("0").doubleValue());
-    assertEquals(.1234, format.parse(".1234").doubleValue());
-    assertEquals(.55, format.parse(".55").doubleValue());
-    assertEquals(.555, format.parse(".555").doubleValue());
+    assertEquals(0d, format.parse("0"));
+    assertEquals(.1234, format.parse(".1234"));
+    assertEquals(.55, format.parse(".55"));
+    assertEquals(.555, format.parse(".555"));
   }
 
   public void testPercentages() throws Exception {
@@ -49,13 +50,22 @@ public class SharedNumberFormatGwtTest extends CommonsGwtTestCase {
     assertEquals("55.5%", format.format(.555));
     assertEquals("55.56%", format.format(.55556));
     assertEquals("100000%", format.format(1000));
-    assertEquals(0L, format.parse("0%"));
+    assertEquals(0d, format.parse("0%"));
     assertEquals(.1234, format.parse("12.34%"));
     assertEquals(.1235, format.parse("12.35%"));
     assertEquals(.55, format.parse("55%"));
     assertEquals(.555, format.parse("55.5%"));
     assertEquals(.5556, format.parse("55.56%"));
-    assertEquals(1000L, format.parse("100000%"));
+    assertEquals(1000d, format.parse("100000%"));
   }
+
+  public void testDigitGrouping() throws Exception {
+    SharedNumberFormat format = new SharedNumberFormat("#,##0.0#");
+    assertEquals("1,234.57", format.format(1234.567));
+    assertEquals(1234.57, format.parse("1,234.57"));
+    assertEquals("1,000,234.0", format.format(1000234.00001));
+    assertEquals(1000234.0, format.parse("1,000,234.0"));
+  }
+
 
 }

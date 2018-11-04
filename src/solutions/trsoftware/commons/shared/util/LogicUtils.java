@@ -1,11 +1,11 @@
 /*
- *  Copyright 2017 TR Software Inc.
+ * Copyright 2018 TR Software Inc.
  *
- *  Licensed under the Apache License, Version 2.0 (the "License"); you may not
- *  use this file except in compliance with the License. You may obtain a copy of
- *  the License at
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not
+ * use this file except in compliance with the License. You may obtain a copy of
+ * the License at
  *
- *  http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
@@ -16,8 +16,6 @@
  */
 
 package solutions.trsoftware.commons.shared.util;
-
-import com.google.common.base.Objects;
 
 /**
  * Can be used to shorten some if statements that are too long.
@@ -54,9 +52,7 @@ public class LogicUtils {
   // TODO: unit test these new methods
   /**
    * Similar to the Javascript expression {@code o1 || o2} when applied to non-boolean objects.
-   * @return o1 if it's not null, otherwise o2.
-   *
-   * @see Objects#firstNonNull(Object, Object)
+   * @return {@code o1} if it's not {@code null}, otherwise {@code o2}.
    */
   public static <T> T firstNonNull(T o1, T o2) {
     if (o1 != null)
@@ -65,8 +61,10 @@ public class LogicUtils {
   }
 
   /**
-   * @return the first of the given elements which is not null, or {@code null} if there isn't a non-null input element.
+   * @return the first of the given elements which is not {@code null},
+   * or {@code null} if there isn't a non-{@code null} input element.
    */
+  @SafeVarargs
   public static <T> T firstNonNull(T... objects) {
     for (T x : objects) {
       if (x != null)

@@ -1,11 +1,11 @@
 /*
- *  Copyright 2017 TR Software Inc.
+ * Copyright 2018 TR Software Inc.
  *
- *  Licensed under the Apache License, Version 2.0 (the "License"); you may not
- *  use this file except in compliance with the License. You may obtain a copy of
- *  the License at
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not
+ * use this file except in compliance with the License. You may obtain a copy of
+ * the License at
  *
- *  http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
@@ -29,7 +29,6 @@ import solutions.trsoftware.commons.client.useragent.UserAgent;
 import solutions.trsoftware.commons.client.widgets.popups.ErrorMessagePopup;
 import solutions.trsoftware.commons.client.widgets.popups.PopupDialog;
 import solutions.trsoftware.commons.shared.util.LazyReference;
-import solutions.trsoftware.gwt.stacktrace.client.StackTraceDeobfuscatorClient;
 
 /**
  * Oct 12, 2011
@@ -46,7 +45,10 @@ public class CommonsUncaughtExceptionHandler implements GWT.UncaughtExceptionHan
       String servletUrl = settings.getStackTraceDeobfuscatorServletUrl();
       if (servletUrl == null)
         throw new IllegalStateException("Did you forget to call Settings.setStackTraceDeobfuscatorServletUrl?");
-      return new StackTraceDeobfuscatorClient(servletUrl, settings.getStackTraceSizeLimit());
+      // NOTE: inheriting modules can override StackTraceDeobfuscatorClient with deferred binding
+      StackTraceDeobfuscatorClient client = GWT.create(StackTraceDeobfuscatorClient.class);
+      client.init(servletUrl, settings.getStackTraceSizeLimit());
+      return client;
     }
   };
 
@@ -89,7 +91,14 @@ public class CommonsUncaughtExceptionHandler implements GWT.UncaughtExceptionHan
     }
   }
 
-  private void showPopupNotice() {
+  /**
+   * Displays a popup warning user that an unexpected error has occurred.
+   * <p>
+   * Subclasses should override with an empty method if they don't want a popup to be shown.
+   *
+   * @see #createExceptionNoticePopup()
+   */
+  protected void showPopupNotice() {
     if (exceptionNoticePopup == null)  // lazy init
       exceptionNoticePopup = createExceptionNoticePopup();
     // still have to check for null because createExceptionNoticePopup could be overridden to return null if app doesn't want an error popup to be displayed
@@ -101,7 +110,13 @@ public class CommonsUncaughtExceptionHandler implements GWT.UncaughtExceptionHan
     }
   }
 
-  /** Subclasses may override to return {@code null} if they don't want a popup to be shown to the user */
+  /**
+   * Creates a warning popup with a message rendered from the {@link CommonTemplates#uncaught_exception_warning()}
+   * template.
+   * <p>
+   * Subclasses may override to return a different popup dialog (or override {@link #showPopupNotice()} instead if this
+   * feature is not wanted).
+   */
   protected ErrorMessagePopup createExceptionNoticePopup() {
     return new ErrorMessagePopup(false,"Warning",
         new HTML(CommonTemplates.INSTANCE.uncaught_exception_warning().render(
@@ -129,7 +144,27 @@ public class CommonsUncaughtExceptionHandler implements GWT.UncaughtExceptionHan
     });
   }
 
+  /**
+   * Calls {@link #logException(String)} with a string containing the exception message and its de-obfuscated stack
+   * trace.
+   * <p>
+   * Subclasses may override.
+   *
+   * @param ex the uncaught exception
+   * @param stackTrace the de-obfuscated stack trace of the given exception
+   */
   protected void onDeobfuscationResultAvailable(Throwable ex, String stackTrace) {
-    JsConsole.get().log(JsConsole.Level.ERROR, ex.toString() + ":\n" + stackTrace);
+    logException(ex.toString() + ":\n" + stackTrace);
+  }
+
+  /**
+   * Prints the given message to the JS console.
+   * <p>
+   * Subclasses may override.
+   *
+   * @param exceptionWithStackTrace a string containing the exception message and the de-obfuscated stack trace
+   */
+  protected void logException(String exceptionWithStackTrace) {
+    JsConsole.get().log(JsConsole.Level.ERROR, exceptionWithStackTrace);
   }
 }

@@ -1,11 +1,11 @@
 /*
- *  Copyright 2017 TR Software Inc.
+ * Copyright 2018 TR Software Inc.
  *
- *  Licensed under the Apache License, Version 2.0 (the "License"); you may not
- *  use this file except in compliance with the License. You may obtain a copy of
- *  the License at
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not
+ * use this file except in compliance with the License. You may obtain a copy of
+ * the License at
  *
- *  http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
@@ -18,10 +18,11 @@
 package solutions.trsoftware.commons.shared.text;
 
 import junit.framework.TestCase;
-import solutions.trsoftware.commons.client.testutil.AssertUtils;
 
 import java.util.Random;
 
+import static solutions.trsoftware.commons.shared.testutil.AssertUtils.assertEqualsAndHashCode;
+import static solutions.trsoftware.commons.shared.testutil.AssertUtils.assertNotEqualsAndHashCode;
 import static solutions.trsoftware.commons.shared.text.TypingSpeed.*;
 
 /**
@@ -153,12 +154,14 @@ public class TypingSpeedTest extends TestCase {
       for (Language lang : Language.values()) {
         double value = rnd.nextInt(100_000);
         for (Unit unit : Unit.values()) {
-          AssertUtils.assertEqualsAndHashCode(new TypingSpeed(value, unit, lang), new TypingSpeed(value, unit, lang));
-          AssertUtils.assertNotEqualsAndHashCode(new TypingSpeed(value, unit, lang), new TypingSpeed(value + DELTA, unit, lang));
+          assertEqualsAndHashCode(new TypingSpeed(value, unit, lang), new TypingSpeed(value, unit, lang));
+          assertNotEqualsAndHashCode(new TypingSpeed(value, unit, lang), new TypingSpeed(value + DELTA, unit, lang));
         }
-        AssertUtils.assertEqualsAndHashCode(new TypingSpeed(value, Unit.CPM, lang), new TypingSpeed(cpmToWpm(value, lang), Unit.WPM, lang));
-        if (lang.charsPerWord() > 1)
-          AssertUtils.assertNotEqualsAndHashCode(new TypingSpeed(value, Unit.CPM, lang), new TypingSpeed(value, Unit.WPM, lang));
+        assertEqualsAndHashCode(new TypingSpeed(value, Unit.CPM, lang), new TypingSpeed(cpmToWpm(value, lang), Unit.WPM, lang));
+        if (!lang.isLogographic() && value != 0) {
+          // CPM and WPM are only equal for logographic languages
+          assertNotEqualsAndHashCode(new TypingSpeed(value, Unit.CPM, lang), new TypingSpeed(value, Unit.WPM, lang));
+        }
       }
     }
   }

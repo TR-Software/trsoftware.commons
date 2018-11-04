@@ -1,11 +1,11 @@
 /*
- *  Copyright 2017 TR Software Inc.
+ * Copyright 2018 TR Software Inc.
  *
- *  Licensed under the Apache License, Version 2.0 (the "License"); you may not
- *  use this file except in compliance with the License. You may obtain a copy of
- *  the License at
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not
+ * use this file except in compliance with the License. You may obtain a copy of
+ * the License at
  *
- *  http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
@@ -142,7 +142,7 @@ public class DataSampleChart {
   private String generateUrl() {
     StringBuilder urlString = new StringBuilder(dataPoints.length()*4);
     long currentTime = System.currentTimeMillis();
-    urlString.append("http://chart.apis.google.com/chart?chxt=x,y&chd=e:")
+    urlString.append(GoogleChart.BASE_URL).append("chxt=x,y&chd=e:")
         .append(dataPoints)
         .append("&chxp=0,97.6,73.2,48.8,24.5,0.1|1,20.0,40.0,60.0,80.0,100.0&chg=0,20.00,1,2&chm=R,7f7f7f,0,0.976,0.977|R,7f7f7f,0,0.732,0.733|R,7f7f7f,0,0.488,0.489|R,7f7f7f,0,0.245,0.246|R,7f7f7f,0,0.001,0.002|B,eaf0f4,0,0,0")
         .append("&chs=").append(width).append("x").append(height)

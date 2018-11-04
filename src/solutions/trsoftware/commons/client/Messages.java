@@ -1,11 +1,11 @@
 /*
- *  Copyright 2017 TR Software Inc.
+ * Copyright 2018 TR Software Inc.
  *
- *  Licensed under the Apache License, Version 2.0 (the "License"); you may not
- *  use this file except in compliance with the License. You may obtain a copy of
- *  the License at
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not
+ * use this file except in compliance with the License. You may obtain a copy of
+ * the License at
  *
- *  http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
@@ -17,27 +17,30 @@
 
 package solutions.trsoftware.commons.client;
 
+import com.google.gwt.core.client.GWT;
 import com.google.gwt.user.client.rpc.StatusCodeException;
 import solutions.trsoftware.commons.client.useragent.UserAgent;
 import solutions.trsoftware.commons.shared.util.StringUtils;
 
+import static solutions.trsoftware.commons.shared.util.LogicUtils.firstNonNull;
+
 /**
- * Singleton that can be used to generate certain common UI messages for the webapp.
+ * Singleton that can be used to generate certain common UI messages and strings for the webapp.
  *
- * TODO: add support for i18n (see http://www.gwtproject.org/doc/latest/DevGuideI18n.html)
+ * <p style="color: #6495ed; font-weight: bold;">
+ *   TODO: add support for i18n (see http://www.gwtproject.org/doc/latest/DevGuideI18n.html)
+ * </p>
  *
  * @author Alex
  */
 public class Messages {
 
-  private static final String CUSTOMER_SUPPORT = "customer support";
-
   private static Messages instance;
 
-  public static Messages get() {
+  public static <T extends Messages> T get() {
     if (instance == null)
-      instance = new Messages();
-    return instance;
+      instance = GWT.create(Messages.class);
+    return (T)instance;
   }
 
   /**
@@ -52,7 +55,10 @@ public class Messages {
     Messages.instance = impl;
   }
 
-  private Messages() {
+  /**
+   * <strong>WARNING</strong>: this constructor is public only for unit testing.  Use {@link #get()} instead.
+   */
+  public Messages() {
   }
 
   public static String exceptionTypeAndMessageToString(Throwable ex) {
@@ -86,24 +92,29 @@ public class Messages {
    * @return the value defined by {@link Settings#getAppName()}, or {@code "this application"} if it's {@code null}.
    */
   public String getAppName() {
-    String appName = Settings.get().getAppName();
-    if (appName == null)
-      appName = "this application";
-    return appName;
+    return firstNonNull(Settings.get().getAppName(), "this application");
   }
 
   public String notifySupportMessage() {
-    String supportEmail = getSupportEmail();
-    if (supportEmail == null)
-      return "please notify " + CUSTOMER_SUPPORT;
-    return "please notify " + supportEmail;
+    return contactSupportMessage("notify");
   }
 
   public String contactSupportMessage() {
-    String supportEmail = getSupportEmail();
-    if (supportEmail == null)
-      return "please contact " + CUSTOMER_SUPPORT;
-    return "please contact " + supportEmail;
+    return contactSupportMessage("contact");
+  }
+
+  /**
+   * Generates a string like {@code "please VERB customer support"},
+   * where {@code VERB} is replaced with the value of the {@code verb} arg.
+   *
+   * If the inheriting module provided a value for {@link Settings#supportEmail}, that email address will be substituted
+   * for the phrase {@code "customer support"}
+   *
+   * @param verb the verb to use
+   * @return a message like {@code "please contact customer support"}
+   */
+  public String contactSupportMessage(String verb) {
+    return "please " + verb + " " + firstNonNull(getSupportEmail(), "customer support");
   }
 
   public String contactSupportForAssistanceMessage() {
@@ -115,8 +126,11 @@ public class Messages {
   }
 
   public String reloadAppMessage() {
-    return "Sorry, this webpage needs to be " + UserAgent.getInstance().getReloadPageVerb() + "ed because a newer version of this app has been released.\n\n"
-        + "(If you are still getting this message after that, please wait a few minutes and try to " + UserAgent.getInstance().getReloadPageVerb() + " again. " + notifySupportIfProblemPersists() + ")";
+    String appTitle = getAppName();
+    return "Sorry, this webpage needs to be " + UserAgent.getInstance().getReloadPageVerb() + "ed because a newer version of "
+        + appTitle + " has been released.\n\n"
+        + "(If you are still getting this message after that, please wait a few minutes and try to "
+        + UserAgent.getInstance().getReloadPageVerb() + " again. " + notifySupportIfProblemPersists() + ")";
   }
 
   /** Formats an error message to be displayed to the user in an alert box */

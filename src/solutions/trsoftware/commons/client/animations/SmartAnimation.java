@@ -1,11 +1,11 @@
 /*
- *  Copyright 2017 TR Software Inc.
+ * Copyright 2018 TR Software Inc.
  *
- *  Licensed under the Apache License, Version 2.0 (the "License"); you may not
- *  use this file except in compliance with the License. You may obtain a copy of
- *  the License at
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not
+ * use this file except in compliance with the License. You may obtain a copy of
+ * the License at
  *
- *  http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
@@ -31,6 +31,12 @@ import com.google.web.bindery.event.shared.SimpleEventBus;
  *   <li>save the current progress of the animation (the last value passed to {@link #onUpdate(double)})</li>
  *   <li>adding event handlers to listen for progress updates</li>
  * </ol>
+ *
+ * <p style="color: #6495ed; font-weight: bold;">
+ *   TODO(3/6/2018): it's no longer necessary for this class to keep track of whether the animation is running,
+ *   because the newer versions of GWT provide a public {@link #isRunning()} method.
+ * </p>
+ *
  * @see #isRunning()
  * @see #getProgress()
  * @see #addUpdateHandler(UpdateEvent.Handler)

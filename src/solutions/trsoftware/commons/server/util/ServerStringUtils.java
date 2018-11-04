@@ -1,11 +1,11 @@
 /*
- *  Copyright 2017 TR Software Inc.
+ * Copyright 2018 TR Software Inc.
  *
- *  Licensed under the Apache License, Version 2.0 (the "License"); you may not
- *  use this file except in compliance with the License. You may obtain a copy of
- *  the License at
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not
+ * use this file except in compliance with the License. You may obtain a copy of
+ * the License at
  *
- *  http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
@@ -20,6 +20,7 @@ package solutions.trsoftware.commons.server.util;
 
 import org.apache.commons.codec.binary.Base64;
 import org.w3c.dom.Document;
+import solutions.trsoftware.commons.client.bridge.util.URIComponentEncoder;
 import solutions.trsoftware.commons.server.io.ServerIOUtils;
 import solutions.trsoftware.commons.shared.util.Levenshtein;
 import solutions.trsoftware.commons.shared.util.StringUtils;
@@ -72,7 +73,10 @@ public class ServerStringUtils {
       }
   }
 
-  /** Returns the UTF-8 encoding of the given string. */
+  /**
+   * Returns the {@value StringUtils#UTF8_CHARSET_NAME} encoding of the given string (this charset should be supported
+   * by all JVMs).
+   */
   public static byte[] stringToBytesUtf8(String str) {
     try {
       return str.getBytes(StringUtils.UTF8_CHARSET_NAME);
@@ -80,6 +84,27 @@ public class ServerStringUtils {
     catch (UnsupportedEncodingException e) {
       // will never happen - all Java VMs support UTF-8
       throw new RuntimeException(e);
+    }
+  }
+
+  /**
+   * Attempts to convert a {@link String} to a byte array using {@link String#getBytes(String)}.  If the desired
+   * charset is not supported, will fall back to {@value StringUtils#UTF8_CHARSET_NAME}
+   * (which should be supported by all JVMs)
+   *
+   * @param str the string whose bytes you want
+   * @param charsetName the desired {@linkplain java.nio.charset.Charset charset} for encoding the bytes
+   * @return the resultant byte array
+   *
+   * @see <a href="https://docs.oracle.com/javase/8/docs/technotes/guides/intl/encoding.doc.html">Supported Encodings</a>
+   */
+  public static byte[] stringToBytes(String str, String charsetName) {
+    try {
+      return str.getBytes(charsetName);
+    }
+    catch (UnsupportedEncodingException e) {
+      e.printStackTrace();
+      return stringToBytesUtf8(str);
     }
   }
 
@@ -123,7 +148,7 @@ public class ServerStringUtils {
     return hashSHA256(plaintext, 1);
   }
 
-  /** URL-decodes the given string as UTF-8 */
+  /** Decodes the given percent-encoded string using {@link java.net.URLDecoder} (UTF-8 encoding is assumed). */
   public static String urlDecode(String str) {
     try {
       return URLDecoder.decode(str, StringUtils.UTF8_CHARSET_NAME);
@@ -137,7 +162,13 @@ public class ServerStringUtils {
     }
   }
 
-  /** URL-encodes the given string as UTF-8 */
+  /**
+   * Percent-encodes the given string using {@link java.net.URLEncoder} (UTF-8 encoding is used).
+   * <p>
+   * <strong>Warning:</strong> Don't use this method for encoding cookie values that might be read client-side with
+   * {@link com.google.gwt.user.client.Cookies} -- use {@link URIComponentEncoder#encode(String)} instead.
+   * @see URIComponentEncoder#encode(String)
+   */
   public static String urlEncode(String str) {
     try {
       return URLEncoder.encode(str, StringUtils.UTF8_CHARSET_NAME);
@@ -218,7 +249,7 @@ public class ServerStringUtils {
     return groups;
   }
 
-  /** Compresses the string using java.zip.DeflaterOutputStream */
+  /** Compresses the string using {@link DeflaterOutputStream} */
   public static byte[] deflateString(String str) {
     // NOTE: DeflaterOutputStream provides better compression than GZIPOutputStream because the latter writes an additional 10-byte header
     DeflaterOutputStream zipOut = null;

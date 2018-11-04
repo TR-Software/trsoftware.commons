@@ -1,11 +1,11 @@
 /*
- *  Copyright 2017 TR Software Inc.
+ * Copyright 2018 TR Software Inc.
  *
- *  Licensed under the Apache License, Version 2.0 (the "License"); you may not
- *  use this file except in compliance with the License. You may obtain a copy of
- *  the License at
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not
+ * use this file except in compliance with the License. You may obtain a copy of
+ * the License at
  *
- *  http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
@@ -23,12 +23,10 @@ import java.util.Map;
 import java.util.Set;
 
 /**
- * Decorates a {@link Map} such that {@link #get(Object)} invokes the private method {@link #getOrInsert(Object)},
- * which inserts the result of {@link #computeDefault(Object)} for any key that's not already contained by the
- * encapsulated map.
- *
- * NOTE: this is different form the new Java 8 method {@link Map#getOrDefault(Object, Object)}, which doesn't
- * actually add the missing value to the map.
+ * Decorates a {@link Map} such that {@link #get(Object)} inserts the result of {@link #computeDefault(Object)}
+ * for any key that's not already contained by the encapsulated map.
+ * <p>
+ * NOTE: Java 8 provides a new method that serves a similar purpose: {@link Map#computeIfAbsent}
  *
  * @author Alex, 2/24/2016
  */
@@ -36,7 +34,7 @@ public abstract class DefaultMap<K, V> implements Map<K, V> {
 
   private final Map<K,V> delegate;
 
-  public DefaultMap() {
+  protected DefaultMap() {
     this(new LinkedHashMap<K, V>());
   }
 
@@ -75,12 +73,7 @@ public abstract class DefaultMap<K, V> implements Map<K, V> {
 
   private V getOrInsert(K key) {
     if (!containsKey(key)) {
-      // double-checked locking
-      synchronized (this) {
-        if (!containsKey(key)) {
-          put(key, computeDefault(key));
-        }
-      }
+      put(key, computeDefault(key));
     }
     return delegate.get(key);
   }
@@ -126,5 +119,10 @@ public abstract class DefaultMap<K, V> implements Map<K, V> {
   @Override
   public int hashCode() {
     return delegate.hashCode();
+  }
+
+  @Override
+  public String toString() {
+    return delegate.toString();
   }
 }

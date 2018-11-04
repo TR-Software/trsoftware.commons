@@ -1,11 +1,11 @@
 /*
- *  Copyright 2017 TR Software Inc.
+ * Copyright 2018 TR Software Inc.
  *
- *  Licensed under the Apache License, Version 2.0 (the "License"); you may not
- *  use this file except in compliance with the License. You may obtain a copy of
- *  the License at
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not
+ * use this file except in compliance with the License. You may obtain a copy of
+ * the License at
  *
- *  http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
@@ -19,7 +19,7 @@ package solutions.trsoftware.commons.client.animations;
 
 import com.google.gwt.dom.client.Element;
 import solutions.trsoftware.commons.client.widgets.input.EnumValueListBox;
-import solutions.trsoftware.commons.shared.util.ColorHSL;
+import solutions.trsoftware.commons.shared.graphics.ColorHSL;
 
 /**
  * Gradually changes one of the HSL components of an element's {@code background-color} style between 2 values at a given rate.

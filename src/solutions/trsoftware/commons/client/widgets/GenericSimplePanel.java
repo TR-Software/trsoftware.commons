@@ -1,11 +1,11 @@
 /*
- *  Copyright 2017 TR Software Inc.
+ * Copyright 2018 TR Software Inc.
  *
- *  Licensed under the Apache License, Version 2.0 (the "License"); you may not
- *  use this file except in compliance with the License. You may obtain a copy of
- *  the License at
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not
+ * use this file except in compliance with the License. You may obtain a copy of
+ * the License at
  *
- *  http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
@@ -26,13 +26,16 @@ import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.Widget;
 
 /**
- * Allows any {@link Element} to become a {@link SimplePanel}.
+ * Allows any {@link Element} to become a {@link SimplePanel} (by exposing the {@link SimplePanel#SimplePanel(Element)}
+ * constructor).
  *
  * @author Alex, 3/24/2015
  */
 public class GenericSimplePanel extends SimplePanel {
 
   /**
+   * Constructor exposed to allow any element to become a {@link GenericSimplePanel}.
+   *
    * @param elem the element to use for this widget.
    */
   public GenericSimplePanel(Element elem) {
@@ -40,6 +43,8 @@ public class GenericSimplePanel extends SimplePanel {
   }
 
   /**
+   * Constructor exposed to allow any element to become a {@link GenericSimplePanel}.
+   *
    * @param elem the element to use for this widget.
    * @param child the child widget to add to it
    */

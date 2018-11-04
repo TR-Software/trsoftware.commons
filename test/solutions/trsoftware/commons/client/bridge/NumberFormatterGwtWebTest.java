@@ -1,11 +1,11 @@
 /*
- *  Copyright 2017 TR Software Inc.
+ * Copyright 2018 TR Software Inc.
  *
- *  Licensed under the Apache License, Version 2.0 (the "License"); you may not
- *  use this file except in compliance with the License. You may obtain a copy of
- *  the License at
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not
+ * use this file except in compliance with the License. You may obtain a copy of
+ * the License at
  *
- *  http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
@@ -27,9 +27,11 @@ import solutions.trsoftware.commons.client.bridge.rpc.NumberFormatTestServiceAsy
 import solutions.trsoftware.commons.client.bridge.text.AbstractNumberFormatter;
 import solutions.trsoftware.commons.client.bridge.text.NumberFormatter;
 import solutions.trsoftware.commons.client.bridge.text.impl.NumberFormatterGwtImpl;
-import solutions.trsoftware.commons.client.bridge.util.RandomGen;
 import solutions.trsoftware.commons.client.util.IncrementalForLoop;
+import solutions.trsoftware.commons.shared.util.RandomUtils;
 import solutions.trsoftware.commons.shared.util.mutable.MutableInteger;
+
+import java.util.Random;
 
 import static solutions.trsoftware.commons.shared.util.StringUtils.template;
 
@@ -75,7 +77,7 @@ public class NumberFormatterGwtWebTest extends CommonsGwtTestCase {
     delayTestFinish(120000);  // go into async mode
 
     int iterations = 10000;
-    final RandomGen rnd = RandomGen.getInstance();
+    final Random rnd = new Random();
 
     // 1) pre-compute the test values and save them into these arrays, so that
     // they can be fed to the servlet as a batch, because doing 10K servlet calls
@@ -94,7 +96,8 @@ public class NumberFormatterGwtWebTest extends CommonsGwtTestCase {
       protected void loopBody(int i) {
         minIntegerDigits[i] = rnd.nextInt(5);
         minFractionalDigits[i] = rnd.nextInt(5);
-        maxFractionalDigits[i] = rnd.nextIntInRange(minFractionalDigits[i], 10);
+//        maxFractionalDigits[i] = rnd.nextIntInRange(minFractionalDigits[i], 10);
+        maxFractionalDigits[i] = RandomUtils.nextIntInRange(rnd, minFractionalDigits[i], 10);
         digitGrouping[i] = rnd.nextBoolean();
 
         // we want to test 3 kinds of numbers - 0..1, single digits, and many digits

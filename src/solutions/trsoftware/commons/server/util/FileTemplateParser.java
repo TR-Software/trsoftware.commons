@@ -1,11 +1,11 @@
 /*
- *  Copyright 2017 TR Software Inc.
+ * Copyright 2018 TR Software Inc.
  *
- *  Licensed under the Apache License, Version 2.0 (the "License"); you may not
- *  use this file except in compliance with the License. You may obtain a copy of
- *  the License at
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not
+ * use this file except in compliance with the License. You may obtain a copy of
+ * the License at
  *
- *  http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
@@ -17,6 +17,8 @@
 
 package solutions.trsoftware.commons.server.util;
 
+import solutions.trsoftware.commons.server.io.DataResource;
+import solutions.trsoftware.commons.server.io.ResourceLocator;
 import solutions.trsoftware.commons.server.io.ServerIOUtils;
 import solutions.trsoftware.commons.shared.util.collections.DefaultMap;
 import solutions.trsoftware.commons.shared.util.template.SimpleTemplateParser;
@@ -43,44 +45,79 @@ import java.io.IOException;
  */
 public final class FileTemplateParser implements TemplateParser {
 
-  // TODO: make this lazy-init to save memory when this class is not needed
-  private static final FileTemplateParser instance = new FileTemplateParser();
-
-  private final DefaultMap<File, Template> cache = new DefaultMap<File, Template>() {
+  /**
+   * Caches parsed templates
+   */
+  private static final DefaultMap<TemplateParser, FileTemplateParser> instances = new DefaultMap<TemplateParser, FileTemplateParser>() {
     @Override
-    public Template computeDefault(File key) {
-      return templateFromFile(key);
+    public FileTemplateParser computeDefault(TemplateParser templateSyntax) {
+      return new FileTemplateParser(templateSyntax);
     }
   };
 
   public static FileTemplateParser getInstance() {
-    return instance;
+    return instances.get(SimpleTemplateParser.DEFAULT_SYNTAX);
   }
 
-  /** This class should not be instantiated */
+  public static FileTemplateParser getInstance(TemplateParser templateSyntax) {
+    return instances.get(templateSyntax);
+  }
+
+  /**
+   * Caches parsed templates
+   */
+  private final DefaultMap<DataResource, Template> cache = new DefaultMap<DataResource, Template>() {
+    @Override
+    public Template computeDefault(DataResource key) {
+      return parseTemplate(key);
+    }
+  };
+
+  private final TemplateParser templateSyntax;
+
+  /** This class should not be instantiated directly; use the {@link #getInstance()} method instead */
   private FileTemplateParser() {
+    templateSyntax = SimpleTemplateParser.DEFAULT_SYNTAX;
   }
 
-  private Template templateFromFile(File templateFile) {
+  private FileTemplateParser(TemplateParser templateSyntax) {
+    this.templateSyntax = templateSyntax;
+  }
+
+  private Template parseTemplate(DataResource templateData) {
     try {
-      return parseTemplate(ServerIOUtils.readFileIntoStringUTF8(templateFile));
+      return parseTemplate(ServerIOUtils.readCharactersIntoString(templateData.getInputStream()));
     }
     catch (IOException e) {
-      throw new IllegalArgumentException("Error parsing parsing template file " + templateFile.getPath(), e);
+      throw new IllegalArgumentException("Error reading template from " + templateData, e);
     }
   }
 
   @Override
   public Template parseTemplate(String templateString) {
-    return SimpleTemplateParser.parseDefault(templateString);
+    return templateSyntax.parseTemplate(templateString);
   }
 
+  /**
+   * @param resource a string suitable for {@link ClassLoader#getResource(String)} (i.e. it should include the full
+   * path without a leading {@code /})
+   * @return the template compiled from the given resource file
+   */
+  public final Template getTemplate(ResourceLocator resource) {
+    return cache.get(new DataResource.JavaResource(resource));
+  }
+
+  /**
+   * @param resourceName a string suitable for {@link ClassLoader#getResource(String)} (i.e. it should include the full
+   * path without a leading {@code /})
+   * @return the template compiled from the given resource file
+   */
   public final Template getTemplate(String resourceName) {
-    return cache.get(ServerIOUtils.resourceNameToFile(resourceName));
+    return cache.get(new DataResource.JavaResource(new ResourceLocator(resourceName)));
   }
 
   public final Template getTemplate(File file) {
-    return cache.get(file);
+    return cache.get(new DataResource.FileResource(file));
   }
 
 }

@@ -1,11 +1,11 @@
 /*
- *  Copyright 2017 TR Software Inc.
+ * Copyright 2018 TR Software Inc.
  *
- *  Licensed under the Apache License, Version 2.0 (the "License"); you may not
- *  use this file except in compliance with the License. You may obtain a copy of
- *  the License at
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not
+ * use this file except in compliance with the License. You may obtain a copy of
+ * the License at
  *
- *  http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
@@ -23,6 +23,7 @@ import java.io.File;
 import java.io.IOException;
 
 import static solutions.trsoftware.commons.server.io.ServerIOUtils.*;
+import static solutions.trsoftware.commons.server.io.file.FileUtils.TEMP_DIR_PATH;
 
 /**
  * Base test case that creates a temporary file in the system's base temp directory (specified by
@@ -43,7 +44,7 @@ public abstract class TempFileTestCase extends TestCase {
   @Override
   protected void setUp() throws Exception {
     super.setUp();
-    tempFile = new File(System.getProperty("java.io.tmpdir"), getName() + "_TEMPFILE_" + System.nanoTime() + getFilenameSuffix());
+    tempFile = new File(TEMP_DIR_PATH, getName() + "_TEMPFILE_" + System.nanoTime() + getFilenameSuffix());
     deleteTempFileIfExists();
     tempFile.deleteOnExit();
     assertFalse(tempFile.exists());

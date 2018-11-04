@@ -1,11 +1,11 @@
 /*
- *  Copyright 2017 TR Software Inc.
+ * Copyright 2018 TR Software Inc.
  *
- *  Licensed under the Apache License, Version 2.0 (the "License"); you may not
- *  use this file except in compliance with the License. You may obtain a copy of
- *  the License at
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not
+ * use this file except in compliance with the License. You may obtain a copy of
+ * the License at
  *
- *  http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
@@ -18,7 +18,6 @@
 package solutions.trsoftware.commons.shared.util;
 
 import junit.framework.TestCase;
-import solutions.trsoftware.commons.client.testutil.AssertUtils;
 
 import java.util.Random;
 
@@ -30,6 +29,8 @@ import static solutions.trsoftware.commons.shared.util.TimeUnit.*;
  * @author Alex
  */
 public class TimeUnitTest extends TestCase {
+
+  public static final double marginOfError = MathUtils.EPSILON;
 
   public void testFrom() throws Exception {
     // check that converting 0 from any unit yields zero
@@ -44,13 +45,13 @@ public class TimeUnitTest extends TestCase {
     }
 
     // do some manual tests as a sanity check
-    assertEquals(2_000_000, NANOSECONDS.from(MILLISECONDS, 2), AssertUtils.EPSILON);
-    assertEquals(2.2, SECONDS.from(MILLISECONDS, 2200), AssertUtils.EPSILON);
-    assertEquals(1.5, MINUTES.from(SECONDS, 90), AssertUtils.EPSILON);
-    assertEquals(1.5, HOURS.from(MINUTES, 90), AssertUtils.EPSILON);
-    assertEquals(4.5, DAYS.from(HOURS, 4.5 * 24), AssertUtils.EPSILON);
+    assertEquals(2_000_000, NANOSECONDS.from(MILLISECONDS, 2), marginOfError);
+    assertEquals(2.2, SECONDS.from(MILLISECONDS, 2200), marginOfError);
+    assertEquals(1.5, MINUTES.from(SECONDS, 90), marginOfError);
+    assertEquals(1.5, HOURS.from(MINUTES, 90), marginOfError);
+    assertEquals(4.5, DAYS.from(HOURS, 4.5 * 24), marginOfError);
     assertEquals(.5, MONTHS.from(DAYS, 15), .01);  // we allow a higher margin of error for this conversion, since a month isn't exactly 30 days
-    assertEquals(1.25, YEARS.from(MONTHS, 15), AssertUtils.EPSILON);
+    assertEquals(1.25, YEARS.from(MONTHS, 15), marginOfError);
   }
 
   public void testTo() throws Exception {
@@ -66,13 +67,14 @@ public class TimeUnitTest extends TestCase {
     }
 
     // do some manual tests as a sanity check
-    assertEquals(2, MILLISECONDS.from(NANOSECONDS, 2_000_000), AssertUtils.EPSILON);
-    assertEquals(2200, SECONDS.to(MILLISECONDS, 2.2), AssertUtils.EPSILON);
-    assertEquals(90, MINUTES.to(SECONDS, 1.5), AssertUtils.EPSILON);
-    assertEquals(90, HOURS.to(MINUTES, 1.5), AssertUtils.EPSILON);
-    assertEquals(4.5, DAYS.from(HOURS, 4.5 * 24), AssertUtils.EPSILON);
-    assertEquals(15, MONTHS.to(DAYS, .5), .3);  // we allow a higher margin of error for this conversion, since a month isn't exactly 30 days
-    assertEquals(15, YEARS.to(MONTHS, 1.25), AssertUtils.EPSILON);
+    assertEquals(2, MILLISECONDS.from(NANOSECONDS, 2_000_000), marginOfError);
+    assertEquals(2200, SECONDS.to(MILLISECONDS, 2.2), marginOfError);
+    assertEquals(90, MINUTES.to(SECONDS, 1.5), marginOfError);
+    assertEquals(90, HOURS.to(MINUTES, 1.5), marginOfError);
+    assertEquals(4.5, DAYS.from(HOURS, 4.5 * 24), marginOfError);
+    assertEquals(15.2184375, MONTHS.to(DAYS, .5), marginOfError);
+    assertEquals(365.2425, YEARS.to(DAYS, 1), marginOfError);
+    assertEquals(15, YEARS.to(MONTHS, 1.25), marginOfError);
   }
 
   public void testToMillis() throws Exception {

@@ -1,11 +1,11 @@
 /*
- *  Copyright 2017 TR Software Inc.
+ * Copyright 2018 TR Software Inc.
  *
- *  Licensed under the Apache License, Version 2.0 (the "License"); you may not
- *  use this file except in compliance with the License. You may obtain a copy of
- *  the License at
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not
+ * use this file except in compliance with the License. You may obtain a copy of
+ * the License at
  *
- *  http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
@@ -18,6 +18,7 @@
 package solutions.trsoftware.commons.shared.util.template;
 
 import junit.framework.TestCase;
+import solutions.trsoftware.commons.shared.testutil.AssertUtils;
 
 /**
  * Apr 13, 2010
@@ -26,12 +27,41 @@ import junit.framework.TestCase;
  */
 public class SimpleTemplateParserTest extends TestCase {
 
+  public void testWithCustomSyntax() throws Exception {
+    verifyTemplateRenderResult(
+        new SimpleTemplateParser("{*", "*}", "/*", "*/"),
+        "{*name*} {*lastName*} is the number {*foo*} {*bar*} in the world/* this is a template */");
+  }
 
-  public void testCustomTemplateParser() throws Exception {
-    TemplateParser parser = new SimpleTemplateParser("{*", "*}", "/*", "*/");
+  public void testWithDefaultSyntax() throws Exception {
+    verifyTemplateRenderResult(
+        SimpleTemplateParser.DEFAULT_SYNTAX,
+        "${name} ${lastName} is the number ${foo} ${bar} in the world<!-- this is a template -->");
+  }
+
+  public void testWithDjangoSyntax() throws Exception {
+    verifyTemplateRenderResult(
+        SimpleTemplateParser.DJANGO_SYNTAX,
+        "{{name}} {{lastName}} is the number {{foo}} {{bar}} in the world{# this is a template#}");
+  }
+
+  private void verifyTemplateRenderResult(TemplateParser parser, String templateString) {
     assertEquals(
-        "AdamLyons is the number 1 player in the world",
-        parser.parseTemplate("{*name*}{*lastName*} is the number {*foo*} {*bar*} in the world/* this is a template */")
+        "Adam Lyons is the number 1 player in the world",
+        parser.parseTemplate(templateString)
             .render("lastName", "Lyons", "name", "Adam", "foo", "1", "bar", "player"));
+  }
+
+  public void testEqualsAndHashCode() throws Exception {
+    // two instances are equal iff they represent the same syntax
+    SimpleTemplateParser a = new SimpleTemplateParser("{*", "*}", "/*", "*/");
+    SimpleTemplateParser b = new SimpleTemplateParser("{*", "*}", "<!--", "-->");
+    AssertUtils.assertEqualsAndHashCode(
+        a,
+        new SimpleTemplateParser("{*", "*}", "/*", "*/"));
+    AssertUtils.assertEqualsAndHashCode(
+        b,
+        new SimpleTemplateParser("{*", "*}", "<!--", "-->"));
+    AssertUtils.assertNotEqual(a, b);
   }
 }

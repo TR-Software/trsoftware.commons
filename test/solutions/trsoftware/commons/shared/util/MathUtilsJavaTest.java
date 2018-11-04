@@ -1,11 +1,11 @@
 /*
- *  Copyright 2017 TR Software Inc.
+ * Copyright 2018 TR Software Inc.
  *
- *  Licensed under the Apache License, Version 2.0 (the "License"); you may not
- *  use this file except in compliance with the License. You may obtain a copy of
- *  the License at
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not
+ * use this file except in compliance with the License. You may obtain a copy of
+ * the License at
  *
- *  http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
@@ -18,16 +18,13 @@
 package solutions.trsoftware.commons.shared.util;
 
 import junit.framework.TestCase;
-import solutions.trsoftware.commons.client.testutil.AssertUtils;
 import solutions.trsoftware.commons.server.util.ServerArrayUtils;
 import solutions.trsoftware.commons.server.util.ServerMathUtils;
+import solutions.trsoftware.commons.shared.testutil.AssertUtils;
 import solutions.trsoftware.commons.shared.util.stats.NumberSample;
 
 import java.math.BigInteger;
-import java.text.NumberFormat;
-import java.util.Arrays;
-import java.util.Random;
-import java.util.UUID;
+import java.util.*;
 
 import static solutions.trsoftware.commons.shared.util.MathUtils.*;
 
@@ -314,6 +311,8 @@ public class MathUtilsJavaTest extends TestCase {
     double delta = .000001;
     // 2) test the example given in the method javadoc: 32450.0 / 3.75 * 3.75 resulting in 32450.000000000004, whereas we would expect 32450.0
     assertTrue(equal(32450.0, 32450.0 / 3.75 * 3.75, delta));
+    // test using a negative delta (method should use the absolute value of the delta)
+    assertTrue(equal(32450.0, 32450.0 / 3.75 * 3.75, -delta));
     // 3) now test a million random finite values
     double[] nonFiniteValues = {Double.POSITIVE_INFINITY, Double.NEGATIVE_INFINITY, Double.NaN};
     Random rnd = new Random();
@@ -403,37 +402,41 @@ public class MathUtilsJavaTest extends TestCase {
   }
 
 
-  public void testRound() throws Exception {
-    for (int i = 0; i < 100; i++) {
-      for (int j = 0; j < 100; j++) {
-        assertEquals((double)i, round(i, j));
+  public void testSignum() throws Exception {
+    Map<Integer, int[]> testCases = new MapDecorator<Integer, int[]>(new LinkedHashMap<Integer, int[]>())
+        .put(0, new int[]{0})
+        .put(-1, new int[]{-123, -1})
+        .put(1, new int[]{123, 1})
+        .getMap();
+    for (Integer expected : testCases.keySet()) {
+      int[] args = testCases.get(expected);
+      for (int arg : args) {
+        assertEquals((int)expected, signum(arg));
+        assertEquals((int)expected, signum((long)arg));
       }
     }
-    Random rnd = new Random();
-    int n = 10;
-//    int n = 1_000_000;
-    for (int i = 0; i < n; i++) {
-      double x = rnd.nextDouble();
-      for (int d = 0; d < 12; d++) {
-        NumberFormat numberFormat = getNumberFormat(d);
-        double result = round(x, d);
-        String expected = numberFormat.format(x);
-        System.out.printf("round(%s, %d) = %s%n", x, d, result);
-        if ("0".equals(expected))
-          assertEquals(0d, result);
-        else if ("1".equals(expected))
-          assertEquals(1d, result);
-        else
-          assertEquals(expected, Double.toString(result));
-      }
+  }
+
+  public void testIsPowerOf2() throws Exception {
+    // 1) compute all the actual powers of 2 that can be represented as int
+    Set<Integer> powersOf2 = new HashSet<>();
+    for (long i = 1; i <= Integer.MAX_VALUE; i*=2) {  // using long to avoid overflow
+      // test all ints between i and the next power of 2
+      int p = (int)i;
+      assertTrue(isPowerOf2(p));
+      powersOf2.add(p);
     }
-
+    // 2) test some specific negative cases manually
+    assertFalse(isPowerOf2(0));
+    assertFalse(isPowerOf2(-1));
+    assertFalse(isPowerOf2(-2));
+    assertFalse(isPowerOf2(-3));
+    assertFalse(isPowerOf2(-4));
+    assertFalse(isPowerOf2(Integer.MIN_VALUE));
+    // 3) now test some random values (too slow to iterate over possible ints)
+    for (int i = 0; i < 100_000; i++) {
+      int x = RandomUtils.rnd.nextInt();
+      assertEquals(powersOf2.contains(x), isPowerOf2(x));
+    }
   }
-
-  private static NumberFormat getNumberFormat(int precision) {
-    NumberFormat numberFormat = NumberFormat.getNumberInstance();
-    numberFormat.setMaximumFractionDigits(precision);
-    return numberFormat;
-  }
-
 }

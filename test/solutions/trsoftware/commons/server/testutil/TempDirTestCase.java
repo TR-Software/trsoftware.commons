@@ -1,11 +1,11 @@
 /*
- *  Copyright 2017 TR Software Inc.
+ * Copyright 2018 TR Software Inc.
  *
- *  Licensed under the Apache License, Version 2.0 (the "License"); you may not
- *  use this file except in compliance with the License. You may obtain a copy of
- *  the License at
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not
+ * use this file except in compliance with the License. You may obtain a copy of
+ * the License at
  *
- *  http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
@@ -18,12 +18,14 @@
 package solutions.trsoftware.commons.server.testutil;
 
 import junit.framework.TestCase;
-import org.apache.commons.io.FileUtils;
+import solutions.trsoftware.commons.server.io.file.FileUtils;
 import solutions.trsoftware.commons.server.util.ThreadUtils;
 import solutions.trsoftware.commons.shared.util.callables.Function1_t;
 
 import java.io.File;
 import java.io.IOException;
+
+import static solutions.trsoftware.commons.server.io.file.FileUtils.TEMP_DIR_PATH;
 
 /**
  * This base test case creates one or more temporary directories in the system's base temp directory (specified by
@@ -68,10 +70,10 @@ public abstract class TempDirTestCase extends TestCase {
   }
 
   public static File createTempDir(String namePrefix) throws IOException {
-    File d = new File(System.getProperty("java.io.tmpdir"), namePrefix + "_TEMPDIR_" + System.nanoTime());
+    File d = new File(TEMP_DIR_PATH, namePrefix + "_TEMPDIR_" + System.nanoTime());
     assertFalse(d.exists());
     mkdir(d);
-    d.deleteOnExit();
+    FileUtils.deleteOnExit(d.toPath());
     return d;
   }
 
@@ -82,7 +84,7 @@ public abstract class TempDirTestCase extends TestCase {
 
   public static void rmdir(File dir) throws IOException {
     if (dir.exists())
-      FileUtils.deleteDirectory(dir);
+      FileUtils.deleteFileTree(dir.toPath());
     assertFalse(dir.exists());
   }
 

@@ -1,11 +1,11 @@
 /*
- *  Copyright 2017 TR Software Inc.
+ * Copyright 2018 TR Software Inc.
  *
- *  Licensed under the Apache License, Version 2.0 (the "License"); you may not
- *  use this file except in compliance with the License. You may obtain a copy of
- *  the License at
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not
+ * use this file except in compliance with the License. You may obtain a copy of
+ * the License at
  *
- *  http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
@@ -20,7 +20,7 @@ package solutions.trsoftware.commons.client.animations;
 import com.google.gwt.animation.client.Animation;
 import com.google.gwt.user.client.DOM;
 import com.google.gwt.user.client.ui.Widget;
-import solutions.trsoftware.commons.shared.util.ColorRGB;
+import solutions.trsoftware.commons.shared.graphics.ColorRGB;
 
 /**
  * Gradually fades the color of the given component between the given start and end
@@ -45,13 +45,13 @@ public class BackgroundTweenAnimation extends Animation {
     this.widget = widget;
     this.endColor = endColor;
 
-    r = startColor.r;
-    g = startColor.g;
-    b = startColor.b;
+    r = startColor.getRed();
+    g = startColor.getGreen();
+    b = startColor.getBlue();
 
-    rDiff = endColor.r - r;
-    gDiff = endColor.g - g;
-    bDiff = endColor.b - b;
+    rDiff = endColor.getRed() - r;
+    gDiff = endColor.getGreen() - g;
+    bDiff = endColor.getBlue() - b;
   }
 
 

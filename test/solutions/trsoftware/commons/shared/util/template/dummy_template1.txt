@@ -1,0 +1,2 @@
+<!-- Example template -->
+${a} x ${b}

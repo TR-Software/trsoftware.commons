@@ -1,11 +1,11 @@
 /*
- *  Copyright 2017 TR Software Inc.
+ * Copyright 2018 TR Software Inc.
  *
- *  Licensed under the Apache License, Version 2.0 (the "License"); you may not
- *  use this file except in compliance with the License. You may obtain a copy of
- *  the License at
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not
+ * use this file except in compliance with the License. You may obtain a copy of
+ * the License at
  *
- *  http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
@@ -18,7 +18,7 @@
 package solutions.trsoftware.commons.shared.util;
 
 import junit.framework.TestCase;
-import solutions.trsoftware.commons.Slow;
+import solutions.trsoftware.commons.shared.annotations.Slow;
 
 import java.util.*;
 
@@ -32,10 +32,10 @@ public class NumberRangeJavaTest extends TestCase {
   private int numRandomsWithinRange = 5000;  // should be enough to generate every number within a range
 
   public void testCornerCases() throws Exception {
-    assertEquals(4.5d, new NumberRange<Double>(4.5d, 4.5d).random());
-    assertEquals(4.5d, new NumberRange<Float>(4.5f, 4.5f).random());
-    assertEquals(5d, new NumberRange<Integer>(5, 5).random());
-    assertEquals(5d, new NumberRange<Long>(5L, 5L).random());
+    assertEquals(4.5d, new NumberRange<Double>(4.5d, 4.5d).randomDouble());
+    assertEquals(4.5d, new NumberRange<Float>(4.5f, 4.5f).randomDouble());
+    assertEquals(5d, new NumberRange<Integer>(5, 5).randomDouble());
+    assertEquals(5d, new NumberRange<Long>(5L, 5L).randomDouble());
   }
 
   public void testRandomDoubleFromFloatRanges() throws Exception {
@@ -60,7 +60,7 @@ public class NumberRangeJavaTest extends TestCase {
 
       // test a bunch of randoms in this range and make sure they're indeed in range
       for (int j = 0; j < numRandomsWithinRange; j++) {
-        double random = range.random();
+        double random = range.randomDouble();
         assertTrue(random >= min && random <= max);
       }
     }
@@ -88,7 +88,7 @@ public class NumberRangeJavaTest extends TestCase {
 
       // test a bunch of randoms in this range and make sure they're indeed in range
       for (int j = 0; j < numRandomsWithinRange; j++) {
-        double random = range.random();
+        double random = range.randomDouble();
         assertTrue(random >= min && random <= max);
       }
     }
@@ -273,8 +273,8 @@ public class NumberRangeJavaTest extends TestCase {
     // start with some simple inputs
     assertTrue(parseIntRangeList("").isEmpty());
 
-    assertEquals(new TreeSet(Arrays.asList((Integer)5)), parseIntRangeList("5"));
-    assertEquals(new TreeSet(Arrays.asList(5, 6, 7)), parseIntRangeList("5..7"));
+    assertEquals(new TreeSet<Integer>(Arrays.asList((Integer)5)), parseIntRangeList("5"));
+    assertEquals(new TreeSet<Integer>(Arrays.asList(5, 6, 7)), parseIntRangeList("5..7"));
 
     // now try a list with multiple ranges
     {

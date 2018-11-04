@@ -1,11 +1,11 @@
 /*
- *  Copyright 2017 TR Software Inc.
+ * Copyright 2018 TR Software Inc.
  *
- *  Licensed under the Apache License, Version 2.0 (the "License"); you may not
- *  use this file except in compliance with the License. You may obtain a copy of
- *  the License at
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not
+ * use this file except in compliance with the License. You may obtain a copy of
+ * the License at
  *
- *  http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
@@ -17,6 +17,9 @@
 
 package solutions.trsoftware.commons.server.servlet;
 
+import solutions.trsoftware.commons.client.util.WebUtils;
+
+import javax.annotation.Nonnull;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.net.MalformedURLException;
@@ -32,6 +35,14 @@ import java.util.*;
 public abstract class ServletUtils {
 
   private static final ThreadLocal<RequestCopy> threadLocalRequestCopy = new ThreadLocal<>();
+
+  public static final String USER_AGENT_HEADER = "User-Agent";
+
+  /**
+   * {@link #getRequestURL(HttpServletRequest)} will save the parsed {@link URL} in the request under this attribute name.
+   */
+  public static final String PARSED_URL_ATTR = ServletUtils.class.getName() + ".requestURL";
+
 
   public static void setThreadLocalRequestCopy(RequestCopy request) {
     if (request == null)
@@ -62,8 +73,12 @@ public abstract class ServletUtils {
     return userAgentString != null && userAgentString.toLowerCase().contains(str);
   }
 
+  /**
+   * @return The value of the request's {@value #USER_AGENT_HEADER} header, or {@code null} if the request
+   * doesn't have this header.
+   */
   public static String getUserAgentHeader(HttpServletRequest request) {
-    return request.getHeader("User-Agent");
+    return request.getHeader(USER_AGENT_HEADER);
   }
 
   public static boolean isIE6(HttpServletRequest request) {
@@ -91,14 +106,13 @@ public abstract class ServletUtils {
   }
 
   /**
-   * HttpServletRequest parameters are represented by a Map<String, String[]>,
-   * which is reduntant, because most of the time there is only one value for
-   * every parameter.
-   * @return The a key value mapping of the parameters to their values.
-   * @throws IllegalArgumentException if one of the String value arrays in the
-   * given map contains more than one element.
+   * The Servlet API represents {@link HttpServletRequest} parameters with a {@code Map<String, String[]>},
+   * which is often redundant, because most of the time there is only one value for every parameter.
+   *
+   * @return The a name-value mapping of the parameters, sorted by name
+   * @throws IllegalArgumentException if one of the {@code String[]} value arrays in the given map contains more than one element.
    */
-  public static SortedMap<String, String> requestParametersAsSortedStringMap(Map<String, String[]> requestParamMap) {
+  public static SortedMap<String, String> getRequestParametersAsSortedStringMap(Map<String, String[]> requestParamMap) {
     SortedMap<String, String> singleValueMap = new TreeMap<>();
     for (Map.Entry<String, String[]> entry : requestParamMap.entrySet()) {
       String[] valueArr = entry.getValue();
@@ -111,38 +125,38 @@ public abstract class ServletUtils {
   }
 
   /**
-   * {@link HttpServletRequest#getParameterMap} returns a {@code Map<String, String[]>},
-   * which is redundant, because most of the time there is only one value for every parameter.
+   * A more convenient version of {@link HttpServletRequest#getParameterMap()}, returning a {@code Map<String, String>}
+   * instead of {@code Map<String, String[]>}.  This is more convenient because most of the time there is only
+   * one value for any request parameter.
+   * <p>
+   * <strong>Warning:</strong> will throw {@link IllegalArgumentException} if the request actually does contain
+   * multi-valued parameters.
    *
-   * @return The a key value mapping of the parameters to their values.
-   * @throws IllegalArgumentException if one of the value arrays in the given map contains more than one element.
+   * @return The a name-value mapping of the parameters, sorted by name
+   * @throws IllegalArgumentException if one of the value arrays from {@link HttpServletRequest#getParameterMap()}
+   * contains more than one element.
    */
-  public static SortedMap<String, String> requestParametersAsSortedStringMap(HttpServletRequest request) {
-    return requestParametersAsSortedStringMap(request.getParameterMap());
+  public static SortedMap<String, String> getRequestParametersAsSortedStringMap(HttpServletRequest request) {
+    return getRequestParametersAsSortedStringMap(request.getParameterMap());
   }
 
-  /** @return the first subdomain from the url, or null if the URL doesn't have one */
-  public static String extractSubdomain(HttpServletRequest request) {
-    String subdomain = null;
-    String url = request.getRequestURL().toString();
-    // we use low-leve string operations because they're faster than regex
-    int startPos = "http://".length();
-    int dotCount = 0;
-    for (int i = startPos; i < url.length(); i++) {
-      char c = url.charAt(i);
-      if (c == '.') {
-        if (dotCount++ < 1)
-          subdomain = url.substring(startPos, i); // this is the first dot: we might have a subdomain ending with this dot, but can't know for sure until we see another dot (e.g. x.y.com has a sub, but x.com doesn't)
-        else
-          break;  // the second dot confirms that we actually do have a subdomain
-      }
-      else if (c == '/')
-        break;  // no subdomain or TLD (e.g. http://localhost/)
+  /**
+   * Retrieves a selected subset of request parameters.
+   *
+   * @param names the names of the parameters to return
+   * @return the name-value mapping for the selected parameters, in the same order they appear in the {@code names} arg.
+   * <b>Note:</b> if the request contains multiple values for any of these parameters, will include only the first value.
+   * @see WebUtils#getUrlParameterMap(Iterable)
+   */
+  @Nonnull
+  public static LinkedHashMap<String, String> getRequestParameters(HttpServletRequest request, Iterable<String> names) {
+    LinkedHashMap<String, String> ret = new LinkedHashMap<>();
+    for (String name : names) {
+      String value = request.getParameter(name);
+      if (value != null)
+        ret.put(name, value);
     }
-    if (dotCount > 1)
-      return subdomain;
-    else
-      return null;
+    return ret;
   }
 
   /**
@@ -187,30 +201,72 @@ public abstract class ServletUtils {
 
   /** Generates a URL equivalent to the requested URL but with the given parameter replaced in the query string */
   public static String replaceQueryStringParameter(HttpServletRequest request, String originalParamName, String originalValue, String newParamName, String newValue) {
-    return request.getRequestURL().append('?').append(replaceQueryStringParameter(
+    return request.getRequestURL().append('?').append(UrlUtils.replaceQueryStringParameter(
         request.getQueryString(), originalParamName, originalValue, newParamName, newValue)).toString();
   }
 
-  /** Replaces a name=value pair in the given URL query string with a new one */
-  public static String replaceQueryStringParameter(String queryString, String originalParamName, String originalValue, String newParamName, String newValue) {
-    return queryString.replaceFirst(originalParamName + "=" + originalValue, newParamName + "=" + newValue);
-  }
-
-  /** Replaces a parameter value in the given URL query string with a new value */
-  public static String replaceQueryStringParameter(String queryString, String paramName, String originalValue, String newValue) {
-    return replaceQueryStringParameter(queryString, paramName, originalValue, paramName, newValue);
+  /**
+   * Parses the URL string given by {@link HttpServletRequest#getRequestURL()} into a {@link URL} object,
+   * and caches the result as a request attribute for future reference.  If a cached instance is already available,
+   * will return that instead of parsing the URL again.
+   * <p>
+   * NOTE: this is the same as calling {@link #getRequestURL(HttpServletRequest, boolean)} with {@code cache = true}.
+   *
+   * @return an instance of {@link URL}, derived from invoking {@link HttpServletRequest#getRequestURL()} on the given
+   *     {@code request}
+   * @see #PARSED_URL_ATTR
+   */
+  public static URL getRequestURL(HttpServletRequest request) {
+    return getRequestURL(request, true);
   }
 
   /**
+   * Parses the URL string given by {@link HttpServletRequest#getRequestURL()} into a {@link URL} object,
+   * and optionally saves the result as a request attribute for future reference (as a performance optimization,
+   * to avoid the overhead of parsing it again later in the request lifecycle).
+   * <p>
+   * Some simple benchmarking shows that the cached version is about 10x faster (see {@code
+   * ServletUtilsTest.testGetRequestURLBenchmark()})
+   *
+   * @param cache if {@code true}, will save the result into a request attribute
+   *     (as a performance optimization, to avoid the overhead of parsing it multiple times);
+   *     otherwise will neither cache the result in a request attribute, nor attempt to use a cached result even if
+   *     it might be available (this might be slightly faster and save a bit of memory if a parsed {@link URL}
+   *     is needed only once throughout the request lifecycle)
    * @return an instance of {@link URL}, derived from invoking {@link HttpServletRequest#getRequestURL()} on the given
-   * {@code request}
+   *     {@code request}
+   * @see #PARSED_URL_ATTR
    */
-  public static URL getRequestURL(HttpServletRequest request) {
+  public static URL getRequestURL(HttpServletRequest request, boolean cache) {
+    if (cache) {
+      /*
+        perf optimization: we save the parsed URL object in a request attribute for future reference
+        (to avoid the overhead of parsing it multiple times)
+      */
+      Object parsedURL = request.getAttribute(PARSED_URL_ATTR);
+      if (parsedURL != null) {
+        if (parsedURL instanceof URL)
+          return (URL)parsedURL;
+        else if (parsedURL instanceof Throwable) {
+          // must have got a MalformedURLException last time we tried to parse it (which is very unlikely)
+          throw new RuntimeException((Throwable)parsedURL);
+        }
+      }
+    }
+
     try {
-      return new URL(request.getRequestURL().toString());
+      URL url = new URL(request.getRequestURL().toString());
+      if (cache) {
+        // save the parsed URL in the request, to avoid the parsing overhead next time it's needed
+        request.setAttribute(PARSED_URL_ATTR, url);
+      }
+      return url;
     }
     catch (MalformedURLException e) {
-      // this should never happen, because the request presumably contains a valid URL string
+      // this should never happen, because the request presumably contains a valid URL (otherwise it wouldn't have made it here)
+      if (cache) {
+        request.setAttribute(PARSED_URL_ATTR, e);
+      }
       throw new RuntimeException(e);
     }
   }
@@ -230,7 +286,7 @@ public abstract class ServletUtils {
   }
 
   /** @return the requested URL minus the path (e.g. http://example.com/foo -> http://example.com) */
-  public static StringBuffer getBaseUrl(HttpServletRequest request) {
+  public static StringBuffer getBaseURL(HttpServletRequest request) {
     StringBuffer url = request.getRequestURL();
     // NOTE: we don't simply strip off the query string because that creates a discrepancy between different versions of tomcat (see https://issues.apache.org/bugzilla/show_bug.cgi?id=28222 )
     // instead, we just strip off everything after the 3rd slash in the URL (which seems to work for all imaginable types of http urls)
@@ -273,5 +329,24 @@ public abstract class ServletUtils {
       ret.add(value);
     }
     return ret;
+  }
+
+  /**
+   * Generates a string with info about the given GWT-RPC request for logging purposes.
+   *
+   * @return info about the given GWT-RPC request for logging purposes.
+   */
+  public static String printGwtRequestInfo(HttpServletRequest request, String permutationStrongName) {
+    return appendGwtRequestInfo(new StringBuilder(), request, permutationStrongName).toString();
+  }
+
+  /**
+   * Appends info about the given GWT-RPC request to the given {@link StringBuilder} for logging purposes.
+   *
+   * @return the given {@link StringBuilder} after appending the request info to it
+   */
+  public static StringBuilder appendGwtRequestInfo(StringBuilder str, HttpServletRequest request, String permutationStrongName) {
+    str.append("permutation ").append(permutationStrongName).append(" from ").append(request.getRemoteAddr()).append(" [").append(getUserAgentHeader(request)).append("]");
+    return str;
   }
 }

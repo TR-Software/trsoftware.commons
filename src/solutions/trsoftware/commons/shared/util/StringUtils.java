@@ -1,11 +1,11 @@
 /*
- *  Copyright 2017 TR Software Inc.
+ * Copyright 2018 TR Software Inc.
  *
- *  Licensed under the Apache License, Version 2.0 (the "License"); you may not
- *  use this file except in compliance with the License. You may obtain a copy of
- *  the License at
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not
+ * use this file except in compliance with the License. You may obtain a copy of
+ * the License at
  *
- *  http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
@@ -38,9 +38,16 @@ public class StringUtils {
   public static final char MAX_PRINTABLE_ASCII_CHAR = '~';
   /** The alphabet {@code [A-Za-z]} */
   public static final String ASCII_LETTERS = new CharRange('A', 'Z').toString() + new CharRange('a', 'z').toString();
+  /** The alphabet {@code [A-Za-z0-9]} */
+  public static final String ASCII_LETTERS_AND_NUMBERS = ASCII_LETTERS + new CharRange('0', '9').toString();
   /** The alphabet of all printable {@code ASCII} chars */
   public static final String ASCII_PRINTABLE_CHARS = new CharRange(MIN_PRINTABLE_ASCII_CHAR, MAX_PRINTABLE_ASCII_CHAR).toString();
 
+  /**
+   * Canonical name for the UTF-8 encoding.
+   * @see <a href="https://en.wikipedia.org/wiki/UTF-8">UTF-8 (Wikipedia)</a>
+   * @see <a href="https://docs.oracle.com/javase/8/docs/technotes/guides/intl/encoding.doc.html">Supported Encodings</a>
+   */
   public static final String UTF8_CHARSET_NAME = "UTF-8";
 
   public static String capitalize(String str) {
@@ -77,7 +84,7 @@ public class StringUtils {
   }
 
   /**
-   * Returns true if the given string is not null, empty, or consists entirely of
+   * @return {@code true} iff the given string is neither {@code null}, empty, nor consists entirely of
    * whitespace.
    */
   public static boolean notBlank(String str) {
@@ -133,10 +140,6 @@ public class StringUtils {
 //   */
 //  public static String unescapeXML() {
 //  }
-
-  public static boolean validateUrl(String url) {
-    return notBlank(url) && url.trim().startsWith("http");
-  }
 
   /**
    * Abbreviates the input string if it's longer than {@code maxLen} by replacing the last
@@ -234,10 +237,11 @@ public class StringUtils {
    * Provides a very limited form of string templating. The symbols {@code $1}...{@code $9}
    * are replaced with the given args.  Supports at most 9 arguments (to make parsing simpler).
    * For a more powerful implementation can use {@link SimpleTemplateParser} instead.
-   *
+   * <p>
    * This method exists because {@link String#format(String, Object...)} is not available in GWT.
-   * 
-   * @param format string which may contain symbols {@code $1}...{@code $9} to be substituted with the positional {@code args}
+   *
+   * @param format string which may contain symbols {@code $1}...{@code $9} to be substituted with the positional
+   *     {@code args}
    * @param args the replacements for the symbols {@code $1}...{@code $9} in the {@code format} string.
    * @return the {@code format} string with symbols {@code $1}...{@code $9} replaced by the positional {@code args}
    * @see Template
@@ -282,9 +286,8 @@ public class StringUtils {
   }
 
   /**
-   * @return A string displaying the given quantity, with the unit value
-   * pluralized if needed.  Example: pluralize(2, "second") returns
-   * "2 seconds".
+   * @return A string displaying the given quantity, with the unit name
+   * pluralized if needed.  Example: {@code pluralize(2, "second")} returns {@code "2 seconds"}.
    */
   public static String quantity(int value, String unit) {
     return String.valueOf(value) + ' ' + pluralize(unit, value);
@@ -300,8 +303,11 @@ public class StringUtils {
    * @param fillChar the {@code char} to be repeated
    * @param repetitions the number of times to repeat the given {@code char}
    * @return a string that contains the requested number of repetitions of {@code fillChar}
+   * @see Arrays#fill(char[], char)
    */
   public static String repeat(char fillChar, int repetitions) {
+    if (repetitions < 0)
+      throw new IllegalArgumentException("negative repetitions");
     char[] chars = new char[repetitions];
     Arrays.fill(chars, fillChar);
     return new String(chars);
@@ -321,22 +327,22 @@ public class StringUtils {
     return buf.toString();
   }
 
+  /**
+   * @return a string that contains the given number of spaces ({@code ' '} chars).
+   */
+  public static String indent(int nSpaces) {
+    return repeat(' ', nSpaces);
+  }
+
+
   /** @return a string of the given length using randomly-selected chars from the alphabet {@code [A-Za-z]} */
   public static String randString(int length) {
     return RandomUtils.randString(length, ASCII_LETTERS);
   }
 
   /**
-   * Returns a camel hump string for the given string.
-   * @return Given MY_STRING, returns myString 
-   */
-  public static String underscoresToCamelHumps(String str) {
-    return toCamelCase(str, "_");
-  }
-
-  /**
    * Converts a string to camel-case, using the given word separator.
-   * Example:
+   * <h3>Example:</h3>
    * <pre>
    *   toCamelCase("MY_STRING", "_") &rarr; "myString"
    * </pre>
@@ -373,9 +379,18 @@ public class StringUtils {
     return n;
   }
 
-  /** A var-arg version of the toString(array, delimiter) method */
   public static <T> String join(String delimiter, T... array) {
     return join(delimiter, Arrays.asList(array));
+  }
+
+  public static String join(String delimiter, int... array) {
+    StringBuilder str = new StringBuilder();
+    for (int i = 0; i < array.length; i++) {
+      str.append(array[i]);
+      if (i < array.length - 1)
+        str.append(delimiter);
+    }
+    return str.toString();
   }
 
   public static <T> String join(String delimiter, Iterator<T> iter) {
@@ -506,7 +521,7 @@ public class StringUtils {
 
   /**
    * Useful for printing debug info.
-   * @return a string that looks like "name(arg1, arg2, arg3)"
+   * @return a string that looks like {@code "methodName(arg1, arg2, ...)"}
    */
   public static String methodCallToString(String methodName, Object... args) {
     return methodName + tupleToString(args);
@@ -514,7 +529,7 @@ public class StringUtils {
 
   /**
    * Useful for printing debug info.
-   * @return a string that looks like "name(arg1, arg2, arg3)"
+   * @return a string that looks like {@code "methodName(arg1, arg2, ...) = result"}
    */
   public static String methodCallToStringWithResult(String methodName, Object result, Object... args) {
     StringBuilder buf = new StringBuilder(64).append(methodCallToString(methodName, args)).append(" = ");
@@ -524,15 +539,18 @@ public class StringUtils {
 
   /**
    * Useful for printing debug info.
-   * @return a string that looks like "arg1, arg2, arg3", appropriately quoting
+   * @return a string that looks like {@code "arg1, arg2, ..."}, appropriately quoting
    * and expanding the arg types as needed.  Arrays are printed using Arrays.toString
    */
   public static StringBuilder appendArgs(StringBuilder buf, Object... args) {
-    for (Object arg : args) {
-      appendValue(buf, arg);
-      buf.append(", ");
+    if (args.length > 0) {
+      for (Object arg : args) {
+        appendValue(buf, arg);
+        buf.append(", ");
+      }
+      buf.delete(buf.length() - 2, buf.length());
     }
-    return buf.delete(buf.length() - 2, buf.length());
+    return buf;
   }
 
   private static void appendValue(StringBuilder buf, Object arg) {
@@ -583,6 +601,133 @@ public class StringUtils {
    */
   public static String quote(String str) {
     return surround(str, "\"");
+  }
+
+  /**
+   * @return {@code str} surrounded by the desired number of space chars.
+   * @see #surround(String, String)
+   * @see #padLeft(String, int)
+   * @see #padRight(String, int)
+   */
+  public static String pad(String str, int nSpaces) {
+    return pad(str, nSpaces, ' ');
+  }
+
+  /**
+   * @return {@code str} surrounded by {@code n} {@code pad} chars.
+   * @see #surround(String, String)
+   * @see #pad(String, int)
+   * @see #padLeft(String, int, char)
+   * @see #padRight(String, int)
+   */
+  public static String pad(String str, int n, char pad) {
+    return surround(str, repeat(pad, n));
+  }
+
+  /**
+   * @return {@code str} with the desired number of space chars prepended on the left.
+   * @see #pad(String, int)
+   * @see #padRight(String, int)
+   */
+  public static String padLeft(String str, int nSpaces) {
+    return padLeft(str, nSpaces, ' ');
+  }
+
+  /**
+   * @return {@code str} with {@code n} {@code pad} chars prepended on the left.
+   * @see #padLeft(String, int)
+   */
+  public static String padLeft(String str, int n, char pad) {
+    return repeat(pad, n) + str;
+  }
+
+  /**
+   * @return {@code str} with the desired number of space chars appended on the right.
+   * @see #pad(String, int)
+   * @see #padLeft(String, int)
+   */
+  public static String padRight(String str, int nSpaces) {
+    return padRight(str, nSpaces, ' ');
+  }
+
+  /**
+   * @return {@code str} with {@code n} {@code pad} chars appended on the right.
+   * @see #pad(String, int)
+   * @see #padLeft(String, int)
+   */
+  public static String padRight(String str, int n, char pad) {
+    return str + repeat(pad, n);
+  }
+
+  /**
+   * Pads the given string with {@code pad} chars, such that the result has the desired {@code width}.  In other words,
+   * this method performs a <i>center-justify</i> operation with a custom padding char
+   * (similar to the <i>left-justify</i> and <i>right-justify</i> capabilities offered by {@link String#format} 
+   * with the {@code %-Ns} and {@code %Ns} patterns).
+   * <p>
+   * This method never truncates the given string: if {@code str.length() <= width}, then it is returned unmodified.
+   * <p>
+   * If the string can't be padded evenly on both sides (to the desired {@code width}), then
+   * the padding on the right will be longer by 1.
+   *
+   * <h3>Examples:</h3>
+   * <pre>
+   *   padCenter("foo", 2, '-') &rarr; "foo"
+   *   padCenter("foo", 4, '-') &rarr; "foo-"
+   *   padCenter("foo", 5, '-') &rarr; "-foo-"
+   *   padCenter("foo", 6, '-') &rarr; "-foo--"
+   * </pre>
+   *
+   * @param str the string to be center-justified
+   * @param width the desired length of the result
+   * @param pad the padding char
+   *
+   * @return the given string padded and center-justified to the desired width.  The result is guaranteed to have
+   * the desired width (unless the input string is longer than that; it will not be truncated).
+   *
+   * @see <a href="https://stackoverflow.com/a/8155547/1965404">Solution given on StackOverflow</a>
+   */
+  public static String padCenter(String str, int width, char pad) {
+    if (str == null || width <= str.length())
+      return str;
+
+    StringBuilder sb = new StringBuilder(width);
+    for (int i = 0; i < (width - str.length()) / 2; i++) {
+      sb.append(pad);
+    }
+    sb.append(str);
+    while (sb.length() < width) {
+      sb.append(pad);
+    }
+    return sb.toString();
+  }
+
+  /**
+   * Pads the given string with spaces, such that the result has the desired {@code width}.
+   * This is similar to the <i>left-justify</i> and <i>right-justify</i> capabilities offered by {@link String#format} 
+   * (with the {@code %-Ns} and {@code %Ns} patterns).
+   * <p>
+   * This method never truncates the given string: if {@code str.length() <= width}, then it is returned unmodified.
+   * <p>
+   * If the string can't be padded evenly on both sides (to the desired {@code width}), then
+   * the padding on the right will be longer by 1.
+   *
+   * <h3>Examples:</h3>
+   * <pre>
+   *   justifyCenter("foo", 2) &rarr; "foo"
+   *   justifyCenter("foo", 4) &rarr; "foo "
+   *   justifyCenter("foo", 5) &rarr; " foo "
+   *   justifyCenter("foo", 6) &rarr; " foo  "
+   * </pre>
+   *
+   * @param str the string to be center-justified
+   * @param width the desired length of the result
+   *
+   * @return the given string padded and center-justified to the desired width.  The result is guaranteed to have
+   * the desired width (unless the input string is longer than that; it will not be truncated).
+   */
+  public static String justifyCenter(String str, int width) {
+    return padCenter(str, width, ' ');
   }
 
   /**
@@ -781,5 +926,33 @@ public class StringUtils {
     if (value instanceof String)
       return "\"" + value + "\"";
     return valStr;
+  }
+
+  /**
+   * Tests if a substring ends with the specified suffix.
+   * <p>
+   * This is equivalent to {@code str.substring(0, endIndex).endsWith(suffix)}, but faster, because it doesn't
+   * call {@link String#substring(int, int)} to create an intermediate object.
+   * @param str the string to test
+   * @param endIndex the end index of the substring within {@code str}
+   * @param suffix the suffix
+   * @return {@code true} iff {@code str.substring(0, endIndex).endsWith(suffix) == true}
+   * @throws StringIndexOutOfBoundsException if {@code endIndex} either negative or larger than the length of {@code str}
+   * (to emulate the behavoir of {@link String#substring(int, int)})
+   * @see String#endsWith(String)
+   * @see String#startsWith(String, int)
+   */
+  public static boolean endsWith(String str, int endIndex, String suffix) throws StringIndexOutOfBoundsException {
+    checkIndex(endIndex, str);
+    return str.startsWith(suffix, endIndex - suffix.length());
+  }
+
+  /**
+   * Checks whether the given index is valid for the given string.
+   * @throws StringIndexOutOfBoundsException if {@code index} is either negative or larger than the length of {@code str}
+   */
+  public static void checkIndex(int index, String str) throws StringIndexOutOfBoundsException {
+    if (index < 0 || index > str.length())
+      throw new StringIndexOutOfBoundsException(index);
   }
 }

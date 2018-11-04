@@ -1,3 +1,20 @@
+/*
+ * Copyright 2018 TR Software Inc.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not
+ * use this file except in compliance with the License. You may obtain a copy of
+ * the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+ * License for the specific language governing permissions and limitations under
+ * the License.
+ *
+ */
+
 package solutions.trsoftware.commons.shared.util.reflect;
 
 import com.google.gwt.regexp.shared.MatchResult;
@@ -9,6 +26,18 @@ import static solutions.trsoftware.commons.shared.util.StringUtils.nonNull;
 /**
  * Parses a value returned by {@link Class#getName()} into its components, which include {@link #packageName},
  * {@link #complexName}, {@link #simpleName}, and {@link #anonymousId} (if the class is anonymous).
+ *
+ * <p>
+ *   <b>WARNING</b>: Parsing array type names (like {@code "[Ljava.lang.String;"} or {@code "[[[I"}) will fail silently
+ *   (will not throw an exception, but the parse result will not be meaningful).
+ *   Refer to {@link Class#getName()} and {@link Class#getSimpleName()} to see how array type names are constructed.
+ * </p>
+ * <p style="color: #6495ed; font-weight: bold;">
+ *   TODO: add support for array classes (with names like {@code "[[Ljava.lang.String;"} or {@code "[[[I"})
+ * </p>
+ *
+ * @see <a href="https://docs.oracle.com/javase/specs/jls/se8/html/jls-13.html#jls-13.1">JLS §13.1: The Form of a Binary (re: binary name of a class)</a>
+ * @see <a href="https://docs.oracle.com/javase/specs/jls/se8/html/jls-6.html#jls-6.7">JLS §6.7: Fully Qualified Names and Canonical Names</a>
  *
  * @author Alex
  * @since 12/25/2017
@@ -24,7 +53,8 @@ public class ClassNameParser {
   private final String packageName;
   /**
    * The portion of the class name that follows the package
-   * (e.g. {@code "Foo$Bar$1"} if class name is {@code "com.example.Foo$Bar$1"})
+   * (e.g. {@code "Foo$Bar$1"} if class name is {@code "com.example.Foo$Bar$1"}).
+   * This is similar to {@link Class#getSimpleBinaryName()}, but also includes the leading enclosing class name.
    */
   private final String complexName;
   /**
@@ -47,6 +77,10 @@ public class ClassNameParser {
    */
   private final MatchResult match;
 
+  /**
+   * @param clsName the "binary name" of a class (which would be returned by {@link Class#getName()}.
+   * @see <a href="https://docs.oracle.com/javase/specs/jls/se8/html/jls-13.html#jls-13.1">JLS §13.1: The Form of a Binary (re: binary name of a class)</a>
+   */
   public ClassNameParser(String clsName) {
     match = regExp.exec(clsName);
     if (match == null)

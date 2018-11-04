@@ -1,11 +1,11 @@
 /*
- *  Copyright 2017 TR Software Inc.
+ * Copyright 2018 TR Software Inc.
  *
- *  Licensed under the Apache License, Version 2.0 (the "License"); you may not
- *  use this file except in compliance with the License. You may obtain a copy of
- *  the License at
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not
+ * use this file except in compliance with the License. You may obtain a copy of
+ * the License at
  *
- *  http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
@@ -27,7 +27,7 @@ import java.util.Map;
  * Maps ISO country codes to their English names via {@link #getCountryName(String)}.
  *
  * <p>
- *   The mapping was generated with the help of {@link solutions.trsoftware.tools.gen.CountryCodesGenerator}
+ *   The mapping was generated with the help of {@link solutions.trsoftware.tools.gwt.gen.CountryCodesGenerator}
  *   using all the available {@link java.util.Locale} info from the JRE.
  * </p>
  * <p style="font-style: italic">

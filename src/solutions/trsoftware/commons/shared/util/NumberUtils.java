@@ -1,3 +1,20 @@
+/*
+ * Copyright 2018 TR Software Inc.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not
+ * use this file except in compliance with the License. You may obtain a copy of
+ * the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+ * License for the specific language governing permissions and limitations under
+ * the License.
+ *
+ */
+
 package solutions.trsoftware.commons.shared.util;
 
 import com.google.common.collect.ImmutableSet;
@@ -64,9 +81,9 @@ public class NumberUtils {
   /**
    * Casts a {@code double} to the given primitive wrapper type.
    * <p style="font-style: italic;">
-   *   <b>WARNING:</b> this might require a
-   *   <a href="https://docs.oracle.com/javase/specs/jls/se7/html/jls-5.html#jls-5.1.3">narrowing conversion</a>,
-   *   in which case, the returned value will almost certainly be undesirable.
+   *   <b>WARNING:</b> this might require a lossy
+   *   <a href="https://docs.oracle.com/javase/specs/jls/se8/html/jls-5.html#jls-5.1.3">narrowing conversion</a>,
+   *   in which case the returned value will likely be undesirable.
    * </p>
    * @param cls a primitive wrapper type
    * @param value the value to cast to the given type

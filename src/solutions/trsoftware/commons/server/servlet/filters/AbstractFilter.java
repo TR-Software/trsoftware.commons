@@ -1,11 +1,11 @@
 /*
- *  Copyright 2017 TR Software Inc.
+ * Copyright 2018 TR Software Inc.
  *
- *  Licensed under the Apache License, Version 2.0 (the "License"); you may not
- *  use this file except in compliance with the License. You may obtain a copy of
- *  the License at
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not
+ * use this file except in compliance with the License. You may obtain a copy of
+ * the License at
  *
- *  http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
@@ -17,12 +17,13 @@
 
 package solutions.trsoftware.commons.server.servlet.filters;
 
-import solutions.trsoftware.commons.server.servlet.filters.config.FilterConfigParser;
-import solutions.trsoftware.commons.server.servlet.filters.config.FilterParameters;
-import solutions.trsoftware.commons.server.servlet.filters.config.ParseException;
+import solutions.trsoftware.commons.server.servlet.config.InitParameters;
+import solutions.trsoftware.commons.server.servlet.config.WebConfigException;
+import solutions.trsoftware.commons.server.servlet.config.WebConfigParser;
 
 import javax.servlet.Filter;
 import javax.servlet.FilterConfig;
+import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 
 /**
@@ -32,8 +33,6 @@ import javax.servlet.ServletException;
  * @author Alex
  */
 public abstract class AbstractFilter implements Filter {
-
-  protected static FilterConfigParser configParser = new FilterConfigParser();
 
   protected FilterConfig filterConfig;
 
@@ -46,16 +45,46 @@ public abstract class AbstractFilter implements Filter {
     // subclasses may override
   }
 
-  protected <P extends FilterParameters> P parse(P parameters) throws ServletException {
+  /**
+   * Sets the fields of the given {@link InitParameters} object from the {@code init-param} values present in the {@link
+   * FilterConfig}.
+   *
+   * @param parameters the object to be populated via {@link WebConfigParser#parse(FilterConfig, InitParameters)}
+   * @return the same instance that was passed as the argument, after its fields have been populated.
+   * @see WebConfigParser#parse(FilterConfig, InitParameters)
+   */
+  protected <P extends InitParameters> P parseInitParams(P parameters) throws ServletException {
+    Class<? extends Filter> filterClass = getClass();
+    FilterConfig filterConfig = this.filterConfig;
+    return parseInitParams(parameters, filterConfig, filterClass);
+  }
+
+  /**
+   * Sets the fields of the given {@link InitParameters} object from the {@code init-param} values present in the given
+   * {@link FilterConfig}.
+   *
+   * @param parameters the object to be populated via {@link WebConfigParser#parse(FilterConfig, InitParameters)}
+   * @param filterConfig contains the {@code init-param} values
+   * @param filterClass the filter's class: will use its name for logging messages
+   * @return the same instance that was passed as the argument, after its fields have been populated.
+   * @see WebConfigParser#parse(FilterConfig, InitParameters)
+   */
+  public static <P extends InitParameters> P parseInitParams(P parameters, FilterConfig filterConfig, Class<? extends Filter> filterClass) throws ServletException {
     try {
-      P parsedParams = configParser.parse(filterConfig, parameters);
-      System.out.printf("Filter '%s' (%s) init-params: %s", filterConfig.getFilterName(), getClass(), parsedParams);
+      P parsedParams = WebConfigParser.parse(filterConfig, parameters);
+      filterConfig.getServletContext().log(
+          String.format("Filter config (filter-name: \"%s\", filter-class: %s) parsed from init-param values: %s",
+              filterConfig.getFilterName(), filterClass.getSimpleName(), parsedParams));
       return parsedParams;
     }
-    catch (ParseException e) {
+    catch (WebConfigException e) {
       throw new ServletException(String.format("Invalid configuration for filter '%s' (%s): %s",
-          filterConfig.getFilterName(), getClass(), e.getMessage()),
+          filterConfig.getFilterName(), filterClass, e.getMessage()),
           e);
     }
+  }
+
+  protected ServletContext getServletContext() {
+    return filterConfig.getServletContext();
   }
 }

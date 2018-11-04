@@ -1,11 +1,11 @@
 /*
- *  Copyright 2017 TR Software Inc.
+ * Copyright 2018 TR Software Inc.
  *
- *  Licensed under the Apache License, Version 2.0 (the "License"); you may not
- *  use this file except in compliance with the License. You may obtain a copy of
- *  the License at
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not
+ * use this file except in compliance with the License. You may obtain a copy of
+ * the License at
  *
- *  http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
@@ -17,18 +17,29 @@
 
 package solutions.trsoftware.commons.server.servlet;
 
+import com.gargoylesoftware.htmlunit.TextPage;
+import com.gargoylesoftware.htmlunit.WebClient;
 import junit.framework.TestCase;
-import solutions.trsoftware.commons.client.testutil.AssertUtils;
 import solutions.trsoftware.commons.server.servlet.testutil.DummyHttpServletRequest;
+import solutions.trsoftware.commons.server.servlet.testutil.LiveServletTestCase;
+import solutions.trsoftware.commons.server.testutil.EmbeddedTomcatServer;
+import solutions.trsoftware.commons.server.testutil.PerformanceComparison;
+import solutions.trsoftware.commons.shared.annotations.Slow;
+import solutions.trsoftware.commons.shared.testutil.AssertUtils;
+import solutions.trsoftware.commons.shared.testutil.TestData;
 import solutions.trsoftware.commons.shared.util.MapUtils;
 
-import java.util.Arrays;
-import java.util.Enumeration;
-import java.util.HashMap;
-import java.util.Map;
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
+import java.net.URL;
+import java.util.*;
 
-import static solutions.trsoftware.commons.client.testutil.AssertUtils.assertSameSequence;
 import static solutions.trsoftware.commons.server.servlet.ServletUtils.*;
+import static solutions.trsoftware.commons.shared.testutil.AssertUtils.assertSameSequence;
+import static solutions.trsoftware.commons.shared.util.RandomUtils.nextIntInRange;
+import static solutions.trsoftware.commons.shared.util.RandomUtils.rnd;
 
 public class ServletUtilsTest extends TestCase {
 
@@ -39,54 +50,45 @@ public class ServletUtilsTest extends TestCase {
       goodMap.put("bar", new String[]{"b"});
       assertEquals(
           MapUtils.stringMap("foo", "a", "bar", "b"),
-          requestParametersAsSortedStringMap(goodMap));
+          getRequestParametersAsSortedStringMap(goodMap));
     }
     {
       final Map<String, String[]> badMap = new HashMap<>();
       badMap.put("foo", new String[]{"a"});
       badMap.put("bar", new String[]{"b", "c"});
-      AssertUtils.assertThrows(IllegalArgumentException.class, (Runnable)() -> requestParametersAsSortedStringMap(badMap));
+      AssertUtils.assertThrows(IllegalArgumentException.class, (Runnable)() -> getRequestParametersAsSortedStringMap(badMap));
     }
   }
 
-  public void testExtractSubdomain() throws Exception {
-    assertEquals("special", extractSubdomain(new DummyHttpServletRequest("http://special.typeracer.com/foo/gameserv", "")));
-    assertEquals("play", extractSubdomain(new DummyHttpServletRequest("http://play.typeracer.com/", "")));
-    assertEquals("play", extractSubdomain(new DummyHttpServletRequest("http://play.typeracer.com", "")));
-    assertNull(extractSubdomain(new DummyHttpServletRequest("http://typeracer.com", "")));  // TODO: impl this
-    assertNull(extractSubdomain(new DummyHttpServletRequest("http://localhost", "")));
-    assertNull(extractSubdomain(new DummyHttpServletRequest("http://localhost/", "")));
-  }
-
   public void testExtractFirstPathElement() throws Exception {
-    assertEquals("foo", extractFirstPathElement(new DummyHttpServletRequest("/foo/")));
-    assertEquals("foo", extractFirstPathElement(new DummyHttpServletRequest("/foo/gameserv")));
-    assertEquals("foo", extractFirstPathElement(new DummyHttpServletRequest("/foo/gameserv/")));
-    assertEquals("foo", extractFirstPathElement(new DummyHttpServletRequest("/foo/bar/gameserv")));
-    assertEquals("foo", extractFirstPathElement(new DummyHttpServletRequest("/foo/bar/gameserv/")));
+    assertEquals("foo", extractFirstPathElement(new DummyHttpServletRequest().setRequestURI("/foo/")));
+    assertEquals("foo", extractFirstPathElement(new DummyHttpServletRequest().setRequestURI("/foo/gameserv")));
+    assertEquals("foo", extractFirstPathElement(new DummyHttpServletRequest().setRequestURI("/foo/gameserv/")));
+    assertEquals("foo", extractFirstPathElement(new DummyHttpServletRequest().setRequestURI("/foo/bar/gameserv")));
+    assertEquals("foo", extractFirstPathElement(new DummyHttpServletRequest().setRequestURI("/foo/bar/gameserv/")));
 
-    assertEquals("bar", extractFirstPathElement(new DummyHttpServletRequest("foo/bar/gameserv/")));
+    assertEquals("bar", extractFirstPathElement(new DummyHttpServletRequest().setRequestURI("foo/bar/gameserv/")));
 
     // the following URIs don't have a first path element
-    assertNull("foo", extractFirstPathElement(new DummyHttpServletRequest("/")));
-    assertNull("foo", extractFirstPathElement(new DummyHttpServletRequest("/foo")));
-    assertNull("foo", extractFirstPathElement(new DummyHttpServletRequest("/foo.html")));
+    assertNull("foo", extractFirstPathElement(new DummyHttpServletRequest().setRequestURI("/")));
+    assertNull("foo", extractFirstPathElement(new DummyHttpServletRequest().setRequestURI("/foo")));
+    assertNull("foo", extractFirstPathElement(new DummyHttpServletRequest().setRequestURI("/foo.html")));
   }
 
   public void testExtractAllPathElements() throws Exception {
-    assertSameSequence(asEnumeration(), extractAllPathElements(new DummyHttpServletRequest("/")));
-    assertSameSequence(asEnumeration(), extractAllPathElements(new DummyHttpServletRequest("")));
+    assertSameSequence(asEnumeration(), extractAllPathElements(new DummyHttpServletRequest().setRequestURI("/")));
+    assertSameSequence(asEnumeration(), extractAllPathElements(new DummyHttpServletRequest().setRequestURI("")));
     AssertUtils.assertThrows(NullPointerException.class,
-        (Runnable)() -> extractAllPathElements(new DummyHttpServletRequest((String)null)));
-    assertSameSequence(asEnumeration("foo"), extractAllPathElements(new DummyHttpServletRequest("/foo/")));
-    assertSameSequence(asEnumeration("foo"), extractAllPathElements(new DummyHttpServletRequest("/foo/")));
-    assertSameSequence(asEnumeration("foo", "gameserv"), extractAllPathElements(new DummyHttpServletRequest("/foo/gameserv")));
-    assertSameSequence(asEnumeration("foo", "gameserv"), extractAllPathElements(new DummyHttpServletRequest("/foo/gameserv/")));
-    assertSameSequence(asEnumeration("foo", "bar", "gameserv"), extractAllPathElements(new DummyHttpServletRequest("/foo/bar/gameserv")));
-    assertSameSequence(asEnumeration("foo", "bar", "gameserv"), extractAllPathElements(new DummyHttpServletRequest("/foo/bar/gameserv/")));
-    assertSameSequence(asEnumeration("foo", "bar", "gameserv"), extractAllPathElements(new DummyHttpServletRequest("/foo/bar//gameserv/")));
-    assertSameSequence(asEnumeration("foo", "bar", "gameserv"), extractAllPathElements(new DummyHttpServletRequest("//foo/bar//gameserv/")));
-    assertSameSequence(asEnumeration("foo", "bar", "gameserv"), extractAllPathElements(new DummyHttpServletRequest("//foo/bar//gameserv//")));
+        (Runnable)() -> extractAllPathElements(new DummyHttpServletRequest().setRequestURI(null)));
+    assertSameSequence(asEnumeration("foo"), extractAllPathElements(new DummyHttpServletRequest().setRequestURI("/foo/")));
+    assertSameSequence(asEnumeration("foo"), extractAllPathElements(new DummyHttpServletRequest().setRequestURI("/foo/")));
+    assertSameSequence(asEnumeration("foo", "gameserv"), extractAllPathElements(new DummyHttpServletRequest().setRequestURI("/foo/gameserv")));
+    assertSameSequence(asEnumeration("foo", "gameserv"), extractAllPathElements(new DummyHttpServletRequest().setRequestURI("/foo/gameserv/")));
+    assertSameSequence(asEnumeration("foo", "bar", "gameserv"), extractAllPathElements(new DummyHttpServletRequest().setRequestURI("/foo/bar/gameserv")));
+    assertSameSequence(asEnumeration("foo", "bar", "gameserv"), extractAllPathElements(new DummyHttpServletRequest().setRequestURI("/foo/bar/gameserv/")));
+    assertSameSequence(asEnumeration("foo", "bar", "gameserv"), extractAllPathElements(new DummyHttpServletRequest().setRequestURI("/foo/bar//gameserv/")));
+    assertSameSequence(asEnumeration("foo", "bar", "gameserv"), extractAllPathElements(new DummyHttpServletRequest().setRequestURI("//foo/bar//gameserv/")));
+    assertSameSequence(asEnumeration("foo", "bar", "gameserv"), extractAllPathElements(new DummyHttpServletRequest().setRequestURI("//foo/bar//gameserv//")));
   }
 
   public static Enumeration asEnumeration(final Object... items) {
@@ -104,37 +106,19 @@ public class ServletUtilsTest extends TestCase {
   }
 
   public void testReplaceQueryStringParameter() throws Exception {
-    DummyHttpServletRequest dummyRequest = new DummyHttpServletRequest("http://example.com/page", "foo=bar&baz=1");
-    assertEquals("http://example.com/page?bar=foo&baz=1",
-        replaceQueryStringParameter(dummyRequest, "foo", "bar", "bar", "foo"));
-    assertEquals("http://example.com/page?baz=2&baz=1",
-        replaceQueryStringParameter(dummyRequest, "foo", "bar", "baz", "2"));
-    assertEquals("http://example.com/page?foo=bar&baz=2",
-        replaceQueryStringParameter(dummyRequest, "baz", "1", "baz", "2"));
-    assertEquals("http://example.com/page?foo=bar&baz=1",
-        replaceQueryStringParameter(dummyRequest, "baz", "2", "baz", "3"));  // param/value combination not present, so url returned unmodified
-    assertEquals("http://example.com/page?foo=bar&baz=1",
-        replaceQueryStringParameter(dummyRequest, "baz", "bar", "baz", "2")); // param/value combination not present, so url returned unmodified
-
-    // now test the overloaded version of this method
-    assertEquals("bar=foo&baz=1",
-        replaceQueryStringParameter("foo=bar&baz=1", "foo", "bar", "bar", "foo"));
-    assertEquals("baz=2&baz=1",
-        replaceQueryStringParameter("foo=bar&baz=1", "foo", "bar", "baz", "2"));
-    assertEquals("foo=bar&baz=2",
-        replaceQueryStringParameter("foo=bar&baz=1", "baz", "1", "baz", "2"));
-    assertEquals("foo=bar&baz=1",
-        replaceQueryStringParameter("foo=bar&baz=1", "baz", "2", "baz", "3"));  // param/value combination not present, so url returned unmodified
-    assertEquals("foo=bar&baz=1",
-        replaceQueryStringParameter("foo=bar&baz=1", "baz", "bar", "baz", "2")); // param/value combination not present, so url returned unmodified
-
-    // now test the other overloaded version of the method the same way
-    assertEquals("foo=foo&baz=1",
-        replaceQueryStringParameter("foo=bar&baz=1", "foo", "bar", "foo"));
-    assertEquals("foo=bar&baz=1",
-        replaceQueryStringParameter("foo=bar&baz=1", "baz", "2", "3"));  // param/value combination not present, so url returned unmodified
-    assertEquals("foo=bar&baz=1",
-        replaceQueryStringParameter("foo=bar&baz=1", "baz", "bar", "2")); // param/value combination not present, so url returned unmodified
+    for (String protocol : new String[]{"http", "https"}) {
+      DummyHttpServletRequest dummyRequest = new DummyHttpServletRequest(protocol + "://example.com/page", "foo=bar&baz=1");
+      assertEquals(protocol + "://example.com/page?bar=foo&baz=1",
+          replaceQueryStringParameter(dummyRequest, "foo", "bar", "bar", "foo"));
+      assertEquals(protocol + "://example.com/page?baz=2&baz=1",
+          replaceQueryStringParameter(dummyRequest, "foo", "bar", "baz", "2"));
+      assertEquals(protocol + "://example.com/page?foo=bar&baz=2",
+          replaceQueryStringParameter(dummyRequest, "baz", "1", "baz", "2"));
+      assertEquals(protocol + "://example.com/page?foo=bar&baz=1",
+          replaceQueryStringParameter(dummyRequest, "baz", "2", "baz", "3"));  // param/value combination not present, so url returned unmodified
+      assertEquals(protocol + "://example.com/page?foo=bar&baz=1",
+          replaceQueryStringParameter(dummyRequest, "baz", "bar", "baz", "2")); // param/value combination not present, so url returned unmodified
+    }
   }
 
   public void testAddIndexedMultivaluedParams() throws Exception {
@@ -167,12 +151,99 @@ public class ServletUtilsTest extends TestCase {
   }
 
   public void testGetBaseUrl() throws Exception {
-    assertEquals("http://localhost:8088", getBaseUrl(
-        new DummyHttpServletRequest().setUrl("http://localhost:8088/errorPage").setUri("/errorPage")).toString());
-    assertEquals("http://localhost:8088", getBaseUrl(
-        new DummyHttpServletRequest().setUrl("http://localhost:8088/").setUri("/")).toString());
-    assertEquals("http://example.com", getBaseUrl(
-        new DummyHttpServletRequest().setUrl("http://example.com/foo/bar").setUri("/")).toString());
+    for (String protocol : new String[]{"http", "https"}) {
+      assertEquals(protocol + "://localhost:8088", getBaseURL(
+          new DummyHttpServletRequest().setRequestURL(protocol + "://localhost:8088/errorPage").setRequestURI("/errorPage")).toString());
+      assertEquals(protocol + "://localhost:8088", getBaseURL(
+          new DummyHttpServletRequest().setRequestURL(protocol + "://localhost:8088/").setRequestURI("/")).toString());
+      assertEquals(protocol + "://example.com", getBaseURL(
+          new DummyHttpServletRequest().setRequestURL(protocol + "://example.com/foo/bar").setRequestURI("/")).toString());
+    }
+  }
+
+  public void testGetRequestURL() throws Exception {
+    for (int i = 0; i < 100; i++) {
+      for (String protocol : new String[]{"http", "https"}) {
+        String url = TestData.randomURL(protocol, nextIntInRange(2, 4), rnd.nextBoolean(),
+            nextIntInRange(1, 5), nextIntInRange(3, 6));
+        // 1) try without caching
+        {
+          DummyHttpServletRequest request = new DummyHttpServletRequest().setRequestURL(url);
+          URL parsedURL = ServletUtils.getRequestURL(request, false);
+          assertEquals(url, parsedURL.toString());
+          assertNull(request.getAttribute(ServletUtils.PARSED_URL_ATTR));
+          // we expect a new URL instance returned each time
+          assertNotSame(parsedURL, ServletUtils.getRequestURL(request, false));
+        }
+        // 2) try with caching
+        {
+          DummyHttpServletRequest request = new DummyHttpServletRequest().setRequestURL(url);
+          URL parsedURL = ServletUtils.getRequestURL(request, true);
+          assertEquals(url, parsedURL.toString());
+          assertSame(parsedURL, request.getAttribute(ServletUtils.PARSED_URL_ATTR));
+          // we expect the same URL instance returned each time
+          assertSame(parsedURL, ServletUtils.getRequestURL(request, true));
+          // we expect the 1-arg version of the method to do the same
+          assertSame(parsedURL, ServletUtils.getRequestURL(request));
+          // however, if cache=false, we expect the cached instance not to be used
+          assertNotSame(parsedURL, ServletUtils.getRequestURL(request, false));
+        }
+      }
+    }
+  }
+
+  /**
+   * Compares the performance of {@link ServletUtils#getRequestURL(HttpServletRequest, boolean)} with and without
+   * caching.
+   * @see GetRequestURLBenchmarkServlet
+   */
+  @Slow
+  public void testGetRequestURLBenchmark() throws Exception {
+    LinkedHashMap<Integer, Double> results = new LinkedHashMap<>();
+    try (EmbeddedTomcatServer embeddedTomcat = new EmbeddedTomcatServer();
+             WebClient webClient = new WebClient()) {
+      String urlPattern = TestData.randomURI(10);
+      EmbeddedTomcatServer.ServletHandle servletHandle = embeddedTomcat.addServlet(
+          embeddedTomcat.addContext(TestData.randomURI(5)),
+          GetRequestURLBenchmarkServlet.class.getSimpleName(),
+          new GetRequestURLBenchmarkServlet(), urlPattern);
+      embeddedTomcat.start();
+      for (int nReads: new int[]{1, 2, 3, 5, 8, 13, 21, 34, 55, 89}) {  // fibonacci sequence
+        TextPage page = webClient.getPage(servletHandle.getUrlBuilder()
+            .append('?').append("nReads").append('=').append(nReads).toString());
+        results.put(nReads, Double.parseDouble(LiveServletTestCase.printResponse(page)));
+      }
+    }
+    System.out.println("================================================================================");
+    System.out.println("Results (nReads -> multiplier [cached vs. uncached]");
+    System.out.println("================================================================================");
+    for (Map.Entry<Integer, Double> entry : results.entrySet()) {
+      System.out.printf("%d -> %.2f%n", entry.getKey(), entry.getValue());
+    }
+  }
+
+
+  private static class GetRequestURLBenchmarkServlet extends BaseHttpServlet {
+    @Override
+    protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+      Integer nReads = getRequiredParameter(req, "nReads", Integer::parseInt);
+      double multiplier = PerformanceComparison.compare(
+          new PerformanceComparison.NamedRunnable("getRequestURL(cache=true)") {
+            @Override
+            public void run() {
+              ServletUtils.getRequestURL(req, true);
+            }
+          },
+          new PerformanceComparison.NamedRunnable("getRequestURL(cache=false)") {
+            @Override
+            public void run() {
+              ServletUtils.getRequestURL(req, false);
+            }
+          },
+          nReads
+      );
+      resp.getWriter().print(multiplier);
+    }
   }
 
 }

@@ -1,3 +1,20 @@
+/*
+ * Copyright 2018 TR Software Inc.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not
+ * use this file except in compliance with the License. You may obtain a copy of
+ * the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+ * License for the specific language governing permissions and limitations under
+ * the License.
+ *
+ */
+
 package solutions.trsoftware.commons.client.widgets.input;
 
 import com.google.gwt.text.shared.Renderer;
@@ -19,7 +36,7 @@ public class EnumValueListBox<E extends Enum<E>> extends ValueListBox<E> {
    * Should call {@link #setAcceptableValues(Collection)} or {@link #addValue(Object)} to add the selectable options.
    */
   public EnumValueListBox() {
-    this(new StringRenderer<E>());
+    this(StringRenderer.getInstance());
   }
 
   /**
@@ -64,7 +81,7 @@ public class EnumValueListBox<E extends Enum<E>> extends ValueListBox<E> {
    * @param elementType the enum class
    */
   public EnumValueListBox(Class<E> elementType) {
-    this(EnumSet.allOf(elementType), new StringRenderer<E>());
+    this(EnumSet.allOf(elementType), StringRenderer.getInstance());
   }
 
   /**
@@ -73,7 +90,7 @@ public class EnumValueListBox<E extends Enum<E>> extends ValueListBox<E> {
    * @param values the initial set of values to be displayed
      */
   public EnumValueListBox(EnumSet<E> values) {
-    this(values, new StringRenderer<E>());
+    this(values, StringRenderer.getInstance());
   }
 
 }

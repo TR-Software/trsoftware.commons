@@ -1,11 +1,11 @@
 /*
- *  Copyright 2017 TR Software Inc.
+ * Copyright 2018 TR Software Inc.
  *
- *  Licensed under the Apache License, Version 2.0 (the "License"); you may not
- *  use this file except in compliance with the License. You may obtain a copy of
- *  the License at
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not
+ * use this file except in compliance with the License. You may obtain a copy of
+ * the License at
  *
- *  http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
@@ -111,7 +111,12 @@ public enum Language {
   POLISH("pl"),
   PORTUGUESE("pt"),
   ROMANIAN("ro"),
-  RUSSIAN("ru"),
+  RUSSIAN("ru") {
+    @Override
+    public String getAlphabet() {
+      return "абвгдеёжзийклмнопрстуфхцчшщъыьэюя";
+    }
+  },
   SERBIAN("sr") {
     @Override
     public String getEnglishPrettyName() {
@@ -434,5 +439,16 @@ public enum Language {
    */
   public String getMainCountry() {
     return languageToCountryMap.get(this);
+  }
+
+  /**
+   * @return the lowercase chars of the official alphabet for this language
+   * @throws UnsupportedOperationException if this language doesn't override this method, which could indicate that the
+   * alphabet hasn't been provided for this language yet, or not representable as a string of normal Java {@code char}s
+   * (i.e. it contains <a href="http://stn.audible.com/abcs-of-unicode/#java-and-unicode">supplementary characters</a>:
+   * Unicode code points above <i>U+FFFF</i>)
+   */
+  public String getAlphabet() {
+    throw new UnsupportedOperationException("No alphabet configured for " + name());
   }
 }

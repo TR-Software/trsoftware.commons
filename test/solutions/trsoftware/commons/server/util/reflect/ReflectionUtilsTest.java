@@ -1,11 +1,11 @@
 /*
- *  Copyright 2017 TR Software Inc.
+ * Copyright 2018 TR Software Inc.
  *
- *  Licensed under the Apache License, Version 2.0 (the "License"); you may not
- *  use this file except in compliance with the License. You may obtain a copy of
- *  the License at
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not
+ * use this file except in compliance with the License. You may obtain a copy of
+ * the License at
  *
- *  http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
@@ -18,13 +18,16 @@
 package solutions.trsoftware.commons.server.util.reflect;
 
 import junit.framework.TestCase;
-import solutions.trsoftware.commons.server.io.FileSet;
-import solutions.trsoftware.commons.server.io.ServerIOUtils;
+import solutions.trsoftware.commons.server.io.ResourceLocator;
+import solutions.trsoftware.commons.server.io.StringPrintStream;
+import solutions.trsoftware.commons.server.io.file.FileSet;
 import solutions.trsoftware.commons.shared.util.SetUtils;
 import solutions.trsoftware.commons.shared.util.StringUtils;
+import solutions.trsoftware.commons.shared.util.reflect.ClassNameParser;
 
 import java.io.File;
 import java.io.Serializable;
+import java.lang.reflect.Method;
 import java.lang.reflect.Type;
 import java.util.*;
 
@@ -127,7 +130,7 @@ public class ReflectionUtilsTest extends TestCase {
     assertTrue(result.isDirectory());
     // confirm that the result indeed contains this class
     FileSet allClassFiles = new FileSet(result);
-    assertTrue(allClassFiles.contains(ServerIOUtils.getClassFile(thisClass)));
+    assertTrue(allClassFiles.contains(ReflectionUtils.getClassFile(thisClass).toFile()));
   }
 
   private static void assertAllAssignableFrom(Class<?> arg, Set<Class<?>> expected) {
@@ -160,6 +163,124 @@ public class ReflectionUtilsTest extends TestCase {
     for (String k : keywordsFromJLS) {
       assertTrue(k, isJavaKeyword(k));
       assertFalse(k, isJavaKeyword(k + "_"));
+    }
+  }
+
+  public void testGetClassFile() throws Exception {
+    class LocalClass {}
+    assertTrue(getClassFile(getClass()).exists());
+    assertTrue(getClassFile(ReflectionUtils.class).exists());
+    assertTrue(getClassFile(NestedClass.class).exists());
+    assertTrue(getClassFile(InnerClass.class).exists());
+    assertTrue(getClassFile(LocalClass.class).exists());
+    // now try some anonymous classes
+    assertTrue(getClassFile(new NestedClass(){}.getClass()).exists());
+    assertTrue(getClassFile(new NestedClass(){}.getClass()).exists());
+    // now try some array classes
+    assertTrue(getClassFile(ReflectionUtils[].class).exists());
+    assertTrue(getClassFile(ReflectionUtils[][].class).exists());
+    assertTrue(getClassFile(NestedClass[].class).exists());
+    assertTrue(getClassFile(InnerClass[].class).exists());
+    assertTrue(getClassFile(LocalClass[].class).exists());
+    // now try some classes from the Java runtime
+    assertNotNull(getClassFile(Map.class));
+    assertNotNull(getClassFile(Map.Entry.class));
+    // now try some primitives
+    assertNull(getClassFile(int.class));
+    assertNull(getClassFile(void.class));
+    assertNull(getClassFile(byte[].class));
+  }
+
+  private File getClassFile(Class cls) {
+    StringPrintStream msg = new StringPrintStream();
+    msg.printf("getClassFile(%s)", cls);
+    ResourceLocator classFileResource = ReflectionUtils.getClassFile(cls);
+    File file = null;
+    if (classFileResource == null) {
+      msg.printf("%n -> null");
+    }
+    else {
+      msg.printf("%n -> (resource) %s", classFileResource);
+      file = classFileResource.toFile();
+      if (file != null) {
+        msg.printf("%n -> (file) %s", file);
+        // check that the filename corresponds to the binary name of the class
+        ClassNameParser classNameParser = new ClassNameParser(getRootComponentTypeOfArray(cls));
+        assertEquals(classNameParser.getComplexName() + ".class", file.getName());
+      }
+    }
+    System.out.println(msg);
+    return file;
+  }
+
+  private static class NestedClass {}
+  private class InnerClass {}
+
+  public void testGetRootComponentTypeOfArray() throws Exception {
+    assertEquals(Foo.class, getRootComponentTypeOfArray(Foo.class));
+    assertEquals(Foo.class, getRootComponentTypeOfArray(Foo[].class));
+    assertEquals(Foo.class, getRootComponentTypeOfArray(Foo[][].class));
+    assertEquals(Foo.class, getRootComponentTypeOfArray(Foo[][][].class));
+  }
+
+  public void testListPublicGetters() throws Exception {
+    Class<SimpleBean> cls = SimpleBean.class;
+    List<Method> expected = Arrays.asList(
+        cls.getMethod("getX"),
+        cls.getMethod("getY"),
+        cls.getMethod("getName"),
+        cls.getMethod("isFoo"),
+        cls.getMethod("getClass")
+    );
+    assertEquals(new HashSet<>(expected), new HashSet<>(listPublicGetters(cls)));
+  }
+
+
+  private static class SimpleBean {
+    private int x, y;
+    private String name;
+    private boolean foo;
+
+    public SimpleBean() {
+    }
+
+    public SimpleBean(int x, int y, String name, boolean foo) {
+      this.x = x;
+      this.y = y;
+      this.name = name;
+      this.foo = foo;
+    }
+
+    public int getX() {
+      return x;
+    }
+
+    public void setX(int x) {
+      this.x = x;
+    }
+
+    public int getY() {
+      return y;
+    }
+
+    public void setY(int y) {
+      this.y = y;
+    }
+
+    public String getName() {
+      return name;
+    }
+
+    public void setName(String name) {
+      this.name = name;
+    }
+
+    public boolean isFoo() {
+      return foo;
+    }
+
+    public void setFoo(boolean foo) {
+      this.foo = foo;
     }
   }
 }

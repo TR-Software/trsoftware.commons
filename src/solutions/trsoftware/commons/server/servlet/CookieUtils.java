@@ -1,11 +1,11 @@
 /*
- *  Copyright 2017 TR Software Inc.
+ * Copyright 2018 TR Software Inc.
  *
- *  Licensed under the Apache License, Version 2.0 (the "License"); you may not
- *  use this file except in compliance with the License. You may obtain a copy of
- *  the License at
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not
+ * use this file except in compliance with the License. You may obtain a copy of
+ * the License at
  *
- *  http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
@@ -45,9 +45,11 @@ public abstract class CookieUtils {
     // conclusion: without SSL, do not use cookie authentication for important functions (such as changing your email or password)
     Cookie cookie = new Cookie(cookieName, cookieValue);
     cookie.setVersion(0);  // IE7 & Safari don't recognize expiration dates in version 1, and hence don't retain the cookies past the session
-    URL requestURL = ServletUtils.getRequestURL(request);
-    if (!"localhost".equals(requestURL.getHost()))  // localhost is not a valid value of the cookie domain attribute
-      cookie.setDomain(domain);
+    if (domain != null) {
+      URL requestURL = ServletUtils.getRequestURL(request);
+      if (!"localhost".equals(requestURL.getHost()))  // localhost is not a valid value of the cookie domain attribute
+        cookie.setDomain(domain);
+    }
     cookie.setPath("/");  // send cookie to all URIs in the domain
     // NOTE: because we're using version 0 cookies, the server will actually output something like "Expires=Wed, 12-Jan-2011 22:00:21 GMT" instead of "Max-Age=12345"
     cookie.setMaxAge((int)(maxAgeMillis / 1000)); // delta seconds from now
@@ -60,15 +62,25 @@ public abstract class CookieUtils {
   }
 
   /**
-   * @return the login token value if the cookie is present or null if the
-   *         cookie isn't there
+   * @return the value of the HTTP cookie with the given name if the request contains such a cookie; otherwise {@code null}
+   * @see Cookie#getValue()
    */
-  public static String getCookie(HttpServletRequest request, String cookieName) {
+  public static String getCookieValue(HttpServletRequest request, String cookieName) {
+    Cookie cookie = getCookie(request, cookieName);
+    if (cookie != null)
+      return cookie.getValue();
+    return null;
+  }
+
+  /**
+   * @return the HTTP cookie with the given name if the request contains such a cookie; otherwise {@code null}
+   */
+  public static Cookie getCookie(HttpServletRequest request, String cookieName) {
     Cookie[] cookies = request.getCookies();
     if (cookies != null) {
       for (Cookie cookie : cookies) {
         if (cookieName.equals(cookie.getName())) {
-          return cookie.getValue();
+          return cookie;
         }
       }
     }

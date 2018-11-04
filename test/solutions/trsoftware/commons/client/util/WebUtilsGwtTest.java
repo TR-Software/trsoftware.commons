@@ -1,11 +1,11 @@
 /*
- *  Copyright 2017 TR Software Inc.
+ * Copyright 2018 TR Software Inc.
  *
- *  Licensed under the Apache License, Version 2.0 (the "License"); you may not
- *  use this file except in compliance with the License. You may obtain a copy of
- *  the License at
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not
+ * use this file except in compliance with the License. You may obtain a copy of
+ * the License at
  *
- *  http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
@@ -17,11 +17,9 @@
 
 package solutions.trsoftware.commons.client.util;
 
-import com.google.gwt.core.client.GWT;
-import com.google.gwt.user.client.Window;
 import solutions.trsoftware.commons.client.CommonsGwtTestCase;
-import solutions.trsoftware.commons.client.bridge.util.UrlEncoder;
-import solutions.trsoftware.commons.client.testutil.AssertUtils;
+import solutions.trsoftware.commons.client.bridge.util.URIComponentEncoder;
+import solutions.trsoftware.commons.shared.testutil.AssertUtils;
 
 import static solutions.trsoftware.commons.client.util.WebUtils.*;
 import static solutions.trsoftware.commons.shared.util.MapUtils.stringLinkedHashMap;
@@ -52,7 +50,7 @@ public class WebUtilsGwtTest extends CommonsGwtTestCase {
     // the GWT version will encode space as %20, while the Java version will encode it as "+"
     // both forms are valid (see http://en.wikipedia.org/wiki/Percent-encoding)
     String expectedResult;
-    if ("+".equals(UrlEncoder.get().encode(" ")))
+    if ("+".equals(URIComponentEncoder.getInstance().encode(" ")))
       expectedResult = "size=3%2F4&phone%23%3D=617+123+4567";
     else
       expectedResult = "size=3%2F4&phone%23%3D=617%20123%204567";
@@ -71,24 +69,4 @@ public class WebUtilsGwtTest extends CommonsGwtTestCase {
     });
   }
 
-  public void test_replaceUrlParameter() throws Exception {
-    printWindowLocation();
-    String newURL = Window.Location.getHref() + "&foo=1&bar=2";
-    System.out.println("       newURL = " + newURL);
-    Window.Location.assign(newURL);
-    printWindowLocation();
-//    fail("TODO"); // TODO
-  }
-
-  // TODO: temp
-  private void printWindowLocation() {
-    String hostPageBaseURL = GWT.getHostPageBaseURL();
-    System.out.println("hostPageBaseURL = " + hostPageBaseURL);
-    String href = Window.Location.getHref();
-    System.out.println("href = " + href);
-    String buildString = Window.Location.createUrlBuilder().buildString();
-    System.out.println("buildString = " + buildString);
-    System.out.println("Removing param gwt.codesvr " + Window.Location.createUrlBuilder().removeParameter("gwt.codesvr").buildString());
-    System.out.println("Replacing param gwt.codesvr " + Window.Location.createUrlBuilder().setParameter("gwt.codesvr", "foobar").buildString());
-  }
 }

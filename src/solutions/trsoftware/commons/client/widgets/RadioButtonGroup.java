@@ -1,11 +1,11 @@
 /*
- *  Copyright 2017 TR Software Inc.
+ * Copyright 2018 TR Software Inc.
  *
- *  Licensed under the Apache License, Version 2.0 (the "License"); you may not
- *  use this file except in compliance with the License. You may obtain a copy of
- *  the License at
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not
+ * use this file except in compliance with the License. You may obtain a copy of
+ * the License at
  *
- *  http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
@@ -25,7 +25,9 @@ import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.event.shared.GwtEvent;
 import com.google.gwt.event.shared.HandlerRegistration;
+import com.google.gwt.text.shared.Renderer;
 import com.google.gwt.user.client.ui.*;
+import solutions.trsoftware.commons.shared.util.text.StringRenderer;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -53,21 +55,33 @@ public class RadioButtonGroup<V> implements HasValue<V>, ClickHandler, KeyPressH
   private final Widget parent;
   /** The set of values over which the radio buttons operate (allow selecting one of them) */
   private final Set<V> valueSet;
+  private final Renderer<V> valueRenderer;
   /** The current value of this radio group (selected from {@link #valueSet} */
   private V value;
 
   private Map<V, RadioButton> rbMap = new LinkedHashMap<V, RadioButton>();
 
   public RadioButtonGroup(Widget parent, Set<V> valueSet) {
+    this(parent, valueSet, StringRenderer.getInstance());
+  }
+
+  /**
+   * @param parent see {@link #parent}
+   * @param valueSet see {@link #valueSet}
+   * @param valueRenderer will be used to render each button's {@code <label>} (NOTE: the rendered string will be
+   *     interpreted as HTML)
+   */
+  public RadioButtonGroup(Widget parent, Set<V> valueSet, Renderer<V> valueRenderer) {
     this.parent = parent;
     this.valueSet = valueSet;
+    this.valueRenderer = valueRenderer;
     createRadioButtons();
   }
 
   private void createRadioButtons() {
     String radioButtonGroupId = HTMLPanel.createUniqueId();
     for (V val : valueSet) {
-      RadioButton rb = new RadioButton(radioButtonGroupId, " " + val);
+      RadioButton rb = new RadioButton(radioButtonGroupId, " " + valueRenderer.render(val), true);
       /*
         NOTE: technically, RadioButton provides an addValueChangeHandler(ValueChangeHandler<Boolean>) method,
         but its implementation is buggy - for instance the value change is only fired in response to clicks

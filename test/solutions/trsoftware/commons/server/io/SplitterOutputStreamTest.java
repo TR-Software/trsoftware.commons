@@ -1,11 +1,11 @@
 /*
- *  Copyright 2017 TR Software Inc.
+ * Copyright 2018 TR Software Inc.
  *
- *  Licensed under the Apache License, Version 2.0 (the "License"); you may not
- *  use this file except in compliance with the License. You may obtain a copy of
- *  the License at
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not
+ * use this file except in compliance with the License. You may obtain a copy of
+ * the License at
  *
- *  http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
@@ -17,9 +17,9 @@
 
 package solutions.trsoftware.commons.server.io;
 
-import com.sun.xml.internal.messaging.saaj.util.ByteOutputStream;
 import junit.framework.TestCase;
 
+import java.io.ByteArrayOutputStream;
 import java.io.PrintStream;
 
 /**
@@ -31,7 +31,7 @@ public class SplitterOutputStreamTest extends TestCase {
 
 
   public void testWriteToOneStream() throws Exception {
-    ByteOutputStream stream1 = new ByteOutputStream();
+    ByteArrayOutputStream stream1 = new ByteArrayOutputStream();
 
     SplitterOutputStream splitter = new SplitterOutputStream(stream1);
     PrintStream ps = new PrintStream(splitter);
@@ -42,8 +42,8 @@ public class SplitterOutputStreamTest extends TestCase {
   }
 
   public void testWriteToMultipleStreams() throws Exception {
-    ByteOutputStream stream1 = new ByteOutputStream();
-    ByteOutputStream stream2 = new ByteOutputStream();
+    ByteArrayOutputStream stream1 = new ByteArrayOutputStream();
+    ByteArrayOutputStream stream2 = new ByteArrayOutputStream();
 
     SplitterOutputStream splitter = new SplitterOutputStream(stream1, stream2);
     PrintStream ps = new PrintStream(splitter);

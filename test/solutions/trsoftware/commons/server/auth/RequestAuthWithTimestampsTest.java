@@ -1,11 +1,11 @@
 /*
- *  Copyright 2017 TR Software Inc.
+ * Copyright 2018 TR Software Inc.
  *
- *  Licensed under the Apache License, Version 2.0 (the "License"); you may not
- *  use this file except in compliance with the License. You may obtain a copy of
- *  the License at
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not
+ * use this file except in compliance with the License. You may obtain a copy of
+ * the License at
  *
- *  http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
@@ -17,10 +17,10 @@
 
 package solutions.trsoftware.commons.server.auth;
 
-import solutions.trsoftware.commons.client.testutil.AssertUtils;
 import solutions.trsoftware.commons.server.TestCaseCanStopClock;
 import solutions.trsoftware.commons.server.servlet.testutil.DummyHttpServletRequest;
 import solutions.trsoftware.commons.server.util.Clock;
+import solutions.trsoftware.commons.shared.testutil.AssertUtils;
 import solutions.trsoftware.commons.shared.util.MapUtils;
 
 import javax.servlet.http.HttpServletRequest;
@@ -60,7 +60,7 @@ public class RequestAuthWithTimestampsTest extends TestCaseCanStopClock {
     SortedMap<String,String> params = MapUtils.sortedMap("foo", "1", "bar", "baz");
     String url = "http://example.com/authenticated";
     final String method = "GET";
-        auth.addSigningParams(method, url, params);
+    auth.addSigningParams(method, url, params);
     // make sure the signing parameters have been added by the RequestAuth
     assertEquals(auth.getPublicKey(), params.get(RequestAuth.PARAM_NAME_ACCESS_KEY));
     assertTrue(params.containsKey(RequestAuth.PARAM_NAME_SIGNATURE));

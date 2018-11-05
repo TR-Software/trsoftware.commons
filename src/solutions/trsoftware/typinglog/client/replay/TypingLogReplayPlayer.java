@@ -528,6 +528,10 @@ public class TypingLogReplayPlayer extends Composite {
     }
   }
 
+  /**
+   * Inheriting modules can override this class via deferred binding, to change how the {@link IncrementSpeedChart}
+   * is displayed.
+   */
   public static class IncrementSpeedChartPresenter {
 
     private static IncrementSpeedChartPresenter instance;

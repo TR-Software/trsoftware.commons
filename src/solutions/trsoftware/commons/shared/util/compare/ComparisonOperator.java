@@ -17,15 +17,22 @@
 
 package solutions.trsoftware.commons.shared.util.compare;
 
+import java.util.function.BiPredicate;
+import java.util.function.IntPredicate;
+
 /**
- * Provides an abstraction for numerical comparison operators.
+ * Provides a general abstraction for comparison operators.
  *
  * @author Alex, 1/11/14
  */
-public enum ComparisonOperator {
+public enum ComparisonOperator implements IntPredicate {
+
+  /**
+   * Abstraction for the &gt; operator
+   */
   GT() {
     @Override
-    protected boolean eval(int cmp) {
+    public boolean test(int cmp) {
       return cmp > 0;
     }
     @Override
@@ -33,9 +40,12 @@ public enum ComparisonOperator {
       return ">";
     }
   },
-  GTE() {
+  /**
+   * Abstraction for the &ge; operator
+   */
+  GEQ() {
     @Override
-    protected boolean eval(int cmp) {
+    public boolean test(int cmp) {
       return cmp >= 0;
     }
     @Override
@@ -43,9 +53,12 @@ public enum ComparisonOperator {
       return ">=";
     }
   },
+  /**
+   * Abstraction for the "=" operator.
+   */
   EQ() {
     @Override
-    protected boolean eval(int cmp) {
+    public boolean test(int cmp) {
       return cmp == 0;
     }
     @Override
@@ -53,9 +66,12 @@ public enum ComparisonOperator {
       return "==";
     }
   },
+  /**
+   * Abstraction for the &ne; operator
+   */
   NEQ() {
     @Override
-    protected boolean eval(int cmp) {
+    public boolean test(int cmp) {
       return cmp != 0;
     }
     @Override
@@ -63,9 +79,12 @@ public enum ComparisonOperator {
       return "!=";
     }
   },
-  LTE() {
+  /**
+   * Abstraction for the &le; operator
+   */
+  LEQ() {
     @Override
-    protected boolean eval(int cmp) {
+    public boolean test(int cmp) {
       return cmp <= 0;
     }
     @Override
@@ -73,9 +92,12 @@ public enum ComparisonOperator {
       return "<=";
     }
   },
+  /**
+   * Abstraction for the &lt; operator
+   */
   LT() {
     @Override
-    protected boolean eval(int cmp) {
+    public boolean test(int cmp) {
       return cmp < 0;
     }
     @Override
@@ -84,10 +106,37 @@ public enum ComparisonOperator {
     }
   };
 
-  protected abstract boolean eval(int cmp);
+  /**
+   * Takes the result of {@link Comparable#compareTo(Object)} and tests it against this operator.
+   * <p>
+   * Example:
+   * <pre>{@code
+   *   LT.test("foo".compareTo("bar")); // returns false
+   *   NEQ.test("foo".compareTo("bar")); // returns true
+   * }</pre>
+   *
+   * @param cmp a result of {@link Comparable#compareTo(Object)}
+   * @return {@code true} iff the arg satisfies this operator
+   */
+  @Override
+  public abstract boolean test(int cmp);
 
+
+  /**
+   * Tests whether the given args satisfy this operator.
+   * Can also be used as a {@link BiPredicate} lambda ({@code GT::compare}).
+   * <p>
+   * Example:
+   * <pre>{@code
+   *   LT.compare(4, 5);  // returns true
+   *   GEQ.compare(4, 5);  // returns false
+   * }</pre>
+   *
+   * @param <T> the type of object being compared
+   * @return {@code true} iff the arg satisfies this operator
+   */
   public <T> boolean compare(Comparable<T> lhs, T rhs) {
-    return eval(lhs.compareTo(rhs));
+    return test(lhs.compareTo(rhs));
   }
 
   /**
@@ -124,6 +173,57 @@ public enum ComparisonOperator {
       return EQ;
     else
       return GT;
+  }
+
+  /**
+   * @return the name of this operator in plain English; for example:
+   * <table>
+   *   <tr>
+   *     <td>{@link ComparisonOperator}:</td>
+   *     <td>{@link #toString()}:</td>
+   *     <td>{@link #prettyName()}:</td>
+   *   </tr>
+   *   <tr>
+   *     <td>{@link #GT}</td>
+   *     <td>{@code ">"}</td>
+   *     <td>{@code "greater than"}</td>
+   *   </tr>
+   *   <tr>
+   *     <td>{@link #GEQ}</td>
+   *     <td>{@code ">="}</td>
+   *     <td>{@code "greater than or equal to"}</td>
+   *   </tr>
+   *   <tr>
+   *     <td>{@link #EQ}</td>
+   *     <td>{@code "=="}</td>
+   *     <td>{@code "equal to"}</td>
+   *   </tr>
+   *   <tr>
+   *     <td>{@link #NEQ}</td>
+   *     <td>{@code "!="}</td>
+   *     <td>{@code "not equal to"}</td>
+   *   </tr>
+   * </table>
+   * 
+   */
+  public String prettyName() {
+    switch (this) {
+      case GT:
+        return "greater than";
+      case GEQ:
+        return "greater than or equal to";
+      case EQ:
+        return "equal to";
+      case NEQ:
+        return "not equal to";
+      case LEQ:
+        return "less than or equal to";
+      case LT:
+        return "less than";
+      default:
+        // should never reach this
+        throw new UnsupportedOperationException("ComparisonOperator.prettyName not implemented for " + this);
+    }
   }
 
 }

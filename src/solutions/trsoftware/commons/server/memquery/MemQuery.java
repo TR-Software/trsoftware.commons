@@ -23,7 +23,7 @@ import solutions.trsoftware.commons.server.memquery.eval.RelationalEvaluator;
 import solutions.trsoftware.commons.server.memquery.output.FixedWidthPrinter;
 import solutions.trsoftware.commons.server.memquery.output.HtmlTablePrinter;
 import solutions.trsoftware.commons.server.memquery.schema.ColSpec;
-import solutions.trsoftware.commons.server.memquery.util.CompositeComparator;
+import solutions.trsoftware.commons.shared.util.compare.CompositeComparator;
 import solutions.trsoftware.commons.shared.util.iterators.CountingIterator;
 
 import java.io.PrintStream;
@@ -89,27 +89,32 @@ public class MemQuery {
    */
   private static Comparator<Row> makeComparator(SortOrder order, RelationSchema schema) {
     String colName = order.getName();
-    final ColSpec colSpec = schema.get(colName);
+    ColSpec colSpec = schema.get(colName);
     Class valueType = colSpec.getType();
     if (!(valueType.isPrimitive() || Comparable.class.isAssignableFrom(valueType)))
       throw new IllegalArgumentException("Cannot create a default comparator for a type that's not comparable.");
-    final int multiplier = order.isReversed() ? -1 : 1;
-    return new Comparator<Row>() {
+    Comparator<Row> sortComparator = new Comparator<Row>() {
       @Override
       public int compare(Row r1, Row r2) {
-        // handle null values (we make them less than all others)
-        int cmp;
-        Comparable v1 = (Comparable)colSpec.getValue(r1);
-        Comparable v2 = (Comparable)colSpec.getValue(r2);
+        /*
+        We treat null values as "less than" all others;
+        this matches the behavior of MySQL/SQLServer, but the opposite of Oracle/Postgres/DB2, and in HSQLDB nulls always come first, regardless of ASC/DESC
+        (see https://docs.mendix.com/refguide/null-ordering-behavior)
+        */
+        Comparable v1 = r1.getValue(colName);
+        Comparable v2 = r2.getValue(colName);
         if (v1 == null)
-          cmp = v2 == null ? 0 : -1;
+          return v2 == null ? 0 : -1;
         else if (v2 == null)
-          cmp = 1;
+          return 1;
         else
-          cmp = v1.compareTo(v2);
-        return multiplier * cmp;
+          return v1.compareTo(v2);
       }
     };
+    if (order.isReversed())
+      return sortComparator.reversed();
+    else
+      return sortComparator;
   }
 
   @Override

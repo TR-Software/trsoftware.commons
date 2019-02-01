@@ -17,6 +17,7 @@
 
 package solutions.trsoftware.commons.server.memquery;
 
+import com.google.common.collect.ImmutableList;
 import solutions.trsoftware.commons.shared.util.iterators.NullIterator;
 
 import java.util.Collections;
@@ -27,30 +28,54 @@ import java.util.List;
 /**
  * @author Alex, 4/17/2015
  */
-public class SortedArrayListRelation extends ArrayListRelation {
+public class SortedArrayListRelation extends ArrayListRelation implements SortedRelation {
 
+  /**
+   * The sort orders for this sorted relation
+   */
+  private final List<SortOrder> sortOrders;
+
+  /**
+   * The {@link Comparator} used to sort this relation (according to {@link #sortOrders})
+   */
   private final Comparator<Row> comparator;
 
-  public SortedArrayListRelation(RelationSchema schema, Iterator<Row> rowIter, Comparator<Row> sortComparator) {
-    super(schema, rowIter);
-    comparator = sortComparator;
-    rows.sort(comparator);
-  }
-
   public SortedArrayListRelation(RelationSchema schema, Iterator<Row> rowIter, List<SortOrder> sortOrders) {
-    this(schema, rowIter, MemQuery.makeComparator(sortOrders, schema));
+    super(schema, rowIter);
+    comparator = MemQuery.makeComparator(sortOrders, schema);
+    rows.sort(comparator);
+    this.sortOrders = ImmutableList.copyOf(sortOrders);
   }
 
-  public SortedArrayListRelation(Relation relation, Comparator<Row> sortComparator) {
-    this(relation.getSchema(), relation.iterator(), sortComparator);
+  SortedArrayListRelation(Relation relation, List<SortOrder> sortOrders) {
+    this(relation.getSchema(), relation.iterator(), sortOrders);
   }
 
-  public SortedArrayListRelation(Relation relation, List<SortOrder> sortOrders) {
-    this(relation, MemQuery.makeComparator(sortOrders, relation.getSchema()));
+  /**
+   * @return the {@link Comparator} used to sort this relation
+   */
+  @Override
+  public Comparator<Row> getComparator() {
+    return comparator;
   }
 
-  /** Iterates all the rows matching the given query */
-  public Iterator<Row> iterator(Row query) {
+  /**
+   * @return the sort orders for this sorted relation
+   */
+  @Override
+  public List<SortOrder> getSortOrders() {
+    return sortOrders;
+  }
+
+  /**
+   * Iterates all the rows matching the given row according to the comparator.
+   *
+   * @param query a row containing values of the columns used by our comparator
+   * @see #getComparator()
+   * @see #getSortOrders()
+   */
+  @Override
+  public Iterator<Row> iterMatches(Row query) {
     int foundIdx = Collections.binarySearch(rows, query, comparator);
     if (foundIdx < 0)
       return NullIterator.getInstance();

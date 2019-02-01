@@ -18,7 +18,7 @@
 package solutions.trsoftware.commons.server.memquery.algebra;
 
 import solutions.trsoftware.commons.server.memquery.Row;
-import solutions.trsoftware.commons.server.memquery.RowImpl;
+import solutions.trsoftware.commons.server.memquery.RowFactory;
 import solutions.trsoftware.commons.shared.util.callables.Function1;
 
 /**
@@ -40,7 +40,7 @@ public abstract class StreamableUnaryOperation<P> extends UnaryOperation<P> impl
    */
   @Override
   public Row call(Row inputRow) {
-    return RowImpl.transform(getOutputSchema(), inputRow);
+    return RowFactory.getInstance().transformRow(getOutputSchema(), inputRow);
   }
 
 

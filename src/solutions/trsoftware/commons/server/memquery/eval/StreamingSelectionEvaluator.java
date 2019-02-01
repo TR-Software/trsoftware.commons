@@ -44,7 +44,7 @@ public class StreamingSelectionEvaluator extends
             new PredicatedIterator<Row>(input.iterator(), new Predicate<Row>() {
               @Override
               public boolean apply(Row item) {
-                return op.getParams().call(item);
+                return op.getParams().apply(item);
               }}) {
             }) {
           @Override

@@ -27,13 +27,11 @@ import com.google.gwt.user.client.Event;
  * mapping of the backspace key to the Back (one page back in history) action
  * is an annoyance, because the user can type it accidentally when not in
  * a text field.  This native event preview handler disables it.
+ * <p>
+ * NOTE(1/31/2019): this native mapping of Backspace to "Back" still affects many of the major browsers on Windows,
+ * including IE, FF, and Opera (but not Chrome).
  *
- * Note: all browsers have Backspace mapped to Back (inlcuding IE, Safari, FF, Opera),
- * at least on Windows.
- *
- * Oct 1, 2009
- *
- * @author Alex
+ * @author Alex - Oct 1, 2009
  */
 public class BackspaceBlocker implements Event.NativePreviewHandler {
 

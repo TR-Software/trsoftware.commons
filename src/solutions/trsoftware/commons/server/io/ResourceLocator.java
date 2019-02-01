@@ -227,6 +227,7 @@ public class ResourceLocator {
 
   /**
    * @return a {@link Path} object for this resource, or {@code null} if the resource is not found.
+   *
    * @throws FileSystemNotFoundException might be thrown by {@link Paths#get(URI)}. NOTE: this exception will be 
    * thrown if the resource is located in a JAR file.  But this can be overcome by creating a new {@link FileSystem}
    * (as described in
@@ -236,8 +237,6 @@ public class ResourceLocator {
    *   <a href="https://gquintana.github.io/2017/09/02/Java-File-vs-Path.html">this blog post</a>,
    *   <a href="https://www.safaribooksonline.com/library/view/learning-java-4th/9781449372477/ch12s03.html">
    *     Learning Java, 4th Edition</a>)
-   *
-   *
    */
   public Path toPath() throws FileSystemNotFoundException {
     URI uri = getURI();

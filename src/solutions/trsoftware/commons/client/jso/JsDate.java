@@ -18,6 +18,7 @@
 package solutions.trsoftware.commons.client.jso;
 
 import com.google.gwt.core.client.JavaScriptObject;
+import solutions.trsoftware.commons.client.useragent.Polyfill;
 import solutions.trsoftware.commons.shared.util.TimeUnit;
 
 import java.util.Date;
@@ -175,9 +176,9 @@ public class JsDate extends com.google.gwt.core.client.JsDate /*implements Compa
    *
    * @return A string representing the given date in the ISO 8601 format according to universal time.
    */
-  public final native String toISOString() /*-{
-    return this.toISOString();
-  }-*/;
+  public final String toISOString() {
+    return Polyfill.get().toISOString(this);
+  }
 
   /**
    * Invokes the <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Date/toJSON">{@code
@@ -423,8 +424,6 @@ public class JsDate extends com.google.gwt.core.client.JsDate /*implements Compa
     return create(getTime());
   }
 
-  // TODO: implement equals/hashCode by assigning native functions to the instance in a jsni method (can override the factory methods to accomplish this)
-
   /**
    * Adds (or subtracts) the given quantity of the given time unit to/from this date, returning a new instance
    * of {@link JsDate} for the result (this is a non-mutating operation).
@@ -451,6 +450,10 @@ public class JsDate extends com.google.gwt.core.client.JsDate /*implements Compa
         return date;
       case DAYS:
         date.setDate(date.getDate() + amount);
+        return date;
+      case WEEKS:
+        // JsDate doesn't have a setter for "weeks", so we'll just use the one for days multiplied by 7
+        date.setDate(date.getDate() + amount * 7);
         return date;
       case MONTHS:
         date.setMonth(date.getMonth() + amount);

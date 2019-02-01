@@ -36,6 +36,8 @@ public class GwtUtilsGwtTest extends CommonsGwtTestCase {
     Class<Number> number = Number.class;
     Class<Integer> integer = Integer.class;
 
+    // TODO: test this with interfaces (which might not work, because Class.getInterfaces() isn't emulated by GWT)
+
     assertTrue(isAssignableFrom(number, integer));
     assertFalse(isAssignableFrom(integer, number));
   }

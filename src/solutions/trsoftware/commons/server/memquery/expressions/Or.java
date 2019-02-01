@@ -30,8 +30,8 @@ public class Or extends CompoundRowPredicate {
 
 
   @Override
-  public Boolean call(Row arg) {
+  public Boolean apply(Row arg) {
     // we override this method to short-circuit the evaluation when the LHS expression is true
-    return lhs.call(arg) || rhs.call(arg);
+    return lhs.apply(arg) || rhs.apply(arg);
   }
 }

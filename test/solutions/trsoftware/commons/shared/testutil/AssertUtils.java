@@ -158,6 +158,14 @@ public abstract class AssertUtils {
       assertFalse("expected:<" + o1 + "> should not be equal to:<" + o2 + ">", o1.equals(o2));
   }
 
+  /**
+   * Combines {@link #assertNotEqual(Object, Object)} and {@link #assertComparablesNotEqual(Comparable, Comparable)}
+   */
+  public static <T extends Comparable<T>> void assertNotEqual(T o1, T o2) {
+    assertNotEqual((Object)o1, o2);
+    assertComparablesNotEqual(o1, o2);
+  }
+
   public static String comparisonFailedMessage(String message, Object expected, Object actual) {
     String formatted = "";
     if (message != null)
@@ -356,6 +364,7 @@ public abstract class AssertUtils {
 
   /**
    * Asserts that the given args are equal and have the same hash code.
+   *
    * @see Object#equals(Object)
    * @see Object#hashCode()
    */
@@ -364,6 +373,34 @@ public abstract class AssertUtils {
     assertTrue(a.hashCode() == b.hashCode());
   }
 
+  /**
+   * Asserts that the given {@link Comparable} objects are equal according to both {@link Object#equals}
+   * and {@link Comparable#compareTo}, and that they have the same hash code.
+   *
+   * In other words, this method combines {@link #assertEqualsAndHashCode(Object, Object)} and
+   * {@link #assertComparablesEqual(Comparable, Comparable)}.
+   *
+   * @see Object#equals(Object)
+   * @see Object#hashCode()
+   */
+  public static <T extends Comparable<T>> void assertEqualsAndHashCode(T a, T b) {
+    assertEqualsAndHashCode((Object)a, b);
+    assertComparablesEqual(a, b);
+  }
+
+  /**
+   * Asserts that the given are not equal according to the {@link Object#equals} method, and that
+   * they have different hash codes (according to {@link Object#hashCode}).
+   * <p>
+   * <strong>NOTE</strong>: this assertion makes sense only when you absolutely have to assure that your implementation
+   * of {@link Object#hashCode} produces a <em>perfect hashing</em> (i.e. a unique hash when {@link Object#equals}
+   * returns {@code false}), despite the fact this behavior is not required by the contract of {@link Object#equals}.
+   *
+   * @deprecated this assertion is too restrictive, because, as described above, objects are
+   * allowed to have the same hash code despite {@link Object#equals} returning {@code false}.
+   * In other words, there is no prescribed relationship between {@link Object#equals} and {@link Object#hashCode}
+   * Use {@link #assertNotEqual(Object, Object)} instead of this method.
+   */
   public static void assertNotEqualsAndHashCode(Object a, Object b) {
     assertNotEqual(a, b);
     assertFalse(a.hashCode() == b.hashCode());
@@ -382,7 +419,7 @@ public abstract class AssertUtils {
   /**
    * Asserts that {@code a == b}, as defined by their {@link Comparable#compareTo(Object)} method.
    */
-  public static <C extends Comparable<C>> void assertComparablesEqual(C a, C b) {
+  public static <T extends Comparable<T>> void assertComparablesEqual(T a, T b) {
     assertTrue(a.compareTo(b) == 0);
     assertTrue(b.compareTo(a) == 0);
   }
@@ -390,7 +427,7 @@ public abstract class AssertUtils {
   /**
    * Asserts that {@code a != b}, as defined by their {@link Comparable#compareTo(Object)} method.
    */
-  public static <C extends Comparable<C>> void assertComparablesNotEqual(C a, C b) {
+  public static <T extends Comparable<T>> void assertComparablesNotEqual(T a, T b) {
     assertTrue(a.compareTo(b) != 0);
     assertTrue(b.compareTo(a) != 0);
   }
@@ -401,11 +438,11 @@ public abstract class AssertUtils {
    * @see Comparable
    */
   @SafeVarargs
-  public static <C extends Comparable<C>> void assertComparablesOrdering(C... comparables) {
+  public static <T extends Comparable<T>> void assertComparablesOrdering(T... comparables) {
     if (comparables.length > 1) {
       for (int i = 1; i < comparables.length; i++) {
-        C a = comparables[i - 1];
-        C b = comparables[i];
+        T a = comparables[i - 1];
+        T b = comparables[i];
         assertLessThan(a, b);
       }
     }
@@ -414,7 +451,7 @@ public abstract class AssertUtils {
   /**
    * Asserts that {@code a < b}, as defined by their {@link Comparable#compareTo(Object)} method.
    */
-  public static <C extends Comparable<C>> void assertLessThan(C a, C b) {
+  public static <T extends Comparable<T>> void assertLessThan(T a, T b) {
     assertTrue(StringUtils.template("Expected {$1}.compareTo({$2}) < 0, but was $3", a, b, a.compareTo(b)), a.compareTo(b) < 0);
     assertTrue(StringUtils.template("Expected {$1}.compareTo({$2}) > 0, but was $3", a, b, b.compareTo(a)), b.compareTo(a) > 0);
   }
@@ -518,7 +555,7 @@ public abstract class AssertUtils {
     }
 
     public ComparableAssertionBuilder<T> isLessThanOrEqualTo(T upperBound) {
-      return compare(ComparisonOperator.LTE, upperBound);
+      return compare(ComparisonOperator.LEQ, upperBound);
     }
 
     public ComparableAssertionBuilder<T> isGreaterThan(T lowerBound) {
@@ -526,7 +563,7 @@ public abstract class AssertUtils {
     }
 
     public ComparableAssertionBuilder<T> isGreaterThanOrEqualTo(T lowerBound) {
-      return compare(ComparisonOperator.GTE, lowerBound);
+      return compare(ComparisonOperator.GEQ, lowerBound);
     }
 
     /** Assert that {@link #value} is in the range {@code [lowerBound, upperBound]} */

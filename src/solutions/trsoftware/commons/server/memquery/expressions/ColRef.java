@@ -37,7 +37,7 @@ public class ColRef<T> extends RowExpression<T> implements VisitableExpression<R
   }
 
   @Override
-  public T call(Row arg) {
+  public T apply(Row arg) {
     return colSpec.getValue(arg);
   }
 

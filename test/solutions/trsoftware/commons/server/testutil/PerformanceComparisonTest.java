@@ -18,7 +18,7 @@
 package solutions.trsoftware.commons.server.testutil;
 
 import junit.framework.TestCase;
-import solutions.trsoftware.commons.server.util.NanoDuration;
+import solutions.trsoftware.commons.server.util.Duration;
 import solutions.trsoftware.commons.shared.annotations.Slow;
 
 public class PerformanceComparisonTest extends TestCase {
@@ -32,7 +32,7 @@ public class PerformanceComparisonTest extends TestCase {
       this.timeLimit = timeLimit;
     }
     public void run() {
-      NanoDuration duration = new NanoDuration(name);
+      Duration duration = new Duration(name);
       while (duration.elapsedMillis() < timeLimit)
         x++;  // this task will run for timeLimit millis
       System.out.println(duration);
@@ -53,7 +53,7 @@ public class PerformanceComparisonTest extends TestCase {
       double result = compare(slowTask, fastTask, iterations);
       assertTrue(slowTask.x > 0); // first of all, assert that the tasks actually ran
       assertTrue(fastTask.x > 0);
-      assertEquals(.33, result, .05); // slowTask is 3 times slower than fastTask (allow 5% accuracy margin)
+      assertEquals(.33, result, .10); // slowTask is 3 times slower than fastTask (allow 10% accuracy margin)
     }
     {
       TimedTask slowTask = new TimedTask("slowTask", 150);
@@ -62,7 +62,7 @@ public class PerformanceComparisonTest extends TestCase {
       assertTrue(slowTask.x > 0);
       assertTrue(fastTask.x > 0);
       // fastTask is 3 times faster than slowTask
-      assertEquals(3, result, .05);  // (allow 5% accuracy margin)
+      assertEquals(3, result, .10);  // (allow 10% accuracy margin)
     }
   }
 

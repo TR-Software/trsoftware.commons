@@ -32,7 +32,4 @@ public interface Row extends NamedTuple, OrderedTuple {
   /** Gets multiple named values at once */
   List<Object> getValues(List<String> names);
 
-  Object getRawData();
-
-
 }

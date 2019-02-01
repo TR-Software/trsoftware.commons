@@ -31,7 +31,6 @@ import solutions.trsoftware.commons.shared.util.compare.ComparisonOperator;
  */
 public class MemQueryTest extends MemQueryTestCase {
 
-
   /**
    * Checks the results of some simple queries
    */
@@ -134,7 +133,7 @@ public class MemQueryTest extends MemQueryTestCase {
     ));
     assertResultSetEquals(runAndPrint(fromUser().select("uid").select("name").selectExprAs(new RowExpression<String>(String.class) {
       @Override
-      public String call(Row row) {
+      public String apply(Row row) {
         return row.getValue(0) + "_" + row.getValue(1);
       }
     }, "concat")), joinCsvRows(
@@ -159,7 +158,7 @@ public class MemQueryTest extends MemQueryTestCase {
             "c,foo,1,81"
         ));
     assertResultSetEquals(runAndPrint(fromScore().select("uid", "modelId", "gameNumber", "score")
-            .where(new ColValueComparison<Integer>("gameNumber", ComparisonOperator.GTE, 2))),
+            .where(new ColValueComparison<Integer>("gameNumber", ComparisonOperator.GEQ, 2))),
         joinCsvRows(
             "a,foo,2,30",
             "a,foo,3,38",
@@ -196,7 +195,7 @@ public class MemQueryTest extends MemQueryTestCase {
             "c,foo,1,81"
         ));
     assertResultSetEquals(runAndPrint(fromScore().selectAll()
-            .where(new ColValueComparison<Integer>("gameNumber", ComparisonOperator.GTE, 2))),
+            .where(new ColValueComparison<Integer>("gameNumber", ComparisonOperator.GEQ, 2))),
         joinCsvRows(
             "a,foo,2,30",
             "a,foo,3,38",
@@ -298,6 +297,10 @@ public class MemQueryTest extends MemQueryTestCase {
         ));
   }
 
+  /**
+   * Tests an "inner" join having the "natural" condition.
+   * @see Join
+   */
   public void testNaturalInnerJoin() throws Exception {
     // inner natural join of two relations without duplicate entries
     ResultSet scoresGroupedByUid = runAndPrint(fromScore().select("uid").selectAggregatedCol(Count.class, "*").selectAggregatedCol(Avg.class, "score").groupBy("uid"));
@@ -378,6 +381,10 @@ public class MemQueryTest extends MemQueryTestCase {
         ));
   }
 
+  /**
+   * Tests a "left outer" join having the "natural" condition.
+   * @see Join
+   */
   public void testNaturalLeftOuterJoin() throws Exception {
     // inner natural left outer join of two relations without duplicate entries
     ResultSet scoresGroupedByUid = runAndPrint(fromScore().select("uid").selectAggregatedCol(Count.class, "*").selectAggregatedCol(Avg.class, "score").groupBy("uid"));
@@ -466,6 +473,10 @@ public class MemQueryTest extends MemQueryTestCase {
         ));
   }
 
+  /**
+   * Tests a "right outer" join having the "natural" condition.
+   * @see Join
+   */
   public void testNaturalRightOuterJoin() throws Exception {
     // inner natural right outer join of two relations without duplicate entries
     ResultSet scoresGroupedByUid = runAndPrint(fromScore().select("uid").selectAggregatedCol(Count.class, "*").selectAggregatedCol(Avg.class, "score").groupBy("uid"));
@@ -554,6 +565,10 @@ public class MemQueryTest extends MemQueryTestCase {
         ));
   }
 
+  /**
+   * Tests a "full outer" join having the "natural" condition.
+   * @see Join
+   */
   public void testNaturalFullOuterJoin() throws Exception {
     // inner natural full outer join of two relations without duplicate entries
     ResultSet scoresGroupedByUid = runAndPrint(fromScore().select("uid").selectAggregatedCol(Count.class, "*").selectAggregatedCol(Avg.class, "score").groupBy("uid"));

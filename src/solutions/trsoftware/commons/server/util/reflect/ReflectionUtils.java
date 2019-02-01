@@ -17,16 +17,22 @@
 
 package solutions.trsoftware.commons.server.util.reflect;
 
+import com.google.common.collect.BiMap;
+import com.google.common.collect.ImmutableBiMap;
 import solutions.trsoftware.commons.server.io.ResourceLocator;
+import solutions.trsoftware.commons.shared.util.StringTokenizer;
 import solutions.trsoftware.commons.shared.util.StringUtils;
+import solutions.trsoftware.commons.shared.util.VersionNumber;
 import solutions.trsoftware.commons.shared.util.callables.Function0;
 import solutions.trsoftware.commons.shared.util.callables.FunctionN;
+import solutions.trsoftware.commons.shared.util.reflect.ClassNameParser;
 
+import javax.lang.model.SourceVersion;
+import javax.lang.model.element.Modifier;
 import java.io.File;
 import java.io.PrintStream;
 import java.lang.reflect.*;
-import java.nio.file.Path;
-import java.nio.file.Paths;
+import java.nio.file.*;
 import java.util.*;
 
 /**
@@ -34,36 +40,63 @@ import java.util.*;
  */
 public abstract class ReflectionUtils {
 
-  /**
-   * Sorted array of all reserved keywords in Java (these strings cannot be used as identifiers).
-   * @see <a href="https://docs.oracle.com/javase/specs/jls/se9/html/jls-3.html#jls-3.9">JLS</a>
-   */
-  public static final String[] JAVA_KEYWORDS = {"_", "abstract", "assert", "boolean", "break", "byte", "case", "catch", "char", "class", "const", "continue", "default", "do", "double", "else", "enum", "extends", "final", "finally", "float", "for", "goto", "if", "implements", "import", "instanceof", "int", "interface", "long", "native", "new", "package", "private", "protected", "public", "return", "short", "static", "strictfp", "super", "switch", "synchronized", "this", "throw", "throws", "transient", "try", "void", "volatile", "while"};
-
 
   // NOTE: the following 2 methods borrows from java.beans.ReflectionUtils, which unfortunately is not public
+
+  /**
+   * Maps the primitive wrapper types to their corresponding primitive types.
+   */
+  public static final BiMap<Class, Class> WRAPPER_TYPES = ImmutableBiMap.<Class, Class>builder()
+      .put(Boolean.class, Boolean.TYPE)
+      .put(Byte.class, Byte.TYPE)
+      .put(Character.class, Character.TYPE)
+      .put(Short.class, Short.TYPE)
+      .put(Integer.class, Integer.TYPE)
+      .put(Long.class, Long.TYPE)
+      .put(Float.class, Float.TYPE)
+      .put(Double.class, Double.TYPE)
+      .put(Void.class, Void.TYPE)
+      .build();
 
   /**
    * @return true iff the given type is one of the wrapper classes for a primitive.
    */
   public static boolean isPrimitiveWrapper(Class type) {
-    return primitiveTypeFor(type) != null;
+    return WRAPPER_TYPES.containsKey(type);
   }
 
   /**
-   * @return the primitive type corresponding to the given wrapper class.
+   * @return the primitive type corresponding to the given wrapper class, or {@code null} if the given class is not
+   * a wrapper type.
    */
   public static Class primitiveTypeFor(Class wrapper) {
-    if (wrapper == Boolean.class) return Boolean.TYPE;
-    if (wrapper == Byte.class) return Byte.TYPE;
-    if (wrapper == Character.class) return Character.TYPE;
-    if (wrapper == Short.class) return Short.TYPE;
-    if (wrapper == Integer.class) return Integer.TYPE;
-    if (wrapper == Long.class) return Long.TYPE;
-    if (wrapper == Float.class) return Float.TYPE;
-    if (wrapper == Double.class) return Double.TYPE;
-    if (wrapper == Void.class) return Void.TYPE;
-    return null;
+    return WRAPPER_TYPES.get(wrapper);
+  }
+
+  /**
+   * @return the wrapper class corresponding to the given primitive type, or {@code null} if the given class is not
+   * a primitive type.
+   */
+  public static Class wrapperTypeFor(Class primitive) {
+    return WRAPPER_TYPES.inverse().get(primitive);
+  }
+
+  /**
+   * @return a list of modifier constants parsed from the given string
+   * @see Modifier
+   */
+  public static List<Modifier> parseModifiers(String str) {
+    ArrayList<Modifier> modifiers = new ArrayList<>();
+    StringTokenizer tok = new StringTokenizer(str);
+    while (tok.hasNext()) {
+      String next = tok.next();
+      for (Modifier modifier : Modifier.values()) {
+        // NOTE: there might be a more efficient way of doing this, but this is good enough b/c the number of modifiers should be sufficiently small
+        if (modifier.toString().equals(next))
+          modifiers.add(modifier);
+      }
+    }
+    return modifiers;
   }
 
   /**
@@ -304,6 +337,8 @@ public abstract class ReflectionUtils {
     return rootDir;
   }
 
+  // TODO: extract the methods that attempt discover locations of .class/.java files to a separate util class
+
   /**
    * Infers the compiler output path for the project by using the given class as a reference point.
    * @param refClass A reference class to use in performing the classpath lookup.
@@ -315,13 +350,22 @@ public abstract class ReflectionUtils {
   }
 
   /**
-   * @return {@code true} if the argument is a reserved Java keyword.
+   * Delegates to {@link SourceVersion#isKeyword}, which decides whether the arg is a reserved Java keyword or literal
+   * (like {@code true},  {@code false}, or {@code null}) in the latest source (i.e. Java language) version
+   * implemented by the current JRE.
    *
-   * @see <a href="https://stackoverflow.com/a/24288335">StackOverflow</a>
+   * @return {@code true} iff the argument is a reserved keyword or literal.
+   *
+   * @see SourceVersion#isKeyword(CharSequence)
+   * @see SourceVersion#keywords
+   * @see <a href="https://docs.oracle.com/javase/specs/jls/se8/html/jls-3.html#jls-3.9">JLS §3.9 (Keywords)</a>
+   * @see <a href="https://docs.oracle.com/javase/specs/jls/se8/html/jls-3.html">JLS Chapter 3 (Lexical Structure)</a>
+   * @see <a href="https://stackoverflow.com/a/54141029/1965404">StackOverflow</a>
    */
   public static boolean isJavaKeyword(String str) {
-    return Arrays.binarySearch(JAVA_KEYWORDS, str) >= 0;
+    return SourceVersion.isKeyword(str);
   }
+
 
   /**
    * Every array in Java has its own class (e.g. {@code Foo.class != Foo[].class != Foo[][].class != Foo[][][].class}),
@@ -377,6 +421,80 @@ public abstract class ReflectionUtils {
   }
 
   /**
+   * Attempts to find the directory where the source ({@code .java} file) of the given class is located, using
+   * the URL returned by {@code cls.getResource("")}.
+   *
+   * <p style="font-style: italic;">
+   *   NOTE: not sure why this works, but {@link Class#getResource(String)} (with an empty string arg) seems to return
+   *   a URL for the directory where the java source code for the given class is located.  However, this might not work
+   *   for inner/anonymous classes, and will almost-certainly not work for system classes or classes loaded from JARs,
+   *   therefore <strong>use caution</strong> when calling this method.
+   * </p>
+   *
+   * @param cls the class to look up
+   * @return a {@link ResourceLocator} <em>potentially</em> pointing to the directory where the source code ({@code .java} file)
+   * of the given class is located; <strong>WARNING:</strong> the result could be totally wrong, and calling
+   * {@link ResourceLocator#toPath()} on it could throw an exception)
+   *
+   */
+  public static ResourceLocator getSourceDir(Class cls) {
+    // the class could also be an array, in which case we're only interested in its top-most component
+    cls = getRootComponentTypeOfArray(cls);
+    return new ResourceLocator("", cls);
+    /*
+    TODO: might make more sense to instead return the Path obtained from ResourceLocator#toPath(), or null if it throws an exception
+     */
+  }
+
+  /**
+   * Attempts to find the root of the directory tree where the source code ({@code .java} file) of the given class is
+   * located, using the result of {@link #getSourceDir(Class)}
+   *
+   * <p style="font-style: italic;">
+   *   WARNING: should exercise the same precautions described in {@link #getSourceDir(Class)}.
+   * </p>
+   *
+   * @param cls the class to look up
+   * @return a {@link ResourceLocator} <em>potentially</em> pointing to the directory where the source code ({@code .java} file)
+   * of the given class is located; <strong>WARNING:</strong> the result could be totally wrong,
+   * and caller might want to at least check whether the returned path exists before using it
+   * @see #getSourceDir(Class)
+   * @see Files#exists(Path, LinkOption...)
+   */
+  public static Path getSourceRoot(Class cls) {
+    ResourceLocator sourceDirResourceLocator = getSourceDir(cls);
+    Path path = sourceDirResourceLocator.toPath();
+    int pkgDepth = StringUtils.count(cls.getPackage().getName(), '.');
+    // walk up the file tree by the number of levels equal to the number of dots in the package name
+    Path sourceRoot = path;
+    for (int i = pkgDepth; i >= 0; i--) {
+      sourceRoot = sourceRoot.getParent();
+    }
+    return sourceRoot;
+  }
+
+  /**
+   * Attempts to find the {@code .java} file containing the source code of the given class,
+   * using the result of {@link #getSourceDir(Class)}
+   *
+   * <p style="font-style: italic;">
+   *   WARNING: should exercise the same precautions described in {@link #getSourceDir(Class)}.
+   * </p>
+   *
+   * @param cls the class to look up
+   * @return a {@link ResourceLocator} <em>potentially</em> pointing to the directory where the source code ({@code .java} file)
+   * of the given class is located; <strong>WARNING:</strong> the result could be totally wrong,
+   * and caller might want to at least check whether the returned path exists before using it.
+   * @see #getSourceDir(Class)
+   */
+  public static Path getSourceFile(Class cls) throws InvalidPathException {
+    ResourceLocator sourceDirResourceLocator = getSourceDir(cls);
+    ClassNameParser classNameInfo = new ClassNameParser(cls);
+    Path srcDir = sourceDirResourceLocator.toPath();
+    return srcDir.resolve(classNameInfo.getComplexName() + ".java");
+  }
+
+  /**
    * Prints the values of the public fields and getter methods in the given object.
    * @param out will print to this stream
    * @param obj the instance to print
@@ -412,5 +530,35 @@ public abstract class ReflectionUtils {
       e.printStackTrace();
       return e;
     }
+  }
+
+  /**
+   * Determines the Java spec version of the current JVM by parsing the value of the {@code "java.specification.version"}
+   * system property.
+   * This could be used for feature discovery, for example:
+   * <pre>{@code
+   *   if (getJavaSpecVersion().greaterThanOrEqualTo(new VersionNumber(1, 7))) {
+   *     // can use diamond operator, try-with-resources, etc.
+   *   }
+   * }</pre>
+   * NOTE: Java also provides the {@link SourceVersion} class for this purpose, for example:
+   * <pre>{@code
+   *   if (SourceVersion.latestSupported().ordinal() >= SourceVersion.RELEASE_7.ordinal()) {
+   *    // can use diamond operator, try-with-resources, etc.
+   *  }
+   * }</pre>
+   *
+   * @return the JRE Spec Version of the current java process, e.g. {@code "1.8"}
+   *
+   * @see SourceVersion#getLatestSupported()
+   * @see Package#getSpecificationVersion()
+   * @see System#getProperties()
+   */
+  public static VersionNumber getJavaSpecVersion() {
+    // NOTE: another way of getting this info is something like String.class.getPackage().getSpecificationVersion()
+    //  return VersionNumber.parse(String.class.getPackage().getSpecificationVersion());
+    // but we use
+
+    return VersionNumber.parse(System.getProperty("java.specification.version"));
   }
 }

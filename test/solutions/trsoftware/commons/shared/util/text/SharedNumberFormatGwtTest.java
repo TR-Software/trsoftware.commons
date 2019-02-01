@@ -17,7 +17,10 @@
 
 package solutions.trsoftware.commons.shared.util.text;
 
+import com.google.gwt.core.shared.GWT;
 import solutions.trsoftware.commons.client.CommonsGwtTestCase;
+
+import java.math.BigDecimal;
 
 
 /**
@@ -65,6 +68,19 @@ public class SharedNumberFormatGwtTest extends CommonsGwtTestCase {
     assertEquals(1234.57, format.parse("1,234.57"));
     assertEquals("1,000,234.0", format.format(1000234.00001));
     assertEquals(1000234.0, format.parse("1,000,234.0"));
+  }
+
+  public void testRounding() {
+    SharedNumberFormat format = new SharedNumberFormat("#.##");
+    // test that rounding mode will be "half-up"
+    // 1) test some values that have have an exact IEEE representation
+    assertEquals("1.13", format.format(1.125));
+    // 2) test some values that don't have an exact IEEE representation (see https://stackoverflow.com/q/45479713/1965404)
+    double inexactDouble = 1.005;  // this actually evaluates to something like 1.00499999999999989341858963598497211933135986328125
+    if (GWT.isScript()) {
+      assertEquals("1.01", format.format(inexactDouble));  // this will only work in GWT
+    }
+    assertEquals("1.01", format.format(BigDecimal.valueOf(inexactDouble)));  // this should work in both GWT and JVM
   }
 
 

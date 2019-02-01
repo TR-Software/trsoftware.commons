@@ -17,6 +17,8 @@
 
 package solutions.trsoftware.commons.server.memquery;
 
+import java.util.Objects;
+
 /**
  * A sort order defined on a column.
  *
@@ -28,8 +30,12 @@ public class SortOrder implements HasName {
   private final boolean reversed;
 
   public SortOrder(String name, boolean reversed) {
-    this.name = name;
+    this.name = Objects.requireNonNull(name);
     this.reversed = reversed;
+  }
+
+  public SortOrder(String name) {
+    this(name, false);
   }
 
   public String getName() {
@@ -46,5 +52,26 @@ public class SortOrder implements HasName {
     if (reversed)
       ret += " DESC";
     return ret;
+  }
+
+  @Override
+  public boolean equals(Object o) {
+    if (this == o)
+      return true;
+    if (o == null || getClass() != o.getClass())
+      return false;
+
+    SortOrder sortOrder = (SortOrder)o;
+
+    if (reversed != sortOrder.reversed)
+      return false;
+    return name.equals(sortOrder.name);
+  }
+
+  @Override
+  public int hashCode() {
+    int result = name.hashCode();
+    result = 31 * result + (reversed ? 1 : 0);
+    return result;
   }
 }

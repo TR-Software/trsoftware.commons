@@ -25,6 +25,7 @@ import solutions.trsoftware.commons.shared.util.callables.Function2;
 import solutions.trsoftware.commons.shared.util.stats.Mergeable;
 
 import java.util.*;
+import java.util.function.Function;
 
 /**
  * Date: Jun 6, 2008 Time: 2:15:43 PM
@@ -40,6 +41,8 @@ public class MapUtils {
   public static <K,V> SortedMap<K, V> sortedMap(Object... keyValuePairs) {
     return putAll(new TreeMap<K, V>(), keyValuePairs);
   }
+
+  // TODO: replace all these deprecated methods with multiple overloads (like com.google.common.collect.ImmutableMap.of(K, V, K, V, K, V))
 
   /**
    * Creates a {@link HashMap} from the given args (treated as {@code key1, value1, key2, value2, ...})
@@ -265,6 +268,8 @@ public class MapUtils {
    * and allows passing in a factory method which, if needed, will be invoked with the given argument.
    * @return The value created by the factory if it was inserted,
    * or the previous value if it was already contained by the map.
+   * @deprecated this method was made obsolete by the introduction of {@link Map#computeIfAbsent(Object, Function)}
+   * in Java 1.8
    */
   public static <K,V,A> V getOrInsert(Map<K,V> map, K key, Function1<A, V> factory, A factoryArg) {
     if (map.containsKey(key))

@@ -22,6 +22,7 @@ import static solutions.trsoftware.commons.shared.util.ListUtils.isEmpty;
  * </ul>
  *
  * @param <E> the element type of the lists
+ * @see CompositeComparator
  *
  * @author Alex
  * @since 8/9/2018

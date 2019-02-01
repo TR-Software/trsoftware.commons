@@ -53,7 +53,7 @@ public class TestTimeboxDecorator extends TestSetup {
   /**
    * Default settings for a {@link TestTimeboxDecorator} that never fails a test for taking too long; only prints warnings
    */
-  public static final TimeBoxSettings LENIENT_TIMEBOX = new TimeBoxSettings(Integer.MAX_VALUE, 1);
+  public static final TimeBoxSettings LENIENT_TIMEBOX = new TimeBoxSettings(Integer.MAX_VALUE, 20);
   /**
    * Default settings for a {@link TestTimeboxDecorator} that fails a test for taking too long
    */

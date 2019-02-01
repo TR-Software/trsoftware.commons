@@ -44,8 +44,7 @@ public abstract class CommonsGwtTestCase extends BaseGwtTestCase {
    * Removes all elements in the body, except scripts and iframes.
    */
   @Override
-  protected void gwtSetUp() throws Exception {
-    super.gwtSetUp();
+  protected void gwtTearDown() throws Exception {
     Element bodyElem = RootPanel.getBodyElement();
 
     List<Element> toRemove = new ArrayList<Element>();
@@ -59,6 +58,7 @@ public abstract class CommonsGwtTestCase extends BaseGwtTestCase {
     for (Element element : toRemove) {
       bodyElem.removeChild(element);
     }
+    super.gwtTearDown();
   }
 
   /**

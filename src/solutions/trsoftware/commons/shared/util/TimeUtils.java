@@ -26,8 +26,9 @@ import static solutions.trsoftware.commons.shared.util.TimeUnit.*;
 
 /**
  * @since Apr 29, 2008
- *
  * @author Alex
+ *
+ * @see TimeUnit
  */
 public class TimeUtils {
   // NOTE: this code was written before we introduced the TimeUnit class, but it's not worth rewriting this until we internationalize the entire app (and have pluralization available in GWT 1.6+)

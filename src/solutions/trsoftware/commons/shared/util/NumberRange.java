@@ -27,8 +27,10 @@ import java.util.TreeSet;
 
 /**
  * Immutable numeric range, capable of generating random numbers within the
- * range.  The endpoints of the range MUST BE either Integer, Long, Double, or Float.
- * and their values must fit into the double range for this class to function correctly.
+ * range.  The endpoints of the range MUST BE either {@link Integer}, {@link Long}, {@link Double}, or {@link Float}.
+ * and their values must fit into the {@code double} range for this class to function correctly.
+ * <p>
+ * NOTE: this class is similar to the {@code xrange} type in Python.
  *
  * @author Alex
  */
@@ -78,11 +80,18 @@ public class NumberRange<T extends Number & Comparable> implements Iterable<T> {
   }
 
   /**
-   * @return true iff value is in the given range (both endpoints inclusive) as
-   * defined by the type's Comparable implementation.
+   * @return {@code true} iff value is in the given range (both endpoints inclusive) as
+   * defined by the type's {@link Comparable#compareTo} implementation.
    */
   public static <T extends Comparable<T>> boolean inRange(T rangeMin, T rangeMax, T value) {
     return value.compareTo(rangeMin) >= 0 && value.compareTo(rangeMax) <= 0;
+  }
+
+  /**
+   * @return {@code true} iff value is in the given range (both endpoints inclusive)
+   */
+  public static boolean inRange(int rangeMin, int rangeMax, int value) {
+    return value >= rangeMin && value <= rangeMax;
   }
 
   /**

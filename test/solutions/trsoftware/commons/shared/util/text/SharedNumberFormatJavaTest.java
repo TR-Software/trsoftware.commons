@@ -21,6 +21,8 @@ import junit.framework.TestCase;
 
 import java.text.DecimalFormat;
 
+import static solutions.trsoftware.commons.shared.util.text.SharedNumberFormat.buildPattern;
+
 /**
  * @author Alex, 10/31/2017
  */
@@ -44,11 +46,30 @@ public class SharedNumberFormatJavaTest extends TestCase {
     delegate.testDigitGrouping();
   }
 
+  public void testRounding() {
+    delegate.testRounding();
+  }
+
   public void testPct() throws Exception {
     DecimalFormat fmt = new DecimalFormat("#.##%");
     String str = fmt.format(.1234); // returns "12.34%"
     fmt.parse(str);  // returns 0.1234
     System.out.println(str);  // returns "12.34%"
     System.out.println(fmt.parse("12.34%"));  // returns 12.34
+  }
+
+  public void testBuildPattern() throws Exception {
+    assertEquals("#.###", buildPattern(0, 0, 3, false));
+    assertEquals("0.0#", buildPattern(1, 1, 2, false));
+    assertEquals("0.00", buildPattern(1, 2, 2, false));
+    assertEquals("0.00", buildPattern(1, 2, 0, false));
+    assertEquals("0.#", buildPattern(1, 0, 1, false));
+    assertEquals("0", buildPattern(1, 0, 0, false));
+    assertEquals("#", buildPattern(0, 0, 0, false));
+    assertEquals("#.###%", buildPattern(0, 0, 3, true));
+    assertEquals("0.0#%", buildPattern(1, 1, 2, true));
+    assertEquals("0.#%", buildPattern(1, 0, 1, true));
+    assertEquals("0%", buildPattern(1, 0, 0, true));
+    assertEquals("#%", buildPattern(0, 0, 0, true));
   }
 }

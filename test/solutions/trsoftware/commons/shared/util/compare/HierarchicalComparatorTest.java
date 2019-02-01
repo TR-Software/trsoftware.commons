@@ -17,7 +17,7 @@ public class HierarchicalComparatorTest extends TestCase {
 
   public void setUp() throws Exception {
     super.setUp();
-    intListComparator = new HierarchicalComparator<Integer>();
+    intListComparator = new HierarchicalComparator<Integer>(SortOrder.DESC);
     assertEquals(SortOrder.DESC, intListComparator.getSortOrder());
   }
 

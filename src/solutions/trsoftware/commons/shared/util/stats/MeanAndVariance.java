@@ -63,11 +63,16 @@ public class MeanAndVariance implements Serializable, Mergeable<MeanAndVariance>
    * Add a new number to the sample.
    */
   public synchronized void update(double x) {
-    // implement the algorithm
-    n++;
-    double delta = x - mean;
-    mean = mean + (delta/n);
-    m2 += delta * (x - mean);
+    if (Double.isFinite(x)) {
+      // allow only finite values, otherwise a single bad input can destroy what we have (e.g. make everything NaN)
+      n++;
+      double delta = x - mean;
+      mean = mean + (delta/n);
+      m2 += delta * (x - mean);
+    }
+    else {
+      System.err.println("WARNING: " + getClass().getSimpleName() + " ignoring bad input: " + x);
+    }
   }
 
   /**

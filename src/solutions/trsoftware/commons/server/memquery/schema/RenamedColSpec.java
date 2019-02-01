@@ -26,6 +26,7 @@ public class RenamedColSpec<T> extends NameAccessorColSpec<T> {  // TODO: get ri
 
   private final ColSpec<T> delegate;
 
+  @SuppressWarnings("unchecked")
   public RenamedColSpec(String newName, ColSpec delegate) {
     super(newName, delegate.getType());
     this.delegate = delegate;

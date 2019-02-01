@@ -19,6 +19,8 @@ package solutions.trsoftware.commons.shared.util;
 
 import java.util.*;
 
+import static solutions.trsoftware.commons.shared.util.CollectionUtils.addAll;
+
 /**
  * @author Alex, 1/9/14
  */
@@ -54,34 +56,45 @@ public abstract class SetUtils {
     return s1;
   }
 
-  /** Returns a new set initialized from the given collection */
+  /** @return a new set initialized from the given collection */
   public static <T> LinkedHashSet<T> newSet(Collection<T> col) {
-    return new LinkedHashSet<T>(col);
+    return new LinkedHashSet<>(col);
   }
 
-  /** Returns a new set initialized from the given collection */
+  /** @return a new set initialized from the given array */
   @SafeVarargs
   public static <T> LinkedHashSet<T> newSet(T... items) {
-    return CollectionUtils.addAll(new LinkedHashSet<T>(), items);
+    return addAll(new LinkedHashSet<>(), items);
   }
 
-  /** Returns a new set initialized from the given iterator */
+  /** @return a new set initialized from the given iterator */
   public static <T> LinkedHashSet<T> newSet(Iterator<T> it) {
-    LinkedHashSet<T> ret = new LinkedHashSet<T>();
-    while (it.hasNext())
-      ret.add(it.next());
-    return ret;
+    return addAll(new LinkedHashSet<>(), it);
   }
 
-  /** Returns a new set of strings parsed from a comma-separated string. The inverse of {@link #print(Set)} */
+  /** @return a new {@link TreeSet} initialized from the given array */
+  @SafeVarargs
+  public static <T> SortedSet<T> newSortedSet(T... items) {
+    return addAll(new TreeSet<>(), items);
+  }
+
+  /** @return a new {@link TreeSet} initialized from the given iterator */
+  public static <T> SortedSet<T> newSortedSet(Iterator<T> it) {
+    return addAll(new TreeSet<>(), it);
+  }
+
+  /** @return a new set of strings parsed from a comma-separated string. The inverse of {@link #toString(Set)} */
   public static LinkedHashSet<String> parse(String csv) {
     return new LinkedHashSet<String>(StringUtils.splitAndTrim(csv, ","));
   }
 
   /**
-   * Prints the elements of the given set as comma separated strings. The opposite of {@link #parse(String)}.
+   * Prints the elements of the given set as a comma-separated string. The opposite of {@link #parse(String)}.
+   * <p>
+   * Unlike a typical implementation of {@link Set#toString()}, this method doesn't enclose the result
+   * within square brackets ("[]").
    */
-  public static String print(Set set) {
+  public static String toString(Set<?> set) {
     return StringUtils.join(",", set);
   }
 

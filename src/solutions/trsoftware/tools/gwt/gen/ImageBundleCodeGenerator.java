@@ -29,9 +29,9 @@ import java.util.Date;
  * Generates Java source code for a class implementing {@link com.google.gwt.user.client.ui.ImageBundle}
  * with all the image files in a particular directory.
  * 
- * Nov 6, 2009
+ * @author Alex, Nov 6, 2009
  *
- * @author Alex
+ * @deprecated use {@link ClientBundleCodeGenerator} instead
  */
 public class ImageBundleCodeGenerator {
   public static void main(String[] args) {
@@ -96,7 +96,7 @@ public class ImageBundleCodeGenerator {
       String filename = imageFile.getName();
       String filenamePrefix = FileUtils.filenamePrefix(filename);
       filenamePrefixes[i] = filenamePrefix;
-      String validName = ServerStringUtils.toJavaNameIdentifier(filenamePrefix);
+      String validName = ServerStringUtils.toJavaIdentifier(filenamePrefix);
       methodNames[i] = validName;
       // we need a valid method name to generate
       if (!filenamePrefix.equals(validName)) {

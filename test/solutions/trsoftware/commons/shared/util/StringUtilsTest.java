@@ -41,14 +41,24 @@ public class StringUtilsTest extends TestCase {
     assertEquals("foo$xfoo$$bar$", template("foo$x$1$$$2$", "foo", "bar"));
   }
 
-  public void testStripTrailing() throws Exception {
-    assertEquals("foo", stripTrailing("foo,", ","));
-    assertEquals("foo", stripTrailing("foo", ","));
-    assertEquals("foo", stripTrailing("foobar", "bar"));
-    assertEquals("", stripTrailing("foobar", "foobar"));
-    assertEquals("", stripTrailing("", "foobar"));
-    assertEquals("", stripTrailing("", ""));
-    assertEquals("foo", stripTrailing("foo", ""));
+  public void testStripSuffix() throws Exception {
+    assertEquals("foo", stripSuffix("foo,", ","));
+    assertEquals("foo", stripSuffix("foo", ","));
+    assertEquals("foo", stripSuffix("foobar", "bar"));
+    assertEquals("", stripSuffix("foobar", "foobar"));
+    assertEquals("", stripSuffix("", "foobar"));
+    assertEquals("", stripSuffix("", ""));
+    assertEquals("foo", stripSuffix("foo", ""));
+  }
+
+  public void testStripPrefix() throws Exception {
+    assertEquals("foo", stripPrefix(",foo", ","));
+    assertEquals("foo", stripPrefix("foo", ","));
+    assertEquals("bar", stripPrefix("foobar", "foo"));
+    assertEquals("", stripPrefix("foobar", "foobar"));
+    assertEquals("", stripPrefix("", "foobar"));
+    assertEquals("", stripPrefix("", ""));
+    assertEquals("foo", stripPrefix("foo", ""));
   }
 
   public void testRepeat() throws Exception {
@@ -128,6 +138,8 @@ public class StringUtilsTest extends TestCase {
     assertEquals("myStrIng", toCamelCase("my0str1ing", "\\d"));
     assertEquals("myStrIng", toCamelCase("myXstrYing", "X|Y"));
     assertEquals("myStrIng", toCamelCase("myXstrYYYYing", "X+|Y+"));
+    // now try with a space separator
+    assertEquals("greaterThanOrEqualTo", toCamelCase("greater than or equal to", " "));
   }
 
   public void testNotBlank() throws Exception {
@@ -147,6 +159,7 @@ public class StringUtilsTest extends TestCase {
     assertEquals(0, count("", 'a'));
     assertEquals(1, count("a", 'a'));
     assertEquals(5, count("abra cadabra", 'a'));
+    assertEquals(3, count("java.util.function.Function", '.'));
   }
 
   public void testAbbreviate() throws Exception {
@@ -730,6 +743,26 @@ public class StringUtilsTest extends TestCase {
     assertEquals("  foo  ", justifyCenter("foo", 7 ));
   }
 
+  public void testJustifyLeft() throws Exception {
+    for (int i = 0; i <= 3; i++) {
+      assertEquals("foo", justifyLeft("foo", i ));
+    }
+    assertEquals("foo ", justifyLeft("foo", 4 ));
+    assertEquals("foo  ", justifyLeft("foo", 5 ));
+    assertEquals("foo   ", justifyLeft("foo", 6 ));
+    assertEquals("foo    ", justifyLeft("foo", 7 ));
+  }
+
+  public void testJustifyRight() throws Exception {
+    for (int i = 0; i <= 3; i++) {
+      assertEquals("foo", justifyRight("foo", i ));
+    }
+    assertEquals(" foo", justifyRight("foo", 4 ));
+    assertEquals("  foo", justifyRight("foo", 5 ));
+    assertEquals("   foo", justifyRight("foo", 6 ));
+    assertEquals("    foo", justifyRight("foo", 7 ));
+  }
+
   public void testEndsWith() throws Exception {
     assertTrue(endsWith("foo", 3, "foo"));
     assertTrue(endsWith("foo", 3, "oo"));
@@ -747,4 +780,19 @@ public class StringUtilsTest extends TestCase {
       });
     }
   }
+
+  public void testIsEmpty() throws Exception {
+    assertTrue(isEmpty(null));
+    assertTrue(isEmpty(""));
+    assertFalse(isEmpty(" "));
+    assertFalse(isEmpty("x"));
+  }
+
+  public void testNotEmpty() throws Exception {
+    assertFalse(notEmpty(null));
+    assertFalse(notEmpty(""));
+    assertTrue(notEmpty(" "));
+    assertTrue(notEmpty("x"));
+  }
+
 }

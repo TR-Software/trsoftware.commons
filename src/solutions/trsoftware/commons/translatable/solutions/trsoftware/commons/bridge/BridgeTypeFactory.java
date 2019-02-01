@@ -4,9 +4,9 @@ import solutions.trsoftware.commons.client.bridge.json.JSONParser;
 import solutions.trsoftware.commons.client.bridge.json.impl.GwtJSONParser;
 import solutions.trsoftware.commons.client.bridge.text.NumberFormatter;
 import solutions.trsoftware.commons.client.bridge.text.impl.NumberFormatterGwtImpl;
-import solutions.trsoftware.commons.client.bridge.util.Duration;
 import solutions.trsoftware.commons.client.bridge.util.URIComponentEncoder;
 import solutions.trsoftware.commons.client.bridge.util.URIComponentEncoderGwtImpl;
+import solutions.trsoftware.commons.shared.util.Duration;
 import solutions.trsoftware.commons.shared.util.text.SharedNumberFormat;
 
 import java.util.Random;

@@ -17,6 +17,7 @@
 
 package solutions.trsoftware.commons.server.memquery.schema;
 
+import solutions.trsoftware.commons.server.memquery.ObjectRow;
 import solutions.trsoftware.commons.server.memquery.Row;
 
 import java.lang.reflect.InvocationTargetException;
@@ -32,7 +33,8 @@ public abstract class ReflectionAccessorColSpec<T> extends NamedTypedColSpec<T> 
 
   @Override
   public T getValue(Row row) {
-    Object rawData = row.getRawData();
+    ObjectRow objectRow = (ObjectRow)row;
+    Object rawData = objectRow.getObject();
     try {
       return getValueByReflection(rawData);
     }

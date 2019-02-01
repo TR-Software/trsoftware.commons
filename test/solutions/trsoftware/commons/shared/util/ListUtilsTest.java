@@ -93,7 +93,7 @@ public class ListUtilsTest extends TestCase {
   }
 
   public void testIsSorted() throws Exception {
-    assertTrue(isSorted(arrayList()));
+    assertTrue(isSorted(new ArrayList<Integer>()));
     assertTrue(isSorted(arrayList(5)));
     assertTrue(isSorted(arrayList(5, 15)));
     assertTrue(isSorted(arrayList(0, 1, 2, 3, 4)));

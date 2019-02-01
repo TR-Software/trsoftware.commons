@@ -113,6 +113,7 @@ public class CollectionUtils {
     return addAll(target, it.iterator());
   }
 
+  @SafeVarargs
   public static <T, C extends Collection<T>> C addAll(C target, T... items) {
     Collections.addAll(target, items);
     return target;
@@ -201,16 +202,6 @@ public class CollectionUtils {
   public static <T> List<T> concat(final Iterable<T>... iterables) {
     return asList(concatIter(iterables));
    }
-
-  /** Creates an immutable list from any given collection */
-  public static <T> List<T> immutableList(Collection<T> src) {
-    List<T> srcList;
-    if (src instanceof List)
-      srcList = (List<T>)src;
-    else
-      srcList = new ArrayList<T>(src);
-    return Collections.unmodifiableList(srcList);
-  }
 
   /**
    * @return the first element returned by the given collection's iterator

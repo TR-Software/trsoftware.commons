@@ -319,6 +319,19 @@ public class NumberRangeJavaTest extends TestCase {
     assertEquals(4, new NumberRange<Double>(.5, 4.9).size());
     assertEquals(4, new NumberRange<Double>(.5, 4.9).size());
     assertEquals(6, new NumberRange<Double>(.5, 6.0).size());
+  }
 
+  public void testInRange() throws Exception {
+    // test some Comparable objects (strings)
+    assertTrue(inRange("a", "b", "a"));
+    assertTrue(inRange("a", "b", "aa"));
+    assertTrue(inRange("a", "b", "b"));
+    assertFalse(inRange("a", "b", "bb"));
+    // test some ints
+    assertTrue(inRange(1, 3, 1));
+    assertTrue(inRange(1, 3, 2));
+    assertTrue(inRange(1, 3, 3));
+    assertFalse(inRange(1, 3, 0));
+    assertFalse(inRange(1, 3, 4));
   }
 }

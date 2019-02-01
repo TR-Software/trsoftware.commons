@@ -17,9 +17,10 @@
 
 package solutions.trsoftware.commons.server.memquery.algebra;
 
+import solutions.trsoftware.commons.server.memquery.MutableRow;
 import solutions.trsoftware.commons.server.memquery.RelationSchema;
 import solutions.trsoftware.commons.server.memquery.Row;
-import solutions.trsoftware.commons.server.memquery.RowImpl;
+import solutions.trsoftware.commons.server.memquery.RowFactory;
 import solutions.trsoftware.commons.server.memquery.schema.ColSpec;
 import solutions.trsoftware.commons.server.memquery.schema.NameAccessorColSpec;
 import solutions.trsoftware.commons.shared.util.SetUtils;
@@ -28,6 +29,40 @@ import solutions.trsoftware.commons.shared.util.callables.Function2;
 import static solutions.trsoftware.commons.server.memquery.util.NameUtils.getUniqueNames;
 
 /**
+ * A <em>join</em> is a subset of the <em>Cartesian product</em> of 2 input relations
+ * (<a href="https://en.wikipedia.org/wiki/Relational_algebra">relational algebra</a>).
+ * <p>
+ * Database Systems Concepts Chapter 4.10.2 lists SQL joins types as:
+ * <ul>
+ *   <li>inner join</li>
+ *   <li>left outer join</li>
+ *   <li>right outer join</li>
+ *   <li>full outer join</li>
+ * </ul>
+ * where each join type can have one of the following conditions:
+ * <ul>
+ *   <li>
+ *     <b>natural</b>: special case of <em>equi-join</em>:
+ *     the set of all combinations of tuples in R and S that are equal on their common attribute names.
+ *   </li>
+ *   <li>
+ *     <b>on</b> <i>{@code <predicate>}</i>: general form of &theta;-join (relational algebra), which uses any kind of
+ *     predicate on the tuples in R and S.
+ *   </li>
+ *   <li>
+ *     <b>using</b> <i>(A1, A2, ... An)</i>: similar to <i>natural join</i>, except that the join attributes
+ *     are the attributes <i>A1, A2, ... An</i> rather than <em>all</em> attributes that are common to both relations
+ *     (i.e. this is like a natural join, but uses only a subset of the shared attributes)
+ *   </li>
+ * </ul>
+ * <p>
+ * <em>NOTE</em>: the Wikipedia article on <a href="https://en.wikipedia.org/wiki/Join_(SQL)#Natural_join">Join (SQL)</a>
+ * makes it seem like <i>natural</i> applies only to <i>inner</i> joins, but in reality, any type of <i>outer</i> join
+ * can also be <i>natural</i>.
+ *
+ * @see Join.Type
+ * @see <a href="https://www.amazon.com/Database-Systems-Concepts-Henry-Korth/dp/0072283637/">
+ *     Database Systems Concepts ("DSC"), 4th Edition Edition, by Silberschatz, et. al. (ISBN 0072283637)</a>
  * @author Alex, 1/10/14
  */
 public abstract class Join<P extends Join.Params> extends BinaryOperation<P> implements Function2<Row, Row, Row> {
@@ -73,13 +108,16 @@ public abstract class Join<P extends Join.Params> extends BinaryOperation<P> imp
   }
 
   /**
-   * @return A row of the output created by joining the given input rows, or null if the given inputs don't satisfy
-   * the join predicate.
+   * Constructs a new output row (i.e. a row in the JOIN result) from joining the given input rows.
+   * <strong>IMPORTANT</strong>: <em>this method should only be called for rows that satisfy the JOIN predicate.</em>
+   *
+   * @return A row of the output created by joining the given input rows
+   * (<em>which are assumed to satisfy the JOIN predicate</em>)
    */
   @Override
   public Row call(Row leftRow, Row rightRow) {
     RelationSchema outputSchema = getOutputSchema();
-    RowImpl outputRow = new RowImpl(outputSchema);
+    MutableRow outputRow = RowFactory.getInstance().newRow(outputSchema);
     for (ColSpec outputCol : outputSchema) {
       String name = outputCol.getName();
       outputRow.setValue(name, outputCol.getValue(chooseInputRow(name, leftRow, rightRow)));
@@ -94,6 +132,16 @@ public abstract class Join<P extends Join.Params> extends BinaryOperation<P> imp
    */
   public abstract boolean match(Row leftRow, Row rightRow);
 
+  /**
+   * The types of joins supported by SQL.
+   * <p>
+   * NOTE: any of these types can be a <i>natural join</i> / <i>equi-join</i>, or, more generally, a join <b>on</b>
+   * any predicate (<i>&theta;-join</i> / the general case, using (using any predicate).
+   *
+   * @see Join
+   * @see EquiJoin
+   * @see NaturalJoin
+   */
   public enum Type {
     INNER, LEFT_OUTER, RIGHT_OUTER, FULL_OUTER
   }

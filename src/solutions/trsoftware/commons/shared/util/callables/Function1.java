@@ -21,6 +21,7 @@ package solutions.trsoftware.commons.shared.util.callables;
  * A function {@link A} &rarr; {@link R}.
  *
  * @author Alex
+ * @deprecated made obsolete by {@link java.util.function.Function}
  */
 public interface Function1<A, R> {
   R call(A arg);

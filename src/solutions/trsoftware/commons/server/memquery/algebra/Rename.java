@@ -19,6 +19,7 @@ package solutions.trsoftware.commons.server.memquery.algebra;
 
 import com.google.common.collect.BiMap;
 import com.google.common.collect.ImmutableBiMap;
+import solutions.trsoftware.commons.server.memquery.Row;
 import solutions.trsoftware.commons.server.memquery.schema.ColSpec;
 import solutions.trsoftware.commons.server.memquery.schema.NameAccessorColSpec;
 import solutions.trsoftware.commons.server.memquery.schema.RenamedColSpec;
@@ -37,6 +38,7 @@ public class Rename extends StreamableUnaryOperation<Rename.Params> {
 
   public Rename(RelationalExpression input, String newRelationName, Map<String, String> newAttributeNames) {
     super(input, new Params(newRelationName, newAttributeNames));
+    getOutputSchema(); // fail early if the output schema can't be generated (the renaming params cause a conflict)
   }
 
   @Override
@@ -63,8 +65,13 @@ public class Rename extends StreamableUnaryOperation<Rename.Params> {
     if (name.equals(oldName))
       return new NameAccessorColSpec(oldCol); // this col is not being renamed
     else
-      return new RenamedColSpec(name, oldCol);  // TODO: testing - hello2
-//    return new NameAccessorColSpec(name, oldCol.getType()); // this col is not being renamed
+      return new RenamedColSpec(name, oldCol);
+  }
+
+  @Override
+  public Row call(Row inputRow) {
+    // TODO: rather than create a new row, this operation should just modify the schema (otherwise too slow)
+    return super.call(inputRow);
   }
 
   /**

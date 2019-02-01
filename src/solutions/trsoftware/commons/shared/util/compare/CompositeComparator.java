@@ -15,23 +15,26 @@
  *
  */
 
-package solutions.trsoftware.commons.server.memquery.util;
+package solutions.trsoftware.commons.shared.util.compare;
+
+import com.google.common.collect.ImmutableList;
 
 import java.util.Comparator;
 import java.util.List;
 
 /**
- * Encapsulates a list of internal Comparators to which it delegates, using each subsequent Comparator to as a tie-breaker
- * for its predecessors.
+ * Encapsulates a list of internal {@link Comparator}s to which it delegates,
+ * using each subsequent {@link Comparator} as a tie-breaker for its predecessors.
  *
+ * @see HierarchicalComparator
  * @author Alex, 1/9/14
  */
 public class CompositeComparator<T> implements Comparator<T> {
 
   private final List<Comparator<T>> comparators;
 
-  public CompositeComparator(List<Comparator<T>> delegates) {
-    this.comparators = delegates;
+  public CompositeComparator(Iterable<Comparator<T>> delegates) {
+    this.comparators = ImmutableList.copyOf(delegates);
   }
 
   @Override

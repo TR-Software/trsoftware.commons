@@ -31,6 +31,7 @@ public class AggregatedColSpec extends NameAccessorColSpec<Aggregation> {
 
   private final AggregationSpec aggregationSpec;
 
+  @SuppressWarnings("unchecked")
   public AggregatedColSpec(AggregationSpec aggregationSpec) {
     super(aggregationSpec.getName(), AggregationUtils.getAggregationValueType(aggregationSpec.getType()));
     this.aggregationSpec = aggregationSpec;

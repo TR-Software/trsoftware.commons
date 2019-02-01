@@ -40,6 +40,6 @@ public class ExpressionAccessorColSpec<T> extends NamedTypedColSpec<T> {
 
   @Override
   public T getValue(Row row) {
-    return expression.call(row);
+    return expression.apply(row);
   }
 }

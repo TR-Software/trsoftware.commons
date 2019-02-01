@@ -73,6 +73,8 @@ public class JsDateTest extends CommonsGwtTestCase {
         "2018-07-18T02:47:13.842Z");
     checkAddResult(TimeUnit.DAYS, 6,  // 6d
         "2018-07-22T01:47:13.842Z");
+    checkAddResult(TimeUnit.WEEKS, 1,  // 1 week (same as 7d)
+        "2018-07-23T01:47:13.842Z");
     checkAddResult(TimeUnit.DAYS, 365,  // 1y
         "2019-07-16T01:47:13.842Z");
     checkAddResult(TimeUnit.MONTHS, 25,  // 2y, 1M

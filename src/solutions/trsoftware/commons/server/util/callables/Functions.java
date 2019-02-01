@@ -28,6 +28,10 @@ import java.lang.reflect.InvocationTargetException;
  */
 public class Functions {
 
+  /**
+   * Creates a function that calls the given method on the given instance.
+   * @deprecated use a method reference (lambda) instead (if using Java 1.8+)
+   */
   public static <V,A> Function1<A, V> fromMethod1Arg(final Object instance, final String methodName, final Class<A> argType) {
     return arg -> {
       try {

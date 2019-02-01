@@ -51,9 +51,15 @@ public class NumberSampleOnlineDouble implements Serializable, SampleStatisticsD
   }
 
   public void update(double x) {
-    mv.update(x);
-    min.update(x);
-    max.update(x);
+    if (Double.isFinite(x)) {
+      // allow only finite values, otherwise a single bad input can destroy what we have (e.g. make everything NaN)
+      mv.update(x);
+      min.update(x);
+      max.update(x);
+    }
+    else {
+      System.err.println("WARNING: " + getClass().getSimpleName() + " ignoring bad input: " + x);
+    }
   }
 
   @Override

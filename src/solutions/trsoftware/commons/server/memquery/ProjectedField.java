@@ -17,6 +17,8 @@
 
 package solutions.trsoftware.commons.server.memquery;
 
+import solutions.trsoftware.commons.server.memquery.schema.ColSpec;
+
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -25,8 +27,8 @@ import java.lang.annotation.Target;
 
 /**
  * Methods marked with this annotation will be treated as projected fields with the specified name, and their
- * names can be passed to {@link MemQuery#createFor} and {@link MemQuery#addColumn} in order to
- * add automatically-generated ColSpecs to the query.
+ * names can be passed to {@link QueryBuilder#createORMSchema} or {@link QueryBuilder#createORM} in order to
+ * add automatically-generated {@link ColSpec}s to the query.
  *
  * @author Alex, 1/6/14
  */

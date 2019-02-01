@@ -35,8 +35,8 @@ public class CompoundRowPredicate extends RowPredicate {
   }
 
   @Override
-  public Boolean call(Row arg) {
-    return op.apply(lhs.call(arg), rhs.call(arg));
+  public Boolean apply(Row arg) {
+    return op.apply(lhs.apply(arg), rhs.apply(arg));
   }
 
   @Override

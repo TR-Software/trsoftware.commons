@@ -23,30 +23,31 @@ import java.util.NoSuchElementException;
 
 /**
  * An iterator that contains exactly one element.
+ * <p>
+ * Same implementation as {@link java.util.Collections#singletonIterator(Object)}
  *
  * @author Alex, 4/17/2015
  */
 public class SingletonIterator<T> extends UnmodifiableIterator<T> {
 
-  private T next;
+  private T elt;
+  private boolean hasNext = true;
 
   public SingletonIterator(T elt) {
-    next = elt;
+    this.elt = elt;
   }
-
-  // TODO: the current implementation doesn't support null values; should we support them?
 
   @Override
   public boolean hasNext() {
-    return next != null;
+    return hasNext;
   }
 
   @Override
   public T next() {
-    if (next == null)
-      throw new NoSuchElementException();
-    T ret = next;
-    next = null;
-    return ret;
+    if (hasNext) {
+      hasNext = false;
+      return elt;
+    }
+    throw new NoSuchElementException();
   }
 }

@@ -36,6 +36,11 @@ import java.util.regex.Pattern;
  * @author Alex
  */
 public class FakeMailServer extends Assert {
+  /*
+  TODO(1/31/2019): replace Dumbster (com.dumbster.smtp.SimpleSmtpServer) with Wiser
+  (see https://github.com/voodoodyne/subethasmtp)
+   */
+
   private SimpleSmtpServer mailServer;
 
   /**

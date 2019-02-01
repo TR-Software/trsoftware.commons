@@ -174,7 +174,7 @@ public class CalDate {
    * <br/>
    * <strong>Example:</strong>
    * <pre>
-   * {@link #unpack(int)}(201612) &rarr; new {@link CalDate}(2016, 12, 1)
+   * {@link #unpack}(201612) &rarr; new {@link CalDate}(2016, 12, 1)
    * </pre>
    */
   public static CalDate unpack(int packed) {

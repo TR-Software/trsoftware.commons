@@ -23,14 +23,20 @@ import solutions.trsoftware.commons.server.io.StringPrintStream;
 import solutions.trsoftware.commons.server.io.file.FileSet;
 import solutions.trsoftware.commons.shared.util.SetUtils;
 import solutions.trsoftware.commons.shared.util.StringUtils;
+import solutions.trsoftware.commons.shared.util.VersionNumber;
 import solutions.trsoftware.commons.shared.util.reflect.ClassNameParser;
 
 import java.io.File;
 import java.io.Serializable;
 import java.lang.reflect.Method;
 import java.lang.reflect.Type;
+import java.nio.file.FileSystemNotFoundException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.*;
 
+import static javax.lang.model.element.Modifier.*;
 import static solutions.trsoftware.commons.server.util.reflect.ReflectionUtils.*;
 
 /**
@@ -40,16 +46,42 @@ public class ReflectionUtilsTest extends TestCase {
 
   public interface IFoo<A,B> {}
   public interface IBar {}
+
   public static class Foo implements IFoo {}
   public static class FooIntString implements IFoo<Integer, String> {}
 
   public interface IFooSubA extends IFoo {}
   public interface IFooSubB extends IFoo {}
+
   public static class FooSubA implements IFooSubA {}
   public static class FooSubB implements IFooSubB {}
   public static class FooSubAB implements IFooSubA, IFooSubB {}
   public static class FooSubABSub extends FooSubAB implements IBar {}
 
+
+  public void testIsPrimitiveWrapper() throws Exception {
+    assertTrue(isPrimitiveWrapper(Boolean.class));
+    assertTrue(isPrimitiveWrapper(Integer.class));
+    assertTrue(isPrimitiveWrapper(Double.class));
+    assertFalse(isPrimitiveWrapper(getClass()));
+    assertFalse(isPrimitiveWrapper(null));
+  }
+
+  public void testPrimitiveTypeFor() throws Exception {
+    assertEquals(char.class, primitiveTypeFor(Character.class));
+    assertEquals(short.class, primitiveTypeFor(Short.class));
+    assertEquals(float.class, primitiveTypeFor(Float.class));
+    assertNull(primitiveTypeFor(getClass()));
+    assertNull(primitiveTypeFor(null));
+  }
+
+  public void testWrapperTypeFor() throws Exception {
+    assertEquals(Byte.class, wrapperTypeFor(byte.class));
+    assertEquals(Long.class, wrapperTypeFor(long.class));
+    assertEquals(Void.class, wrapperTypeFor(void.class));
+    assertNull(wrapperTypeFor(getClass()));
+    assertNull(wrapperTypeFor(null));
+  }
 
   public void testGetActualTypeArguments() throws Exception {
     assertEquals(Arrays.<Type>asList(Integer.class, String.class),
@@ -122,6 +154,12 @@ public class ReflectionUtilsTest extends TestCase {
         expectedSet());  // no classes have anything in common with a null arg
   }
 
+  public void testParseModifiers() throws Exception {
+    assertEquals(Arrays.asList(PUBLIC), parseModifiers("public"));
+    assertEquals(Arrays.asList(PUBLIC, STATIC), parseModifiers("  public\n static\n"));
+    assertEquals(Arrays.asList(DEFAULT, STRICTFP), parseModifiers("default strictfp void"));  // void is not a modifier
+  }
+
   public void testGetCompilerOutputDir() throws Exception {
     Class<? extends ReflectionUtilsTest> thisClass = getClass();
     File result = getCompilerOutputDir(thisClass);
@@ -158,9 +196,15 @@ public class ReflectionUtilsTest extends TestCase {
   }
 
   public void testIsJavaKeyword() throws Exception {
-    // list obtained from https://docs.oracle.com/javase/specs/jls/se9/html/jls-3.html#jls-3.9
-    String[] keywordsFromJLS = {"abstract", "continue", "for", "new", "switch", "assert", "default", "if", "package", "synchronized", "boolean", "do", "goto", "private", "this", "break", "double", "implements", "protected", "throw", "byte", "else", "import", "public", "throws", "case", "enum", "instanceof", "return", "transient", "catch", "extends", "int", "short", "try", "char", "final", "interface", "static", "void", "class", "finally", "long", "strictfp", "volatile", "const", "float", "native", "super", "while", "_"};
+    /*
+      This list of keywords obtained from https://docs.oracle.com/javase/specs/jls/se8/html/jls-3.html#jls-3.9
+      NOTE: it applies only to Java 1.8, and may not work for other Java versions
+        (for example Java 9 also reserves "_" as a keyword)
+    */
+    String[] keywordsFromJLS = {"abstract", "assert", "boolean", "break", "byte", "case", "catch", "char", "class", "const", "continue", "default", "do", "double", "else", "enum", "extends", "final", "finally", "float", "for", "goto", "if", "implements", "import", "instanceof", "int", "interface", "long", "native", "new", "package", "private", "protected", "public", "return", "short", "static", "strictfp", "super", "switch", "synchronized", "this", "throw", "throws", "transient", "try", "void", "volatile", "while"};
+
     for (String k : keywordsFromJLS) {
+      // NOTE: this test could fail if running on a JRE older than 1.8
       assertTrue(k, isJavaKeyword(k));
       assertFalse(k, isJavaKeyword(k + "_"));
     }
@@ -213,6 +257,84 @@ public class ReflectionUtilsTest extends TestCase {
     return file;
   }
 
+  public void testGetSourceDir() throws Exception {
+    // should work for this test class
+    Path srcPath = getSrcPath(getClass());
+    assertTrue(Files.exists(srcPath));
+    String srcFileName = getClass().getSimpleName() + ".java";
+    assertTrue(Files.exists(srcPath.resolve(srcFileName)));
+
+    // now try some classes for which it might not work
+    class LocalClass {}
+    // should work for a local class
+    assertEquals(srcPath, getSrcPath(LocalClass.class));
+    // but shouldn't work for system classes or classes that come from a JAR
+    // (we won't even bother checking any assertions for these, because the results are hard to predict)
+    getSrcPath(String.class);
+    getSrcPath(int.class);
+  }
+
+  private Path getSrcPath(Class cls) {
+    System.out.printf("getSourceDir(%s)", cls);
+    ResourceLocator resourceLocator = ReflectionUtils.getSourceDir(cls);
+    System.out.printf("%n -> (resource) %s", resourceLocator);
+    System.out.printf("%n -> (resource URL) %s%n", resourceLocator.getURL());
+    try {
+      Path path = resourceLocator.toPath();
+      System.out.printf(" -> (path) %s%n", path);
+      return path;
+    }
+    catch (FileSystemNotFoundException e) {
+      return null;
+    }
+  }
+
+  public void testGetSourceRoot() throws Exception {
+    Class<? extends ReflectionUtilsTest> thisClass = getClass();
+    Path sourceRoot = getSourceRoot(thisClass);
+    System.out.println("sourceRoot = " + sourceRoot);
+    Path thisFile = sourceRoot.resolve(
+        thisClass.getName().replace('.', File.separatorChar) + ".java");
+    System.out.println("thisFile = " + thisFile);
+    assertTrue(Files.exists(thisFile));
+  }
+
+  public void testGetSourceFile() throws Exception {
+    Class<? extends ReflectionUtilsTest> thisClass = getClass();
+    Path sourceRoot = getSourceRoot(thisClass);
+    System.out.println("sourceRoot = " + sourceRoot);
+    Path expected = Paths.get(sourceRoot.toString()
+        + File.separator
+        + thisClass.getName().replace('.', '/')
+        + ".java");
+    Path actual = getSourceFile(thisClass);
+    System.out.println("result = " + actual);
+    assertEquals(expected, actual);
+    assertTrue(Files.exists(actual));
+  }
+
+  public void testGetJavaSpecVersion() throws Exception {
+    // print out all system properties (just to see which ones might contain the Java version
+    SortedMap<String, String> sysProps = new TreeMap<>();
+    for (Map.Entry<Object, Object> entry : System.getProperties().entrySet()) {
+      Object key = entry.getKey();
+      Object value = entry.getValue();
+      if (key instanceof String && (value instanceof String || value == null)) {
+        sysProps.put((String)key, (String)value);
+      }
+    }
+    for (Map.Entry<String, String> entry : sysProps.entrySet()) {
+      if (!entry.getKey().equals("line.separator")) {  // printing the line separator is pointless (it will just be an empty line)
+        System.out.println(entry);
+      }
+    }
+
+    VersionNumber javaSpecVersion = getJavaSpecVersion();
+    assertNotNull(javaSpecVersion);
+    System.out.println("\nparsed javaSpecVersion = " + javaSpecVersion);
+    assertEquals(VersionNumber.parse(System.getProperty("java.specification.version")), javaSpecVersion);
+  }
+
   private static class NestedClass {}
   private class InnerClass {}
 
@@ -235,8 +357,8 @@ public class ReflectionUtilsTest extends TestCase {
     assertEquals(new HashSet<>(expected), new HashSet<>(listPublicGetters(cls)));
   }
 
-
   private static class SimpleBean {
+
     private int x, y;
     private String name;
     private boolean foo;

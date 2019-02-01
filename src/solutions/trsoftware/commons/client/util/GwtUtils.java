@@ -49,6 +49,12 @@ public class GwtUtils {
 
   /**
    * Imitates the functionality of {@link Class#isAssignableFrom(Class)}, which isn't emulated by GWT.
+   * <p style="color: #6495ed; font-weight: bold;">
+   *   TODO: this implementation probably doesn't produce the same results as {@link Class#isAssignableFrom(Class)}
+   *   because it's able to use only {@link Class#getSuperclass()} ({@link Class#getInterfaces()} isn't emulated by GWT).
+   *   Therefore, should probably rename this method to "isSubclass", and replace all usages that need true
+   *   "isAssignableFrom" functionality with a try/catch block for ClassCastException.
+   * </p>
    * @return true if an instance of c2 can be cast to c1
    */
   public static boolean isAssignableFrom(Class c1, Class c2) {
@@ -77,6 +83,8 @@ public class GwtUtils {
    * </ul>
    * @see Class#getSimpleName()
    * @see ClassNameParser
+   *
+   * @deprecated GWT now supports {@link Class#getSimpleName()} natively (via JRE emulation)
    */
   public static String getSimpleName(Class c) {
     ClassNameParser parser = new ClassNameParser(c);

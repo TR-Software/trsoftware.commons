@@ -26,6 +26,11 @@ import java.util.zip.GZIPOutputStream;
 /**
  * A container for storing a string as a gzipped byte array, and uncompressing
  * it on demand, in the toString method.
+ *
+ * <p style="color: #6495ed; font-weight: bold;">
+ *   TODO: For better compression use {@link java.util.zip.DeflaterOutputStream} instead of {@link GZIPOutputStream},
+ *   because the latter writes an additional 10-byte header (see {@link ServerStringUtils#deflateString(String)}
+ * </p>
  * 
  * @author Alex Epshteyn
  */

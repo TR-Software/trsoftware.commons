@@ -68,9 +68,9 @@ public class ServerStringUtils {
       return new String(Base64.encodeBase64(hashBytes));
     }
     catch (NoSuchAlgorithmException e) {
-        e.printStackTrace();
-        throw new RuntimeException(e);
-      }
+      e.printStackTrace();
+      throw new RuntimeException(e);
+    }
   }
 
   /**
@@ -95,7 +95,6 @@ public class ServerStringUtils {
    * @param str the string whose bytes you want
    * @param charsetName the desired {@linkplain java.nio.charset.Charset charset} for encoding the bytes
    * @return the resultant byte array
-   *
    * @see <a href="https://docs.oracle.com/javase/8/docs/technotes/guides/intl/encoding.doc.html">Supported Encodings</a>
    */
   public static byte[] stringToBytes(String str, String charsetName) {
@@ -167,6 +166,7 @@ public class ServerStringUtils {
    * <p>
    * <strong>Warning:</strong> Don't use this method for encoding cookie values that might be read client-side with
    * {@link com.google.gwt.user.client.Cookies} -- use {@link URIComponentEncoder#encode(String)} instead.
+   *
    * @see URIComponentEncoder#encode(String)
    */
   public static String urlEncode(String str) {
@@ -225,8 +225,8 @@ public class ServerStringUtils {
   /**
    * Similar to the Javascript regex match method. This is useful when using a
    * debugger's expression evaluator.
-   * @return an array of all the capturing groups if the given regex matches
-   * the string, otherwise null.
+   *
+   * @return an array of all the capturing groups if the given regex matches the string, otherwise null.
    */
   public static String[] match(String str, String regex) {
     return match(str, Pattern.compile(regex));
@@ -235,14 +235,14 @@ public class ServerStringUtils {
   /**
    * Similar to the Javascript regex match method. This is useful when using a
    * debugger's expression evaluator.
-   * @return an array of all the capturing groups if the given regex matches
-   * the string, otherwise null.
+   *
+   * @return an array of all the capturing groups if the given regex matches the string, otherwise null.
    */
   public static String[] match(String str, Pattern regex) {
     Matcher matcher = regex.matcher(str);
     if (!matcher.matches())
       return null;
-    String[] groups = new String[matcher.groupCount()+1];
+    String[] groups = new String[matcher.groupCount() + 1];
     for (int i = 0; i < groups.length; i++) {
       groups[i] = matcher.group(i);
     }
@@ -276,7 +276,7 @@ public class ServerStringUtils {
     }
   }
 
-  /** Reverses the action of deflateString */
+  /** Reverses the action of {@link #deflateString(String)} */
   public static String inflateString(byte[] gzippedBytes) {
     try {
       return ServerIOUtils.readCharactersIntoString(new InputStreamReader(
@@ -312,9 +312,9 @@ public class ServerStringUtils {
   /**
    * Quotes string as Java Language string literal. Returns string
    * <code>"null"</code> if <code>s</code> is <code>null</code>.
-   *
-   * This code is borrowed from freemarker.template.utility.StringUtil (see
-   * http://freemarker.org)
+   * <p>
+   * This code is borrowed from {@code freemarker.template.utility.StringUtil}
+   * (see http://freemarker.org)
    */
   public static String jQuote(String s) {
     if (s == null) {
@@ -367,13 +367,13 @@ public class ServerStringUtils {
    * Escapes the <code>String</code> with the escaping rules of Java
    * language string literals, so it is safe to insert the value into a
    * string literal. The resulting string will not be quoted.
-   *
-   * <p>In additional, all characters under UCS code point 0x20, that has no
-   * dedicated escape sequence in Java language, will be replaced with
+   * <p>
+   * In addition, all characters under UCS code point 0x20, that have no
+   * dedicated escape sequence in the Java language, will be replaced with
    * UNICODE escape (<tt>\<!-- -->u<i>XXXX</i></tt>).
-   *
-   * This code is borrowed from freemarker.template.utility.StringUtil (see
-   * http://freemarker.org)
+   * <p>
+   * This code is borrowed from {@code freemarker.template.utility.StringUtil}
+   * (see http://freemarker.org)
    *
    * @see #jQuote(String)
    */
@@ -434,15 +434,15 @@ public class ServerStringUtils {
   /**
    * Escapes a <code>String</code> according the JavaScript string literal
    * escaping rules. The resulting string will not be quoted.
-   *
-   * <p>It escapes both <tt>'</tt> and <tt>"</tt>. In additional it escapes
+   * <p>
+   * It escapes both <tt>'</tt> and <tt>"</tt>. In additional it escapes
    * <tt>></tt> as <tt>\></tt> (to avoid <tt>&lt;/script></tt>).
    * Furthermore, all characters under UCS code point 0x20, that has no
    * dedicated escape sequence in JavaScript language, will be replaced with
    * hexadecimal escape (<tt>\x<i>XX</i></tt>).
-   *
-   * This code is borrowed from freemarker.template.utility.StringUtil (see
-   * http://freemarker.org)
+   * <p>
+   * This code is borrowed from {@code freemarker.template.utility.StringUtil}
+   * (see http://freemarker.org)
    */
   public static String javaScriptStringEnc(String s) {
     int ln = s.length();
@@ -532,19 +532,44 @@ public class ServerStringUtils {
   }
 
   /**
-   * @return the closest string resembling str that can be used as a valid
-   * Java variable, method, etc. name in source code.
+   * Transforms the given input string to satisfy the JLS definition of an <em>identifier</em> (as defined in
+   * <a href="https://docs.oracle.com/javase/specs/jls/se8/html/jls-3.html#jls-3.8">JLS §3.8</a>), such that
+   * the resulting string can be used as a method name, variable name, or (simple) class name.
+   * <p>
+   * <em>Implementation Note</em>: we're using the predicates {@link Character#isJavaIdentifierStart}
+   * and {@link Character#isJavaIdentifierPart} to escape invalid chars, and {@link SourceVersion#isName}
+   * to exclude reserved keywords).
+   * <p>
+   * NOTE: Despite the fact that JLS §3.8 says "<i>An identifier cannot have the same spelling as a keyword</i>",
+   * {@link SourceVersion#isIdentifier} does allow reserved keywords (because it uses only the methods
+   * methods {@link Character#isJavaIdentifierStart} and {@link Character#isJavaIdentifierPart}, which examine only
+   * one char at a time).
+   * <p>
+   * The result of this method should satisfy <em>both</em> {@link SourceVersion#isIdentifier}, which allows keywords
+   * but doesn't allow chars like dots, and {@link SourceVersion#isName}, which allows dots (they're valid in class
+   * FQNs,
+   * e.g. {@code "java.util.Map"}) but doesn't allow keywords.  The intersection of those 2 predicates is the sweet
+   * spot we're aiming for here.
+   *
+   * @return the closest string resembling the input that can be used as a valid method name, variable name,
+   * or (simple) class name in the latest Java language version supported by the current runtime
+   * (i.e. satisfies both {@link SourceVersion#isName} and {@link SourceVersion#isIdentifier})
+   *
+   * @see SourceVersion#isName(CharSequence)
+   * @see SourceVersion#isKeyword(CharSequence)
+   * @see <a href="https://docs.oracle.com/javase/specs/jls/se8/html/jls-3.html">JLS Chapter 3 (Lexical Structure)</a>
    */
-  public static String toJavaNameIdentifier(String str) {
+  public static String toJavaIdentifier(String str) {
     if (isBlank(str))
-      return "_";
-    if (SourceVersion.isName(str))
-      return str;  // already valid
-
+      return "__";  // NOTE: we were previously returning just "_" here, but single underscores not allowed starting Java 9
+    /*
+      TODO: update this code to use String.codePointAt() rather than String.charAt(), to support Unicode
+      (see javax.lang.model.SourceVersion.isIdentifier)
+    */
     StringBuilder builder = new StringBuilder(str);
     // we prepend a valid starting char "_" if the first char isn't valid
     if (!Character.isJavaIdentifierStart(builder.charAt(0)))
-        builder.setCharAt(0, '_');
+      builder.setCharAt(0, '_');
     // and replace all the invalid chars in the name
     for (int i = 1; i < builder.length(); i++) {
       char c = builder.charAt(i);
@@ -553,10 +578,25 @@ public class ServerStringUtils {
     }
 
     // now, if we still don't have a valid name, we probably have a reserved
-    // keyword or something, so we just prepend it with a '_'
+    // keyword or something, so we just append a '_'
     String result = builder.toString();
-    if (SourceVersion.isName(result))
-      return result;
-    return "_" + result;
+    if (!isName(result)) {
+      if (result.length() <= 1)
+        result = "$";
+      else
+        result += "_";
+    }
+
+    assert isName(result) && SourceVersion.isIdentifier(result);
+    return result;
   }
+
+  /**
+   * Future-proofs the result of {@link SourceVersion#isName(CharSequence)} for Java 9, which doesn't allow a single
+   * underscore ({@code "_"}) as an identifier.
+   */
+  private static boolean isName(String str) {
+    return str != null && !str.equals("_") && SourceVersion.isName(str);
+  }
+
 }

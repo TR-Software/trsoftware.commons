@@ -61,6 +61,7 @@ public class URIComponentEncoderJavaImplTest extends TestCase {
   /**
    * Tests that {@link URIComponentEncoderJavaImpl#encode(String)} is compatible with the JS {@code decodeURIComponent} function.
    */
+  @Slow
   public void testEncode() throws Exception {
     // 1) make sure it produces the same output as JavaScript encodeURIComponent
     assertEncodersEqual(
@@ -124,6 +125,7 @@ public class URIComponentEncoderJavaImplTest extends TestCase {
     assertEquals(msg, rawString, jsDecoded);
   }
 
+  @Slow
   public void testDecode() throws Exception {
     // 1) test decoding a simple JSON object encoded in javascript
     testDecode(JSON_STR);

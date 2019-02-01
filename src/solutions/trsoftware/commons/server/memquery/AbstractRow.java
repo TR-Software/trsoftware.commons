@@ -58,11 +58,14 @@ public abstract class AbstractRow implements Row {
 
   @Override
   public List<Object> getValues(List<String> names) {
-    ArrayList<Object> ret = new ArrayList<Object>();
+    ArrayList<Object> ret = new ArrayList<>(names.size());
     for (String name : names) {
       ret.add(getValue(name));
     }
     return ret;
   }
 
+  protected int getColIndex(String colName) {
+    return schema.getColIndex(colName);
+  }
 }

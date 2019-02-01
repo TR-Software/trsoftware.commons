@@ -15,19 +15,29 @@
  *
  */
 
-package solutions.trsoftware.commons.client.bridge.util;
+package solutions.trsoftware.commons.shared.util;
 
-import solutions.trsoftware.commons.shared.util.TimeUnit;
+import solutions.trsoftware.commons.bridge.BridgeTypeFactory;
 
 /**
- * Apr 28, 2011
+ * A utility class for measuring elapsed time based on GWT's {@link com.google.gwt.core.client.Duration}, with a few
+ * extra utility methods.
  *
- * @author Alex
+ * "Shared" code (that runs on both client and server) can call {@link BridgeTypeFactory#newDuration} to obtain
+ * an appropriate instance for its environment.
+ *
+ * @author Alex, Apr 28, 2011
+ *
+ * @see BridgeTypeFactory#newDuration()
+ * @see BridgeTypeFactory#newDuration(String)
+ * @see BridgeTypeFactory#newDuration(String, String)
  */
 public interface Duration {
 
   /**
-   * @return the number of milliseconds that have elapsed since this object was created.
+   * @return the number of milliseconds that have elapsed since this object was created; this value is returned
+   * as {@code double} (rather than {@code long}) to avoid any performance penalty from {@code long} emulation in
+   * client-side GWT code.
    */
   double elapsedMillis();
 
@@ -37,7 +47,7 @@ public interface Duration {
   double elapsed(TimeUnit timeUnit);
 
   /** @return true if more than the given time value has elapsed */
-  boolean exceeds(long value, TimeUnit timeUnit);
+  boolean exceeds(double value, TimeUnit timeUnit);
 
   /**
    * Computes processing speed.

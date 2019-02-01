@@ -36,7 +36,9 @@ public class TimeValue extends Number implements Comparable<TimeValue> {
 
   private TimeUnit unit;
 
-  private static transient SharedNumberFormat numberFormat;
+  private static transient ThreadLocal<SharedNumberFormat> threadLocalNumberFormat = ThreadLocal.withInitial(
+      () -> new SharedNumberFormat(3)
+  );
 
   public TimeValue(double value, TimeUnit unit) {
     Assert.assertNotNull(unit);
@@ -123,9 +125,7 @@ public class TimeValue extends Number implements Comparable<TimeValue> {
   }
 
   public static SharedNumberFormat getNumberFormat() {
-    if (numberFormat == null)
-      numberFormat = new SharedNumberFormat(3);
-    return numberFormat;
+    return threadLocalNumberFormat.get();
   }
 
   /**

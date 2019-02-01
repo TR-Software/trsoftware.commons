@@ -40,7 +40,11 @@ public class LogicUtils {
     return o1 == null && o2 == null;
   }
 
-  /** Like {@link Object#equals(Object)}, but allows {@code null} values */
+  /**
+   * Like {@link Object#equals(Object)}, but allows {@code null} values
+   *
+   * @see java.util.Objects#equals(Object, Object)
+   */
   public static boolean eq(Object o1, Object o2) {
     if (o1 != null)
       return o1.equals(o2);

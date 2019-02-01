@@ -34,6 +34,8 @@ public class MathUtils {
    */
   public static final double EPSILON = 0.0001;
 
+  // TODO: move all the bitwise operations (e.g. packUnsignedInt) to BitwiseUtils
+
   /**
    * Converts a 128-bit integer represented by the two given {@code long} components to a {@code byte} array.
    */

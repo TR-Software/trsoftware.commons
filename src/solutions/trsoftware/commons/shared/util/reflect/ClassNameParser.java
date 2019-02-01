@@ -28,8 +28,8 @@ import static solutions.trsoftware.commons.shared.util.StringUtils.nonNull;
  * {@link #complexName}, {@link #simpleName}, and {@link #anonymousId} (if the class is anonymous).
  *
  * <p>
- *   <b>WARNING</b>: Parsing array type names (like {@code "[Ljava.lang.String;"} or {@code "[[[I"}) will fail silently
- *   (will not throw an exception, but the parse result will not be meaningful).
+ *   <b>WARNING</b>: Parsing array type names (like {@code "[Ljava.lang.String;"} or {@code "[[[I"}) is not yet supported:
+ *   will not throw an exception, but the parse result will not be meaningful.
  *   Refer to {@link Class#getName()} and {@link Class#getSimpleName()} to see how array type names are constructed.
  * </p>
  * <p style="color: #6495ed; font-weight: bold;">

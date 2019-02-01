@@ -17,10 +17,10 @@
 
 package solutions.trsoftware.commons.server.memquery.algebra;
 
+import com.google.common.collect.BiMap;
+import com.google.common.collect.ImmutableBiMap;
 import solutions.trsoftware.commons.server.memquery.RelationSchema;
 
-import java.util.LinkedHashMap;
-import java.util.Map;
 import java.util.Set;
 
 /**
@@ -33,13 +33,13 @@ public class NaturalJoin extends EquiJoin {
   }
 
   /** Generates the correspondence of the equivalent cols from both sides */
-  private static Map<String, String> buildColNameCorrespondence(RelationSchema leftSchema, RelationSchema rightSchema) {
+  private static BiMap<String, String> buildColNameCorrespondence(RelationSchema leftSchema, RelationSchema rightSchema) {
     Set<String> sharedNames = getAttributeNamesIntersection(leftSchema, rightSchema);
-    LinkedHashMap<String, String> ret = new LinkedHashMap<String, String>();
+    ImmutableBiMap.Builder<String, String> builder = ImmutableBiMap.builderWithExpectedSize(sharedNames.size());
     for (String name : sharedNames) {
-      ret.put(name, name);
+      builder.put(name, name);
     }
-    return ret;
+    return builder.build();
   }
 
 }

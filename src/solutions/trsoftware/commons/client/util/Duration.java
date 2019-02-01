@@ -17,27 +17,38 @@
 
 package solutions.trsoftware.commons.client.util;
 
+import solutions.trsoftware.commons.shared.util.AbstractDuration;
+import solutions.trsoftware.commons.shared.util.text.DurationFormat;
+
 import static com.google.gwt.core.client.Duration.currentTimeMillis;
 
 /**
- * Adapts {@link com.google.gwt.core.client.Duration} class (a utility class for measuring elapsed time)
- * for compatibility with the {@link solutions.trsoftware.commons.client.bridge.util.Duration}
- * interface (so the same interface can be used on both the client and server).
+ * Client-side implementation of {@link solutions.trsoftware.commons.shared.util.Duration}
+ * (a utility class for measuring elapsed time).
+ *
+ * Uses {@link com.google.gwt.core.client.Duration#currentTimeMillis()} to compute {@link #elapsedMillis()}
+ *
+ * @see com.google.gwt.core.client.Duration
+ * @see solutions.trsoftware.commons.server.util.Duration
  */
 public class Duration extends AbstractDuration {
 
   private double start;
 
   /**
-   * Creates a new Duration whose start time is now.
+   * Creates a new instance whose start time is now.
+   * <p>
+   * The {@link #toString()} method will simply return the elapsed duration formatted with {@link DurationFormat}.
    */
   public Duration() {
-    this("", "");
+    this("");
   }
 
   /**
-   * Creates a new Duration whose start time is now, with a name.
-   * The toString method will return "{name} took {duration} {timeUnit}"
+   * Creates a new instance whose start time is now, with a name.
+   * <p>
+   * The {@link #toString()} method will return something like {@code "{name} took {duration}"}
+   * @param name action name for pretty printing (optional)
    */
   public Duration(String name) {
     this(name, "took");
@@ -45,11 +56,14 @@ public class Duration extends AbstractDuration {
 
 
   /**
-   * Creates a new Duration whose start time is now, with a name and action.
-   * The toString method will return "{name} {action} {duration} {timeUnit}"
+   * Creates a new instance whose start time is now, with a name and action verb.
+   * <p>
+   * The {@link #toString()} method will return something like {@code "{name} {verb} {duration}"}
+   * @param name action name for pretty printing (optional)
+   * @param verb action verb for pretty printing (optional)
    */
-  public Duration(String name, String action) {
-    super(action, name);
+  public Duration(String name, String verb) {
+    super(name, verb);
     start = currentTimeMillis();
   }
 

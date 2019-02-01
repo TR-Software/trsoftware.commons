@@ -21,7 +21,6 @@ import com.google.gwt.core.client.JavaScriptException;
 import com.google.gwt.core.shared.GWT;
 import junit.framework.TestCase;
 import solutions.trsoftware.commons.bridge.BridgeTypeFactory;
-import solutions.trsoftware.commons.client.bridge.util.Duration;
 import solutions.trsoftware.commons.shared.annotations.Slow;
 import solutions.trsoftware.commons.shared.testutil.AssertUtils;
 import solutions.trsoftware.commons.shared.util.callables.Function3_;

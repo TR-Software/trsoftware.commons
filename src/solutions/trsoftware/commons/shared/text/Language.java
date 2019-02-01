@@ -184,8 +184,8 @@ public enum Language {
     return isoCode;  // HEBREW should override this
   }
 
-  /** @return The modelId corresponding to this language */
-  public String getOfficialModelId() {
+  /** @return The official universe ID corresponding to this language on typeracer.com */
+  public String getOfficialModelId() {  // TODO: move this method to the com.typeracer source root
     return MODEL_ID_PREFIX + isoCode;  // ENGLISH and CODE should override this
   }
 

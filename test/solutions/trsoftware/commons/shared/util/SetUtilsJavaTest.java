@@ -23,7 +23,8 @@ import junit.framework.TestCase;
 import java.util.Collections;
 import java.util.Set;
 
-import static solutions.trsoftware.commons.shared.util.SetUtils.*;
+import static solutions.trsoftware.commons.shared.util.SetUtils.newSet;
+import static solutions.trsoftware.commons.shared.util.SetUtils.parse;
 
 public class SetUtilsJavaTest extends TestCase {
 
@@ -39,10 +40,10 @@ public class SetUtilsJavaTest extends TestCase {
     assertEquals(Collections.<String>emptySet(), parse("  , , ,,, "));
   }
 
-  public void testPrint() throws Exception {
-    assertEquals("a,b,c", print(newSet("a", "b", "c")));
-    assertEquals("a", print(newSet("a")));
-    assertEquals("", print(newSet()));
+  public void testToString() throws Exception {
+    assertEquals("a,b,c", SetUtils.toString(newSet("a", "b", "c")));
+    assertEquals("a", SetUtils.toString(newSet("a")));
+    assertEquals("", SetUtils.toString(newSet()));
   }
 
   public void testPowerset() throws Exception {

@@ -36,7 +36,7 @@ import java.io.PrintWriter;
  * This code is based on {@link com.google.gwt.useragent.rebind.UserAgentGenerator}.
  * </p>
  * <p>
- *   The possible values of the {@code user.agent} property are specified in {@link UserAgentPropertyGenerator#VALID_VALUES}
+ *   The possible values of the {@code user.agent} property are specified in {@link UserAgentPropertyGenerator.UserAgent}
  * </p>
  * @see UserAgentPropertyGenerator
  */

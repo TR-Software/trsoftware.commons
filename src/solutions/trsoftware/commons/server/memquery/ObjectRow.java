@@ -30,8 +30,7 @@ public class ObjectRow extends AbstractRow {
     this.object = object;
   }
 
-  @Override
-  public Object getRawData() {
+  public Object getObject() {
     return object;
   }
 

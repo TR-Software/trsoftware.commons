@@ -26,8 +26,6 @@ public interface MutableOrderedTuple extends OrderedTuple {
 
   /**
    * @param <V> the value type
-   * @param <T> the type of this tuple-like object
-   * @return {@code this}, for method chaining
    */
-  <V, T> T setValue(int index, V value);
+  <V> void setValue(int index, V value);
 }

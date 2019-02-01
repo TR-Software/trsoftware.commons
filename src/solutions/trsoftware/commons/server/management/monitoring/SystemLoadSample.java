@@ -69,6 +69,7 @@ public class SystemLoadSample implements DataSample {
     long elapsedTime = upTime - prevUpTime;
     // cpuUsage could go higher than 100% because elapsedTime
     // and elapsedCpu are not fetched simultaneously. Limit to 100%
+    // TODO: replace this manual calculation with the newer MonitoringUtils.getProcessCpuLoad() method (Java 1.7+)
     this.cpu = (float)Math.min(1d, (double)elapsedCpu / (elapsedTime * 1000000d * nCPUs));
     this.heapUsedMB = bytesToMB(memoryBean.getHeapMemoryUsage().getUsed());
     this.heapCommittedMB = bytesToMB(memoryBean.getHeapMemoryUsage().getCommitted());

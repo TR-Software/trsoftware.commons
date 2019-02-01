@@ -1,18 +1,16 @@
-package solutions.trsoftware.commons.client.useragent;
-
-import solutions.trsoftware.commons.shared.util.StringUtils;
+package solutions.trsoftware.commons.shared.util;
 
 import javax.annotation.Nonnull;
 import java.util.Arrays;
 
 /**
- * Represents an application version number, e.g. {@code 67.0.3396.99}
- *
+ * Represents an application version number (e.g. {@code 67.0.3396.99})
+ * consisting of up to {@value #MAX_COMPONENTS} parts.
  *
  * @author Alex
  * @since 8/9/2018
  */
-public class VersionNumber implements Comparable<VersionNumber> {
+public class VersionNumber implements RichComparable<VersionNumber> {
 
   /**
    * Maximum supported number of components (for performance reasons).
@@ -23,6 +21,7 @@ public class VersionNumber implements Comparable<VersionNumber> {
    * The actual components passed to the constructor. Used by {@link #toString()}
    */
   private int[] components;
+  // NOTE: can reduce memory consumption by using a short[] instead of int[] (this would allow doubling MAX_COMPONENTS with no penalty, at the expense of having an upper bound on the magntude of a component rather than the total number of components)
 
   /**
    * The {@link #components} padded with zeros up to {@link #MAX_COMPONENTS}.
@@ -104,6 +103,9 @@ public class VersionNumber implements Comparable<VersionNumber> {
 
   /**
    * Parses a string of integers joined by {@code '.'}.
+   * <p>
+   * <em>NOTE</em>: when performing comparisons on the parsed {@link VersionNumber}s,
+   * inputs like {@code "1.0"} and {@code "1.0.0.0"} will be considered equal.
    *
    * @param versionStr a version string, e.g. {@code "67.0.3396.99"}
    * @return an instance with components parsed from the given string, e.g. {@code [67, 0, 3396, 99]}
@@ -114,6 +116,7 @@ public class VersionNumber implements Comparable<VersionNumber> {
     versionStr = versionStr.trim();
     if (versionStr.isEmpty())
       return new VersionNumber();
+    // TODO: allow passing a custom regex for splitting the components (to be able to parse strings like "1.7_b123"
     String[] components = versionStr.split("\\.");  // e.g. ["67", "0", "3396", "99"]
     int[] intComponents = new int[components.length];
     for (int i = 0; i < components.length; i++) {
@@ -121,4 +124,5 @@ public class VersionNumber implements Comparable<VersionNumber> {
     }
     return new VersionNumber(intComponents);
   }
+
 }

@@ -19,6 +19,9 @@ package solutions.trsoftware.commons.shared.util.compare;
 
 import junit.framework.TestCase;
 
+import java.util.function.BiPredicate;
+import java.util.function.IntPredicate;
+
 import static solutions.trsoftware.commons.shared.util.compare.ComparisonOperator.*;
 
 /**
@@ -31,5 +34,37 @@ public class ComparisonOperatorTest extends TestCase {
     assertEquals(EQ, lookup(1, 1));
     assertEquals(LT, lookup(1, 2));
     assertEquals(GT, lookup(2, 1));
+  }
+
+  public void testPredicate() throws Exception {
+    int cmp = "foo".compareTo("bar");
+    assertIntPredicateResult(LT, cmp, false);
+    assertIntPredicateResult(LEQ, cmp, false);
+    assertIntPredicateResult(EQ, cmp, false);
+    assertIntPredicateResult(NEQ, cmp, true);
+    assertIntPredicateResult(GT, cmp, true);
+    assertIntPredicateResult(GEQ, cmp, true);
+  }
+
+  public void testBiPredicate() throws Exception {
+    int lhs = 4, rhs = 5;
+    assertBiPredicateResult(LT::compare, lhs, rhs, true);
+    assertBiPredicateResult(LEQ::compare, lhs, rhs, true);
+    assertBiPredicateResult(NEQ::compare, lhs, rhs, true);
+    assertBiPredicateResult(EQ::compare, lhs, rhs, false);
+    assertBiPredicateResult(GT::compare, lhs, rhs, false);
+    assertBiPredicateResult(GEQ::compare, lhs, rhs, false);
+  }
+
+  public static void assertIntPredicateResult(IntPredicate predicate, int arg, boolean expected) {
+    assertEquals(expected, predicate.test(arg));
+    // also test negation of the predicate
+    assertEquals(!expected, predicate.negate().test(arg));
+  }
+
+  public static <T> void assertBiPredicateResult(BiPredicate<T, T> predicate, T lhs, T rhs, boolean expected) {
+    assertEquals(expected, predicate.test(lhs, rhs));
+    // also test negation of the predicate
+    assertEquals(!expected, predicate.negate().test(lhs, rhs));
   }
 }

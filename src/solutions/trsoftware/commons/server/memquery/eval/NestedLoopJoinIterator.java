@@ -20,7 +20,7 @@ package solutions.trsoftware.commons.server.memquery.eval;
 import com.google.common.collect.UnmodifiableIterator;
 import solutions.trsoftware.commons.server.memquery.MaterializedRelation;
 import solutions.trsoftware.commons.server.memquery.Row;
-import solutions.trsoftware.commons.server.memquery.RowImpl;
+import solutions.trsoftware.commons.server.memquery.RowFactory;
 import solutions.trsoftware.commons.server.memquery.algebra.Join;
 import solutions.trsoftware.commons.server.util.Duration;
 import solutions.trsoftware.commons.shared.util.iterators.FilteringIterator;
@@ -95,7 +95,7 @@ abstract class NestedLoopJoinIterator<J extends Join<? extends Join.Params>> ext
     if (unmatchedRightIter != null) {
       // we have finished emitting all the matches, and now we just have to emit all the unmatched RHS rows
       if (unmatchedRightIter.hasNext())
-        nextResult = joinOp.call(new RowImpl(joinOp.getLHSchema()), unmatchedRightIter.next());
+        nextResult = joinOp.call(RowFactory.getInstance().newRow(joinOp.getLHSchema()), unmatchedRightIter.next());
       else {
         reachedEnd = true;
         unmatchedRightIter = null;
@@ -118,6 +118,7 @@ abstract class NestedLoopJoinIterator<J extends Join<? extends Join.Params>> ext
           nextResult = joinOp.call(nextLeft, nextRight);
           // for joins that need to return all RHS tuples, we have to keep track of which ones have been returned so we can later add those that never got matched
           if (matchedRightRows != null)
+            // NOTE: although matchedRightRows is a HashSet and RowImpl doesn't implement equals/hashCode, this still works because we only care about identity equality here
             matchedRightRows.add(nextRight);
           return;
         }
@@ -163,7 +164,7 @@ abstract class NestedLoopJoinIterator<J extends Join<? extends Join.Params>> ext
       rightIter = getRightMatchesIterator();
       // if there are no matches on the right, and this is left or full outer join, we use a singleton iterator with a row of nulls
       if (!rightIter.hasNext() && (joinType == Join.Type.LEFT_OUTER || joinType == Join.Type.FULL_OUTER)) {
-        rightIter = new SingletonIterator<Row>(new RowImpl(rightInputRelation.getSchema()));
+        rightIter = new SingletonIterator<Row>(RowFactory.getInstance().newRow(rightInputRelation.getSchema()));
       }
     }
     if (!rightIter.hasNext()) {

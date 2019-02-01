@@ -82,7 +82,7 @@ public class TestUtils {
    */
   public static void printMemoryDelta(String prefix, Function0 factory) {
     System.out.printf(
-        "%s used up %3.3f KB of memory%n",
+        "%s used up %,3.3f KB of memory%n",
         prefix,
         bytesToKilobytes(measureMemoryDelta(factory)));
   }

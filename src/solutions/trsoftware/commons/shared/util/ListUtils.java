@@ -101,7 +101,7 @@ public class ListUtils {
   /**
    * @return {@code true} iff the given list is sorted in ascending order (as defined by its comparator).
    */
-  public static <T extends Comparable> boolean isSorted(List<T> list) {
+  public static <T extends Comparable<T>> boolean isSorted(List<T> list) {
     T lastElt = null;
     for (T elt : list) {
       if (lastElt != null) {
@@ -115,9 +115,10 @@ public class ListUtils {
 
 
   /**
-   * Returns a standard ArrayList with the given elements (in contrast to Arrays.asList,
-   * which returns a very limited implementation of List).
+   * Returns a standard {@link ArrayList} with the given elements (in contrast to {@link Arrays#asList},
+   * which returns a very limited implementation of {@link List}).
    */
+  @SafeVarargs
   public static <T> ArrayList<T> arrayList(T... a) {
     return new ArrayList<T>(Arrays.asList(a));
   }
@@ -126,8 +127,8 @@ public class ListUtils {
    * @return the last element of the given list
    * @throws IndexOutOfBoundsException if the list is empty
    */
-  public static <T> T last(List<T> lst) {
-    return lst.get(lst.size()-1);
+  public static <T> T last(List<T> list) {
+    return list.get(list.size()-1);
   }
 
   /**

@@ -25,6 +25,8 @@ import solutions.trsoftware.commons.server.memquery.schema.NameAccessorColSpec;
 /**
  * A relational selection (&sigma;) operation.  Produces an output relation with the same schema as the input relation
  * and containing the subset of rows matching the filter expression.
+ * <p>
+ * Corresponds to the {@code WHERE} clause in SQL (but <strong>not</strong> the {@code SELECT} clause - see {@link Projection})
  *
  * @author Alex, 1/14/14
  */

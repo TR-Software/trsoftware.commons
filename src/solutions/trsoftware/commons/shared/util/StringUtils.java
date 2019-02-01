@@ -78,6 +78,8 @@ public class StringUtils {
   /**
    * @return {@code true} iff the given string is {@code null}, empty, or consists entirely of whitespace
    * (as determined by {@link String#trim()})
+   * @see #notBlank(String)
+   * @see #isEmpty(String)
    */
   public static boolean isBlank(String str) {
     return str == null || str.trim().isEmpty();
@@ -86,9 +88,32 @@ public class StringUtils {
   /**
    * @return {@code true} iff the given string is neither {@code null}, empty, nor consists entirely of
    * whitespace.
+   * @see #isBlank(String)
+   * @see #notEmpty(String)
    */
   public static boolean notBlank(String str) {
     return !isBlank(str);
+  }
+
+  /**
+   * Similar to {@link #isBlank(String)}, but doesn't use {@link String#trim()} to check whether the string contains
+   * only whitespace.
+   *
+   * @return {@code true} iff the given string is either {@code null} or {@code ""}
+   * @see #isBlank(String)
+   * @see #notEmpty(String)
+   */
+  public static boolean isEmpty(String str) {
+    return str == null || str.isEmpty();
+  }
+
+  /**
+   * @return {@code true} iff the given string is neither {@code null} nor {@code ""}
+   * @see #notBlank(String)
+   * @see #isEmpty(String)
+   */
+  public static boolean notEmpty(String str) {
+    return !isEmpty(str);
   }
 
   /**
@@ -294,8 +319,17 @@ public class StringUtils {
   }
 
   /** Removes the given suffix from the string if it's present */
-  public static String stripTrailing(String str, String suffix) {
-    return str.endsWith(suffix) ? str.substring(0, str.length() - suffix.length()) : str;
+  public static String stripSuffix(String str, String suffix) {
+    if (str.endsWith(suffix))
+      return str.substring(0, str.length() - suffix.length());
+    return str;
+  }
+
+  /** Removes the given prefix from the string if it's present */
+  public static String stripPrefix(String str, String prefix) {
+    if (str.startsWith(prefix))
+      return str.substring(prefix.length());
+    return str;
   }
 
   /**
@@ -347,11 +381,9 @@ public class StringUtils {
    *   toCamelCase("MY_STRING", "_") &rarr; "myString"
    * </pre>
    * @param str the string to convert
-   * @param wordSeparatorRegex the string will be split into words using this regex; <b>WARNING</b>: do not use values can't be used
-   * as a regex (e.g. passing {@code "*"} would trigger a "Dangling meta character" exception)
+   * @param wordSeparatorRegex the string will be split into words using this regex; <b>WARNING</b>: do not pass values
+   * that can't be used as a regex (e.g. passing {@code "*"} would trigger a "Dangling meta character" exception)
    * @return a camel-case version of the given string
-   *
-   * Given MY_STRING, returns myString
    */
   public static String toCamelCase(String str, String wordSeparatorRegex) {
     if (isBlank(str))
@@ -369,7 +401,7 @@ public class StringUtils {
 
   /** @return the number of the times the given char appears in the given string */
   public static int count(String s, char c) {
-    if (isBlank(s))
+    if (s == null)
       return 0;
     int n = 0;
     for (int i = 0; i < s.length(); i++) {
@@ -379,6 +411,7 @@ public class StringUtils {
     return n;
   }
 
+  @SafeVarargs
   public static <T> String join(String delimiter, T... array) {
     return join(delimiter, Arrays.asList(array));
   }
@@ -683,7 +716,7 @@ public class StringUtils {
    * @param pad the padding char
    *
    * @return the given string padded and center-justified to the desired width.  The result is guaranteed to have
-   * the desired width (unless the input string is longer than that; it will not be truncated).
+   * the desired width unless the input string is longer than that, in which case it will not be truncated.
    *
    * @see <a href="https://stackoverflow.com/a/8155547/1965404">Solution given on StackOverflow</a>
    */
@@ -724,31 +757,72 @@ public class StringUtils {
    * @param width the desired length of the result
    *
    * @return the given string padded and center-justified to the desired width.  The result is guaranteed to have
-   * the desired width (unless the input string is longer than that; it will not be truncated).
+   * the desired width unless the input string is longer than that, in which case it will not be truncated.
    */
   public static String justifyCenter(String str, int width) {
     return padCenter(str, width, ' ');
   }
 
   /**
-   * If {@code str} is not empty and neither is {@code token}, appends {@code delimiter} followed by {@code token}.
-   * If only {@code str} is empty but {@code token}, simply appends {@code token}.  If both are empty, does nothing.
-   * @return the given {@link StringBuilder}, for method chaining.
+   * Pads the given string with spaces on the right, such that the result has the desired {@code width}.
+   * This is similar to the <i>left-justify</i> capability offered by {@link String#format}
+   * (with the {@code %-Ns} pattern).
+   * <p>
+   * This method never truncates the given string: if {@code str.length() <= width}, then it is returned unmodified.
+   *
+   * <h3>Examples:</h3>
+   * <pre>
+   *   justifyLeft("foo", 2) &rarr; "foo"
+   *   justifyLeft("foo", 4) &rarr; "foo "
+   *   justifyLeft("foo", 5) &rarr; "foo  "
+   *   justifyLeft("foo", 6) &rarr; "foo   "
+   * </pre>
+   *
+   * @param str the string to be left-justified
+   * @param width the desired length of the result
+   *
+   * @return the given string padded on the right to the desired width.  The result is guaranteed to have
+   * the desired width unless the input string is longer than that, in which case it will not be truncated.
    */
-  public static StringBuilder append(StringBuilder str, CharSequence delimiter, CharSequence token) {
-    // TODO: unit test this method
-    if (token.length() > 0) {
-      if (str.length() > 0)
-        str.append(delimiter);
-      str.append(token);
-    }
-    return str;
+  public static String justifyLeft(String str, int width) {
+    if (str == null || width <= str.length())
+      return str;
+    return padRight(str, width - str.length(), ' ');
   }
 
-  /** Returns a string which represents a mirror image of the given string */
+  /**
+   * Pads the given string with spaces on the left, such that the result has the desired {@code width}.
+   * This is similar to the <i>right-justify</i> capability offered by {@link String#format}
+   * (with the {@code %Ns} pattern).
+   * <p>
+   * This method never truncates the given string: if {@code str.length() <= width}, then it is returned unmodified.
+   *
+   * <h3>Examples:</h3>
+   * <pre>
+   *   justifyRight("foo", 2) &rarr; "foo"
+   *   justifyRight("foo", 4) &rarr; " foo"
+   *   justifyRight("foo", 5) &rarr; "  foo"
+   *   justifyRight("foo", 6) &rarr; "   foo"
+   * </pre>
+   *
+   * @param str the string to be right-justified
+   * @param width the desired length of the result
+   *
+   * @return the given string padded on the left to the desired width.  The result is guaranteed to have
+   * the desired width unless the input string is longer than that, in which case it will not be truncated.
+   */
+  public static String justifyRight(String str, int width) {
+    if (str == null || width <= str.length())
+      return str;
+    return padLeft(str, width - str.length(), ' ');
+  }
+
+  /**
+   * @return a string which represents a mirror image of the given string
+   * @see StringBuilder#reverse()
+   */
   public static String reverse(String s) {
-    // in pure Java, you could do it like this: return new StringBuilder(s).reverse().toString();
-    // but GWT doesn't emulate the StringBuilder.reverse method
+    // NOTE: this method was written because earlier versions of GWT didn't emulate StringBuilder.reverse
     char[] chars = s.toCharArray();
     for (int i = 0, j = chars.length-1; i < j; i++, j--) {
       // swap the symmetric characters at indices i and j
@@ -938,21 +1012,14 @@ public class StringUtils {
    * @param suffix the suffix
    * @return {@code true} iff {@code str.substring(0, endIndex).endsWith(suffix) == true}
    * @throws StringIndexOutOfBoundsException if {@code endIndex} either negative or larger than the length of {@code str}
-   * (to emulate the behavoir of {@link String#substring(int, int)})
+   * (to emulate the behavior of {@link String#substring(int, int)})
    * @see String#endsWith(String)
    * @see String#startsWith(String, int)
    */
   public static boolean endsWith(String str, int endIndex, String suffix) throws StringIndexOutOfBoundsException {
-    checkIndex(endIndex, str);
+    if (endIndex < 0 || endIndex > str.length())
+      throw new StringIndexOutOfBoundsException(endIndex);
     return str.startsWith(suffix, endIndex - suffix.length());
   }
 
-  /**
-   * Checks whether the given index is valid for the given string.
-   * @throws StringIndexOutOfBoundsException if {@code index} is either negative or larger than the length of {@code str}
-   */
-  public static void checkIndex(int index, String str) throws StringIndexOutOfBoundsException {
-    if (index < 0 || index > str.length())
-      throw new StringIndexOutOfBoundsException(index);
-  }
 }

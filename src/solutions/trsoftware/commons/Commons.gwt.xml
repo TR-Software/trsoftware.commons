@@ -43,6 +43,11 @@
     <when-type-assignable class="solutions.trsoftware.commons.client.useragent.UserAgentPermutationOracle"/>
   </generate-with>
 
+  <replace-with class="solutions.trsoftware.commons.client.useragent.PolyfillIE8">
+		<when-type-is class="solutions.trsoftware.commons.client.useragent.Polyfill"/>
+    <when-property-is name="user.agent" value="ie8"/>
+  </replace-with>
+
   <replace-with class="solutions.trsoftware.commons.client.event.BackspaceBlockerFirefoxImpl">
 		<when-type-is class="solutions.trsoftware.commons.client.event.BackspaceBlocker"/>
     <when-property-is name="user.agent" value="gecko1_8"/>

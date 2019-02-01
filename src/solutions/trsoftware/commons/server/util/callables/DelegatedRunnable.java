@@ -19,7 +19,12 @@ package solutions.trsoftware.commons.server.util.callables;
 
 /**
  * Wraps a {@link Runnable}, allowing execution of some additional code before (override {@link #doBefore()})
- * and after (override {@link #doAfter(Exception)}) the delegate's {@link Runnable#run() run()} method is invoked.
+ * and after (override {@link #doAfter(Throwable)}) the delegate's {@link Runnable#run() run()} method is invoked.
+ * <p>
+ * Also, {@link java.util.concurrent.ExecutorService} implementations don't log exceptions arising from a {@link Runnable}
+ * they execute.  This class wraps the {@link #run()} method in a try/catch block to log
+ * and rethrow any {@link RuntimeException} or {@link Error} that might arise.
+ *
  *
  * @see #doRun()
  * @author Alex
@@ -48,7 +53,10 @@ public class DelegatedRunnable implements Runnable {
    *
    * @param ex any exception that was thrown by {@link #doRun()}, or {@code null} if no exception was thrown.
    */
-  protected void doAfter(Exception ex) {}
+  protected void doAfter(Throwable ex) {
+    if (ex != null)
+      ex.printStackTrace();
+  }
 
   @Override
   public final void run() {
@@ -56,7 +64,7 @@ public class DelegatedRunnable implements Runnable {
     try {
       doRun();
     }
-    catch (RuntimeException e) {
+    catch (RuntimeException | Error e) {
       doAfter(e);
       throw e;
     }

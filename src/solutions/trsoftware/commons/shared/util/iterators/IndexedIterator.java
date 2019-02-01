@@ -64,9 +64,16 @@ public abstract class IndexedIterator<T> implements Iterator<T> {
 
   @Override
   public T next() {
+    maybeThrowNoSuchElement();
+    return get(i++);
+  }
+
+  /**
+   * @throws NoSuchElementException iff {@link #hasNext()} returns {@code false}, to comply with the Iterator interface
+   */
+  protected void maybeThrowNoSuchElement() {
     if (!hasNext())
       throw new NoSuchElementException();  // to comply with the Iterator interface
-    return get(i++);
   }
 
   /**

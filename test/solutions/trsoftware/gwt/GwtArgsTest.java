@@ -17,10 +17,13 @@
 
 package solutions.trsoftware.gwt;
 
+import com.google.gwt.dev.GwtVersion;
 import junit.framework.TestCase;
 import solutions.trsoftware.commons.client.BaseGwtTestCase;
-import solutions.trsoftware.commons.shared.gwt.GwtVersion;
 import solutions.trsoftware.commons.shared.util.MapUtils;
+import solutions.trsoftware.commons.shared.util.SetUtils;
+
+import java.util.Collections;
 
 /**
  * Tests {@link BaseGwtTestCase}
@@ -82,6 +85,35 @@ public class GwtArgsTest extends TestCase {
     assertTrue(new GwtArgs280("-foo -bar x -web -foobar").isWebMode());
     assertTrue(new GwtArgs280("-prod -bar x -baz -foobar").isWebMode());
     assertFalse(new GwtArgs280("-prod -bar x -baz -devMode").isWebMode());
+  }
+
+  public void testGetRunStyle() throws Exception {
+    {
+      GwtArgs.RunStyleValue runStyle = new GwtArgs("-foo -bar x -baz -foobar").getRunStyle();
+      assertNull(runStyle);
+    }
+    {
+      GwtArgs.RunStyleValue runStyle = new GwtArgs("-foo -runStyle HtmlUnit:Chrome,FF38,IE8,IE11 -foobar").getRunStyle();
+      assertNotNull(runStyle);
+      assertEquals("HtmlUnit", runStyle.getName());
+      assertEquals(SetUtils.newSet("Chrome", "FF38", "IE8", "IE11"), runStyle.getArgs());
+      assertEquals(SetUtils.newSet("Chrome"),
+          new GwtArgs("-runStyle HtmlUnit:Chrome").getRunStyle().getArgs());
+    }
+    {
+      GwtArgs.RunStyleValue runStyle = new GwtArgs("-foo -runStyle Manual -foobar").getRunStyle();
+      assertNotNull(runStyle);
+      assertEquals("Manual", runStyle.getName());
+      assertEquals(Collections.emptySet(), runStyle.getArgs());
+    }
+  }
+
+  public void testGetRunStyleHtmlUnitArgs() throws Exception {
+    assertEquals(Collections.emptySet(), new GwtArgs("-foo -bar x -baz -foobar").getRunStyleHtmlUnitArgs());
+    assertEquals(Collections.emptySet(), new GwtArgs("-foo -runStyle HtmlUnit -baz -foobar").getRunStyleHtmlUnitArgs());
+
+    assertEquals(SetUtils.newSet("Chrome", "FF38", "IE8", "IE11"),
+        new GwtArgs("-foo -runStyle HtmlUnit:Chrome,FF38,IE8,IE11 -foobar").getRunStyleHtmlUnitArgs());
   }
 
   /**

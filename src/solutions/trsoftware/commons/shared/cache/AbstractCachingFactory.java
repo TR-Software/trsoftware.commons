@@ -18,7 +18,7 @@
 package solutions.trsoftware.commons.shared.cache;
 
 import solutions.trsoftware.commons.bridge.BridgeTypeFactory;
-import solutions.trsoftware.commons.client.bridge.util.Duration;
+import solutions.trsoftware.commons.shared.util.Duration;
 import solutions.trsoftware.commons.shared.util.stats.Mean;
 
 /**

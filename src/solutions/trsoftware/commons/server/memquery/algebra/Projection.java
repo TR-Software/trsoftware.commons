@@ -24,7 +24,8 @@ import java.util.Collections;
 import java.util.List;
 
 /**
- * An simple relational projection operation (&pi;): projects a subset of attribute names from the input relation.
+ * A simple relational algebra <em>project</em> operation (&pi;): projects a subset of
+ * attribute names from the input relation (similar to the {@code SELECT} clause in SQL).
  *
  * @author Alex, 1/14/14
  */

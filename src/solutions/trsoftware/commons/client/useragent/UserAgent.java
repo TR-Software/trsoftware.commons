@@ -17,10 +17,12 @@
 
 package solutions.trsoftware.commons.client.useragent;
 
+import com.google.common.base.MoreObjects;
 import com.google.gwt.core.shared.GWT;
 import com.google.gwt.regexp.shared.MatchResult;
 import com.google.gwt.regexp.shared.RegExp;
 import com.google.gwt.user.client.Window;
+import solutions.trsoftware.commons.shared.util.VersionNumber;
 
 /**
  * A simple interface to the browser's userAgent string, which allows getting
@@ -106,12 +108,12 @@ public class UserAgent {
 
   /**
    * Modern browsers list several products in their user agent string, for example
-   * {@code Mozilla/5.0 (Windows NT 6.3; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/67.0.3396.99 Safari/537.36}.
+   * <pre>Mozilla/5.0 (Windows NT 6.3; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/67.0.3396.99 Safari/537.36</pre>
    * Therefore this method takes a specific browser name, and attempts to extract the version of that particular
    * browser from the user agent string.
    * @param browserName the name of the product to look for in the UA string, e.g. {@code Chrome}, {@code Mozilla}, etc.
-   * @return the version number of the given browser from the UA string, if present, or {@code null} if it doesn't
-   * contain an entry for this browser
+   * @return the version number of the given browser from the UA string, if present, or {@code null} if the given browser
+   * name isn't mentioned anywhere in the UA string
    */
   public VersionNumber parseVersionNumber(String browserName) {
     return parseVersionNumber(this.userAgentStringLowercase, browserName);
@@ -119,13 +121,13 @@ public class UserAgent {
 
   /**
    * Modern browsers list several products in their user agent string, for example
-   * {@code Mozilla/5.0 (Windows NT 6.3; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/67.0.3396.99 Safari/537.36}.
+   * <pre>Mozilla/5.0 (Windows NT 6.3; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/67.0.3396.99 Safari/537.36</pre>
    * Therefore this method takes a specific browser name, and attempts to extract the version of that particular
    * browser from the user agent string.
    * @param uaString the value of {@code navigator.userAgent}
    * @param browserName the name of the product to look for in the UA string, e.g. {@code Chrome}, {@code Mozilla}, etc.
-   * @return the version number of the given browser from the UA string, if present, or {@code null} if it doesn't
-   * contain an entry for this browser
+   * @return the version number of the given browser from the UA string, if present, or {@code null} if the given browser
+   * name isn't mentioned anywhere in the UA string
    */
   public static VersionNumber parseVersionNumber(String uaString, String browserName) {
     RegExp regExp = RegExp.compile(".*?" + browserName + "/([\\d.]+).*", "i");
@@ -135,6 +137,39 @@ public class UserAgent {
       return VersionNumber.parse(versionStr);
     }
     return null;  // match not found
+  }
+
+  /**
+   * @return an instance of {@link Property}, which provides both the compile time and runtime
+   * <code>user.agent</code> property value (for GWT deferred binding).
+   */
+  public static Property getUserAgentProperty() {
+    return new Property();
+  }
+
+  /**
+   * Wraps an instance of {@link com.google.gwt.useragent.client.UserAgent}, which provides
+   * both the compile time and runtime <code>user.agent</code> property value (for GWT deferred binding).
+   */
+  public static class Property {
+    private com.google.gwt.useragent.client.UserAgent delegate
+        = GWT.create(com.google.gwt.useragent.client.UserAgent.class);
+
+    public String getCompileTimeValue() {
+      return delegate.getCompileTimeValue();
+    }
+
+    public String getRuntimeValue() {
+      return delegate.getRuntimeValue();
+    }
+
+    @Override
+    public String toString() {
+      return MoreObjects.toStringHelper(delegate.getClass())
+          .add("compileTimeValue", getCompileTimeValue())
+          .add("runtimeValue", getRuntimeValue())
+          .toString();
+    }
   }
 
 }

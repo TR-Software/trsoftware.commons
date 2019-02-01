@@ -20,12 +20,13 @@ package solutions.trsoftware.commons.server.memquery.expressions;
 /**
  * @author Alex, 1/11/14
  */
-public class Constant<T> extends TypedExpression<Object, T> implements VisitableExpression<Object, T> {
+public class Constant<T> extends TypedExpression<Void, T> implements VisitableExpression<Void, T> {
 
   private final T value;
 
+  @SuppressWarnings("unchecked")
   public Constant(T value) {
-    super(Object.class, (Class<T>)value.getClass());
+    super(Void.class, (Class<T>)value.getClass());
     this.value = value;
   }
 
@@ -33,8 +34,7 @@ public class Constant<T> extends TypedExpression<Object, T> implements Visitable
     return value;
   }
 
-  @Override
-  public T call(Object arg) {
+  public T apply(Void arg) {
     return value;
   }
 

@@ -24,10 +24,7 @@ import solutions.trsoftware.commons.server.memquery.algebra.AggregationOperation
 import solutions.trsoftware.commons.server.util.Duration;
 import solutions.trsoftware.commons.shared.util.iterators.MapEntryTransformingIterator;
 
-import java.util.ArrayList;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * An evaluator for the aggregation operation.  Needs to process the entire input relation prior to emitting
@@ -61,7 +58,14 @@ public class AggregationEvaluator extends UnaryOperationEvaluator<AggregationOpe
           System.out.printf("      %s: %,d LHS rows processed, time elapsed: %s %n",
               getClass().getSimpleName(), rowCount, processingDuration.formatAsClockTime(false));
       }
-      List<Object> groupingKey = inputRow.getValues(groupingAttrs);
+      List<Object> groupingKey;
+      if (groupingAttrs.size() == 1) {
+        // memory optimization - use the more compact SingletonList if possible
+        groupingKey = Collections.singletonList(inputRow.getValue(groupingAttrs.get(0)));
+      }
+      else {
+        groupingKey = inputRow.getValues(groupingAttrs);
+      }
       Map<AggregationSpec, Aggregation> aggs = groups.get(groupingKey);  // TODO: optimization: it might be faster to group via sorting instead of hashing lists
       if (aggs == null) {
         // instantiate the aggregations for a new group
@@ -82,7 +86,7 @@ public class AggregationEvaluator extends UnaryOperationEvaluator<AggregationOpe
         new MapEntryTransformingIterator<List<Object>, Map<AggregationSpec, Aggregation>, Row>(groups) {
           @Override
           public Row transformEntry(List<Object> key, Map<AggregationSpec, Aggregation> value) {
-            RowImpl ret = new RowImpl(outputSchema);
+            MutableRow ret = RowFactory.getInstance().newRow(outputSchema);
             int i = 0;
             for (Object val : key)
               ret.setValue(i++, val);

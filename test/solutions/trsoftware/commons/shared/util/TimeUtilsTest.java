@@ -76,12 +76,11 @@ public class TimeUtilsTest extends TestCase {
     assertEquals("3 months ago", generateRelativeTimeElapsedString(1000d*60*60*24*92));
 
     assertEquals("11 months ago", generateRelativeTimeElapsedString(1000d*60*60*24*364));
-    assertEquals("11 months ago", generateRelativeTimeElapsedString(1000d*60*60*24*364.9));
-    assertEquals("1 year ago", generateRelativeTimeElapsedString(1000d*60*60*24*365));
-    assertEquals("1 year ago", generateRelativeTimeElapsedString(1000d*60*60*24*366));
-    assertEquals("1 year ago", generateRelativeTimeElapsedString(1000d*60*60*24*365*2-1));
-    assertEquals("2 years ago", generateRelativeTimeElapsedString(1000d*60*60*24*365*2));
-    assertEquals("2 years ago", generateRelativeTimeElapsedString(1000d*60*60*24*365*2.5));
+    assertEquals("11 months ago", generateRelativeTimeElapsedString(TimeUnit.YEARS.toMillis(.99)));
+    assertEquals("1 year ago", generateRelativeTimeElapsedString(TimeUnit.YEARS.toMillis(1)));
+    assertEquals("1 year ago", generateRelativeTimeElapsedString(TimeUnit.YEARS.toMillis(1.99)));
+    assertEquals("2 years ago", generateRelativeTimeElapsedString(TimeUnit.YEARS.toMillis(2)));
+    assertEquals("2 years ago", generateRelativeTimeElapsedString(TimeUnit.YEARS.toMillis(2.5)));
   }
 
   public void testMillisToSeconds() throws Exception {

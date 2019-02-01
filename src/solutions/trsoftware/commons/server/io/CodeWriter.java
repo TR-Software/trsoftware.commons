@@ -27,7 +27,7 @@ import java.io.PrintStream;
  * @see #indent()
  * @author Alex, 10/10/2016
  */
-public class CodeGenerator {
+public class CodeWriter {
 
   /**
    * The number of spaces to print for each {@link #indentLevel}.  E.g. 2, 4, etc.
@@ -38,7 +38,7 @@ public class CodeGenerator {
 
   protected int indentLevel;
 
-  public CodeGenerator(PrintStream out) {
+  public CodeWriter(PrintStream out) {
     this.out = out;
   }
 
@@ -47,7 +47,7 @@ public class CodeGenerator {
    * @param indentSpaces the number of spaces to print for each indent level
    * @param indentLevel the starting value for {@link #indentLevel}
    */
-  public CodeGenerator(PrintStream out, int indentSpaces, int indentLevel) {
+  public CodeWriter(PrintStream out, int indentSpaces, int indentLevel) {
     this.indentSpaces = indentSpaces;
     this.indentLevel = indentLevel;
     this.out = out;

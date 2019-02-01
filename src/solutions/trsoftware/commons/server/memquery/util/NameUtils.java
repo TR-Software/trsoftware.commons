@@ -69,7 +69,8 @@ public abstract class NameUtils {
   }
 
   /**
-   * @return an ordered mapping of the given objects by their names
+   * @return an ordered mapping of the given named objects by their names (the keys will be the names of
+   * the objects and their values will be the objects themselves)
    */
   public static <T extends HasName> Map<String, T> mapByName(Iterable<T> namedObjects) {
     LinkedHashMap<String, T> ret = new LinkedHashMap<>();
@@ -90,7 +91,9 @@ public abstract class NameUtils {
   }
 
   /**
-   * @return an ordered mapping of the names of the given objects to their ordinal numbers.
+   * @return an ordered mapping of the names of the given named {@link HasValue} instances to the values they contain.
+   * NOTE: unlike {@link #mapByName(Iterable)}, the values of the returned map will be the encapsulated values of the
+   * given objects rather than the objects themselves).
    */
   public static <T extends HasName & HasValue<V>, V> Map<String, V> mapNamesToValues(Iterable<T> namedObjects) {
     LinkedHashMap<String, V> ret = new LinkedHashMap<>();

@@ -190,8 +190,8 @@ public class AssertUtilsTest extends TestCase {
 
   public void testAssertNotEqual() throws Exception {
     assertNotEqual("a", "b");
-    assertNotEqual("a", null);
-    assertNotEqual(null, "b");
+    assertNotEqual((Object)"a", null);
+    assertNotEqual((Object)null, "b");
     assertNotEqual("a", "b", "c");
     assertNotEqual("a", "b", "c", null);
     assertNotEqual("a", null, "c", "d");

@@ -30,6 +30,7 @@ import solutions.trsoftware.commons.shared.util.iterators.TransformingIterator;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
 import java.util.*;
 
 import static java.util.Collections.addAll;
@@ -41,7 +42,7 @@ import static solutions.trsoftware.commons.shared.util.StringUtils.*;
  */
 public class QueryBuilder {
 
-  private static interface ProjectionSpec extends HasName, HasValue<Expression<Row, ?>> {
+  private interface ProjectionSpec extends HasName, HasValue<Expression<Row, ?>> {
   }
 
   private static class SimpleProjectionSpec implements ProjectionSpec {
@@ -457,7 +458,9 @@ public class QueryBuilder {
   public static RelationSchema createORMSchema(Class cls, Method... projectedMethods) {
     List<ReflectionAccessorColSpec> colSpecs = new ArrayList<ReflectionAccessorColSpec>();
     for (Field field : cls.getDeclaredFields()) {
-      if (!field.isSynthetic())
+      int modifiers = field.getModifiers();
+      // we exclude static and synthetic (compiler-generated) fields from the ORM
+      if (!field.isSynthetic() && !Modifier.isStatic(modifiers))
         colSpecs.add(new FieldAccessorColSpec(field));
     }
     for (Method method : cls.getDeclaredMethods()) {

@@ -31,7 +31,7 @@ public abstract class ColValuePredicate<T> extends RowPredicate {
   }
 
   @Override
-  public final Boolean call(Row arg) {
+  public final Boolean apply(Row arg) {
     return eval((T)arg.getValue(colName));
   }
 

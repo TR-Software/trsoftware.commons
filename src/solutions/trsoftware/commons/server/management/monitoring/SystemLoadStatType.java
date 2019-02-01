@@ -26,23 +26,39 @@ import java.text.NumberFormat;
 */
 public enum SystemLoadStatType implements StatType {
   REQUEST_COUNT(NumberFormat.getIntegerInstance(), "RecentRequestCount"),
-  CPU(NumberFormat.getPercentInstance(), "JVM CPU Usage", 1),
+  CPU(NumberFormat.getPercentInstance(), "JVM CPU Load", 1) {
+    @Override
+    public double getCurrentValue() {
+      return MonitoringUtils.getProcessCpuLoad();
+    }
+  },
   SYS_LOAD_AVG(NumberFormat.getNumberInstance(), "SystemLoadAverage (1 minute)"),
   HEAP_USED(null, "Heap Used") {
     @Override
-    public String format(double value) {
-      return String.format("%.2f MB", value);
-    }},
-  HEAP_COMMITTED(null, "Heap Committed") {
+    public double getCurrentValue() {
+      return MonitoringUtils.Memory.getUsed();
+    }
     @Override
     public String format(double value) {
       return String.format("%.2f MB", value);
-    }},
+    }
+  },
+  HEAP_COMMITTED(null, "Heap Committed") {
+    @Override
+    public double getCurrentValue() {
+      return MonitoringUtils.Memory.getCommitted();
+    }
+    @Override
+    public String format(double value) {
+      return String.format("%.2f MB", value);
+    }
+  },
   HEAP_TENURED_GEN(null, "Tenured Gen Usage (after last GC)") {
     @Override
     public String format(double value) {
       return String.format("%.2f MB", value);
-    }};
+    }
+  };
 
   private NumberFormat printFormatter;
   private final String prettyName;
@@ -85,5 +101,9 @@ public enum SystemLoadStatType implements StatType {
   @Override
   public String toString() {
     return getName();
+  }
+
+  public double getCurrentValue() {
+    throw new UnsupportedOperationException();
   }
 }

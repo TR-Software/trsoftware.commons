@@ -20,23 +20,45 @@ package solutions.trsoftware.commons.shared.util.text;
 import solutions.trsoftware.commons.client.bridge.text.AbstractNumberFormatter;
 import solutions.trsoftware.commons.shared.util.StringUtils;
 
+import java.math.RoundingMode;
 import java.text.DecimalFormat;
 import java.text.ParseException;
 
 /**
- * Allows formatting and parsing numbers using the same class in both clientside GWT code and serverside Java code.
+ * Allows formatting and parsing numbers using the same class in both client-side GWT code and server-side Java code.
+ * 
+ * <h3>Implementation Note</h3>  
+ * Delegates to {@link java.text.DecimalFormat}, which we're emulating for GWT using
+ * {@link com.google.gwt.i18n.client.NumberFormat} (see this module's {@code super-source} directory:
+ * {@code src/solutions/trsoftware/commons/translatable/})
  *
- *<p>
- *  <b>NOTE</b>: this requires {@link DecimalFormat} to be emulated in GWT (it's not part of GWT's
- *  <a href="http://www.gwtproject.org/doc/latest/RefJreEmulation.html">JRE emulation library</a>).
+ * <h3>Rounding Behavior</h3>
+ * GWT's {@link com.google.gwt.i18n.client.NumberFormat} always does <em>half-up</em> rounding), with no way to change
+ * this behavior, therefore we're setting {@link DecimalFormat}'s rounding mode to {@link RoundingMode#HALF_UP} to
+ * emulate GWT's behavior while running in a JVM.
  *
- *  Our emulated version of {@link DecimalFormat} is located in our module's {@code super-source} directory
- *  ({@code src/solutions/trsoftware/commons/translatable})
- *</p>
+ * However, the rounding behavior of {@link #format(double)} might still differ when the argument can't be represented
+ * exactly as a {@code double} (e.g. <a href="https://stackoverflow.com/q/45479713/1965404">1.15</a>), for example:
+ * <pre>
+ *   // in client-side GWT:
+ *   com.google.gwt.i18n.client.NumberFormat.getFormat("#.##").format(1.005);  // returns "1.01"
+ *   // in JVM:
+ *   DecimalFormat decimalFormat = new DecimalFormat("#.##");
+ *   decimalFormat.setRoundingMode(RoundingMode.HALF_UP);
+ *   decimalFormat.format(1.005);  // returns "1"
+ * </pre>
+ * That's because the actual value of {@code 1.005} in IEEE floating-point is actually something like {@code 1.004999...},
+ * but {@link com.google.gwt.i18n.client.NumberFormat} performs the rounding on the string representation
+ * of the given {@code double}, while {@link DecimalFormat} performs the rounding using IEEE 754 floating-point arithmetic.
+ * To get the same behavior from both, instead of {@link #format(double)}, call {@link #format(Number)}
+ * with a {@link java.math.BigDecimal} argument (the "exact" representation of any double can be obtained via
+ * {@link java.math.BigDecimal#valueOf(double)}).
  *
  * <p style="color: #6495ed; font-weight: bold;">
  *   TODO: use this class to replace {@link AbstractNumberFormatter}
  * </p>
+ *
+ * @see <a href="http://www.gwtproject.org/doc/latest/RefJreEmulation.html">JRE emulation library</a>
  * @author Alex, 10/31/2017
  */
 public class SharedNumberFormat {
@@ -49,6 +71,7 @@ public class SharedNumberFormat {
    */
   public SharedNumberFormat(String pattern) {
     format = new DecimalFormat(pattern);
+    format.setRoundingMode(RoundingMode.HALF_UP);
   }
 
   /**
@@ -84,8 +107,11 @@ public class SharedNumberFormat {
       patternBuffer.append('.');
     if (minFractionDigits > 0)
       patternBuffer.append(requiredDigitsPattern(minFractionDigits));
-    if (maxFractionDigits > 0)
-      patternBuffer.append(optionalDigitsPattern(maxFractionDigits - minFractionDigits));
+    if (maxFractionDigits > 0) {
+      int nOptional = maxFractionDigits - minFractionDigits;
+      if (nOptional > 0)
+        patternBuffer.append(optionalDigitsPattern(nOptional));
+    }
     if (percent)
       patternBuffer.append('%');
     return patternBuffer.toString();
@@ -99,8 +125,18 @@ public class SharedNumberFormat {
     return StringUtils.repeat('#', nDigits);
   }
 
+  /**
+   * NOTE: to get more accurate rounding behavior for {@code double} values with no exact IEEE representation,
+   * call {@link #format(Number)} with a {@link java.math.BigDecimal} argument instead (see explanation in the 
+   * javadoc for this class: {@link SharedNumberFormat})
+   * @see <a href="https://stackoverflow.com/q/45479713/1965404">DecimalFormat with HALF_UP rounding mode</a>
+   */
   public String format(double value) {
     return format.format(value);
+  }
+
+  public String format(Number number) {
+    return format.format(number);
   }
 
   /**

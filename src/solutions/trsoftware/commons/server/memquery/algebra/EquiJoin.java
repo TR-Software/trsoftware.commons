@@ -17,6 +17,7 @@
 
 package solutions.trsoftware.commons.server.memquery.algebra;
 
+import com.google.common.collect.BiMap;
 import solutions.trsoftware.commons.server.memquery.Row;
 import solutions.trsoftware.commons.shared.util.LogicUtils;
 
@@ -24,8 +25,16 @@ import java.util.Map;
 
 /**
  * Matches rows whose columns have the same value for a given column mapping.
+ * <p>
+ * <em>NOTE</em>:: the Wikipedia article on <a href="https://en.wikipedia.org/wiki/Join_(SQL)#Equi-join">Join (SQL)</a>
+ * makes it seem like <em>equi-join</em> is a type of <em>inner</em> join, but in reality,
+ * the term <em>equi-join</em> simply means a special-case of &theta;-join (relational algebra),
+ * where the join condition is equality of attribute values for for some mapping of attributes from the input relations
+ * (see Database Systems Concepts Chapter 13.5)
  *
  * @author Alex, 1/10/14
+ * @see <a href="https://www.amazon.com/Database-Systems-Concepts-Henry-Korth/dp/0072283637/">
+ *     Database Systems Concepts ("DSC"), 4th Edition Edition, by Silberschatz, et. al. (ISBN 0072283637)</a>
  */
 public class EquiJoin extends Join<EquiJoin.Params> {
 
@@ -46,14 +55,14 @@ public class EquiJoin extends Join<EquiJoin.Params> {
 
   public static class Params extends Join.Params {
 
-    private final Map<String, String> colNameCorrespondence;
+    private final BiMap<String, String> colNameCorrespondence;
 
-    public Params(Type type, Map<String, String> colNameCorrespondence) {
+    public Params(Type type, BiMap<String, String> colNameCorrespondence) {
       super(type);
       this.colNameCorrespondence = colNameCorrespondence;
     }
 
-    public Map<String, String> getColNameCorrespondence() {
+    public BiMap<String, String> getColNameCorrespondence() {
       return colNameCorrespondence;
     }
 

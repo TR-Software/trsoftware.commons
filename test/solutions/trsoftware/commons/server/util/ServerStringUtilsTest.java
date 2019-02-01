@@ -19,7 +19,10 @@ package solutions.trsoftware.commons.server.util;
 
 import junit.framework.TestCase;
 import solutions.trsoftware.commons.shared.util.RandomUtils;
+import solutions.trsoftware.commons.shared.util.StringUtils;
+import solutions.trsoftware.commons.shared.util.text.CharRange;
 
+import javax.lang.model.SourceVersion;
 import java.util.Collections;
 
 import static java.util.Arrays.asList;
@@ -59,15 +62,25 @@ public class ServerStringUtilsTest extends TestCase {
     checkStringCompression("\u0412\u0441\u0435 \u0432 \u043F\u043E\u0440\u044F\u0434\u043A\u0435\n\u0412\u0441\u0435 \u0432 \u043F\u043E\u0440\u044F\u0434\u043A\u0435\n\u0412\u0441\u0435 \u0432 \u043F\u043E\u0440\u044F\u0434\u043A\u0435\n\u043E\u043D\u0430 \u0434\u0432\u0438\u0436\u0435\u0442\u0441\u044F \u0432 \u0442\u0430\u0438\u043D\u0441\u0442\u0432\u0435\u043D\u043D\u0430\u044F \u0441\u043F\u043E\u0441\u043E\u0431\u0430\u043C\u0438.");  // the same text in Russian
     // try a single-line unicode string
     checkStringCompression("\u5B83\u7684\u6240\u6709\u6743\uFF0C\u5B83\u662F\u6240\u6709\u6743\uFF0C\u5B83\u7684\u6240\u6709\u6743\uFF0C\u5979\u52A8\u4F5C\u662F\u4E0D\u53EF\u601D\u8BAE\u7684\u3002");  // the same thing in Chinese
-
+    // now see if we could get any savings by compressing some shorter strings
+    deflateString("tr:typeracer");
+    deflateString("play");
+    deflateString("int_$java_lang_Integer$java_lang_String");
+    deflateString("int_$java_lang_Integer$java_lang_Stringint_$java_lang_Integer$java_lang_String");
   }
 
   private void checkStringCompression(String input) {
     byte[] compressedBytes = deflateString(input);
     // check that the compression reduced the size of the string
     assertTrue(compressedBytes.length < stringToBytesUtf8(input).length);
-    // check that the compressoin is reversible
+    // check that the compression is reversible
     assertEquals(input, inflateString(compressedBytes));
+  }
+
+  private byte[] deflateString(String input) {
+    byte[] ret = ServerStringUtils.deflateString(input);
+    System.out.printf("String of length %d compressed to %d bytes (\"%s\")%n", input.length(), ret.length, input);
+    return ret;
   }
 
   public void testSearchByEditDistance() throws Exception {
@@ -101,21 +114,39 @@ public class ServerStringUtilsTest extends TestCase {
         toUnicodeLiteral("What up \u041f\u0438\u0434\u0430\u0440\u0430\u0441 \ndogg?"));
   }
 
-  public void testToJavaNameIdentifier() throws Exception {
-    assertEquals("foo_bar", toJavaNameIdentifier("foo+bar"));
-    assertEquals("foo_bar", toJavaNameIdentifier("foo!bar"));
-    assertEquals("_foo_bar", toJavaNameIdentifier("+foo!bar"));
+  public void testToJavaIdentifier() throws Exception {
+    assertEquals("foo_bar", toJavaIdentifier("foo+bar"));
+    assertEquals("foo_bar", toJavaIdentifier("foo!bar"));
+    assertEquals("_foo_bar", toJavaIdentifier("+foo!bar"));
     // check some reserved keywords
-    assertEquals("_do", toJavaNameIdentifier("do"));
-    assertEquals("_while", toJavaNameIdentifier("while"));
-    assertEquals("_try", toJavaNameIdentifier("try"));
-    assertEquals("_try", toJavaNameIdentifier("try"));
+    assertEquals("do_", toJavaIdentifier("do"));
+    assertEquals("while_", toJavaIdentifier("while"));
+    assertEquals("try_", toJavaIdentifier("try"));
     // check empty strings
-    assertEquals("_", toJavaNameIdentifier(""));
-    assertEquals("_", toJavaNameIdentifier(null));
+    assertEquals("__", toJavaIdentifier(""));
+    assertEquals("__", toJavaIdentifier(null));
     // check strings of length 1
-    assertEquals("_", toJavaNameIdentifier("_"));
-    assertEquals("x", toJavaNameIdentifier("x"));
+    assertEquals("$", toJavaIdentifier("+"));
+    assertEquals("$", toJavaIdentifier("_"));
+    assertEquals("x", toJavaIdentifier("x"));
+    // now test some random strings
+    int n = 10_000;
+    for (int i = 0; i < n; i++) {
+      String input = RandomUtils.randString(new CharRange((char)0, (char)255).toString(), 0, 10);
+      String result = toJavaIdentifier(input);
+      boolean validId = SourceVersion.isIdentifier(result);
+      boolean validName = SourceVersion.isName(result);
+      if (!(validId && validName)) {
+        toJavaIdentifier(input);  // can set a breakpoint here for debugging
+      }
+      assertTrue(validId);
+      assertTrue(validName);
+      if (n % 100 == 0) {
+        // print some of the results for manual inspection
+        System.out.println(StringUtils.methodCallToStringWithResult("toJavaIdentifier", result, input));
+      }
+
+    }
   }
 
   public void testMatch() throws Exception {

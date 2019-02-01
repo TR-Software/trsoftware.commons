@@ -17,6 +17,7 @@
 
 package solutions.trsoftware.commons.client;
 
+import com.gargoylesoftware.htmlunit.BrowserVersion;
 import com.google.gwt.junit.client.GWTTestCase;
 import solutions.trsoftware.commons.server.io.file.FileUtils;
 import solutions.trsoftware.commons.shared.util.MapUtils;
@@ -46,16 +47,6 @@ public abstract class BaseGwtTestCase extends GWTTestCase {
 
   private static boolean gwtArgsProcessed;
 
-  /**
-   * We have created our own version of {@link com.google.gwt.junit.RunStyleHtmlUnit} to support HtmlUnit 2.15
-   * @see solutions.trsoftware.gwt.junit.RunStyleHtmlUnit215
-   */
-  public static final String RUN_STYLE_CLASS_NAME = "solutions.trsoftware.gwt.junit.RunStyleHtmlUnit215";
-  // TODO: cont here: use the above in maybeModifyGwtArgs()
-
-  /**
-   *
-   */
   public static boolean modifyRunStyle = false;
 
   @Override
@@ -73,7 +64,6 @@ public abstract class BaseGwtTestCase extends GWTTestCase {
    *
    * We also modify the gwt.persistentunitcachedir setting to a globally-shared dir, because different runs are able
    * to reuse most of each-other's compiler unit cache output (see doc/gwt/experiments/PersistentUnitCacheUsageExperiment.txt)
-   *
    */
   private static void maybeModifyGwtArgs() throws IOException {
     if (!gwtArgsProcessed) {
@@ -107,21 +97,27 @@ public abstract class BaseGwtTestCase extends GWTTestCase {
           String userAgents;
           if (gwtArgs.containsKey(GwtArgs.DRAFT_COMPILE)) {
             // we'll take this to mean that the user wants a very fast test run, so we restrict the perms to only 1 browser
-            // we choose FF because FF3 was the default setting in GWT2.5.0 with htmlunit-2.9, but with htmlunit-2.15 we only have FF17 and FF24 as options
-            runStyle = "HtmlUnit:FF24";
+            // (FF38 is the default in GWT 2.8.x with HtmlUnit 2.19)
+            runStyle = "HtmlUnit:FF38";
             userAgents = "gecko1_8"; // we only need the permutation for the browser specified in -runStyle
           }
           else{
             // since the user is not passing -draftCompile, we're assuming that he's willing to wait longer to get a more thorough test run
             // htmlunit-2.15 supports FF17,FF24,IE8,IE9,IE11,Chrome, of which we choose only FF24,IE8,IE11,Chrome,
             // because FF17 seems redundant, and IE9 didn't seem to work when we tried it
-            runStyle = "HtmlUnit:FF24,IE8,IE11,Chrome";
-            userAgents = "gecko1_8,ie8,ie10,safari"; // we only need the permutation for the browser specified in -runStyle
-            // we're using the user.agent property "ie10" for IE11, because currently user.agent="ie10" really means "IE10+"
+            runStyle = "HtmlUnit:Chrome,FF38,IE8,IE11";
+            userAgents = "safari,gecko1_8,ie8"; // we only need the permutation for the browsers specified in -runStyle
+            // NOTE: IE11 uses the "gecko1_8" permutation in RunStyleHtmlUnit
           }
           gwtArgs.put(GwtArgs.RUN_STYLE, runStyle);
           gwtArgs.put(GwtArgs.USER_AGENTS, userAgents);
         }
+      }
+
+      // warn if attempting to use com.gargoylesoftware.htmlunit.BrowserVersion.EDGE (tends to cause lots of test failures)
+      if (gwtArgs.getRunStyleHtmlUnitArgs().contains("Edge")) {
+        System.err.printf("WARNING: using BrowserVersion.EDGE could cause inexplicable test failures (remove %s from -%s %s)%n",
+            BrowserVersion.EDGE.getNickname(), GwtArgs.RUN_STYLE, gwtArgs.get(GwtArgs.RUN_STYLE));
       }
 
       // we need to use separate dirs depending on the configuration of the running tests to avoid a race condition

@@ -17,10 +17,14 @@
 
 package solutions.trsoftware.commons.server.memquery.expressions;
 
+import solutions.trsoftware.commons.server.memquery.Row;
+
+import java.util.function.Predicate;
+
 /**
  * @author Alex, 4/17/2015
  */
-public abstract class RowPredicate extends RowExpression<Boolean> {
+public abstract class RowPredicate extends RowExpression<Boolean> implements Predicate<Row> {
 
   public RowPredicate() {
     super(Boolean.TYPE);
@@ -32,5 +36,10 @@ public abstract class RowPredicate extends RowExpression<Boolean> {
 
   public static Or or(RowPredicate lhs, RowPredicate rhs) {
     return new Or(lhs, rhs);
+  }
+
+  @Override
+  public boolean test(Row row) {
+    return apply(row);
   }
 }

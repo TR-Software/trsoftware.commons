@@ -17,14 +17,15 @@
 
 package solutions.trsoftware.gwt;
 
+import com.google.gwt.dev.About;
+import com.google.gwt.dev.GwtVersion;
 import com.google.gwt.junit.JUnitShell;
 import com.google.gwt.junit.client.GWTTestCase;
-import solutions.trsoftware.commons.shared.gwt.GwtVersion;
+import solutions.trsoftware.commons.shared.util.SetUtils;
+import solutions.trsoftware.commons.shared.util.StringUtils;
 import solutions.trsoftware.commons.shared.util.compare.ComparisonOperator;
 
-import java.util.ArrayList;
-import java.util.LinkedHashMap;
-import java.util.Map;
+import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -227,7 +228,7 @@ public class GwtArgs extends LinkedHashMap<String, String> {
   }
 
   protected GwtVersion getGwtVersion() {
-    return GwtVersion.get();
+    return About.getGwtVersionObject();
   }
 
   /**
@@ -252,4 +253,60 @@ public class GwtArgs extends LinkedHashMap<String, String> {
     }
     return ret.toString();
   }
+
+  /**
+   * @return the parsed value of the {@code -runStyle} arg, or {@code null} if this arg not specified
+   */
+  public RunStyleValue getRunStyle() {
+    String value = get(RUN_STYLE);
+    if (StringUtils.notBlank(value))
+      return new RunStyleValue(value);
+    return null;
+  }
+
+  /**
+   * @return the set of browser names parsed from a {@code -runStyle HtmlUnit:...} arg, or an empty set if
+   * the {@code -runStyle} arg is not specified or doesn't start with the {@code "HtmlUnit"} prefix.
+   */
+  public Set<String> getRunStyleHtmlUnitArgs() {
+    RunStyleValue runStyle = getRunStyle();
+    if (runStyle != null && "HtmlUnit".equals(runStyle.getName())) {
+      return runStyle.getArgs();
+    }
+    return Collections.emptySet();
+  }
+
+  /**
+   * Parsed value of the {@code -runStyle} arg.
+   * @see <a href="http://www.gwtproject.org/doc/latest/DevGuideTesting.html">GWT Testing Guide</a>
+   * @see <a href="http://www.gwtproject.org/doc/latest/DevGuideTestingHtmlUnit.html">GWT Testing HTML Unit Guide</a>
+   */
+  public static class RunStyleValue {
+    private String name;
+    private Set<String> args;
+
+    /**
+     * @param value the {@code -runStyle} arg
+     */
+    public RunStyleValue(String value) {
+      name = value;
+      int colon = value.indexOf(':');
+      if (colon >= 0) {
+        name = value.substring(0, colon);
+        String args = value.substring(colon + 1);
+        this.args = SetUtils.newSet(args.split(","));
+      } else {
+        this.args = Collections.emptySet();
+      }
+    }
+
+    public String getName() {
+      return name;
+    }
+
+    public Set<String> getArgs() {
+      return args;
+    }
+  }
+
 }

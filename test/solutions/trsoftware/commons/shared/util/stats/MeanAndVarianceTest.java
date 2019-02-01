@@ -70,4 +70,18 @@ public class MeanAndVarianceTest extends TestCase {
     assertEquals(controlSample.variance(), meanAndVariance.variance(), .01);
     assertEquals(controlSample.stdev(), meanAndVariance.stdev(), .01);
   }
+
+  public void testInvalidInputs() throws Exception {
+    MeanAndVariance meanAndVariance = new MeanAndVariance();
+    assertEquals(0d, meanAndVariance.mean());
+    assertEquals(0, meanAndVariance.size());
+    double[] badValues = {Double.NaN, Double.POSITIVE_INFINITY, Double.NEGATIVE_INFINITY};
+    for (double badValue : badValues) {
+      meanAndVariance.update(badValue);
+      // should have ignored this input
+      assertEquals(0d, meanAndVariance.mean());
+      assertEquals(0, meanAndVariance.size());
+
+    }
+  }
 }

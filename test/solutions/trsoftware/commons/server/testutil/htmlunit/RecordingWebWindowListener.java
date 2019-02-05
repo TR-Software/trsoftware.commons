@@ -28,8 +28,6 @@ import java.nio.file.NotDirectoryException;
 import java.nio.file.Path;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import static solutions.trsoftware.commons.server.io.file.FileUtils.deleteOnExit;
-
 /**
  * Saves the pages loaded by a {@link WebClient} to a directory on the file system.
  *
@@ -48,7 +46,7 @@ public class RecordingWebWindowListener extends CurrentWebWindowContentChangeLis
    * @throws IOException if the output directory could not be created
    */
   public RecordingWebWindowListener(WebClient webClient) throws IOException {
-    this(webClient, deleteOnExit(Files.createTempDirectory(RecordingWebWindowListener.class.getSimpleName())));
+    this(webClient, Files.createTempDirectory(RecordingWebWindowListener.class.getSimpleName()));
   }
 
   /**

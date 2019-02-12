@@ -103,16 +103,32 @@ public class NetUtils {
   }
 
   /**
-   * Finds an available port in the given range on the loopback interface {@value #LOCALHOST}.  It's probably
-   * best to use ports in the range [{@value #MIN_USER_PORT}, {@value #MIN_DYNAMIC_PORT}] when looking for
-   * a port for your (long-running) application, or [{@value #MIN_DYNAMIC_PORT}, {@value #MAX_VALID_PORT}] for
-   * temporary allocations.
+   * Finds the next available port in the range [{@code preferredPort}, {@value #MIN_DYNAMIC_PORT})
+   * on the loopback interface {@value #LOCALHOST}.
+   *
+   * @param preferredPort the search will start with this port number
+   * @return the first available local port in the range [{@code preferredPort}, {@value #MIN_DYNAMIC_PORT})
+   * @throws NoAvailablePortException if unable to find an available port in this range
+   * @see #isLocalPortAvailable(int)
+   * @see #MIN_USER_PORT
+   * @see #MIN_DYNAMIC_PORT
+   * @see #MAX_VALID_PORT
+   */
+  public static int findNextAvailableLocalPort(int preferredPort) {
+    return findAvailableLocalPort(preferredPort, MIN_DYNAMIC_PORT);
+  }
+
+  /**
+   * Finds an available port in the given range on the loopback interface {@value #LOCALHOST}.
+   * <p>
+   * It's probably best to use ports in the range [{@value #MIN_USER_PORT}, {@value #MIN_DYNAMIC_PORT}] when looking for
+   * a port for your (long-running) application, or [{@value #MIN_DYNAMIC_PORT}, {@value #MAX_VALID_PORT}] for temporary
+   * allocations.
    *
    * @param minPort the search will start with this port number
    * @param maxPort the search will end on this port number (inclusive)
    * @return the first available local port in the given range
    * @throws NoAvailablePortException if unable to find an available port in this range
-   *
    * @see #isLocalPortAvailable(int)
    * @see #MIN_USER_PORT
    * @see #MIN_DYNAMIC_PORT

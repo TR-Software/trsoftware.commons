@@ -46,7 +46,7 @@ public final class SchedulerUtils {
    * @return {@code true} if the given command was executed right away, otherwise {@code false}, to indicate
    * that a background timer was started by this method
    *
-   * @see ThreadUtils#waitFor(java.util.concurrent.Callable, long, long)
+   * @see ThreadUtils#waitFor(java.util.function.BooleanSupplier, long, long)
    */
   public static boolean checkAndWait(final Condition condition, int delayMillis, int timeoutMillis, final Command onConditionMet) {
     if (condition.check()) {

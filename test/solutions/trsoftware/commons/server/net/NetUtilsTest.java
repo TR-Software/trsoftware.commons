@@ -70,6 +70,7 @@ public class NetUtilsTest extends TestCase {
     }
   }
 
+  @Slow
   public void testIsLocalAddress() throws Exception {
     // 1) test the string version of the method
     //   a) check some typical local hostname strings

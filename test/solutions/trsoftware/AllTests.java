@@ -31,8 +31,7 @@ public class AllTests {
 
   public static Test suite() throws Exception {
     return combineTests(
-        FastJavaTests.suite(),
-        SlowJavaTests.suite(),
+        AllJavaTests.suite(),
         GwtTests.suite()
     );
   }

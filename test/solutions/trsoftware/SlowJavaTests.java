@@ -23,7 +23,7 @@ import solutions.trsoftware.commons.shared.annotations.ExcludeFromSuite;
 import solutions.trsoftware.commons.shared.annotations.Slow;
 import solutions.trsoftware.junit.TestSuiteBuilder;
 
-import static solutions.trsoftware.junit.TestTimeboxDecorator.LENIENT_TIMEBOX;
+import static solutions.trsoftware.junit.TestTimeBoxDecorator.LENIENT_TIMEBOX;
 
 /**
  * A test suite for all unit tests that don't extend {@link GWTTestCase} and are annotated with {@link Slow}.

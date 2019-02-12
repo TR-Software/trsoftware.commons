@@ -21,8 +21,7 @@ import com.google.gwt.junit.client.GWTTestCase;
 import junit.framework.Test;
 import solutions.trsoftware.commons.shared.annotations.ExcludeFromSuite;
 import solutions.trsoftware.junit.TestSuiteBuilder;
-
-import static solutions.trsoftware.junit.TestTimeboxDecorator.LENIENT_TIMEBOX;
+import solutions.trsoftware.junit.TestTimeBoxDecorator;
 
 /**
  * A test suite for all unit tests that don't extend {@link GWTTestCase}
@@ -33,20 +32,20 @@ import static solutions.trsoftware.junit.TestTimeboxDecorator.LENIENT_TIMEBOX;
 public class AllJavaTests {
 
   public static Test suite() throws Exception {
-    return TestSuiteBuilder.combineTests(
-        FastJavaTests.suite(),
-        SlowJavaTests.suite());
+    return suiteBuilder()
+        .addContentRoot(AllJavaTests.class)
+        .buildSuite();
   }
 
   /**
    * @return a new {@link TestSuiteBuilder} instance, pre-configured with the settings required for a suite of
-   * all non-GWT test cases.
+   * all non-GWT test cases, without any {@link TestTimeBoxDecorator}s applied.
    */
   public static TestSuiteBuilder suiteBuilder() {
     return new TestSuiteBuilder()
         .excludeSubclassesOf(GWTTestCase.class)
         .excludeTestsAnnotatedWith(ExcludeFromSuite.class)
-        .setTimeBoxSettings(LENIENT_TIMEBOX);
+        ;
   }
 
 }

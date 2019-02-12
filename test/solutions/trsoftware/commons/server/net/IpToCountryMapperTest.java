@@ -41,6 +41,7 @@ public class IpToCountryMapperTest extends TestCase {
    * This test just makes sure there are no exceptions while reading
    * the database, and that
    */
+  @Slow
   public void testLoadingFromCsv() throws Exception {
     IpToCountryMapper db = IpToCountryMapper.get();
     // sanity check: there should be over 100K entries in the database

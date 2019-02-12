@@ -46,7 +46,7 @@ import static solutions.trsoftware.commons.shared.util.StringUtils.join;
  *
  * @author Alex
  */
-public final class Template extends AbstractRenderer<Map<String, String>> {
+public final class Template extends AbstractRenderer<Map<String, ?>> {
 
   private final List<TemplatePart> parts;
 
@@ -79,7 +79,7 @@ public final class Template extends AbstractRenderer<Map<String, String>> {
    * Renders the template by applying each value in the given map to a variable whose name is given by key of the map entry.
    */
   @Override
-  public String render(Map<String, String> substitutions) {
+  public String render(Map<String, ?> substitutions) {
     // TODO: throw an exception if variables don't match?
     StringBuilder out = new StringBuilder(bufferSizeHint);
     for (TemplatePart part : parts) {

@@ -30,7 +30,7 @@ public class VariablePart implements TemplatePart {
     this.varName = varName;
   }
 
-  public StringBuilder write(StringBuilder buffer, Map<String, String> substitutions) {
+  public StringBuilder write(StringBuilder buffer, Map<String, ?> substitutions) {
     if (substitutions.containsKey(varName))
       return buffer.append(String.valueOf(substitutions.get(varName)));
     return buffer;

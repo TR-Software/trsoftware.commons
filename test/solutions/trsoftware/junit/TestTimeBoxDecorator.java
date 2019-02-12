@@ -39,7 +39,7 @@ import static solutions.trsoftware.commons.shared.util.TimeUnit.SECONDS;
  *
  * @author Alex
  */
-public class TestTimeboxDecorator extends TestSetup {
+public class TestTimeBoxDecorator extends TestSetup {
 
   /**
    * Test classes that might require a costly 1-time set up operation can define a {@code static} field of this name
@@ -51,11 +51,11 @@ public class TestTimeboxDecorator extends TestSetup {
    */
   public static final String DISCOUNT_FIELD_NAME = "_TestTimeboxDecoratorDiscount";
   /**
-   * Default settings for a {@link TestTimeboxDecorator} that never fails a test for taking too long; only prints warnings
+   * Default settings for a {@link TestTimeBoxDecorator} that never fails a test for taking too long; only prints warnings
    */
   public static final TimeBoxSettings LENIENT_TIMEBOX = new TimeBoxSettings(Integer.MAX_VALUE, 20);
   /**
-   * Default settings for a {@link TestTimeboxDecorator} that fails a test for taking too long
+   * Default settings for a {@link TestTimeBoxDecorator} that fails a test for taking too long
    */
   public static final TimeBoxSettings STRICT_TIMEBOX = new TimeBoxSettings(2, 1);
 
@@ -116,7 +116,7 @@ public class TestTimeboxDecorator extends TestSetup {
    * @param test The test to be wrapped by this decorator.
    * @param testMethod The original method corresponding to the test (e.g. {@code FooTest.testFoo()})
    */
-  public TestTimeboxDecorator(Test test, Method testMethod, TimeBoxSettings timeBoxSettings) {
+  public TestTimeBoxDecorator(Test test, Method testMethod, TimeBoxSettings timeBoxSettings) {
     super(test);
     this.test = test;
     this.testMethod = testMethod;
@@ -149,7 +149,9 @@ public class TestTimeboxDecorator extends TestSetup {
     // if the test contains a field named _TestTimeboxDecoratorDiscount, its value will be subtracted from elapsedSeconds
     double discountSeconds;
     try {
+      // TODO: use an interface instead of a field here
       Field discountField = test.getClass().getField(DISCOUNT_FIELD_NAME);
+      discountField.setAccessible(true);
       discountSeconds = TimeUnit.MILLISECONDS.to(TimeUnit.SECONDS, discountField.getDouble(test));
     }
     catch (NoSuchFieldException e) {
@@ -177,12 +179,9 @@ public class TestTimeboxDecorator extends TestSetup {
         System.err.println(warnMsg.append("."));
       }
     }
-    else {
-
-      if (elapsedSeconds < settings.warningSeconds && hasSlowAnnotation) {
-        System.err.println("WARNING: " + getDetailedName() + " took " + timeFormatter.format(elapsedSeconds)
-            + " seconds, so there is no need for it to be annotated with @" + Slow.class.getSimpleName() + ".");
-      }
+    else if (elapsedSeconds < STRICT_TIMEBOX.warningSeconds && hasSlowAnnotation) {
+      System.err.println("WARNING: " + getDetailedName() + " took " + timeFormatter.format(elapsedSeconds)
+          + " seconds, so there is no need for it to be annotated with @" + Slow.class.getSimpleName() + ".");
     }
   }
 

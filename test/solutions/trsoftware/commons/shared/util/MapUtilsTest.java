@@ -146,17 +146,17 @@ public class MapUtilsTest extends TestCase {
   }
 
   public void testExtractSingleValue() throws Exception {
-    assertEquals("bar", extractSingleValue(MapUtils.<String, String[]>hashMap("foo", new String[]{"bar"}), "foo"));
-    assertEquals("bar", extractSingleValue(MapUtils.<String, String[]>hashMap("foo", "bar"), "foo"));
-    assertEquals("bar", extractSingleValue(MapUtils.<String, String[]>hashMap("foo", new String[]{"bar", "baz"}), "foo"));
-    assertEquals("bar", extractSingleValue(MapUtils.<String, String[]>hashMap("foo", new String[]{"bar"}, "a", new String[]{"b", "c"}), "foo"));
-    assertEquals("b", extractSingleValue(MapUtils.<String, String[]>hashMap("foo", new String[]{"bar"}, "a", new String[]{"b", "c"}), "a"));
-    assertNull(extractSingleValue(MapUtils.<String, String[]>hashMap("foo", new String[]{"bar"}), "bar"));
-    assertNull(extractSingleValue(MapUtils.<String, String[]>hashMap("foo", new String[]{}), "foo"));
-    assertNull(extractSingleValue(MapUtils.<String, String[]>hashMap("foo", new int[]{}), "foo"));
-    assertNull(extractSingleValue(MapUtils.<String, String[]>hashMap("foo", new int[]{1, 2, 3}), "foo"));
-    assertNull(extractSingleValue(MapUtils.<String, String[]>hashMap("foo", null), "foo"));
-    assertNull(extractSingleValue(MapUtils.<String, String[]>hashMap("foo", "bar"), "a"));
+    assertEquals("bar", extractSingleValue(MapUtils.hashMap("foo", new String[]{"bar"}), "foo"));
+    assertEquals("bar", extractSingleValue(MapUtils.hashMap("foo", "bar"), "foo"));
+    assertEquals("bar", extractSingleValue(MapUtils.hashMap("foo", new String[]{"bar", "baz"}), "foo"));
+    assertEquals("bar", extractSingleValue(MapUtils.hashMap("foo", new String[]{"bar"}, "a", new String[]{"b", "c"}), "foo"));
+    assertEquals("b", extractSingleValue(MapUtils.hashMap("foo", new String[]{"bar"}, "a", new String[]{"b", "c"}), "a"));
+    assertNull(extractSingleValue(MapUtils.hashMap("foo", new String[]{"bar"}), "bar"));
+    assertNull(extractSingleValue(MapUtils.hashMap("foo", new String[]{}), "foo"));
+    assertNull(extractSingleValue(MapUtils.hashMap("foo", new int[]{}), "foo"));
+    assertNull(extractSingleValue(MapUtils.hashMap("foo", new int[]{1, 2, 3}), "foo"));
+    assertNull(extractSingleValue(MapUtils.hashMap("foo", null), "foo"));
+    assertNull(extractSingleValue(MapUtils.hashMap("foo", "bar"), "a"));
   }
 
   public void testGetOrInsert() throws Exception {

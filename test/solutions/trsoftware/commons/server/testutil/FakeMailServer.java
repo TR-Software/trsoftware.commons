@@ -17,31 +17,28 @@
 
 package solutions.trsoftware.commons.server.testutil;
 
-import com.dumbster.smtp.SimpleSmtpServer;
-import com.dumbster.smtp.SmtpMessage;
-import org.apache.commons.codec.binary.Base64;
+import junit.framework.AssertionFailedError;
+import org.simplejavamail.converter.internal.mimemessage.MimeMessageParser;
+import org.subethamail.wiser.Wiser;
+import org.subethamail.wiser.WiserMessage;
+import solutions.trsoftware.commons.server.util.Duration;
+import solutions.trsoftware.commons.server.util.ThreadUtils;
 import solutions.trsoftware.commons.shared.util.Assert;
-import solutions.trsoftware.commons.shared.util.CollectionUtils;
 
-import java.util.Date;
-import java.util.Iterator;
-import java.util.LinkedList;
+import java.util.ArrayList;
 import java.util.List;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 /**
- * Encapsulates a dummy SMTP server for testing.
+ * Encapsulates a {@link Wiser} instance (SMTP server for testing).
+ * Can be used in a <i>try-with-resources</i> block.
  *
  * @author Alex
+ * @see <a href="https://github.com/voodoodyne/subethasmtp">SubEtha SMTP project on GitHub</a>
  */
-public class FakeMailServer extends Assert {
-  /*
-  TODO(1/31/2019): replace Dumbster (com.dumbster.smtp.SimpleSmtpServer) with Wiser
-  (see https://github.com/voodoodyne/subethasmtp)
-   */
+public class FakeMailServer extends Assert implements AutoCloseable {
+  public static final int DEFAULT_PORT = 25252;
 
-  private SimpleSmtpServer mailServer;
+  private Wiser wiser;
 
   /**
    * The number of emails received by the server after the last time assertReceivedCount
@@ -50,134 +47,89 @@ public class FakeMailServer extends Assert {
   private int lastCount = 0;
 
   public FakeMailServer(int port) {
-    mailServer = SimpleSmtpServer.start(port);
+    String startMsg = String.format("Starting %s on port %d", Wiser.class.getSimpleName(), port);
+    System.out.println(startMsg);
+    Duration startupDuration = new Duration(startMsg);
+    wiser = new Wiser(port);
+    wiser.start();
+    System.out.println(startupDuration);
   }
 
   /**
-   * Asserts that the fake mail server received count emails since it was last
-   * checked, (presumably at the beginning of the unit test) waiting up to 10
-   * seconds for this to happen.
+   * Asserts that the SMTP server stub received the given number of emails since it was last checked,
+   * waiting up to the given number of milliseconds for this to happen.
    *
-   * @return the last n=count email messages
+   * @param expectedNewCount the number of new email messages expected
+   * @param timeoutMs will wait this number of millis for the assertion to be satisfied before throwing an
+   *   {@link AssertionFailedError}
+   * @return the {@code expectedNewCount} most recent email messages
    */
-  public LinkedList<SmtpMessage> assertNewMessageCount(int expectedNewCount) throws Exception {
+  public List<MimeMessageParser> assertNewMessageCount(int expectedNewCount, int timeoutMs) throws Exception {
     if (expectedNewCount < 1)
       throw new IllegalArgumentException("Use assertNoEmailReceived instead");
     // ensure that the new messages have been received, waiting up to timeout millis
-    int timeout = 5000;
-    long startTime = System.currentTimeMillis();
-    while (mailServer.getReceivedEmailSize() < lastCount + expectedNewCount) {
-      if (System.currentTimeMillis() > (startTime + timeout)) {
-        fail(String.format("Timed out while waiting for email to be received.  (expected new count=%d, actual new count=%d, total count=%d)", expectedNewCount, mailServer.getReceivedEmailSize()- lastCount, mailServer.getReceivedEmailSize()));
-      }
-      Thread.sleep(100);
+    if (!ThreadUtils.waitFor(() -> getReceivedEmailCount() >= lastCount + expectedNewCount, timeoutMs, 100)) {
+      fail(String.format("Timed out while waiting for email to be received.  (expected new count=%d, actual new count=%d, total count=%d)", expectedNewCount, getReceivedEmailCount() - lastCount, getReceivedEmailCount()));
     }
-    int count = mailServer.getReceivedEmailSize();
+    int count = getReceivedEmailCount();
     assertEquals(expectedNewCount, count - lastCount);
     // return only the new messages
-    List<SmtpMessage> newMessages = CollectionUtils.<SmtpMessage>asList(mailServer.getReceivedEmail()).subList(lastCount, count);
+    List<WiserMessage> newMessages = wiser.getMessages().subList(lastCount, count);
+    List<MimeMessageParser> parsedMessages = new ArrayList<>();
+    for (WiserMessage wiserMessage : newMessages) {
+      parsedMessages.add(new MimeMessageParser(wiserMessage.getMimeMessage()).parse());
+    }
     lastCount = count;
-    return new LinkedList<SmtpMessage>(newMessages);
-  }
-
-  private static final Pattern BODY_HEADER_PATTERN = Pattern.compile(".*Content-Type: text/plain; charset=\"(.+?)\"MIME-Version: 1.0Content-Transfer-Encoding: (\\w+)\n(.*)", Pattern.DOTALL);
-
-  /**
-   * The result of {@link SmtpMessage#getBody } might be something like this:
-   * <pre>
-   *--===============1686450895==Content-Type: text/plain; charset="us-ascii"MIME-Version: 1.0Content-Transfer-Encoding: 7bit
-   *Hello
-   *--===============1686450895==--
-   * </pre>
-   * Or base64-encoded:
-   * <pre>
-   *--===============0105064596==Content-Type: text/plain; charset="utf-8"MIME-Version: 1.0Content-Transfer-Encoding: base64
-   *SGVsbG8=
-   *--===============0105064596==--
-   * </pre>
-   * Either way, this method should return "Hello" for these two examples.
-   *
-   * NOTE: this implementation has not been thoroughly tested - it's only been deemed good-enough for messages
-   * sent by the Google App Engine SDK's local dev_appserver.
-   */
-  public static String extractMessageBodyText(SmtpMessage message) {
-    String emailBody = message.getBody();
-    Matcher matcher = BODY_HEADER_PATTERN.matcher(emailBody);
-    if (matcher.matches()) {
-      String charset = matcher.group(1);
-      String encoding = matcher.group(2);
-      String bodyText = matcher.group(3);
-      if ("base64".equalsIgnoreCase(encoding)) {
-        return new String(Base64.decodeBase64(bodyText.getBytes()));
-      }
-      return bodyText;
-    }
-    throw new IllegalArgumentException("Body message text doesn't match expected pattern");
+    return parsedMessages;
   }
 
   /**
-   * Asserts that the fake mail server received no new emails since it was last
-   * checked, waiting up to 10 seconds to be sure.
-   *
-   * @return the email messages
+   * @return the total number of messages received by this SMTP server since it was started
    */
-  public void assertNoEmailReceived() throws Exception {
-    int oldCount = lastCount;
-    // ensure that newCount email has been received, waiting up to 10 seconds
-    int timeout = 10000;
-    long startTime = System.currentTimeMillis();
-    while (System.currentTimeMillis() < (startTime + timeout)) {
-      assertEquals(oldCount, mailServer.getReceivedEmailSize());
-      Thread.sleep(1000);
-    }
-    assertEquals(oldCount, mailServer.getReceivedEmailSize());
+  public int getReceivedEmailCount() {
+    return wiser.getMessages().size();
   }
 
   public void stop() {
-    mailServer.stop();
+    wiser.stop();
   }
 
-  public boolean isStopped() {
-    return mailServer.isStopped();
+  public boolean isRunning() {
+    return wiser.getServer().isRunning();
+  }
+
+  @Override
+  public void close() {
+    wiser.stop();
   }
 
   /**
-   * Runs dumbster and prints out all the received email to the command line, until
-   * process is killed.
+   * Runs a new instance of {@link FakeMailServer} on port {@value DEFAULT_PORT} (a different port can be specified with
+   * a command line arg) and keeps printing out all the received email to the console, until the process is killed.
    */
-  public static void main(String[] args) throws InterruptedException {
-    int port = 25252;
-    SimpleSmtpServer mailServer = SimpleSmtpServer.start(port);
-    System.out.println("Dumbster SMTP Server started on port " + port);
-    System.out.println("NOTE: Dumbster doesn't properly preserve line breaks in message bodies");
-    try {
-      int lastCount = mailServer.getReceivedEmailSize();
+  public static void main(String[] args) throws Exception {
+    int port;
+    if (args.length == 1) {
+      port = Integer.parseInt(args[0]);
+      System.out.printf("Using port %d (specified via command-line arg)%n", port);
+    }
+    else {
+      port = DEFAULT_PORT;
+      System.out.printf("Using port %d (can override via command-line arg)%n", port);
+    }
+    try (FakeMailServer mailServer = new FakeMailServer(port)) {
+      int lastCount = mailServer.getReceivedEmailCount();
       while (true) {
-        int newCount = mailServer.getReceivedEmailSize();
+        int newCount = mailServer.getReceivedEmailCount();
         if (newCount > lastCount) {
-          LinkedList<SmtpMessage> messages = new LinkedList<SmtpMessage>();
-          Iterator emailIter = mailServer.getReceivedEmail();
-          while (emailIter.hasNext()) {
-            messages.add((SmtpMessage)emailIter.next());
-          }
-          for (SmtpMessage message : messages.subList(lastCount, newCount)) {
-            System.out.printf("New Email Message Received at %s:%n", new Date().toString());
-            System.out.println("------------------------ Begin Message:");
-            Iterator headerIter = message.getHeaderNames();
-            while (headerIter.hasNext()) {
-              String headerName = (String)headerIter.next();
-              System.out.printf("%s: %s%n", headerName, message.getHeaderValue(headerName));
-            }
-            System.out.println(message.getBody());
-            System.out.println("------------------------ End Message");
+          List<WiserMessage> messages = mailServer.wiser.getMessages();
+          for (WiserMessage message : messages.subList(lastCount, newCount)) {
+            message.dumpMessage(System.out);
           }
         }
         lastCount = newCount;
-        Thread.sleep(1000);
+        ThreadUtils.sleepUnchecked(1000);
       }
-    }
-    finally {
-      mailServer.stop();
     }
   }
 }

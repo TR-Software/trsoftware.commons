@@ -23,7 +23,7 @@ import solutions.trsoftware.commons.shared.annotations.ExcludeFromSuite;
 import solutions.trsoftware.commons.shared.annotations.Slow;
 import solutions.trsoftware.junit.TestSuiteBuilder;
 
-import static solutions.trsoftware.junit.TestTimeboxDecorator.STRICT_TIMEBOX;
+import static solutions.trsoftware.junit.TestTimeBoxDecorator.STRICT_TIMEBOX;
 
 /**
  * A test suite for all unit tests that don't extend {@link GWTTestCase} and are not marked with a

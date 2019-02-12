@@ -351,7 +351,7 @@ public class ObjectDiffsTest extends TestCase {
     assertNoDiffs(MapUtils.hashMap("abc", 1, "xyz", 2), MapUtils.sortedMap("abc", 1, "xyz", 2));
     assertNoDiffs(MapUtils.hashMap("abc", 1, "xyz", null), MapUtils.sortedMap("abc", 1, "xyz", null));
     assertNoDiffs(MapUtils.hashMap(null, 1, "xyz", null), MapUtils.hashMap(null, 1, "xyz", null));
-    assertDiffResult(MapUtils.hashMap(1, "abc"), MapUtils.hashMap(),
+    assertDiffResult(MapUtils.hashMap(1, "abc"), Collections.emptyMap(),
         new ExpectedDiff(new Removed("abc"), new MapEntry(1)));
     assertDiffResult(MapUtils.hashMap(1, "abc"), MapUtils.sortedMap(1, "xyz"),
         new ExpectedDiff(new Diff("abc", "xyz"), new MapEntry(1)));

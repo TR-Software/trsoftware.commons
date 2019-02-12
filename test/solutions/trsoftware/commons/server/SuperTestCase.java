@@ -102,7 +102,7 @@ public abstract class SuperTestCase extends TestCase implements CanStopClock {
         if (!Modifier.isStatic(field.getModifiers()) && !fieldType.isPrimitive() && !fieldType.isEnum()) {
           field.setAccessible(true);
           if (field.get(this) != null) {
-            System.err.println("WARNING: field not null after tearDown: " + field.getDeclaringClass().getSimpleName() + "#" + field.getName() + " - it will be nulled by reflection in SuperTestCase.checkForNonNullFields");
+            System.err.println("WARNING: field not null after tearDown: " + field.getDeclaringClass().getSimpleName() + "." + field.getName() + " - it will be nulled by reflection in SuperTestCase.checkForNonNullFields");
             field.set(this, null);
           }
         }

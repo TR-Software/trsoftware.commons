@@ -19,6 +19,7 @@ package solutions.trsoftware.commons.shared.util;
 
 import junit.framework.TestCase;
 import solutions.trsoftware.commons.server.testutil.PerformanceComparison;
+import solutions.trsoftware.commons.shared.annotations.Slow;
 import solutions.trsoftware.commons.shared.testutil.TestData;
 
 import java.util.Collections;
@@ -48,21 +49,20 @@ public class StringTokenizerJavaTest extends TestCase {
   }
 
   /**
-   * Compares performance of solutions.trsoftware.commons.shared.util.StringTokenizer
-   * to java.util.StringTokenizer.
+   * Compares performance of
+   * {@link solutions.trsoftware.commons.shared.util.StringTokenizer solutions.trsoftware.commons.shared.util.StringTokenizer}
+   * to {@link java.util.StringTokenizer}.
    */
+  @Slow
   public void testComparePerformance() throws Exception {
-    // assert that our implementation is at most twice as fast as java.util's
-    assertTrue(2 >=
-        PerformanceComparison.compare(
-            new JavaTokenizeAction(), "java.util.StringTokenizer",
-            new TyperacerTokenizeAction(), "solutions.trsoftware.commons.shared.util.StringTokenizer",
-            200));
-    assertTrue(.5 <=
-        PerformanceComparison.compare(
-            new TyperacerTokenizeAction(), "solutions.trsoftware.commons.shared.util.StringTokenizer",
-            new JavaTokenizeAction(), "java.util.StringTokenizer",
-            200));
+    PerformanceComparison.compare(
+        new JavaTokenizeAction(), "java.util.StringTokenizer",
+        new TyperacerTokenizeAction(), "solutions.trsoftware.commons.shared.util.StringTokenizer",
+        200);
+    PerformanceComparison.compare(
+        new TyperacerTokenizeAction(), "solutions.trsoftware.commons.shared.util.StringTokenizer",
+        new JavaTokenizeAction(), "java.util.StringTokenizer",
+        200);
   }
 
   /**

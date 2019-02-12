@@ -19,10 +19,9 @@ package solutions.trsoftware.commons.shared.graphics;
 
 import com.google.common.collect.BiMap;
 import com.google.common.collect.ImmutableBiMap;
+import com.google.common.collect.ImmutableMap;
 import junit.framework.TestCase;
-import solutions.trsoftware.commons.shared.util.MapDecorator;
 
-import java.util.LinkedHashMap;
 import java.util.Map;
 
 import static solutions.trsoftware.commons.shared.graphics.ColorRGB.valueOf;
@@ -42,10 +41,9 @@ public class ColorRGBTest extends TestCase {
       new ColorRGB(255, 228, 196), new ColorHSL(32.54237288135594, 1, 0.884313725490196)
   );
 
-  private static final Map<String, ColorRGB> STRING_VALUES = new MapDecorator<String, ColorRGB>(new LinkedHashMap<String, ColorRGB>())
-      .put("#12afb1", new ColorRGB(0x12, 0xaf, 0xb1))  // RGB
-      .put("#12afb1ca", new ColorRGB(0x12, 0xaf, 0xb1, 0xca))  // RGBA
-      .getMap();
+  private static final Map<String, ColorRGB> STRING_VALUES = ImmutableMap.of(
+      "#12afb1", new ColorRGB(0x12, 0xaf, 0xb1),  // RGB
+      "#12afb1ca", new ColorRGB(0x12, 0xaf, 0xb1, 0xca));  // RGBA
 
   public void testToHSL() throws Exception {
     for (ColorRGB rgb : EQUIVALENT_COLORS.keySet()) {

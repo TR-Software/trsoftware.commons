@@ -18,12 +18,13 @@
 package solutions.trsoftware.commons.server.testutil;
 
 import com.google.gson.Gson;
+import solutions.trsoftware.commons.server.net.NetUtils;
 import solutions.trsoftware.commons.server.servlet.testutil.DummyHttpServlet;
 import solutions.trsoftware.commons.server.servlet.testutil.HelloServlet;
 import solutions.trsoftware.commons.server.servlet.testutil.LiveServletTestCase;
 import solutions.trsoftware.commons.shared.annotations.Slow;
 
-import static solutions.trsoftware.commons.server.net.NetUtils.*;
+import static solutions.trsoftware.commons.server.net.NetUtils.MIN_USER_PORT;
 
 /**
  * @author Alex
@@ -42,7 +43,7 @@ public class EmbeddedJettyServerTest extends LiveServletTestCase {
   @Override
   protected void setUp() throws Exception {
     super.setUp();
-    port = findAvailableLocalPort(MIN_USER_PORT, MIN_DYNAMIC_PORT);
+    port = NetUtils.findNextAvailableLocalPort(MIN_USER_PORT);
     container = new EmbeddedJettyServer(port);
     dummyServletURL = "http://localhost:" + port + DUMMY_SERVLET_URI;
     helloServletURL = "http://localhost:" + port + HELLO_SERVLET_URI;

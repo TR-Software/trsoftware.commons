@@ -55,12 +55,12 @@ public class Clock {
   }
 
   /**
-   * Causes currentTimeMillis() to return an instrumented value of time,
+   * Causes {@link #currentTimeMillis()} to return an instrumented value of time,
    * for the current thread, which is initialized to the last real time value
-   * by this method but can be adjusted with set() or advance.
-   *
+   * by this method, but can be adjusted with {@link #set(long)} or {@link #advance(long)}.
+   * <p>
    * NOTE: the requirement that this method is always called prior to
-   * advance, startTicking, etc., gives us a convenient way to search
+   * {@link #advance(long)}, {@link #startTicking}, etc., gives us a convenient way to search
    * for all occurrences of code that stops the clock.
    *
    * @return the current time as fixed by this call
@@ -82,23 +82,29 @@ public class Clock {
 
   /** Resumes the clock from the current value of instrumentedTime */
   public static void startTicking() {
-    if (instrumentedTime.get() == null)
-      throw new IllegalStateException("Clock must be stopped before calling startTicking()");
+    assertClockStopped();
     offset.set(instrumentedTime.get() - System.currentTimeMillis());
     instrumentedTime.set(null);
   }
 
   /** Advances the clock by the given number of milliseconds */
   public static void advance(long millis) {
-    if (instrumentedTime.get() == null)
-      throw new IllegalStateException("Clock must be stopped before calling advance()");
+    assertClockStopped();
     instrumentedTime.set(instrumentedTime.get() + millis);
   }
 
   /** Sets a fake time value to be returned by currentTimeMillis after stop() was called */
   public static void set(long millis) {
-    if (instrumentedTime.get() == null)
-      throw new IllegalStateException("Clock must be stopped before calling set()");
+    assertClockStopped();
     instrumentedTime.set(millis);
+  }
+
+  public static boolean isStopped() {
+    return instrumentedTime.get() != null;
+  }
+
+  private static void assertClockStopped() {
+    if (!isStopped())
+      throw new IllegalStateException("Clock must be stopped before calling this method");
   }
 }

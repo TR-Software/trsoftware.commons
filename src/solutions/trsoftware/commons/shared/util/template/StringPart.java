@@ -31,7 +31,7 @@ public class StringPart implements TemplatePart {
     this.str = str;
   }
 
-  public StringBuilder write(StringBuilder buffer, Map<String, String> substitutions) {
+  public StringBuilder write(StringBuilder buffer, Map<String, ?> substitutions) {
     return buffer.append(str);
   }
 

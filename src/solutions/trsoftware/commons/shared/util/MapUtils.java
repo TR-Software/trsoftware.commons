@@ -35,17 +35,50 @@ import java.util.function.Function;
 public class MapUtils {
 
   /**
-   * Creates a {@link TreeMap} from the given args (treated as {@code key1, value1, key2, value2, ...})
+   * Creates a {@link TreeMap} from the given key-value pairs (treated as {@code key1, value1, key2, value2, ...})
    * @deprecated use {@link MapDecorator} for type-safety
    */
-  public static <K,V> SortedMap<K, V> sortedMap(Object... keyValuePairs) {
+  public static <K,V> TreeMap<K, V> sortedMap(Object... keyValuePairs) {
     return putAll(new TreeMap<K, V>(), keyValuePairs);
   }
 
-  // TODO: replace all these deprecated methods with multiple overloads (like com.google.common.collect.ImmutableMap.of(K, V, K, V, K, V))
+  /**
+   * Creates a {@link TreeMap} from the given key-value pair
+   */
+  public static <K,V> TreeMap<K, V> sortedMap(K key, V value) {
+    return putAll(new TreeMap<K, V>(), key, value);
+  }
 
   /**
-   * Creates a {@link HashMap} from the given args (treated as {@code key1, value1, key2, value2, ...})
+   * Creates a {@link TreeMap} from the given key-value pairs
+   */
+  public static <K,V> TreeMap<K, V> sortedMap(K key1, V value1, K key2, V value2) {
+    return putAll(new TreeMap<K, V>(), key1, value1, key2, value2);
+  }
+
+  /**
+   * Creates a {@link TreeMap} from the given key-value pairs
+   */
+  public static <K,V> TreeMap<K, V> sortedMap(K key1, V value1, K key2, V value2, K key3, V value3) {
+    return putAll(new TreeMap<K, V>(), key1, value1, key2, value2, key3, value3);
+  }
+
+  /**
+   * Creates a {@link TreeMap} from the given key-value pairs
+   */
+  public static <K,V> TreeMap<K, V> sortedMap(K key1, V value1, K key2, V value2, K key3, V value3, K key4, V value4) {
+    return putAll(new TreeMap<K, V>(), key1, value1, key2, value2, key3, value3, key4, value4);
+  }
+
+  /**
+   * Creates a {@link TreeMap} from the given key-value pairs
+   */
+  public static <K,V> TreeMap<K, V> sortedMap(K key1, V value1, K key2, V value2, K key3, V value3, K key4, V value4, K key5, V value5) {
+    return putAll(new TreeMap<K, V>(), key1, value1, key2, value2, key3, value3, key4, value4, key5, value5);
+  }
+
+  /**
+   * Creates a {@link HashMap} from the given key-value pairs (treated as {@code key1, value1, key2, value2, ...})
    * @deprecated use {@link MapDecorator} for type-safety
    */
   public static <K,V> HashMap<K, V> hashMap(Object... keyValuePairs) {
@@ -53,7 +86,77 @@ public class MapUtils {
   }
 
   /**
-   * Creates a {@link LinkedHashMap} from the given args (treated as {@code key1, value1, key2, value2, ...})
+   * Creates a {@link HashMap} from the given key-value pairs
+   */
+  public static <K,V> HashMap<K, V> hashMap(K key, V value) {
+    return putAll(new HashMap<K, V>(), key, value);
+  }
+
+  /**
+   * Creates a {@link HashMap} from the given key-value pairs
+   */
+  public static <K,V> HashMap<K, V> hashMap(K key1, V value1, K key2, V value2) {
+    return putAll(new HashMap<K, V>(), key1, value1, key2, value2);
+  }
+
+  /**
+   * Creates a {@link HashMap} from the given key-value pairs
+   */
+  public static <K,V> HashMap<K, V> hashMap(K key1, V value1, K key2, V value2, K key3, V value3) {
+    return putAll(new HashMap<K, V>(), key1, value1, key2, value2, key3, value3);
+  }
+
+  /**
+   * Creates a {@link HashMap} from the given key-value pairs
+   */
+  public static <K,V> HashMap<K, V> hashMap(K key1, V value1, K key2, V value2, K key3, V value3, K key4, V value4) {
+    return putAll(new HashMap<K, V>(), key1, value1, key2, value2, key3, value3, key4, value4);
+  }
+  
+  /**
+   * Creates a {@link HashMap} from the given key-value pairs
+   */
+  public static <K,V> HashMap<K, V> hashMap(K key1, V value1, K key2, V value2, K key3, V value3, K key4, V value4, K key5, V value5) {
+    return putAll(new HashMap<K, V>(), key1, value1, key2, value2, key3, value3, key4, value4, key5, value5);
+  }
+
+  /**
+   * Creates a {@link LinkedHashMap} from the given key-value pairs
+   */
+  public static <K,V> LinkedHashMap<K, V> linkedHashMap(K key, V value) {
+    return putAll(new LinkedHashMap<K, V>(), key, value);
+  }
+
+  /**
+   * Creates a {@link LinkedHashMap} from the given key-value pairs
+   */
+  public static <K,V> LinkedHashMap<K, V> linkedHashMap(K key1, V value1, K key2, V value2) {
+    return putAll(new LinkedHashMap<K, V>(), key1, value1, key2, value2);
+  }
+
+  /**
+   * Creates a {@link LinkedHashMap} from the given key-value pairs
+   */
+  public static <K,V> LinkedHashMap<K, V> linkedHashMap(K key1, V value1, K key2, V value2, K key3, V value3) {
+    return putAll(new LinkedHashMap<K, V>(), key1, value1, key2, value2, key3, value3);
+  }
+
+  /**
+   * Creates a {@link LinkedHashMap} from the given key-value pairs
+   */
+  public static <K,V> LinkedHashMap<K, V> linkedHashMap(K key1, V value1, K key2, V value2, K key3, V value3, K key4, V value4) {
+    return putAll(new LinkedHashMap<K, V>(), key1, value1, key2, value2, key3, value3, key4, value4);
+  }
+
+  /**
+   * Creates a {@link LinkedHashMap} from the given key-value pairs
+   */
+  public static <K,V> LinkedHashMap<K, V> linkedHashMap(K key1, V value1, K key2, V value2, K key3, V value3, K key4, V value4, K key5, V value5) {
+    return putAll(new LinkedHashMap<K, V>(), key1, value1, key2, value2, key3, value3, key4, value4, key5, value5);
+  }
+  
+  /**
+   * Creates a {@link LinkedHashMap} from the given key-value pairs (treated as {@code key1, value1, key2, value2, ...})
    * @deprecated use {@link #linkedHashMapBuilder()} for type-safety
    */
   public static <K,V> LinkedHashMap<K, V> linkedHashMap(Object... keyValuePairs) {
@@ -69,23 +172,51 @@ public class MapUtils {
 
   /** This a frequently-used special case of {@link #hashMap(Object...)}, for String keys and values */
   public static HashMap<String, String> stringMap(String... keyValuePairs) {
-    return hashMap((Object[])keyValuePairs);
+    return putAll(new HashMap<>(), keyValuePairs);
   }
 
   /** This a frequently-used special case of {@link #linkedHashMap(Object...)}, for String keys and values */
   public static LinkedHashMap<String, String> stringLinkedHashMap(String... keyValuePairs) {
-    return linkedHashMap((Object[])keyValuePairs);
+    return putAll(new LinkedHashMap<>(), keyValuePairs);
   }
 
-  /** Creates a sorted map of the given the args in order key1, value2, key2, value2, ... */
+  /**
+   * Creates an {@link EnumMap} of the given the args in order key1, value2, key2, value2, ...
+   * @deprecated use {@link MapDecorator} for type-safety
+   */
   public static <K extends Enum<K>,V> EnumMap<K, V> enumMap(Class<K> enumClass, Object... keyValuePairs) {
     return putAll(new EnumMap<K, V>(enumClass), keyValuePairs);
+  }
+  
+  /** Creates an {@link EnumMap} from the given key-value pair */
+  public static <K extends Enum<K>,V> EnumMap<K, V> enumMap(Class<K> enumClass, K key, V value) {
+    return putAll(new EnumMap<K, V>(enumClass), key, value);
+  }
+  
+  /** Creates an {@link EnumMap} from the given key-value pairs */
+  public static <K extends Enum<K>,V> EnumMap<K, V> enumMap(Class<K> enumClass, K key1, V value1, K key2, V value2) {
+    return putAll(new EnumMap<K, V>(enumClass), key1, value1, key2, value2);
+  }
+  
+  /** Creates an {@link EnumMap} from the given key-value pairs */
+  public static <K extends Enum<K>,V> EnumMap<K, V> enumMap(Class<K> enumClass, K key1, V value1, K key2, V value2, K key3, V value3) {
+    return putAll(new EnumMap<K, V>(enumClass), key1, value1, key2, value2, key3, value3);
+  }
+  
+  /** Creates an {@link EnumMap} from the given key-value pairs */
+  public static <K extends Enum<K>,V> EnumMap<K, V> enumMap(Class<K> enumClass, K key1, V value1, K key2, V value2, K key3, V value3, K key4, V value4) {
+    return putAll(new EnumMap<K, V>(enumClass), key1, value1, key2, value2, key3, value3, key4, value4);
+  }
+  
+  /** Creates an {@link EnumMap} from the given key-value pairs */
+  public static <K extends Enum<K>,V> EnumMap<K, V> enumMap(Class<K> enumClass, K key1, V value1, K key2, V value2, K key3, V value3, K key4, V value4, K key5, V value5) {
+    return putAll(new EnumMap<K, V>(enumClass), key1, value1, key2, value2, key3, value3, key4, value4, key5, value5);
   }
 
   /**
    * Adds the given items to the given map instance.
    * @param keyValuePairs should be K key1, V value1, K key2, V value2, ...
-   *
+   * @deprecated use {@link MapDecorator} for type-safety
    */
   public static <M extends Map<K,V>,K,V> M putAll(M map, Object... keyValuePairs) {
     int n = keyValuePairs.length;
@@ -97,10 +228,74 @@ public class MapUtils {
   }
 
   /**
+   * Adds the given items to the given map instance.
+   * @param keyValuePairs should be K key1, V value1, K key2, V value2, ...
+   */
+  public static <M extends Map<String,String>> M putAll(M map, String... keyValuePairs) {
+    int n = keyValuePairs.length;
+    if (n % 2 == 1)
+      throw new IllegalArgumentException("Even number of args required.");
+    for (int i = 0; i < n; i+=2)
+      map.put(keyValuePairs[i], keyValuePairs[i+1]);
+    return map;
+  }
+
+  /**
+   * Adds the given items to the given map instance.
+   */
+  public static <M extends Map<K,V>,K,V> M putAll(M map, K key1, V value1) {
+    map.put(key1, value1);
+    return map;
+  }
+
+  /**
+   * Adds the given items to the given map instance.
+   */
+  public static <M extends Map<K,V>,K,V> M putAll(M map, K key1, V value1, K key2, V value2) {
+    map.put(key1, value1);
+    map.put(key2, value2);
+    return map;
+  }
+
+  /**
+   * Adds the given items to the given map instance.
+   */
+  public static <M extends Map<K,V>,K,V> M putAll(M map, K key1, V value1, K key2, V value2, K key3, V value3) {
+    map.put(key1, value1);
+    map.put(key2, value2);
+    map.put(key3, value3);
+    return map;
+  }
+
+  /**
+   * Adds the given items to the given map instance.
+   */
+  public static <M extends Map<K,V>,K,V> M putAll(M map, K key1, V value1, K key2, V value2, K key3, V value3, K key4, V value4) {
+    map.put(key1, value1);
+    map.put(key2, value2);
+    map.put(key3, value3);
+    map.put(key4, value4);
+    return map;
+  }
+
+  /**
+   * Adds the given items to the given map instance.
+   */
+  public static <M extends Map<K,V>,K,V> M putAll(M map, K key1, V value1, K key2, V value2, K key3, V value3, K key4, V value4, K key5, V value5) {
+    map.put(key1, value1);
+    map.put(key2, value2);
+    map.put(key3, value3);
+    map.put(key4, value4);
+    map.put(key5, value5);
+    return map;
+  }
+
+  /**
    * Creates a map that incorporates all the entries in the given maps.  If a map contains a key that is present
    * in a previous map (according to the order of the arguments to this method), then that key will be overwritten.
    * @return A new map that contains all the entries from the given maps, in the same order.
    */
+  @SafeVarargs
   public static <M extends Map<K,V>, K, V> LinkedHashMap<K, V> union(M... maps) {
     LinkedHashMap<K, V> ret = new LinkedHashMap<K, V>();
     for (M map : maps)
@@ -133,12 +328,7 @@ public class MapUtils {
    * @return the same map, post-modification.
    */
   public static <K,V> Map<K,V> removeNullValues(Map<K,V> map) {
-    Iterator<K> mapKeyIter = map.keySet().iterator();
-    while (mapKeyIter.hasNext()) {
-      K k = mapKeyIter.next();
-      if (map.get(k) == null)
-        mapKeyIter.remove();
-    }
+    map.keySet().removeIf(k -> map.get(k) == null);
     return map;
   }
 
@@ -149,12 +339,7 @@ public class MapUtils {
    * doesn't modify the given map. 
    */
   public static <K,V> Map<K,V> retainAll(Map<K,V> map, Set<K> keysToRetain) {
-    Iterator<K> mapKeyIter = map.keySet().iterator();
-    while (mapKeyIter.hasNext()) {
-      K k = mapKeyIter.next();
-      if (!keysToRetain.contains(k))
-        mapKeyIter.remove();
-    }
+    map.keySet().removeIf(k -> !keysToRetain.contains(k));
     return map;
   }
 
@@ -181,7 +366,7 @@ public class MapUtils {
    *
    * @return the same map that was passed in; post-modification
    */
-  public static <K,V> Map<K,V> put(Map<K,V> map, K key, V value) {
+  public static <K,V, M extends Map<K,V>> M put(M map, K key, V value) {
     map.put(key, value);
     return map;
   }
@@ -197,7 +382,7 @@ public class MapUtils {
    *
    * @return the first mapping for the given key, or {@code null} if the mapping doesn't exist.
    */
-  public static String extractSingleValue(Map<String, String[]> paramMap, String key) {
+  public static String extractSingleValue(Map<String, ?> paramMap, String key) {
     Object value = paramMap.get(key);
     if (value instanceof String)
       return (String)value;

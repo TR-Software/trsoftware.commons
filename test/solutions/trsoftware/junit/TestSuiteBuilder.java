@@ -159,9 +159,9 @@ public class TestSuiteBuilder {
   }
 
   /**
-   * If not {@code null}, individual tests will be wrapped with a {@link TestTimeboxDecorator}
+   * If not {@code null}, individual tests will be wrapped with a {@link TestTimeBoxDecorator}
    */
-  private TestTimeboxDecorator.TimeBoxSettings timeBoxSettings;
+  private TestTimeBoxDecorator.TimeBoxSettings timeBoxSettings;
 
 
   /**
@@ -444,7 +444,7 @@ public class TestSuiteBuilder {
       if (applyAnnotationFilters(testMethod)) {
         testsByName.put(testName,
             timeBoxSettings != null ?
-                new TestTimeboxDecorator(test, testMethod, timeBoxSettings)
+                new TestTimeBoxDecorator(test, testMethod, timeBoxSettings)
                 : test);
       }
     }
@@ -569,11 +569,11 @@ public class TestSuiteBuilder {
   }
 
   /**
-   * Wrap individual tests with a {@link TestTimeboxDecorator} using the given settings.
-   * Don't use this method if wrapping tests with a {@link TestTimeboxDecorator} is not desired.
+   * Wrap individual tests with a {@link TestTimeBoxDecorator} using the given settings.
+   * Don't use this method if wrapping tests with a {@link TestTimeBoxDecorator} is not desired.
    * @return self, for method chaining
    */
-  public TestSuiteBuilder setTimeBoxSettings(TestTimeboxDecorator.TimeBoxSettings timeBoxSettings) {
+  public TestSuiteBuilder setTimeBoxSettings(TestTimeBoxDecorator.TimeBoxSettings timeBoxSettings) {
     this.timeBoxSettings = Objects.requireNonNull(timeBoxSettings);
     return this;
   }

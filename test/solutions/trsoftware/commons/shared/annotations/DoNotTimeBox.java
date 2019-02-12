@@ -17,7 +17,7 @@
 
 package solutions.trsoftware.commons.shared.annotations;
 
-import solutions.trsoftware.junit.TestTimeboxDecorator;
+import solutions.trsoftware.junit.TestTimeBoxDecorator;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
@@ -25,14 +25,14 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * Test methods that should not be surrounded with {@link TestTimeboxDecorator}
+ * Test methods that should not be surrounded with {@link TestTimeBoxDecorator}
  * should be marked with this annotation.  This is useful for tests
  *
  * @author Alex
  *
  * @deprecated TODO: get rid of this class, since it's logically equivalent to @Slow
  */
-@Retention(RetentionPolicy.RUNTIME)  // the JVM won't have access usages of @Slow without this
-@Target(ElementType.METHOD)  // only methods may be annotated with @Slow
+@Retention(RetentionPolicy.RUNTIME)
+@Target(ElementType.METHOD)
 public @interface DoNotTimeBox {
 }

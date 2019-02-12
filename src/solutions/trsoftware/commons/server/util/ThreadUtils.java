@@ -19,7 +19,7 @@ package solutions.trsoftware.commons.server.util;
 
 import solutions.trsoftware.commons.client.util.SchedulerUtils;
 
-import java.util.concurrent.Callable;
+import java.util.function.BooleanSupplier;
 
 /**
  * @author Alex, 1/7/14
@@ -49,17 +49,15 @@ public final class ThreadUtils {
    * @param sleepMs millis to sleep between successive checks of the condition
    * @return {@code true} iff the condition was met before the timeout elapsed.
    *
-   * @throws Exception if either the given {@link Callable} or {@link Thread#sleep(long)} threw an exception
-   *
+   * @see RuntimeUtils#retryWhileFalse(int, BooleanSupplier)
    * @see SchedulerUtils#checkAndWait
    */
-  public static boolean waitFor(Callable<Boolean> endCondition, long timeoutMs, long sleepMs) throws Exception {
-    long startTime = System.currentTimeMillis();
-    while (!endCondition.call()) {
-      Thread.sleep(sleepMs);
-      if (System.currentTimeMillis() > startTime + timeoutMs) {
+  public static boolean waitFor(BooleanSupplier endCondition, long timeoutMs, long sleepMs) {
+    Duration duration = new Duration();
+    while (!endCondition.getAsBoolean()) {
+      if (duration.elapsedMillis() > timeoutMs)
         return false;
-      }
+      sleepUnchecked(sleepMs);
     }
     return true;
   }
@@ -71,9 +69,10 @@ public final class ThreadUtils {
    * @param timeoutMs total millis to wait before returning {@code false}
    * @return {@code true} iff the condition was met before the timeout elapsed.
    *
-   * @throws Exception if either the given {@link Callable} or {@link Thread#sleep(long)} threw an exception
+   * @see #waitFor(BooleanSupplier, long, long)
+   * @see RuntimeUtils#retryWhileFalse(int, BooleanSupplier)
    */
-  public static boolean waitFor(Callable<Boolean> endCondition, long timeoutMs) throws Exception {
+  public static boolean waitFor(BooleanSupplier endCondition, long timeoutMs) {
     return waitFor(endCondition, timeoutMs, DEFAULT_SLEEP_DURATION);
   }
 

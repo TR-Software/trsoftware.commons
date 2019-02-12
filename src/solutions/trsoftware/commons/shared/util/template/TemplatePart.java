@@ -22,5 +22,5 @@ import java.util.Map;
 /** A part of the final output - either a string or a substituted variable */
 public interface TemplatePart {
   /** Appends itself to the given string buffer, optionally using a substitution */
-  StringBuilder write(StringBuilder buffer, Map<String, String> substitutions);
+  StringBuilder write(StringBuilder buffer, Map<String, ?> substitutions);
 }

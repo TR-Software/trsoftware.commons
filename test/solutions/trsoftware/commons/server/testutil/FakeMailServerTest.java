@@ -17,8 +17,10 @@
 
 package solutions.trsoftware.commons.server.testutil;
 
-import com.dumbster.smtp.SmtpMessage;
 import junit.framework.TestCase;
+import org.simplejavamail.converter.internal.mimemessage.MimeMessageParser;
+import solutions.trsoftware.commons.server.net.NetUtils;
+import solutions.trsoftware.commons.shared.annotations.Slow;
 
 import javax.mail.Message;
 import javax.mail.Session;
@@ -31,11 +33,12 @@ import java.util.Properties;
 /** @author Alex, 10/8/13 */
 public class FakeMailServerTest extends TestCase {
 
-  private final int port = 25253;
+  private int port;
   private FakeMailServer fakeMailServer;
 
   public void setUp() throws Exception {
     super.setUp();
+    port = NetUtils.findNextAvailableLocalPort(25253);
     fakeMailServer = new FakeMailServer(port);
   }
 
@@ -45,6 +48,7 @@ public class FakeMailServerTest extends TestCase {
     super.tearDown();
   }
 
+  @Slow
   public void testReceivingMail() throws Exception {
     // configure the JavaMail API
     Properties props = new Properties();
@@ -63,8 +67,8 @@ public class FakeMailServerTest extends TestCase {
     msg.setText(msgBody);
     Transport.send(msg);
     // verify receipt
-    SmtpMessage receivedMessage = fakeMailServer.assertNewMessageCount(1).get(0);
-    assertEquals(msgBody, receivedMessage.getBody());
-    assertEquals(subject, receivedMessage.getHeaderValue("Subject"));
+    MimeMessageParser receivedMessage = fakeMailServer.assertNewMessageCount(1, 5000).get(0);
+    assertEquals(msgBody, receivedMessage.getPlainContent().trim());
+    assertEquals(subject, receivedMessage.getSubject());
   }
 }

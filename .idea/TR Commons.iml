@@ -258,15 +258,52 @@
         </SOURCES>
       </library>
     </orderEntry>
-    <orderEntry type="module-library">
-      <library name="Dumbster">
+    <orderEntry type="module-library" scope="TEST">
+      <library name="com.sun.mail:javax.mail:1.6.1" type="repository">
+        <properties maven-id="com.sun.mail:javax.mail:1.6.1" />
         <CLASSES>
-          <root url="jar://$PROGRAMMING_LIBS_DIR$/dumbster-1.6/dumbster1.6.jar!/" />
+          <root url="jar://$PROGRAMMING_LIBS_DIR$/javax.mail-1.6.1/javax.mail-1.6.1.jar!/" />
+          <root url="jar://$PROGRAMMING_LIBS_DIR$/javax.mail-1.6.1/activation-1.1.jar!/" />
         </CLASSES>
-        <JAVADOC />
+        <JAVADOC>
+          <root url="jar://$PROGRAMMING_LIBS_DIR$/javax.mail-1.6.1/javax.mail-1.6.1-javadoc.jar!/" />
+        </JAVADOC>
         <SOURCES>
-          <root url="file://$PROGRAMMING_LIBS_DIR$/dumbster-1.6/src" />
+          <root url="jar://$PROGRAMMING_LIBS_DIR$/javax.mail-1.6.1/javax.mail-1.6.1-sources.jar!/" />
+          <root url="jar://$PROGRAMMING_LIBS_DIR$/javax.mail-1.6.1/activation-1.1-sources.jar!/" />
         </SOURCES>
+      </library>
+    </orderEntry>
+    <orderEntry type="module-library" scope="TEST">
+      <library name="simple-java-mail 4.4.5">
+        <CLASSES>
+          <root url="file://$PROGRAMMING_LIBS_DIR$/simple-java-mail/4.4.5" />
+        </CLASSES>
+        <JAVADOC>
+          <root url="jar://$PROGRAMMING_LIBS_DIR$/simple-java-mail/4.4.5/simple-java-mail-4.4.5-javadoc.jar!/" />
+        </JAVADOC>
+        <SOURCES>
+          <root url="file://$PROGRAMMING_LIBS_DIR$/simple-java-mail/4.4.5" />
+        </SOURCES>
+        <jarDirectory url="file://$PROGRAMMING_LIBS_DIR$/simple-java-mail/4.4.5" recursive="false" />
+        <jarDirectory url="file://$PROGRAMMING_LIBS_DIR$/simple-java-mail/4.4.5" recursive="false" type="SOURCES" />
+      </library>
+    </orderEntry>
+    <orderEntry type="module-library" scope="TEST">
+      <library name="subethasmtp-3.1.7">
+        <CLASSES>
+          <root url="file://$PROGRAMMING_LIBS_DIR$/subethasmtp-3.1.7" />
+          <root url="file://$PROGRAMMING_LIBS_DIR$/subethasmtp-3.1.7/lib" />
+        </CLASSES>
+        <JAVADOC>
+          <root url="jar://$PROGRAMMING_LIBS_DIR$/subethasmtp-3.1.7/subethasmtp-3.1.7-javadoc.jar!/" />
+        </JAVADOC>
+        <SOURCES>
+          <root url="file://$PROGRAMMING_LIBS_DIR$/subethasmtp-3.1.7" />
+        </SOURCES>
+        <jarDirectory url="file://$PROGRAMMING_LIBS_DIR$/subethasmtp-3.1.7" recursive="false" />
+        <jarDirectory url="file://$PROGRAMMING_LIBS_DIR$/subethasmtp-3.1.7/lib" recursive="false" />
+        <jarDirectory url="file://$PROGRAMMING_LIBS_DIR$/subethasmtp-3.1.7" recursive="false" type="SOURCES" />
       </library>
     </orderEntry>
     <orderEntry type="module-library" scope="TEST">

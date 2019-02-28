@@ -1,6 +1,6 @@
 # TR Software Commons
 
-A collection of libraries for building Java web applications with [GWT](http://www.gwtproject.org/learnmore-sdk.html).
+A collection of libraries for building Java web applications with [GWT](http://www.gwtproject.org/overview.html).
 
 ### Getting started
 

@@ -397,8 +397,10 @@ public class MapUtils {
 
   /**
    * Inserts the given element into the map if the map doesn't already contain it.
+   * NOTE: this is different from {@link Map#putIfAbsent(Object, Object)} (Java 1.8), which returns {@code null} if the
+   * value wasn't already in the map.
    * @return The given value if it was inserted, or the previous value if it
-   * was already contained by the map. 
+   * was already contained by the map.
    */
   public static <K,V> V getOrInsert(Map<K,V> map, K key, V value) {
     if (map.containsKey(key))
@@ -412,6 +414,7 @@ public class MapUtils {
    * but does not insert it.
    * @return The given value if it's not in the map, or the previous value if it
    * was already contained by the map.
+   * @deprecated available as {@link Map#getOrDefault(Object, Object)} in Java 1.8+
    */
   public static <K,V> V getOrDefault(Map<K,V> map, K key, V defaultValue) {
     if (map.containsKey(key))
@@ -422,10 +425,11 @@ public class MapUtils {
   // TODO: write a GWT generator that will instantiate a class based on its literal - can get rid of many factories that way:
 
   /**
-   * This version of getOrInsert is for values that are expensive to create,
+   * This version of {@link #getOrInsert} is for values that are expensive to create,
    * and allows passing in a factory method which will be invoked only if needed. 
    * @return The value created by the factory if it was inserted,
    * or the previous value if it was already contained by the map.
+   * @deprecated superseded by {@link Map#computeIfAbsent(Object, Function)} in Java 1.8+
    */
   public static <K,V> V getOrInsert(Map<K,V> map, K key, Function0<V> factory) {
     if (map.containsKey(key))
@@ -449,12 +453,11 @@ public class MapUtils {
   }
 
   /**
-   * This version of getOrInsert is for values that are expensive to create,
+   * This version of {@link #getOrInsert} is for values that are expensive to create,
    * and allows passing in a factory method which, if needed, will be invoked with the given argument.
    * @return The value created by the factory if it was inserted,
    * or the previous value if it was already contained by the map.
-   * @deprecated this method was made obsolete by the introduction of {@link Map#computeIfAbsent(Object, Function)}
-   * in Java 1.8
+   * @see Map#computeIfAbsent(Object, Function)
    */
   public static <K,V,A> V getOrInsert(Map<K,V> map, K key, Function1<A, V> factory, A factoryArg) {
     if (map.containsKey(key))
@@ -465,10 +468,11 @@ public class MapUtils {
   }
 
   /**
-   * This version of getOrInsert is for values that are expensive to create,
+   * This version of {@link #getOrInsert} is for values that are expensive to create,
    * and allows passing in a factory method which will be invoked only if needed.
    * @return The value created by the factory if it was inserted,
    * or the previous value if it was already contained by the map.
+   * @see Map#computeIfAbsent(Object, Function)
    */
   public static <K,A1,A2,V> V getOrInsert(Map<K,V> map, K key, Function2<A1, A2, V> factory, A1 factoryArg1, A2 factoryArg2) {
     if (map.containsKey(key))

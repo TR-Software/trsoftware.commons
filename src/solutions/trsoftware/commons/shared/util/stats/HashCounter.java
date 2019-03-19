@@ -17,10 +17,9 @@
 
 package solutions.trsoftware.commons.shared.util.stats;
 
+import com.google.common.collect.ImmutableMap;
 import solutions.trsoftware.commons.shared.util.ImmutablePair;
 import solutions.trsoftware.commons.shared.util.JsonBuilder;
-import solutions.trsoftware.commons.shared.util.MapUtils;
-import solutions.trsoftware.commons.shared.util.callables.Function0;
 import solutions.trsoftware.commons.shared.util.mutable.MutableInteger;
 
 import java.util.*;
@@ -29,28 +28,24 @@ import java.util.*;
  * Uses a hash map to count the number of occurrences of each key (a key
  * can be any hashable object, most commonly a string).
  *
+ * @param <K> type of the objects being counted
+ *
  * @author Alex
  */
 public class HashCounter<K> implements Mergeable<HashCounter<K>> {
-  private final Map<K, MutableInteger> map;
+  private final LinkedHashMap<K, MutableInteger> map;
   private int totalSum = 0;
 
-  private static final Function0<MutableInteger> newValueFactory = new Function0<MutableInteger>() {
-    public MutableInteger call() {
-      return new MutableInteger(0);
-    }
-  };
-
   public HashCounter() {
-    this(new HashMap<K, MutableInteger>());
+    this(new LinkedHashMap<>());
   }
 
   public HashCounter(int estimatedSize) {
-    this(new HashMap<K, MutableInteger>(estimatedSize));
+    this(new LinkedHashMap<>(estimatedSize));
   }
 
   /** Subclasses can use this constructor to provide their own map implementation */
-  protected HashCounter(Map<K, MutableInteger> mapImpl) {
+  protected HashCounter(LinkedHashMap<K, MutableInteger> mapImpl) {
     map = mapImpl;
   }
 
@@ -61,9 +56,8 @@ public class HashCounter<K> implements Mergeable<HashCounter<K>> {
 
   /** Increments the counter for the given key, and returns the previous count */
   public synchronized int add(K key, int delta) {
-    MutableInteger value = MapUtils.getOrInsert(map, key, newValueFactory);
     totalSum += delta;
-    return value.getAndAdd(delta);
+    return map.computeIfAbsent(key, k -> new MutableInteger()).getAndAdd(delta);
   }
 
   /** Returns the count for the given key */
@@ -76,6 +70,22 @@ public class HashCounter<K> implements Mergeable<HashCounter<K>> {
 
   public synchronized Set<K> keySet() {
     return map.keySet();
+  }
+
+  /**
+   * @return a copy of this counter as an immutable map containing key-count pairs in the same order they were inserted.
+   *
+   * @see #entriesSortedByKeyAscending()
+   * @see #entriesSortedByKeyDescending()
+   * @see #entriesSortedByValueAscending()
+   * @see #entriesSortedByValueDescending()
+   */
+  public synchronized Map<K, Integer> asMap() {
+    ImmutableMap.Builder<K, Integer> mapBuilder = ImmutableMap.builderWithExpectedSize(map.size());
+    for (Map.Entry<K, MutableInteger> entry : map.entrySet()) {
+      mapBuilder.put(entry.getKey(), entry.getValue().get());
+    }
+    return mapBuilder.build();
   }
 
   public SortedSet<Map.Entry<K, Integer>> entriesSortedByKeyAscending() {

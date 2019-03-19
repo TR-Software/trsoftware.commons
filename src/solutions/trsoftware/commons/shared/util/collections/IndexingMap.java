@@ -26,7 +26,7 @@ import java.util.*;
 /**
  * An implementation of {@link Map} that allows lookup of keys via the {@link #findKeys(Enum, Object)} by
  * using additional secondary indexes computed on the values by the {@link Indexer} instance specified at creation time.
- * Therefore this class defines {@link Map} that behaves like a database table.
+ * Therefore this class defines a {@link Map} that behaves like a database table.
  *
  * The set of possible indexes is specified by the {@code enum} {@link I}.
  *

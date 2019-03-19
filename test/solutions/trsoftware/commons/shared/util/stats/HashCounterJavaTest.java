@@ -17,6 +17,7 @@
 
 package solutions.trsoftware.commons.shared.util.stats;
 
+import com.google.common.collect.ImmutableMap;
 import junit.framework.TestCase;
 import solutions.trsoftware.commons.server.testutil.MultithreadedTestHarness;
 import solutions.trsoftware.commons.server.util.ServerArrayUtils;
@@ -40,18 +41,22 @@ public class HashCounterJavaTest extends TestCase {
     counter.increment(0);
     counter.increment(0);
     assertEquals(4, counter.sumOfAllEntries());
+    assertEquals(ImmutableMap.of(0, 4), counter.asMap());
 
     counter.increment(1);
     counter.increment(1);
     counter.increment(1);
     assertEquals(7, counter.sumOfAllEntries());
+    assertEquals(ImmutableMap.of(0, 4, 1, 3), counter.asMap());
 
     counter.increment(2);
     counter.increment(2);
     assertEquals(9, counter.sumOfAllEntries());
+    assertEquals(ImmutableMap.of(0, 4, 1, 3, 2, 2), counter.asMap());
 
     counter.increment(3);
     assertEquals(10, counter.sumOfAllEntries());
+    assertEquals(ImmutableMap.of(0, 4, 1, 3, 2, 2, 3, 1), counter.asMap());
 
     assertEquals(4, counter.size());
 

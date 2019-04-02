@@ -67,6 +67,7 @@ public class CollectionUtils {
    * a collection of person objects to a list of name strings.
    *
    * @return a mapping of all items in the collection matching each key (as defined by keyGetter).
+   * @deprecated in Java 1.8+ can replace this method with {@code items.stream().map(transformation).collect(Collectors.toList())}
    */
   public static <I, O> List<O> collect(Collection<I> items, Function1<I, O> transformation) {
     List<O> outputs = new ArrayList<O>(items.size());
@@ -79,7 +80,8 @@ public class CollectionUtils {
 
   /**
    * Removes all the entries matching predicate from the given collection.
-   * Returns the same map to allow method chaining.
+   * @return the same map to allow method chaining.
+   * @deprecated Java 1.8+ provides {@link Collection#removeIf(java.util.function.Predicate)} for this purpose
    */
   public static <V> Collection<V> removeMatchingEntries(Collection<V> collection, Predicate<V> predicate) {
     Iterator<V> iter = collection.iterator();
@@ -91,7 +93,9 @@ public class CollectionUtils {
     return collection;
   }
 
-
+  /**
+   * @return a new list containing all the elements returned by the given iterator
+   */
   public static <T> ArrayList<T> asList(Iterator<T> it) {
     ArrayList<T> ret = new ArrayList<T>();
     while (it.hasNext())
@@ -99,6 +103,9 @@ public class CollectionUtils {
     return ret;
   }
 
+  /**
+   * @return a new list containing all the elements returned by the iterator of the given {@link Iterable}.
+   */
   public static <T> ArrayList<T> asList(Iterable<T> iterable) {
     return asList(iterable.iterator());
   }

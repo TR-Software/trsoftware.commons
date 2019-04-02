@@ -592,7 +592,7 @@ public class StringUtils {
     else if (arg instanceof Character)
       appendSurrounded(buf, arg, "\'");
     else if (arg instanceof Object[])
-      buf.append(Arrays.toString((Object[])arg));
+      buf.append(Arrays.deepToString((Object[])arg));
     else if (arg instanceof byte[])
       buf.append(Arrays.toString((byte[])arg));
     else if (arg instanceof short[])

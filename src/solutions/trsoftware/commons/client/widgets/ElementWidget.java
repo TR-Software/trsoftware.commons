@@ -60,4 +60,8 @@ public class ElementWidget extends Widget implements HasHTML {
   public void setText(String text) {
     getElement().setInnerText(text);
   }
+
+  public static ElementWidget wrap(String elementId) {
+    return new ElementWidget(Document.get().getElementById(elementId));
+  }
 }

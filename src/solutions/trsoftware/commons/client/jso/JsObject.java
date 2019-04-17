@@ -50,7 +50,7 @@ public class JsObject extends JavaScriptObject {
    * @return An object property value of this native objector or {@code null} if the property is missing or its value is
    * actually {@code null}. Use {@link #hasKey(String)} to disambiguate.
    */
-  public final native JavaScriptObject getObject(String key)/*-{
+  public final native <T extends JavaScriptObject> T getObject(String key)/*-{
     return this[key] || null
   }-*/;
 

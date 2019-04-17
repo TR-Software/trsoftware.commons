@@ -29,6 +29,7 @@ import solutions.trsoftware.commons.client.useragent.UserAgent;
 import solutions.trsoftware.commons.client.widgets.popups.ErrorMessagePopup;
 import solutions.trsoftware.commons.client.widgets.popups.PopupDialog;
 import solutions.trsoftware.commons.shared.util.LazyReference;
+import solutions.trsoftware.commons.shared.util.StringUtils;
 
 /**
  * Oct 12, 2011
@@ -139,7 +140,6 @@ public class CommonsUncaughtExceptionHandler implements GWT.UncaughtExceptionHan
       @Override
       public void onDeobfuscationResultAvailable(Throwable ex, String stackTrace) {
         CommonsUncaughtExceptionHandler.this.onDeobfuscationResultAvailable(ex, stackTrace);
-
       }
     });
   }
@@ -154,7 +154,7 @@ public class CommonsUncaughtExceptionHandler implements GWT.UncaughtExceptionHan
    * @param stackTrace the de-obfuscated stack trace of the given exception
    */
   protected void onDeobfuscationResultAvailable(Throwable ex, String stackTrace) {
-    logException(ex.toString() + ":\n" + stackTrace);
+    logException(ex.toString() + ":\n" + StringUtils.firstNotBlank(stackTrace, "<no stack trace available>"));
   }
 
   /**

@@ -129,6 +129,11 @@ public class StackTraceDeobfuscatorClient {
   public void deobfuscateStackTrace(final Throwable ex, final Callback callback) {
     assertInitialized();
     List<StackTraceElement> stackTrace = Arrays.asList(ex.getStackTrace());
+    if (stackTrace.isEmpty()) {
+      // this might happen if the exception originated outside GWT code
+      callback.onDeobfuscationResultAvailable(ex, "");
+      return;
+    }
     // 1) clean up the stack trace to create a compact canonical representation (that can be used as a cache key)
     // 1.a) truncate the stack trace on the client side to save bandwidth (also have the client not send the stack trace if it's the same as the last one, but simply has one extra element at the end)
     if (stackTrace.size() > stackTraceSizeLimit) {

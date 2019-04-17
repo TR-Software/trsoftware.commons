@@ -17,8 +17,8 @@
 
 package solutions.trsoftware.commons.client.widgets;
 
+import com.google.gwt.dom.client.Element;
 import com.google.gwt.dom.client.Style;
-import com.google.gwt.user.client.Element;
 import com.google.gwt.user.client.ui.TextBoxBase;
 import com.google.gwt.user.client.ui.Widget;
 import solutions.trsoftware.commons.shared.util.StringUtils;

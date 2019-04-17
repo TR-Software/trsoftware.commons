@@ -18,9 +18,9 @@
 package solutions.trsoftware.commons.client.util;
 
 import com.google.gwt.core.shared.GWT;
+import com.google.gwt.dom.client.Element;
 import com.google.gwt.user.client.Command;
 import com.google.gwt.user.client.DOM;
-import com.google.gwt.user.client.Element;
 import com.google.gwt.user.client.EventListener;
 import com.google.gwt.user.client.ui.Widget;
 import solutions.trsoftware.commons.client.jso.JsDocument;
@@ -135,7 +135,7 @@ public class GwtUtils {
   public static Widget getFocusedWidget() {
     Element activeElement = JsDocument.get().getActiveElement();
     if (activeElement != null)
-      return (Widget)elementToWidget(activeElement);
+      return elementToWidget(activeElement);
     return null;
   }
 

@@ -22,6 +22,7 @@ import com.google.gwt.event.shared.EventHandler;
 import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.user.client.Event;
 import solutions.trsoftware.commons.client.jso.JsDocument;
+import solutions.trsoftware.commons.client.jso.JsObject;
 
 /**
  * Entry point into the HTML5 "Page Visibility API", which can tell us whether the browser tab/window is currently visible.
@@ -54,14 +55,14 @@ public class PageVisibility {
    * @return true if the current browser supports this API
    */
   public static boolean isSupported() {
-    return JsDocument.get().hasKey("hidden");
+    return JsDocument.get().<JsObject>cast().hasKey("hidden");
   }
 
   /**
    * @return false if the page is currently hidden or if the current browser doesn't support this API
    */
   public static boolean isHidden() {
-    return JsDocument.get().getBoolean("hidden");
+    return JsDocument.get().<JsObject>cast().getBoolean("hidden");
   }
 
   /**

@@ -174,20 +174,22 @@ public class ListUtils {
   }
 
   /**
-   * Replaces the i-th element of the given list with the given value.
-   * @return the given list
-   */
-  public static <T> List<T> replace(List<T> list, int i, T newValue) {
-    list.remove(i);
-    list.add(i, newValue);
-    return list;
-  }
-
-  /**
    * @return the subset of elements satisfying the given predicate
    * @see CollectionUtils#filter(Iterable, Predicate)
    */
   public static <T> ArrayList<T> filter(List<T> list, Predicate<T> predicate) {
     return CollectionUtils.filter(list, predicate);
+  }
+
+  /**
+   * Removes elements from the tail of the list until its size is &le; {@code maxSize}.
+   *
+   * @param maxSize the max number of elements to keep in the original list
+   */
+  public static <T> void trimTail(List<T> list, int maxSize) {
+    assert maxSize >= 0;
+    if (list.size() > maxSize) {
+      list.subList(maxSize, list.size()).clear();
+    }
   }
 }

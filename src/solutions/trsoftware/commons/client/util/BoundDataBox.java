@@ -30,6 +30,8 @@ import java.util.List;
  */
 public class BoundDataBox<V> extends Box<V> {
 
+  // TODO: rewrite this using event handlers?
+
   /** These display widgets will be updated whenever the boxed value changes */
   private List<TakesValue<V>> boundWidgets;
 

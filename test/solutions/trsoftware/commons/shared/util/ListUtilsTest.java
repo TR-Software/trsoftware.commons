@@ -17,6 +17,7 @@
 
 package solutions.trsoftware.commons.shared.util;
 
+import com.google.common.collect.ImmutableList;
 import junit.framework.TestCase;
 import solutions.trsoftware.commons.shared.testutil.AssertUtils;
 
@@ -131,14 +132,33 @@ public class ListUtilsTest extends TestCase {
     assertNotSame(lst, reversedCopy(lst));  // make sure that a copy of the list was made
   }
 
-  public void testReplace() throws Exception {
-    assertEquals(arrayList(1, 2, 3), replace(arrayList(5, 2, 3), 0, 1));
-    assertEquals(arrayList(1, 2, 3), replace(arrayList(1, 5, 3), 1, 2));
-    assertEquals(arrayList(1, 2, 3), replace(arrayList(1, 2, 5), 2, 3));
-    AssertUtils.assertThrows(IndexOutOfBoundsException.class, new Runnable() {
-      public void run() {
-        replace(arrayList(1, 2, 5), 3, 4);
-      }
-    });
+  public void testTrimTail() throws Exception {
+    List<Integer> list = new ArrayList<>();
+    for (int i = 0; i < 20; i++) {
+      list.add(i);
+    }
+    List<Integer> originalList = ImmutableList.copyOf(list);
+
+    for (int i = list.size(); i < list.size() + 3; i++) {
+      // shouldn't modify the list if maxSize >= actual size
+      trimTail(list, i);
+      assertEquals(originalList, list);
+      assertEquals(19, (int)last(list));
+    }
+    // the list should still contain 0..19
+    assertEquals(20, list.size());
+    assertEquals(19, (int)last(list));
+
+    // now actually trim the list
+    trimTail(list, 15);
+    assertEquals(15, list.size());
+    assertEquals(14, (int)last(list));
+
+    trimTail(list, 1);
+    assertEquals(1, list.size());
+    assertEquals(0, (int)last(list));
+
+    trimTail(list, 0);
+    assertTrue(list.isEmpty());
   }
 }

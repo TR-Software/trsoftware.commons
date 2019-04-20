@@ -17,6 +17,8 @@
 
 package solutions.trsoftware.commons.shared.util;
 
+import java.util.concurrent.atomic.AtomicBoolean;
+
 /**
  * A simple way to ensure that some code only runs once.
  * <p>
@@ -30,18 +32,17 @@ package solutions.trsoftware.commons.shared.util;
  * @author Alex
  */
 public class RunOnlyOnceGuard {
-  private boolean locked = false;
+  private final AtomicBoolean locked = new AtomicBoolean();
 
   /**
    * @throws IllegalStateException if this method has already been called on this instance.
    */
   public void check(String failureMessage) throws IllegalStateException {
-    if (locked)  // this method should only be called once per lifetime of this instance
+    if (!locked.compareAndSet(false, true))  // this method should only be called once per lifetime of this instance
       throw new IllegalStateException(failureMessage);
-    locked = true;
   }
 
   public boolean isLocked() {
-    return locked;
+    return locked.get();
   }
 }

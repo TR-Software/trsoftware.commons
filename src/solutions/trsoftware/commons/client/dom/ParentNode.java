@@ -46,10 +46,7 @@ public class ParentNode extends Node {
    * @return {@code true} iff the arg is not {@code null} and is either an Element or Document node.
    */
   public static boolean is(JavaScriptObject o) {
-    if (Node.is(o)) {
-      return is((Node) o);
-    }
-    return false;
+    return Node.is(o) && is((Node)o);
   }
 
   /**

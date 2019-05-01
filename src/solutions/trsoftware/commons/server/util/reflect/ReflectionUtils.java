@@ -68,9 +68,21 @@ public abstract class ReflectionUtils {
   /**
    * @return the primitive type corresponding to the given wrapper class, or {@code null} if the given class is not
    * a wrapper type.
+   * @see #unwrap(Class)
    */
   public static Class primitiveTypeFor(Class wrapper) {
     return WRAPPER_TYPES.get(wrapper);
+  }
+
+  /**
+   * @return if the arg is a wrapper type, returns the corresponding primitive type; otherwise returns the arg as-is.
+   * @see #isPrimitiveWrapper(Class)
+   * @see #primitiveTypeFor(Class)
+   */
+  public static Class unwrap(Class type) {
+    if (isPrimitiveWrapper(type))
+      return primitiveTypeFor(type);
+    return type;
   }
 
   /**

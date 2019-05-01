@@ -20,7 +20,7 @@ package solutions.trsoftware.commons.server.util.persistence;
 /**
  * @author Alex, 12/31/2014
  */
-public interface JsonSerializer<T> {
+public interface JsonSerializer<T> extends ObjectSerializer<T, String> {
 
   /** @return a new instance of {@link T} based on the data encoded in the given JSON object string. */
   T parseJson(String json);
@@ -31,5 +31,13 @@ public interface JsonSerializer<T> {
    */
   String toJson(T instance);
 
-  Class<T> getValueType();
+  @Override
+  default String serialize(T instance) {
+    return toJson(instance);
+  }
+
+  @Override
+  default T parse(String data) {
+    return parseJson(data);
+  }
 }

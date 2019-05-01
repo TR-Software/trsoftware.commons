@@ -75,6 +75,17 @@ public class ReflectionUtilsTest extends TestCase {
     assertNull(primitiveTypeFor(null));
   }
 
+  public void testUnwrap() throws Exception {
+    assertEquals(char.class, unwrap(Character.class));
+    assertEquals(short.class, unwrap(Short.class));
+    assertEquals(float.class, unwrap(Float.class));
+    // if the arg is not a wrapper, should just return the arg
+    assertSame(char.class, unwrap(char.class));
+    assertSame(short.class, unwrap(short.class));
+    assertSame(float.class, unwrap(float.class));
+    assertSame(Foo.class, unwrap(Foo.class));
+  }
+
   public void testWrapperTypeFor() throws Exception {
     assertEquals(Byte.class, wrapperTypeFor(byte.class));
     assertEquals(Long.class, wrapperTypeFor(long.class));

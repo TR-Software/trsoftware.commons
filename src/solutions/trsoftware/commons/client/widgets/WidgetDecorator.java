@@ -19,6 +19,7 @@ package solutions.trsoftware.commons.client.widgets;
 
 import com.google.gwt.dom.client.Element;
 import com.google.gwt.dom.client.Style;
+import com.google.gwt.user.client.ui.IsWidget;
 import com.google.gwt.user.client.ui.TextBoxBase;
 import com.google.gwt.user.client.ui.Widget;
 import solutions.trsoftware.commons.shared.util.StringUtils;
@@ -125,7 +126,7 @@ public class WidgetDecorator {
 
 
   /**
-   * Controlling the visibility of an element with a "visibility: hidden" style
+   * Controlling the visibility of an element with a {@code "visibility: hidden"} style
    * preserves the element's size (shows a blank area where the element was
    * supposed to be), unlike "display: none".
    * @return the widget itself to allow method chaining.
@@ -136,10 +137,19 @@ public class WidgetDecorator {
   }
 
   /**
-   * Controlling the visibility of an element with a "visibility: hidden" style
+   * Controlling the visibility of an element with a {@code "visibility: hidden"} style
    * preserves the element's size (shows a blank area where the element was
    * supposed to be), unlike "display: none".
    * @return the widget itself to allow method chaining.
+   */
+  @SuppressWarnings("unchecked")
+  public static <T extends IsWidget> T setVisibilityHidden(T widget, boolean hidden) {
+    return (T)setVisibilityHidden(widget.asWidget(), hidden);
+  }
+
+  /**
+   * @return {@code true} iff the widget's element has the style property {@code "visibility: hidden"}
+   * @see #setVisibilityHidden
    */
   public static boolean isVisibilityHidden(Widget widget) {
     return "hidden".equals(getStyleProperty(widget, "visibility"));

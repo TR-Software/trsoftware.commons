@@ -17,8 +17,12 @@
 
 package solutions.trsoftware.commons.shared.util;
 
+import java.util.function.Supplier;
+
 /**
  * A cache for an instance that will be created only once (on the first invocation of {@link #get()}).
+ *
+ * @param <T> the type of object referred to by this reference
  *
  * @author Alex
  */
@@ -53,4 +57,16 @@ public abstract class LazyReference<T> {
   }
 
   protected abstract T create();
+
+  /**
+   * Factory method that uses the given supplier function to implement the {@link #create()} method.
+   */
+  public static <T> LazyReference<T> fromSupplier(Supplier<T> supplier) {
+    return new LazyReference<T>() {
+      @Override
+      protected T create() {
+        return supplier.get();
+      }
+    };
+  }
 }

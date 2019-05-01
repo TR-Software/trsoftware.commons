@@ -80,7 +80,7 @@ import static solutions.trsoftware.commons.server.io.file.FileUtils.TEMP_DIR_PAT
  *   </li>
  * </ol>
  * </blockquote>
- * The above information (which comes from <cite>the source code of {@link Shutdown} in JDK 1.8</cite>).
+ * The above information comes from <cite>the source code of {@link Shutdown} in JDK 1.8</cite>.
  *
  * <h3><i>Justification</i></h3>
  *
@@ -96,8 +96,6 @@ import static solutions.trsoftware.commons.server.io.file.FileUtils.TEMP_DIR_PAT
  *      Tampering with the {@link Shutdown} sequence by forcing the directory hook (as described above) into
  *      {@link Shutdown#hooks slot 3}, thereby making it run only <em>after</em> all the application hooks
  *      (and the {@link java.io.DeleteOnExitHook}).
- *
- *      This is the approach we used in {@link DeleteDirectoryOnExitHook}.
  *      The downside to this hack is that it may not be compatible with future versions of the JDK.
  *   </li>
  * </ol>
@@ -132,6 +130,8 @@ public final class TempFileRegistry {
    */
   private NavigableSet<Path> paths = new TreeSet<>();
 
+  private boolean shutdownHookAdded;
+
   private final Object lock = this;
 
   private static final Object staticLock = TempFileRegistry.class;
@@ -162,7 +162,24 @@ public final class TempFileRegistry {
    * Constructor exposed for unit testing only.  Normal application code should use {@link #getInstance()}.
    */
   TempFileRegistry() {
-    Runtime.getRuntime().addShutdownHook(new Thread(this::runShutdownHook, getClass().getName() + " shutdown hook"));
+
+  }
+
+  /**
+   * Lazily adds the shutdown hook (if it hasn't already been added).  Assumes that it's called within a
+   * {@code synchronized} block.
+   * <p>
+   * NOTE: if called from inside a webapp, could cause an exception while the app server (e.g. Tomcat) is shutting down,
+   * because the webapp that added this hook would have already been unloaded at that point:
+   * <pre>
+   *   java.lang.IllegalStateException: Illegal access: this web application instance has been stopped already. Could not load [solutions.trsoftware.commons.server.io.file.FileDeletionScheduler]
+   * </pre>
+   */
+  private void maybeAddShutdownHook() {
+    if (!shutdownHookAdded) {
+      Runtime.getRuntime().addShutdownHook(new Thread(this::runShutdownHook, getClass().getName() + " shutdown hook"));
+      shutdownHookAdded = true;
+    }
   }
 
   public static TempFileRegistry getInstance() {
@@ -184,6 +201,7 @@ public final class TempFileRegistry {
     path = requireChildOfSystemTempDir(path);
     // we only need locking after the path has been checked
     synchronized (lock) {
+      maybeAddShutdownHook();
       return getPaths().add(path);
     }
   }

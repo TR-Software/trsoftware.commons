@@ -25,8 +25,6 @@ import java.util.LinkedHashSet;
 import java.util.NavigableSet;
 import java.util.Objects;
 
-// TODO: cont here: unit test this class
-
 /**
  * Helper for {@link TempFileRegistry}.
  * <p>
@@ -91,7 +89,7 @@ class FileDeletionScheduler implements Runnable {
 
   private void visitDirectory(Path path) {
     try {
-      Files.walkFileTree(path, new DeleteOnExitVisitor());
+      Files.walkFileTree(path, new DeleteOnExitVisitor());  // depth-first traversal
     }
     catch (Throwable e) {
       // trap all exceptions (to allow the shutdown hook to continue)

@@ -46,9 +46,7 @@ public abstract class Formatters {
   private static Map<Class, Formatter> aggregationDefaults;
 
   private static Class normalizeType(Class type) {
-    if (ReflectionUtils.isPrimitiveWrapper(type))
-      return ReflectionUtils.primitiveTypeFor(type);
-    return type;
+    return ReflectionUtils.unwrap(type);
   }
 
   private static Formatter getOrCreateSprintfDefault(Class cls, String formatSpec) {

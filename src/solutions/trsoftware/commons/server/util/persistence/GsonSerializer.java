@@ -20,6 +20,8 @@ package solutions.trsoftware.commons.server.util.persistence;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 
+import java.io.Reader;
+
 /**
  * Implements {@link JsonSerializer} using the GSON library.
  *
@@ -31,7 +33,7 @@ public class GsonSerializer<T> implements JsonSerializer<T> {
 
   protected final Gson gson;
 
-  protected final Class<T> valueType;
+  protected final Class<? extends T> valueType;
 
   /**
    * @param valueType Needs to be passed explicitly despite this class already having a generic type argument,
@@ -40,7 +42,7 @@ public class GsonSerializer<T> implements JsonSerializer<T> {
    * Read <a href="http://www.javacodegeeks.com/2013/12/advanced-java-generics-retreiving-generic-type-arguments.html">
    * this article</a> for more info.
    */
-  public GsonSerializer(Class<T> valueType) {
+  public GsonSerializer(Class<? extends T> valueType) {
     this.valueType = valueType;
     GsonBuilder gsonBuilder = new GsonBuilder();
     configureGson(gsonBuilder);
@@ -57,17 +59,20 @@ public class GsonSerializer<T> implements JsonSerializer<T> {
 
   @Override
   public T parseJson(String json) {
-    return gson.fromJson(json, getValueType());
+    return gson.fromJson(json, valueType);
+  }
+
+  public T parseJson(Reader reader) {
+    return gson.fromJson(reader, valueType);  // TODO: pull this method up?
   }
 
   @Override
   public String toJson(T instance) {
-    return gson.toJson(instance, getValueType());
+    return gson.toJson(instance, valueType);
   }
 
-  @Override
-  public Class<T> getValueType() {
-    return valueType;
+  public void toJson(T instance, Appendable writer) {
+    gson.toJson(instance, valueType, writer);  // TODO: pull this method up?
   }
 
 }

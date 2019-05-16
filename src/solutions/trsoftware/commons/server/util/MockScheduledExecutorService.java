@@ -75,7 +75,7 @@ public class MockScheduledExecutorService implements ScheduledExecutorService {
 
 
   /**
-   * Unlike advanceClockAndPump, which advances the clock in one go, this method
+   * Unlike {@link #advanceClockAndPump}, which advances the clock in one go, this method
    * advances the mock clock incrementally, 1/64 th of the remaining interval
    * on each iteration (or 1 millis whichever is larger),
    * invoking all the tasks scheduled up to that point.
@@ -91,12 +91,13 @@ public class MockScheduledExecutorService implements ScheduledExecutorService {
   }
 
   /**
-   * Unlike similar to advanceClockAndPumpIncrementally, except instead
+   * Similar to {@link #advanceClockAndPumpIncrementally}, except instead
    * of specifying the offset, you specify the target time to advance the clock
    * to.
    *
    * This ensures that the scheduled events execute as close to their target time as possible.
-   * @param targetTime
+   *
+   * @param targetTime an absolute timestamp
    */
   public void advanceClockAndPumpIncrementallyTo(long targetTime) {
     // tick through the clock, 1/64 th of the interval at a time, until we reach the target date

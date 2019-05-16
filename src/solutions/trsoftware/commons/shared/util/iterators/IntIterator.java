@@ -1,22 +1,18 @@
 package solutions.trsoftware.commons.shared.util.iterators;
 
 import java.util.Iterator;
+import java.util.PrimitiveIterator;
 
 /**
  * An {@link Iterator} optimized for primitive {@code int} elements:
  * provides the {@link #nextInt()} method to avoid auto-boxing.
  *
+ * @see PrimitiveIterator.OfInt
  * @author Alex
  * @since 1/11/2019
  */
-public interface IntIterator extends Iterator<Integer> {
+public interface IntIterator extends PrimitiveIterator.OfInt {
 
-  /**
-   * Same as {@link #next()}, but returns a primitive {@code int}.
-   * <p>
-   * <em>Implementation Note</em>: must obey the contract of {@link #next()}
-   *
-   * @return the next element in the iteration
-   */
-  int nextInt();
+  // TODO: get rid of this interface (make all subclasses implement java.util.PrimitiveIterator.OfInt directly)
+
 }

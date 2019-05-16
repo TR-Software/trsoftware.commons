@@ -23,6 +23,7 @@ import solutions.trsoftware.commons.shared.testutil.AssertUtils;
 import java.util.*;
 
 import static solutions.trsoftware.commons.shared.util.StringUtils.*;
+import static solutions.trsoftware.commons.shared.util.function.FunctionalUtils.partial;
 
 /**
  * Date: Jul 7, 2008 Time: 2:34:57 PM
@@ -30,6 +31,42 @@ import static solutions.trsoftware.commons.shared.util.StringUtils.*;
  * @author Alex
  */
 public class StringUtilsTest extends TestCase {
+
+  /**
+   * Unicode string for the "see no evil" monkey emoji character ({@value #SEE_NO_EVIL}).
+   * This is a {@link Character#isSupplementaryCodePoint(int) supplementary code point} which is represented in a Java
+   * string as a {@link Character#isSurrogate(char) surrogate pair}.
+   * @see #THREE_MONKEYS
+   */
+  public static final String SEE_NO_EVIL = "\uD83D\uDE48";
+
+  /**
+   * Unicode string for the "hear no evil" monkey emoji character ({@value #HEAR_NO_EVIL}).
+   * This is a {@link Character#isSupplementaryCodePoint(int) supplementary code point} which is represented in a Java
+   * string as a {@link Character#isSurrogate(char) surrogate pair}.
+   * @see #THREE_MONKEYS
+   */
+  public static final String HEAR_NO_EVIL = "\uD83D\uDE49";
+  
+  /**
+   * Unicode string for the "speak no evil" monkey emoji character ({@value #SPEAK_NO_EVIL}).
+   * This is a {@link Character#isSupplementaryCodePoint(int) supplementary code point} which is represented in a Java
+   * string as a {@link Character#isSurrogate(char) surrogate pair}.
+   * @see #THREE_MONKEYS
+   */
+  public static final String SPEAK_NO_EVIL = "\uD83D\uDE4A";
+
+  /**
+   * Unicode string containing 3 {@link Character#isSupplementaryCodePoint(int) supplementary code points}
+   * ({@link Character#isSurrogate(char) surrogate pairs}) separated by spaces.
+   *
+   * These supplementary characters are the emoji of "3 wise monkeys" (see no evil, hear no evil, speak no evil):
+   * {@value #THREE_MONKEYS}
+   *
+   * @see <a href="https://unicode.org/emoji/charts/full-emoji-list.html">Full Emoji List on unicode.org</a>
+   * @see <a href="http://snible.org/java2/uni2java.html">Unicode to Java string literal converter</a>
+   */
+  public static final String THREE_MONKEYS = SEE_NO_EVIL + " " + HEAR_NO_EVIL + " " + SPEAK_NO_EVIL;
 
   public void testTemplate() throws Exception {
     assertEquals("x-y+x", template("$1-$2+$1", "x", "y"));
@@ -73,6 +110,12 @@ public class StringUtilsTest extends TestCase {
     assertEquals("ab", repeat("ab", 1));
     assertEquals("abab", repeat("ab", 2));
     assertEquals("ababab", repeat("ab", 3));
+
+    // test overloaded method taking a Unicode code point
+    assertEquals("", repeat(SEE_NO_EVIL.codePointAt(0), 0));
+    assertEquals(repeat(SEE_NO_EVIL, 1), repeat(SEE_NO_EVIL.codePointAt(0), 1));
+    assertEquals(repeat(SEE_NO_EVIL, 2), repeat(SEE_NO_EVIL.codePointAt(0), 2));
+    assertEquals(repeat(SEE_NO_EVIL, 3), repeat(SEE_NO_EVIL.codePointAt(0), 3));
   }
 
   public void testConstantNameToTitleCase() throws Exception {
@@ -795,4 +838,30 @@ public class StringUtilsTest extends TestCase {
     assertTrue(notEmpty("x"));
   }
 
+  public void testBracket() throws Exception {
+    // 1) test the (String, char) version of the method
+    assertEquals("(foo)", bracket("foo", '('));
+    assertEquals("{foo}", bracket("foo", '{'));
+    assertEquals("[foo]", bracket("foo", '['));
+    assertEquals("<foo>", bracket("foo", '<'));
+    assertEquals("XfooX", bracket("foo", 'X'));
+    // 2) test the (String, String) version of the method
+    assertEquals("([foo])", bracket("foo", "(["));
+    assertEquals("<{{foo}}>", bracket("foo", "<{{"));
+    assertEquals("/* foo */", bracket("foo", "/* "));
+    assertEquals("XyZfooZyX", bracket("foo", "XyZ"));
+  }
+
+  public void testLastCodePoint() throws Exception {
+    assertEquals(0x1F64A, lastCodePoint(THREE_MONKEYS));
+    assertEquals((int)'o', lastCodePoint("foo"));
+    AssertUtils.assertThrows(IllegalArgumentException.class, partial(StringUtils::lastCodePoint, null));
+    AssertUtils.assertThrows(IllegalArgumentException.class, partial(StringUtils::lastCodePoint, ""));
+  }
+
+  public void testLastChar() throws Exception {
+    assertEquals('o', lastChar("foo"));
+    AssertUtils.assertThrows(IllegalArgumentException.class, partial(StringUtils::lastChar, null));
+    AssertUtils.assertThrows(IllegalArgumentException.class, partial(StringUtils::lastChar, ""));
+  }
 }

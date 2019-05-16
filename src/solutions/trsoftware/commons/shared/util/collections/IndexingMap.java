@@ -17,6 +17,7 @@
 
 package solutions.trsoftware.commons.shared.util.collections;
 
+import com.google.common.base.Function;
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Multimap;
 import solutions.trsoftware.commons.shared.util.Assert;
@@ -41,6 +42,7 @@ import java.util.*;
  * the iterators and the additional methods provided by this class that are not present in {@link Map}
  * (e.g. {@link #findKeys(Enum, Object)}).
  *
+ * @see com.google.common.collect.Maps#uniqueIndex(Iterable, Function)
  * @author Alex, 2/24/2016
  */
 public class IndexingMap<K, V, I extends Enum<I>> extends AbstractMap<K, V> {

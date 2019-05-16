@@ -24,6 +24,7 @@ import java.util.Map;
  * <p>
  * This is a type-safe alternative to the factory methods in {@link MapUtils}, e.g. {@link MapUtils#hashMap(Object...)}
  * @see MapUtils#linkedHashMapBuilder()
+ * @see com.google.common.collect.ImmutableMap#builder()
  * @author Alex
  * @since 11/11/2017
  */

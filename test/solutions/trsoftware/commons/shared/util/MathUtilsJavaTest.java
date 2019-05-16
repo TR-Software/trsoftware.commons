@@ -19,9 +19,7 @@ package solutions.trsoftware.commons.shared.util;
 
 import junit.framework.TestCase;
 import solutions.trsoftware.commons.server.util.ServerArrayUtils;
-import solutions.trsoftware.commons.server.util.ServerMathUtils;
 import solutions.trsoftware.commons.shared.testutil.AssertUtils;
-import solutions.trsoftware.commons.shared.util.stats.NumberSample;
 
 import java.math.BigInteger;
 import java.util.*;
@@ -58,26 +56,6 @@ public class MathUtilsJavaTest extends TestCase {
       System.out.println("ourBytes = " + ServerArrayUtils.toHexString(ourBytes, 1, ""));
       assertTrue(Arrays.equals(bigIntBytes, ourBytes));
     }
-  }
-
-  public void testRandomGaussian() throws Exception {
-    int nSamples = 100000;
-    Random rnd = new Random();
-    double mean = 55;
-    double stdev = 30;
-    NumberSample<Double> sample = new NumberSample<Double>();
-    System.out.printf("Random gaussian numbers with mean=%.2f and stdev=%.2f%n", mean, stdev);
-    for (int i = 0; i < nSamples; i++) {
-      double generatedNumber = ServerMathUtils.randomGaussian(rnd, mean, stdev);
-      // print every 1000th number
-      if (i % 1000 == 0)
-        System.out.println(generatedNumber);
-      sample.update(generatedNumber);
-    }
-
-    // make sure that the generated numbers match the expected distribution +/- 1 unit
-    assertEquals(mean, sample.mean(), 1);
-    assertEquals(stdev, sample.stdev(), 1);
   }
 
   public void testPackUnsignedInt32() throws Exception {

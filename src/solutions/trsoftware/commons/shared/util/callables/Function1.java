@@ -17,12 +17,19 @@
 
 package solutions.trsoftware.commons.shared.util.callables;
 
+import java.util.function.Function;
+
 /**
  * A function {@link A} &rarr; {@link R}.
  *
  * @author Alex
  * @deprecated made obsolete by {@link java.util.function.Function}
  */
-public interface Function1<A, R> {
+public interface Function1<A, R> extends Function<A, R> {
   R call(A arg);
+
+  @Override
+  default R apply(A a) {
+    return call(a);
+  }
 }

@@ -44,21 +44,6 @@ import static solutions.trsoftware.commons.server.util.reflect.ReflectionUtils.*
  */
 public class ReflectionUtilsTest extends TestCase {
 
-  public interface IFoo<A,B> {}
-  public interface IBar {}
-
-  public static class Foo implements IFoo {}
-  public static class FooIntString implements IFoo<Integer, String> {}
-
-  public interface IFooSubA extends IFoo {}
-  public interface IFooSubB extends IFoo {}
-
-  public static class FooSubA implements IFooSubA {}
-  public static class FooSubB implements IFooSubB {}
-  public static class FooSubAB implements IFooSubA, IFooSubB {}
-  public static class FooSubABSub extends FooSubAB implements IBar {}
-
-
   public void testIsPrimitiveWrapper() throws Exception {
     assertTrue(isPrimitiveWrapper(Boolean.class));
     assertTrue(isPrimitiveWrapper(Integer.class));
@@ -322,6 +307,51 @@ public class ReflectionUtilsTest extends TestCase {
     System.out.println("result = " + actual);
     assertEquals(expected, actual);
     assertTrue(Files.exists(actual));
+
+    // we also test that this method works for classes with any level of nesting, as well as for local and anonymous classes
+    getInnerLocalAndAnonClasses().forEach(arg -> {
+      assertEquals(expected, getSourceFile(arg));
+    });
+  }
+
+  public void testGetEnclosingClass() throws Exception {
+    Class thisClass = getClass();
+    // we test that this method works for classes with any level of nesting, as well as for local and anonymous classes
+    getInnerLocalAndAnonClasses().forEach(arg -> {
+      assertEquals(thisClass, doGetEnclosingClass(arg));
+    });
+  }
+
+  /**
+   * Generates some test data.
+   * @return an assortment of inner, local, and anonymous classes, with various levels of nesting 
+   */
+  private List<Class> getInnerLocalAndAnonClasses() throws Exception {
+    Class thisClass = getClass();
+    EnclosingClassTester tester = new EnclosingClassTester();
+    return Arrays.asList(thisClass,
+        EnclosingClassTester.class,
+        EnclosingClassTester.Inner.class,
+        EnclosingClassTester.Inner.InnerInner.class,
+        tester.anonClassFromConstructor,
+        tester.anonClassFromFieldDecl,
+        tester.localClassFromConstructor,
+        EnclosingClassTester.getLocalClassFromMethod(),
+        EnclosingClassTester.getLocalInnerClassFromMethod(),
+        EnclosingClassTester.localClassFromStaticInit,
+        EnclosingClassTester.localClassFromStaticInitAnon,
+        EnclosingClassTester.localInnerClassFromStaticInit,
+        EnclosingClassTester.localInnerClassFromStaticInitAnon);
+  }
+
+  /**
+   * Invokes {@link ReflectionUtils#getEnclosingClass(Class)} with the given arg, and prints its return value.
+   * @return the result of {@link ReflectionUtils#getEnclosingClass(Class)}
+   */
+  private Class doGetEnclosingClass(Class cls) {
+    Class ret = getEnclosingClass(cls);
+    System.out.println(StringUtils.methodCallToStringWithResult("getEnclosingClass", ret, cls));
+    return ret;
   }
 
   public void testGetJavaSpecVersion() throws Exception {
@@ -344,6 +374,11 @@ public class ReflectionUtilsTest extends TestCase {
     assertNotNull(javaSpecVersion);
     System.out.println("\nparsed javaSpecVersion = " + javaSpecVersion);
     assertEquals(VersionNumber.parse(System.getProperty("java.specification.version")), javaSpecVersion);
+  }
+
+  public void testIsJunitTestCase() throws Exception {
+    assertTrue(isJunit3TestCase(getClass()));  // this class is a unit test
+    assertFalse(isJunit3TestCase(ReflectionUtils.class));  // but ReflectionUtils is not
   }
 
   private static class NestedClass {}
@@ -416,4 +451,71 @@ public class ReflectionUtilsTest extends TestCase {
       this.foo = foo;
     }
   }
+
+
+  public interface IFoo<A,B> {}
+  public interface IBar {}
+
+  public static class Foo implements IFoo {}
+  public static class FooIntString implements IFoo<Integer, String> {}
+
+  public interface IFooSubA extends IFoo {}
+  public interface IFooSubB extends IFoo {}
+
+  public static class FooSubA implements IFooSubA {}
+  public static class FooSubB implements IFooSubB {}
+  public static class FooSubAB implements IFooSubA, IFooSubB {}
+  public static class FooSubABSub extends FooSubAB implements IBar {}
+
+  public static class EnclosingClassTester {
+    static class Inner {
+      class InnerInner {
+
+      }
+    }
+    private final static Class localClassFromStaticInit;
+    private final static Class localClassFromStaticInitAnon;
+    private final static Class localInnerClassFromStaticInit;
+    private final static Class localInnerClassFromStaticInitAnon;
+    static {
+      class Local {
+        class Inner {
+          Class anon = new IBar(){}.getClass();
+        }
+        Class anon = new IBar(){}.getClass();
+        Inner innerInstance = new Inner();
+      }
+      Local localInstance = new Local();
+      localClassFromStaticInit = Local.class;
+      localClassFromStaticInitAnon = localInstance.anon;
+      localInnerClassFromStaticInit = Local.Inner.class;
+      localInnerClassFromStaticInitAnon = localInstance.innerInstance.anon;
+    }
+
+    private Class anonClassFromConstructor;
+    private Class anonClassFromFieldDecl = new IBar(){}.getClass();
+
+    private Class localClassFromConstructor;
+
+    public EnclosingClassTester() {
+      anonClassFromConstructor = new IFoo(){}.getClass();
+      class Local {}
+      localClassFromConstructor = Local.class;
+    }
+
+    static Class getLocalClassFromMethod() {
+      class Local {}
+      return Local.class;
+    }
+
+    static Class getLocalInnerClassFromMethod() {
+      class Local {
+        class Inner {}
+      }
+      return Local.Inner.class;
+    }
+
+
+  }
+
 }

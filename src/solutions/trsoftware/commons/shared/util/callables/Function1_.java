@@ -17,11 +17,19 @@
 
 package solutions.trsoftware.commons.shared.util.callables;
 
+import java.util.function.Consumer;
+
 /**
  * A function {@link A} &rarr; &empty;.
  *
  * @author Alex
+ * @deprecated made obsolete by {@link java.util.function.Consumer}
  */
-public interface Function1_<A> {
+public interface Function1_<A> extends Consumer<A> {
   void call(A arg);
+
+  @Override
+  default void accept(A a) {
+    call(a);
+  }
 }

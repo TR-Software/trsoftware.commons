@@ -17,11 +17,19 @@
 
 package solutions.trsoftware.commons.shared.util.callables;
 
+import java.util.function.Supplier;
+
 /**
  * A function &empty; &rarr; {@link R}
  *
  * @author Alex
+ * @deprecated made obsolete by {@link java.util.function.Supplier}
  */
-public interface Function0<R> {
+public interface Function0<R> extends Supplier<R> {
   R call();
+
+  @Override
+  default R get() {
+    return call();
+  }
 }

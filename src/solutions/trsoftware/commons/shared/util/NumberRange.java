@@ -32,6 +32,7 @@ import java.util.TreeSet;
  * <p>
  * NOTE: this class is similar to the {@code xrange} type in Python.
  *
+ * @see com.google.common.collect.Range
  * @author Alex
  */
 public class NumberRange<T extends Number & Comparable> implements Iterable<T> {

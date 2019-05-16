@@ -28,9 +28,13 @@ import java.util.List;
 /**
  * Reports statistics for a sample of numbers.  Caution: since all samples
  * must be remembered, this class uses O(N) memory.
- *
+ * <p>
  * Implements serializable to support persisting instances to disk
  * using ObjectOutputStream.
+ *
+ * <p style="color: #6495ed; font-weight: bold;">
+ *   TODO: implement {@link java.util.stream.Collector} to allow using this class with a stream.
+ * </p>
  *
  * @author Alex
  */

@@ -18,7 +18,11 @@
 package solutions.trsoftware.commons.shared.util;
 
 import com.google.common.base.Predicate;
+import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.ImmutableMultimap;
+import com.google.common.collect.Multimap;
 import junit.framework.TestCase;
+import solutions.trsoftware.commons.shared.testutil.AssertUtils;
 import solutions.trsoftware.commons.shared.util.callables.Function0;
 import solutions.trsoftware.commons.shared.util.callables.Function1;
 import solutions.trsoftware.commons.shared.util.callables.Function2;
@@ -213,5 +217,45 @@ public class MapUtilsTest extends TestCase {
             return item.getValue() == 2;
           }
         }));
+  }
+
+  private static final ImmutableMultimap<String, Integer> multimap = ImmutableMultimap.<String, Integer>builder()
+      .putAll("even", 0, 2, 4)
+      .putAll("odd", 1, 3, 5)
+      .build();
+
+  /**
+   * @see MapUtils#asMap(Multimap)
+   */
+  public void testAsMap() throws Exception {
+    // NOTE: although the above multimap contains multiple values for each key, this method will not throw an exception
+    Map<String, Integer> map = asMap(multimap);
+    assertEquals(2, map.size());
+    assertNull(map.get("foo"));
+    // however accessing keys with multiple values on this result will raise an IllegalArgumentException
+    AssertUtils.assertThrows(IllegalArgumentException.class, (Runnable)() -> map.get("even"));
+    AssertUtils.assertThrows(IllegalArgumentException.class, (Runnable)() -> new HashMap<>(map));
+    // the inverse of the multimap, on the other hand, is going to be single-valued
+    Map<Integer, String> inverseMap = asMap(multimap.inverse());
+    System.out.println("inverseMap = " + inverseMap);
+    ImmutableMap<Integer, String> expectedInverse = ImmutableMap.<Integer, String>builder()
+        .put(0, "even")
+        .put(2, "even")
+        .put(4, "even")
+        .put(1, "odd")
+        .put(3, "odd")
+        .put(5, "odd")
+        .build();
+    assertEquals(expectedInverse, inverseMap);
+    assertEquals(expectedInverse, ImmutableMap.copyOf(inverseMap));
+  }
+
+  /**
+   * @see MapUtils#maxValuesPerKey(Multimap)
+   */
+  public void testMaxValuesPerKey() throws Exception {
+    assertEquals(3, maxValuesPerKey(multimap));
+    assertEquals(1, maxValuesPerKey(multimap.inverse()));
+    assertEquals(0, maxValuesPerKey(ImmutableMultimap.of()));
   }
 }

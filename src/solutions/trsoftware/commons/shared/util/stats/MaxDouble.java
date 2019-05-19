@@ -22,6 +22,7 @@ import java.io.Serializable;
 /**
  * Keeps track of the max of a sequence of double values.
  *
+ * @see java.util.stream.DoubleStream#max()
  * @author Alex
  */
 public class MaxDouble extends MinMaxDoubleBase implements Serializable, Mergeable<MaxDouble> {

@@ -27,6 +27,8 @@ import solutions.trsoftware.commons.shared.util.StringUtils;
  */
 public class LogographicTokenizer implements TextTokenizer {
 
+  // TODO: this might fail if the text uses "supplemental" Unicode characters (which are represented by 2-char "code pairs" in Java)
+
   @Override
   public String getDelimiter() {
     return "";

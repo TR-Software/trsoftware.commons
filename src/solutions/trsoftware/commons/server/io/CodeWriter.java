@@ -20,6 +20,7 @@ package solutions.trsoftware.commons.server.io;
 import solutions.trsoftware.commons.shared.util.StringUtils;
 
 import java.io.PrintStream;
+import java.util.Objects;
 
 /**
  * Encapsulates a {@link PrintStream} and provides methods that are useful for printing generated code.
@@ -39,7 +40,7 @@ public class CodeWriter {
   protected int indentLevel;
 
   public CodeWriter(PrintStream out) {
-    this.out = out;
+    this.out = Objects.requireNonNull(out);
   }
 
   /**

@@ -23,7 +23,14 @@ import java.util.NoSuchElementException;
 
 /**
  * A GWT-compatible version of {@link java.util.StringTokenizer}.
- *
+ * <p>
+ *   Notable differences from {@link java.util.StringTokenizer} are that this class:
+ *   <ol>
+ *     <li>implements {@code Iterator<String>} instead of {@code Enumeration<Object>}</li>
+ *     <li>is <strong>unable to handle Unicode <i>supplementary characters</i></strong>
+ *     (code points represented by <i>surrogate pairs</i> of 2 chars in Java) as delimiters</li>
+ *   </ol>
+ * </p>
  * @author Alex
  */
 public class StringTokenizer implements Iterator<String> {
@@ -50,8 +57,11 @@ public class StringTokenizer implements Iterator<String> {
   /**
    * Constructs a string tokenizer for the specified string using the given
    * string of characters that should be treated as delimiters.
+   * @param str the string to tokenize
+   * @param delims the delimiter chars to use (must not contain any surrogate pairs)
    */
   public StringTokenizer(String str, String delims) {
+    // TODO: throw IAE if delims contains any surrogate pairs
     this.str = str;
     this.delims = delims.toCharArray();
     Arrays.sort(this.delims);

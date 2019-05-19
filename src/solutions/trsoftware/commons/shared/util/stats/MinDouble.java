@@ -22,6 +22,7 @@ import java.io.Serializable;
 /**
  * Keeps track of the min of a sequence of double values.
  *
+ * @see java.util.stream.DoubleStream#min()
  * @author Alex
  */
 public class MinDouble extends MinMaxDoubleBase implements Serializable, Mergeable<MinDouble> {

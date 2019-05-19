@@ -17,9 +17,12 @@
 
 package solutions.trsoftware.commons.shared.util.stats;
 
+import java.util.Comparator;
+
 /**
  * Keeps track of the minimum in a sequence of Comparable objects.
  *
+ * @see java.util.stream.Stream#min(Comparator)
  * @author Alex
  */
 public class MinComparable<T extends Comparable<T>> extends AbstractMinMaxComparable<T> {

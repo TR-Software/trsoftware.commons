@@ -43,7 +43,7 @@ public final class ServerIOUtils {
       return new InputStreamReader(input, StringUtils.UTF8_CHARSET_NAME);
     }
     catch (UnsupportedEncodingException e) {
-      // will never happen - all java VM's support UTF-8
+      // will never happen - all JVMs support UTF-8
       throw new RuntimeException(e);
     }
   }
@@ -80,7 +80,7 @@ public final class ServerIOUtils {
       return new OutputStreamWriter(new FileOutputStream(file, append), StringUtils.UTF8_CHARSET_NAME);
     }
     catch (UnsupportedEncodingException e) {
-      // will never happen - all java VM's support UTF-8
+      // will never happen - all JVMs support UTF-8
       throw new RuntimeException(e);
     }
   }
@@ -156,7 +156,7 @@ public final class ServerIOUtils {
    * <p>
    *   WARNING: if given a file reader, the result will contain platform-specific line break characters
    *   (e.g. {@code "\r\n"} on Windows).  If that's not desired, can use a {@link BufferedReader} instead
-   *   (whose {@link BufferedReader#readLine()} method omits the line-break chars.
+   *   (whose {@link BufferedReader#readLine()} method omits the line-break chars).
    * </p>
    */
   public static String readCharactersIntoString(Reader reader) throws IOException {
@@ -187,53 +187,33 @@ public final class ServerIOUtils {
     return lines;
   }
 
-  /** Copies everything from the reader to the writer, closing both the reader and writer when finished */
+  /** Copies everything from the reader to the writer, using a {@value #BUFFER_SIZE}-char buffer */
   public static void copyReaderToWriter(Reader from, Writer to) throws IOException {
-    try {
-      char[] buf = new char[BUFFER_SIZE];
-      int n;
-      do {
-        n = from.read(buf);
-        if (n > 0)
-          to.write(buf, 0, n);
-      }
-      while (n >= 0);
+    char[] buf = new char[BUFFER_SIZE];
+    int n;
+    do {
+      n = from.read(buf);
+      if (n > 0)
+        to.write(buf, 0, n);
     }
-    finally {
-      try {
-        from.close();
-      }
-      finally {
-        to.close();
-      }
-    }
+    while (n >= 0);
   }
 
-  /** Copies everything from input to output, closing both streams when finished */
+  /** Copies everything from input to output, using a {@value #BUFFER_SIZE}-byte buffer */
   public static void copyInputToOutput(InputStream from, OutputStream to) throws IOException {
     copyInputToOutput(from, to, BUFFER_SIZE);
   }
 
-  /** Copies everything from input to output, closing both streams when finished */
+  /** Copies everything from input to output, using a temporary buffer of the given size */
   public static void copyInputToOutput(InputStream from, OutputStream to, int bufferSize) throws IOException {
-    try {
-      byte[] buf = new byte[bufferSize];
-      int n;
-      do {
-        n = from.read(buf);
-        if (n > 0)
-          to.write(buf, 0, n);
-      }
-      while (n >= 0);
+    byte[] buf = new byte[bufferSize];
+    int n;
+    do {
+      n = from.read(buf);
+      if (n > 0)
+        to.write(buf, 0, n);
     }
-    finally {
-      try {
-        from.close();
-      }
-      finally {
-        to.close();
-      }
-    }
+    while (n >= 0);
   }
 
   /**

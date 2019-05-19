@@ -2,6 +2,8 @@ package solutions.trsoftware.commons.shared.util.iterators;
 
 import solutions.trsoftware.commons.shared.util.ArrayUtils;
 
+import java.util.PrimitiveIterator;
+
 /**
  * Same as {@link ArrayIterator}, but optimized for primitive {@code int} arrays:
  * provides the {@link #nextInt()} method to avoid auto-boxing.
@@ -9,7 +11,7 @@ import solutions.trsoftware.commons.shared.util.ArrayUtils;
  * @author Alex
  * @since 1/11/2019
  */
-public class IntArrayIterator extends IndexedIterator<Integer> implements IntIterator {
+public class IntArrayIterator extends IndexedIterator<Integer> implements PrimitiveIterator.OfInt {
 
   private final int[] arr;
 

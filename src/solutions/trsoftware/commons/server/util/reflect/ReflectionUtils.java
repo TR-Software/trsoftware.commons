@@ -17,7 +17,6 @@
 
 package solutions.trsoftware.commons.server.util.reflect;
 
-import com.google.common.collect.BiMap;
 import com.google.common.collect.ImmutableBiMap;
 import solutions.trsoftware.commons.server.io.ResourceLocator;
 import solutions.trsoftware.commons.shared.util.StringTokenizer;
@@ -34,6 +33,7 @@ import java.io.PrintStream;
 import java.lang.reflect.*;
 import java.nio.file.*;
 import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * @author Alex, 1/5/14
@@ -46,7 +46,7 @@ public abstract class ReflectionUtils {
   /**
    * Maps the primitive wrapper types to their corresponding primitive types.
    */
-  public static final BiMap<Class, Class> WRAPPER_TYPES = ImmutableBiMap.<Class, Class>builder()
+  public static final ImmutableBiMap<Class, Class> WRAPPER_TYPES = ImmutableBiMap.<Class, Class>builder()
       .put(Boolean.class, Boolean.TYPE)
       .put(Byte.class, Byte.TYPE)
       .put(Character.class, Character.TYPE)
@@ -68,9 +68,22 @@ public abstract class ReflectionUtils {
   /**
    * @return the primitive type corresponding to the given wrapper class, or {@code null} if the given class is not
    * a wrapper type.
+   * @see #unwrap(Class)
    */
   public static Class primitiveTypeFor(Class wrapper) {
     return WRAPPER_TYPES.get(wrapper);
+  }
+
+  /**
+   * @return if the arg is a wrapper type, returns the corresponding primitive type; otherwise returns the arg as-is.
+   * @see #isPrimitiveWrapper(Class)
+   * @see #primitiveTypeFor(Class)
+   * @see #wrapperTypeFor(Class)
+   */
+  public static Class unwrap(Class type) {
+    if (isPrimitiveWrapper(type))
+      return primitiveTypeFor(type);
+    return type;
   }
 
   /**
@@ -209,13 +222,15 @@ public abstract class ReflectionUtils {
   }
 
   /**
-   * @return The set of all types that {@code cls} can be cast to: this includes all superclasses and
-   * interfaces implemented by {@code cls}, recursively.  In other words, will return the set
-   * <code>
-   *   {X &forall;X s.t. X.isAssignableFrom(cls) == true}
-   * </code>
+   * Computes the transitive closure of all the superclasses and interfaces implemented by {@code cls}.
+   * <p>
+   * This set is computed by recursively applying {@link Class#getInterfaces()} and {@link Class#getSuperclass()} to
+   * the argument.
+   * <p>
    * The iterator of the resulting set will first return {@code cls}, followed by the transitive closure of all the interfaces
    * implemented by {@code cls}, and finally, the transitive closure of {@code cls.getSuperclass()}.
+   * @return the set of all types that {@code cls} can be cast to, which can be formally defined as
+   * <p><code>{X &forall;X s.t. X.isAssignableFrom(cls) == true}</code></p>
    */
   public static Set<Class<?>> getAllTypesAssignableFrom(Class<?> cls) {
     if (cls == null)
@@ -422,13 +437,19 @@ public abstract class ReflectionUtils {
 
   /**
    * Attempts to find the directory where the source ({@code .java} file) of the given class is located, using
-   * the URL returned by {@code cls.getResource("")}.
-   *
-   * <p style="font-style: italic;">
-   *   NOTE: not sure why this works, but {@link Class#getResource(String)} (with an empty string arg) seems to return
-   *   a URL for the directory where the java source code for the given class is located.  However, this might not work
-   *   for inner/anonymous classes, and will almost-certainly not work for system classes or classes loaded from JARs,
+   * the URL returned by {@link Class#getResource(String)} (with an empty string arg): {@code cls.getResource("")}.
+   * <p>
+   *   <strong>WARNING:</strong> this operation makes sense only when the {@code .java} source files are located alongside
+   *   the {@code .class} files in the compiler output directory.  However, this might not work
+   *   for inner/anonymous classes, classes loaded from JARs, and will almost-certainly not work for system classes,
    *   therefore <strong>use caution</strong> when calling this method.
+   * </p>
+   * <p style="font-style: italic;">
+   *   <b>IntelliJ IDEA Note:</b> for some reason, the above seems to work when running unit tests even when the
+   *   {@code .java} files are not present in the compiler output directory, but it doesn't work when running
+   *   normal (production) code.  To get the source files from production code, the {@code .java} files should be
+   *   included in the compiler output directory (by adding the "resource pattern" {@code ?*.java} under the
+   *   <a href="https://www.jetbrains.com/help/idea/specifying-compilation-settings.html">Compiler Settings</a>).
    * </p>
    *
    * @param cls the class to look up
@@ -488,10 +509,33 @@ public abstract class ReflectionUtils {
    * @see #getSourceDir(Class)
    */
   public static Path getSourceFile(Class cls) throws InvalidPathException {
+    // use the topmost class containing the given class
+    cls = getEnclosingClass(cls);
     ResourceLocator sourceDirResourceLocator = getSourceDir(cls);
     ClassNameParser classNameInfo = new ClassNameParser(cls);
     Path srcDir = sourceDirResourceLocator.toPath();
     return srcDir.resolve(classNameInfo.getComplexName() + ".java");
+  }
+
+  /**
+   * Gets the topmost enclosing class of the given class.  This operation is useful for looking up the source file
+   * where a particular class is defined.
+   *
+   * <p>
+   * <b>Example:</b>
+   * <pre>{@code
+   *   getEnclosingClass(com.example.Foo.Inner.InnerInner.class) // returns com.example.Foo.class
+   * }</pre>
+   *
+   * @param cls can be any class declared with any level or nesting (this works for local and anonymous classes also)
+   * @return the outermost enclosing class of the arg, or the arg itself if it's a top-level class.
+   * @see Class#getEnclosingClass()
+   */
+  public static Class getEnclosingClass(final Class cls) {
+    Class outer = cls.getEnclosingClass();
+    if (outer == null)
+      return cls; // base case: arg was a top level class
+    return getEnclosingClass(outer);  // recursive case
   }
 
   /**
@@ -560,5 +604,34 @@ public abstract class ReflectionUtils {
     // but we use
 
     return VersionNumber.parse(System.getProperty("java.specification.version"));
+  }
+
+  /**
+   * Checks whether the given class is a Junit 3.x TestCase.
+   * @return {@code true} iff the given class inherits from {@code junit.framework.TestCase}
+   * @see #getAllTypesAssignableFrom(Class)
+   */
+  public static boolean isJunit3TestCase(Class cls) {
+    /*
+    NOTE: we can't use junit.framework.TestCase.class directly because it's not available in production code
+    (only in unit tests), so we're converting the set returned by getAllTypesAssignableFrom(cls) to a set of class names,
+    and checking whether it contains the string "junit.framework.TestCase"
+    */
+    // TODO: would be more efficient to simply check cls.getSuperclass() (iteratively)
+    return getAllTypesAssignableFrom(cls).stream()
+        .map(Class::getName)
+        .collect(Collectors.toCollection(LinkedHashSet::new))
+        .contains("junit.framework.TestCase");
+    /*
+      TODO: support newer versions of JUnit as well:
+        - JUnit 4: check whether cls has anything annotated with any annotation from the org.junit package (e.g. @Test, etc.)
+        - JUnit 5: check whether cls has anything annotated with any annotation from the org.junit.jupiter.api package (e.g. @Test, @ParameterizedTest, etc.)
+        * - for both of the the above, check the annotations everywhere in the class (the class itself, its methods/constructors and their parameters), fields, etc.
+            example: cls.getAnnotations()[0].getClass().getPackage(); cls.getDeclaredAnnotations(); cls.getMethods()
+
+      see:
+        https://www.vogella.com/tutorials/JUnit/article.html
+        https://junit.org/junit5/docs/current/user-guide/#writing-tests
+    */
   }
 }

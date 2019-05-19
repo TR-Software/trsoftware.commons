@@ -26,6 +26,7 @@ import solutions.trsoftware.commons.shared.util.callables.Function0_t;
 import solutions.trsoftware.commons.shared.util.compare.ComparisonOperator;
 
 import java.util.*;
+import java.util.function.Supplier;
 
 import static junit.framework.Assert.*;
 import static solutions.trsoftware.commons.shared.util.CollectionUtils.asList;
@@ -82,23 +83,47 @@ public abstract class AssertUtils {
 
   /**
    * Asserts that running the given code capsule results in the given exception type.
+   *
+   * @param expectedThrowableClass must be a class (not an interface)
+   * @param code will be executed to trigger the expected exception
    * @return The caught exception so that it may be examined by the caller.
+   * @throws IllegalArgumentException if the first arg is an interface (it should be an actual class because
+   * this method uses {@link GwtUtils#isAssignableFrom(Class, Class)} to check whether the thrown exception is of the
+   * expected type)
    */
   public static <T extends Throwable> T assertThrows(Class<T> expectedThrowableClass, final Runnable code) {
-    return assertThrows(expectedThrowableClass, new Function0_t<T>() {
-      public void call() throws T {
-        code.run();
-      }
-    });
+    return assertThrows(expectedThrowableClass, (Function0_t<T>)code::run);
   }
 
   /**
-   * Asserts that running the given code capsule results in the given exception
-   * type
+   * Asserts that running the given code capsule results in the given exception type.
    *
+   * @param expectedThrowableClass must be a class (not an interface)
+   * @param code will be executed to trigger the expected exception
    * @return The caught exception so that it may be examined by the caller.
+   * @throws IllegalArgumentException if the first arg is an interface (it should be an actual class because
+   * this method uses {@link GwtUtils#isAssignableFrom(Class, Class)} to check whether the thrown exception is of the
+   * expected type)
+   */
+  public static <T extends Throwable> T assertThrows(Class<T> expectedThrowableClass, final Supplier code) {
+    return assertThrows(expectedThrowableClass, (Function0_t<T>)code::get);
+  }
+
+  /**
+   * Asserts that running the given code capsule results in the given exception type.
+   *
+   * @param expectedThrowableClass must be a class (not an interface)
+   * @param code will be executed to trigger the expected exception
+   * @return The caught exception so that it may be examined by the caller.
+   * @throws IllegalArgumentException if the first arg is an interface (it should be an actual class because
+   * this method uses {@link GwtUtils#isAssignableFrom(Class, Class)} to check whether the thrown exception is of the
+   * expected type)
    */
   public static <T extends Throwable> T assertThrows(Class<T> expectedThrowableClass, Function0_t<? extends Throwable> code) {
+    // TODO: move this code to one of the other overloads (e.g. assertThrows(Class, Runnable)), and get rid of this method
+    // TODO: or make this method take java.util.function.Function instead of Function0_t
+    if (expectedThrowableClass.isInterface())
+      throw new IllegalArgumentException(expectedThrowableClass + " must be a class (not an interface)");
     Throwable caught = null;
     try {
       code.call();

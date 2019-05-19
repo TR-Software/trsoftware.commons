@@ -28,9 +28,11 @@ import java.nio.file.*;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.nio.file.attribute.FileAttribute;
 import java.util.EnumSet;
+import java.util.List;
 import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 import static java.nio.file.FileVisitResult.CONTINUE;
 
@@ -321,6 +323,16 @@ public class FileUtils {
     return !Files.list(dir).findAny().isPresent();
   }
 
+  /**
+   * Lists the entries in the given directory, by materializing the stream returned by {@link Files#list(Path)}.
+   *
+   * @param dir the directory to list
+   * @return a list of the entries in the given directory
+   * @see Files#list(Path)
+   */
+  public static List<Path> listFiles(Path dir) throws IOException {
+    return Files.list(dir).collect(Collectors.toList());
+  }
 
   /**
    * Base class for a {@link FileVisitor} that matches filenames against a regular expression.

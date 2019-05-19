@@ -32,10 +32,16 @@ import java.util.*;
  */
 public class CollectionUtils {
 
+  /**
+   * @return {@code true} iff the given collection is either {@code null} or empty.
+   */
   public static boolean isEmpty(Collection c) {
     return c == null || c.isEmpty();
   }
 
+  /**
+   * @return {@code true} iff the given map is either {@code null} or empty.
+   */
   public static boolean isEmpty(Map m) {
     return m == null || m.isEmpty();
   }

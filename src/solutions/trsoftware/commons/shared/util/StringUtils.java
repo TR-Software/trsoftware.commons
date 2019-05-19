@@ -17,7 +17,9 @@
 
 package solutions.trsoftware.commons.shared.util;
 
+import com.google.common.collect.ImmutableBiMap;
 import solutions.trsoftware.commons.shared.util.iterators.CharSequenceIterator;
+import solutions.trsoftware.commons.shared.util.iterators.CodePointIterator;
 import solutions.trsoftware.commons.shared.util.stats.MaxComparable;
 import solutions.trsoftware.commons.shared.util.template.SimpleTemplateParser;
 import solutions.trsoftware.commons.shared.util.template.Template;
@@ -348,6 +350,23 @@ public class StringUtils {
   }
 
   /**
+   * Creates a string that contains some number of repetitions of a single Unicode
+   * {@link Character#isValidCodePoint(int) code point}
+   *
+   * @param codePoint the Unicode code point to be repeated
+   * @param repetitions the number of times to repeat the given code point
+   * @return a string that contains the requested number of repetitions of {@code fillChar}
+   * @see Arrays#fill(char[], char)
+   */
+  public static String repeat(int codePoint, int repetitions) {
+    if (repetitions < 0)
+      throw new IllegalArgumentException("negative repetitions");
+    int[] codePoints = new int[repetitions];
+    Arrays.fill(codePoints, codePoint);
+    return new String(codePoints, 0, codePoints.length);
+  }
+
+  /**
    * Creates a string that contains some number of repetitions of a substring
    * @param fillStr the substring to be repeated
    * @param repetitions the number of times to repeat the given substring
@@ -547,6 +566,8 @@ public class StringUtils {
 
   /**
    * @return the given string surrounded by parentheses
+   * @see #bracket(String, char)
+   * @see #bracket(String, String)
    */
   public static String parenthesize(String str) {
     return "(" + str + ')';
@@ -634,6 +655,70 @@ public class StringUtils {
    */
   public static String quote(String str) {
     return surround(str, "\"");
+  }
+
+  /**
+   * A bidirectional mapping of the various ASCII bracketing symbol pairs such as
+   * <code>( )</code>, <code>{ }</code>, <code>[ ]</code>, and {@code < >}
+   */
+  public static final ImmutableBiMap<Character, Character> BRACKET_SYMBOLS = ImmutableBiMap.<Character, Character>builder()
+      .put('(', ')')
+      .put('{', '}')
+      .put('[', ']')
+      .put('<', '>')
+      .build();
+
+  /**
+   * A general-purpose method for bracketing a string of text.
+   * <p>
+   *   Specifically, if the given char parameter is in {@link #BRACKET_SYMBOLS}, will use the corresponding closing
+   *   bracket symbol to terminate the result; otherwise will use the same char on both sides.
+   * </p>
+   * <p>
+   *   <b>Examples</b>:
+   *   <pre>
+   *     bracket("foo", '(') &rarr; "(foo)"
+   *     bracket("foo", '{') &rarr; "{foo}"
+   *     bracket("foo", '[') &rarr; "[foo]"
+   *     bracket("foo", '<') &rarr;{@code "<foo>"}
+   *     bracket("foo", 'X') &rarr; "XfooX"
+   *   </pre>
+   * </p>
+   * @param str the string to be wrapped with brackets
+   * @param openingBracket the opening bracket symbol
+   * @return the string surrounded with the appropriate brackets for the given arguments
+   * @see #bracket(String, String)
+   * @see #parenthesize(String)
+   */
+  public static String bracket(String str, char openingBracket) {
+    char closingBracket = BRACKET_SYMBOLS.getOrDefault(openingBracket, openingBracket);
+    return openingBracket + str + closingBracket;
+  }
+
+  /**
+   * Recursively applies {@link #bracket(String, char)} for each char in the {@code openingBrackets} argument.
+   * <p>
+   *   <b>Examples</b>:
+   *   <pre>
+   *     bracket("foo", "([") &rarr; "([foo])"
+   *     bracket("foo", "<{{") &rarr; "<{{foo}}>"
+   *     bracket("foo", "/* ") &rarr; "/* foo &#42;/"
+   *     bracket("foo", "XyZ") &rarr; "XyZfooZyX"
+   *   </pre>
+   * </p>
+   * </p>
+   * @param str the string to be wrapped with brackets
+   * @param openingBrackets the opening bracket symbols
+   * @return the string surrounded with the appropriate brackets for the given arguments
+   * @see #bracket(String, char)
+   */
+  public static String bracket(String str, String openingBrackets) {
+    // apply the brackets from right to left
+    for (int i = openingBrackets.length() - 1; i >= 0; i--) {
+      char bracket = openingBrackets.charAt(i);
+      str = bracket(str, bracket);
+    }
+    return str;
   }
 
   /**
@@ -996,10 +1081,9 @@ public class StringUtils {
    * @return the result of {@link String#valueOf(Object)}, quoted if {@code value} is a string.
    */
   public static String valueToString(Object value) {
-    String valStr = String.valueOf(value);
-    if (value instanceof String)
+    if (value instanceof CharSequence)
       return "\"" + value + "\"";
-    return valStr;
+    return String.valueOf(value);
   }
 
   /**
@@ -1020,6 +1104,57 @@ public class StringUtils {
     if (endIndex < 0 || endIndex > str.length())
       throw new StringIndexOutOfBoundsException(endIndex);
     return str.startsWith(suffix, endIndex - suffix.length());
+  }
+
+  /**
+   * Returns the last Unicode code point in the given string, which may or may not be the same as
+   * {@code str.charAt(str.length()-1)}, depending on whether the last {@code char} in the string is a
+   * {@link Character#isSurrogate(char) surrogate}.
+   *
+   * @return the last Unicode code point in the string
+   * @see String#codePointBefore(int)
+   * @see #codePoints(String)
+   * @see CodePointIterator
+   */
+  public static int lastCodePoint(String str) {
+    if (isEmpty(str))
+      throw new IllegalArgumentException(valueToString(str));
+    return str.codePointBefore(str.length());
+  }
+
+  /**
+   * Returns the last Java {@code char} in the given string (i.e. {@code str.charAt(str.length()-1)}), which may or may
+   * not represent a valid Unicode code point, depending on whether this {@code char} is part of a
+   * {@link Character#isSurrogate(char) surrogate pair} encoding a
+   * {@link Character#isSupplementaryCodePoint(int) supplementary character}.
+   *
+   * @return {@code str.charAt(str.length()-1)}
+   * @see #lastCodePoint(String)
+   */
+  public static char lastChar(String str) {
+    if (isEmpty(str))
+      throw new IllegalArgumentException(valueToString(str));
+    return str.charAt(str.length()-1);
+  }
+
+  /**
+   * Converts a string to an array of code points.
+   * <p>
+   *   <em>NOTE</em>: if you simply want to iterate over the code points, it would be more efficient to use
+   *   {@link CodePointIterator} (assuming you can't use {@link CharSequence#codePoints()}, which isn't implemented in GWT).
+   * </p>
+   * @return the code points in the given string as an array
+   * @see CodePointIterator
+   * @see String#codePoints()
+   */
+  public static int[] codePoints(String str) {
+    int codePointCount = str.codePointCount(0, str.length());
+    int[] ret = new int[codePointCount];
+    CodePointIterator codePointIterator = new CodePointIterator(str);
+    for (int i = 0; codePointIterator.hasNext(); i++) {
+      ret[i] = codePointIterator.nextInt();
+    }
+    return ret;
   }
 
 }

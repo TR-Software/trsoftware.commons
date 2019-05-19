@@ -24,9 +24,11 @@ import java.io.Serializable;
 /**
  * Computes mean and variance of a stream of numbers without storing all the
  * individual data points using the algorithm described in
- * http://en.wikipedia.org/wiki/Algorithms_for_calculating_variance#Online_algorithm:
+ * http://en.wikipedia.org/wiki/Algorithms_for_calculating_variance#Online_algorithm.
  *
- * NOTE: this same algorithm is implemented in variance.py
+ * <p style="color: #6495ed; font-weight: bold;">
+ *   TODO: implement {@link java.util.stream.Collector} to allow using this class with a stream.
+ * </p>
  *
  * @author Alex
  */
@@ -49,7 +51,7 @@ public class MeanAndVariance implements Serializable, Mergeable<MeanAndVariance>
    *    return (variance, variance_n)
    * ---------------------------------------------------------------------------
    */
-  // NOTE: this algorithm is duplicated in variance.py
+  // NOTE: this algorithm is also implemented in variance.py
 
   private int n;
   private double mean;

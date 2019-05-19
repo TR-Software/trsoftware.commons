@@ -18,6 +18,9 @@
 package solutions.trsoftware.commons.shared.util;
 
 import com.google.common.base.Predicate;
+import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.Iterables;
+import com.google.common.collect.Maps;
 import com.google.common.collect.Multimap;
 import solutions.trsoftware.commons.shared.util.callables.Function0;
 import solutions.trsoftware.commons.shared.util.callables.Function1;
@@ -501,11 +504,54 @@ public class MapUtils {
    * @param to the recipient of the data
    * @param from the source of the data
    * @return the same {@link Multimap} instance that was passed in
+   * @see com.google.common.collect.Multimaps#forMap(Map)
    */
   public static <K,V> Multimap<K, V> putAllToMultimap(Multimap<K, V> to, Map<K, V> from) {
     for (Map.Entry<K, V> entry : from.entrySet()) {
       to.put(entry.getKey(), entry.getValue());
     }
     return to;
+  }
+
+  /**
+   * Creates a view of the given {@link Multimap} as a normal 1-1 {@link Map}, if the multimap contains only unique
+   * key-value mappings.  This is an alternative for {@link Multimap#asMap()} (which returns {@code Map<K, Collection<V>>}).
+   * <p>
+   * <b>WARNING:</b> this method will not throw an exception if the given multimap contains multiple values for any key,
+   * but accessing such an entry via the returned map will throw an {@link IllegalArgumentException}, because the returned
+   * view is backed by {@link Iterables#getOnlyElement(java.lang.Iterable)}.
+   * It might be a good idea to preemptively call {@link #maxValuesPerKey(Multimap)} to check whether it's safe to call
+   * this method on the given multimap.
+   * <p>
+   * <b>NOTE:</b> since modifications to the returned map will propagate to the given multimap, it might be a good idea
+   * to create a defensive copy of the result (e.g. with {@link ImmutableMap#copyOf(Map)}).
+   *
+   * @param multimap should contain only unique key-value mappings
+   * @return a view of the given multimap as a single-valued map (<b>WARNING:</b> if the given multimap contains multiple
+   * values for any key, accessing that entry via the returned map will throw an {@link IllegalArgumentException})
+   * @see <a href="https://stackoverflow.com/a/40432352/1965404">solution posted on StackOverflow</a>
+   * @see Multimap#asMap()
+   * @see Maps#transformValues
+   */
+  public static <K,V> Map<K, V> asMap(Multimap<K, V> multimap) {
+    return Maps.transformValues(multimap.asMap(), Iterables::getOnlyElement);
+  }
+
+  /**
+   * Determines the maximum number of values mapped to any key in the given multimap.  This can be used to check
+   * whether it's safe to call {@link #asMap(Multimap)} on it.
+   * <p>
+   * <b>Example:</b>
+   * <pre>{@code
+   *   if (maxValuesPerKey(multimap) <= 1)
+   *     // safe to call asMap(multimap)
+   *   else
+   *     // not safe to call asMap(multimap)
+   * }</pre>
+   * </p>
+   * @return the maximum number of values mapped to any key in the given multimap.
+   */
+  public static <K,V> int maxValuesPerKey(Multimap<K, V> multimap) {
+    return multimap.keySet().stream().mapToInt(k -> multimap.get(k).size()).max().orElse(0);
   }
 }

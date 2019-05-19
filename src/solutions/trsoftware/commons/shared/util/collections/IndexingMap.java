@@ -41,6 +41,7 @@ import java.util.*;
  * the iterators and the additional methods provided by this class that are not present in {@link Map}
  * (e.g. {@link #findKeys(Enum, Object)}).
  *
+ * @see com.google.common.collect.Maps#uniqueIndex(Iterable, com.google.common.base.Function)
  * @author Alex, 2/24/2016
  */
 public class IndexingMap<K, V, I extends Enum<I>> extends AbstractMap<K, V> {

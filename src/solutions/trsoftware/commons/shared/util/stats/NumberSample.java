@@ -26,13 +26,22 @@ import java.util.Collections;
 import java.util.List;
 
 /**
- * Reports statistics for a sample of numbers.  Caution: since all samples
- * must be remembered, this class uses O(N) memory.
- *
+ * Reports statistics for a sample of numbers.
+ * Caution: since all samples must be remembered, this class uses O(N) memory.
+ * For an O(1) memory algorithm, see {@link NumberSampleOnline}.
+ * <p>
  * Implements serializable to support persisting instances to disk
  * using ObjectOutputStream.
+ * <p>
+ * NOTE:
+ *
+ * <p style="color: #6495ed; font-weight: bold;">
+ *   TODO: implement {@link java.util.stream.Collector} to allow using this class with a stream.
+ * </p>
  *
  * @author Alex
+ * @see NumberSampleOnline
+ * @see NumberSampleOnlineDouble
  */
 public class NumberSample<N extends Number & Comparable> implements SampleStatistics<N>, Serializable {
 

@@ -48,14 +48,23 @@ public class GwtUtils {
   }
 
   /**
-   * Imitates the functionality of {@link Class#isAssignableFrom(Class)}, which isn't emulated by GWT.
-   * <p style="color: #6495ed; font-weight: bold;">
-   *   TODO: this implementation probably doesn't produce the same results as {@link Class#isAssignableFrom(Class)}
-   *   because it's able to use only {@link Class#getSuperclass()} ({@link Class#getInterfaces()} isn't emulated by GWT).
-   *   Therefore, should probably rename this method to "isSubclass", and replace all usages that need true
-   *   "isAssignableFrom" functionality with a try/catch block for ClassCastException.
+   * Imitates the functionality of {@link Class#isAssignableFrom(Class)}, which isn't emulated by GWT, by transitively
+   * examining the chain of {@link Class#getSuperclass() superclasses} of c2 until c1 is encountered.
+   * <p>
+   *   <strong>NOTE: </strong> since GWT doesn't emulate {@link Class#getInterfaces()}, this method is only able to check
+   *   the hierarchy of superclasses (but not superinterfaces), and therefore will not always produce the same result
+   *   as {@link Class#isAssignableFrom(Class)}
    * </p>
-   * @return true if an instance of c2 can be cast to c1
+   * <p style="color: #0073BF; font-weight: bold;">
+   *   TODO: for the aforementioned reasons, should probably rename this method to "isSubclass", and replace all
+   *   usages that need true "isAssignableFrom" functionality with a try/catch block for ClassCastException (wherever possible)
+   * </p>
+   * @param c1 should be a class (not an interface)
+   * @param c2 should be a class (not an interface)
+   * @return {@code true} if an instance of c2 can be cast to c1.
+   * <strong>NOTE:</strong> <em>a return value of {@code false} does not necessarily mean that such a cast will fail</em>,
+   * because this method is able to check only {@link Class#getSuperclass()} (but not {@link Class#getInterfaces()},
+   * which isn't emulated by GWT).
    */
   public static boolean isAssignableFrom(Class c1, Class c2) {
     // TODO: could replace this method by emulating Class (put it in super-source, or extract it to gwt-stack-trace-kit\patch\src\com\google\gwt\emul\java\lang\Class.java)

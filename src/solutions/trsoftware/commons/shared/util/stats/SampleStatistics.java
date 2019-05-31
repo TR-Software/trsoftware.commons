@@ -21,6 +21,7 @@ package solutions.trsoftware.commons.shared.util.stats;
  * Mar 26, 2009
  *
  * @author Alex
+ * @see com.google.common.math.Stats
  */
 public interface SampleStatistics<N extends Number> extends Updatable<N> {
   int size();

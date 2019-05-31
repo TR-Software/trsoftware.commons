@@ -20,6 +20,7 @@ package solutions.trsoftware.commons.server.cache;
 import solutions.trsoftware.commons.server.TestCaseCanStopClock;
 import solutions.trsoftware.commons.server.util.Clock;
 import solutions.trsoftware.commons.shared.testutil.AssertUtils;
+import solutions.trsoftware.commons.shared.util.SetUtils;
 import solutions.trsoftware.commons.shared.util.stats.NumberSample;
 
 import java.util.Iterator;
@@ -67,6 +68,12 @@ public class FixedTimeCacheTest extends TestCaseCanStopClock {
     cache.put(11, "1_1");
     cache.put(12, "1_2");
     cache.put(13, "1_3");
+    // check that the expiration time of all these entries is as expected
+    long expectedExpirationTime = Clock.currentTimeMillis() + maxAge;
+    for (Integer key : cache.keySet()) {
+      FixedTimeCacheValue<String> value = cache.getWithExpirationTime(key);
+      assertEquals(expectedExpirationTime, value.getExpirationTime());
+    }
     assertTrue(cache.containsKey(11));
     assertEquals("1_2", cache.get(12));
     assertEquals(3, cache.size());
@@ -77,11 +84,27 @@ public class FixedTimeCacheTest extends TestCaseCanStopClock {
     assertEquals("1_3b", cache.remove(13));
     assertNull(cache.get(13));
     assertFalse(cache.containsKey(13));
+    // at this point, the cache should only contain keys 11 and 12
     assertEquals(2, cache.size());
+    assertEquals(SetUtils.newSet(11, 12), cache.keySet());
     // now advance the clock far enough to evict both of the remaining entries
     Clock.advance(maxAge);
     // be sure no evictions yet (age = maxAge is acceptable)
     assertEquals(2, cache.size());
+    // check that both of the remaining entries are scheduled to expire in 0 milliseconds
+    for (Integer key : cache.keySet()) {
+      FixedTimeCacheValue<String> value = cache.getWithExpirationTime(key);
+      assertEquals(expectedExpirationTime, value.getExpirationTime());  // same absolute expiration time as before
+      assertEquals(0, value.getExpirationTimeDelta());
+    }
+    // check that assigning a new value to an existing key doesn't change its expiration time
+    {
+      assertEquals("1_1", cache.put(11, "1_1b"));
+      FixedTimeCacheValue<String> value11 = cache.getWithExpirationTime(11);
+      assertEquals("1_1b", value11.getValue());  // has new value
+      assertEquals(expectedExpirationTime, value11.getExpirationTime());  // but expiration time same as before
+      assertEquals(0, value11.getExpirationTimeDelta());
+    }
     Clock.advance(1);  // now this should put it over the top
     // make sure that get performs amortized eviction
     assertNull(cache.get(12));  // check the entries in reverse order of insertion to be sure all expired entries have been evicted, not just the oldest one

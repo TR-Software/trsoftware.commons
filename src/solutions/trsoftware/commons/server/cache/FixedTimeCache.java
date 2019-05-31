@@ -25,13 +25,14 @@ import java.util.*;
  * Implements a cache which evicts entries that were added more than the threshold
  * time interval ago.  Getting or updating keys does not change their expiration
  * time, that is, this cache is not LRU and doesn't care about any of its
- * entries being touched before expiring them.
- *
- * The eviction is amortized - performed on every get and put operation.
- *
+ * entries having been touched before expiring them.
+ * <p>
+ * The eviction is amortized: it is performed before every {@link #get}, {@link #put}, {@link #containsKey} operation
+ * (but only when the given key is already contained by the mapping), and always when computing the {@link #size}.
+ * <p>
  * This class decorates {@link LinkedHashMap} with fixed-time logic.
- *
- * This class must be synchronized externally.  There is no way to avoid
+ * <p>
+ * <strong>This class must be synchronized externally.</strong>  There is no way to avoid
  * locking, because a cache cannot be built using the {@link java.util.concurrent}
  * classes. (Trust me, I spent a lot of time trying).
  *
@@ -51,18 +52,16 @@ public class FixedTimeCache<K,V> implements Map<K,V> {
   private long earliestExpirationTime = Long.MAX_VALUE;
 
   /**
-   *
-   * @param initialCapacity The starting capacity of the underlying LHM (affects performace).
-   * @param loadFactor The load factor of the underlying LHM (affects performace).
-   * @param maxAge (millis) Entries will be evicted after this amount of time has
-   * elapsed since they were put.
+   * @param initialCapacity The starting capacity of the underlying {@link LinkedHashMap} (affects performance).
+   * @param loadFactor The load factor of the underlying {@link LinkedHashMap} (affects performance).
+   * @param maxAge (millis) Entries will be evicted after this amount of time has elapsed since they were put.
    */
   public FixedTimeCache(int initialCapacity, float loadFactor, long maxAge, final int maxCapacity) {
     // the third arg (false) makes the LinkedHashMap maintaing the original insertion order
     delegate = new LinkedHashMap<K, FixedTimeCacheValue<V>>(initialCapacity, loadFactor, false) {
       @Override
       protected boolean removeEldestEntry(Map.Entry<K, FixedTimeCacheValue<V>> eldest) {
-        return size() > maxCapacity || isExpired(eldest.getValue());
+        return size() > maxCapacity || eldest.getValue().isExpired();
       }
     };
     this.maxAge = maxAge;
@@ -76,10 +75,6 @@ public class FixedTimeCache<K,V> implements Map<K,V> {
     this(maxAge, Integer.MAX_VALUE);
   }
 
-  private boolean isExpired(FixedTimeCacheValue<V> value) {
-    return value.getExpirationTime() < Clock.currentTimeMillis();
-  }
-
   /** Removes all entries that were added more than maxAge ago */
   private void removeExpiredEntries() {
     if (Clock.currentTimeMillis() < earliestExpirationTime)
@@ -87,7 +82,7 @@ public class FixedTimeCache<K,V> implements Map<K,V> {
     Iterator<Entry<K, FixedTimeCacheValue<V>>> entryIterator = delegate.entrySet().iterator();
     while (entryIterator.hasNext()) {
       Entry<K, FixedTimeCacheValue<V>> entry = entryIterator.next();
-      if (isExpired(entry.getValue())) {
+      if (entry.getValue().isExpired()) {
 //        System.out.printf("Entry (%s,%s) has expired at time %d.%n", entry.getKey(), entry.getValue().getValue(), Clock.currentTimeMillis());
         entryIterator.remove();
       }
@@ -157,22 +152,29 @@ public class FixedTimeCache<K,V> implements Map<K,V> {
   /**
    * If already contains a mapping for this key, the old mapping's
    * expiration time will be used for the new value.  (This is the only
-   * way to preserve the invariants, because the underlying LHM is not
+   * way to preserve the invariants, because the underlying {@link LinkedHashMap} is not
    * access-ordered).
+   * <p>
+   * <strong>NOTE:</strong> this operation is not atomic, and should be synchronized externally.
    */
   public V put(K key, V value) {
     // the keySet iterator doesn't handle null keys properly
     if (key == null)
       throw new NullPointerException("FixedTimeCache doesn't support null keys");
-    removeExpiredEntries();
-    FixedTimeCacheValue<V> oldCacheValue = delegate.put(key, wrap(value));
+    FixedTimeCacheValue<V> oldCacheValue = getWithExpirationTime(key);
+    V ret = unwrap(oldCacheValue);
     if (oldCacheValue != null) {
-      // we must use the old value's expiration time to preserve the invariant
+      // we must reuse the old value's expiration time to preserve the invariant
       // otherwise the delegate LHM will contain an entry with a later expiration
       // than a subsequent entry
-      delegate.put(key, new FixedTimeCacheValue<V>(value, oldCacheValue.getExpirationTime()));
+      // so instead of putting a new instance of FixedTimeCacheValue, we just update the value of the existing one
+      oldCacheValue.setValue(value);
     }
-    return unwrap(oldCacheValue);
+    else {
+      // add a new entry
+      delegate.put(key, wrap(value));
+    }
+    return ret;
   }
 
   public V remove(Object key) {
@@ -186,12 +188,12 @@ public class FixedTimeCache<K,V> implements Map<K,V> {
 
   /**
    * This method is useful for unit testing.
-   * @return Whether the underlying LHM contains any entries whose expirationTime
-   * exceeds the curret clock time.
+   * @return Whether the underlying {@link LinkedHashMap} contains any entries whose expirationTime
+   * exceeds the current clock time.
    */
   boolean anyExpiredEntries() {
     for (Entry<K, FixedTimeCacheValue<V>> entry : delegate.entrySet()) {
-      if (isExpired(entry.getValue()))
+      if (entry.getValue().isExpired())
         return true;
     }
     return false;
@@ -208,6 +210,7 @@ public class FixedTimeCache<K,V> implements Map<K,V> {
   }
 
   public Set<K> keySet() {
+    // TODO(5/29/2019): why not just delegate this to delegate.keySet()?
     // because entries in the underlying map can "expire" (i.e. be removed at any time)
     // an iterator on the underlying collection can throw a CME, so we make a
     // copy of the keys and then iterate over them manually, checking for expiration each time
@@ -240,11 +243,6 @@ public class FixedTimeCache<K,V> implements Map<K,V> {
             next = null;
             return temp;
           }
-
-          public void remove() {
-            throw new UnsupportedOperationException("Method solutions.trsoftware.commons.server.cache.FixedTimeCache.entrySet().iterator().remove() is not supported.");
-
-          }
         };
       }
 
@@ -261,7 +259,7 @@ public class FixedTimeCache<K,V> implements Map<K,V> {
     }
   }
 
-  // we chose not to support these two methods to avoid the hassle of unwrapping values
+  // we chose not to support these two methods to avoid the hassle of unwrapping values:
 
   public Set<Entry<K, V>> entrySet() {
     throw new UnsupportedOperationException("Method solutions.trsoftware.commons.server.cache.FixedTimeCache.entrySet is not supported.");

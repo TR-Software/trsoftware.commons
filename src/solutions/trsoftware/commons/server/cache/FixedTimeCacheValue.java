@@ -39,6 +39,10 @@ public class FixedTimeCacheValue<V> {
     return value;
   }
 
+  void setValue(V value) {
+    this.value = value;
+  }
+
   /** The absolute datetime when this value will be evicted from the cache */
   public long getExpirationTime() {
     return expirationTime;
@@ -47,5 +51,13 @@ public class FixedTimeCacheValue<V> {
   /** The number of milliseconds remaining until this value will be evicted from the cache */
   public long getExpirationTimeDelta() {
     return expirationTime - Clock.currentTimeMillis();
+  }
+
+  /**
+   * @return {@code true} iff if this value's {@link #getExpirationTime() expiration time} is older than the
+   * current clock time.
+   */
+  public boolean isExpired() {
+    return getExpirationTime() < Clock.currentTimeMillis();
   }
 }

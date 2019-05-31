@@ -42,6 +42,7 @@ import java.util.List;
  * @author Alex
  * @see NumberSampleOnline
  * @see NumberSampleOnlineDouble
+ * @see com.google.common.math.Stats
  */
 public class NumberSample<N extends Number & Comparable> implements SampleStatistics<N>, Serializable {
 

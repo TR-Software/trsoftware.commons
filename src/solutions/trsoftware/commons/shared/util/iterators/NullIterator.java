@@ -19,17 +19,22 @@ package solutions.trsoftware.commons.shared.util.iterators;
 
 import com.google.common.collect.UnmodifiableIterator;
 
+import java.util.Collections;
 import java.util.NoSuchElementException;
 
 /**
  * An iterator that doesn't return any elements.
  *
+ * @deprecated Java 1.7+ added {@link Collections#emptyIterator()}, which does the same thing.
+ *
  * @author Alex, 4/17/2015
+ * @see Collections#emptyIterator()
  */
 public class NullIterator<T> extends UnmodifiableIterator<T> {
 
   private static NullIterator instance;
 
+  @SuppressWarnings("unchecked")
   public static <T> NullIterator<T> getInstance() {
     if (instance == null)
       instance = new NullIterator();

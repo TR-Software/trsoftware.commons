@@ -22,9 +22,9 @@ import java.util.Iterator;
 /**
  * An iterator that delegates all operations to the underlying iterator.  Useful for intercepting and overriding
  * methods of another iterator.
- * 
- * Jan 15, 2010
- * @author Alex
+ *
+ * @author Alex, Jan 15, 2010
+ * @see com.google.common.collect.ForwardingIterator
  */
 public class DelegatedIterator<T> implements Iterator<T> {
   protected Iterator<T> delegate;

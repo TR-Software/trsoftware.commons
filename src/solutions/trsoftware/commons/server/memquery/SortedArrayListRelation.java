@@ -18,7 +18,6 @@
 package solutions.trsoftware.commons.server.memquery;
 
 import com.google.common.collect.ImmutableList;
-import solutions.trsoftware.commons.shared.util.iterators.NullIterator;
 
 import java.util.Collections;
 import java.util.Comparator;
@@ -78,7 +77,7 @@ public class SortedArrayListRelation extends ArrayListRelation implements Sorted
   public Iterator<Row> iterMatches(Row query) {
     int foundIdx = Collections.binarySearch(rows, query, comparator);
     if (foundIdx < 0)
-      return NullIterator.getInstance();
+      return Collections.emptyIterator();
     else {
       // Collections.binarySearch returns an arbitrary matching element;
       // we do a linear scan on the list in both directions to find the actual endpoints

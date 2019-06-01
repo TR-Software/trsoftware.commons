@@ -10,7 +10,11 @@ package solutions.trsoftware.commons.shared.util.iterators;
 
 import java.util.NoSuchElementException;
 import java.util.PrimitiveIterator;
+import java.util.Spliterator;
+import java.util.Spliterators;
 import java.util.function.IntConsumer;
+import java.util.stream.IntStream;
+import java.util.stream.StreamSupport;
 
 /**
  * Based on the implementation of {@link CharSequence#codePoints()}, this class iterates over the Unicode code points
@@ -18,9 +22,12 @@ import java.util.function.IntConsumer;
  * <p>
  * This class is intended as a GWT-compatible substitute for {@link CharSequence#codePoints()} (which is not
  * emulated by GWT 2.8.2)
+ * <p>
+ * For an exact replica of {@link CharSequence#codePoints()}, use the {@link #codePointsStream(CharSequence)} factory method.
  *
  * @author Alex
  * @since 5/14/2019
+ * @see #codePointsStream(CharSequence)
  */
 public class CodePointIterator implements PrimitiveIterator.OfInt {
 
@@ -78,4 +85,18 @@ public class CodePointIterator implements PrimitiveIterator.OfInt {
     }
     return c1;
   }
+
+  /**
+   * Emulates the behavior of {@link CharSequence#codePoints()} for GWT code.
+   * @return an IntStream of Unicode code points from the given sequence
+   */
+  public static IntStream codePointsStream(CharSequence chars) {
+    return StreamSupport.intStream(() ->
+            Spliterators.spliteratorUnknownSize(
+                new CodePointIterator(chars),
+                Spliterator.ORDERED),
+        Spliterator.ORDERED,
+        false);
+  }
+
 }

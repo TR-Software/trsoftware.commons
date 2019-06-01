@@ -1,6 +1,7 @@
 package solutions.trsoftware.commons.shared.util.iterators;
 
 import junit.framework.TestCase;
+import solutions.trsoftware.commons.shared.testutil.AssertUtils;
 import solutions.trsoftware.commons.shared.util.StringUtilsTest;
 
 import java.util.stream.IntStream;
@@ -14,7 +15,6 @@ public class CodePointIteratorJavaTest extends TestCase {
 
   /**
    * Compares the elements returned by this iterator to that of {@link CharSequence#codePoints()}
-   * @throws Exception
    */
   public void testCodePointIterator() throws Exception {
     // compare the output of this iterator to that
@@ -24,5 +24,13 @@ public class CodePointIteratorJavaTest extends TestCase {
     codePointsStream.forEachOrdered(codePoint ->
         assertEquals(codePoint, codePointIterator.nextInt()));
     assertFalse(codePointIterator.hasNext());  // our iterator should be exhausted at this point
+  }
+
+  public void testCodePointsStream() throws Exception {
+    // compare the output of this iterator to that
+    String inputString = StringUtilsTest.THREE_MONKEYS;
+    IntStream codePointsStream = CodePointIterator.codePointsStream(inputString);
+    IntStream charSequenceCodePoints = inputString.codePoints();
+    AssertUtils.assertArraysEqual(charSequenceCodePoints.toArray(), codePointsStream.toArray());
   }
 }

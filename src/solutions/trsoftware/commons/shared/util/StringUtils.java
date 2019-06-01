@@ -26,6 +26,7 @@ import solutions.trsoftware.commons.shared.util.template.Template;
 import solutions.trsoftware.commons.shared.util.text.CharRange;
 
 import java.util.*;
+import java.util.stream.IntStream;
 
 /**
  * Date: Dec 18, 2007 Time: 9:56:00 PM
@@ -1141,10 +1142,12 @@ public class StringUtils {
    * Converts a string to an array of code points.
    * <p>
    *   <em>NOTE</em>: if you simply want to iterate over the code points, it would be more efficient to use
-   *   {@link CodePointIterator} (assuming you can't use {@link CharSequence#codePoints()}, which isn't implemented in GWT).
+   *   {@link #codePointsStream(String)} or {@link CodePointIterator}
+   *   (assuming you can't use {@link CharSequence#codePoints()}, which isn't implemented in GWT).
    * </p>
    * @return the code points in the given string as an array
    * @see CodePointIterator
+   * @see CodePointIterator#codePointsStream(CharSequence)
    * @see String#codePoints()
    */
   public static int[] codePoints(String str) {
@@ -1155,6 +1158,14 @@ public class StringUtils {
       ret[i] = codePointIterator.nextInt();
     }
     return ret;
+  }
+
+  /**
+   * Emulates the behavior of {@link String#codePoints()} for GWT code.
+   * @return an IntStream of Unicode code points from the given string
+   */
+  public static IntStream codePointsStream(String str) {
+    return CodePointIterator.codePointsStream(str);
   }
 
 }

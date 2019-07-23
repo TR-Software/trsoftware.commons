@@ -217,6 +217,45 @@ public class CookieSpec {
     return httpOnly;
   }
 
+  @Override
+  public boolean equals(Object o) {
+    if (this == o)
+      return true;
+    if (o == null || getClass() != o.getClass())
+      return false;
+
+    CookieSpec that = (CookieSpec)o;
+
+    if (version != that.version)
+      return false;
+    if (secure != that.secure)
+      return false;
+    if (httpOnly != that.httpOnly)
+      return false;
+    if (name != null ? !name.equals(that.name) : that.name != null)
+      return false;
+    if (value != null ? !value.equals(that.value) : that.value != null)
+      return false;
+    if (maxAge != null ? !maxAge.equals(that.maxAge) : that.maxAge != null)
+      return false;
+    if (domain != null ? !domain.equals(that.domain) : that.domain != null)
+      return false;
+    return path != null ? path.equals(that.path) : that.path == null;
+  }
+
+  @Override
+  public int hashCode() {
+    int result = name != null ? name.hashCode() : 0;
+    result = 31 * result + (value != null ? value.hashCode() : 0);
+    result = 31 * result + version;
+    result = 31 * result + (maxAge != null ? maxAge.hashCode() : 0);
+    result = 31 * result + (domain != null ? domain.hashCode() : 0);
+    result = 31 * result + (path != null ? path.hashCode() : 0);
+    result = 31 * result + (secure ? 1 : 0);
+    result = 31 * result + (httpOnly ? 1 : 0);
+    return result;
+  }
+
   /**
    * Builder for a {@link CookieSpec} instance.
    * @see #builder()
@@ -249,6 +288,7 @@ public class CookieSpec {
       domain = spec.domain;
       path = spec.path;
       secure = spec.secure;
+      httpOnly = spec.httpOnly;
     }
 
     /**

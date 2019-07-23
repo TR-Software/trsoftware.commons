@@ -17,13 +17,17 @@
 
 <!DOCTYPE module PUBLIC "-//Google Inc.//DTD Google Web Toolkit 2.0//EN"
     "http://google-web-toolkit.googlecode.com/svn/releases/2.0/distro-source/core/src/gwt-module.dtd">
+<!--
+   This module contains the TypingLogReplayPlayer UI,
+   without bundling the stylesheet ("TypingLog.css") via automatic resource inclusion.
+   (the styles can't be natively overridden in the page if the stylesheet is bundled with the module via ARI)
+ -->
 <module rename-to="TypingLog">
-  <!-- This module contains the TypingLogReplayPlayer UI -->
+
   <inherits name="solutions.trsoftware.commons.Commons"/>
   <inherits name="solutions.trsoftware.gcharts.GoogleCharts"/>
 
   <source path="client"/>
-  <stylesheet src="TypingLog.css"/>
 
   <entry-point class='solutions.trsoftware.typinglog.client.TypingLogEntryPoint'/>
 

@@ -132,6 +132,7 @@ public class TestUtils {
    * @see <a href="https://stackoverflow.com/a/27831908">StackOverflow discussion about Java memory benchmarking</a>
    */
   public static long calcSystemMemoryUsage(boolean awaitFullGc) {
+    System.gc();
     if (awaitFullGc)
       GcFinalization.awaitFullGc(); // see https://stackoverflow.com/a/27831908
     Runtime rt = Runtime.getRuntime();

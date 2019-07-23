@@ -43,6 +43,7 @@ import solutions.trsoftware.commons.client.styles.CellPanelStyle;
 import solutions.trsoftware.commons.client.widgets.DestroyableComposite;
 import solutions.trsoftware.commons.client.widgets.ImageButton;
 import solutions.trsoftware.commons.client.widgets.ImageToggleButton;
+import solutions.trsoftware.commons.client.widgets.ListPanel;
 import solutions.trsoftware.commons.client.widgets.clocks.TimeDisplay;
 import solutions.trsoftware.commons.client.widgets.text.TypingSpeedLabel;
 import solutions.trsoftware.commons.shared.text.*;
@@ -495,7 +496,7 @@ public class TypingLogReplayPlayer extends Composite {
 
 
   private class WordsWithErrors extends Composite {
-    private FlowPanel pnlMain = new FlowPanel();
+    private ListPanel pnlMain = new ListPanel(ListPanel.Type.OL);
 
     private WordsWithErrors() {
       initWidget(disclosurePanel("Mistakes:", true, pnlMain));
@@ -507,7 +508,7 @@ public class TypingLogReplayPlayer extends Composite {
         setVisible(false);  // don't show this panel when there are no errors
       else {
         for (final TypingLogReplayState.Word word : wordsWithErrors) {
-          HTML lblWord = new HTML("&uarr; " + word.getWordStr());
+          Label lblWord = new Label(word.getWordStr());
           lblWord.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {

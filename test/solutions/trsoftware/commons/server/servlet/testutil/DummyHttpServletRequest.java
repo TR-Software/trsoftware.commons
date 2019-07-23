@@ -116,7 +116,7 @@ public class DummyHttpServletRequest implements HttpServletRequest {
   }
 
   public Cookie[] getCookies() {
-    return cookies.toArray(new Cookie[0]);
+    return cookies.toArray(new Cookie[cookies.size()]);
   }
 
   public long getDateHeader(String val) {

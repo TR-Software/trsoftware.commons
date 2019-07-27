@@ -17,14 +17,21 @@
 
 package solutions.trsoftware.commons.shared.util.stats;
 
+import java.util.function.Consumer;
+
 /**
  * Indicates that an instance can update itself from single values of some data type.
  *
  * @author Alex, 1/7/14
  */
-public interface Updatable<T> {
+public interface Updatable<T> extends Consumer<T> {
   /**
    * Updates itself with the given value.
    */
   void update(T x);
+
+  @Override
+  default void accept(T t) {
+    update(t);
+  }
 }

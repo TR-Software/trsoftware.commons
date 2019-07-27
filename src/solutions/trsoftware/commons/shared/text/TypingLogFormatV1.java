@@ -32,9 +32,11 @@ import java.util.List;
  * of characters needed to represent it.
  *
  * TypingLog:
- *   version,charTimings,editLog
+ *   version,language,charTimings,editLog
  * version:
  *   "TLvX"  (where X is the version number, e.g. "TLv1")
+ * language:
+ *   ISO 639-1 language code (2 chars)
  * charTimings:
  *   N,T_1,...,T_N  (where N = charTimings.length and T_i is the time elapsed since T_i-1)
  * editLog:
@@ -44,7 +46,7 @@ import java.util.List;
  * EditOperation:
  *   p$c  (character c substituted at position p)
  *   p-c  (character c deleted at position p)
- *   p+c  (character c inserterd at position p)
+ *   p+c  (character c inserted at position p)
  *
  * 
  * Nov 23, 2012

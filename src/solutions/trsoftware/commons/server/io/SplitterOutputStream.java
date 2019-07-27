@@ -17,12 +17,17 @@
 
 package solutions.trsoftware.commons.server.io;
 
-import java.io.IOException;
-import java.io.OutputStream;
+import javax.annotation.Nonnull;
+import java.io.*;
 
 /**
- * Serves a similar purpose to the Unix {@code tee} utility.
+ * Sends the same output to a number of underlying output streams.
+ * <p>
+ * Can be used to implement something similar to the Unix {@code tee} utility.
  *
+ * @see <a href="https://en.wikipedia.org/wiki/Tee_(command)">tee (shell command)</a>
+ * @see #teeToFile(File)
+ * @see #teeTo(OutputStream)
  * @author Alex
  */
 public class SplitterOutputStream extends OutputStream {
@@ -57,5 +62,37 @@ public class SplitterOutputStream extends OutputStream {
     for (OutputStream destinationStream : destinationStreams) {
       destinationStream.flush();
     }
+  }
+
+  /**
+   * Factory method that constructs an instance that behaves like the Unix {@code tee} utility.
+   *
+   * @param outputFile the file to be opened for writing using {@link FileOutputStream#FileOutputStream(File)}.
+   * <em><strong>NOTE:</strong> the written bytes will overwrite the file</em>; to have the bytes appended
+   * use {@link #teeTo(OutputStream)} with an instance of {@link FileOutputStream} created with {@code append = true}.
+   * @return an output stream that writes both to stdout and the given file
+   * @see #teeTo(OutputStream)
+   * @see <a href="https://en.wikipedia.org/wiki/Tee_(command)">tee (shell command)</a>
+   */
+  @Nonnull
+  public static PrintStream teeToFile(File outputFile) throws FileNotFoundException {
+    return teeTo(new FileOutputStream(outputFile));
+  }
+
+  /**
+   * Factory method that constructs an instance that behaves like the Unix {@code tee} utility,
+   * except allows writing to any output stream, not just a file.
+   *
+   * @return an output stream that writes both to stdout and the given output stream.
+   * @see <a href="https://en.wikipedia.org/wiki/Tee_(command)">tee (shell command)</a>
+   */
+  @Nonnull
+  public static PrintStream teeTo(OutputStream outStream) {
+    return new PrintStream(
+        new SplitterOutputStream(
+            new NonCloseableOutputStream(System.out), // wrap stdout to prevent accidentally closing it
+            outStream
+        ),
+        true);
   }
 }

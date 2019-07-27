@@ -33,6 +33,7 @@ import java.io.PrintStream;
 import java.lang.reflect.*;
 import java.nio.file.*;
 import java.util.*;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 /**
@@ -154,6 +155,18 @@ public abstract class ReflectionUtils {
         return newInstanceUnchecked(cls);
       }
     };
+  }
+
+  /**
+   * Creates a supplier of instances of the given class using its default (0-arg) constructor. Any checked exception caught
+   * while trying to invoke the constructor by reflection will be rethrown as {@link IllegalArgumentException}.
+   * <p>
+   * This is the {@link java.util.function} version of {@link #newInstanceFactory0(Class)}.
+   *
+   * @return A factory that will keep creating new instances of cls, based on the given constructor args.
+   */
+  public static <T> Supplier<T> newInstanceSupplier(final Class<T> cls) {
+    return () -> newInstanceUnchecked(cls);
   }
 
   /**
@@ -634,4 +647,5 @@ public abstract class ReflectionUtils {
         https://junit.org/junit5/docs/current/user-guide/#writing-tests
     */
   }
+
 }

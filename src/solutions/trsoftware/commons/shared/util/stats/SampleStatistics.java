@@ -42,4 +42,20 @@ public interface SampleStatistics<N extends Number> extends Updatable<N> {
   double variance();
 
   ImmutableStats<N> summarize();
+
+  /**
+   * Computes mean + N&sigma; (where &sigma; denotes "standard deviation")
+   * <p>
+   * For example, given a normal distribution, approximately 95.5% of the data is expected to be within 2&sigma; of
+   * the mean.
+   *
+   * @param nStdev the number of standard deviations to add to the mean
+   * @return the mean plus the given number of standard deviations
+   * @see <a href="https://en.wikipedia.org/wiki/Standard_deviation#Rules_for_normally_distributed_data">
+   *     Rules for normally distributed data</a>
+   */
+  default double meanPlusStdev(double nStdev) {
+    return mean() + stdev() * nStdev;
+  }
+
 }

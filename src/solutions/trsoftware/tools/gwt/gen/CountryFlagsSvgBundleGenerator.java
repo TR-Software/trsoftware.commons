@@ -48,11 +48,7 @@ public class CountryFlagsSvgBundleGenerator {
         "  <a href=\"https://github.com/lipis/flag-icon-css/tree/master/flags/4x3\">flag-icon-css project on GitHub</a>\n" +
         "</p>\n");
     File outputFile = generator.getOutputFile();
-    try (Writer out = new OutputStreamWriter(
-        new SplitterOutputStream(
-            System.out,
-            new FileOutputStream(outputFile, false)
-        ))) {
+    try (Writer out = new OutputStreamWriter(SplitterOutputStream.teeToFile(outputFile))) {
       generator.generateBundleClass(out);
     }
     System.out.println("// Output written to " + outputFile);

@@ -17,14 +17,21 @@
 
 package solutions.trsoftware.commons.shared.util.stats;
 
+import java.util.function.DoubleConsumer;
+
 /**
  * Indicates that an instance can update itself from a value of type double.
  *
  * @author Alex, 1/7/14
  */
-public interface UpdatableDouble {
+public interface UpdatableDouble extends DoubleConsumer {
   /**
    * Updates itself with the given value.
    */
   void update(double x);
+
+  @Override
+  default void accept(double value) {
+    update(value);
+  }
 }

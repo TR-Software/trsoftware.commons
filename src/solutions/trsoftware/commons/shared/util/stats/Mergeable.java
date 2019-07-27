@@ -27,4 +27,17 @@ public interface Mergeable<T> {
    * Merges in data from another instance.
    */
   void merge(T other);
+
+  /**
+   * Merges the second arg into the first and returns it.
+   *
+   * This operation can be used as a "combiner" function for a {@link java.util.stream.Collector},
+   * when passed as a method reference.
+   *
+   * @return the result of merging {@code b} into {@code a}
+   */
+  static <T extends Mergeable<T>> T combine(T a, T b) {
+    a.merge(b);
+    return a;
+  }
 }

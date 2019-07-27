@@ -41,8 +41,8 @@ import java.io.Serializable;
  */
 public class NumberSampleOnline<N extends Number & Comparable<N>> implements SampleStatistics<N>, Serializable {
 
-  final MeanAndVariance meanAndVariance = new MeanAndVariance();
-  final MinAndMaxComparable<N> minAndMax = new MinAndMaxComparable<N>();
+  private final MeanAndVariance meanAndVariance = new MeanAndVariance();
+  private final MinAndMaxComparable<N> minAndMax = new MinAndMaxComparable<N>();
 
   @Override
   public synchronized void update(N number) {

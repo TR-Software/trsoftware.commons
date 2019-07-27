@@ -136,10 +136,8 @@ public class GwtCompilationStatsReport implements Callable<Void> {
 
     String extrasDirPathSuffix = joinPath("WEB-INF", "gwtExtras");
     String reportSavePathSuffix = joinPath(extrasDirPathSuffix, GwtCompilationStatsReport.class.getSimpleName() + ".txt");
-    PrintStream out = new PrintStream(new SplitterOutputStream(
-        System.out,
-        new FileOutputStream(joinPath(warDirPath, reportSavePathSuffix))
-    ));
+    File outFile = new File(joinPath(warDirPath, reportSavePathSuffix));
+    PrintStream out = new PrintStream(SplitterOutputStream.teeToFile(outFile));
 
     out.println("This report will appear in " + reportSavePathSuffix);
     out.println("(generated on " + new Date() + " using " + GwtCompilationStatsReport.class.getName() + ")");

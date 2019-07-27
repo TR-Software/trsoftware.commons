@@ -18,7 +18,7 @@ public class StatsUtils {
    * @param resultType the class that implements both {@link Updatable} and {@link Mergeable}
    * @param <T> the type of objects being collected
    * @param <R> the accumulator and result type (e.g. {@link NumberSampleOnline})
-   * @return
+   * @return a collector that uses an instance of the given class
    */
   public static <T, R extends Updatable<T> & Mergeable<R>> Collector<T, R, R> newCollector(Class<R> resultType) {
     return Collector.of(ReflectionUtils.newInstanceSupplier(resultType), Updatable::update, Mergeable::combine, Collector.Characteristics.IDENTITY_FINISH);

@@ -199,21 +199,76 @@ public final class ServerIOUtils {
     while (n >= 0);
   }
 
-  /** Copies everything from input to output, using a {@value #BUFFER_SIZE}-byte buffer */
-  public static void copyInputToOutput(InputStream from, OutputStream to) throws IOException {
-    copyInputToOutput(from, to, BUFFER_SIZE);
+  /**
+   * Copies everything from input to output, using a {@value #BUFFER_SIZE}-byte buffer
+   *
+   * @return the total number of bytes that were written to the output stream (should be the same as the number
+   * of bytes read from the input stream)
+   */
+  public static long copyInputToOutput(InputStream from, OutputStream to) throws IOException {
+    return copyInputToOutput(from, to, BUFFER_SIZE);
   }
 
-  /** Copies everything from input to output, using a temporary buffer of the given size */
-  public static void copyInputToOutput(InputStream from, OutputStream to, int bufferSize) throws IOException {
+  /**
+   * Copies everything from input to output, using a temporary buffer of the given size.
+   *
+   * @param bufferSize size of the buffer to use for this operation
+   * @return the total number of bytes that were written to the output stream (should be the same as the number
+   * of bytes read from the input stream)
+   */
+  public static long copyInputToOutput(InputStream from, OutputStream to, int bufferSize) throws IOException {
+    try {
+      return copyInputToOutput(from, to, bufferSize, Long.MAX_VALUE);
+    }
+    catch (InputStreamTooLongException e) {
+      // this should never happen in a practical scenario because we're using Long.MAX_VALUE as the limit
+      throw new IllegalStateException(e);
+    }
+  }
+
+  /**
+   * Copies bytes from input to output, using a temporary buffer of the given size, until the given limit is reached.
+   * When more than the given limit number of bytes have been read, will terminate prematurely by throwing
+   * {@link InputStreamTooLongException}, before reaching the end of the input stream.
+   * <p>
+   * If needed, code that catches this exception can resume the copy operation using the info provided by the
+   * exception (see {@link InputStreamTooLongException#continueCopying(InputStream, OutputStream)}).
+   * <p>
+   * The buffer size argument can be adjusted to control how often the limit will be checked.
+   *
+   * @param from the input stream
+   * @param to the output stream
+   * @param bufferSize size of the buffer to use for this operation; the limit will be checked in increments of this size
+   * @param inputLengthLimit will stop copying after this number of bytes have been read from the input stream
+   * @return the total number of bytes that were written to the output stream
+   *
+   * @throws InputStreamTooLongException will be thrown as soon as the number of bytes read from the input stream
+   * exceeds the given limit.  If this happens, it's possible that the the input stream will not have been read
+   * completely, and that not all of the bytes read from the input stream have been written to the output stream.
+   * If needed, code that catches this exception can resume the copy operation using the info provided by the
+   * exception (see {@link InputStreamTooLongException#continueCopying(InputStream, OutputStream)})
+   *
+   * @see #copyInputToOutput(InputStream, OutputStream)
+   * @see #copyInputToOutput(InputStream, OutputStream, int)
+   * @see InputStreamTooLongException#continueCopying(InputStream, OutputStream)
+   */
+  public static long copyInputToOutput(InputStream from, OutputStream to, int bufferSize, long inputLengthLimit) throws IOException, InputStreamTooLongException {
+    long byteCount = 0;
     byte[] buf = new byte[bufferSize];
     int n;
     do {
       n = from.read(buf);
-      if (n > 0)
+      if (n > 0) {
+        byteCount += n;
+        if (byteCount > inputLengthLimit) {
+          // stop prematurely because limit was reached
+          throw new InputStreamTooLongException(byteCount - n, inputLengthLimit, buf, n);
+        }
         to.write(buf, 0, n);
+      }
     }
     while (n >= 0);
+    return byteCount;  // the total number of bytes actually copied to the output stream
   }
 
   /**

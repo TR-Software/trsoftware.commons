@@ -41,8 +41,9 @@ import java.util.stream.Collectors;
  */
 public abstract class ReflectionUtils {
 
-
-  // NOTE: the following 2 methods borrows from java.beans.ReflectionUtils, which unfortunately is not public
+  /** Static class not instantiable */
+  private ReflectionUtils() {
+  }
 
   /**
    * Maps the primitive wrapper types to their corresponding primitive types.

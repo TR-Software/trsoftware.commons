@@ -18,10 +18,10 @@
 package solutions.trsoftware.commons.server.testutil;
 
 import junit.framework.AssertionFailedError;
-import solutions.trsoftware.commons.server.util.function.ThrowingBiConsumer;
 import solutions.trsoftware.commons.server.util.reflect.MemberSet;
 import solutions.trsoftware.commons.server.util.reflect.ObjectDiffs;
 import solutions.trsoftware.commons.shared.util.StringUtils;
+import solutions.trsoftware.commons.shared.util.function.BiConsumerThrows;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Member;
@@ -150,7 +150,7 @@ public abstract class ServerAssertUtils {
    * @param <E> the type of elements in the given lists
    * @throws AssertionFailedError if {@code equalityAssertion} throws an exception for any pair of elements
    */
-  public static <E> void assertListsEqual(List<E> expected, List<E> actual, ThrowingBiConsumer<E, E, Exception> equalityAssertion) {
+  public static <E> void assertListsEqual(List<E> expected, List<E> actual, BiConsumerThrows<E, E, Exception> equalityAssertion) {
     assertEquals(expected.size(), actual.size());
     for (int i = 0; i < expected.size(); i++) {
       E a = expected.get(i);

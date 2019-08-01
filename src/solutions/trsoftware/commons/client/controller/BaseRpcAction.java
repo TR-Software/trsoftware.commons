@@ -35,6 +35,8 @@ import solutions.trsoftware.commons.client.widgets.popups.ModalDialog;
 import solutions.trsoftware.commons.client.widgets.popups.PleaseWaitPopup;
 
 /**
+ * @param <T> the return type of the RPC method
+ *
  * @author Alex, 9/22/2017
  */
 public abstract class BaseRpcAction<T> implements Command, AsyncCallback<T> {

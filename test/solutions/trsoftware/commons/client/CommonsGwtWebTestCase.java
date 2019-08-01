@@ -18,12 +18,15 @@
 package solutions.trsoftware.commons.client;
 
 import com.google.gwt.core.shared.GWT;
+import com.google.gwt.junit.DoNotRunWith;
+import com.google.gwt.junit.Platform;
 
 /**
  * Dec 4, 2008
  *
  * @author Alex
  */
+@DoNotRunWith(Platform.HtmlUnitUnknown)
 public abstract class CommonsGwtWebTestCase extends CommonsGwtTestCase {
 
   @Override

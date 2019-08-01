@@ -15,21 +15,22 @@
  *
  */
 
-package solutions.trsoftware.commons.server.util.function;
+package solutions.trsoftware.commons.shared.util.function;
 
-import java.util.function.BiConsumer;
+import java.util.function.ToLongBiFunction;
 
 /**
- * Same as {@link BiConsumer}, but allows the function to throw a declared exception.
+ * Same as {@link ToLongBiFunction}, but allows the function to throw a declared exception.
  *
- * @param <A> the type of the first argument to the operation
- * @param <B> the type of the second argument to the operation
+ * @param <A> the type of the first argument to the function
+ * @param <B> the type of the second argument to the function
+ * @param <E> the type of exception declared by the {@code throws} clause of this function
  *
  * @author Alex
  * @since 2/27/2018
  */
 @FunctionalInterface
-public interface ThrowingBiConsumer<A, B, E extends Exception>  {
+public interface ToLongBiFunctionThrows<A, B, E extends Exception>  {
 
-  void accept(A a, B b) throws E;
+  long accept(A a, B b) throws E;
 }

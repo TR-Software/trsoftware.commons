@@ -46,6 +46,9 @@
   <servlet path="/numberFormatterServlet"
            class="solutions.trsoftware.commons.server.bridge.rpc.NumberFormatTestServiceImpl"/>
 
+  <servlet path="/mockRpcService"
+           class="solutions.trsoftware.commons.server.servlet.gwt.MockRpcServiceServlet"/>
+
   <!-- Workaround for https://github.com/gwtproject/gwt/issues/9616 -->
   <replace-with class="solutions.trsoftware.commons.client.animations.NativeAnimationSupportDisabled">
     <when-type-is class="com.google.gwt.animation.client.AnimationScheduler.AnimationSupportDetector"/>

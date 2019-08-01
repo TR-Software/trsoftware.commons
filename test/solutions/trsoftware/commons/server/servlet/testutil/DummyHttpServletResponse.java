@@ -83,6 +83,7 @@ public class DummyHttpServletResponse implements HttpServletResponse {
   }
 
   public void setStatus(int i, String s) {
+    // NOTE: this method is deprecated since Servlet API 2.1+
     statusCode = i;
     statusMessage = s;
   }
@@ -252,7 +253,14 @@ public class DummyHttpServletResponse implements HttpServletResponse {
 
   @Override
   public void reset() {
-    throw new UnsupportedOperationException("Method solutions.trsoftware.commons.server.servlet.testutil.DummyHttpServletResponse.reset has not been fully implemented yet.");
+    /* In compliance with Servlet spec:
+       "Clears any data that exists in the buffer as well as the status code and
+       headers."
+     */
+    output.getBuffer().setLength(0);  // see https://stackoverflow.com/questions/7168881/what-is-more-efficient-stringbuffer-new-or-delete0-sb-length
+    statusCode = 0;
+    statusMessage = null;  // NOTE: status message is deprecated since Servlet API 2.1+
+    headers.clear();
   }
 
   @Override

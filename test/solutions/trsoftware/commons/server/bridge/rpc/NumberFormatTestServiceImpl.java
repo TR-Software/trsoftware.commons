@@ -26,11 +26,10 @@ import solutions.trsoftware.commons.server.bridge.text.NumberFormatterJavaImpl;
 import java.util.Random;
 
 /**
- * Allows comparing the output of GWT's NumberFormat to that of
- * java.text.NumberFormat by running the former client-side
- * and the latter server-side.
+ * Allows comparing the output of GWT's {@link com.google.gwt.i18n.client.NumberFormat} to that of
+ * {@link java.text.NumberFormat} by running the former client-side and the latter server-side.
  *
- * This class formats numbers using the Java implentation of NumberFormat.
+ * This class formats numbers using the Java implementation of NumberFormat.
  *
  * @author Alex
  */

@@ -21,7 +21,7 @@ import com.google.gwt.core.client.GWT;
 import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.rpc.ServiceDefTarget;
-import solutions.trsoftware.commons.client.CommonsGwtTestCase;
+import solutions.trsoftware.commons.client.CommonsGwtWebTestCase;
 import solutions.trsoftware.commons.client.bridge.rpc.NumberFormatTestService;
 import solutions.trsoftware.commons.client.bridge.rpc.NumberFormatTestServiceAsync;
 import solutions.trsoftware.commons.client.bridge.text.AbstractNumberFormatter;
@@ -44,7 +44,7 @@ import static solutions.trsoftware.commons.shared.util.StringUtils.template;
  *
  * @author Alex
  */
-public class NumberFormatterGwtWebTest extends CommonsGwtTestCase {
+public class NumberFormatterGwtWebTest extends CommonsGwtWebTestCase {
   NumberFormatterTestBridge delegate;
   NumberFormatTestServiceAsync serversideJavaFormatter;
 

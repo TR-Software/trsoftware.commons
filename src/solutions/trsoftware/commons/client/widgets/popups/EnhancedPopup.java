@@ -22,10 +22,7 @@ import com.google.gwt.dom.client.Document;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.user.client.Command;
 import com.google.gwt.user.client.Window;
-import com.google.gwt.user.client.ui.FocusWidget;
-import com.google.gwt.user.client.ui.PopupPanel;
-import com.google.gwt.user.client.ui.TextBoxBase;
-import com.google.gwt.user.client.ui.Widget;
+import com.google.gwt.user.client.ui.*;
 import solutions.trsoftware.commons.client.animations.ShakePopupAnimation;
 import solutions.trsoftware.commons.client.jso.JsDocument;
 import solutions.trsoftware.commons.client.jso.JsWindow;
@@ -245,6 +242,11 @@ public class EnhancedPopup extends PopupPanel implements HasFocusTarget {
     }
   }
 
+  /**
+   * Show the popup relative to the given widget, with the given prefs defining the meaning of "relative".
+   *
+   * @see PopupPanel#showRelativeTo(UIObject)
+   */
   public void showRelativeTo(Widget pivot, Alignment... alignmentPrefs) {
     showRelativeTo(new RelativePosition(pivot, alignmentPrefs));
   }
@@ -277,6 +279,11 @@ public class EnhancedPopup extends PopupPanel implements HasFocusTarget {
     });
   }
 
+  /**
+   * Shows the popup in the center of the browser window.
+   *
+   * @see PopupPanel#center()
+   */
   public void showCenteredInWindow() {
     showRelativeToWindow(.5, .5);
   }

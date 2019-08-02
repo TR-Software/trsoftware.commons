@@ -230,6 +230,7 @@ public class BaseRpcServlet extends RemoteServiceServlet {
    * with the request headers.
    *
    * @see ServerIOUtils#copyInputToOutput(java.io.InputStream, java.io.OutputStream, int, long)
+   * @see <a href="https://github.com/csviri/bodylimiter">The "bodylimiter" project on GitHub for a more comprehensive solution</a>
    */
   @Override
   protected String readContent(HttpServletRequest request) throws ServletException, IOException {

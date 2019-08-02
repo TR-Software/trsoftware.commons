@@ -18,6 +18,7 @@
 package solutions.trsoftware.commons.server.auth;
 
 import solutions.trsoftware.commons.server.cache.FixedTimeCache;
+import solutions.trsoftware.commons.server.servlet.ServletUtils;
 import solutions.trsoftware.commons.server.util.ServerStringUtils;
 import solutions.trsoftware.commons.server.util.UrlSafeBase64;
 
@@ -124,11 +125,12 @@ public class RequestAuthWithSessionTokens extends RequestAuth {
   }
 
   /** Returns the session token cache from the request's session, creating it if necessary */
+  @SuppressWarnings("unchecked")
   public Map<String,Boolean> getOrCreateSessionTokenCache(HttpServletRequest request) {
     HttpSession session = request.getSession(false); // assumes the session exists
     FixedTimeCache<String, Boolean> cache = (FixedTimeCache<String, Boolean>)session.getAttribute(SESSION_ATTR);
      if (cache == null) {
-       synchronized (session) {  // double-checked locking
+       synchronized (ServletUtils.getSessionMutex(session)) {  // double-checked locking
          cache = (FixedTimeCache<String, Boolean>)session.getAttribute(SESSION_ATTR);
          if (cache == null) {
            cache = new FixedTimeCache<String, Boolean>(tokenTtlMillis, maxOutstandingTokens);

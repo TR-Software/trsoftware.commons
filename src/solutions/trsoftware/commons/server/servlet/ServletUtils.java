@@ -18,10 +18,12 @@
 package solutions.trsoftware.commons.server.servlet;
 
 import solutions.trsoftware.commons.client.util.WebUtils;
+import solutions.trsoftware.commons.server.servlet.listeners.HttpSessionMutexListener;
 
 import javax.annotation.Nonnull;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.*;
@@ -42,6 +44,12 @@ public abstract class ServletUtils {
    * {@link #getRequestURL(HttpServletRequest)} will save the parsed {@link URL} in the request under this attribute name.
    */
   public static final String PARSED_URL_ATTR = ServletUtils.class.getName() + ".requestURL";
+
+  /**
+   * {@link #getSessionMutex(HttpSession)} will use this session attribute to save
+   * a mutex object that can be used for synchronizing access to a session.
+   */
+  public static final String SESSION_MUTEX_ATTRIBUTE = ServletUtils.class.getName() + ".SESSION_MUTEX";
 
 
   public static void setThreadLocalRequestCopy(RequestCopy request) {
@@ -349,4 +357,41 @@ public abstract class ServletUtils {
     str.append("permutation ").append(permutationStrongName).append(" from ").append(request.getRemoteAddr()).append(" [").append(getUserAgentHeader(request)).append("]");
     return str;
   }
+
+  /**
+ 	 * Returns the best available mutex for the given session:
+ 	 * that is, an object to synchronize on for the given session.
+ 	 * <p>
+   * Returns the session mutex attribute if available; usually,
+ 	 * this means that the {@link HttpSessionMutexListener} needs to be defined
+ 	 * in {@code web.xml}. Falls back to the {@link HttpSession} itself
+ 	 * if no mutex attribute found.
+   * <p>
+ 	 * The session mutex is guaranteed to be the same object during
+ 	 * the entire lifetime of the session, available under the key defined
+ 	 * by the {@link #SESSION_MUTEX_ATTRIBUTE} constant. It serves as a
+ 	 * safe reference to synchronize on for locking on the current session.
+   * <p>
+ 	 * In many cases, the {@link HttpSession} reference itself is a safe mutex
+ 	 * as well, since it will always be the same object reference for the
+ 	 * same active logical session. However, this is not guaranteed across
+ 	 * different servlet containers; the only 100% safe way is a session mutex.
+   * For example, when running Tomcat with persistent or replicated sessions,
+   * the {@link HttpSession} could be a different object deserialized from the datastore.
+   *
+ 	 * @param session the HttpSession to find a mutex for
+ 	 * @return the mutex object (never {@code null})
+ 	 * @see #SESSION_MUTEX_ATTRIBUTE
+ 	 * @see HttpSessionMutexListener
+ 	 */
+  // NOTE: this code borrowed from Spring (https://github.com/spring-projects/spring-framework/blob/9be327985b61588d5f8c7050a5558ef36a33b321/spring-web/src/main/java/org/springframework/web/util/WebUtils.java#L417-L444)
+ 	public static Object getSessionMutex(HttpSession session) {
+ 		Objects.requireNonNull(session, "Session must not be null");
+ 		Object mutex = session.getAttribute(SESSION_MUTEX_ATTRIBUTE);
+ 		if (mutex == null) {
+ 			mutex = session;
+ 		}
+ 		return mutex;
+ 	}
+
 }

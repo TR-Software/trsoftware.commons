@@ -80,7 +80,7 @@ public class MockScheduledExecutorService implements ScheduledExecutorService {
    * on each iteration (or 1 millis whichever is larger),
    * invoking all the tasks scheduled up to that point.
    * The clock is guaranteed to stop exactly at the target time,
-   * because we'll be pumping 1 ms at a time toward the end of the iterval.
+   * because we'll be pumping 1 ms at a time toward the end of the interval.
    *
    * This ensures that the scheduled events execute as close to their target time as possible.
    * 

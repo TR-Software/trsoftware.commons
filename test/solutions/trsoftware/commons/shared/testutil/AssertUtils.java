@@ -26,6 +26,9 @@ import solutions.trsoftware.commons.shared.util.callables.Function0_t;
 import solutions.trsoftware.commons.shared.util.compare.ComparisonOperator;
 
 import java.util.*;
+import java.util.function.BiPredicate;
+import java.util.function.IntPredicate;
+import java.util.function.Predicate;
 import java.util.function.Supplier;
 
 import static junit.framework.Assert.*;
@@ -179,8 +182,10 @@ public abstract class AssertUtils {
       assertNotNull(o2);
     else if (o2 == null)
       assertNotNull(o1);
-    else
+    else {
       assertFalse("expected:<" + o1 + "> should not be equal to:<" + o2 + ">", o1.equals(o2));
+      assertFalse("expected:<" + o2 + "> should not be equal to:<" + o1 + ">", o2.equals(o1));
+    }
   }
 
   /**
@@ -395,6 +400,7 @@ public abstract class AssertUtils {
    */
   public static void assertEqualsAndHashCode(Object a, Object b) {
     assertEquals(a, b);
+    assertEquals(b, a);
     assertTrue(a.hashCode() == b.hashCode());
   }
 
@@ -512,6 +518,24 @@ public abstract class AssertUtils {
     return first(values);
   }
 
+  public static <T> void assertPredicateResult(Predicate<T> predicate, T arg, boolean expected) {
+    assertEquals(expected, predicate.test(arg));
+    // also test negation of the predicate
+    assertEquals(!expected, predicate.negate().test(arg));
+  }
+
+  public static void assertIntPredicateResult(IntPredicate predicate, int arg, boolean expected) {
+    assertEquals(expected, predicate.test(arg));
+    // also test negation of the predicate
+    assertEquals(!expected, predicate.negate().test(arg));
+  }
+
+  public static <T> void assertBiPredicateResult(BiPredicate<T, T> predicate, T lhs, T rhs, boolean expected) {
+    assertEquals(expected, predicate.test(lhs, rhs));
+    // also test negation of the predicate
+    assertEquals(!expected, predicate.negate().test(lhs, rhs));
+  }
+
   /**
    * Allows chaining assertions (sort of like a simpler version of the AssertJ library).
    * The simplest way to use this class is by calling {@link #assertThat(Object)} and chaining the assertions
@@ -527,21 +551,25 @@ public abstract class AssertUtils {
       this.value = value;
     }
 
+    @SuppressWarnings("unchecked")
     public T isEqualTo(V expected) {
       assertEquals(expected, value);
       return (T)this;
     }
 
+    @SuppressWarnings("unchecked")
     public T isNotEqualTo(V expected) {
       assertNotEqual(expected, value);
       return (T)this;
     }
 
+    @SuppressWarnings("unchecked")
     public T isNull() {
       assertNull(value);
       return (T)this;
     }
 
+    @SuppressWarnings("unchecked")
     public T isNotNull() {
       assertNotNull(value);
       return (T)this;

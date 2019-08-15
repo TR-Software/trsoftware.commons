@@ -20,6 +20,11 @@ package solutions.trsoftware.commons.server.memquery;
 /**
  * @author Alex, 1/8/14
  */
-public interface HasValue<V> {
+public interface HasValue<V> extends solutions.trsoftware.commons.shared.util.HasValue {
   V get();
+
+  @Override
+  default Object getValue() {
+    return get();
+  }
 }

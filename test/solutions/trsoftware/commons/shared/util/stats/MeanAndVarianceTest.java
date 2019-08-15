@@ -17,29 +17,36 @@
 
 package solutions.trsoftware.commons.shared.util.stats;
 
-import junit.framework.TestCase;
+import static solutions.trsoftware.commons.shared.util.MathUtils.EPSILON;
 
 /**
  * Oct 2, 2012
  *
  * @author Alex
  */
-public class MeanAndVarianceTest extends TestCase {
+public class MeanAndVarianceTest extends CollectableStatsTestCase {
 
-  private static final int[] inputs = new int[]{2,3,65,123,435,123,69,34,23,42,123,12,3,-123,34,-34};
+  private static final double[] inputs = new double[]{2,3,65,123,435,123,69,34,23,42,123,12,3,-123,34,-34};
   
   /** Since we've already unit tested controlSample, all we need to do is to compare variance with controlSample */
-  private NumberSample<Integer> controlSample;
+  private NumberSample<Double> controlSample;
 
   public void setUp() throws Exception {
-    controlSample = new NumberSample<Integer>();
+    super.setUp();
+    controlSample = new NumberSample<>();
+  }
+
+  @Override
+  protected void tearDown() throws Exception {
+    controlSample = null;
+    super.tearDown();
   }
 
   public void testMeanAndVariance() throws Exception {
     // test a sample with a bunch of Integers; we assume it will work
     // for other numeric types if it works for Integers
     MeanAndVariance meanAndVariance = new MeanAndVariance();
-    for (int x : inputs) {
+    for (double x : inputs) {
       meanAndVariance.update(x);
       controlSample.update(x);
       // compare all the stats at each step
@@ -56,7 +63,7 @@ public class MeanAndVarianceTest extends TestCase {
     MeanAndVariance meanAndVariance = new MeanAndVariance();
     MeanAndVariance meanAndVariance2 = new MeanAndVariance();
     for (int i = 0; i < inputs.length; i++) {
-      int x = inputs[i];
+      double x = inputs[i];
       controlSample.update(x);
       if (i < 4)  // add the first 4 values to the first instance and the rest to the second instance
         meanAndVariance.update(x);
@@ -66,9 +73,9 @@ public class MeanAndVarianceTest extends TestCase {
     // now merge the two instances and compare against the control
     meanAndVariance.merge(meanAndVariance2);
     assertEquals(controlSample.size(), meanAndVariance.size());
-    assertEquals(controlSample.mean(), meanAndVariance.mean(), .01);
-    assertEquals(controlSample.variance(), meanAndVariance.variance(), .01);
-    assertEquals(controlSample.stdev(), meanAndVariance.stdev(), .01);
+    assertEquals(controlSample.mean(), meanAndVariance.mean(), EPSILON);
+    assertEquals(controlSample.variance(), meanAndVariance.variance(), EPSILON);
+    assertEquals(controlSample.stdev(), meanAndVariance.stdev(), EPSILON);
   }
 
   public void testInvalidInputs() throws Exception {
@@ -83,5 +90,17 @@ public class MeanAndVarianceTest extends TestCase {
       assertEquals(0, meanAndVariance.size());
 
     }
+  }
+  
+  static void assertEquals(MeanAndVariance expected, MeanAndVariance actual) {
+    // compare each field separately within a delta, to ignore floating-point precision errors
+    assertEquals(expected.size(), actual.size());
+    assertEquals(expected.mean(), actual.mean(), EPSILON);
+    assertEquals(expected.variance(), actual.variance(), EPSILON);
+  }
+
+  @Override
+  public void testAsCollector() throws Exception {
+    doTestAsDoubleStreamCollector(new MeanAndVariance(), MeanAndVariance::collectDoubleStream, MeanAndVarianceTest::assertEquals, inputs);
   }
 }

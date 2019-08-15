@@ -19,6 +19,9 @@ package solutions.trsoftware.commons.shared.util.mutable;
 
 import junit.framework.TestCase;
 
+import static solutions.trsoftware.commons.shared.testutil.AssertUtils.assertEqualsAndHashCode;
+import static solutions.trsoftware.commons.shared.testutil.AssertUtils.assertNotEqual;
+
 public class MutableFloatTest extends TestCase {
 
   private MutableFloat one;
@@ -107,6 +110,12 @@ public class MutableFloatTest extends TestCase {
 
   public void testEquals() throws Exception {
     assertEquals(one, new MutableFloat(1));
+  }
+
+  public void testEqualsAndHashCode() throws Exception {
+    assertEqualsAndHashCode(one, new MutableFloat(1));
+    assertNotEqual(one, new MutableFloat(2));
+    assertNotEqual(one, new MutableInteger(1));
   }
 
   public void testMerge() throws Exception {

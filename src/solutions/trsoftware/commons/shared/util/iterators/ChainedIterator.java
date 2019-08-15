@@ -17,19 +17,26 @@
 
 package solutions.trsoftware.commons.shared.util.iterators;
 
+import com.google.common.collect.Iterables;
 import com.google.common.collect.Iterators;
 
 import java.util.Collection;
 import java.util.Iterator;
+import java.util.NoSuchElementException;
 
 /**
  * Combines multiple iterators into a single "chain", similar to
  * <a href="https://docs.python.org/2/library/itertools.html#itertools.chain">itertools.chain</a> in Python.
  * <p>
- * This class has the same functionality as {@link Iterators#concat(Iterator)} in Guava, but provides constructors
- * supporting a wider range of sources for the chain.
+ * This class has basically the same functionality as {@link Iterators#concat(Iterator)} in Guava.
+ *
+ * @deprecated This class has not been thoroughly tested and could contain bugs.
+ * Since Guava appears to provide most of this functionality (and is probably better-tested),
+ * we recommend using the equivalent constructs from Guava instead,
+ * such as the various {@link Iterators#concat} and {@link Iterables#concat} methods.
  *
  * @see Iterators#concat(Iterator)
+ * @see Iterators#concat(Iterator[])
  * @author Alex
  * @since 4/30/2018
  */
@@ -42,19 +49,34 @@ public class ChainedIterator<T> implements Iterator<T> {
    */
   private Iterator<T> it;
 
+  /**
+   * @see Iterators#concat(Iterator[])
+   */
   public ChainedIterator(Iterator<Iterator<T>> chain) {
     this.chain = chain;
     it = getNextIterator();
   }
 
+  /**
+   * Can use {@code Iterators.concat(iterators.iterator())} instead
+   * @see Iterators#concat(Iterator)
+   */
   public ChainedIterator(Collection<Iterator<T>> iterators) {
     this(iterators.iterator());
   }
 
+  /**
+   * Can use {@code Iterables.concat(iterables.iterator()).iterator()} instead
+   * @see Iterables#concat(Iterable)
+   */
   public static <T> ChainedIterator<T> fromIterables(Collection<? extends Iterable<T>> iterables) {
     return fromIterables(iterables.iterator());
   }
 
+  /**
+   * Can use {@code Iterators.concat(iterators.iterator())} instead
+   * @see Iterables#concat(Iterable)
+   */
   @SuppressWarnings("unchecked")
   public static <T> ChainedIterator<T> fromIterables(Iterator<? extends Iterable<T>> iterables) {
     return new ChainedIterator<T>(new TransformingIterator<Iterable<T>, Iterator<T>>((Iterator<Iterable<T>>)iterables) {
@@ -84,7 +106,7 @@ public class ChainedIterator<T> implements Iterator<T> {
   }
 
   @Override
-  public T next() {
+  public T next() throws NoSuchElementException {
     T result = it.next();
     if (!it.hasNext())
       it = getNextIterator();

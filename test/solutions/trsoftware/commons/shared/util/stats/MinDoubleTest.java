@@ -17,13 +17,13 @@
 
 package solutions.trsoftware.commons.shared.util.stats;
 
-import junit.framework.TestCase;
-import solutions.trsoftware.commons.shared.testutil.AssertUtils;
+import static solutions.trsoftware.commons.shared.testutil.AssertUtils.assertEqualsAndHashCode;
+import static solutions.trsoftware.commons.shared.testutil.AssertUtils.assertNotEqual;
 
 /**
  * @author Alex, 1/8/14
  */
-public class MinDoubleTest extends TestCase {
+public class MinDoubleTest extends CollectableStatsTestCase {
 
   public void testCRUD() throws Exception {
     assertEquals(Double.POSITIVE_INFINITY, new MinDouble().get());
@@ -35,14 +35,14 @@ public class MinDoubleTest extends TestCase {
   }
 
   public void testEqualsAndHashCode() throws Exception {
-    AssertUtils.assertEqualsAndHashCode(new MinDouble(), new MinDouble());
-    AssertUtils.assertEqualsAndHashCode(new MinDouble(1d), new MinDouble(1d));
-    AssertUtils.assertEqualsAndHashCode(new MinDouble(1d, 2d, -2d), new MinDouble(-2d));
+    assertEqualsAndHashCode(new MinDouble(), new MinDouble());
+    assertEqualsAndHashCode(new MinDouble(1d), new MinDouble(1d));
+    assertEqualsAndHashCode(new MinDouble(1d, 2d, -2d), new MinDouble(-2d));
 
-    AssertUtils.assertNotEqualsAndHashCode(new MinDouble(), new MaxDouble());
-    AssertUtils.assertNotEqualsAndHashCode(new MinDouble(1d), new MaxDouble(1d));
-    AssertUtils.assertNotEqualsAndHashCode(new MinDouble(1d), new MinDouble(-1d));
-    AssertUtils.assertNotEqualsAndHashCode(new MinDouble(1d, 2d, -2d), new MinDouble(1d, 2d, 2d));
+    assertNotEqual(new MinDouble(), new MaxDouble());
+    assertNotEqual(new MinDouble(1d), new MaxDouble(1d));
+    assertNotEqual(new MinDouble(1d), new MinDouble(-1d));
+    assertNotEqual(new MinDouble(1d, 2d, -2d), new MinDouble(1d, 2d, 2d));
   }
 
   public void testMerge() throws Exception {
@@ -60,4 +60,10 @@ public class MinDoubleTest extends TestCase {
     }
   }
 
+  @Override
+    public void testAsCollector() throws Exception {
+    MinDouble result = doTestAsCollector(new MinDouble(), null, 1d, 2d, 3d, 1d, 2d, 3d);
+      // sanity check
+      assertEquals(1d, result.get());
+    }
 }

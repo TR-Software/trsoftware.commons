@@ -17,6 +17,8 @@
 
 package solutions.trsoftware.commons.shared.util.stats;
 
+import java.util.function.Supplier;
+
 /**
  * A superclass for the {@link ArgMax} and {@link ArgMin} classes.
  *
@@ -25,7 +27,7 @@ package solutions.trsoftware.commons.shared.util.stats;
  *
  * @author Alex
  */
-public abstract class AbstractArgMinMax<A, V extends Comparable<V>> {
+public abstract class AbstractArgMinMax<A, V extends Comparable<V>> implements Supplier<A>, Mergeable<AbstractArgMinMax<A, V>> {
   /** The current max or min value of all the samples that have been given */
   private V bestValue;
 
@@ -51,4 +53,8 @@ public abstract class AbstractArgMinMax<A, V extends Comparable<V>> {
     return bestArg;
   }
 
+  @Override
+  public void merge(AbstractArgMinMax<A, V> other) {
+    update(other.bestArg, other.bestValue);
+  }
 }

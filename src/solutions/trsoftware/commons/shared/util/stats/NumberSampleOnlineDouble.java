@@ -18,22 +18,35 @@
 package solutions.trsoftware.commons.shared.util.stats;
 
 import java.io.Serializable;
+import java.util.function.Supplier;
+import java.util.stream.Collectors;
+import java.util.stream.DoubleStream;
+import java.util.stream.Stream;
 
 /**
- * An online version of NumberSample for values of type double that uses O(1) space. Computes mean and variance
- * of the sample without storing all the individual data points using the algorithm described in
- * http://en.wikipedia.org/wiki/Algorithms_for_calculating_variance#Online_algorithm:
- *
+ * An online version of NumberSample for values of type double that uses O(1) space.
+ * Uses Welford's online algorithm to computes the mean and variance (see {@link MeanAndVariance}).
+ * <p>
  * Since the individual numbers are not stored, it's impossible to compute an exact median nor select a percentile,
  * therefore those operations are not supported.
+ * <p>
+ * In the future, it might be possible to modify this class to use an approximate median selection algorithm like
+ * the one described in Cantone and Hofri's paper <a href="ftp://ftp.cs.wpi.edu/pub/techreports/pdf/06-17.pdf">
+ * "Analysis of An Approximate Median Selection Algorithm"</a>
+ * (NOTE: there are also more general approximation algorithms for computing vaarious quantiles, e.g. percentiles).
+ * <p>
+ * <b>NOTE</b>: although this class implements {@link CollectableStats StatsCollector&lt;Double, ...&gt},
+ * which allows it to be used with  {@link Stream#collect(java.util.stream.Collector) Stream&lt;Double&gt;.collect()},
+ * it is more efficient to use {@link DoubleStream#collect} where applicable
+ * (see {@link #collectDoubleStream(DoubleStream)}).
  *
- * In the future, it's possible to modify this class to use an approximate online median selection algorithm like the
- * one described in Cantone and Hofri, "Analysis of An Approximate Median Selection Algorithm,"
- * ftp.cs.wpi.edu/pub/techreports/pdf/06-17.pdf
- *
- *  @author Alex
+ * @see <a href="https://en.wikipedia.org/wiki/Algorithms_for_calculating_variance#Welford's_online_algorithm">
+ *   Welford's online algorithm for calculating variance</a>
+ * @see DoubleStream#summaryStatistics()
+ * @see Collectors#summarizingDouble
+ * @author Alex
  */
-public class NumberSampleOnlineDouble implements Serializable, SampleStatisticsDouble, Mergeable<NumberSampleOnlineDouble> {
+public class NumberSampleOnlineDouble implements Serializable, SampleStatisticsDouble, CollectableStats<Double, NumberSampleOnlineDouble> {
 
   final MeanAndVariance mv = new MeanAndVariance();
   final MinDouble min = new MinDouble();
@@ -92,11 +105,7 @@ public class NumberSampleOnlineDouble implements Serializable, SampleStatisticsD
 
   /** The upper median of the dataset (if there are 2 medians) */
   public double median() {
-    throw new UnsupportedOperationException("NumberSampleOnlineDouble doesn't support medians.");
-  }
-
-  public double stdev() {
-    return Math.sqrt(variance());
+    throw new UnsupportedOperationException("This online algorithm doesn't support medians.");
   }
 
   public double variance() {
@@ -130,8 +139,56 @@ public class NumberSampleOnlineDouble implements Serializable, SampleStatisticsD
    */
   @Override
   public ImmutableStats<Double> summarize() {
-    return new ImmutableStats<Double>(size(), min(), max(), null, sum(), mean(), stdev(), variance());
+    return new ImmutableStats<Double>(size(), min(), max(), null, sum(), mean(), variance());
   }
 
 
+  @Override
+  public java.util.stream.Collector<Double, ?, NumberSampleOnlineDouble> getCollector() {
+    return Collector.getInstance();
+  }
+
+  /**
+   * Collects a {@link DoubleStream} into an instance of this class.
+   */
+  public static NumberSampleOnlineDouble collectDoubleStream(DoubleStream doubleStream) {
+    return doubleStream.collect(NumberSampleOnlineDouble::new,
+        (numberSample, value) -> numberSample.update(value),
+        NumberSampleOnlineDouble::merge);
+  }
+  
+  /**
+   * Provides a cached collector descriptor that can be passed to {@link Stream#collect}
+   * to collect the stream elements into an instance of {@link NumberSampleOnlineDouble}.
+   *
+   * @see #getInstance()
+   */
+  public static class Collector extends CollectableStats.Collector<Double, NumberSampleOnlineDouble> {
+
+    /**
+     * NOTE: static fields are automatically lazy-init for singletons and safer to use than double-checked locking.
+     * @see <a href="https://www.cs.umd.edu/~pugh/java/memoryModel/DoubleCheckedLocking.html">Why double-checked locking is broken</a>
+     * @see <a href="https://en.wikipedia.org/wiki/Initialization-on-demand_holder_idiom">Initialization-on-demand holder idiom</a>
+     */
+    private static final Collector INSTANCE = new Collector();
+
+    /**
+     * <strong>NOTE:</strong> it is more efficient to use {@link DoubleStream#collect} where applicable.
+     *
+     * @see #collectDoubleStream(DoubleStream)
+     * 
+     * @return the cached instance of this {@link Collector}
+     */
+    @SuppressWarnings("unchecked")
+    public static Collector getInstance() {
+      return INSTANCE;
+    }
+
+    @Override
+    public Supplier<NumberSampleOnlineDouble> supplier() {
+      return NumberSampleOnlineDouble::new;
+    }
+
+  }
+  
 }

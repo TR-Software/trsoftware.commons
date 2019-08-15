@@ -151,6 +151,7 @@ public class RandomUtils {
   /**
    * @return the next pseudo-random number in the given generator's sequence,
    * drawn from a Gaussian distribution with the given {@code mean} and {@code stdev}.
+   * @see Random#nextGaussian()
    */
   public static double nextGaussian(Random rnd, double mean, double stdev) {
     return rnd.nextGaussian() * stdev + mean;
@@ -168,6 +169,7 @@ public class RandomUtils {
   /**
    * @return the next pseudo-random integer in the sequence,
    * drawn from a Gaussian distribution with the given {@code mean} and {@code stdev}.
+   * @see Random#nextGaussian()
    */
   public static int nextGaussian(int mean, int stdev) {
     return (int)(rnd.nextGaussian() * stdev + mean);
@@ -274,6 +276,14 @@ public class RandomUtils {
    */
   public static int randInt() {
     return rnd.nextInt();
+  }
+
+  public static int[] randIntArray(int length) {
+    int[] ret = new int[length];
+    for (int i = 0; i < ret.length; i++) {
+      ret[i] = randInt();
+    }
+    return ret;
   }
 
   /**

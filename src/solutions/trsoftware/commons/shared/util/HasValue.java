@@ -17,9 +17,16 @@
 
 package solutions.trsoftware.commons.shared.util;
 
+import java.util.function.Supplier;
+
 /**
  * @author Alex, 3/30/2016
  */
-public interface HasValue<V> {
+public interface HasValue<V> extends Supplier<V> {
   V getValue();
+
+  @Override
+  default V get() {
+    return getValue();
+  }
 }

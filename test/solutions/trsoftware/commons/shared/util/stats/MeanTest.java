@@ -17,9 +17,9 @@
 
 package solutions.trsoftware.commons.shared.util.stats;
 
-import junit.framework.TestCase;
+import static solutions.trsoftware.commons.shared.util.MathUtils.EPSILON;
 
-public class MeanTest extends TestCase {
+public class MeanTest extends CollectableStatsTestCase {
 
   public void testMean() throws Exception {
     Mean<Integer> mean = new Mean<Integer>();
@@ -61,4 +61,38 @@ public class MeanTest extends TestCase {
     assertEquals(4, mean.getNumSamples());
     assertEquals((1d + 2d + 3d + 4d) / 4, mean.getMean());
   }
+
+  public void testMerge() throws Exception {
+    Mean<Integer> mean1 = new Mean<>();
+    Mean<Integer> mean2 = new Mean<>();
+    Mean<Integer> meanAll = new Mean<>();
+
+    Integer[] mean1Inputs = {1, 2, 3};
+    Integer[] mean2Inputs = {3, 4, 5, 6};
+
+    mean1.updateAll(mean1Inputs);
+    mean2.updateAll(mean2Inputs);
+    meanAll.updateAll(mean1Inputs);
+    meanAll.updateAll(mean2Inputs);
+
+    // merge mean2 into mean1 and assert that the result is equal to meanAll
+    mean1.merge(mean2);
+
+    assertEquals(meanAll, mean1);
+  }
+
+  static void assertEquals(Mean expected, Mean actual) {
+    // TODO: consider having the Mean class implement equals & hashCode directly
+    assertEquals(expected.getMean(), actual.getMean(), EPSILON);
+    assertEquals(expected.getNumSamples(), actual.getNumSamples());
+  }
+
+  @Override
+  public void testAsCollector() throws Exception {
+    Mean<Integer> result = doTestAsCollector(new Mean<>(), MeanTest::assertEquals, 1, 2, 3, 4, 5);
+    // sanity check
+    assertEquals(3d, result.getMean(), EPSILON);
+    assertEquals(5, result.getNumSamples());
+  }
+
 }

@@ -349,12 +349,12 @@ public class RandomUtilsTest extends TestCase {
     verifyGaussianDistribution(55, 30, RandomUtils::nextGaussian);
   }
 
-  private <T extends Number & Comparable> void verifyGaussianDistribution(T mean, T stdev, BiFunction<T, T, T> nextGaussianFcn) {
+  private <N extends Number & Comparable<N>> void verifyGaussianDistribution(N mean, N stdev, BiFunction<N, N, N> nextGaussianFcn) {
     int nSamples = 100000;
-    NumberSample<T> sample = new NumberSample<>();
+    NumberSample<N> sample = new NumberSample<>();
     System.out.println("Random gaussian numbers with mean=" + mean + " and stdev=" + stdev + ":");
     for (int i = 0; i < nSamples; i++) {
-      T generatedNumber = nextGaussianFcn.apply(mean, stdev);
+      N generatedNumber = nextGaussianFcn.apply(mean, stdev);
       // print every 1000th number
       if (i % 1000 == 0)
         System.out.println(generatedNumber);

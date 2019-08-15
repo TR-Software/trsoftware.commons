@@ -50,7 +50,7 @@ import static solutions.trsoftware.commons.server.servlet.gwt.RPCServletUtils.*;
 public class BaseRpcServlet extends RemoteServiceServlet {
 
   private final ThreadLocal<RPCRequest> threadLocalRPCRequest = new ThreadLocal<>();
-  private GwtPermutationsIndex permutationsIndex;
+  private volatile GwtPermutationsIndex permutationsIndex;
 
   /**
    * Name of the servlet {@code init-param} specifying the value for {@link #maxContentLength}

@@ -17,14 +17,14 @@
 
 package solutions.trsoftware.commons.shared.util.stats;
 
-import junit.framework.TestCase;
+import static solutions.trsoftware.commons.shared.util.MathUtils.EPSILON;
 
 /**
  * Sep 30, 2012
  *
  * @author Alex
  */
-public class NumberSampleOnlineTest extends TestCase {
+public class NumberSampleOnlineTest extends CollectableStatsTestCase {
   // since we've already unit tested NumberSample, all we need to do to test
   // this class is to compare its output to that of NumberSample
 
@@ -47,4 +47,18 @@ public class NumberSampleOnlineTest extends TestCase {
     }
   }
 
+  public static void assertEquals(SampleStatistics expected, SampleStatistics actual) {
+    assertEquals(expected.size(), actual.size());
+    assertEquals(expected.min(), actual.min());
+    assertEquals(expected.max(), actual.max());
+    assertEquals(expected.mean(), actual.mean(), EPSILON);
+    assertEquals(expected.variance(), actual.variance(), EPSILON);
+    assertEquals(expected.stdev(), actual.stdev(), EPSILON);
+  }
+
+  @Override
+  public void testAsCollector() throws Exception {
+    doTestAsCollector(new NumberSampleOnline<>(), NumberSampleOnlineTest::assertEquals,
+        2,3,65,123,435,123,69,34,23,42,123,12,3,-123,34,-34);
+  }
 }

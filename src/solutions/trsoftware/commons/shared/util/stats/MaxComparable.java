@@ -18,14 +18,16 @@
 package solutions.trsoftware.commons.shared.util.stats;
 
 import java.util.Comparator;
+import java.util.function.Supplier;
+import java.util.stream.Stream;
 
 /**
  * Keeps track of the maximum in a sequence of Comparable objects.
  *
- * @see java.util.stream.Stream#max(Comparator)
+ * @see Stream#max(Comparator)
  * @author Alex
  */
-public class MaxComparable<T extends Comparable<T>> extends AbstractMinMaxComparable<T> {
+public class MaxComparable<T extends Comparable<T>> extends AbstractMinMaxComparable<T, MaxComparable<T>> {
 
   public MaxComparable() {}
 
@@ -56,7 +58,47 @@ public class MaxComparable<T extends Comparable<T>> extends AbstractMinMaxCompar
   /**
    * @return The max of the given comparable objects.
    */
+  @SafeVarargs
   public static <T extends Comparable<T>> T eval(T... candidates) {
-    return new MaxComparable<T>().updateAll(candidates);
+    MaxComparable<T> instance = new MaxComparable<>();
+    instance.updateAll(candidates);
+    return instance.get();
+  }
+
+  @Override
+  public java.util.stream.Collector<T, ?, MaxComparable<T>> getCollector() {
+    return Collector.getInstance();
+  }
+
+  /**
+   * Provides a cached collector descriptor that can be passed to {@link Stream#collect}
+   * to collect the stream elements into an instance of {@link MaxComparable}.
+   *
+   * @param <T> the input element type
+   * @see #getInstance()
+   */
+  public static class Collector<T extends Comparable<T>> extends CollectableStats.Collector<T, MaxComparable<T>> {
+
+    /**
+     * NOTE: static fields are automatically lazy-init for singletons and safer to use than double-checked locking.
+     * @see <a href="https://www.cs.umd.edu/~pugh/java/memoryModel/DoubleCheckedLocking.html">Why double-checked locking is broken</a>
+     * @see <a href="https://en.wikipedia.org/wiki/Initialization-on-demand_holder_idiom">Initialization-on-demand holder idiom</a>
+     */
+    private static final Collector INSTANCE = new Collector();
+
+    /**
+     * @param <T> the input element type
+     * @return the cached instance of this {@link Collector}
+     * @see Stream#max(Comparator)
+     */
+    @SuppressWarnings("unchecked")
+    public static <T extends Comparable<T>> Collector<T> getInstance() {
+      return INSTANCE;
+    }
+
+    @Override
+    public Supplier<MaxComparable<T>> supplier() {
+      return MaxComparable::new;
+    }
   }
 }

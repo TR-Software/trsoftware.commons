@@ -18,20 +18,25 @@
 package solutions.trsoftware.commons.shared.util.stats;
 
 import java.io.Serializable;
+import java.util.stream.Collectors;
+import java.util.stream.DoubleStream;
 
 /**
  * Base class for {@link MinDouble} and {@link MaxDouble}, which keep track of the min/max of a sequence of double values.
  *
+ * @see DoubleStream#min()
+ * @see DoubleStream#summaryStatistics()
+ * @see Collectors#summarizingDouble
  * @author Alex
  */
-public abstract class MinMaxDoubleBase implements Serializable {
+public abstract class MinMaxDoubleBase<R extends MinMaxDoubleBase<R>> implements CollectableStats<Double, R>, UpdatableDouble, Serializable {
   /** The current max or min value of all the samples that have been given */
   private double best = absoluteWorst();
 
   protected abstract double absoluteWorst();
   protected abstract double bestOf(double a, double b);
 
-  protected MinMaxDoubleBase() {
+  protected MinMaxDoubleBase() {  // default constructor to support Serializable
   }
 
   protected MinMaxDoubleBase(double initialValue) {
@@ -39,11 +44,11 @@ public abstract class MinMaxDoubleBase implements Serializable {
   }
 
   protected MinMaxDoubleBase(Iterable<Double> candidates) {
-    update(candidates);
+    updateAll(candidates);
   }
 
   protected MinMaxDoubleBase(double... candidates) {
-    update(candidates);
+    updateAll(candidates);
   }
 
   public double get() {
@@ -51,23 +56,13 @@ public abstract class MinMaxDoubleBase implements Serializable {
   }
 
   /** Updates the current best value with a new sample, returning the new best value. */
-  public double update(double x) {
+  public void update(double x) {
     best = bestOf(best, x);
-    return best;
   }
 
-  public double update(Iterable<Double> candidates) {
-    for (Double x : candidates) {
-      update(x);
-    }
-    return best;
-  }
-
-  public double update(double... candidates) {
-    for (double x : candidates) {
-      update(x);
-    }
-    return best;
+  @Override
+  public void update(Double x) {
+    update(x.doubleValue());
   }
 
   @Override

@@ -30,8 +30,29 @@ public interface Updatable<T> extends Consumer<T> {
    */
   void update(T x);
 
+  /**
+   * Updates itself with the given value.
+   */
   @Override
   default void accept(T t) {
     update(t);
+  }
+
+  /**
+   * Equivalent to calling {@link #update(Object)} for each element in the given items
+   */
+  default void updateAll(Iterable<T> items) {
+    for (T item : items) {
+      update(item);
+    }
+  }
+
+  /**
+   * Equivalent to calling {@link #update(Object)} for each element in the given items
+   */
+  default void updateAll(T... items) {
+    for (T item : items) {
+      update(item);
+    }
   }
 }

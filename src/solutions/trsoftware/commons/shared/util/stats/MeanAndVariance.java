@@ -20,19 +20,26 @@ package solutions.trsoftware.commons.shared.util.stats;
 import solutions.trsoftware.commons.shared.util.HashCodeBuilder;
 
 import java.io.Serializable;
+import java.util.Set;
+import java.util.function.Supplier;
+import java.util.stream.DoubleStream;
+import java.util.stream.Stream;
 
 /**
- * Computes mean and variance of a stream of numbers without storing all the
- * individual data points using the algorithm described in
- * http://en.wikipedia.org/wiki/Algorithms_for_calculating_variance#Online_algorithm.
+ * Uses Welford's online algorithm to compute the mean and variance of a stream of numbers
+ * without storing all the individual data points.
+ * <p>
+ * <b>NOTE</b>: although this class implements {@link CollectableStats StatsCollector&lt;Double, ...&gt},
+ * which allows it to be used with  {@link Stream#collect(java.util.stream.Collector) Stream&lt;Double&gt;.collect()},
+ * it is more efficient to use {@link DoubleStream#collect} where applicable
+ * (see {@link #collectDoubleStream(DoubleStream)}).
  *
- * <p style="color: #6495ed; font-weight: bold;">
- *   TODO: implement {@link java.util.stream.Collector} to allow using this class with a stream.
- * </p>
- *
+ * @see NumberSampleOnlineDouble
+ * @see <a href="https://en.wikipedia.org/wiki/Algorithms_for_calculating_variance#Welford's_online_algorithm">
+ *   Welford's online algorithm for calculating variance</a>
  * @author Alex
  */
-public class MeanAndVariance implements Serializable, Mergeable<MeanAndVariance> {
+public class MeanAndVariance implements Serializable, SampleStatisticsDouble, CollectableStats<Double, MeanAndVariance> {
 
   /* -------------------- Algorithm --------------------------------------------
    *  def online_variance(data):
@@ -90,20 +97,34 @@ public class MeanAndVariance implements Serializable, Mergeable<MeanAndVariance>
     n = newN;
   }
 
+  /**
+   * @return the number of inputs processed
+   */
   public synchronized int size() {
     return n;
+  }
+
+  @Override
+  public double min() {
+    throw new UnsupportedOperationException();
+  }
+
+  @Override
+  public double max() {
+    throw new UnsupportedOperationException();
   }
 
   public synchronized double mean() {
     return mean;
   }
 
-  public synchronized double sum() {
-    return mean * n;
+  @Override
+  public double median() {
+    throw new UnsupportedOperationException();
   }
 
-  public synchronized double stdev() {
-    return Math.sqrt(variance());
+  public synchronized double sum() {
+    return mean * n;
   }
 
   public synchronized double variance() {
@@ -111,6 +132,11 @@ public class MeanAndVariance implements Serializable, Mergeable<MeanAndVariance>
     // variance = M2/(n - 1)  # Sample variance
     // NOTE: NumberSample uses the Population variance, so we use the same here
     return m2/n;
+  }
+
+  @Override
+  public synchronized ImmutableStats<Double> summarize() {
+    return new ImmutableStats<>(size(), null, null, null, sum(), mean(), variance());
   }
 
   public synchronized boolean equals(Object o) {
@@ -141,6 +167,68 @@ public class MeanAndVariance implements Serializable, Mergeable<MeanAndVariance>
     sb.append(", m2=").append(m2);
     sb.append(')');
     return sb.toString();
+  }
+
+  @Override
+  public void update(Double x) {
+    update(x.doubleValue());
+  }
+
+  @Override
+  public java.util.stream.Collector<Double, ?, MeanAndVariance> getCollector() {
+    return Collector.getInstance();
+  }
+
+  /**
+   * Collects a {@link DoubleStream} into an instance of this class.
+   */
+  public static MeanAndVariance collectDoubleStream(DoubleStream doubleStream) {
+    return doubleStream.collect(MeanAndVariance::new,
+        (meanAndVariance, value) -> meanAndVariance.update(value),
+        MeanAndVariance::merge);
+  }
+
+  /**
+   * Provides a cached collector descriptor that can be passed to {@link Stream#collect}
+   * to collect the stream elements into an instance of {@link MeanAndVariance}.
+   *
+   * @see #getInstance()
+   */
+  public static class Collector extends CollectableStats.Collector<Double, MeanAndVariance> {
+
+    /**
+     * NOTE: static fields are automatically lazy-init for singletons and safer to use than double-checked locking.
+     * @see <a href="https://www.cs.umd.edu/~pugh/java/memoryModel/DoubleCheckedLocking.html">Why double-checked locking is broken</a>
+     * @see <a href="https://en.wikipedia.org/wiki/Initialization-on-demand_holder_idiom">Initialization-on-demand holder idiom</a>
+     */
+    private static final Collector INSTANCE = new Collector();
+
+    /**
+     * <strong>NOTE:</strong> it is more efficient to use {@link DoubleStream#collect} where applicable.
+     *
+     * @see #collectDoubleStream(DoubleStream)
+     * 
+     * @return the cached instance of this {@link Collector}
+     */
+    @SuppressWarnings("unchecked")
+    public static Collector getInstance() {
+      return INSTANCE;
+    }
+
+    @Override
+    public Supplier<MeanAndVariance> supplier() {
+      return MeanAndVariance::new;
+    }
+
+    /**
+     * Since all the methods in {@link MeanAndVariance} are synchronized, we can include
+     * {@link java.util.stream.Collector.Characteristics#CONCURRENT CONCURRENT} characteristic.
+     * @see #CH_CONCURRENT_ID
+     */
+    @Override
+    public Set<Characteristics> characteristics() {
+      return CH_CONCURRENT_ID;
+    }
   }
 
 }

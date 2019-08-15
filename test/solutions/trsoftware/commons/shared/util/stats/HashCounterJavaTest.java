@@ -18,7 +18,6 @@
 package solutions.trsoftware.commons.shared.util.stats;
 
 import com.google.common.collect.ImmutableMap;
-import junit.framework.TestCase;
 import solutions.trsoftware.commons.server.testutil.MultithreadedTestHarness;
 import solutions.trsoftware.commons.server.util.ServerArrayUtils;
 import solutions.trsoftware.commons.shared.annotations.Slow;
@@ -30,7 +29,10 @@ import java.util.Map;
 import java.util.Random;
 import java.util.concurrent.atomic.AtomicInteger;
 
-public class HashCounterJavaTest extends TestCase {
+import static solutions.trsoftware.commons.shared.testutil.AssertUtils.assertEqualsAndHashCode;
+import static solutions.trsoftware.commons.shared.testutil.AssertUtils.assertNotEqual;
+
+public class HashCounterJavaTest extends CollectableStatsTestCase {
 
   public void testHashCounter() throws Exception {
     HashCounter<Integer> counter = new HashCounter<Integer>();
@@ -180,5 +182,37 @@ public class HashCounterJavaTest extends TestCase {
     assertEquals(4./12, counter.probabilityOf('b'), .001);
     assertEquals(6./12, counter.probabilityOf('c'), .001);
     assertEquals(0., counter.probabilityOf('X'), .001);
+  }
+
+  public void testEqualsAndHashCode() throws Exception {
+    HashCounter<Character> counter1 = createCounter(ImmutableMap.of(
+        'a', 2,
+        'b', 4,
+        'c', 6
+    ));
+    HashCounter<Character> counter2 = createCounter(ImmutableMap.of(
+        'a', 2,
+        'b', 4,
+        'c', 6
+    ));
+    HashCounter<Character> counter3 = createCounter(ImmutableMap.of(
+        'a', 1,
+        'b', 4,
+        'c', 6
+    ));
+    assertEqualsAndHashCode(counter1, counter2);
+    assertNotEqual(counter1, counter3);
+    assertNotEqual(counter2, counter3);
+  }
+
+  @Override
+  public void testAsCollector() throws Exception {
+    HashCounter<String> result = doTestAsCollector(new HashCounter<>(), null, "a", "b", "c", "d", "e", "c", "d", "e", "e");
+    // sanity check
+    assertEquals(1, result.get("a"));
+    assertEquals(1, result.get("b"));
+    assertEquals(2, result.get("c"));
+    assertEquals(2, result.get("d"));
+    assertEquals(3, result.get("e"));
   }
 }

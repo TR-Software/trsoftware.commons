@@ -33,24 +33,22 @@ public class ImmutableStats<N extends Number> implements SampleStatistics<N>, Se
   private final N median;
   private final double sum;
   private final double mean;
-  private final double stdev;
   private final double variance;
 
   /**
    * Default constructor to satisfy the contract of {@link Serializable}
    */
   public ImmutableStats() {
-    this(0, null, null, null, 0, 0, 0, 0);
+    this(0, null, null, null, 0, 0, 0);
   }
 
-  public ImmutableStats(int size, N min, N max, N median, double sum, double mean, double stdev, double variance) {
+  public ImmutableStats(int size, N min, N max, N median, double sum, double mean, double variance) {
     this.size = size;
     this.min = min;
     this.max = max;
     this.median = median;
     this.sum = sum;
     this.mean = mean;
-    this.stdev = stdev;
     this.variance = variance;
   }
 
@@ -84,10 +82,6 @@ public class ImmutableStats<N extends Number> implements SampleStatistics<N>, Se
     return median;
   }
 
-  public double stdev() {
-    return stdev;
-  }
-
   public double variance() {
     return variance;
   }
@@ -101,7 +95,7 @@ public class ImmutableStats<N extends Number> implements SampleStatistics<N>, Se
     sb.append(", min=").append(min);
     sb.append(", median=").append(median);
     sb.append(", max=").append(max);
-    sb.append(", stdev=").append(stdev);
+    sb.append(", stdev=").append(stdev());
     sb.append(", variance=").append(variance);
     sb.append(')');
     return sb.toString();

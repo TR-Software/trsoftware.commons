@@ -36,7 +36,9 @@ public interface SampleStatisticsDouble extends Updatable<Double>, UpdatableDoub
   /** The upper median of the dataset (if there are 2 medians) */
   double median();
 
-  double stdev();
+  default double stdev() {
+    return Math.sqrt(variance());
+  }
 
   double variance();
 

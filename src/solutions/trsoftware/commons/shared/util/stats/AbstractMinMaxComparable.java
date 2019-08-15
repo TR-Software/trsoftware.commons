@@ -17,14 +17,19 @@
 
 package solutions.trsoftware.commons.shared.util.stats;
 
+import solutions.trsoftware.commons.shared.util.HasValue;
+
 import java.io.Serializable;
 
 /**
- * A superclass for the MaxComparable and MinComparable classes.
+ * A superclass for the {@link MaxComparable} and {@link MinComparable} classes.
+ *
+ * @param <T> type of input elements (for {@link Updatable#update(Object)})
+ * @param <R> the concrete subclass of this class (for {@link Mergeable#merge(Object)})
  *
  * @author Alex
  */
-public abstract class AbstractMinMaxComparable<T extends Comparable<T>> implements Serializable {
+public abstract class AbstractMinMaxComparable<T extends Comparable<T>, R extends AbstractMinMaxComparable<T, R>> implements Serializable, CollectableStats<T, R>, HasValue<T> {
   /** The current max or min value of all the samples that have been given */
   private T best;
 
@@ -35,32 +40,26 @@ public abstract class AbstractMinMaxComparable<T extends Comparable<T>> implemen
   protected AbstractMinMaxComparable() {} // default constructor for serialization
 
   /** Updates the current best value with a new sample, returning the new best value */
-  public T update(T candidate) {
+  public T updateAndGet(T candidate) {
+    update(candidate);
+    return getValue();
+  }
+
+  public void update(T candidate) {
     if (best == null)
       best = candidate;
     else if ((getMultiplier() * best.compareTo(candidate)) < 0)
       best = candidate;
-    return best;
   }
 
   protected abstract int getMultiplier();
 
-  public T updateAll(Iterable<T> candidates) {
-    for (T candidate : candidates) {
-      update(candidate);
-    }
-    return get();
-  }
-
-  public T updateAll(T... candidates) {
-    for (T candidate : candidates) {
-      update(candidate);
-    }
-    return get();
-  }
-
-  public T get() {
+  @Override
+  public T getValue() {
     return best;
   }
 
+  public void merge(R other) {
+    update(other.getValue());
+  }
 }

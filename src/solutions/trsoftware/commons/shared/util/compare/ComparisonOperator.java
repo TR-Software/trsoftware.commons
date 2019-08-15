@@ -17,11 +17,18 @@
 
 package solutions.trsoftware.commons.shared.util.compare;
 
+import com.google.common.base.Preconditions;
+import com.google.common.collect.ImmutableBiMap;
+
+import java.util.function.BiFunction;
 import java.util.function.BiPredicate;
 import java.util.function.IntPredicate;
+import java.util.function.Predicate;
 
 /**
  * Provides a general abstraction for comparison operators.
+ *
+ * Can be used as a {@link IntPredicate predicate} on the result of {@link Comparable#compareTo(Object)} (see {@link #test(int)})
  *
  * @author Alex, 1/11/14
  */
@@ -124,7 +131,7 @@ public enum ComparisonOperator implements IntPredicate {
 
   /**
    * Tests whether the given args satisfy this operator.
-   * Can also be used as a {@link BiPredicate} lambda ({@code GT::compare}).
+   * Can also be used as a {@link BiPredicate} lambda or method refence (e.g. {@code GT::compare}).
    * <p>
    * Example:
    * <pre>{@code
@@ -137,6 +144,22 @@ public enum ComparisonOperator implements IntPredicate {
    */
   public <T> boolean compare(Comparable<T> lhs, T rhs) {
     return test(lhs.compareTo(rhs));
+  }
+
+  /**
+   * This is a higher order function that returns a partial application of {@link #compare(Comparable, Object)} with
+   * the RHS argument fixed to the given value.
+   *
+   * @param rhs fixed value for the second arg to {@link #compare(Comparable, Object)}
+   * @param <T> the arg type
+   * @return a predicate that compares its input (LHS) to the given value (RHS) using this comparison operator.
+   *
+   * @see solutions.trsoftware.commons.shared.util.function.FunctionalUtils#partial1(BiFunction, Object)
+   * @see <a href="https://en.wikipedia.org/wiki/Partial_application">Partial application</a>
+   * @see <a href="https://en.wikipedia.org/wiki/Higher-order_function">Higher-order function</a>
+   */
+  public <T extends Comparable<T>> Predicate<T> comparingTo(T rhs) {
+    return t -> compare(t, rhs);
   }
 
   /**
@@ -165,7 +188,7 @@ public enum ComparisonOperator implements IntPredicate {
    * </p>
    * @return the operator that most-accurately describes the natural ordering relationship of the given elements
    */
-  public static <T extends Comparable<? super T>> ComparisonOperator lookup(T lhs, T rhs) {
+  public static <T extends Comparable<? super T>> ComparisonOperator describeRelationship(T lhs, T rhs) {
     int cmp = lhs.compareTo(rhs);
     if (cmp < 0)
       return LT;
@@ -226,4 +249,46 @@ public enum ComparisonOperator implements IntPredicate {
     }
   }
 
+
+  /**
+   * NOTE: this method overrides {@link Enum#toString()} and <i>does not return the name of the enum constant</i>.
+   *
+   * @return the corresponding Java operator (e.g. {@code ">="} for {@link #GEQ})
+   * @see #name()
+   */
+  @Override
+  public abstract String toString();
+
+
+  /**
+   * The inverse of {@link #toString()}: returns the {@link ComparisonOperator} that corresponds to the given
+   * Java primitive operator.
+   *
+   * @param javaOperator a primitive comparison operator like {@code ">"}, {@code ">="}, {@code "!="}, etc.
+   * @return the {@link ComparisonOperator} counterpart for the given Java operator, or {@code null} if not found
+   */
+  public static ComparisonOperator lookup(String javaOperator) {
+    Preconditions.checkNotNull(javaOperator);
+    Preconditions.checkArgument(!javaOperator.isEmpty());
+    // TODO: maybe also trim the given string?
+    // lazy-init the lookup table
+    if (lookupTable == null) {
+      synchronized (ComparisonOperator.class) {
+        if (lookupTable == null) {
+          ImmutableBiMap.Builder<String, ComparisonOperator> mapBuilder = ImmutableBiMap.builder();
+          for (ComparisonOperator op : values()) {
+            mapBuilder.put(op.toString(), op);
+          }
+          lookupTable = mapBuilder.build();
+        }
+      }
+    }
+    return lookupTable.get(javaOperator);
+  }
+
+  /**
+   * Maps plain Java operator strings to the corresponding enum constants.
+   * Will be created on first use by {@link #lookup(String)}.
+   */
+  private static transient ImmutableBiMap<String, ComparisonOperator> lookupTable = null;
 }

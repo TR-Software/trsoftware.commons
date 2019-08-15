@@ -18,6 +18,9 @@
 package solutions.trsoftware.commons.shared.util;
 
 import com.google.common.base.Predicate;
+import com.google.common.collect.Iterables;
+import com.google.common.collect.Iterators;
+import com.google.common.collect.Lists;
 import solutions.trsoftware.commons.shared.util.callables.Function1;
 import solutions.trsoftware.commons.shared.util.compare.ComparisonOperator;
 import solutions.trsoftware.commons.shared.util.iterators.ArrayIterator;
@@ -135,6 +138,13 @@ public class CollectionUtils {
   /**
    * @return the last element of the given iterator, or null if the iterator
    * has no elements.
+   * <p style="color: #0073BF; font-weight: bold;">
+   *   TODO: when no elements, returning null is ambiguous; better to either throw {@link NoSuchElementException} or
+   *   return some sentinel value passed as an argument ({@link Iterators#getLast(Iterator, Object)}
+   * </p>
+   * @deprecated use the corresponding methods from Guava's {@link Iterators} instead: they offer better semantics
+   * @see Iterators#getLast(Iterator)
+   * @see Iterators#getLast(Iterator, Object)
    */
   public static <T> T last(Iterator<T> it) {
     T last = null;
@@ -147,8 +157,26 @@ public class CollectionUtils {
   /**
    * @return the last element of the given iterator, or null if the iterator
    * has no elements.
+   * <p style="color: #0073BF; font-weight: bold;">
+   *   TODO: when no elements, returning null is ambiguous; better to either throw {@link NoSuchElementException} or
+   *   return some sentinel value passed as an argument ({@link Iterables#getLast(Iterable, Object)}
+   * </p>
+   * @deprecated use the corresponding methods from Guava's {@link Iterables} instead: they offer better semantics
+   * @see Iterables#getLast(Iterable)
+   * @see Iterables#getLast(Iterable, Object)
    */
   public static <T> T last(Iterable<T> it) {
+    if (it instanceof List) {
+      // if it's a List, can do better than iterating over all the elements
+      try {
+        return ListUtils.last((List<T>)it);
+      }
+      catch (IndexOutOfBoundsException e) {
+        // return null just to support the original contract of this method; but really this is semantically wrong
+        // (see deprecation note)
+        return null;
+      }
+    }
     return last(it.iterator());
   }
 
@@ -177,6 +205,8 @@ public class CollectionUtils {
 
   /**
    * @return an iterable over all the elements in all the given iterables
+   * @deprecated Can use {@link Iterables#concat(Iterable[])} instead
+   * @see Iterables#concat(Iterable[])
    */
   @SafeVarargs
   public static <A extends Iterable<T>, T> Iterable<T> concatIter(final A... iterables) {
@@ -192,6 +222,8 @@ public class CollectionUtils {
 
   /**
    * @return an iterable over all the elements in all the nested iterables.
+   * @deprecated Can use {@link Iterables#concat(Iterable)} instead
+   * @see Iterables#concat(Iterable)
    */
   public static <A extends Iterable<T>, T> Iterable<T> concatIter(final Collection<A> iterables) {
     return new Iterable<T>() {
@@ -204,6 +236,8 @@ public class CollectionUtils {
 
   /**
    * @return A list containing all the elements from the given collections.
+   * @deprecated Can use {@link Iterables#concat(Iterable, Iterable)} instead
+   * @see Iterables#concat(Iterable, Iterable)
    */
   public static <T> List<T> concat(final Iterable<T> i1, Iterable<T> i2) {
     return asList(concatIter(i1, i2));
@@ -211,7 +245,10 @@ public class CollectionUtils {
 
   /**
    * @return A list containing all the elements from the given collections.
+   * @deprecated Can use {@link Iterables#concat(Iterable[])} instead
+   * @see Iterables#concat(Iterable[])
    */
+  @SafeVarargs
   public static <T> List<T> concat(final Iterable<T>... iterables) {
     return asList(concatIter(iterables));
    }
@@ -241,7 +278,7 @@ public class CollectionUtils {
    * @param collection a collection of mutually-comparable elements
    * @return a new list containing the same elements as the given collection, but sorted with {@link Collections#sort(List)}
    */
-  public static <T extends Comparable<? super T>> ArrayList<T> sorted(Collection<T> collection) {
+  public static <T extends Comparable<? super T>> ArrayList<T> sortedCopy(Collection<T> collection) {
     ArrayList<T> ret = new ArrayList<>(collection);
     Collections.sort(ret);
     return ret;
@@ -253,9 +290,9 @@ public class CollectionUtils {
    * A {@code null} value indicates that the elements' <i>natural ordering</i> should be used.
    * @return a new list containing the same elements as the given collection, but sorted with {@link Collections#sort(List, Comparator)}
    */
-  public static <T> ArrayList<T> sorted(Collection<T> collection, Comparator<? super T> cmp) {
+  public static <T> ArrayList<T> sortedCopy(Collection<T> collection, Comparator<? super T> cmp) {
     ArrayList<T> ret = new ArrayList<>(collection);
-    Collections.sort(ret, cmp);
+    ret.sort(cmp);
     return ret;
   }
 
@@ -270,14 +307,42 @@ public class CollectionUtils {
   public static <T extends Comparable<? super T>> String printTotalOrdering(Collection<T> collection) {
     if (collection.isEmpty())
       return "";
-    ArrayList<T> ordering = sorted(collection);
+    ArrayList<T> ordering = sortedCopy(collection);
     StringBuilder out = new StringBuilder();
     out.append(ordering.get(0));
     for (int i = 1; i < ordering.size(); i++) {
-        out.append(' ').append(ComparisonOperator.lookup(ordering.get(i-1), ordering.get(i)))
+        out.append(' ').append(ComparisonOperator.describeRelationship(ordering.get(i-1), ordering.get(i)))
             .append(' ').append(ordering.get(i));
     }
     return out.toString();
   }
 
+  /**
+   * @return {@code true} iff the given collection is sorted (in the natural ordering of its elements)
+   */
+  // TODO: create an overloaded version that takes a Comparator?
+  public static <T extends Comparable<T>> boolean isSorted(Iterable<T> list) {
+    T lastElt = null;
+    for (T elt : list) {
+      if (lastElt != null) {
+        if (elt.compareTo(lastElt) < 0)
+          return false;
+      }
+      lastElt = elt;
+    }
+    return true;
+  }
+
+  /**
+   * Creates a copy of the given collection and calls {@link Collections#reverse(List)} on it.
+   *
+   * @param <E> the element type
+   * @return a new list containing all the elements of the given collection in reverse order
+   * @see Lists#reverse(List)
+   */
+  public static <E> ArrayList<E> reversedCopy(Collection<E> collection) {
+    ArrayList<E> reversedList = new ArrayList<>(collection);
+    Collections.reverse(reversedList);
+    return reversedList;
+  }
 }

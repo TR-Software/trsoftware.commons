@@ -220,6 +220,10 @@ public class ArrayUtils {
     return list.toArray(arrays[0]);  // use the first array the typecast "hint" (the no-arg version of toArray will not work to get T[] back)
   }
 
+  /**
+   * @return a new array containing only the elements from the given array that match the given predicate
+   * @see java.util.stream.Stream#filter(java.util.function.Predicate)
+   */
   public static int[] filter(int[] array, Predicate<Integer> predicate) {
     ArrayList<Integer> matchingMembers = new ArrayList<Integer>();
     for (int member : array) {
@@ -232,7 +236,11 @@ public class ArrayUtils {
     }
     return result;
   }
-  
+
+  /**
+   * @return a new array containing only the elements from the given array that match the given predicate
+   * @see java.util.stream.Stream#filter(java.util.function.Predicate)
+   */
   public static <T> ArrayList<T> filter(T[] array, Predicate<T> predicate) {
     ArrayList<T> matchingMembers = new ArrayList<T>();
     for (T member : array) {
@@ -280,9 +288,18 @@ public class ArrayUtils {
     return arr;
   }
 
-  /** Unboxes every element in the given array */
+  /** Unwraps every element in the given array */
   public static double[] unbox(Double[] arr) {
     double[] ret = new double[arr.length];
+    for (int i = 0; i < ret.length; i++) {
+      ret[i] = arr[i];
+    }
+    return ret;
+  }
+
+  /** Wraps every element in the given array */
+  public static Double[] box(double[] arr) {
+    Double[] ret = new Double[arr.length];
     for (int i = 0; i < ret.length; i++) {
       ret[i] = arr[i];
     }

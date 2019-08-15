@@ -274,6 +274,7 @@ public class StringUtils {
    * @return the {@code format} string with symbols {@code $1}...{@code $9} replaced by the positional {@code args}
    * @see Template
    * @see SimpleTemplateParser
+   * @see com.google.common.base.Strings#lenientFormat(String, Object...)
    */
   public static String template(String format, Object... args) {
     if (args.length > 9)

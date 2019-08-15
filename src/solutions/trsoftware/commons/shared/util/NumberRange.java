@@ -96,6 +96,13 @@ public class NumberRange<T extends Number & Comparable> implements Iterable<T> {
   }
 
   /**
+   * @return {@code true} iff value is in the given range (both endpoints inclusive)
+   */
+  public static boolean inRange(double rangeMin, double rangeMax, double value) {
+    return value >= rangeMin && value <= rangeMax;
+  }
+
+  /**
    * Coerces the number into the range, i.e. if the number is in the range,
    * returns it unchanged, otherwise returns the closest endpoint of the range.
    * 
@@ -183,7 +190,11 @@ public class NumberRange<T extends Number & Comparable> implements Iterable<T> {
   }
   
 
-  /** Iterates over the possible values in the range in steps of 1 */
+  /**
+   * Iterates over the possible values in the range in steps of 1
+   * @see java.util.stream.IntStream#rangeClosed(int, int)
+   * @see java.util.stream.LongStream#rangeClosed(long, long)
+   */
   public Iterator<T> iterator() {
     return iterator(fromDouble(1));
   }
@@ -200,6 +211,7 @@ public class NumberRange<T extends Number & Comparable> implements Iterable<T> {
     };
   }
 
+  @SuppressWarnings("unchecked")
   private T fromDouble(double v) {
     return (T)NumberUtils.fromDouble(min.getClass(), v);
   }

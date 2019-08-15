@@ -112,4 +112,21 @@ public class MutableInteger extends MutableNumber {
   public int compareTo(Number o) {
     return intValue() - o.intValue();
   }
+
+  @Override
+  public boolean equals(Object o) {
+    if (this == o)
+      return true;
+    if (o == null || getClass() != o.getClass())
+      return false;
+
+    MutableInteger that = (MutableInteger)o;
+
+    return n == that.n;
+  }
+
+  @Override
+  public int hashCode() {
+    return n;
+  }
 }

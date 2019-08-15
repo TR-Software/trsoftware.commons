@@ -20,11 +20,17 @@ package solutions.trsoftware.commons.shared.util;
 import com.google.common.base.Predicate;
 import com.google.common.base.Predicates;
 import junit.framework.TestCase;
+import org.jetbrains.annotations.NotNull;
 import solutions.trsoftware.commons.shared.util.callables.Function1;
 
 import java.util.*;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
+import java.util.stream.Stream;
 
+import static java.util.Collections.*;
 import static solutions.trsoftware.commons.shared.util.CollectionUtils.*;
+import static solutions.trsoftware.commons.shared.util.StringUtils.ASCII_PRINTABLE_CHARS;
 
 /**
  * Jun 8, 2009
@@ -129,12 +135,16 @@ public class CollectionUtilsTest extends TestCase {
 
   public void testIteratorToList() throws Exception {
     assertEquals(strList("a", "b", "c"), asList(strList("a", "b", "c").iterator()));
-    assertEquals(Collections.emptyList(), asList(Collections.emptyList().iterator()));
+    assertEquals(emptyList(), asList(emptyList().iterator()));
   }
 
+  /**
+   * @deprecated because {@link CollectionUtils#last} is deprecated
+   */
+  @Deprecated
   public void testGetLast() throws Exception {
     // test with Iterator argument
-    assertEquals(null, last(Collections.emptyList().iterator()));
+    assertEquals(null, last(emptyList().iterator()));
     assertEquals("a", last(strList("a").iterator()));
     assertEquals("b", last(strList("a", "b").iterator()));
     assertEquals("c", last(strList("a", "b", "c").iterator()));
@@ -143,7 +153,7 @@ public class CollectionUtilsTest extends TestCase {
     assertEquals((Integer)3, last(Arrays.asList(1, 2, 3).iterator()));
 
     // test with Iterable argument
-    assertEquals(null, last(Collections.emptyList()));
+    assertEquals(null, last(emptyList()));
     assertEquals("a", last(strList("a")));
     assertEquals("b", last(strList("a", "b")));
     assertEquals("c", last(strList("a", "b", "c")));
@@ -206,4 +216,124 @@ public class CollectionUtilsTest extends TestCase {
     assertEquals("1 < 2", printTotalOrdering(Arrays.asList(2, 1)));
     assertEquals("1 < 2 < 3 == 3 < 4 < 5", printTotalOrdering(Arrays.asList(5, 2, 4, 3, 3, 1)));
   }
+
+  public void testSortedCopy() throws Exception {
+    // generate a list of random strings
+    List<String> data = randomStrings(20);
+    // ensure that the data is not already sorted (this is very unlikely)
+    while (isSorted(data)) {
+      Collections.shuffle(data, RandomUtils.rnd);
+    }
+    ArrayList<String> dataCopy = new ArrayList<>(data);
+    assertFalse(isSorted(data));
+    assertEquals(data, dataCopy);  // sanity check
+    ArrayList<String> sortedData = sortedCopy(data);
+    assertNotSame(data, sortedData);  // a defensive copy should've been created
+    assertTrue(isSorted(sortedData));  // the result should be sorted
+    assertEquals(dataCopy, data);  // make sure the original list wasn't mutated
+
+    // make sure it works for a collection that's already sorted
+    assertEquals(sortedData, sortedCopy(sortedData));
+
+    // make sure it works for a collection containing duplicate values
+    assertTrue(isSorted(sortedCopy(Arrays.asList(-1, 2, 3, 3, 3, 15))));
+    assertTrue(isSorted(sortedCopy(Arrays.asList(-1, -1, 3, 3, 3, 15))));
+    assertTrue(isSorted(sortedCopy(Arrays.asList(1, 15, 15, 3))));
+    assertTrue(isSorted(sortedCopy(Arrays.asList(-1, -1, 15, 3))));
+
+    // now try passing a different collection type to sorted() to be sure it doesn't just work for lists
+    assertTrue(isSorted(sortedCopy(new HashSet<>(data))));
+    assertTrue(isSorted(sortedCopy(new LinkedHashSet<>(data))));
+    assertTrue(isSorted(sortedCopy(new TreeSet<>(data))));
+
+    // TODO: (probably overkill) test the overload version that takes a Comparator?
+  }
+
+  /**
+   * @return a list containing the given number of random (ASCII) strings, each between 1 and 10 chars long
+   * @see RandomUtils#randString(String, int, int)
+   */
+  // TODO: move to TestData?
+  public static List<String> randomStrings(int n) {
+    return Stream.generate(() -> RandomUtils.randString(ASCII_PRINTABLE_CHARS, 1, 10))
+        .limit(n).collect(Collectors.toList());
+  }
+
+  public void testIsSorted() throws Exception {
+    // 1) test the trivial cases first
+    // an empty collection should be considered sorted
+    assertTrue(isSorted(Collections.<Integer>emptyList()));  // NOTE: have to use a generic type that implements Comparable<T>
+    assertTrue(isSorted(Collections.<String>emptySet()));
+    // same with a collection containing only 1 element
+    assertTrue(isSorted(singletonList(1)));
+    assertTrue(isSorted(Collections.singleton("foo")));
+    // 2) test some basic examples manually
+    assertTrue(isSorted(SetUtils.newSet("", "a", "foo", "foos")));  // NOTE: Sets are supported too because they might be ordered (like LHS or SortedSet)
+    assertFalse(isSorted(SetUtils.newSet("a", "", "foo", "foos")));
+    // a list with duplicate values
+    assertTrue(isSorted(Arrays.asList(-1, 2, 3, 3, 3, 15)));
+    assertTrue(isSorted(Arrays.asList(-1, -1, 3, 3, 3, 15)));
+    assertFalse(isSorted(Arrays.asList(1, 15, 15, 3)));
+    assertFalse(isSorted(Arrays.asList(-1, -1, 15, 3)));
+    // 3) test some large inputs
+    List<Integer> intList = IntStream.rangeClosed(-50, 185).boxed().collect(Collectors.toList());
+    assertTrue(isSorted(intList));
+    assertTrue(isSorted(new LinkedHashSet<>(intList)));
+    assertTrue(isSorted(new TreeSet<>(intList)));
+    ArrayList<Integer> reversedIntList = reversedCopy(intList);
+    assertFalse(isSorted(reversedIntList));
+    assertFalse(isSorted(new LinkedHashSet<>(reversedIntList)));
+    // 4) test that the arg is not structurally modified
+    List<MockInteger> mockInts = IntStream.rangeClosed(-50, 185).mapToObj(MockInteger::new).collect(Collectors.toList());
+    List<MockInteger> mockIntsCopy = new ArrayList<>(mockInts);
+    assertEquals(mockInts, mockIntsCopy);
+    assertTrue(isSorted(mockInts));
+    assertEquals(mockIntsCopy, mockInts);  // no structural modifications to the arg
+  }
+
+  public void testReversedCopy() throws Exception {
+    // test some trivial cases:
+    assertTrue(reversedCopy(emptyList()).isEmpty());
+    assertTrue(reversedCopy(emptySet()).isEmpty());
+    assertTrue(reversedCopy(SetUtils.newSortedSet()).isEmpty());
+    assertEquals(singletonList(1), reversedCopy(singletonList(1)));
+    assertEquals(singletonList(1), reversedCopy(singleton(1)));
+    assertEquals(singletonList(1), reversedCopy(singletonList(1)));
+    assertEquals(singletonList(1), reversedCopy(singleton(1)));
+    assertEquals(singletonList(1), reversedCopy(SetUtils.newSortedSet(1)));
+    assertEquals(Arrays.asList(2, 1), reversedCopy(Arrays.asList(1, 2)));
+    assertEquals(Arrays.asList(2, 1), reversedCopy(SetUtils.newSet(1, 2)));
+    assertEquals(Arrays.asList(2, 1), reversedCopy(SetUtils.newSortedSet(1, 2)));
+
+    // now test that it returns a copy without structurally modifying the arg
+    List<String> strings = randomStrings(20);
+    List<String> stringsCopy = new ArrayList<>(strings);
+    assertEquals(strings, stringsCopy);
+    List<String> expected = new ArrayList<>(strings);
+    Collections.reverse(expected);
+    ArrayList<String> actual = reversedCopy(strings);
+    assertEquals(expected, actual);  // reversed as expected
+    assertNotSame(strings, actual);  // defensive copy was made
+    assertEquals(stringsCopy, strings);  // original list unmodified
+  }
+
+  /**
+   * Helper class for {@link #testIsSorted()}: wraps an int, and uses it in its {@link Comparable},
+   * but purposefully omits {@link #equals(Object)} and {@link #hashCode()}, to allow checking that a collection arg
+   * was not modified by an operation.
+   */
+  private static class MockInteger implements Comparable<MockInteger> {
+    private int i;
+
+    public MockInteger(int i) {
+      this.i = i;
+    }
+
+    @Override
+    public int compareTo(@NotNull MockInteger o) {
+      return Integer.compare(i, o.i);
+    }
+
+  }
+
 }

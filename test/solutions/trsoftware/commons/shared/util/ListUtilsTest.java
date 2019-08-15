@@ -102,6 +102,12 @@ public class ListUtilsTest extends TestCase {
     assertFalse(isSorted(arrayList(0, 1, 5, 3, 4)));
     assertFalse(isSorted(arrayList(0, 1, 2, 3, 1)));
     assertFalse(isSorted(reversedCopy(arrayList(0, 1, 2, 3, 4))));
+
+    /*
+        TODO: test lists with duplicate values (see solutions.trsoftware.commons.shared.util.CollectionUtilsTest.testIsSorted)
+        - or maybe get rid of this test altogether, since the implementation delegates to CollectionUtils
+     */
+
   }
 
   public void testArrayList() throws Exception {

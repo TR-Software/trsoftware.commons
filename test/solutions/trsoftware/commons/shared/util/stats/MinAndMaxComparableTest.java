@@ -17,17 +17,18 @@
 
 package solutions.trsoftware.commons.shared.util.stats;
 
-import junit.framework.TestCase;
-
 import java.util.Arrays;
 import java.util.List;
+
+import static solutions.trsoftware.commons.shared.testutil.AssertUtils.assertEqualsAndHashCode;
+import static solutions.trsoftware.commons.shared.testutil.AssertUtils.assertNotEqual;
 
 /**
  * Oct 11, 2012
  *
  * @author Alex
  */
-public class MinAndMaxComparableTest extends TestCase {
+public class MinAndMaxComparableTest extends CollectableStatsTestCase {
 
   public void testMinAndMax() throws Exception {
     MinAndMaxComparable<Integer> m = new MinAndMaxComparable<Integer>();
@@ -50,7 +51,7 @@ public class MinAndMaxComparableTest extends TestCase {
 
   public void testUpdateFromCollection() throws Exception {
     MinAndMaxComparable<Integer> m = new MinAndMaxComparable<Integer>();
-    m.update(intList(1, 3, 2));
+    m.updateAll(intList(1, 3, 2));
     assertEquals(1, (int)m.getMin());
     assertEquals(3, (int)m.getMax());
   }
@@ -65,17 +66,24 @@ public class MinAndMaxComparableTest extends TestCase {
     return Arrays.asList(values);
   }
 
-  public void testEquals() throws Exception {
+  public void testEqualsAndHashCode() throws Exception {
     MinAndMaxComparable<Integer> m1 = new MinAndMaxComparable<Integer>(intList(1, 3, 2));
     // these two lists have the same min and max
     MinAndMaxComparable<Integer> m2 = new MinAndMaxComparable<Integer>(intList(1, 3, 2, 1, 2, 3, 1));
-    assertTrue(m1.equals(m2));
-    assertEquals(m1.hashCode(), m2.hashCode());
+    assertEqualsAndHashCode(m1, m2);
     // the next two do not
     MinAndMaxComparable<Integer> m3 = new MinAndMaxComparable<Integer>(intList(1, 3, 2, 1, 4));
-    assertFalse(m1.equals(m3));
-    assertFalse(m1.hashCode() == m3.hashCode());
+    assertNotEqual(m1, m3);
     // the next object is not an instance of MinAndMaxComparable
-    assertFalse(m1.equals(new MinComparable<Integer>(intList(1, 3, 2))));
+    assertNotEqual(m1, new MinComparable<Integer>(intList(1, 3, 2)));
+  }
+
+  @Override
+  public void testAsCollector() throws Exception {
+    MinAndMaxComparable<Integer> result =
+        doTestAsCollector(new MinAndMaxComparable<>(), null, 1, 3, 2, 1, 2, 3, 1);
+    // sanity check
+    assertEquals((Integer)1, result.getMin());
+    assertEquals((Integer)3, result.getMax());
   }
 }

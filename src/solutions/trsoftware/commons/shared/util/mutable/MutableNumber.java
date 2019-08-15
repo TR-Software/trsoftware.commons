@@ -38,10 +38,4 @@ public abstract class MutableNumber extends Number implements Mergeable<MutableN
     return numberValue().toString();
   }
 
-
-  @Override
-  public boolean equals(Object obj) {
-    return obj != null && obj instanceof MutableNumber
-        && numberValue().equals(((MutableNumber)obj).numberValue());
-  }
 }

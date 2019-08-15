@@ -186,7 +186,7 @@ public class MathUtils {
    * @see junit.framework.Assert#assertEquals(double, double, double)
    */
   public static boolean equal(double a, double b, double delta) {
-    // handle infinity specially since subtracting to infinite values gives NaN and the following test fails
+    // handle infinity specially since subtracting two infinite values gives NaN and the following test fails
     if (Double.isInfinite(a) || Double.isInfinite(b)) {
       return a == b;
     }

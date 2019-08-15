@@ -37,7 +37,9 @@ public interface SampleStatistics<N extends Number> extends Updatable<N> {
   /** The upper median of the dataset (if there are 2 medians) */
   N median();
 
-  double stdev();
+  default double stdev() {
+    return Math.sqrt(variance());
+  }
 
   double variance();
 

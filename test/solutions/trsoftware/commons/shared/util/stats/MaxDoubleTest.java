@@ -17,13 +17,13 @@
 
 package solutions.trsoftware.commons.shared.util.stats;
 
-import junit.framework.TestCase;
-import solutions.trsoftware.commons.shared.testutil.AssertUtils;
+import static solutions.trsoftware.commons.shared.testutil.AssertUtils.assertEqualsAndHashCode;
+import static solutions.trsoftware.commons.shared.testutil.AssertUtils.assertNotEqual;
 
 /**
  * @author Alex, 1/8/14
  */
-public class MaxDoubleTest extends TestCase {
+public class MaxDoubleTest extends CollectableStatsTestCase {
 
   public void testCRUD() throws Exception {
     assertEquals(Double.NEGATIVE_INFINITY, new MaxDouble().get());
@@ -35,14 +35,14 @@ public class MaxDoubleTest extends TestCase {
   }
 
   public void testEqualsAndHashCode() throws Exception {
-    AssertUtils.assertEqualsAndHashCode(new MaxDouble(), new MaxDouble());
-    AssertUtils.assertEqualsAndHashCode(new MaxDouble(1d), new MaxDouble(1d));
-    AssertUtils.assertEqualsAndHashCode(new MaxDouble(1d, 2d, -2d), new MaxDouble(2d));
+    assertEqualsAndHashCode(new MaxDouble(), new MaxDouble());
+    assertEqualsAndHashCode(new MaxDouble(1d), new MaxDouble(1d));
+    assertEqualsAndHashCode(new MaxDouble(1d, 2d, -2d), new MaxDouble(2d));
 
-    AssertUtils.assertNotEqualsAndHashCode(new MaxDouble(), new MinDouble());
-    AssertUtils.assertNotEqualsAndHashCode(new MaxDouble(1d), new MinDouble(1d));
-    AssertUtils.assertNotEqualsAndHashCode(new MaxDouble(1d), new MaxDouble(-1d));
-    AssertUtils.assertNotEqualsAndHashCode(new MaxDouble(1d, 2d, -2d), new MaxDouble(1d));
+    assertNotEqual(new MaxDouble(), new MinDouble());
+    assertNotEqual(new MaxDouble(1d), new MinDouble(1d));
+    assertNotEqual(new MaxDouble(1d), new MaxDouble(-1d));
+    assertNotEqual(new MaxDouble(1d, 2d, -2d), new MaxDouble(1d));
   }
 
   public void testMerge() throws Exception {
@@ -60,4 +60,10 @@ public class MaxDoubleTest extends TestCase {
     }
   }
 
+  @Override
+  public void testAsCollector() throws Exception {
+    MaxDouble result = doTestAsCollector(new MaxDouble(), null, 1d, 2d, 3d, 1d, 2d, 3d);
+    // sanity check
+    assertEquals(3d, result.get());
+  }
 }

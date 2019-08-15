@@ -34,4 +34,10 @@ public interface UpdatableDouble extends DoubleConsumer {
   default void accept(double value) {
     update(value);
   }
+
+  default void updateAll(double... candidates) {
+    for (double x : candidates) {
+      update(x);
+    }
+  }
 }

@@ -18,13 +18,16 @@
 package solutions.trsoftware.commons.shared.util.stats;
 
 import java.io.Serializable;
+import java.util.stream.Collectors;
+import java.util.stream.DoubleStream;
 
 /**
  * Combines {@link MinDouble} and {@link MaxDouble} under one data structure.
  * 
- * Oct 11, 2012
+ * @see DoubleStream#summaryStatistics()
+ * @see Collectors#summarizingDouble
  *
- * @author Alex
+ * @author Alex, Oct 11, 2012
  */
 public class MinAndMaxDouble implements Serializable {
   private MinDouble min;
@@ -42,13 +45,13 @@ public class MinAndMaxDouble implements Serializable {
   }
 
   public void update(Iterable<Double> candidates) {
-    min.update(candidates);
-    max.update(candidates);
+    min.updateAll(candidates);
+    max.updateAll(candidates);
   }
 
   public void update(double... candidates) {
-    min.update(candidates);
-    max.update(candidates);
+    min.updateAll(candidates);
+    max.updateAll(candidates);
   }
 
   public double getMin() {

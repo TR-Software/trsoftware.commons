@@ -18,6 +18,9 @@
 package solutions.trsoftware.commons.shared.util.stats;
 
 import java.io.Serializable;
+import java.util.Set;
+import java.util.function.Supplier;
+import java.util.stream.Stream;
 
 /**
  * An online version of {@link NumberSample} for {@link Comparable} values that uses O(1) space.
@@ -39,7 +42,7 @@ import java.io.Serializable;
  * @see NumberSampleOnlineDouble
  * @see NumberSample
  */
-public class NumberSampleOnline<N extends Number & Comparable<N>> implements SampleStatistics<N>, Serializable {
+public class NumberSampleOnline<N extends Number & Comparable<N>> implements SampleStatistics<N>, CollectableStats<N, NumberSampleOnline<N>>, Serializable {
 
   private final MeanAndVariance meanAndVariance = new MeanAndVariance();
   private final MinAndMaxComparable<N> minAndMax = new MinAndMaxComparable<N>();
@@ -48,6 +51,12 @@ public class NumberSampleOnline<N extends Number & Comparable<N>> implements Sam
   public synchronized void update(N number) {
     meanAndVariance.update(number.doubleValue());
     minAndMax.update(number);
+  }
+
+  @Override
+  public synchronized void merge(NumberSampleOnline<N> other) {
+    meanAndVariance.merge(other.meanAndVariance);
+    minAndMax.merge(other.minAndMax);
   }
 
   public synchronized int size() {
@@ -63,7 +72,7 @@ public class NumberSampleOnline<N extends Number & Comparable<N>> implements Sam
   }
 
   @Override
-  public double sum() {
+  public synchronized double sum() {
     return meanAndVariance.sum();
   }
 
@@ -73,11 +82,7 @@ public class NumberSampleOnline<N extends Number & Comparable<N>> implements Sam
 
   /** The upper median of the dataset (if there are 2 medians) */
   public synchronized N median() {
-    throw new UnsupportedOperationException("NumberSampleOnlineComparable doesn't support medians.");
-  }
-
-  public synchronized double stdev() {
-    return Math.sqrt(variance());
+    throw new UnsupportedOperationException("This online algorithm doesn't support medians.");
   }
 
   public synchronized double variance() {
@@ -93,9 +98,9 @@ public class NumberSampleOnline<N extends Number & Comparable<N>> implements Sam
 
     NumberSampleOnline that = (NumberSampleOnline)o;
 
-    if (meanAndVariance != null ? !meanAndVariance.equals(that.meanAndVariance) : that.meanAndVariance != null)
+    if (!meanAndVariance.equals(that.meanAndVariance))
       return false;
-    if (minAndMax != null ? !minAndMax.equals(that.minAndMax) : that.minAndMax != null)
+    if (!minAndMax.equals(that.minAndMax))
       return false;
 
     return true;
@@ -103,8 +108,8 @@ public class NumberSampleOnline<N extends Number & Comparable<N>> implements Sam
 
   public int hashCode() {
     int result;
-    result = (meanAndVariance != null ? meanAndVariance.hashCode() : 0);
-    result = 31 * result + (minAndMax != null ? minAndMax.hashCode() : 0);
+    result = meanAndVariance.hashCode();
+    result = 31 * result + minAndMax.hashCode();
     return result;
   }
 
@@ -116,6 +121,55 @@ public class NumberSampleOnline<N extends Number & Comparable<N>> implements Sam
    */
   @Override
   public ImmutableStats<N> summarize() {
-    return new ImmutableStats<N>(size(), min(), max(), null, sum(), mean(), stdev(), variance());
+    return new ImmutableStats<N>(size(), min(), max(), null, sum(), mean(), variance());
+  }
+
+  @Override
+  public java.util.stream.Collector<N, ?, NumberSampleOnline<N>> getCollector() {
+    return Collector.getInstance();
+  }
+
+  /**
+   * Provides a cached collector descriptor that can be passed to {@link Stream#collect}
+   * to collect the stream elements into an instance of {@link NumberSampleOnline}.
+   *
+   * @param <N> the input element type
+   * @see #getInstance()
+   */
+  public static class Collector<N extends Number & Comparable<N>> extends CollectableStats.Collector<N, NumberSampleOnline<N>> {
+
+    /**
+     * NOTE: static fields are automatically lazy-init for singletons and safer to use than double-checked locking.
+     *
+     * @see <a href="https://www.cs.umd.edu/~pugh/java/memoryModel/DoubleCheckedLocking.html">Why double-checked locking
+     *     is broken</a>
+     * @see <a href="https://en.wikipedia.org/wiki/Initialization-on-demand_holder_idiom">Initialization-on-demand
+     *     holder idiom</a>
+     */
+    private static final Collector INSTANCE = new Collector();
+
+    /**
+     * @param <N> the input element type
+     * @return the cached instance of this {@link Collector}
+     */
+    @SuppressWarnings("unchecked")
+    public static <N extends Number & Comparable<N>> Collector<N> getInstance() {
+      return INSTANCE;
+    }
+
+    @Override
+    public Supplier<NumberSampleOnline<N>> supplier() {
+      return NumberSampleOnline::new;
+    }
+
+    /**
+     * Since all the methods in {@link NumberSampleOnline} are synchronized, we can include
+     * {@link java.util.stream.Collector.Characteristics#CONCURRENT CONCURRENT} characteristic.
+     * @see #CH_CONCURRENT_ID
+     */
+    @Override
+    public Set<Characteristics> characteristics() {
+      return CH_CONCURRENT_ID;
+    }
   }
 }

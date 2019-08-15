@@ -19,6 +19,9 @@ package solutions.trsoftware.commons.shared.util.mutable;
 
 import junit.framework.TestCase;
 
+import static solutions.trsoftware.commons.shared.testutil.AssertUtils.assertEqualsAndHashCode;
+import static solutions.trsoftware.commons.shared.testutil.AssertUtils.assertNotEqual;
+
 public class MutableIntegerTest extends TestCase {
 
   private MutableInteger one;
@@ -105,8 +108,10 @@ public class MutableIntegerTest extends TestCase {
     assertTrue(one.numberValue() instanceof Integer);
   }
 
-  public void testEquals() throws Exception {
-    assertEquals(one, new MutableInteger(1));
+  public void testEqualsAndHashCode() throws Exception {
+    assertEqualsAndHashCode(one, new MutableInteger(1));
+    assertNotEqual(one, new MutableInteger(2));
+    assertNotEqual(one, new MutableFloat(1));
   }
 
   public void testMerge() throws Exception {

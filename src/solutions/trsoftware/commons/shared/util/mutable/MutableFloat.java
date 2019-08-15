@@ -104,4 +104,21 @@ public class MutableFloat extends MutableNumber {
   public int compareTo(Number o) {
     return Float.compare(floatValue(), o.floatValue());
   }
+
+  @Override
+  public boolean equals(Object o) {
+    if (this == o)
+      return true;
+    if (o == null || getClass() != o.getClass())
+      return false;
+
+    MutableFloat that = (MutableFloat)o;
+
+    return Float.compare(that.n, n) == 0;
+  }
+
+  @Override
+  public int hashCode() {
+    return (n != +0.0f ? Float.floatToIntBits(n) : 0);
+  }
 }

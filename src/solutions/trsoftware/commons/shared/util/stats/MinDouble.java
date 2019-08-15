@@ -18,14 +18,24 @@
 package solutions.trsoftware.commons.shared.util.stats;
 
 import java.io.Serializable;
+import java.util.function.Supplier;
+import java.util.stream.Collectors;
+import java.util.stream.DoubleStream;
+import java.util.stream.Stream;
 
 /**
  * Keeps track of the min of a sequence of double values.
+ * <p>
+ * <b>NOTE</b>: although this class implements {@link CollectableStats StatsCollector&lt;Double, ...&gt},
+ * which allows it to be used with  {@link Stream#collect(java.util.stream.Collector) Stream&lt;Double&gt;.collect()},
+ * it is more efficient to use {@link DoubleStream#min()} where applicable.
  *
- * @see java.util.stream.DoubleStream#min()
+ * @see DoubleStream#min()
+ * @see DoubleStream#summaryStatistics()
+ * @see Collectors#summarizingDouble
  * @author Alex
  */
-public class MinDouble extends MinMaxDoubleBase implements Serializable, Mergeable<MinDouble> {
+public class MinDouble extends MinMaxDoubleBase<MinDouble> implements Serializable {
 
   @Override
   protected double absoluteWorst() {
@@ -56,4 +66,44 @@ public class MinDouble extends MinMaxDoubleBase implements Serializable, Mergeab
   public void merge(MinDouble other) {
     update(other.get());
   }
+
+  @Override
+  public java.util.stream.Collector<Double, ?, MinDouble> getCollector() {
+    return Collector.getInstance();
+  }
+
+  /**
+   * Provides a cached collector descriptor that can be passed to {@link Stream#collect}
+   * to collect the stream elements into an instance of {@link MinDouble}.
+   *
+   * @see #getInstance()
+   */
+  public static class Collector extends CollectableStats.Collector<Double, MinDouble> {
+
+    /**
+     * NOTE: static fields are automatically lazy-init for singletons and safer to use than double-checked locking.
+     * @see <a href="https://www.cs.umd.edu/~pugh/java/memoryModel/DoubleCheckedLocking.html">Why double-checked locking is broken</a>
+     * @see <a href="https://en.wikipedia.org/wiki/Initialization-on-demand_holder_idiom">Initialization-on-demand holder idiom</a>
+     */
+    private static final Collector INSTANCE = new Collector();
+
+    /**
+     * <strong>NOTE:</strong> it is more efficient to use {@link DoubleStream#min()} where applicable.
+     *
+     * @return the cached instance of this {@link Collector}
+     * @see DoubleStream#min()
+     * @see DoubleStream#summaryStatistics()
+     * @see Collectors#summarizingDouble
+     */
+    @SuppressWarnings("unchecked")
+    public static Collector getInstance() {
+      return INSTANCE;
+    }
+
+    @Override
+    public Supplier<MinDouble> supplier() {
+      return MinDouble::new;
+    }
+  }
+  
 }

@@ -81,6 +81,19 @@ public class ListUtils {
    * @return A reference to the given list, to allow method chaining.
    */
   public static <T extends Comparable> List<T> insertInOrder(List<T> list, T newElement) {
+    /*
+     * TODO: improve performance using Collections.binarySearch when list has non-trivial length
+     * Our current algorithm is O(n): uses a linear scan of the list
+     * We can achieve O(log n) with a binary search to find the proper insertion point in the list,
+     * using an algorithm similar to Python's bisect module (https://docs.python.org/2.7/library/bisect.html)
+     * Should be able to use Collections.binarySearch, which returns (-(insertion point) - 1) when key not found
+     * @see https://stackoverflow.com/questions/2945017/javas-equivalent-to-bisect-in-python
+     * @see https://www.geeksforgeeks.org/collections-binarysearch-java-examples/
+     *
+     * NOTE: could also roll our own "TreeSortedList" data structure using Guava's TreeMultiset for this (not random access),
+     * or "SortedArrayList" that uses the aforementioned binarySearch method (random access).
+     * @see https://stackoverflow.com/questions/8725387/why-is-there-no-sortedlist-in-java
+     */
     ListIterator<T> listIterator = list.listIterator();
     int index = -1;
     while (listIterator.hasNext()) {
@@ -102,21 +115,14 @@ public class ListUtils {
    * @return {@code true} iff the given list is sorted in ascending order (as defined by its comparator).
    */
   public static <T extends Comparable<T>> boolean isSorted(List<T> list) {
-    T lastElt = null;
-    for (T elt : list) {
-      if (lastElt != null) {
-        if (elt.compareTo(lastElt) <= 0)
-          return false;
-      }
-      lastElt = elt;
-    }
-    return true;
+    return CollectionUtils.isSorted(list);
   }
 
 
   /**
    * Returns a standard {@link ArrayList} with the given elements (in contrast to {@link Arrays#asList},
    * which returns a very limited implementation of {@link List}).
+   * @see Arrays#asList(Object[])
    */
   @SafeVarargs
   public static <T> ArrayList<T> arrayList(T... a) {

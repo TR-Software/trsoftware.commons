@@ -35,6 +35,7 @@ package solutions.trsoftware.commons.shared.util.formatter;  // copied from java
  *
  * @since 1.5
  */
+@com.google.gwt.core.shared.GwtIncompatible("Uses String.format")
 public class DuplicateFormatFlagsException extends IllegalFormatException {
 
     private static final long serialVersionUID = 18890531L;

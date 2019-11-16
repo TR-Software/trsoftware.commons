@@ -38,6 +38,12 @@ public class MockScheduledExecutorServiceTest extends TestCaseCanStopClock {
     scheduler = new MockScheduledExecutorService();
   }
 
+  @Override
+  public void tearDown() throws Exception {
+    scheduler = null;
+    super.tearDown();
+  }
+
   public void testSchedule() throws Exception {
     // using a nested single-threaded executor for testing so we can check the deterministic execution order
     Clock.stop();
@@ -188,6 +194,10 @@ public class MockScheduledExecutorServiceTest extends TestCaseCanStopClock {
     // make sure the clock stopped at the right time
     assertEquals(startTime + 64, Clock.currentTimeMillis());
     // make sure all the tasks have been executed at their scheduled time
+    assertAllTasksExecutedOnTime(startTime, tasks);
+  }
+
+  private void assertAllTasksExecutedOnTime(long startTime, DummyTask[] tasks) {
     for (int i = 0; i < tasks.length; i++) {
       DummyTask task = tasks[i];
       assertEquals(1, task.getRunCount());
@@ -214,14 +224,7 @@ public class MockScheduledExecutorServiceTest extends TestCaseCanStopClock {
     // make sure the clock stopped at the right time
     assertEquals(startTime + 64, Clock.currentTimeMillis());
     // make sure all the tasks have been executed at their scheduled time
-    for (int i = 0; i < tasks.length; i++) {
-      DummyTask task = tasks[i];
-      assertEquals(1, task.getRunCount());
-      if (i == 0)  // special case - the advanceClockAndPumpIncrementally method will execute a task with delay 0 one millisecond late
-        assertEquals(startTime + 1, task.getLastRunTime());
-      else
-        assertEquals(startTime + i, task.getLastRunTime());
-    }
+    assertAllTasksExecutedOnTime(startTime, tasks);
   }
 
   /** A block of code that remembers whether and when it was run */

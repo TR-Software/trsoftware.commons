@@ -261,6 +261,8 @@ public class FileUtils {
    * @return the prefix (e.g. {@code "bar"})
    */
   public static String filenamePrefix(String filename) {
+    // TODO(10/11/2019): should we use lastIndexOf here? because extension is technically after the last dot
+    // TODO: extract this code to StringUtils (can call it substringBefore)
     int extensionStartIndex = filename.indexOf(".");
     if (extensionStartIndex < 0)
       return filename;  // the name doesn't have an extension
@@ -273,6 +275,7 @@ public class FileUtils {
    * @return the filename extension (e.g. {@code "txt"}), or an empty string if the filename doesn't have an extension.
    */
   public static String filenameExtension(String filename) {
+    // TODO: extract this code to StringUtils (can call it substringAfter)
     int extensionStartIndex = filename.lastIndexOf(".");
     if (extensionStartIndex < 0)
       return "";  // the name doesn't have an extension

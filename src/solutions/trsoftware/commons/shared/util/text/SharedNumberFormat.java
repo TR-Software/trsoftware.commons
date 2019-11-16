@@ -94,6 +94,9 @@ public class SharedNumberFormat {
 
   /**
    * Creates a format pattern string suitable for the {@link DecimalFormat} constructor based on the given parameters.
+   * <p style="color: #0073BF; font-weight: bold;">
+   *   TODO: add support for digit grouping (e.g. {@code #,###.##} to group thousands, or {@code #,##.##} to group hundreds, etc.)
+   * </p>
    * @return a string suitable for {@link DecimalFormat#DecimalFormat(String)}
    */
   public static String buildPattern(int minIntegerDigits, int minFractionDigits, int maxFractionDigits, boolean percent) {

@@ -20,8 +20,12 @@ package solutions.trsoftware.commons.server.util;
 import java.util.UUID;
 
 /**
- * A simpler version of java.util.UUID, which generates a "universally unique id"
- * by delegating to java.util.UUID and encoding the result using a url-safe
+ * Produces "universally unique" url-safe base64-encoded strings derived from
+ * a {@linkplain UUID#randomUUID()} random (version 4) UUID}.
+ *
+ * <a href="https://en.wikipedia.org/wiki/Universally_unique_identifier#Version_4_(random)">Version 4 (random) UUID (Wikipedia</a>
+ * A simpler version of {@link java.util.UUID}: generates a "universally unique id"
+ * by taking the result of {@link UUID#randomUUID()} and encoding the it using a url-safe
  * encoding in base64.  The base 64 algorithm is customized for encoding
  * a 128-bit number, and hence avoids trailing padding characters normally
  * present when using the standard base64 encoding on character data.
@@ -29,6 +33,8 @@ import java.util.UUID;
  * Because this class encodes the uuid as base 64, the string returned by this
  * class will be approximately 24 chars instead of the 36 by UUID.toString().
  *
+ * @see UUID
+ * @see <a href="https://en.wikipedia.org/wiki/Universally_unique_identifier#Version_4_(random)">Version 4 (random) UUID (Wikipedia</a>
  * @see NumberRadixEncoder
  * @author Alex
  */

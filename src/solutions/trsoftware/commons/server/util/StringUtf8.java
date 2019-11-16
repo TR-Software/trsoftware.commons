@@ -29,7 +29,7 @@ import java.util.Arrays;
  * (The JVM also seems to internally cache strings, which goes in favor of
  * using java.lang.String)
  *
- * Oct 21, 2009
+ * @since Oct 21, 2009
  * @author Alex
  */
 public final class StringUtf8 {

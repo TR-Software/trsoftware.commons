@@ -4,84 +4,78 @@ import javax.annotation.Nonnull;
 import java.util.Arrays;
 
 /**
- * Represents an application version number (e.g. {@code 67.0.3396.99})
- * consisting of up to {@value #MAX_COMPONENTS} parts.
+ * Represents an application version number (e.g. {@code 67.0.3396.99}).
+ * <p>
+ * Instances of this class are immutable and mutually comparable based on their {@linkplain #components
+ * canonical representation} (e.g. {@code 1.2} is considered equal to {@code 1.2.0}, {@code 1.2.0.0}, etc.)
  *
+ * @see #parse(String)
  * @author Alex
  * @since 8/9/2018
  */
 public class VersionNumber implements RichComparable<VersionNumber> {
 
   /**
-   * Maximum supported number of components (for performance reasons).
-   */
-  public static final int MAX_COMPONENTS = 5;
-
-  /**
-   * The actual components passed to the constructor. Used by {@link #toString()}
-   */
-  private int[] components;
-  // NOTE: can reduce memory consumption by using a short[] instead of int[] (this would allow doubling MAX_COMPONENTS with no penalty, at the expense of having an upper bound on the magntude of a component rather than the total number of components)
-
-  /**
-   * The {@link #components} padded with zeros up to {@link #MAX_COMPONENTS}.
+   * A copy of the components passed to the constructor, stripped of any trailing zeros.
    * This canonical representation is used by {@link #compareTo(VersionNumber)}, {@link #equals(Object)},
    * and {@link #hashCode()}, to make 2 instances mutually comparable.
    */
-  private int[] paddedComponents;
+  private final int[] components;
 
   /**
-   * @param components the components of the version number listed in descending order of significance
-   * @throws IllegalArgumentException if the given array is longer than {@link #MAX_COMPONENTS}
+   * String representation of the original args passed to the constructor.
+   * @see #toString()
+   */
+  private final String string;
+
+  /**
+   * @param components the components of the version number listed in decreasing order of significance.
+   * Each element should be &ge; 0 (to ensure the correct behavior of {@link #compareTo(VersionNumber)}),
+   * and the array should not be concurrently modified until the constructor has finished.
    */
   public VersionNumber(int... components) {
+    /*
+    TODO:
+      - consider throwing an IllegalArgumentException if any component is < 0 (to ensure the correct behavior of compareTo)
+      - consider creating a defensive copy of the arg array in the beginning of the constructor to immunize against concurrent modification
+     */
+    this.string = StringUtils.join(".", components);  // preserve the original args in the string repr of this instance
     if (components.length == 0)
       this.components = new int[0];
     else {
-      // defensive copy
-      this.components = new int[components.length];
-      System.arraycopy(components, 0, this.components, 0, components.length);
+      // create a canonical copy of the args, with all trailing zeros stripped off
+      int lastNonZeroIdx;
+      for (lastNonZeroIdx = components.length - 1; lastNonZeroIdx >= 0; lastNonZeroIdx--) {
+        if (components[lastNonZeroIdx] != 0)
+          break;
+      }
+      this.components = Arrays.copyOf(components, lastNonZeroIdx + 1);
     }
-    this.paddedComponents = maybePad(this.components, MAX_COMPONENTS);
   }
 
   @Override
   public int compareTo(@Nonnull VersionNumber other) {
     // we compare the canonical representation (we want the 2 arrays to have the same length)
-    int[] a = this.paddedComponents;
-    int[] b = other.paddedComponents;
-    int len = a.length;
-    assert b.length == len;
-    for (int i = 0; i < len; i++) {
+    int[] a = this.components;
+    int[] b = other.components;
+    int minLen = Math.min(a.length, b.length);
+    int i;
+    for (i = 0; i < minLen; i++) {
       if (a[i] < b[i])
         return -1;
       else if (a[i] > b[i])
         return 1;
     }
-    return 0;
-  }
-
-  /**
-   * If the given array is shorter than the desired length, will copy it into a new array of that length, effectively
-   * padding the given array with zeros at the end.
-   * @param arr the source array
-   * @param desiredLength the desired length of the result
-   * @return either the given array or a new array of the desired length containing the same data with zeros at the end
-   */
-  private int[] maybePad(int[] arr, int desiredLength) {
-    if (arr.length < desiredLength) {
-      int[] paddedArr = new int[desiredLength];
-      System.arraycopy(arr, 0, paddedArr, 0, arr.length);
-      return paddedArr;
-    }
-    else {
-      return arr;
-    }
+    if (a.length > i)
+      return 1; // a has more non-zero components remaining
+    else if (b.length > i)
+      return -1; // b has more non-zero components remaining
+    return 0;  // both have the same number of components, all of which are equal
   }
 
   @Override
   public String toString() {
-    return StringUtils.join(".", components);
+    return string;
   }
 
   @Override
@@ -93,12 +87,12 @@ public class VersionNumber implements RichComparable<VersionNumber> {
 
     VersionNumber that = (VersionNumber)o;
 
-    return Arrays.equals(paddedComponents, that.paddedComponents);
+    return Arrays.equals(components, that.components);
   }
 
   @Override
   public int hashCode() {
-    return Arrays.hashCode(paddedComponents);
+    return Arrays.hashCode(components);
   }
 
   /**

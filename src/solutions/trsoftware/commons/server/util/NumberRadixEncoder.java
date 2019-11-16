@@ -18,26 +18,31 @@
 package solutions.trsoftware.commons.server.util;
 
 /**
- * Provides 2 encodings:
- *
- * Base 64:
- * A variant of b64 specifically taylored for encoding numbers as opposed
- * to bytes of character data.  The result using a url-safe
- * encoding in base64.  The base 64 algorithm is customized for encoding
- * a 128-bit number, and hence avoids the trailing padding characters normally
- * present when using the standard base64 encoding on character data.
- *
- * WARNING: this encoding doesn't preserve the sign of number, because it
- * pads the bitstring with zeros. If you want to decode this encoding safely,
- * you have to count the number of zero bits that were added.  But we don't
- * really care about decoding for generating UUIDs and stuff like that.
- *
- *
- * Base 62:
- * This is the largest radix that can be used to produce only ASCII characters
- * and digits. The ordering is totally different from b64, in that this codec
- * starts with 0-1, then a-f, then A-Z (similar to hexidecimal, but more characters)
- *
+ * Provides 2 custom radix encodings:
+ * <ol>
+ * <li>
+ * <b>Base 64</b>:
+ * A variant of the URL-safe Base 64 encoding standard, specifically tailored for encoding
+ * 128-bit integers, using the smallest possible number of output characters.
+ * In particular, this scheme avoids the need for any padding characters that you often see at
+ * the end of traditional base64 strings.
+ * <p>
+ * <em>This is a lossy encoding</em>:
+ * in order to avoid padding chars, it doesn't preserve the sign of integer
+ * (leading 0-bits will be prepended to its binary representation such that the total number
+ * of bits is divisible by 6).  It was designed for the purpose of representing
+ * {@link java.util.UUID} values as url-safe strings of the shortest possible length, and
+ * reversibility was not a requirement.
+ * </li>
+ * <li>
+ * <b>Base 62</b>:
+ * This is the largest radix that produces strings containing only Latin letters and decimal digits
+ * using the the same encoding scheme as the {@linkplain Character#MAX_RADIX radix}-based
+ * string conversions implemented by {@link Integer#toString(int, int)} and {@link Long#toString(long, int)}.
+ * The characters ordering starts with [0-9], then [a-z], then [A-Z]. This is similar to hexadecimal,
+ * but the opposite of Base64.
+ * </li>
+ * </ol>
  *
  * @author Alex
  */
@@ -79,14 +84,17 @@ public class NumberRadixEncoder {
    * rather than character data, and hence avoids the trailing padding characters
    * normally present when using standard base64 encoding on character data.
    *
+   * <p>
+   *   <em>This is a lossy encoding:</em>
+   *   in order to avoid padding chars, it doesn't preserve the sign of integer
+   *   (leading 0-bits will be prepended to its binary representation such that the total number
+   *   of bits is divisible by 6).  It was designed for the purpose of representing
+   *   {@link java.util.UUID} values as url-safe strings of the shortest possible length, and
+   *   reversibility was not a requirement.
+   * </p>
+   *
    * @param i the value to encode
-   *
    * @return the number encoded in a url-safe base64 alphabet
-   *
-   * WARNING: this encoding doesn't preserve the sign of number, because it
-   * pads the bitstring with zeros. If you want to decode this encoding safely,
-   * you have to count the number of zero bits that were added.  But we don't
-   * really care about decoding for generating UUIDs and stuff like that.
    */
   public static String toStringBase64(long i) {
     return toStringBase64(0, i);
@@ -97,15 +105,21 @@ public class NumberRadixEncoder {
    * rather than character data, and hence avoids the trailing padding characters
    * normally present when using standard base64 encoding on character data.
    *
-   * @param msb the most significant 64 bits of a 128-bit number
-   * @param msb the least significant 64 bits of a 128-bit number
+   * <p>
+   *   <em>This is a lossy encoding:</em>
+   *   in order to avoid padding chars, it doesn't preserve the sign of integer
+   *   (leading 0-bits will be prepended to its binary representation such that the total number
+   *   of bits is divisible by 6).  It was designed for the purpose of representing
+   *   {@link java.util.UUID} values as url-safe strings of the shortest possible length, and
+   *   reversibility was not a requirement.
+   * </p>
    *
+   *
+   * @param msb the most significant 64 bits of a 128-bit number
+   * @param lsb the least significant 64 bits of a 128-bit number
    * @return the number encoded in a url-safe base64 alphabet
    *
-   * WARNING: this encoding doesn't preserve the sign of number, because it
-   * pads the bitstring with zeros. If you want to decode this encoding safely,
-   * you have to count the number of zero bits that were added.  But we don't
-   * really care about decoding for generating UUIDs and stuff like that.
+   * @see SimpleUUID#randomUUID()
    */
   public static String toStringBase64(long msb, long lsb) {
     if (msb == 0 && lsb == 0)
@@ -133,8 +147,15 @@ public class NumberRadixEncoder {
     return result.toString();
   }
 
-  /** Copied from Long.toString(i, radix), and slightly modified */
+  /**
+   * Produces a string representation of the given {@code long} in base 62 using the alphabet {@code [0-9][a-z][A-Z]}.
+   * <p>
+   * This encoding algorithm works in the same manner as you might expect from {@link Long#toString(long, int) Long.toString(i, 62)}
+   * (if 62 would have been
+   * a {@linkplain Character#MAX_RADIX valid radix} for integer-string conversions in the {@link java.lang} classes).
+   */
   public static String toStringBase62(long i) {
+    // NOTE: this code was copied from Long.toString(i, radix), and slightly modified
     int radix = 62;
     char[] buf = new char[65];
     int charPos = 64;
@@ -156,5 +177,7 @@ public class NumberRadixEncoder {
 
     return new String(buf, charPos, (65 - charPos));
   }
+
+  // TODO: consider adding support encoding BigInteger in base62 (might be able to use an algorithm similar to Long.toString(i, radix))
 
 }

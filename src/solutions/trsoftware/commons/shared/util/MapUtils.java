@@ -28,6 +28,7 @@ import solutions.trsoftware.commons.shared.util.callables.Function2;
 import solutions.trsoftware.commons.shared.util.stats.Mergeable;
 
 import java.util.*;
+import java.util.function.BiFunction;
 import java.util.function.Function;
 
 /**
@@ -307,23 +308,46 @@ public class MapUtils {
   }
 
   /**
-   * Adds the entries from the second map to the first map, merging values that already exist (if the value type
-   * implements {@link Mergeable}).
-   * @param map the map to which entries will be added.
-   * @param map2 the entries from this map will be added to the first map, if the values implement {@link Mergeable},
+   * Adds the entries from the second map to the first map, merging values that already exist.
+   * This is a specialization of {@link #mergeAll} for maps containing {@link Mergeable} values.
+   *
+   * @param destMap the map into which entries will be merged.
+   * @param srcMap the entries from this map will be added to the first map, if the values implement {@link Mergeable},
    * then instead of overwriting values in the first map, the values from the second map will be merged.
    * @return the map to which entries were added (i.e. the first argument: {@code map}), for method chaining.
+   * @see #mergeAll(Map, Map, BiFunction)
    */
-  public static <M extends Map<K,V>, K, V extends Mergeable<V>> M unionMerge(M map, M map2) {
-    for (K k : map2.keySet()) {
-      V map1Value = map.get(k);
-      V map2Value = map2.get(k);
+  public static <M extends Map<K,V>, K, V extends Mergeable<V>> M unionMerge(M destMap, M srcMap) {
+    for (K k : srcMap.keySet()) {
+      V map1Value = destMap.get(k);
+      V map2Value = srcMap.get(k);
       if (map1Value != null && map2Value != null)
         map1Value.merge(map2Value);
       else
-        map.put(k, map2Value);
+        destMap.put(k, map2Value);
     }
-    return map;
+    return destMap;
+  }
+
+  /**
+   * Merges the entries from the second map into the first map, by repeatedly invoking {@link Map#merge} for all
+   * entries in the second map.
+   *
+   * <h3>Example:</h3>
+   * If both maps contain {@link Integer} values, can use the method reference {@link Integer#sum Integer::sum} as the
+   * remapping function to produce the sum of the entries in both maps.
+   *
+   * @param destMap the map into which entries will be merged
+   * @param srcMap the entries from this map will be merged into the first map using the given remapping function
+   * @param remappingFunction the function to recompute a value if present (see {@link Map#merge} for details).
+   * @return the map into which entries were merged (i.e. the first argument), for method chaining.
+   * @see #unionMerge(Map, Map)
+   * @since 10/29/2019
+   */
+  public static <M extends Map<K,V>, K, V> M mergeAll(M destMap, M srcMap,
+                                                      BiFunction<? super V, ? super V, ? extends V> remappingFunction) {
+    srcMap.forEach((k, v) -> destMap.merge(k, v, remappingFunction));
+    return destMap;
   }
 
   /**
@@ -338,10 +362,12 @@ public class MapUtils {
   /**
    * Removes all the keys from the given map that aren't in the given set.
    * Returns the same map post-modification.
-   * See MapUtils.filterMap(Map<K,V>, Set<K>) for the same operation that
-   * doesn't modify the given map. 
+   *
+   * @return the same map instance, for call chaining
+   * @see #filterMap(Map, Set)
    */
   public static <K,V> Map<K,V> retainAll(Map<K,V> map, Set<K> keysToRetain) {
+    // TODO: perhaps better to return a boolean? (i.e. whether any elements were removed)
     map.keySet().removeIf(k -> !keysToRetain.contains(k));
     return map;
   }
@@ -350,9 +376,10 @@ public class MapUtils {
    * Creates a new HashMap with all the keys from the given map that aren't in
    * the given set.
    *
-   * Similar to retainAll, except the underlying map is not modified.
+   * Similar to {@link #retainAll}, except the underlying map is not modified.
    *
    * @return the new map
+   * @see #retainAll(Map, Set)
    */
   public static <K,V> Map<K,V> filterMap(Map<K,V> map, Set<K> keysToRetain) {
     HashMap<K,V> ret = new HashMap<K,V>(keysToRetain.size()*2);

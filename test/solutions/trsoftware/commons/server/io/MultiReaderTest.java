@@ -62,14 +62,14 @@ public class MultiReaderTest extends TestCase {
       Object[] expectedLine = {"1", "25", "foo bar", "", "b"};
       Object[] actualLine = cr.readNext();
       assertTrue(
-          AssertUtils.comparisonFailedMessage("", Arrays.toString(expectedLine), Arrays.toString(actualLine)),
+          AssertUtils.formatComparisonFailedMessage("", Arrays.toString(expectedLine), Arrays.toString(actualLine)),
           Arrays.equals(expectedLine, actualLine));
     }
     {
       Object[] expectedLine = {"a", "z"};
       Object[] actualLine = cr.readNext();
       assertTrue(
-          AssertUtils.comparisonFailedMessage("", Arrays.toString(expectedLine), Arrays.toString(actualLine)),
+          AssertUtils.formatComparisonFailedMessage("", Arrays.toString(expectedLine), Arrays.toString(actualLine)),
           Arrays.equals(expectedLine, actualLine));
     }
     assertNull(cr.readNext());

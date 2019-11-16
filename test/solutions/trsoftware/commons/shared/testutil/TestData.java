@@ -38,6 +38,9 @@ import static solutions.trsoftware.commons.shared.util.RandomUtils.rnd;
 public class TestData {
 
   public static final ResourceLocator ALICE_TEXT_RESOURCE = new ResourceLocator("aliceInWonderlandCorpus.txt", TestData.class);
+
+  // TODO: use private static "holder" classes instead of LazyReference (to avoid need for double-checked locking)
+
   private static LazyReference<String> aliceInWonderlandText = new LazyReference<String>() {
     @Override
     protected String create() {

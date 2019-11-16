@@ -31,7 +31,7 @@ import java.util.function.BiFunction;
  * @since 2/27/2018
  */
 @FunctionalInterface
-public interface BiFunctionThrows<A, B, R, E extends Exception>  {
+public interface BiFunctionThrows<A, B, R, E extends Throwable>  {
 
   R accept(A a, B b) throws E;
 }

@@ -18,6 +18,7 @@
 package solutions.trsoftware.commons.shared.util.stats;
 
 import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.ImmutableSet;
 import solutions.trsoftware.commons.shared.util.ImmutablePair;
 import solutions.trsoftware.commons.shared.util.JsonBuilder;
 import solutions.trsoftware.commons.shared.util.mutable.MutableInteger;
@@ -39,20 +40,54 @@ import java.util.stream.Stream;
  * @author Alex
  */
 public class HashCounter<K> implements CollectableStats<K, HashCounter<K>> {
+  /*
+   NOTE: don't change the value type to AtomicInteger because it doesn't implement equals (so would have to rewrite
+   our equals method to manually compare the values of each entry, because Map.equals would no longer work as expected.
+   */
   private final Map<K, MutableInteger> map;
   private int totalSum = 0;
 
+  /**
+   * Will use a new instance of {@link LinkedHashMap} as the internal map.
+   * @see #HashCounter(int)
+   */
   public HashCounter() {
     this(new LinkedHashMap<>());
   }
 
-  public HashCounter(int estimatedSize) {
-    this(new LinkedHashMap<>(estimatedSize));
+  /**
+   * Will store the counts in a {@link LinkedHashMap} constructed with the given initial capacity.
+   *
+   * @param initialCapacity argument for {@link LinkedHashMap#LinkedHashMap(int)}
+   * @see #HashCounter(Map)
+   */
+  public HashCounter(int initialCapacity) {
+    this(new LinkedHashMap<>(initialCapacity));
   }
 
-  /** Subclasses can use this constructor to provide their own map implementation */
-  protected HashCounter(Map<K, MutableInteger> mapImpl) {
+  /**
+   * Can use this constructor to provide a custom implementation for the internal map.
+   *
+   * @param mapImpl will be used as the internal map.
+   * NOTE: it is recommended that the caller doesn't retain a reference to this arg
+   * after constructing the {@link HashCounter}
+   *
+   * @see #HashCounter(Supplier)
+   */
+  public HashCounter(Map<K, MutableInteger> mapImpl) {
     map = mapImpl;
+  }
+
+  /**
+   * Can use this constructor to specify a custom implementation for the internal map.
+   * Rather than directly passing a map instance to {@link #HashCounter(Map)}, this constructor can be used to
+   * ensure that the internal map doesn't leak from this class.
+   *
+   * @param mapSupplier factory for a new map instance to be used as the internal map
+   * @see #HashCounter(Map)
+   */
+  public HashCounter(Supplier<? extends Map<K, MutableInteger>> mapSupplier) {
+    this(mapSupplier.get());
   }
 
   /** Increments the counter for the given key, and returns the previous count */
@@ -74,8 +109,11 @@ public class HashCounter<K> implements CollectableStats<K, HashCounter<K>> {
     return value.get();
   }
 
+  /**
+   * @return immutable set of the unique keys
+   */
   public synchronized Set<K> keySet() {
-    return map.keySet();
+    return ImmutableSet.copyOf(map.keySet());
   }
 
   /**
@@ -120,6 +158,7 @@ public class HashCounter<K> implements CollectableStats<K, HashCounter<K>> {
       if (k1 instanceof Comparable && k2 instanceof Comparable)
         return ((Comparable)k1).compareTo(k2);
       else
+        // TODO(10/4/2019): this is too arbitrary; instead have callers explicitly pass the Comparator<K>
         return k1.toString().compareTo(k2.toString());  // compare the string representations if the classes aren't comparable
     };
   }
@@ -130,6 +169,7 @@ public class HashCounter<K> implements CollectableStats<K, HashCounter<K>> {
       int result = e1.getValue().compareTo(e2.getValue());
       // since the underlying implementation uses a SortedSet, we have to make
       // sure that equivalent values don't get lost: use the key comparator to resolve ties
+      // TODO(10/4/2019): to be sure values don't get lost, don't use SortedSet (instead return a List sorted with Collections.sort)
       if (result == 0)
         return keyComparator.compare(e1, e2);
       return result;
@@ -137,6 +177,11 @@ public class HashCounter<K> implements CollectableStats<K, HashCounter<K>> {
   }
 
   private synchronized SortedSet<Map.Entry<K, Integer>> toSortedSet(Comparator<Map.Entry<K, Integer>> comparator) {
+    /*
+     TODO(10/4/2019): it might make more sense to return a List<Map.Entry> instead of SortedSet<Map.Entry> to be
+     sure that none of the entries get lost because the comparator considers them equal
+     (can just use Collections.sort() instead of TreeSet)
+     */
     SortedSet<Map.Entry<K, Integer>> sortedEntries = new TreeSet<Map.Entry<K, Integer>>(comparator);
     for (K key : map.keySet()) {
       sortedEntries.add(new ImmutablePair<K, Integer>(key, map.get(key).get()));

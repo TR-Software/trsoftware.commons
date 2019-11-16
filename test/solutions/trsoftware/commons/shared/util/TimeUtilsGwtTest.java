@@ -25,12 +25,12 @@ import solutions.trsoftware.commons.client.CommonsGwtTestCase;
  */
 public class TimeUtilsGwtTest extends CommonsGwtTestCase {
 
-  private TimeUtilsTest delegate;
+  private TimeUtilsJavaTest delegate;
 
   @Override
   protected void gwtSetUp() throws Exception {
     super.gwtSetUp();
-    delegate = new TimeUtilsTest();
+    delegate = new TimeUtilsJavaTest();
   }
 
   @Override

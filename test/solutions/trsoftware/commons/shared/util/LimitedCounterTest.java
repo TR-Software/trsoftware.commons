@@ -63,7 +63,7 @@ public class LimitedCounterTest extends TestCase {
   }
 
   private void verifyMetLimit(LimitedCounter c) {
-    // limit has alread been met; all subsequent calls to increment will return false
+    // limit has already been met; all subsequent calls to increment will return false
     for (int i = 0; i < 100; i++) {
       assertTrue(c.metLimit());
       assertFalse(c.increment());

@@ -25,7 +25,7 @@ import java.util.EnumMap;
 import java.util.Map;
 
 /**
- * Prints a time delta (in milliseconds) in a format similar to Python's {@code datetime.timedelta}.
+ * Prints a time delta (in milliseconds) in a human-readable format similar to Python's {@code datetime.timedelta}.
  *
  * <h3>Examples</h3>
  * <ul>
@@ -41,10 +41,19 @@ import java.util.Map;
  * considerations apply: it is recommended to create separate format instances for each thread.
  * If multiple threads access a format concurrently, it must be synchronized externally.
  *
+ * @see java.time.Duration#toString()
  * @see <a href="https://stackoverflow.com/q/266825/1965404">Other ways to format a duration in Java</a>
  * @author Alex, 8/3/2017
  */
 public class DurationFormat {
+
+  /**
+   * Default instances of this class will use this value for the {@code minRequired} argument to the
+   * {@link DurationFormat#DurationFormat(Component, int)} and {@link DurationFormat#DurationFormat(Component, int, int)}
+   * constructors.
+   */
+  public static final Component DEFAULT_MIN_COMPONENT = Component.HOURS;
+
 
   /**
    * The most-significant component to be printed (even if its value is 0)
@@ -58,8 +67,8 @@ public class DurationFormat {
    * <ul>
    *   <li>{@code new DurationFormat(Component.MINUTES, 3, 3).format(1.0)} &rarr; {@code "00:00.001"} (prints the full milliseconds value)</li>
    *   <li>{@code new DurationFormat(Component.MINUTES, 1, 3).format(500.0)} &rarr; {@code "00:00.5"}</li>
-   *   <li>{@code new DurationFormat(Component.YEARS, 0, 0).format(1.0)} &rarr; {@code "0 years, 0 days, 00:00:00"}</li>
    *   <li>{@code new DurationFormat(Component.HOURS, 3, 3).format(500.0)} &rarr; {@code "00:00:00.500"}</li>
+   *   <li>{@code new DurationFormat(Component.YEARS, 0, 0).format(1.0)} &rarr; {@code "0 years, 0 days, 00:00:00"}</li>
    * </ul>
    * NOTE: will use {@link RoundingMode#HALF_UP} rounding for seconds.
    *
@@ -93,15 +102,15 @@ public class DurationFormat {
   }
 
   /**
-   * Shortcut for {@link #DurationFormat(Component, int)} setting {@link #minRequired} to {@link Component#MINUTES}.
+   * Shortcut for {@link #DurationFormat(Component, int)} setting {@link #minRequired} to {@link #DEFAULT_MIN_COMPONENT}.
    *
    * <h3>Examples:</h3>
    * <ul>
-   *   <li>{@code new DurationFormat(3).format(1.0)} &rarr; {@code "00:00.001"} (prints the full milliseconds value)</li>
-   *   <li>{@code new DurationFormat(0).format(1.0)} &rarr; {@code "00:00"} (milliseconds rounded to nearest second)</li>
-   *   <li>{@code new DurationFormat(2).format(500.0)} &rarr; {@code "00:00.50"}</li>
-   *   <li>{@code new DurationFormat(1).format(YEARS.toMillis(2) + 5_123)} &rarr; {@code "2 years, 00:05.1"}</li>
-   *   <li>{@code new DurationFormat(0).format(YEARS.toMillis(2) + 5_123)} &rarr; {@code "2 years, 00:05"}</li>
+   *   <li>{@code new DurationFormat(3).format(1.0)} &rarr; {@code "00:00:00.001"} (prints the full milliseconds value)</li>
+   *   <li>{@code new DurationFormat(0).format(1.0)} &rarr; {@code "00:00:00"} (milliseconds rounded to nearest second)</li>
+   *   <li>{@code new DurationFormat(2).format(500.0)} &rarr; {@code "00:00:00.50"}</li>
+   *   <li>{@code new DurationFormat(1).format(YEARS.toMillis(2) + 5_123)} &rarr; {@code "2 years, 00:00:05.1"}</li>
+   *   <li>{@code new DurationFormat(0).format(YEARS.toMillis(2) + 5_123)} &rarr; {@code "2 years, 00:00:05"}</li>
    *   <li>{@code new DurationFormat(Component.HOURS, 2).format(500.0)} &rarr; {@code "00:00:00.50"}</li>
    * </ul>
    *
@@ -110,17 +119,17 @@ public class DurationFormat {
    * @see #DurationFormat(Component, int, int)
    */
   public DurationFormat(int decimalPlaces) {
-    this(Component.MINUTES, decimalPlaces);
+    this(DEFAULT_MIN_COMPONENT, decimalPlaces);
   }
 
   /**
-   * Default constructor, setting {@link #minRequired} to {@link Component#MINUTES} and using exactly 3 decimal places
-   * of precision for seconds (i.e. always printing the full milliseconds)
+   * Default constructor, setting {@link #minRequired} to {@link #DEFAULT_MIN_COMPONENT}
+   * and using exactly 3 decimal places of precision for seconds (i.e. always printing the full milliseconds)
    *
    * <h3>Examples:</h3>
    * <ul>
-   *   <li>{@code new DurationFormat().format(0.0)} &rarr; {@code "00:00.000"}</li>
-   *   <li>{@code new DurationFormat().format(500.0)} &rarr; {@code "00:00.500"}</li>
+   *   <li>{@code new DurationFormat().format(0.0)} &rarr; {@code "00:00:00.000"}</li>
+   *   <li>{@code new DurationFormat().format(500.0)} &rarr; {@code "00:00:00.500"}</li>
    *   <li>{@code new DurationFormat().format(YEARS.toMillis(2) + 5_123)} &rarr; {@code "2 years, 00:05.123"}</li>
    * </ul>
    * NOTE: will use {@link RoundingMode#HALF_UP} rounding for milliseconds.
@@ -128,7 +137,7 @@ public class DurationFormat {
    * @see #DurationFormat(Component, int, int)
    */
   public DurationFormat() {
-    this(Component.MINUTES, 3);
+    this(DEFAULT_MIN_COMPONENT, 3);
   }
 
   private void initComponentFormats(int minFractionDigits, int maxFractionDigits) {
@@ -260,7 +269,7 @@ public class DurationFormat {
   private static final ThreadLocal<DurationFormat> defaultInstanceNoMillis = ThreadLocal.withInitial(() -> new DurationFormat(0));
 
   /**
-   * Factory method for obtaining a cached thread-local instance for one of the most-commonly used configurations.
+   * Factory method for obtaining a cached thread-local instance for the most-common configurations.
    *
    * @param printMillis if {@code true}, will return an instance created with the default constructor ({@link
    *     #DurationFormat() new DurationFormat()}), otherwise {@link #DurationFormat(int) new DurationFormat(0)}

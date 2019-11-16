@@ -17,6 +17,8 @@
 
 package solutions.trsoftware.commons.shared.util.stats;
 
+import javax.annotation.Nonnull;
+
 /**
  * Indicates that an instance can incorporate into itself data from another instance (for map-reduce-style processing).
  *
@@ -26,7 +28,7 @@ public interface Mergeable<T> {
   /**
    * Merges in data from another instance.
    */
-  void merge(T other);
+  void merge(@Nonnull T other);
 
   /**
    * Merges the second arg into the first and returns it.

@@ -22,8 +22,9 @@ package solutions.trsoftware.commons.shared.util;
  *
  * Example: {@code new HashCodeBuilder().update(a, b, c).hashCode();}
  *
- * Oct 17, 2012
+ * @see org.apache.commons.lang3.builder.HashCodeBuilder
  *
+ * @since Oct 17, 2012
  * @author Alex
  */
 public class HashCodeBuilder {

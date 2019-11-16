@@ -19,7 +19,7 @@ package solutions.trsoftware.commons.server.util.codec;
 
 /**
  * This is the standardized base64 alphabet.  It differs from typical
- * number base encodings (like hex) because it doesn't start with '0' - '9'
+ * number radix encodings (like hex) because it doesn't start with '0' - '9'
  *
  * @author Alex
  */

@@ -18,6 +18,7 @@
 package solutions.trsoftware.commons.shared.util;
 
 import com.google.common.collect.ImmutableBiMap;
+import com.google.common.collect.ImmutableMap;
 import solutions.trsoftware.commons.shared.util.iterators.CharSequenceIterator;
 import solutions.trsoftware.commons.shared.util.iterators.CodePointIterator;
 import solutions.trsoftware.commons.shared.util.stats.MaxComparable;
@@ -48,6 +49,7 @@ public class StringUtils {
 
   /**
    * Canonical name for the UTF-8 encoding.
+   * @see java.nio.charset.StandardCharsets#UTF_8
    * @see <a href="https://en.wikipedia.org/wiki/UTF-8">UTF-8 (Wikipedia)</a>
    * @see <a href="https://docs.oracle.com/javase/8/docs/technotes/guides/intl/encoding.doc.html">Supported Encodings</a>
    */
@@ -389,6 +391,13 @@ public class StringUtils {
     return repeat(' ', nSpaces);
   }
 
+  /**
+   * Prepends the given number of space chars to the given string.
+   * @return the given string prefixed with the given number of spaces ({@code ' '} chars).
+   */
+  public static String indent(int nSpaces, String toIndent) {
+    return nSpaces > 0 ? indent(nSpaces) + toIndent : toIndent;
+  }
 
   /** @return a string of the given length using randomly-selected chars from the alphabet {@code [A-Za-z]} */
   public static String randString(int length) {
@@ -405,6 +414,7 @@ public class StringUtils {
    * @param wordSeparatorRegex the string will be split into words using this regex; <b>WARNING</b>: do not pass values
    * that can't be used as a regex (e.g. passing {@code "*"} would trigger a "Dangling meta character" exception)
    * @return a camel-case version of the given string
+   * @see com.google.common.base.CaseFormat
    */
   public static String toCamelCase(String str, String wordSeparatorRegex) {
     if (isBlank(str))
@@ -505,10 +515,10 @@ public class StringUtils {
   }
 
   /** Maps some irregular words to their plural forms */
-  private static final Map<String, String> pluralDict = Collections.unmodifiableMap(MapUtils.stringMap(
+  private static final Map<String, String> pluralDict = ImmutableMap.of(
       "is", "are",
       "its", "their"
-  ));
+  );
 
   /**
    * @return the plural form of the given word if it needs to be pluralized (number > 1).  If the given word is in
@@ -519,6 +529,7 @@ public class StringUtils {
     if (number == 1)
       return singular;
     String singularLowerCase = singular.toLowerCase();
+    // TODO: for more flexibility (and to support non-English languages) allow passing a custom plural form for irregular words (maybe even a full dict of pluralization rules)
     if (pluralDict.containsKey(singularLowerCase)) {
       String plural = pluralDict.get(singularLowerCase);
       return maybeCapitalize(plural, singular);
@@ -1167,6 +1178,33 @@ public class StringUtils {
    */
   public static IntStream codePointsStream(String str) {
     return CodePointIterator.codePointsStream(str);
+  }
+
+
+  /**
+   * Generates the same toString representation of the given object that would be produced by
+   * {@link Object#toString()} if the object's class didn't override either {@link Object#toString()}
+   * or {@link Object#hashCode()}.
+   *
+   * <p>
+   * Examples:
+   * <pre>
+   * identityToString(null)         = null
+   * identityToString("")           = "java.lang.String@1e23"
+   * identityToString(Boolean.TRUE) = "java.lang.Boolean@7fa"
+   * </pre>
+   *
+   * @param object  the object to create a toString for, may be {@code null}
+   * @return the default toString text, or {@code null} if {@code null} passed in
+   *
+   * @see Object#toString()
+   * @see System#identityHashCode(Object)
+   * @see org.apache.commons.lang3.ObjectUtils#identityToString(java.lang.Object)
+   */
+  public static String identityToString(final Object object) {
+    if (object == null)
+      return null;
+    return object.getClass().getName() + "@" + Integer.toHexString(System.identityHashCode(object));
   }
 
 }

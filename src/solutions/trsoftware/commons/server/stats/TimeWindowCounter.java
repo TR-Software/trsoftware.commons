@@ -75,7 +75,7 @@ public class TimeWindowCounter extends Counter {
    * time window of this size.
    * @param granularityMillis The time window will be measure in blocks of this size.
    * This value should be smaller than maxAgeMillis and maxAgeMillis should be
-   * divisible by this value.  The tradeoff is: higer granularity => less memory
+   * divisible by this value.  The tradeoff is: higher granularity => less memory
    * consumption; lower granularity => better time window accuracy.
    */
   public TimeWindowCounter(String name, long maxAgeMillis, long granularityMillis) {

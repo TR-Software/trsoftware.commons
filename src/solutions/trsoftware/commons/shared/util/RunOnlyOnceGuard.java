@@ -28,8 +28,13 @@ import java.util.concurrent.atomic.AtomicBoolean;
  *   guard.check();  // no problem
  *   guard.check();  // throws IllegalStateException
  * </pre>
- * </p>
+ * <p>
+ * <b>NOTE:</b> unless the exception-throwing behavior provided by this class is necessary, it is simpler
+ * to use {@link AtomicBoolean} to ensure that something happens only once
+ * (see {@link AtomicBoolean#compareAndSet(boolean, boolean)})
+ *
  * @author Alex
+ * @see AtomicBoolean#compareAndSet(boolean, boolean)
  */
 public class RunOnlyOnceGuard {
   private final AtomicBoolean locked = new AtomicBoolean();

@@ -32,19 +32,23 @@ import java.util.List;
  */
 public class ArrayUtils {
 
-  // TODO: change the order of the args and make array a vararg
   /**
+   * Like {@link Arrays#toString(Object[])}, but omits the enclosing brackets and allows using a custom delimiter.
+   * @return a string representation of the given array, constructed by joining the elements using the given delimiter
    * @deprecated use {@link StringUtils#join(String, Object[])} instead.
    */
   public static <T> String toString(T[] array, String delimiter) {
     return StringUtils.join(delimiter, array);
   }
 
+  /**
+   * Like {@link Arrays#toString(int[])}, but omits the enclosing brackets and allows using a custom delimiter.
+   * @return a string representation of the given array, constructed by joining the elements using the given delimiter
+   * @deprecated use {@link StringUtils#join(String, int...)}
+   */
   public static String toString(int[] array, String delimiter) {
     return StringUtils.join(delimiter, array);
   }
-
-  // TODO: document how the above toString methods differ from Arrays.toString (i.e. they omit brackets and allow specifying a custom delimiter
 
   /** Linearly scans the array for the given element */
   public static boolean contains(int[] array, int element) {
@@ -53,6 +57,7 @@ public class ArrayUtils {
         return true;
     }
     return false;
+    // TODO: this method duplicates linearSearch(int[], int)
   }
 
   /** Linearly scans the array for the given element */
@@ -62,6 +67,7 @@ public class ArrayUtils {
         return true;
     }
     return false;
+    // TODO: this method duplicates linearSearch(Object[], int)
   }
 
   /**
@@ -114,6 +120,7 @@ public class ArrayUtils {
    * @param a one array to be tested for equality.
    * @param a2 the other array to be tested for equality.
    * @return <tt>true</tt> if the two arrays are equal.
+   * @deprecated can now use {@link Arrays#equals(int[], int[])} in GWT
    */
   public static boolean equals(int[] a, int[] a2) {
       if (a==a2)

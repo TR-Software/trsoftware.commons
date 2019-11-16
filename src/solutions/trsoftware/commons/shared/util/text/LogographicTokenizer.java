@@ -42,7 +42,4 @@ public class LogographicTokenizer implements TextTokenizer {
     return words;
   }
 
-  public String join(String[] tokens) {
-    return StringUtils.join(getDelimiter(), tokens);
-  }
 }

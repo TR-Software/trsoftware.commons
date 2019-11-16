@@ -34,7 +34,7 @@ public class MathUtils {
    */
   public static final double EPSILON = 0.0001;
 
-  // TODO: move all the bitwise operations (e.g. packUnsignedInt) to BitwiseUtils
+  // TODO: move all the bitwise operations (e.g. packUnsignedInt) to BitwiseUtils (and make sure they don't duplicate the functionality in com.google.common.primitives.UnsignedInteger
 
   /**
    * Converts a 128-bit integer represented by the two given {@code long} components to a {@code byte} array.
@@ -52,6 +52,7 @@ public class MathUtils {
    * Maps the given unsigned 32-bit number into the range of a signed int.
    * {@code 0} maps to {@link Integer#MIN_VALUE} and {@code 0xFFFFFFFF} maps to {@link Integer#MAX_VALUE}
    * This ensures that the values will still be comparable by their natural ordering.
+   * @see com.google.common.primitives.UnsignedInteger
    */
   public static int packUnsignedInt(long unsigned) {
     if (unsigned < 0 || unsigned > 0xffffffffL)
@@ -62,6 +63,7 @@ public class MathUtils {
   /**
    * Returns the unsigned representation of the given integer as a long.
    * This is the inverse of {@link #packUnsignedInt(long)}
+   * @see com.google.common.primitives.UnsignedInteger
    */
   public static long unsignedInt(int i) {
     return (long)i - Integer.MIN_VALUE;
@@ -70,6 +72,7 @@ public class MathUtils {
   /**
    * Converts an 8 bit integer value (0..255) into a signed byte (-128..127).
    * The results will still be comparable by their natural ordering.
+   * @see com.google.common.primitives.UnsignedBytes
    */
   public static byte packUnsignedByte(int i) {
     if (i < 0 || i > 255)
@@ -80,6 +83,7 @@ public class MathUtils {
   /**
    * Convert a signed byte (-128..127) to an "unsigned byte" (0..255) int value.
    * This is the inverse of {@link #packUnsignedByte(int)}
+   * @see com.google.common.primitives.UnsignedBytes
    */
   public static int unsignedByte(byte b) {
     return (int)b - Byte.MIN_VALUE;

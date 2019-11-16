@@ -53,16 +53,17 @@ public abstract class BufferedReaderThread extends Thread {
    * @param name name for this thread, which will be passed to {@link Thread#Thread(String)}
    */
   public BufferedReaderThread(InputStream in, String name) {
+    // TODO(10/12/2019): allow passing a specific charset to InputStreamReader?
     this(new InputStreamReader(in), name);
   }
 
   /**
    * Will be called for each line in the input.
-   * @return false to stop reading and terminate thread, otherwise true.
+   * @return {@code false} to stop reading and terminate thread, otherwise {@code true}.
    */
   protected abstract boolean processLine(String line);
 
-  /** Sublcasses may override to hand IOExceptions thrown during reading */
+  /** Subclasses may override to handle {@link IOException}s thrown during reading */
   protected void handleException(IOException ex) {
     ex.printStackTrace();
     throw new RuntimeException(ex);

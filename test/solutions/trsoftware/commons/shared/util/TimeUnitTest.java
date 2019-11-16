@@ -32,6 +32,17 @@ public class TimeUnitTest extends TestCase {
 
   public static final double marginOfError = MathUtils.EPSILON;
 
+  private double[] randomDoubles;
+
+  public void setUp() throws Exception {
+    super.setUp();
+    randomDoubles = new double[1000];
+    Random rnd = RandomUtils.rnd;
+    for (int i = 0; i < randomDoubles.length; i++) {
+      randomDoubles[i] = rnd.nextDouble() * rnd.nextInt();
+    }
+  }
+
   public void testFrom() throws Exception {
     // check that converting 0 from any unit yields zero
     for (TimeUnit unit1 : values()) {
@@ -42,6 +53,12 @@ public class TimeUnitTest extends TestCase {
     // check that converting 1 from any unit to MILLISECOND simply yields the number of milliseconds in that unit
     for (TimeUnit unit : values()) {
       assertEquals(unit.millis, MILLISECONDS.from(unit, 1));
+    }
+    // check that converting from any unit to itself returns *exactly* the same value (i.e. no conversion involving lossy arithmetic)
+    for (TimeUnit unit : TimeUnit.values()) {
+      for (double value : randomDoubles) {
+        assertEquals(value, unit.from(unit, value));
+      }
     }
 
     // do some manual tests as a sanity check
@@ -64,6 +81,12 @@ public class TimeUnitTest extends TestCase {
     // check that converting 1 in any unit to MILLISECOND simply yields the number of milliseconds in that unit
     for (TimeUnit unit : values()) {
       assertEquals(unit.millis, unit.to(MILLISECONDS, 1));
+    }
+    // check that converting any unit to itself returns *exactly* the same value (i.e. no conversion involving lossy arithmetic)
+    for (TimeUnit unit : TimeUnit.values()) {
+      for (double value : randomDoubles) {
+        assertEquals(value, unit.to(unit, value));
+      }
     }
 
     // do some manual tests as a sanity check

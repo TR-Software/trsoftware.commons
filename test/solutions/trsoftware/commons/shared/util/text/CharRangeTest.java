@@ -23,6 +23,7 @@ import solutions.trsoftware.commons.shared.testutil.AssertUtils;
 import java.util.Arrays;
 import java.util.Collections;
 
+import static solutions.trsoftware.commons.shared.testutil.AssertUtils.*;
 import static solutions.trsoftware.commons.shared.util.iterators.IteratorTestCase.assertIteratedElements;
 
 /**
@@ -33,7 +34,7 @@ public class CharRangeTest extends TestCase {
 
   public void testConstructor() throws Exception {
     // should throw an exception if max is less than min
-    AssertUtils.assertThrows(new IllegalArgumentException("z > a"), new Runnable() {
+    assertThrows(new IllegalArgumentException("z > a"), new Runnable() {
       @Override
       public void run() {
         new CharRange('z', 'a');
@@ -60,5 +61,38 @@ public class CharRangeTest extends TestCase {
     assertIteratedElements(Collections.singletonList('a'), new CharRange('a', 'a').iterator());
     assertIteratedElements(Arrays.asList('A', 'B'), new CharRange('A', 'B').iterator());
     assertIteratedElements(Arrays.asList('0', '1', '2', '3', '4', '5', '6', '7', '8', '9'), new CharRange('0', '9').iterator());
+  }
+
+  public void testSubSequence() throws Exception {
+    final CharRange range = new CharRange('a', 'z');
+    final int len = range.length();
+    // test some examples manually
+    assertEquals(new CharRange('a', 'a'), range.subSequence(0, 1));
+    assertEquals(new CharRange('b', 'c'), range.subSequence(1, 3));
+    // test some invalid start/end pairs
+    assertThrows(IndexOutOfBoundsException.class, () -> range.subSequence(-1, 0));
+    assertThrows(IndexOutOfBoundsException.class, () -> range.subSequence(-5, 6));
+    assertThrows(IndexOutOfBoundsException.class, () -> range.subSequence(1, -6));
+    assertThrows(IndexOutOfBoundsException.class, () -> range.subSequence(1, len+1));
+    // test all the valid start/end pairs
+    for (int start = 0; start < len; start++) {
+      for (int end = start; end < len; end++) {
+        CharSequence sub = range.subSequence(start, end);
+        int subLen = sub.length();
+        assertEquals(end - start, subLen);
+        if (subLen > 0) {
+          // the result should also be an instance of CharRange if possible (i.e. when result has a nonzero length)
+          assertTrue(sub instanceof CharRange);
+        }
+        assertEquals(range.toString().substring(start, end), sub.toString());
+      }
+    }
+  }
+
+  public void testEqualsAndHashCode() throws Exception {
+    assertEqualsAndHashCode(new CharRange('a', 'a'), new CharRange('a', 'a'));
+    assertEqualsAndHashCode(new CharRange('A', 'B'), new CharRange('A', 'B'));
+    assertEqualsAndHashCode(new CharRange('0', '9'), new CharRange('0', '9'));
+    assertNotEqual(new CharRange('A', 'B'), new CharRange('A', 'C'));
   }
 }

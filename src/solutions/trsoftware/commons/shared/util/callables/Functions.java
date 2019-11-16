@@ -29,13 +29,10 @@ import java.util.Set;
  */
 public abstract class Functions {
 
-  public static Function1 IDENTITY_FUNCTION = new Function1() {
-    public Object call(Object arg) {
-      return arg;
-    }
-  };
+  public static Function1 IDENTITY_FUNCTION = arg -> arg;
 
   /** @return the {@link T} &rarr; {@link T} identity function, {@code f(x) = x }*/
+  @SuppressWarnings("unchecked")
   public static <T> Function1<T, T> identity() {
     return IDENTITY_FUNCTION;
   }

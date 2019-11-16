@@ -19,6 +19,7 @@ package solutions.trsoftware.commons.shared.util;
 
 import com.google.common.base.Predicate;
 import com.google.common.base.Predicates;
+import com.google.common.base.Supplier;
 import junit.framework.TestCase;
 import org.jetbrains.annotations.NotNull;
 import solutions.trsoftware.commons.shared.util.callables.Function1;
@@ -73,18 +74,10 @@ public class CollectionUtilsTest extends TestCase {
   public void testCollect() throws Exception {
     assertEquals(
         Arrays.asList(bono.name, edge.name, adam.name, larry.name, roger.name, david.name, rick.name, nick.name, syd.name),
-        collect(rockers, new Function1<RockNRolla, String>() {
-          public String call(RockNRolla parameter) {
-            return parameter.name;
-          }
-        }));
+        collect(rockers, parameter -> parameter.name));
     assertEquals(
         Arrays.asList(bono.position, edge.position, adam.position, larry.position, roger.position, david.position, rick.position, nick.position, syd.position),
-        collect(rockers, new Function1<RockNRolla, String>() {
-          public String call(RockNRolla parameter) {
-            return parameter.position;
-          }
-        }));
+        collect(rockers, parameter -> parameter.position));
   }
 
   public void testBuildIndex() throws Exception {
@@ -136,6 +129,52 @@ public class CollectionUtilsTest extends TestCase {
   public void testIteratorToList() throws Exception {
     assertEquals(strList("a", "b", "c"), asList(strList("a", "b", "c").iterator()));
     assertEquals(emptyList(), asList(emptyList().iterator()));
+  }
+
+  public void testAddFromSupplier() throws Exception {
+    class IntSequenceSupplier implements Supplier<Integer> {
+      // generates an infinite sequence of consecutive integers
+      private int next;
+
+      IntSequenceSupplier() {
+      }
+
+      IntSequenceSupplier(int start) {
+        this.next = start;
+      }
+
+      @Override
+      public Integer get() {
+        return next++;
+      }
+    }
+    {
+      // 1) test some edge cases
+      // 1.a) n <= 0: should not invoke the supplier
+      IntSequenceSupplier supplier = new IntSequenceSupplier();
+      ArrayList<Integer> list = new ArrayList<>();
+      for (int n = -5; n <= 0; n++) {
+        addFromSupplier(list, n, supplier);
+        assertTrue(list.isEmpty());  // no elements added
+        assertEquals(0, supplier.next);  // supplier not invoked
+      }
+      // 1.b) n = 1:
+      addFromSupplier(list, 1, supplier);
+      assertEquals(Collections.singletonList(0), list);
+      assertEquals(1, supplier.next);
+    }
+    {
+      // 2) compare CollectionUtils.addFromSupplier with some other implementations of the same concept
+      // 2.a) starting with an empty collection
+      IntSequenceSupplier supplier = new IntSequenceSupplier();
+      ArrayList<Integer> list = new ArrayList<>();
+      ArrayList<Integer> expected = asList(new NumberRange<>(0, 9));
+      assertEquals(expected, addFromSupplier(list, 10, supplier));
+      assertEquals(expected, Stream.generate(new IntSequenceSupplier()).limit(10).collect(Collectors.toList()));
+      // 2.b) appending to an existing collection
+      Stream.generate(new IntSequenceSupplier(10)).limit(3).forEach(expected::add);
+      assertEquals(expected, addFromSupplier(list, 3, supplier));
+    }
   }
 
   /**

@@ -41,6 +41,10 @@ import java.util.NoSuchElementException;
  * @since 4/30/2018
  */
 public class ChainedIterator<T> implements Iterator<T> {
+  /*
+  NOTE: even the performance of this class is worse than the Guava version
+  (see com.typeracer.main.server.util.SystemPerformanceTest.testStreamVsLoop)
+   */
 
   /** Provides the next {@link Iterator} in the chain */
   private Iterator<Iterator<T>> chain;

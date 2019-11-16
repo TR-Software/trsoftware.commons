@@ -23,7 +23,7 @@ import java.util.function.Function;
  * A function {@link A} &rarr; {@link R}.
  *
  * @author Alex
- * @deprecated made obsolete by {@link java.util.function.Function}
+ * @deprecated made obsolete by {@link java.util.function.Function} in Java 1.8+
  */
 public interface Function1<A, R> extends Function<A, R> {
   R call(A arg);

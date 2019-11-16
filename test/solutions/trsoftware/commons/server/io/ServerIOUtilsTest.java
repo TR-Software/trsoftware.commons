@@ -23,6 +23,7 @@ import solutions.trsoftware.commons.shared.util.callables.Function0_t;
 import solutions.trsoftware.commons.shared.util.function.ToLongBiFunctionThrows;
 
 import java.io.*;
+import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 
 import static solutions.trsoftware.commons.server.io.ServerIOUtils.copyInputToOutput;
@@ -43,7 +44,7 @@ public class ServerIOUtilsTest extends TestCase {
     String expected = new String(inputSource);
     assertEquals(expected, readCharactersIntoString(new ByteArrayInputStream(inputSource)));
     // the overloaded versions of the method should produce the same result
-    assertEquals(expected, readCharactersIntoString(new ByteArrayInputStream(inputSource), "ASCII"));
+    assertEquals(expected, readCharactersIntoString(new ByteArrayInputStream(inputSource), StandardCharsets.US_ASCII));
     assertEquals(expected, readCharactersIntoString(new StringReader(expected)));
   }
 

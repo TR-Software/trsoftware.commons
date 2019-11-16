@@ -17,10 +17,12 @@
 
 package solutions.trsoftware.commons.server.io;
 
-import solutions.trsoftware.commons.shared.util.StringUtils;
-
 import java.io.*;
+import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.zip.Deflater;
+import java.util.zip.GZIPOutputStream;
 
 /**
  * Oct 2, 2009
@@ -29,8 +31,11 @@ import java.util.ArrayList;
  */
 public final class ServerIOUtils {
 
-  /** The size of the buffer used by the stream reading and copying methods in this class */
-  public static final int BUFFER_SIZE = 8192;  // this is the default value from Java's BufferedReader class
+  /**
+   * The size of the buffer used by the stream reading and copying methods in this class.
+   * (Same as the default size used by {@link BufferedReader})
+   */
+  public static final int DEFAULT_BUFFER_SIZE = 8192;
 
   /** Value of the {@code line.separator} system property */
   public static final String LINE_SEPARATOR = System.getProperty("line.separator");
@@ -39,13 +44,7 @@ public final class ServerIOUtils {
    * @return an an {@link InputStreamReader} using the UTF-8 charset for the given input stream.
    */
   public static Reader readUTF8(InputStream input) {
-    try {
-      return new InputStreamReader(input, StringUtils.UTF8_CHARSET_NAME);
-    }
-    catch (UnsupportedEncodingException e) {
-      // will never happen - all JVMs support UTF-8
-      throw new RuntimeException(e);
-    }
+    return new InputStreamReader(input, StandardCharsets.UTF_8);
   }
 
   /**
@@ -76,13 +75,7 @@ public final class ServerIOUtils {
    * must be closed explicitly by the caller.
    */
   public static Writer writeFileUTF8(File file, boolean append) throws FileNotFoundException {
-    try {
-      return new OutputStreamWriter(new FileOutputStream(file, append), StringUtils.UTF8_CHARSET_NAME);
-    }
-    catch (UnsupportedEncodingException e) {
-      // will never happen - all JVMs support UTF-8
-      throw new RuntimeException(e);
-    }
+    return new OutputStreamWriter(new FileOutputStream(file, append), StandardCharsets.UTF_8);
   }
 
   public static void writeStringToFileUTF8(File file, String str, boolean append) {
@@ -128,20 +121,20 @@ public final class ServerIOUtils {
    * Closes the input stream when finished.
    */
   public static String readCharactersIntoString(InputStream in) throws IOException {
-    return readCharactersIntoString(in, StringUtils.UTF8_CHARSET_NAME);
+    return readCharactersIntoString(in, StandardCharsets.UTF_8);
   }
 
   /**
    * Can be used for reading a text file or another input stream into a String.  Uses an 8K buffer to reduce CPU usage.
    * Closes the input stream when finished.
    */
-  public static String readCharactersIntoString(InputStream in, String charsetName) throws IOException {
-    StringBuilder s = new StringBuilder(BUFFER_SIZE);
-    byte[] buf = new byte[BUFFER_SIZE];
+  public static String readCharactersIntoString(InputStream in, Charset charset) throws IOException {
+    StringBuilder s = new StringBuilder(DEFAULT_BUFFER_SIZE);
+    byte[] buf = new byte[DEFAULT_BUFFER_SIZE];
     try {
       int nRead = 0;
       while ((nRead = in.read(buf)) >= 0) {
-        s.append(new String(buf, 0, nRead, charsetName));
+        s.append(new String(buf, 0, nRead, charset));
       }
       return s.toString();
     }
@@ -160,8 +153,8 @@ public final class ServerIOUtils {
    * </p>
    */
   public static String readCharactersIntoString(Reader reader) throws IOException {
-    StringBuilder s = new StringBuilder(BUFFER_SIZE);
-    char[] buf = new char[BUFFER_SIZE];
+    StringBuilder s = new StringBuilder(DEFAULT_BUFFER_SIZE);
+    char[] buf = new char[DEFAULT_BUFFER_SIZE];
     try (Reader in = reader) {
       int nRead = 0;
       while ((nRead = in.read(buf)) >= 0) {
@@ -187,9 +180,9 @@ public final class ServerIOUtils {
     return lines;
   }
 
-  /** Copies everything from the reader to the writer, using a {@value #BUFFER_SIZE}-char buffer */
+  /** Copies everything from the reader to the writer, using a {@value #DEFAULT_BUFFER_SIZE}-char buffer */
   public static void copyReaderToWriter(Reader from, Writer to) throws IOException {
-    char[] buf = new char[BUFFER_SIZE];
+    char[] buf = new char[DEFAULT_BUFFER_SIZE];
     int n;
     do {
       n = from.read(buf);
@@ -200,13 +193,13 @@ public final class ServerIOUtils {
   }
 
   /**
-   * Copies everything from input to output, using a {@value #BUFFER_SIZE}-byte buffer
+   * Copies everything from input to output, using a {@value #DEFAULT_BUFFER_SIZE}-byte buffer
    *
    * @return the total number of bytes that were written to the output stream (should be the same as the number
    * of bytes read from the input stream)
    */
   public static long copyInputToOutput(InputStream from, OutputStream to) throws IOException {
-    return copyInputToOutput(from, to, BUFFER_SIZE);
+    return copyInputToOutput(from, to, DEFAULT_BUFFER_SIZE);
   }
 
   /**
@@ -269,6 +262,66 @@ public final class ServerIOUtils {
     }
     while (n >= 0);
     return byteCount;  // the total number of bytes actually copied to the output stream
+  }
+
+  /**
+   * Wraps the given output stream with a {@link GZIPOutputStream} initialized to use the given compression level (0-9)
+   * and buffer size.
+   * <p>
+   * We provide this method because {@link GZIPOutputStream} doesn't expose any way to change the compression level
+   * from its {@linkplain Deflater#DEFAULT_COMPRESSION default value}.
+   *
+   * <h3>Performance considerations:</h3>
+   * Our past experiments (using JSON data) showed no significant correlation between buffer size and compression ratio
+   * (e.g. using 65,536 instead of the default 512 only reduced the file size from 646KB to 645KB), although a larger
+   * buffer <i>may</i> improve speed in some cases (depending on the characteristics of the destination device).
+   * Using a higher compression level, however does have a noticeable impact on the compression ratio
+   * e.g. (in the same experiment as above) we were able to reduce the file size down to 613KB by using
+   * {@link Deflater#BEST_COMPRESSION} instead of {@link Deflater#DEFAULT_COMPRESSION}.
+   * Disclaimer: we didn't measure how the compression level affects speed.
+   *
+   * @param outputStream the destination stream
+   * @param compressionLevel the desired {@linkplain Deflater#setLevel(int) compression level}
+   *     ({@value Deflater#NO_COMPRESSION} - {@value Deflater#BEST_COMPRESSION});
+   *     can use the constants provided by the {@link Deflater} class (e.g. {@link Deflater#BEST_COMPRESSION})
+   * @param bufferSize the output buffer size passed to {@link GZIPOutputStream#GZIPOutputStream(OutputStream, int)}.
+   *     NOTE: our past experiments showed no significant correlation between buffer size and compression ratio
+   *     (e.g. using 65,536 instead of 512 only reduced the file size from 646KB to 645KB)
+   * @return a new {@link GZIPOutputStream} wrapping the given stream, with its compression level and buffer size
+   *     initialized to the given values
+   * @throws IllegalArgumentException if the given compression level is invalid (acceptable values:
+   *     [{@value Deflater#NO_COMPRESSION} - {@value Deflater#BEST_COMPRESSION}], {@value Deflater#DEFAULT_COMPRESSION})
+   *
+   * @see Deflater#setLevel(int)
+   * @see <a href="https://stackoverflow.com/q/1082320/">StackOverflow question about buffer sizes</a>
+   *
+   */
+  public static GZIPOutputStream newGZIPOutputStream(OutputStream outputStream, int compressionLevel, int bufferSize) throws IOException {
+    // NOTE: passing a larger buffer size value to the GZIPOutputStream constructor doesn't yield any significant improvements in output file size (e.g. using 65,536 instead of 512 only reduced the file size from 646KB to 645KB)
+    // however, setting a custom compression level (best instead of default) reduces the file size to 613KB
+    return new GZIPOutputStream(outputStream, bufferSize) {
+      {
+        def.setLevel(compressionLevel);
+      }
+    };
+  }
+
+  /**
+   * Delegates to {@link #newGZIPOutputStream(OutputStream, int, int)} with bufferSize = {@value #DEFAULT_BUFFER_SIZE}.
+   *
+   * @param outputStream the destination stream
+   * @param compressionLevel the desired {@linkplain Deflater#setLevel(int) compression level}
+   *     ({@value Deflater#NO_COMPRESSION} - {@value Deflater#BEST_COMPRESSION});
+   *     can use the constants provided by the {@link Deflater} class (e.g. {@link Deflater#BEST_COMPRESSION})
+   * @return a new {@link GZIPOutputStream} wrapping the given stream, with its compression level
+   *     initialized to the given value
+   * @throws IllegalArgumentException if the given compression level is invalid (acceptable values:
+   *     [{@value Deflater#NO_COMPRESSION} - {@value Deflater#BEST_COMPRESSION}], {@value Deflater#DEFAULT_COMPRESSION})
+   *
+   * @see #newGZIPOutputStream(OutputStream, int, int)
+   */
+  public static GZIPOutputStream newGZIPOutputStream(OutputStream outputStream, int compressionLevel) throws IOException {
+    return newGZIPOutputStream(outputStream, compressionLevel, DEFAULT_BUFFER_SIZE);
   }
 
   /**

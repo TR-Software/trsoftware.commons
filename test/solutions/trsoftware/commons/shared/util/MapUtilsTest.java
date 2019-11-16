@@ -31,6 +31,7 @@ import solutions.trsoftware.commons.shared.util.mutable.MutableInteger;
 import solutions.trsoftware.commons.shared.util.mutable.MutableNumber;
 
 import java.util.*;
+import java.util.function.BiFunction;
 
 import static solutions.trsoftware.commons.shared.util.MapUtils.*;
 
@@ -257,5 +258,16 @@ public class MapUtilsTest extends TestCase {
     assertEquals(3, maxValuesPerKey(multimap));
     assertEquals(1, maxValuesPerKey(multimap.inverse()));
     assertEquals(0, maxValuesPerKey(ImmutableMultimap.of()));
+  }
+
+  /**
+   * @see MapUtils#mergeAll(Map, Map, BiFunction)
+   */
+  public void testMergeAll() {
+    Map<String, Integer> map1 = hashMap("a", 1, "b", 2, "c", 3);
+    Map<String, Integer> map2 = hashMap("a", 3, "b", -1, "d", 5);
+    assertEquals(
+        hashMap("a", 4, "b", 1, "c", 3, "d", 5),
+        mergeAll(map1, map2, (a, b) -> a + b));
   }
 }

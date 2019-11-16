@@ -35,6 +35,7 @@ import javax.xml.transform.stream.StreamResult;
 import java.io.*;
 import java.net.URLDecoder;
 import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.*;
@@ -78,13 +79,7 @@ public class ServerStringUtils {
    * by all JVMs).
    */
   public static byte[] stringToBytesUtf8(String str) {
-    try {
-      return str.getBytes(StringUtils.UTF8_CHARSET_NAME);
-    }
-    catch (UnsupportedEncodingException e) {
-      // will never happen - all Java VMs support UTF-8
-      throw new RuntimeException(e);
-    }
+    return str.getBytes(StandardCharsets.UTF_8);
   }
 
   /**
@@ -109,13 +104,7 @@ public class ServerStringUtils {
 
   /** Returns a String represented by the give UTF-8 bytes. */
   public static String bytesToStringUtf8(byte[] utf8Bytes) {
-    try {
-      return new String(utf8Bytes, StringUtils.UTF8_CHARSET_NAME);
-    }
-    catch (UnsupportedEncodingException e) {
-      // will never happen - all java VM's support UTF-8
-      throw new RuntimeException(e);
-    }
+    return new String(utf8Bytes, StandardCharsets.UTF_8);
   }
 
   /**
@@ -134,7 +123,13 @@ public class ServerStringUtils {
   }
 
   /**
-   * @return {@code true} iff the given string can be safely used in a URL without having to be escaped.
+   * Checks if the argument satisfies the URL-encoding strategy employed by {@link #urlEncode(String)}
+   *
+   * @return {@code true} if the given string can be safely used in a URL without having to be escaped.
+   * NOTE: a {@code false} return value doesn't mean that it ca
+   *
+   * @deprecated this test depends on the specific implementation of {@link #urlEncode(String)} and therefore
+   * is subject to false negatives (and maybe even false positives)
    */
   public static boolean isUrlSafe(String str) {
     return str.equals(urlEncode(str));
@@ -164,8 +159,12 @@ public class ServerStringUtils {
   /**
    * Percent-encodes the given string using {@link java.net.URLEncoder} (UTF-8 encoding is used).
    * <p>
-   * <strong>Warning:</strong> Don't use this method for encoding cookie values that might be read client-side with
-   * {@link com.google.gwt.user.client.Cookies} -- use {@link URIComponentEncoder#encode(String)} instead.
+   * <strong>Warning:</strong> the escaping strategy implemented by {@link java.net.URLEncoder} does not
+   * match the Javascript {@code encodeURIComponent} function and therefore the result is not guaranteed to be
+   * compatible with the Javascript {@code decodeURIComponent} function.
+   * In particular, this method should not be used for encoding cookie values that might be read client-side with
+   * {@link com.google.gwt.user.client.Cookies} (which uses the native JS {@code decodeURIComponent} function).
+   * To match the Javascript behavior, use {@link URIComponentEncoder#encode(String)} instead.
    *
    * @see URIComponentEncoder#encode(String)
    */

@@ -17,8 +17,11 @@
 
 package solutions.trsoftware.commons.server.util;
 
+import com.google.common.annotations.VisibleForTesting;
+import org.jetbrains.annotations.NotNull;
 import solutions.trsoftware.commons.server.io.StringPrintStream;
 
+import javax.annotation.Nonnull;
 import java.io.PrintStream;
 import java.util.*;
 import java.util.concurrent.*;
@@ -32,18 +35,29 @@ import java.util.concurrent.atomic.AtomicLong;
  * Unlike typical scheduled executors, this class is event-driven (single-threaded)
  * and its event loop must be externally pumped by repeatedly calling the {@link #pumpEvents()} method.
  * The scheduled tasks will be executed inline by this method. To imitate the behavior
- * of a multithreaded executor you can call pumpEvents() from an external timer.
+ * of a multithreaded executor you can call {@link #pumpEvents()} from an external timer.
  *
+ * @see #advanceClockAndPump(long)
+ * @see #advanceClockAndPumpIncrementally(long)
+ * @see #advanceClockAndPumpIncrementallyTo(long)
+ * @see com.google.common.util.concurrent.MoreExecutors#newDirectExecutorService()
  * @author Alex
  */
 public class MockScheduledExecutorService implements ScheduledExecutorService {
+  /*
+  TODO(11/13/2019): refactor this class:
+    - extend java.util.concurrent.AbstractExecutorService
+    - review the code in java.util.concurrent.ScheduledThreadPoolExecutor as an example of how to implement this
+  */
+
+
   private NavigableSet<ScheduledTask> tasks = new ConcurrentSkipListSet<ScheduledTask>();
 
   public MockScheduledExecutorService() {
 
   }
 
-  /** Inititializes to contain the same tasks as the given executor */
+  /** Initializes to contain the same tasks as the given executor */
   public MockScheduledExecutorService(MockScheduledExecutorService originator) {
     // make proper defensive copies of all the tasks
     for (ScheduledTask task : originator.tasks) {
@@ -156,21 +170,21 @@ public class MockScheduledExecutorService implements ScheduledExecutorService {
     }
   }
 
-  public ScheduledFuture<?> schedule(final Runnable command, long delay, TimeUnit unit) {
+  public MockScheduledFuture<?> schedule(final Runnable command, long delay, TimeUnit unit) {
     return scheduleTask(new ScheduledRunnableTask(command,  Clock.currentTimeMillis() + unit.toMillis(delay)));
   }
 
-  public <V> ScheduledFuture<V> schedule(final Callable<V> callable, long delay, TimeUnit unit) {
-    return scheduleTask(new ScheduledCallableTask(callable, Clock.currentTimeMillis() + unit.toMillis(delay)));
+  public <V> MockScheduledFuture<V> schedule(final Callable<V> callable, long delay, TimeUnit unit) {
+    return scheduleTask(new ScheduledCallableTask<>(callable, Clock.currentTimeMillis() + unit.toMillis(delay)));
   }
 
   public ScheduledFuture<?> scheduleAtFixedRate(final Runnable command, long initialDelay, final long period, final TimeUnit unit) {
     return scheduleRepeatingTask(new RepeatingTask(command, Clock.currentTimeMillis() + unit.toMillis(initialDelay), period, unit));
   }
 
-  private <V> ScheduledFuture<V> scheduleTask(ScheduledTask task) {
+  private <V> MockScheduledFuture<V> scheduleTask(ScheduledTask<V> task) {
     tasks.add(task);
-    return new MockScheduledFuture<V>(task);
+    return new MockScheduledFuture<>(task);
   }
 
   private ScheduledFuture<?> scheduleRepeatingTask(RepeatingTask task) {
@@ -248,9 +262,9 @@ public class MockScheduledExecutorService implements ScheduledExecutorService {
     throw new UnsupportedOperationException("Method .execute has not been fully implemented yet.");
   }
 
-  /** @returns a list of currently scheduled tasks */
+  /** @return a list of currently scheduled tasks */
   public List<ScheduledTask> examineTasks() {
-    return new ArrayList<ScheduledTask>(tasks);
+    return new ArrayList<>(tasks);
   }
 
   public int getScheduledTaskCount() {
@@ -270,11 +284,13 @@ public class MockScheduledExecutorService implements ScheduledExecutorService {
 
   private static final AtomicLong nextSequenceNumber = new AtomicLong(0);
 
-  private abstract class ScheduledTask<V> implements Runnable, Comparable {
+  @VisibleForTesting
+  public abstract class ScheduledTask<V> implements Runnable, Comparable<ScheduledTask> {
+    // TODO: rewrite this to be like java.util.concurrent.ScheduledThreadPoolExecutor.ScheduledFutureTask
     /** Used to deterministically resolve timing collisions (see compareTo) */
-    protected final Long id = nextSequenceNumber.getAndIncrement();
+    protected final long id = nextSequenceNumber.getAndIncrement();
     protected final String name;
-    protected final Long time;
+    protected final long time;
     private boolean running;
     private boolean finished;
     protected V computationResult;
@@ -284,18 +300,42 @@ public class MockScheduledExecutorService implements ScheduledExecutorService {
       this.name = name;
     }
 
-    public int compareTo(Object o) {
-      ScheduledTask otherTask = (ScheduledTask)o;
-      int result = this.time.compareTo(otherTask.time);
-      // make sure the result is nonzero if the two objects are not acually equal
+    @Override
+    public int compareTo(@Nonnull ScheduledTask other) {
+      int result = Long.compare(this.time, other.time);
+      // make sure the result is nonzero if the two objects are not actually equal
       // (because the ConcurrentSkipListSet treats comparison=0 as the elements being equal, and will replace one with the other)
-      if (result == 0 && !this.equals(o))
-        return id.compareTo(otherTask.id);  // use the unambiguous creation order to resolve conflict deterministically
+      if (result == 0 && !this.equals(other))
+        return Long.compare(this.id, other.id); // use the unambiguous creation order to resolve conflict deterministically
       return result;
+    }
+
+    public long getId() {
+      return id;
+    }
+
+    public String getName() {
+      return name;
+    }
+
+    public long getTime() {
+      return time;
+    }
+
+    public boolean isRunning() {
+      return running;
+    }
+
+    public boolean isFinished() {
+      return finished;
+    }
+
+    public V getComputationResult() {
+      return computationResult;
     }
   }
 
-  private class ScheduledRunnableTask extends ScheduledTask {
+  private class ScheduledRunnableTask extends ScheduledTask<Void> {
     protected final Runnable runnable;
 
     protected ScheduledRunnableTask(Runnable runnable, long time) {
@@ -351,7 +391,7 @@ public class MockScheduledExecutorService implements ScheduledExecutorService {
       // which is in accordance to the ScheduledExecutorService interface spec
       long nextExecutionTime = time + periodUnit.toMillis(period);
       RepeatingTask task = new RepeatingTask(runnable, nextExecutionTime, period, periodUnit);
-      ScheduledFuture<Object> taskFuture = scheduleTask(task);
+      ScheduledFuture<?> taskFuture = scheduleTask(task);
       task.repeatingFuture = repeatingFuture;
       // point the repeating future to the latest instance of the task
       repeatingFuture.delegate = taskFuture;
@@ -359,7 +399,8 @@ public class MockScheduledExecutorService implements ScheduledExecutorService {
   }
 
 
-  private class MockScheduledFuture<V> implements ScheduledFuture<V> {
+  @VisibleForTesting
+  public class MockScheduledFuture<V> implements ScheduledFuture<V> {
     private boolean cancelled;
     private final ScheduledTask<V> task;
 
@@ -373,7 +414,7 @@ public class MockScheduledExecutorService implements ScheduledExecutorService {
     }
 
     public int compareTo(Delayed o) {
-      return new Long(getDelay(TimeUnit.MILLISECONDS)).compareTo(o.getDelay(TimeUnit.MILLISECONDS));
+      return Long.compare(getDelay(TimeUnit.MILLISECONDS), o.getDelay(TimeUnit.MILLISECONDS));
     }
 
     public boolean cancel(boolean mayInterruptIfRunning) {
@@ -412,6 +453,11 @@ public class MockScheduledExecutorService implements ScheduledExecutorService {
         advanceClockAndPump(100);
       }
       return task.computationResult;
+    }
+
+    @VisibleForTesting
+    public ScheduledTask<V> getTask() {
+      return task;
     }
   }
 

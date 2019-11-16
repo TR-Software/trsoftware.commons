@@ -30,7 +30,7 @@ import java.util.function.BiConsumer;
  * @since 2/27/2018
  */
 @FunctionalInterface
-public interface BiConsumerThrows<A, B, E extends Exception>  {
+public interface BiConsumerThrows<A, B, E extends Throwable>  {
 
   void accept(A a, B b) throws E;
 

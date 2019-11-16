@@ -40,8 +40,4 @@ public class WhitespaceTokenizer implements TextTokenizer {
     return tokenList.toArray(new String[tokenList.size()]);
   }
 
-  public String join(String[] tokens) {
-    return StringUtils.join(getDelimiter(), tokens);
-  }
-
 }

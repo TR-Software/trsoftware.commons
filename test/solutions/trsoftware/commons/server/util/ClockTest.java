@@ -29,7 +29,8 @@ public class ClockTest extends TestCaseCanStopClock {
   public void testClock() throws Exception {
     // put the clock through its various states several times
     for (int i = 0; i < 3; i++) {
-      assertApproximatelyEquals(System.currentTimeMillis(), Clock.currentTimeMillis(), 10);   // not more than 10 millis should have elapsed between those two calls
+      // NOTE: the following line commented out on 9/26/2019 because it creates an arbitrary system-dependent timing restriction
+      // assertApproximatelyEquals(System.currentTimeMillis(), Clock.currentTimeMillis(), 10);   // not more than 10 millis should have elapsed between those two calls
 
       // make sure that no operations are possible while the clock is ticking in normal mode
       try { Clock.advance(100); fail(); } catch (IllegalStateException e) {}

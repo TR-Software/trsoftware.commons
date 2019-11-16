@@ -657,17 +657,17 @@ public class StringUtilsTest extends TestCase {
   }
 
   public void testIndent() throws Exception {
+    // 1) test indent(int)
     assertEquals("", indent(0));
     assertEquals(" ", indent(1));
     assertEquals("  ", indent(2));
     assertEquals("   ", indent(3));
-
-    AssertUtils.assertThrows(IllegalArgumentException.class, new Runnable() {
-      @Override
-      public void run() {
-        indent(-1);
-      }
-    });
+    AssertUtils.assertThrows(IllegalArgumentException.class, (Runnable)() -> indent(-1));
+    // 2) test indent(int, String)
+    assertEquals("foo", indent(0, "foo"));
+    assertEquals(" foo", indent(1, "foo"));
+    assertEquals("  foo", indent(2, "foo"));
+    assertEquals("   foo", indent(3, "foo"));
   }
 
   public void testTupleToString() throws Exception {

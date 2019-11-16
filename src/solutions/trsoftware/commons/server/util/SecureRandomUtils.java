@@ -30,7 +30,7 @@ public abstract class SecureRandomUtils {
   public static final SecureRandom rnd = new SecureRandom();
 
   /**
-   * @return A string of {@code length} chars chosen at random from {@link Base64Alphabet#CHARS}
+   * @return A string of {@code length} chars chosen at random from {@link UrlSafeBase64Alphabet#CHARS}
    */
   public static String randString(int length) {
     if (length <= 0)

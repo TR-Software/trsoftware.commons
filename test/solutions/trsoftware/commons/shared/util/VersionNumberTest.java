@@ -37,6 +37,7 @@ public class VersionNumberTest extends TestCase {
   public void testToString() throws Exception {
     assertEquals("", new VersionNumber().toString());
     assertEquals("1", new VersionNumber(1).toString());
+    assertEquals("1.0.0", new VersionNumber(1, 0, 0).toString());
     assertEquals("1.23.456", new VersionNumber(1, 23, 456).toString());
   }
 

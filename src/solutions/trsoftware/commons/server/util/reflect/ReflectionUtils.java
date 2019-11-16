@@ -35,6 +35,7 @@ import java.nio.file.*;
 import java.util.*;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
  * @author Alex, 1/5/14
@@ -648,5 +649,17 @@ public abstract class ReflectionUtils {
         https://junit.org/junit5/docs/current/user-guide/#writing-tests
     */
   }
+
+  /**
+   * Returns a stream consisting of the elements of the given stream that match the given type.
+   * The matching elements will be {@linkplain Class#cast(Object)} cast} to that type.
+   *
+   * @param stream the stream to be transformed
+   * @param type the desired element type
+   * @return the new stream
+   */
+  public static <T> Stream<T> filterByType(Stream<?> stream, Class<T> type) {
+    return stream.filter(o -> type.isAssignableFrom(o.getClass())).map(type::cast);
+  }  // TODO: unit test this method
 
 }

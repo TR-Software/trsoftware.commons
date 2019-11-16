@@ -25,7 +25,7 @@ import java.util.SortedMap;
 import java.util.TreeMap;
 
 /**
- * Uses timpestamps to mitigate the possibility of replay attacks.
+ * Uses timestamps to mitigate the possibility of replay attacks.
  * 
  * Feb 6, 2013
  *
@@ -56,9 +56,9 @@ public class RequestAuthWithTimestamps extends RequestAuth {
 
   /**
    * Prevent replay attack by ensuring there is a passed in "date" parameter,
-   * and that date is not older than VALID_TIME_WINDOW_MILLIS before the last request's date.
+   * and that date is not older than {@value #VALID_TIME_WINDOW_MILLIS} ms before the last request's date.
    * This method expects that all clients (e.g. nodes on Google App Engine)
-   * have their clocks sycnronized.
+   * have their clocks synchronized.
    *
    * Shortcomings of this method:
    * 1) all clients must have their clocks synchronized with each other (this is probably true for GAE)

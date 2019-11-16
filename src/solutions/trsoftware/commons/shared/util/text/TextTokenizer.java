@@ -17,16 +17,20 @@
 
 package solutions.trsoftware.commons.shared.util.text;
 
+import solutions.trsoftware.commons.shared.util.StringUtils;
+
 /**
  * A way to convert text to tokens and back to text again, which can
  * be implemented depending on source language (e.g. English vs. Chinese).
- *
+ * <p>
  * All implementing classes should be stateless (the same instance can be
  * reused and shared between threads)
  *
- * @author Alex
+ * <p style="color: #0073BF; font-weight: bold;">
+ * TODO: see {@link java.text.BreakIterator} which might be a better choice than this class
+ * </p>
  *
- * TODO: @see java.text.BreakIterator which might be a better choice than this class
+ * @author Alex
  */
 public interface TextTokenizer {
 
@@ -39,5 +43,7 @@ public interface TextTokenizer {
    * Reconstructs text from the given tokens by inserting the language-specific
    * word delimiter (e.g. space for English)
    */
-  String join(String[] tokens);
+  default String join(String[] tokens) {
+    return StringUtils.join(getDelimiter(), tokens);
+  }
 }

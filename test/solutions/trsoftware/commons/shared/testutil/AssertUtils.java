@@ -19,11 +19,13 @@ package solutions.trsoftware.commons.shared.testutil;
 
 import com.google.common.collect.Multimap;
 import com.google.gwt.user.client.Element;
+import junit.framework.Assert;
 import junit.framework.AssertionFailedError;
 import solutions.trsoftware.commons.client.util.GwtUtils;
 import solutions.trsoftware.commons.shared.util.StringUtils;
 import solutions.trsoftware.commons.shared.util.callables.Function0_t;
 import solutions.trsoftware.commons.shared.util.compare.ComparisonOperator;
+import solutions.trsoftware.commons.shared.util.function.BiConsumerThrows;
 
 import java.util.*;
 import java.util.function.BiPredicate;
@@ -150,8 +152,8 @@ public abstract class AssertUtils {
   }
 
   /**
-   * Asserts that no given object is .equals() to any other and that none of
-   * them are null.
+   * Asserts that no given object is {@link Object#equals(Object) equal} to any other and that none of
+   * them are {@code null}.
    */
   public static void assertNotEqualAndNotNull(Object... objects) {
     assertNotNull(objects);
@@ -165,7 +167,7 @@ public abstract class AssertUtils {
   }
 
   /**
-   * Asserts that no given object is .equals() to any other.
+   * Asserts that no given object is {@link Object#equals(Object) equal} to any other.
    */
   public static void assertNotEqual(Object... objects) {
     assertNotNull(objects);
@@ -196,11 +198,24 @@ public abstract class AssertUtils {
     assertComparablesNotEqual(o1, o2);
   }
 
-  public static String comparisonFailedMessage(String message, Object expected, Object actual) {
+  /**
+   * Generates the same message as {@link Assert#format(java.lang.String, java.lang.Object, java.lang.Object)}.
+   * Adhering to this message format allows the IntelliJ to show diffs for this type of failure.
+   *
+   * @return a message that can be passed to the {@link AssertionFailedError} constructor
+   */
+  public static String formatComparisonFailedMessage(String message, Object expected, Object actual) {
     String formatted = "";
     if (message != null)
       formatted = message + " ";
     return formatted + "expected:<" + expected + "> but was:<" + actual + ">";
+  }
+
+  /**
+   * Same as the private JUnit method {@link Assert#failNotEquals(String, Object, Object)}
+   */
+  private static void failNotEquals(String message, Object expected, Object actual) {
+    fail(formatComparisonFailedMessage(message, expected, actual));
   }
 
   public static void assertEqualAndNotNull(Object expected, Object actual) {
@@ -238,7 +253,7 @@ public abstract class AssertUtils {
   public static void assertArraysEqual(long[] a, long[] a2) {
     boolean pass = Arrays.equals(a, a2);
     if (!pass)
-      fail(comparisonFailedMessage("Arrays not equal.", Arrays.toString(a), Arrays.toString(a2)));
+      fail(formatComparisonFailedMessage("Arrays not equal.", Arrays.toString(a), Arrays.toString(a2)));
   }
 
   /**
@@ -255,7 +270,7 @@ public abstract class AssertUtils {
   public static void assertArraysEqual(int[] a, int[] a2) {
     boolean pass = Arrays.equals(a, a2);
     if (!pass)
-      fail(comparisonFailedMessage("Arrays not equal.", Arrays.toString(a), Arrays.toString(a2)));
+      fail(formatComparisonFailedMessage("Arrays not equal.", Arrays.toString(a), Arrays.toString(a2)));
   }
 
   /**
@@ -272,7 +287,7 @@ public abstract class AssertUtils {
   public static void assertArraysEqual(short[] a, short a2[]) {
     boolean pass = Arrays.equals(a, a2);
     if (!pass)
-      fail(comparisonFailedMessage("Arrays not equal.", Arrays.toString(a), Arrays.toString(a2)));
+      fail(formatComparisonFailedMessage("Arrays not equal.", Arrays.toString(a), Arrays.toString(a2)));
   }
 
   /**
@@ -289,7 +304,7 @@ public abstract class AssertUtils {
   public static void assertArraysEqual(char[] a, char[] a2) {
     boolean pass = Arrays.equals(a, a2);
     if (!pass)
-      fail(comparisonFailedMessage("Arrays not equal.", Arrays.toString(a), Arrays.toString(a2)));
+      fail(formatComparisonFailedMessage("Arrays not equal.", Arrays.toString(a), Arrays.toString(a2)));
   }
 
   /**
@@ -306,7 +321,7 @@ public abstract class AssertUtils {
   public static void assertArraysEqual(byte[] a, byte[] a2) {
     boolean pass = Arrays.equals(a, a2);
     if (!pass)
-      fail(comparisonFailedMessage("Arrays not equal.", Arrays.toString(a), Arrays.toString(a2)));
+      fail(formatComparisonFailedMessage("Arrays not equal.", Arrays.toString(a), Arrays.toString(a2)));
   }
 
   /**
@@ -323,7 +338,7 @@ public abstract class AssertUtils {
   public static void assertArraysEqual(boolean[] a, boolean[] a2) {
     boolean pass = Arrays.equals(a, a2);
     if (!pass)
-      fail(comparisonFailedMessage("Arrays not equal.", Arrays.toString(a), Arrays.toString(a2)));
+      fail(formatComparisonFailedMessage("Arrays not equal.", Arrays.toString(a), Arrays.toString(a2)));
   }
 
   /**
@@ -346,7 +361,7 @@ public abstract class AssertUtils {
   public static void assertArraysEqual(double[] a, double[] a2) {
     boolean pass = Arrays.equals(a, a2);
     if (!pass)
-      fail(comparisonFailedMessage("Arrays not equal.", Arrays.toString(a), Arrays.toString(a2)));
+      fail(formatComparisonFailedMessage("Arrays not equal.", Arrays.toString(a), Arrays.toString(a2)));
   }
 
   /**
@@ -369,7 +384,7 @@ public abstract class AssertUtils {
   public static void assertArraysEqual(float[] a, float[] a2) {
     boolean pass = Arrays.equals(a, a2);
     if (!pass)
-      fail(comparisonFailedMessage("Arrays not equal.", Arrays.toString(a), Arrays.toString(a2)));
+      fail(formatComparisonFailedMessage("Arrays not equal.", Arrays.toString(a), Arrays.toString(a2)));
   }
 
 
@@ -389,7 +404,7 @@ public abstract class AssertUtils {
   public static void assertArraysEqual(Object[] a, Object[] a2) {
     boolean pass = Arrays.equals(a, a2);
     if (!pass)
-      fail(comparisonFailedMessage("Arrays not equal.", Arrays.toString(a), Arrays.toString(a2)));
+      fail(formatComparisonFailedMessage("Arrays not equal.", Arrays.toString(a), Arrays.toString(a2)));
   }
 
   /**
@@ -401,7 +416,7 @@ public abstract class AssertUtils {
   public static void assertEqualsAndHashCode(Object a, Object b) {
     assertEquals(a, b);
     assertEquals(b, a);
-    assertTrue(a.hashCode() == b.hashCode());
+    assertEquals(a.hashCode(), b.hashCode());
   }
 
   /**
@@ -534,6 +549,78 @@ public abstract class AssertUtils {
     assertEquals(expected, predicate.test(lhs, rhs));
     // also test negation of the predicate
     assertEquals(!expected, predicate.negate().test(lhs, rhs));
+  }
+
+  /**
+   * Tests two lists for equality using a custom assertion function to compare the elements.
+   * <p>
+   * This is similar to {@link junit.framework.Assert#assertEquals(Object, Object) assertEquals(List, List)}, but
+   * allows the elements to be tested for equality using something other than {@link Object#equals(Object)}
+   *
+   * @param equalityAssertion a function that takes a pair of elements and throws an exception if it doesn't consider
+   * them to be equal.
+   * @param <E> the type of elements in the given lists
+   * @throws AssertionFailedError if {@code equalityAssertion} throws an exception for any pair of elements
+   */
+  public static <E> void assertListsEqual(List<E> expected, List<E> actual, BiConsumerThrows<E, E, Throwable> equalityAssertion) {
+    assertEquals(expected.size(), actual.size());
+    for (int i = 0; i < expected.size(); i++) {
+      E a = expected.get(i);
+      E b = actual.get(i);
+      // TODO: should this first perform the same null checks as Assert.assertEquals(String, Object, Object)?
+      try {
+        equalityAssertion.accept(a, b);
+      }
+      catch (Throwable ex) {
+        ex.printStackTrace();
+        failNotEquals("Lists differ on element " + i, expected, actual);
+      }
+    }
+  }
+
+  /**
+   * Tests two lists for equality using a custom comparison function to compare the elements.
+   * <p>
+   * This is similar to {@link junit.framework.Assert#assertEquals(Object, Object) assertEquals(List, List)}, but
+   * allows the elements to be tested for equality using something other than {@link Object#equals(Object)}
+   *
+   * @param equalityPredicate a predicate that takes a pair of elements and returns {@code true} if it considers
+   * them equal
+   * @param <E> the type of elements in the given lists
+   * @throws AssertionFailedError if the given predicate returns {@code false} for any pair of elements
+   */
+  public static <E> void assertListsEqual(List<E> expected, List<E> actual, BiPredicate<E, E> equalityPredicate) {
+    assertEquals(expected.size(), actual.size());
+    for (int i = 0; i < expected.size(); i++) {
+      E a = expected.get(i);
+      E b = actual.get(i);
+      // TODO: should this first perform the same null checks as Assert.assertEquals(String, Object, Object)?
+      if (!equalityPredicate.test(a, b)) {
+        failNotEquals("Lists differ on element " + i, expected, actual);
+      }
+    }
+  }
+
+  /**
+   * Similar to {@link Assert#assertEquals(Object, Object)}, but uses the given predicate instead of
+   * {@link Object#equals(Object)} to compare the given objects.
+   *
+   * @throws AssertionFailedError if the given predicate returns {@code false} for the given args
+   */
+  public static <T> void assertEqual(T expected, T actual, BiPredicate<T, T> equalityPredicate) {
+    assertEqual(null, expected, actual, equalityPredicate);
+  }
+
+  /**
+   * Similar to {@link Assert#assertEquals(String, Object, Object)}, but uses the given predicate instead of
+   * {@link Object#equals(Object)} to compare the given objects.
+   *
+   * @throws AssertionFailedError if the given predicate returns {@code false} for the given args
+   */
+  public static <T> void assertEqual(String message, T expected, T actual, BiPredicate<T, T> equalityPredicate) {
+    // TODO: should this first perform the same null checks as Assert.assertEquals(String, Object, Object)?
+    if (!equalityPredicate.test(expected, actual))
+      failNotEquals(message, expected, actual);
   }
 
   /**

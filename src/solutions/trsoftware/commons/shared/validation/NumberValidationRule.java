@@ -26,7 +26,7 @@ import solutions.trsoftware.commons.shared.util.StringUtils;
  *
  * @author Alex
  */
-public class NumberValidationRule<V extends Number & Comparable> extends BaseObjectValidationRule<V> {
+public class NumberValidationRule<V extends Number & Comparable<V>> extends BaseObjectValidationRule<V> {
   private final NumberRange<V> acceptableRange;
 
   public NumberValidationRule(String fieldName, NumberRange<V> acceptableRange, boolean acceptNull) {

@@ -17,11 +17,19 @@
 
 package solutions.trsoftware.commons.shared.util.callables;
 
+import java.util.function.BiFunction;
+
 /**
  * A function {@link A} &times; {@link B} &rarr; {@link R}.
  *
+ * @deprecated made obsolete by {@link BiFunction} in Java 1.8+
  * @author Alex
  */
-public interface Function2<A, B, R> {
+public interface Function2<A, B, R> extends BiFunction<A, B, R> {
   R call(A a, B b);
+
+  @Override
+  default R apply(A a, B b) {
+    return call(a, b);
+  }
 }

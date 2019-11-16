@@ -17,12 +17,10 @@
 
 package solutions.trsoftware.commons.shared.util.stats;
 
-import com.google.common.base.Predicate;
 import junit.framework.TestCase;
 import solutions.trsoftware.commons.shared.util.ListUtils;
 import solutions.trsoftware.commons.shared.util.RealPoint;
 
-import javax.annotation.Nullable;
 import java.util.Arrays;
 import java.util.List;
 
@@ -45,28 +43,10 @@ public class FunctionStatsTest extends TestCase {
         new Point(2.5, .5),
         new Point(3, 0, MIN)
     );
-    List<Point> expectedInflectionPoints = ListUtils.filter(points, new Predicate<Point>() {
-      @Override
-      public boolean apply(@Nullable Point input) {
-        assert input != null;
-        return input.isInflection();
-      }
-    });
-    List<Point> expectedMinimums = ListUtils.filter(points, new Predicate<Point>() {
-      @Override
-      public boolean apply(@Nullable Point input) {
-        assert input != null;
-        return input.type == MIN;
-      }
-    });
-    List<Point> expectedMaximums = ListUtils.filter(points, new Predicate<Point>() {
-      @Override
-      public boolean apply(@Nullable Point input) {
-        assert input != null;
-        return input.type == MAX;
-      }
-    });
-    FunctionStats fs = new FunctionStats<Point>(points);
+    List<Point> expectedInflectionPoints = ListUtils.filter(points, Point::isInflection);
+    List<Point> expectedMinimums = ListUtils.filter(points, point -> point.type == MIN);
+    List<Point> expectedMaximums = ListUtils.filter(points, point -> point.type == MAX);
+    FunctionStats fs = new FunctionStats<>(points);
     assertEquals(expectedInflectionPoints, fs.getInflections());
     assertEquals(expectedMinimums, fs.getMinimums());
     assertEquals(expectedMaximums, fs.getMaximums());

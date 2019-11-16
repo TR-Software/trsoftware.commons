@@ -23,11 +23,16 @@ import solutions.trsoftware.commons.bridge.BridgeTypeFactory;
  * Provides string escaping logic compatible with the JavaScript
  * {@code encodeURIComponent} and {@code decodeURIComponent} functions.
  * <p>
- * NOTE: This class should always be used instead of {@link java.net.URLEncoder} for encoding cookie values,
- * to ensure they can be read client-side with {@link com.google.gwt.user.client.Cookies}.
- * This is particularly important if the value contains a JSON object: since {@link java.net.URLEncoder} encodes
- * spaces as {@code '+'} (e.g. {@code "{a: 1, b: 2}"} &rarr; {@code "%7Ba%3A+1%2C+b%3A+2%7D"}, and
- * {@code decodeURIComponent("%7Ba%3A+1%2C+b%3A+2%7D")} &rarr; {@code "{a:+1,+b:+2}"} (invalid JSON).
+ * This class should always be used instead of {@link java.net.URLEncoder} when the encoded value needs to
+ * be compatible with {@code decodeURIComponent} (e.g. a cookie value that might be read client-side
+ * with {@link com.google.gwt.user.client.Cookies}).
+ * <p>
+ * <b>Example:</b> JSON strings are particularly sensitive to the  {@code URLEncoder.encode("{a: 1, b: 2}", "UTF-8")}
+ * returns {@code "%7Ba%3A+1%2C+b%3A+2%7D"} (because it encodes spaces as {@code '+'}), but
+ * {@code decodeURIComponent("%7Ba%3A+1%2C+b%3A+2%7D")} returns {@code "{a:+1,+b:+2}"}, which is invalid JSON!
+ *
+ * @see java.net.URLEncoder
+ * @see java.net.URLDecoder
  *
  * @author Alex
  */

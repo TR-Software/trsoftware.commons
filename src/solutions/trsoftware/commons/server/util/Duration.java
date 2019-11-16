@@ -71,9 +71,23 @@ public class Duration extends AbstractDuration implements AutoCloseable {
    * @return the number of milliseconds that have elapsed since this object was created.
    */
   public double elapsedMillis() {
-    return TimeUnit.NANOSECONDS.toMillis(System.nanoTime() - start);
+    return TimeUnit.NANOSECONDS.toMillis(elapsedNanos());
   }
 
+  /**
+   * @return the number of nanoseconds that have elapsed since this object was created.
+   */
+  public long elapsedNanos() {
+    return System.nanoTime() - start;
+  }
+
+  @Override
+  public double elapsed(TimeUnit timeUnit) {
+    long nanos = elapsedNanos();
+    if (timeUnit == TimeUnit.NANOSECONDS)
+      return nanos;
+    return timeUnit.from(TimeUnit.NANOSECONDS, nanos);
+  }
 
   /**
    * If the duration is less than an hour, it will be printed as "MM:SS" or "MM:SS.millis" if printMillis is true,

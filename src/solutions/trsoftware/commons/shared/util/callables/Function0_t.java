@@ -20,8 +20,11 @@ package solutions.trsoftware.commons.shared.util.callables;
 /**
  * A function &empty; &rarr; &empty; that might throw exception {@link E}
  *
+ * This is basically a {@link Runnable} that declares an exception
+ *
  * @author Alex
  */
+@FunctionalInterface
 public interface Function0_t<E extends Throwable> {
   void call() throws E;
 }

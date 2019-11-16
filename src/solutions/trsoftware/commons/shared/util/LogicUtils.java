@@ -56,7 +56,7 @@ public class LogicUtils {
   // TODO: unit test these new methods
   /**
    * Similar to the Javascript expression {@code o1 || o2} when applied to non-boolean objects.
-   * @return {@code o1} if it's not {@code null}, otherwise {@code o2}.
+   * @return {@code o1} if it's not {@code null}, otherwise {@code o2} (which could be null).
    */
   public static <T> T firstNonNull(T o1, T o2) {
     if (o1 != null)

@@ -29,29 +29,36 @@ import static solutions.trsoftware.commons.shared.util.stats.FunctionStats.Direc
 import static solutions.trsoftware.commons.shared.util.stats.FunctionStats.Direction.UP;
 
 /**
+ * Computes the basic properties of a discrete (mathematical) function, specified as a set of {@linkplain Point points}.
+ * The computed properties include the inflection points and the local/absolute minimums/maximums.
+ *
  * @author Alex
  * @since 12/18/2017
  */
-public class FunctionStats<T extends Point> {
+public class FunctionStats<P extends Point> {
 
+  /**
+   * Helper used to compute the inflection points
+   * @see #getDirection(double, double)
+   */
   enum Direction {UP, DOWN}
 
-  private List<T> points;
-  private List<T> inflections = new ArrayList<T>();
-  private List<T> minimums = new ArrayList<T>();
-  private List<T> maximums = new ArrayList<T>();
+  private List<P> points;
+  private List<P> inflections = new ArrayList<P>();
+  private List<P> minimums = new ArrayList<P>();
+  private List<P> maximums = new ArrayList<P>();
   private MinAndMaxDouble minAndMax = new MinAndMaxDouble();
 
-  public FunctionStats(List<T> points) {
+  public FunctionStats(List<P> points) {
     this.points = points;
     findInflections();
   }
 
-  private FilteringIterator<T> filterDuplicates() {
-    return new FilteringIterator<T>(points.iterator()) {
-      private T last;
+  private FilteringIterator<P> filterDuplicates() {
+    return new FilteringIterator<P>(points.iterator()) {
+      private P last;
       @Override
-      protected boolean filter(T elt) {
+      protected boolean filter(P elt) {
         boolean ret = last == null || last.getY() != elt.getY();
         last = elt;
         return ret;
@@ -61,8 +68,8 @@ public class FunctionStats<T extends Point> {
 
   private void findInflections() {
     Direction dir = null;
-    for (PeekingIterator<T> it = Iterators.peekingIterator(filterDuplicates()); it.hasNext(); ) {
-      T pt = it.next();
+    for (PeekingIterator<P> it = Iterators.peekingIterator(filterDuplicates()); it.hasNext(); ) {
+      P pt = it.next();
       double y = pt.getY();
       minAndMax.update(y);
       if (it.hasNext()) {
@@ -100,7 +107,7 @@ public class FunctionStats<T extends Point> {
     return null; // no change in direction
   }
 
-  public List<T> getPoints() {
+  public List<P> getPoints() {
     return points;
   }
 
@@ -109,21 +116,21 @@ public class FunctionStats<T extends Point> {
    * @see #getMinimums()
    * @see #getMaximums()
    */
-  public List<T> getInflections() {
+  public List<P> getInflections() {
     return inflections;
   }
 
   /**
    * @return the local minimums of the function
    */
-  public List<T> getMinimums() {
+  public List<P> getMinimums() {
     return minimums;
   }
 
   /**
    * @return the local maximums of the function
    */
-  public List<T> getMaximums() {
+  public List<P> getMaximums() {
     return maximums;
   }
 
@@ -148,8 +155,8 @@ public class FunctionStats<T extends Point> {
     if (maximums.isEmpty())
       return Double.POSITIVE_INFINITY;
     MeanAndVariance stats = new MeanAndVariance();
-    for (PeekingIterator<T> it = Iterators.peekingIterator(maximums.iterator()); it.hasNext(); ) {
-      T pt = it.next();
+    for (PeekingIterator<P> it = Iterators.peekingIterator(maximums.iterator()); it.hasNext(); ) {
+      P pt = it.next();
       if (it.hasNext()) {
         stats.update(it.peek().getX() - pt.getX());
       }

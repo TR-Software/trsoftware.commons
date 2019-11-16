@@ -17,9 +17,8 @@
 
 package solutions.trsoftware.commons.shared.util;
 
-import com.google.common.base.Predicate;
-
 import java.util.*;
+import java.util.function.Predicate;
 
 /**
  * @author Alex
@@ -27,11 +26,15 @@ import java.util.*;
 public class ListUtils {
 
   /**
-   * This method exists because the types returned by {@link List#subList(int, int)} are not serializable by GWT.
+   * Copies the specified range of the given list into a new {@link ArrayList}.
+   * <p>
+   * This method was originally created because the views returned by {@link List#subList(int, int)}
+   * were not serializable by GWT, but can also just be used as shorthand for {@code new ArrayList<>(list.subList(from, to)})
    *
    * @param fromIndex low endpoint (inclusive) of the subList
    * @param toIndex high endpoint (exclusive) of the subList
-   * @return a new {@link ArrayList} that contains the elements in the specified range of the given list.
+   * @return a <i>new</i> {@link ArrayList} that contains the elements in the specified range of the given list;
+   * not a <i>view</i> (modifications do not propagate to the original list and vice-versa)
    * @throws IndexOutOfBoundsException for an illegal endpoint index value
    *         (<tt>fromIndex &lt; 0 || toIndex &gt; size ||
    *         fromIndex &gt; toIndex</tt>)
@@ -59,7 +62,8 @@ public class ListUtils {
    * @param list the original list
    * @param fromIndex low endpoint (inclusive) of the subList
    * @param toIndex high endpoint (exclusive) of the subList
-   * @return a view of the specified range within this list
+   * @return a copy of the elements in the given list that in a valid range within the given bounds
+   * @see #subList(List, int, int)
    */
   public static <T> List<T> safeSubList(List<T> list, int fromIndex, int toIndex) {
     // fix the range bounds, if needed
@@ -123,6 +127,7 @@ public class ListUtils {
    * Returns a standard {@link ArrayList} with the given elements (in contrast to {@link Arrays#asList},
    * which returns a very limited implementation of {@link List}).
    * @see Arrays#asList(Object[])
+   * @see com.google.common.collect.Lists#newArrayList(Object[])
    */
   @SafeVarargs
   public static <T> ArrayList<T> arrayList(T... a) {
@@ -154,7 +159,13 @@ public class ListUtils {
     return copy;
   }
 
-  /** Clears the given list and fills it with {@code n} occurrences of {@code value}. */
+  /**
+   * Clears the given list and fills it with {@code n} occurrences of {@code value}.
+   * <p>
+   * NOTE: unlike {@link Collections#fill(List, Object)}, this method always returns a list that contains
+   * exactly {@code n} elements.
+   * @return the same list instance that was passed in (for chaining)
+   */
   public static <L extends List<T>, T> L fill(L list, int n, T value) {
     list.clear();
     for (int i = 0; i < n; i++) {
@@ -180,7 +191,14 @@ public class ListUtils {
   }
 
   /**
-   * @return the subset of elements satisfying the given predicate
+   * Equivalent to the following Java 1.8 {@code Stream} operation:
+   * <pre>
+   *   list.stream().filter(predicate).collect(Collectors.toList());
+   * </pre>
+   *
+   * <i>NOTE: this method is not deprecated because it offers better performance than the above example</i>
+   *
+   * @return a new list containing the elements that satisfy the given predicate
    * @see CollectionUtils#filter(Iterable, Predicate)
    */
   public static <T> ArrayList<T> filter(List<T> list, Predicate<T> predicate) {

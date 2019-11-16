@@ -17,6 +17,7 @@
 
 package solutions.trsoftware.commons.shared.util;
 
+import com.google.common.collect.Iterables;
 import com.google.gwt.core.shared.GWT;
 import solutions.trsoftware.commons.shared.util.random.RandomCharGenerator;
 import solutions.trsoftware.commons.shared.util.text.Alphabet;
@@ -33,6 +34,8 @@ public class RandomUtils {
     TODO: might want to convert this class and all its static methods to a normal class that encapsulates a non-static Random instance (passed to the constructor).
     This would allow using seeded randoms to produce repeatable runs (if needed), as well as using instances of SecureRandom (if needed).
     Could provide a default static instance via RandomUtils.getDefaultInstance() if seeding isn't needed.
+    Could call the new class something like FluentRandom or EnhancedRandom, and it could be implemented as a decorator:
+     (extending java.util.Random and delegating all methods to the wrapped instance, in addition to adding our enhanced methods)
   */
 
   public static final Random rnd = new Random();
@@ -60,7 +63,10 @@ public class RandomUtils {
    * </p>
    * <p style="color: #6495ed; font-weight: bold;">
    *   TODO: rewrite this method using {@link java.text.BreakIterator#getCharacterInstance()} instead of
-   *   {@link String#charAt(int)} as suggested in <a href="http://stn.audible.com/abcs-of-unicode/#java-and-unicode">Java and Unicode (article)</a>.
+   *   {@link String#charAt(int)} as suggested in <a href="http://stn.audible.com/abcs-of-unicode/#java-and-unicode">Java and Unicode (article)</a>
+   *   (NOTE: GWT doesn't emulate {@link java.text.BreakIterator}, so instead can use our
+   *   {@link StringUtils#codePoints(String)} or {@link StringUtils#codePointsStream(String)} methods, in conjunction
+   *   with {@link StringBuilder#appendCodePoint(int)} to build the result string
    * </p>
    *
    * @param length the result will contain this number of chars
@@ -177,10 +183,9 @@ public class RandomUtils {
 
   /**
    * Intended as a GWT-compatible replacement for {@link Collections#shuffle(List)}.
-   * <p style="font-style: italic;">
-   *   NOTE: GWT now supports both {@link Collections#shuffle(List)} and {@link Collections#shuffle(List, Random)}
-   *   (at least as of GWT 2.8.x)
-   * </p>
+   *
+   * @deprecated GWT now supports both {@link Collections#shuffle(List)} and {@link Collections#shuffle(List, Random)}
+   * (at least as of GWT 2.8.x)
    */
   public static <T> void shuffle(List<T> list) {
     int size = list.size();
@@ -207,11 +212,15 @@ public class RandomUtils {
   }
 
   public static <T> List<T> randomSampleWithoutReplacement(Collection<T> collection, int sampleSize) {
+    return randomSampleWithoutReplacement(collection, sampleSize, rnd);
+  }
+
+  public static <T> List<T> randomSampleWithoutReplacement(Collection<T> collection, int sampleSize, Random rnd) {
     if (sampleSize > collection.size())
       throw new IllegalArgumentException("sampleSize > collection.size()");
 
     ArrayList<T> copy = new ArrayList<T>(collection);
-    shuffle(copy);
+    Collections.shuffle(copy, rnd);
     return ListUtils.subList(copy, 0, sampleSize);
   }
 
@@ -238,20 +247,15 @@ public class RandomUtils {
     return list.get(rnd.nextInt(list.size()));
   }
 
-  /** Returns a random element from the collection */
+  /** @return a random element from the collection, using the {@linkplain #rnd default RNG} */
   public static <T> T randomElement(Collection<T> collection) {
+    return randomElement(collection, rnd);
+  }
+
+  /** @return a random element from the collection, using the given RNG */
+  public static <T> T randomElement(Collection<T> collection, Random rnd) {
     int index = rnd.nextInt(collection.size());
-    if (collection instanceof List && collection instanceof RandomAccess)
-      return ((List<T>)collection).get(index);
-    // not a random access list - use this, slower seek
-    Iterator<T> iter = collection.iterator();
-    while (index > 0) {
-      iter.next();
-      index--;
-    }
-    return iter.next();
-    // NOTE: there's a more concise approach, but 50% slower:
-    //    return new ArrayList<T>(collection).get(rnd.nextInt(collection.size()));
+    return Iterables.get(collection, index);
   }
 
   /**

@@ -26,16 +26,21 @@ import java.util.SortedSet;
 import java.util.TreeSet;
 
 /**
- * Immutable numeric range, capable of generating random numbers within the
- * range.  The endpoints of the range MUST BE either {@link Integer}, {@link Long}, {@link Double}, or {@link Float}.
+ * Immutable numeric range
+ * (<a href="https://en.wikipedia.org/wiki/Interval_(mathematics)#Terminology">closed bounded interval</a>).
+ * <p>
+ * Provides operations similar to a {@link java.util.Set} as well as utility methods for things like
+ * generating random numbers within the range and parsing/formatting string representations.
+ * <p>
+ * The endpoints of the range MUST BE either {@link Integer}, {@link Long}, {@link Double}, or {@link Float}.
  * and their values must fit into the {@code double} range for this class to function correctly.
  * <p>
  * NOTE: this class is similar to the {@code xrange} type in Python.
  *
- * @see com.google.common.collect.Range
  * @author Alex
+ * @see com.google.common.collect.Range
  */
-public class NumberRange<T extends Number & Comparable> implements Iterable<T> {
+public class NumberRange<T extends Number & Comparable<T>> implements Iterable<T> {
 
   // NOTE: can't extend Comparable<T> because the fromDouble wouldn't compile under those circumstances.
 
@@ -220,8 +225,11 @@ public class NumberRange<T extends Number & Comparable> implements Iterable<T> {
    * Parses a string of the form "1, 2, 6..10, 12, 19..23", where each entry
    * is either an integer or an integer range, and returns a sorted set of all the integers
    * represented by this string (in ascending order).
-   * @param str
-   * @return
+   * @param str a string like "1, 2, 6..10, 12, 19..23"
+   * @return a set containing all the integers encapsulated by the ranges in the given string
+   * (e.g. <code>{1,2,6,7,8,9,10,12,19,20,21,22,23}</code> for the above example)
+   * @see com.google.common.collect.RangeSet
+   * @see com.google.common.collect.ContiguousSet
    */
   public static SortedSet<Integer> parseIntRangeList(String str) {
     if (StringUtils.isBlank(str))

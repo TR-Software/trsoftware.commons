@@ -17,6 +17,9 @@
 
 package solutions.trsoftware.commons.server.io;
 
+import solutions.trsoftware.commons.shared.util.StringUtils;
+
+import javax.annotation.Nonnull;
 import java.io.PrintStream;
 
 /**
@@ -29,7 +32,16 @@ public class PrefixedPrintStream extends PrintStream {
 
   private String prefix;
   private PrintStream delegate;
+  /**
+   * Number of space chars to print after the {@link #prefix}
+   */
+  private int indent;
 
+  /**
+   * @param prefix will be prepended to every invocation of {@link #println(String)} and {@link #printf(String, Object...)}
+   * <br><strong>WARNING: </strong> if this string contains any {@code printf} formatting sequences (e.g. {@code "%s"}),
+   * all calls to {@link #printf(String, Object...)} must include the corresponding values.
+   */
   public PrefixedPrintStream(String prefix, PrintStream delegate) {
     super(delegate);
     this.prefix = prefix;
@@ -40,17 +52,41 @@ public class PrefixedPrintStream extends PrintStream {
     return delegate;
   }
 
+  public String getPrefix() {
+    return prefix;
+  }
+
+  public void setPrefix(String prefix) {
+    this.prefix = prefix;
+  }
+
+  public int getIndent() {
+    return indent;
+  }
+
+  /**
+   * @param indent the number of space chars to print after the {@link #prefix}
+   */
+  public void setIndent(int indent) {
+    this.indent = indent;
+  }
+
+  @Nonnull
+  private String prependPrefix(String s) {
+    return prefix + StringUtils.indent(indent, s);
+  }
+
   // override methods to add the prefix
 
 
   @Override
   public void println(String x) {
-    super.println(prefix + x);
+    super.println(prependPrefix(x));
   }
 
   @Override
   public PrintStream printf(String format, Object... args) {
-    return super.printf(prefix + format, args);
+    return super.printf(prependPrefix(format), args);
   }
 
 }

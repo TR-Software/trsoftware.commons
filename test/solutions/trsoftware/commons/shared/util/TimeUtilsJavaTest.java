@@ -18,10 +18,19 @@
 package solutions.trsoftware.commons.shared.util;
 
 import junit.framework.TestCase;
+import solutions.trsoftware.commons.server.util.Clock;
+import solutions.trsoftware.commons.server.util.time.TemporalUnitImpl;
+import solutions.trsoftware.commons.shared.testutil.AssertUtils;
+
+import java.time.Duration;
+import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.ZoneOffset;
+import java.time.temporal.TemporalUnit;
 
 import static solutions.trsoftware.commons.shared.util.TimeUtils.*;
 
-public class TimeUtilsTest extends TestCase {
+public class TimeUtilsJavaTest extends TestCase {
 
   public void testGenerateRelativeTimeElapsedString() throws Exception {
 
@@ -115,5 +124,38 @@ public class TimeUtilsTest extends TestCase {
     assertFalse(isElapsed(10d, 0d, 10d));
     assertTrue(isElapsed(10, 0, 11));
     assertTrue(isElapsed(10d, 0d, 11d));
+  }
+
+  /**
+   * Compares {@link TimeUtils#truncateTime(long, long)} to {@link LocalDateTime#truncatedTo(TemporalUnit)}
+   * and {@link Instant#truncatedTo(TemporalUnit)}.
+   */
+  public void testTruncateTime() {
+    // test various truncation methods for rounding to the closest 15-minute time frame
+    Clock clock = new Clock();
+    final long startTime = clock.stopTime();
+    final long endTime = startTime + java.util.concurrent.TimeUnit.HOURS.toMillis(2);
+    final int increment = 59_123;
+//    final int increment = 1_000;
+    final TemporalUnit unit = new TemporalUnitImpl(Duration.ofMinutes(15));
+    System.out.printf("%42s,%22s,%22s,%38s%n", "time", "LDT.truncateTo", "Instant.truncateTo", "truncateTime(long)");
+    while (clock.millis() < endTime) {
+      LocalDateTime localDateTime = LocalDateTime.now(clock);
+      long timeMillis = clock.millis();
+      Instant timeInstant = clock.instant();
+      LocalDateTime ldtTrunc = localDateTime.truncatedTo(unit);
+      Instant ldtTruncInstant = ldtTrunc.toInstant(ZoneOffset.UTC);
+      Instant instantTrunc = timeInstant.truncatedTo(unit);
+      long dur = unit.getDuration().toMillis();
+      long longTrunc = solutions.trsoftware.commons.shared.util.TimeUtils.truncateTime(timeMillis, dur);
+      Instant longTruncInstant = Instant.ofEpochMilli(longTrunc);
+      System.out.printf("%42s,%22s,%22s,%38s%n",
+          String.format("%d (%s)", timeMillis, timeInstant),
+          ldtTruncInstant,
+          instantTrunc,
+          String.format("%d (%s)", longTrunc, longTruncInstant));
+      AssertUtils.assertAllEqual(instantTrunc, ldtTruncInstant, longTruncInstant);
+      clock.advanceTime(increment);
+    }
   }
 }

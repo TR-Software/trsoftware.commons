@@ -18,10 +18,13 @@
 package solutions.trsoftware.commons.shared.util.callables;
 
 /**
- A function &empty; &rarr; {@link R} that might throw exception {@link E}
+ * A function &empty; &rarr; {@link R} that might throw exception {@link E}.
+ *
+ * Basically the same as {@link java.util.concurrent.Callable}, but allows the exception type to be parametrized
  *
  * @author Alex
  */
+@FunctionalInterface
 public interface Function0t<R, E extends Throwable> {
   R call() throws E;
 }

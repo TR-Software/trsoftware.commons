@@ -23,7 +23,7 @@ import java.util.function.Supplier;
  * A function &empty; &rarr; {@link R}
  *
  * @author Alex
- * @deprecated made obsolete by {@link java.util.function.Supplier}
+ * @deprecated made obsolete by {@link java.util.function.Supplier} in Java 1.8+
  */
 public interface Function0<R> extends Supplier<R> {
   R call();

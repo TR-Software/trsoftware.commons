@@ -37,7 +37,7 @@
   </replace-with>
 
   <source path="client">
-    <!-- All tests that don't extend GWTTestCase and use code that's not Java-compatible
+    <!-- All tests that don't extend GWTTestCase and use code that's not GWT-compatible
      should end in .*JavaTest.java, to be excluded from the GWT compile -->
     <exclude name="**/*JavaTest.java"/>
   </source>

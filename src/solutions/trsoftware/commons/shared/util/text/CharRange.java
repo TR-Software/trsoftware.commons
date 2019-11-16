@@ -83,11 +83,38 @@ public class CharRange implements CharSequence, Iterable<Character> {
 
   @Override
   public CharSequence subSequence(int start, int end) {
-    return toString().subSequence(start, end);
+    // check bounds
+    if (start < 0 || end < 0 || start > end || end > length())
+      throw new IndexOutOfBoundsException(start + ", " + end);
+    int len = end - start;
+    if (len == 0)
+      return "";  // we have no way of representing an empty sequence with CharRange
+    return new CharRange(charAt(start), charAt(end-1));
   }
 
   @Override
   public Iterator<Character> iterator() {
     return new CharSequenceIterator(this);
+  }
+
+  @Override
+  public boolean equals(Object o) {
+    if (this == o)
+      return true;
+    if (o == null || getClass() != o.getClass())
+      return false;
+
+    CharRange that = (CharRange)o;
+
+    if (min != that.min)
+      return false;
+    return max == that.max;
+  }
+
+  @Override
+  public int hashCode() {
+    int result = (int)min;
+    result = 31 * result + (int)max;
+    return result;
   }
 }

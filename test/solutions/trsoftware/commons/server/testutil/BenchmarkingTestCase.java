@@ -88,7 +88,7 @@ public abstract class BenchmarkingTestCase extends TestCase {
     private int iterations;
     /** The benchmark result (total time or memory) */
     private long measurement;
-    /** The measurement per 1500 iterations */
+    /** The measurement per 1000 iterations */
     private double normalizedMeasurement;
     /** The type of value represented by the measurement (total time or memory) */
     private BenchmarkType measurementType;

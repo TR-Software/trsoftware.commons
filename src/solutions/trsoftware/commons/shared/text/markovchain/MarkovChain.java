@@ -18,6 +18,7 @@
 package solutions.trsoftware.commons.shared.text.markovchain;
 
 import solutions.trsoftware.commons.shared.text.markovchain.dict.CodingDictionary;
+import solutions.trsoftware.commons.shared.text.markovchain.dict.ShortArrayCodingDictionary;
 import solutions.trsoftware.commons.shared.text.markovchain.dict.ShortHashArrayCodingDictionary;
 import solutions.trsoftware.commons.shared.text.markovchain.state.State;
 import solutions.trsoftware.commons.shared.util.text.TextTokenizer;
@@ -68,13 +69,11 @@ public class MarkovChain implements Serializable {
   }
 
   /**
-   * This version of the constructor can be used to provide a custom dictionary coding strategy
-   *
-   * Benchmarks show that ShortArrayCodingDictionary is best when trying to reduce
-   * memory overhead and ShortHashArrayCodingDictionary is best when trying to
-   * reduce construction speed.
-   *
-   * Benchmark results:
+   * This version of the constructor can be used to provide a custom dictionary coding strategy.
+   * <p>
+   * A simple benchmark showed that {@link ShortArrayCodingDictionary} is best when trying to reduce
+   * memory overhead and {@link ShortHashArrayCodingDictionary} is best when trying to
+   * reduce construction speed:
    * <pre>
    *  Training order 2 MarkovChains on aliceInWonderlandCorpus.txt with various CodingDictionary implementations:
    *    ShortHashArrayCodingDictionary used up 784.859 KB of memory and 17.81 ms avg. time
@@ -83,8 +82,18 @@ public class MarkovChain implements Serializable {
    *    ShortArrayCodingDictionaryUtf8 used up 719.922 KB of memory and 265.50 ms avg. time
    * </pre>
    *
+   * <p style="color: #0073BF; font-weight: bold;">
+   *   TODO(10/14/2019): can use {@link java.lang.instrument.Instrumentation#getObjectSize(Object)} to perform better
+   *   memory benchmarking of the various {@link CodingDictionary} implementations.
+   *   See <a href="https://www.baeldung.com/java-size-of-object">this article</a> for an example.
+   *   <br>
+   *   Additional resources:
+   *   <br>* <a href="https://github.com/jbellis/jamm">jamm library</a> (javaagent able to estimate "deep" object size based on the above)
+   *   <br>* <a href="https://stackoverflow.com/questions/9368764/calculate-size-of-object-in-java">related questions on StackOverflow</a>
+   * </p>
+   *
    * @param dict An instance of the desired dictionary implementation depending
-   * on the desired memory/construction speed tradeoff.
+   * on the desired memory usage vs.construction speed tradeoff.
    *
    */
   public MarkovChain(int order, TextTokenizer tokenizer, CodingDictionary dict, Random rnd) {

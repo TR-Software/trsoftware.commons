@@ -33,6 +33,7 @@ public abstract class LazyReference<T> {
    * <p style="color: #6495ed; font-weight: bold;">
    *   TODO: perhaps init the value to some dummy object instead of {@code null}, to
    *   disambiguate between a {@code null} value returned by {@link #create()} and the "not initialized" state?
+   *   (can also use an {@link java.util.concurrent.atomic.AtomicBoolean} for this purpose).
    * </p>
    */
   protected volatile T value;

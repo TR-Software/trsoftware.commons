@@ -20,6 +20,9 @@ package solutions.trsoftware.commons.shared.util;
 import com.google.gwt.core.client.Duration;
 import com.google.gwt.core.shared.GWT;
 
+import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.temporal.TemporalUnit;
 import java.util.Date;
 
 import static solutions.trsoftware.commons.shared.util.TimeUnit.*;
@@ -198,4 +201,51 @@ public class TimeUtils {
     return (currentTime - startTime) > duration;
   }
 
+  /**
+   * Rounds down the given time value to the nearest increment of the given duration.
+   * <p>
+   * This method takes the idea behind the {@code truncatedTo(TemporalUnit)} methods provided by various
+   * {@link java.time} API classes, and applies it to raw epoch millis values.
+   *
+   * <h3>Examples:</h3>
+   * Given a {@code unitDurationMillis} equal to 900000ms (15 minutes), this method will produce the following results:
+   * <table>
+   *   <tr>
+   *     <th>argument</th>
+   *     <th>result</th>
+   *   </tr>
+   *   <tr>
+   *     <td>{@code 1569578905651} (<i>2019-09-27T10:08:25.651Z</i>)</td>
+   *     <td>{@code 1569578400000} (<i>2019-09-27T10:00:00Z</i>)</td>
+   *   </tr>
+   *   <tr>
+   *     <td>{@code 1569579319512} (<i>2019-09-27T10:15:19.512Z</i>)</td>
+   *     <td>{@code 1569579300000} (<i>2019-09-27T10:15:00Z</i>)</td>
+   *   </tr>
+   *   <tr>
+   *     <td>{@code 1569580442849} (<i>2019-09-27T10:34:02.849Z</i>)</td>
+   *     <td>{@code 1569580200000} (<i>2019-09-27T10:30:00Z</i>)</td>
+   *   </tr>
+   *   <tr>
+   *     <td>{@code 1569581980047} (<i>2019-09-27T10:59:40.047Z</i>)</td>
+   *     <td>{@code 1569581100000} (<i>2019-09-27T10:45:00Z</i>)</td>
+   *   </tr>
+   * </table>
+   * <em>NOTE:</em> the above results are identical to those produced by {@link Instant#truncatedTo(TemporalUnit)}
+   * and {@link LocalDateTime#truncatedTo(TemporalUnit)} (given a {@link TemporalUnit} that represents 15 minutes).
+   *
+   * TODO: could move this to the "shared.util" package
+   *
+   * @param timeMillis the time to truncate (round down)
+   * @param unitDurationMillis the modulus for the rounding
+   * @return the highest value {@code T} such that {@code T <= timeMillis} and {@code T % unitDurationMillis == 0}
+   *
+   *
+   * @see Instant#truncatedTo(TemporalUnit)
+   * @see LocalDateTime#truncatedTo(TemporalUnit)
+   */
+  public static long truncateTime(long timeMillis, long unitDurationMillis) {
+    // TODO: test this with negative values (might need to use floorMod here)
+    return timeMillis - (timeMillis % unitDurationMillis);
+  }
 }

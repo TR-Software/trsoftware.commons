@@ -140,32 +140,6 @@ public abstract class ServerAssertUtils {
   }
 
   /**
-   * Tests two lists for equality using a custom comparison function to compare the elements.
-   * <p>
-   * This is similar to {@link junit.framework.Assert#assertEquals(Object, Object) assertEquals(List, List)}, but
-   * allows the elements to be tested for equality using something other than {@link Object#equals(Object)}
-   *
-   * @param equalityAssertion a function that takes a pair of elements and throws an exception if it doesn't consider
-   * them to be equal.
-   * @param <E> the type of elements in the given lists
-   * @throws AssertionFailedError if {@code equalityAssertion} throws an exception for any pair of elements
-   */
-  public static <E> void assertListsEqual(List<E> expected, List<E> actual, BiConsumerThrows<E, E, Exception> equalityAssertion) {
-    assertEquals(expected.size(), actual.size());
-    for (int i = 0; i < expected.size(); i++) {
-      E a = expected.get(i);
-      E b = actual.get(i);
-      try {
-        equalityAssertion.accept(a, b);
-      }
-      catch (Exception ex) {
-        ex.printStackTrace();
-        throw new AssertionFailedError(String.format("Lists differ on element %d: expected:<%s> but was:<%s>", i, expected, actual));
-      }
-    }
-  }
-
-  /**
    * Tests the given function against the expected results.
    * <p>
    * In other words, asserts that

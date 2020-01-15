@@ -17,6 +17,8 @@
 
 package solutions.trsoftware.commons.shared.util.stats;
 
+import java.util.Collection;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
@@ -25,6 +27,7 @@ import java.util.stream.Stream;
  * Keeps track of the maximum in a sequence of Comparable objects.
  *
  * @see Stream#max(Comparator)
+ * @see Collections#max(Collection)
  * @author Alex
  */
 public class MaxComparable<T extends Comparable<T>> extends AbstractMinMaxComparable<T, MaxComparable<T>> {

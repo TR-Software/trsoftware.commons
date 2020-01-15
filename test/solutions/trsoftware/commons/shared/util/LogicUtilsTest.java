@@ -20,6 +20,7 @@ package solutions.trsoftware.commons.shared.util;
 import junit.framework.TestCase;
 
 import java.util.ArrayList;
+import java.util.Collections;
 
 import static solutions.trsoftware.commons.shared.util.LogicUtils.*;
 
@@ -66,16 +67,18 @@ public class LogicUtilsTest extends TestCase {
     assertFalse(eq(null, "foo"));
   }
 
-  public void testFirstNonNull() throws Exception {
+  public void test_firstNonNull() throws Exception {
+    // 1) test the 2-arg version of this method
     assertNull(firstNonNull(null, null));
     assertEquals("", firstNonNull(null, ""));
     assertEquals("", firstNonNull("", null));
     assertEquals("", firstNonNull("", "foo"));
     assertEquals("foo", firstNonNull("foo", ""));
+    // 2) test the var-args version
     ArrayList<String> args = ListUtils.fill(new ArrayList<String>(), 5, null);
     args.add("foo");
     for (int i = 0; i < 100; i++) {
-      RandomUtils.shuffle(args);
+      Collections.shuffle(args);
       assertEquals("foo", firstNonNull(args.toArray()));
     }
   }

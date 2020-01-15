@@ -22,10 +22,11 @@ import solutions.trsoftware.commons.server.io.ResourceLocator;
 import solutions.trsoftware.commons.shared.util.StringTokenizer;
 import solutions.trsoftware.commons.shared.util.StringUtils;
 import solutions.trsoftware.commons.shared.util.VersionNumber;
-import solutions.trsoftware.commons.shared.util.callables.Function0;
 import solutions.trsoftware.commons.shared.util.callables.FunctionN;
+import solutions.trsoftware.commons.shared.util.function.FunctionalUtils;
 import solutions.trsoftware.commons.shared.util.reflect.ClassNameParser;
 
+import javax.annotation.Nonnull;
 import javax.lang.model.SourceVersion;
 import javax.lang.model.element.Modifier;
 import java.io.File;
@@ -48,6 +49,7 @@ public abstract class ReflectionUtils {
 
   /**
    * Maps the primitive wrapper types to their corresponding primitive types.
+   * @see com.google.common.primitives.Primitives
    */
   public static final ImmutableBiMap<Class, Class> WRAPPER_TYPES = ImmutableBiMap.<Class, Class>builder()
       .put(Boolean.class, Boolean.TYPE)
@@ -63,6 +65,7 @@ public abstract class ReflectionUtils {
 
   /**
    * @return true iff the given type is one of the wrapper classes for a primitive.
+   * @see Class#isPrimitive()
    */
   public static boolean isPrimitiveWrapper(Class type) {
     return WRAPPER_TYPES.containsKey(type);
@@ -82,6 +85,7 @@ public abstract class ReflectionUtils {
    * @see #isPrimitiveWrapper(Class)
    * @see #primitiveTypeFor(Class)
    * @see #wrapperTypeFor(Class)
+   * @see com.google.common.primitives.Primitives#unwrap
    */
   public static Class unwrap(Class type) {
     if (isPrimitiveWrapper(type))
@@ -92,6 +96,7 @@ public abstract class ReflectionUtils {
   /**
    * @return the wrapper class corresponding to the given primitive type, or {@code null} if the given class is not
    * a primitive type.
+   * @see com.google.common.primitives.Primitives#wrap
    */
   public static Class wrapperTypeFor(Class primitive) {
     return WRAPPER_TYPES.inverse().get(primitive);
@@ -116,68 +121,86 @@ public abstract class ReflectionUtils {
   }
 
   /**
-   * Creates a factory for the given class using the given constructor args. Any checked exception caught
-   * while trying to invoke the constructor by reflection will be rethrown as {@link IllegalArgumentException}.
+   * Creates a factory for the given class using the given constructor args.
+   * <p>
+   * The returned function will rethrow any checked exception thrown by {@link Constructor#newInstance(Object...)} as a
+   * {@link RuntimeException}.
    *
-   * @return A factory that will keep creating new instances of cls, based on the given constructor args.
+   * @return a factory that creates new instances of {@code cls} by calling {@link Constructor#newInstance(Object...)}
+   *     with the given args
+   * @throws IllegalArgumentException if any exception was thrown by {@link Class#getConstructor(Class[])}
    */
   public static <T> FunctionN<T> newInstanceFactory(Class<T> cls, Class... constructorParamTypes) {
-    try {
-      final Constructor<T> constructor = cls.getConstructor(constructorParamTypes);
-      constructor.setAccessible(true);
-      return new FunctionN<T>() {
-        @Override
-        public T call(Object... args) {
-          try {
-            return constructor.newInstance(args);
-          }
-          catch (Exception e) {
-            e.printStackTrace();
-            throw new IllegalArgumentException(e);
-          }
-        }
-      };
-    }
-    catch (NoSuchMethodException e) {
-      e.printStackTrace();
-      throw new IllegalArgumentException(e);
-    }
-  }
-
-  /**
-   * Creates a factory for the given class using its default (0-arg) constructor. Any checked exception caught
-   * while trying to invoke the constructor by reflection will be rethrown as {@link IllegalArgumentException}.
-   *
-   * @return A factory that will keep creating new instances of cls, based on the given constructor args.
-   */
-  public static <T> Function0<T> newInstanceFactory0(final Class<T> cls) {
-    return new Function0<T>() {
-      @Override
-      public T call() {
-        return newInstanceUnchecked(cls);
+    final Constructor<T> constructor = getConstructorUnchecked(cls, constructorParamTypes);
+    return args -> {
+      try {
+        return constructor.newInstance(args);
+      }
+      catch (ReflectiveOperationException e) {
+        e.printStackTrace();
+        throw new IllegalArgumentException(e);
       }
     };
   }
 
   /**
-   * Creates a supplier of instances of the given class using its default (0-arg) constructor. Any checked exception caught
-   * while trying to invoke the constructor by reflection will be rethrown as {@link IllegalArgumentException}.
-   * <p>
-   * This is the {@link java.util.function} version of {@link #newInstanceFactory0(Class)}.
+   * Obtains the constructor of given class that matches the given signature args and calls
+   * {@link Constructor#setAccessible(boolean) setAccessible(true)} to suppress Java language access
+   * checking when it is used.
    *
-   * @return A factory that will keep creating new instances of cls, based on the given constructor args.
+   * @return the constructor of given class that matches the given signature.
+   * @throws IllegalArgumentException if any exception was thrown by {@link Class#getConstructor(Class[])}
+   */
+  @Nonnull
+  public static <T> Constructor<T> getConstructorUnchecked(Class<T> cls, Class... constructorParamTypes) {
+    final Constructor<T> constructor;
+    try {
+      constructor = cls.getConstructor(constructorParamTypes);
+    }
+    catch (NoSuchMethodException e) {
+      e.printStackTrace();
+      throw new IllegalArgumentException(e);
+    }
+    constructor.setAccessible(true);
+    return constructor;
+  }
+
+  /**
+   * Creates a supplier of instances of the given class using its default (0-arg) constructor.
+   * <p>
+   * The returned supplier will rethrow any checked exception thrown by {@link Class#newInstance()} as a
+   * {@link RuntimeException}.
+   *
+   * @return a factory that creates new instances of {@code cls} by calling {@link Class#newInstance()}.
    */
   public static <T> Supplier<T> newInstanceSupplier(final Class<T> cls) {
     return () -> newInstanceUnchecked(cls);
   }
 
   /**
+   * Creates a supplier of instances of the given class with the given constructor args, using the constructor whose
+   * signature matches the types of the given args.
+   * <p>
+   * The returned supplier will rethrow any checked exception thrown by {@link Constructor#newInstance(Object...)} as a
+   * {@link RuntimeException}.
+   *
+   * @return a factory that creates new instances of {@code cls} by calling
+   *     {@link Constructor#newInstance(Object...)}.
+   * @throws IllegalArgumentException if any exception was thrown by {@link Class#getConstructor(Class[])}
+   */
+  public static <T> Supplier<T> newInstanceSupplier(final Class<T> cls, Object... constructorArgs) {
+    Class[] typeSignature = Arrays.stream(constructorArgs).map(Object::getClass).toArray(Class[]::new);
+    return FunctionalUtils.partial(newInstanceFactory(cls, typeSignature));
+  }
+
+  /**
    * Instantiates the given class using its default (0-arg) constructor. Any checked exception caught
-   * while trying to invoke the constructor by reflection will be rethrown as {@link IllegalArgumentException}.
+   * while trying to invoke the constructor by reflection will be rethrown as {@link RuntimeException}.
    *
    * @param cls the class to instantiate
    * @param <T> the generic type of the class
    * @return a new instance of the given class
+   * @throws RuntimeException if {@link Class#newInstance()} throws an exception
    */
   public static <T> T newInstanceUnchecked(Class<T> cls) {
     try {
@@ -185,7 +208,7 @@ public abstract class ReflectionUtils {
     }
     catch (Exception e) {
       e.printStackTrace();
-      throw new IllegalArgumentException(e);
+      throw new RuntimeException(e);
     }
   }
 

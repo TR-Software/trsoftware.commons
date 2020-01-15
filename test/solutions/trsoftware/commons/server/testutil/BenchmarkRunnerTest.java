@@ -1,6 +1,5 @@
 package solutions.trsoftware.commons.server.testutil;
 
-import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.ListMultimap;
 import com.google.common.collect.Multimaps;
 import junit.framework.TestCase;
@@ -11,16 +10,16 @@ import solutions.trsoftware.commons.shared.util.StringUtils;
 
 import java.util.*;
 
-import static solutions.trsoftware.commons.server.testutil.Benchmark.*;
+import static solutions.trsoftware.commons.server.testutil.BenchmarkRunner.*;
 import static solutions.trsoftware.commons.shared.util.CollectionUtils.addFromSupplier;
 
 /**
- * Unit tests for {@link Benchmark}
+ * Unit tests for {@link BenchmarkRunner}
  *
  * @author Alex
  * @since 10/31/2019
  */
-public class BenchmarkTest extends TestCase {
+public class BenchmarkRunnerTest extends TestCase {
 
   public void testPrintResults() throws Exception {
     Random rnd = new Random(1234);
@@ -50,12 +49,12 @@ public class BenchmarkTest extends TestCase {
   }
 
   /**
-   * Tests {@link Benchmark.ResultSet#combine(ResultSet, ResultSet)}
-   * (and, as a consequence, also {@link Benchmark.Result#add(Result)})
+   * Tests {@link BenchmarkRunner.ResultSet#combine(ResultSet, ResultSet)}
+   * (and, as a consequence, also {@link BenchmarkRunner.Result#add(Result)})
    */
   @Slow
   public void testCombine() throws Exception {
-    Benchmark benchmarkRunner = new Benchmark();
+    BenchmarkRunner benchmarkRunner = new BenchmarkRunner();
     benchmarkRunner.setEqualNumIterations(true);
 
     ListMultimap<BenchmarkType, ResultSet> resultSets = Multimaps.newListMultimap(
@@ -92,10 +91,6 @@ public class BenchmarkTest extends TestCase {
       combined.printResults();
       // TODO: verify some assertions on the combined ResultSet
     }
-
-    fail("TODO"); // TODO: verify some assertions on each combined ResultSet above
-
-
   }
 
   // Some benchmark task examples:

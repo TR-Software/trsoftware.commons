@@ -2,6 +2,7 @@ package solutions.trsoftware.commons.shared.util;
 
 import junit.framework.TestCase;
 import org.jetbrains.annotations.NotNull;
+import solutions.trsoftware.commons.shared.util.compare.RichComparable;
 
 import java.util.function.Function;
 
@@ -43,41 +44,41 @@ public class RichComparableTest extends TestCase {
    * @param cloneFcn a function that clones a given object of this type
    */
   public static <T extends RichComparable<T>> void checkRichComparisons(T a, T b, Function<T, T> cloneFcn) {
-    assertTrue(b.greaterThan(a));
-    assertFalse(a.greaterThan(b));
-    assertFalse(b.greaterThan(b));
-    assertFalse(a.greaterThan(a));
+    assertTrue(b.isGreaterThan(a));
+    assertFalse(a.isGreaterThan(b));
+    assertFalse(b.isGreaterThan(b));
+    assertFalse(a.isGreaterThan(a));
 
-    assertTrue(b.greaterThanOrEqualTo(a));
-    assertFalse(a.greaterThanOrEqualTo(b));
-    assertTrue(b.greaterThanOrEqualTo(b));
-    assertTrue(a.greaterThanOrEqualTo(a));
+    assertTrue(b.isGreaterThanOrEqualTo(a));
+    assertFalse(a.isGreaterThanOrEqualTo(b));
+    assertTrue(b.isGreaterThanOrEqualTo(b));
+    assertTrue(a.isGreaterThanOrEqualTo(a));
 
-    assertFalse(b.equalTo(a));
-    assertFalse(a.equalTo(b));
-    assertTrue(b.equalTo(b));
-    assertTrue(a.equalTo(a));
+    assertFalse(b.isEqualTo(a));
+    assertFalse(a.isEqualTo(b));
+    assertTrue(b.isEqualTo(b));
+    assertTrue(a.isEqualTo(a));
     T aCopy = cloneFcn.apply(a);
     assertNotSame(a, aCopy);
-    assertTrue(a.equalTo(aCopy));
+    assertTrue(a.isEqualTo(aCopy));
     T bCopy = cloneFcn.apply(b);
     assertNotSame(b, bCopy);
-    assertTrue(b.equalTo(bCopy));
+    assertTrue(b.isEqualTo(bCopy));
 
-    assertTrue(b.notEqualTo(a));
-    assertTrue(a.notEqualTo(b));
-    assertFalse(b.notEqualTo(b));
-    assertFalse(a.notEqualTo(a));
+    assertTrue(b.isNotEqualTo(a));
+    assertTrue(a.isNotEqualTo(b));
+    assertFalse(b.isNotEqualTo(b));
+    assertFalse(a.isNotEqualTo(a));
 
-    assertTrue(a.lessThanOrEqualTo(b));
-    assertFalse(b.lessThanOrEqualTo(a));
-    assertTrue(b.lessThanOrEqualTo(b));
-    assertTrue(a.lessThanOrEqualTo(a));
+    assertTrue(a.isLessThanOrEqualTo(b));
+    assertFalse(b.isLessThanOrEqualTo(a));
+    assertTrue(b.isLessThanOrEqualTo(b));
+    assertTrue(a.isLessThanOrEqualTo(a));
 
-    assertTrue(a.lessThan(b));
-    assertFalse(b.lessThan(a));
-    assertFalse(b.lessThan(b));
-    assertFalse(a.lessThan(a));
+    assertTrue(a.isLessThan(b));
+    assertFalse(b.isLessThan(a));
+    assertFalse(b.isLessThan(b));
+    assertFalse(a.isLessThan(a));
   }
 
 }

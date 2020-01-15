@@ -17,7 +17,7 @@
 
 package solutions.trsoftware.commons.client.bridge.json;
 
-import java.util.Collection;
+import java.util.Set;
 
 
 /**
@@ -47,5 +47,5 @@ public interface JSONObject {
   boolean hasKey(String key);
   /** Returns a properly formatted JSON string representation of this object. */
   String toString();
-  Collection<String> keys();
+  Set<String> keys();
 }

@@ -19,7 +19,7 @@ package solutions.trsoftware.commons.shared.util;
 
 import junit.framework.TestCase;
 
-import static solutions.trsoftware.commons.client.util.TestUtils.randomInts;
+import static solutions.trsoftware.commons.shared.util.TestUtils.randomInts;
 
 /**
  * @author Alex

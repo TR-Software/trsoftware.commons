@@ -23,14 +23,15 @@ import java.util.NoSuchElementException;
 
 /**
  * Base class to help implement iterators over indexed sequences.
+ * Essentially an Iterator version of an indexed for-loop.
  *
  * @author Alex, 4/27/2016
  */
 public abstract class IndexedIterator<T> implements Iterator<T> {
 
-  /** The lowest index value (iteration will stop when {@link #i} is less than this value) */
-  protected final int min;
-  /** The largest index value (iteration will stop when {@link #i} is greater than or equal to this value) */
+  /** The starting index value (iteration will start with {@link #i} equal to this value) */
+  protected final int start;
+  /** Upper limit for the index value (iteration will stop when {@link #i} is greater than or equal to this value) */
   protected final int limit;
   /** The next index value to be returned */
   protected int i;
@@ -46,11 +47,11 @@ public abstract class IndexedIterator<T> implements Iterator<T> {
   /**
    * Creates a new instance to iterate indices in the range {@code [start, limit[}
    *
-   * @param start the value for {@link #min}
-   * @param limit the value for {@link #limit}
+   * @param start initial index value (inclusive)
+   * @param limit upper limit for the index value (exclusive)
    */
   public IndexedIterator(int start, int limit) {
-    this.min = start;
+    this.start = start;
     this.limit = limit;
     i = start;
   }

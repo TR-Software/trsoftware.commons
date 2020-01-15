@@ -34,33 +34,15 @@ public class AssertUtilsTest extends TestCase {
     assertAllEqual(1, 1);
     assertAllEqual(1, 1, 1);
 
-    assertThrows(AssertionFailedError.class, new Runnable() {
-      public void run() {
-        assertAllEqual(1, 2);
-      }
-    });
-
-    assertThrows(AssertionFailedError.class, new Runnable() {
-      public void run() {
-        assertAllEqual(1, 1, 2);
-      }
-    });
+    assertThrows(AssertionFailedError.class, (Runnable)() -> assertAllEqual(1, 2));
+    assertThrows(AssertionFailedError.class, (Runnable)() -> assertAllEqual(1, 1, 2));
 
     assertAllEqual("a");
     assertAllEqual("a", "a");
     assertAllEqual("a", "a", "a");
 
-    assertThrows(AssertionFailedError.class, new Runnable() {
-      public void run() {
-        assertAllEqual("a", "b");
-      }
-    });
-
-    assertThrows(AssertionFailedError.class, new Runnable() {
-      public void run() {
-        assertAllEqual("a", "a", "b");
-      }
-    });
+    assertThrows(AssertionFailedError.class, (Runnable)() -> assertAllEqual("a", "b"));
+    assertThrows(AssertionFailedError.class, (Runnable)() -> assertAllEqual("a", "a", "b"));
 
   }
 
@@ -69,59 +51,24 @@ public class AssertUtilsTest extends TestCase {
     assertAllEqualAndNotNull(1, 1);
     assertAllEqualAndNotNull(1, 1, 1);
 
-    assertThrows(AssertionFailedError.class, new Runnable() {
-      public void run() {
-        assertAllEqualAndNotNull(1, 2);
-      }
-    });
-
-    assertThrows(AssertionFailedError.class, new Runnable() {
-      public void run() {
-        assertAllEqualAndNotNull(1, 1, 2);
-      }
-    });
-
-    assertThrows(AssertionFailedError.class, new Runnable() {
-      public void run() {
-        assertAllEqualAndNotNull(null, 1, 2);
-      }
-    });
+    assertThrows(AssertionFailedError.class, (Runnable)() -> assertAllEqualAndNotNull(1, 2));
+    assertThrows(AssertionFailedError.class, (Runnable)() -> assertAllEqualAndNotNull(1, 1, 2));
+    assertThrows(AssertionFailedError.class, (Runnable)() -> assertAllEqualAndNotNull(null, 1, 2));
 
     assertAllEqualAndNotNull("a");
     assertAllEqualAndNotNull("a", "a");
     assertAllEqualAndNotNull("a", "a", "a");
 
-    assertThrows(AssertionFailedError.class, new Runnable() {
-      public void run() {
-        assertAllEqualAndNotNull("a", "b");
-      }
-    });
-
-    assertThrows(AssertionFailedError.class, new Runnable() {
-      public void run() {
-        assertAllEqualAndNotNull("a", "a", "b");
-      }
-    });
-
-    assertThrows(AssertionFailedError.class, new Runnable() {
-      public void run() {
-        assertAllEqualAndNotNull("a", "a", null);
-      }
-    });
-    
-    assertThrows(AssertionFailedError.class, new Runnable() {
-      public void run() {
-        assertAllEqualAndNotNull("a", null, "a");
-      }
-    });
+    assertThrows(AssertionFailedError.class, (Runnable)() -> assertAllEqualAndNotNull("a", "b"));
+    assertThrows(AssertionFailedError.class, (Runnable)() -> assertAllEqualAndNotNull("a", "a", "b"));
+    assertThrows(AssertionFailedError.class, (Runnable)() -> assertAllEqualAndNotNull("a", "a", null));
+    assertThrows(AssertionFailedError.class, (Runnable)() -> assertAllEqualAndNotNull("a", null, "a"));
   }
 
   public void testAssertThrows() throws Exception {
     // test an obvious case first
-    assertThrows(IllegalArgumentException.class, new Runnable() {
-      public void run() {
-        throw new IllegalArgumentException();
-      }
+    assertThrows(IllegalArgumentException.class, (Runnable)() -> {
+      throw new IllegalArgumentException();
     });
 
     {
@@ -130,11 +77,7 @@ public class AssertUtilsTest extends TestCase {
       // exception isn't thrown
       Throwable caught = null;
       try {
-        assertThrows(IllegalArgumentException.class, new Runnable() {
-          public void run() {
-            fail("Calling fail()");
-          }
-        });
+        assertThrows(IllegalArgumentException.class, (Runnable)() -> fail("Calling fail()"));
       }
       catch (Throwable ex) {
         caught = ex;
@@ -147,10 +90,8 @@ public class AssertUtilsTest extends TestCase {
       // now try it with a code block that throws a different type of exception from what we expect
       Throwable caught = null;
       try {
-        assertThrows(IllegalArgumentException.class, new Runnable() {
-          public void run() {
-            throw new UnsupportedOperationException("Testing with a UOE");
-          }
+        assertThrows(IllegalArgumentException.class, (Runnable)() -> {
+          throw new UnsupportedOperationException("Testing with a UOE");
         });
       }
       catch (Throwable ex) {
@@ -171,21 +112,9 @@ public class AssertUtilsTest extends TestCase {
     assertNotEqualAndNotNull("a");
     assertNotEqualAndNotNull("a", "b");
     assertNotEqualAndNotNull("a", "b", "c");
-    assertThrows(AssertionFailedError.class, new Runnable() {
-      public void run() {
-        assertNotEqualAndNotNull(null);
-      }
-    });
-    assertThrows(AssertionFailedError.class, new Runnable() {
-      public void run() {
-        assertNotEqualAndNotNull("a", "b", null);
-      }
-    });
-    assertThrows(AssertionFailedError.class, new Runnable() {
-      public void run() {
-        assertNotEqualAndNotNull("a", "a");
-      }
-    });
+    assertThrows(AssertionFailedError.class, (Runnable)() -> assertNotEqualAndNotNull(null));
+    assertThrows(AssertionFailedError.class, (Runnable)() -> assertNotEqualAndNotNull("a", "b", null));
+    assertThrows(AssertionFailedError.class, (Runnable)() -> assertNotEqualAndNotNull("a", "a"));
   }
 
   public void testAssertNotEqual() throws Exception {
@@ -195,115 +124,67 @@ public class AssertUtilsTest extends TestCase {
     assertNotEqual("a", "b", "c");
     assertNotEqual("a", "b", "c", null);
     assertNotEqual("a", null, "c", "d");
-    assertThrows(AssertionFailedError.class, new Runnable() {
-      public void run() {
-        assertNotEqual(null);
-      }
-    });
-    assertThrows(AssertionFailedError.class, new Runnable() {
-      public void run() {
-        assertNotEqual("a");
-      }
-    });
-    assertThrows(AssertionFailedError.class, new Runnable() {
-      public void run() {
-        assertNotEqual("a", "b", "a");
-      }
-    });
-    assertThrows(AssertionFailedError.class, new Runnable() {
-      public void run() {
-        assertNotEqual("a", null, null);
-      }
-    });
-    assertThrows(AssertionFailedError.class, new Runnable() {
-      public void run() {
-        assertNotEqual("a", "a");
-      }
-    });
-    assertThrows(AssertionFailedError.class, new Runnable() {
-      public void run() {
-        assertNotEqual(null, null);
-      }
-    });
+    assertThrows(AssertionFailedError.class, (Runnable)() -> assertNotEqual(null));
+    assertThrows(AssertionFailedError.class, (Runnable)() -> assertNotEqual("a"));
+    assertThrows(AssertionFailedError.class, (Runnable)() -> assertNotEqual("a", "b", "a"));
+    assertThrows(AssertionFailedError.class, (Runnable)() -> assertNotEqual("a", null, null));
+    assertThrows(AssertionFailedError.class, (Runnable)() -> assertNotEqual("a", "a"));
+    assertThrows(AssertionFailedError.class, (Runnable)() -> assertNotEqual(null, null));
   }
 
   public void testAssertIntArraysEqual() throws Exception {
     assertArraysEqual(new int[]{1, 2, 3}, new int[]{1, 2, 3});
-    AssertionFailedError error = assertThrows(AssertionFailedError.class, new Runnable() {
-      public void run() {
-        assertArraysEqual(new int[]{1, 2, 3}, new int[]{1, 2, 4});
-      }
-    });
+    AssertionFailedError error = assertThrows(AssertionFailedError.class,
+        (Runnable)() -> assertArraysEqual(new int[]{1, 2, 3}, new int[]{1, 2, 4}));
     assertEquals("Arrays not equal. expected:<[1, 2, 3]> but was:<[1, 2, 4]>", error.getMessage());
   }
   
   public void testAssertLongArraysEqual() throws Exception {
     assertArraysEqual(new long[]{1, 2, 3}, new long[]{1, 2, 3});
-    AssertionFailedError error = assertThrows(AssertionFailedError.class, new Runnable() {
-      public void run() {
-        assertArraysEqual(new long[]{1, 2, 3}, new long[]{1, 2, 4});
-      }
-    });
+    AssertionFailedError error = assertThrows(AssertionFailedError.class,
+        (Runnable)() -> assertArraysEqual(new long[]{1, 2, 3}, new long[]{1, 2, 4}));
     assertEquals("Arrays not equal. expected:<[1, 2, 3]> but was:<[1, 2, 4]>", error.getMessage());
   }
 
   public void testAssertShortArraysEqual() throws Exception {
     assertArraysEqual(new short[]{1, 2, 3}, new short[]{1, 2, 3});
-    AssertionFailedError error = assertThrows(AssertionFailedError.class, new Runnable() {
-      public void run() {
-        assertArraysEqual(new short[]{1, 2, 3}, new short[]{1, 2, 4});
-      }
-    });
+    AssertionFailedError error = assertThrows(AssertionFailedError.class,
+        (Runnable)() -> assertArraysEqual(new short[]{1, 2, 3}, new short[]{1, 2, 4}));
     assertEquals("Arrays not equal. expected:<[1, 2, 3]> but was:<[1, 2, 4]>", error.getMessage());
   }
 
   public void testAssertByteArraysEqual() throws Exception {
     assertArraysEqual(new byte[]{1, 2, 3}, new byte[]{1, 2, 3});
-    AssertionFailedError error = assertThrows(AssertionFailedError.class, new Runnable() {
-      public void run() {
-        assertArraysEqual(new byte[]{1, 2, 3}, new byte[]{1, 2, 4});
-      }
-    });
+    AssertionFailedError error = assertThrows(AssertionFailedError.class,
+        (Runnable)() -> assertArraysEqual(new byte[]{1, 2, 3}, new byte[]{1, 2, 4}));
     assertEquals("Arrays not equal. expected:<[1, 2, 3]> but was:<[1, 2, 4]>", error.getMessage());
   }
 
   public void testAssertFloatArraysEqual() throws Exception {
     assertArraysEqual(new float[]{1, 2, 3}, new float[]{1, 2, 3});
-    AssertionFailedError error = assertThrows(AssertionFailedError.class, new Runnable() {
-      public void run() {
-        assertArraysEqual(new float[]{1, 2, 3}, new float[]{1, 2, 4});
-      }
-    });
+    AssertionFailedError error = assertThrows(AssertionFailedError.class,
+        (Runnable)() -> assertArraysEqual(new float[]{1, 2, 3}, new float[]{1, 2, 4}));
     assertEquals("Arrays not equal. expected:<[1.0, 2.0, 3.0]> but was:<[1.0, 2.0, 4.0]>", error.getMessage());
   }
 
   public void testAssertDoubleArraysEqual() throws Exception {
     assertArraysEqual(new double[]{1, 2, 3}, new double[]{1, 2, 3});
-    AssertionFailedError error = assertThrows(AssertionFailedError.class, new Runnable() {
-      public void run() {
-        assertArraysEqual(new double[]{1, 2, 3}, new double[]{1, 2, 4});
-      }
-    });
+    AssertionFailedError error = assertThrows(AssertionFailedError.class,
+        (Runnable)() -> assertArraysEqual(new double[]{1, 2, 3}, new double[]{1, 2, 4}));
     assertEquals("Arrays not equal. expected:<[1.0, 2.0, 3.0]> but was:<[1.0, 2.0, 4.0]>", error.getMessage());
   }
 
   public void testAssertBooleanArraysEqual() throws Exception {
     assertArraysEqual(new boolean[]{true, true, false}, new boolean[]{true, true, false});
-    AssertionFailedError error = assertThrows(AssertionFailedError.class, new Runnable() {
-      public void run() {
-        assertArraysEqual(new boolean[]{true, true, false}, new boolean[]{true, false, false});
-      }
-    });
+    AssertionFailedError error = assertThrows(AssertionFailedError.class,
+        (Runnable)() -> assertArraysEqual(new boolean[]{true, true, false}, new boolean[]{true, false, false}));
     assertEquals("Arrays not equal. expected:<[true, true, false]> but was:<[true, false, false]>", error.getMessage());
   }
 
   public void testAssertObjectArraysEqual() throws Exception {
     assertArraysEqual(new String[]{"1", "2", "3"}, new String[]{"1", "2", "3"});
-    AssertionFailedError error = assertThrows(AssertionFailedError.class, new Runnable() {
-      public void run() {
-        assertArraysEqual(new String[]{"1", "2", "3"}, new String[]{"1", "2", "4"});
-      }
-    });
+    AssertionFailedError error = assertThrows(AssertionFailedError.class,
+        (Runnable)() -> assertArraysEqual(new String[]{"1", "2", "3"}, new String[]{"1", "2", "4"}));
     assertEquals("Arrays not equal. expected:<[1, 2, 3]> but was:<[1, 2, 4]>", error.getMessage());
   }
 
@@ -336,27 +217,15 @@ public class AssertUtilsTest extends TestCase {
     chainNumberAssertions(5);
 
     // 4) now test some assertions that should fail
-    assertThrows(AssertionFailedError.class, new Runnable() {
-      public void run() {
-        assertThat("foo").isEqualTo("bar");
-      }
+    assertThrows(AssertionFailedError.class, (Runnable)() -> assertThat("foo").isEqualTo("bar"));
+    assertThrows(AssertionFailedError.class, (Runnable)() -> {
+      assertThat("foo").isEqualTo("foo").isNull();  // the isNull assertion in this chain should fail
     });
-    assertThrows(AssertionFailedError.class, new Runnable() {
-      public void run() {
-        assertThat("foo").isEqualTo("foo").isNull();  // the isNull assertion in this chain should fail
-      }
-    });
-    assertThrows(AssertionFailedError.class, new Runnable() {
-      public void run() {
-        assertThat("foo").isNotEqualTo("bar").isEqualTo("bar");  // the is .isEqualTo("bar") assertion should fail
-      }
+    assertThrows(AssertionFailedError.class, (Runnable)() -> {
+      assertThat("foo").isNotEqualTo("bar").isEqualTo("bar");  // the is .isEqualTo("bar") assertion should fail
     });
     for (final int value : new int[]{-1, 0, 1, 2, 3, 4, 6, 7, 8}) {
-      assertThrows(AssertionFailedError.class, new Runnable() {
-        public void run() {
-          chainNumberAssertions(value);
-        }
-      });
+      assertThrows(AssertionFailedError.class, (Runnable)() -> chainNumberAssertions(value));
     }
   }
 
@@ -368,35 +237,15 @@ public class AssertUtilsTest extends TestCase {
   public void testAssertComparablesEqual() throws Exception {
     assertComparablesEqual(1, 1);
     assertComparablesEqual("foo", "foo");
-    assertThrows(AssertionFailedError.class, new Runnable() {
-      @Override
-      public void run() {
-        assertComparablesEqual(0, 1);
-      }
-    });
-    assertThrows(AssertionFailedError.class, new Runnable() {
-      @Override
-      public void run() {
-        assertComparablesEqual("foo", "bar");
-      }
-    });
+    assertThrows(AssertionFailedError.class, (Runnable)() -> assertComparablesEqual(0, 1));
+    assertThrows(AssertionFailedError.class, (Runnable)() -> assertComparablesEqual("foo", "bar"));
   }
 
   public void testAssertComparablesNotEqual() throws Exception {
     assertComparablesNotEqual(0, 1);
     assertComparablesNotEqual("foo", "bar");
-    assertThrows(AssertionFailedError.class, new Runnable() {
-      @Override
-      public void run() {
-        assertComparablesNotEqual(1, 1);
-      }
-    });
-    assertThrows(AssertionFailedError.class, new Runnable() {
-      @Override
-      public void run() {
-        assertComparablesNotEqual("foo", "foo");
-      }
-    });
+    assertThrows(AssertionFailedError.class, (Runnable)() -> assertComparablesNotEqual(1, 1));
+    assertThrows(AssertionFailedError.class, (Runnable)() -> assertComparablesNotEqual("foo", "foo"));
   }
 
   public void testAssertComparablesOrdering() throws Exception {
@@ -406,17 +255,7 @@ public class AssertUtilsTest extends TestCase {
     assertComparablesOrdering(0, 1);
     assertComparablesOrdering(-1, 0, 1, 2);
     assertComparablesOrdering("bar", "foo");
-    assertThrows(AssertionFailedError.class, new Runnable() {
-      @Override
-      public void run() {
-        assertComparablesOrdering(1, 0);
-      }
-    });
-    assertThrows(AssertionFailedError.class, new Runnable() {
-      @Override
-      public void run() {
-        assertComparablesOrdering("foo", "foo");
-      }
-    });
+    assertThrows(AssertionFailedError.class, (Runnable)() -> assertComparablesOrdering(1, 0));
+    assertThrows(AssertionFailedError.class, (Runnable)() -> assertComparablesOrdering("foo", "foo"));
   }
 }

@@ -18,11 +18,11 @@
 package solutions.trsoftware.commons.shared.util;
 
 /**
- * Provides some JUnit-like assertions to the production code without requiring the JUnit lib to be available in production.
+ * Provides some JUnit-like assertions to production code without requiring the JUnit lib to be available in production.
  *
- * Dec 30, 2009
- *
+ * @since Dec 30, 2009
  * @author Alex
+ * @see com.google.common.base.Preconditions
  */
 public class Assert {
 

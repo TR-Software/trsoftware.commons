@@ -17,6 +17,7 @@
 
 package solutions.trsoftware.commons.client.widgets.input;
 
+import com.google.gwt.core.shared.GWT;
 import solutions.trsoftware.commons.client.CommonsGwtTestCase;
 import solutions.trsoftware.commons.shared.util.StringUtils;
 
@@ -34,7 +35,13 @@ public class DirtyAdvancedTextBoxTest extends CommonsGwtTestCase {
     for (String initialText : new String[]{"foo", ""}) {
       DirtyAdvancedTextBox dirtyTextBox = new DirtyAdvancedTextBox(visibleChars, maxChars, initialText, null);
 
-      assertEquals(visibleChars, dirtyTextBox.getVisibleLength());
+      /*
+        TODO(12/6/2019): getVisibleLength() started failing in dev mode with exception:
+        com.google.gwt.dev.shell.HostedModeException: Something other than an int was returned from JSNI method '@com.google.gwt.dom.client.InputElement::getSize()': JS value of type string, expected int
+       */
+      if (GWT.isScript()) {
+        assertEquals(visibleChars, dirtyTextBox.getVisibleLength());
+      }
       assertEquals(maxChars, dirtyTextBox.getMaxLength());
       assertEquals("", dirtyTextBox.getText());  // initial text not modified
 

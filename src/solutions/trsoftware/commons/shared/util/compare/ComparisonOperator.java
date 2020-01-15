@@ -50,7 +50,7 @@ public enum ComparisonOperator implements IntPredicate {
   /**
    * Abstraction for the &ge; operator
    */
-  GEQ() {
+  GE() {
     @Override
     public boolean test(int cmp) {
       return cmp >= 0;
@@ -76,7 +76,7 @@ public enum ComparisonOperator implements IntPredicate {
   /**
    * Abstraction for the &ne; operator
    */
-  NEQ() {
+  NE() {
     @Override
     public boolean test(int cmp) {
       return cmp != 0;
@@ -89,7 +89,7 @@ public enum ComparisonOperator implements IntPredicate {
   /**
    * Abstraction for the &le; operator
    */
-  LEQ() {
+  LE() {
     @Override
     public boolean test(int cmp) {
       return cmp <= 0;
@@ -117,10 +117,10 @@ public enum ComparisonOperator implements IntPredicate {
    * Takes the result of {@link Comparable#compareTo(Object)} and tests it against this operator.
    * <p>
    * Example:
-   * <pre>{@code
-   *   LT.test("foo".compareTo("bar")); // returns false
-   *   NEQ.test("foo".compareTo("bar")); // returns true
-   * }</pre>
+   * <pre>
+   *   {@link #LT}.test("foo".compareTo("bar")); // returns false
+   *   {@link #NE}.test("foo".compareTo("bar")); // returns true
+   * </pre>
    *
    * @param cmp a result of {@link Comparable#compareTo(Object)}
    * @return {@code true} iff the arg satisfies this operator
@@ -134,10 +134,10 @@ public enum ComparisonOperator implements IntPredicate {
    * Can also be used as a {@link BiPredicate} lambda or method refence (e.g. {@code GT::compare}).
    * <p>
    * Example:
-   * <pre>{@code
-   *   LT.compare(4, 5);  // returns true
-   *   GEQ.compare(4, 5);  // returns false
-   * }</pre>
+   * <pre>
+   *   {@link #LT}.compare(4, 5);  // returns true
+   *   {@link #GE}.compare(4, 5);  // returns false
+   * </pre>
    *
    * @param <T> the type of object being compared
    * @return {@code true} iff the arg satisfies this operator
@@ -212,7 +212,7 @@ public enum ComparisonOperator implements IntPredicate {
    *     <td>{@code "greater than"}</td>
    *   </tr>
    *   <tr>
-   *     <td>{@link #GEQ}</td>
+   *     <td>{@link #GE}</td>
    *     <td>{@code ">="}</td>
    *     <td>{@code "greater than or equal to"}</td>
    *   </tr>
@@ -222,24 +222,23 @@ public enum ComparisonOperator implements IntPredicate {
    *     <td>{@code "equal to"}</td>
    *   </tr>
    *   <tr>
-   *     <td>{@link #NEQ}</td>
+   *     <td>{@link #NE}</td>
    *     <td>{@code "!="}</td>
    *     <td>{@code "not equal to"}</td>
    *   </tr>
    * </table>
-   * 
    */
   public String prettyName() {
     switch (this) {
       case GT:
         return "greater than";
-      case GEQ:
+      case GE:
         return "greater than or equal to";
       case EQ:
         return "equal to";
-      case NEQ:
+      case NE:
         return "not equal to";
-      case LEQ:
+      case LE:
         return "less than or equal to";
       case LT:
         return "less than";
@@ -253,7 +252,7 @@ public enum ComparisonOperator implements IntPredicate {
   /**
    * NOTE: this method overrides {@link Enum#toString()} and <i>does not return the name of the enum constant</i>.
    *
-   * @return the corresponding Java operator (e.g. {@code ">="} for {@link #GEQ})
+   * @return the corresponding Java operator (e.g. {@code ">="} for {@link #GE})
    * @see #name()
    */
   @Override

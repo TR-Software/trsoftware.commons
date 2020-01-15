@@ -41,19 +41,19 @@ public class LogicUtils {
   }
 
   /**
-   * Like {@link Object#equals(Object)}, but allows {@code null} values
+   * Like {@link Object#equals(Object)}, but allows {@code null} values.
+   * <p>
+   * <b>NOTE:</b> the performance of this method (as well as of {@link java.util.Objects#equals(Object, Object)})
+   * might be worse than writing the equivalent logical expression inline where the argument types can be determined
+   * statically (see <a href="https://bugs.openjdk.java.net/browse/JDK-8015417">JDK-8015417</a>).
    *
+   * @return true if the specified arguments are equal, or both null
    * @see java.util.Objects#equals(Object, Object)
    */
   public static boolean eq(Object o1, Object o2) {
-    if (o1 != null)
-      return o1.equals(o2);
-    else if (o2 == null)
-      return true;  // both null
-    return false; // one is null
+    return o1 == null ? o2 == null : o1.equals(o2);
   }
 
-  // TODO: unit test these new methods
   /**
    * Similar to the Javascript expression {@code o1 || o2} when applied to non-boolean objects.
    * @return {@code o1} if it's not {@code null}, otherwise {@code o2} (which could be null).

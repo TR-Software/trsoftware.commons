@@ -430,7 +430,7 @@ public class NumberSampleTest extends CollectableStatsTestCase {
       return false;
     assertTrue(pctLessThan <= pPct);
     // check "at least P percent of the data is less than or equal to that value"
-    double pctLessThanOrEq = pctMatchingElements(data, ComparisonOperator.LEQ, value);
+    double pctLessThanOrEq = pctMatchingElements(data, ComparisonOperator.LE, value);
     return pctLessThanOrEq >= pPct;
   }
 

@@ -18,17 +18,23 @@
 package solutions.trsoftware.commons.server.util;
 
 import org.apache.commons.codec.binary.Hex;
+import solutions.trsoftware.commons.shared.util.ArrayUtils;
+
+import java.util.function.Supplier;
 
 /**
- * Date: Sep 22, 2008 Time: 1:50:50 PM
+ * Supplements {@link ArrayUtils} with additional methods that cannot be implemented in client-side GWT code.
  *
+ * @since Sep 22, 2008
  * @author Alex
+ * @see ArrayUtils
  */
 public class ServerArrayUtils {
 
   /**
    * Fills the given array with array.length new instances of the given class.
    * @return the array
+   * @see ArrayUtils#fill(Object[], Supplier)
    */
   public static <T> T[] fill(T[] array, Class<T> c) throws IllegalAccessException, InstantiationException {
     for (int i = 0; i < array.length; i++) {

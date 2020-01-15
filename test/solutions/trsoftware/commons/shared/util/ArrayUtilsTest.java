@@ -17,11 +17,12 @@
 
 package solutions.trsoftware.commons.shared.util;
 
-import com.google.common.base.Predicate;
 import junit.framework.TestCase;
 
 import java.util.Arrays;
+import java.util.function.Supplier;
 
+import static solutions.trsoftware.commons.shared.testutil.AssertUtils.assertArraysEqual;
 import static solutions.trsoftware.commons.shared.testutil.AssertUtils.assertThrows;
 import static solutions.trsoftware.commons.shared.util.ArrayUtils.*;
 
@@ -78,11 +79,7 @@ public class ArrayUtilsTest extends TestCase {
         new int[]{2, 5, 1},
         ArrayUtils.filter(
             new int[]{8, 2, 5, 1, 8, 9, 1000},
-            new Predicate<Integer>() {
-              public boolean apply(Integer item) {
-                return item <= 5;
-              }
-            })
+            item -> item <= 5)
     ));
   }
 
@@ -91,11 +88,7 @@ public class ArrayUtilsTest extends TestCase {
         new String[]{"foo", "bar", "baz"},
         filter(
             new String[]{"foo", "a", "bar", "cigar", "baz"},
-            new Predicate<String>() {
-              public boolean apply(String item) {
-                return item.length() == 3;
-              }
-            }).toArray()
+            item -> item.length() == 3).toArray()
     ));
   }
 
@@ -137,45 +130,45 @@ public class ArrayUtilsTest extends TestCase {
     assertEquals(3d, result[2]);
   }
 
-  public void testLinearSearchChar() throws Exception {
-    assertEquals(-1, linearSearch(new char[]{'a', 'b', 'c'}, 'd'));
-    assertEquals(-1, linearSearch(new char[]{'a'}, 'd'));
-    assertEquals(-1, linearSearch(new char[0], 'd'));
-    assertEquals(0, linearSearch(new char[]{'a', 'b', 'c'}, 'a'));
-    assertEquals(1, linearSearch(new char[]{'a', 'b', 'c'}, 'b'));
-    assertEquals(2, linearSearch(new char[]{'a', 'b', 'c'}, 'c'));
-    assertEquals(0, linearSearch(new char[]{'a', 'b'}, 'a'));
-    assertEquals(1, linearSearch(new char[]{'a', 'b'}, 'b'));
-    assertEquals(0, linearSearch(new char[]{'a'}, 'a'));
+  public void testIndexOfChar() throws Exception {
+    assertEquals(-1, indexOf(new char[]{'a', 'b', 'c'}, 'd'));
+    assertEquals(-1, indexOf(new char[]{'a'}, 'd'));
+    assertEquals(-1, indexOf(new char[0], 'd'));
+    assertEquals(0, indexOf(new char[]{'a', 'b', 'c'}, 'a'));
+    assertEquals(1, indexOf(new char[]{'a', 'b', 'c'}, 'b'));
+    assertEquals(2, indexOf(new char[]{'a', 'b', 'c'}, 'c'));
+    assertEquals(0, indexOf(new char[]{'a', 'b'}, 'a'));
+    assertEquals(1, indexOf(new char[]{'a', 'b'}, 'b'));
+    assertEquals(0, indexOf(new char[]{'a'}, 'a'));
   }
 
-  public void testLinearSearchInt() throws Exception {
-    assertEquals(-1, linearSearch(new int[]{1, 2, 3}, 4));
-    assertEquals(-1, linearSearch(new int[]{1}, 4));
-    assertEquals(-1, linearSearch(new int[0], 4));
-    assertEquals(0, linearSearch(new int[]{1, 2, 3}, 1));
-    assertEquals(1, linearSearch(new int[]{1, 2, 3}, 2));
-    assertEquals(2, linearSearch(new int[]{1, 2, 3}, 3));
-    assertEquals(0, linearSearch(new int[]{1, 2}, 1));
-    assertEquals(1, linearSearch(new int[]{1, 2}, 2));
-    assertEquals(0, linearSearch(new int[]{1}, 1));
+  public void testIndexOfInt() throws Exception {
+    assertEquals(-1, indexOf(new int[]{1, 2, 3}, 4));
+    assertEquals(-1, indexOf(new int[]{1}, 4));
+    assertEquals(-1, indexOf(new int[0], 4));
+    assertEquals(0, indexOf(new int[]{1, 2, 3}, 1));
+    assertEquals(1, indexOf(new int[]{1, 2, 3}, 2));
+    assertEquals(2, indexOf(new int[]{1, 2, 3}, 3));
+    assertEquals(0, indexOf(new int[]{1, 2}, 1));
+    assertEquals(1, indexOf(new int[]{1, 2}, 2));
+    assertEquals(0, indexOf(new int[]{1}, 1));
   }
 
-  public void testLinearSearchObject() throws Exception {
-    assertEquals(-1, linearSearch(new String[]{"a", "b", "c"}, "d"));
-    assertEquals(-1, linearSearch(new String[]{"a"}, "d"));
-    assertEquals(-1, linearSearch(new String[0], "d"));
-    assertEquals(0, linearSearch(new String[]{"a", "b", "c"}, "a"));
-    assertEquals(1, linearSearch(new String[]{"a", "b", "c"}, "b"));
-    assertEquals(2, linearSearch(new String[]{"a", "b", "c"}, "c"));
-    assertEquals(0, linearSearch(new String[]{"a", "b"}, "a"));
-    assertEquals(1, linearSearch(new String[]{"a", "b"}, "b"));
-    assertEquals(0, linearSearch(new String[]{"a"}, "a"));
+  public void testIndexOfObject() throws Exception {
+    assertEquals(-1, indexOf(new String[]{"a", "b", "c"}, "d"));
+    assertEquals(-1, indexOf(new String[]{"a"}, "d"));
+    assertEquals(-1, indexOf(new String[0], "d"));
+    assertEquals(0, indexOf(new String[]{"a", "b", "c"}, "a"));
+    assertEquals(1, indexOf(new String[]{"a", "b", "c"}, "b"));
+    assertEquals(2, indexOf(new String[]{"a", "b", "c"}, "c"));
+    assertEquals(0, indexOf(new String[]{"a", "b"}, "a"));
+    assertEquals(1, indexOf(new String[]{"a", "b"}, "b"));
+    assertEquals(0, indexOf(new String[]{"a"}, "a"));
     // also test null values
-    assertEquals(-1, linearSearch(new String[]{null}, "a"));
-    assertEquals(0, linearSearch(new String[]{null}, null));
-    assertEquals(1, linearSearch(new String[]{"a", null}, null));
-    assertEquals(-1, linearSearch(new String[]{"a", "b"}, null));
+    assertEquals(-1, indexOf(new String[]{null}, "a"));
+    assertEquals(0, indexOf(new String[]{null}, null));
+    assertEquals(1, indexOf(new String[]{"a", null}, null));
+    assertEquals(-1, indexOf(new String[]{"a", "b"}, null));
   }
 
   public void testSlice() throws Exception {
@@ -228,4 +221,17 @@ public class ArrayUtilsTest extends TestCase {
     });
   }
 
+  public void testFill() throws Exception {
+    Integer[] expected = {0, 1, 2, 3, 4};
+    Integer[] array = new Integer[expected.length];
+    Integer[] result = fill(array, new Supplier<Integer>() {
+      private int next;
+      @Override
+      public Integer get() {
+        return next++;
+      }
+    });
+    assertSame(array, result);
+    assertArraysEqual(expected, result);
+  }
 }

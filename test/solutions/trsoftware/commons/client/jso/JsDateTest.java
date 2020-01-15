@@ -113,7 +113,7 @@ public class JsDateTest extends CommonsGwtTestCase {
     HashCodeTester hasher = new HashCodeTester();
     for (int i = 1; i < 50; i++) {
       for (TimeUnit unit : TimeUnit.values()) {
-        if (unit != TimeUnit.NANOSECONDS) {
+        if (unit.isGreaterThanOrEqualTo(TimeUnit.MILLISECONDS)) {
           JsDate d1 = dt.add(unit, i);
           assertEqualsAndHashCode(d1);
           hasher.addHash(d1);

@@ -17,7 +17,7 @@
 
 package solutions.trsoftware.commons.server.util;
 
-import com.google.common.collect.UnmodifiableIterator;
+import solutions.trsoftware.commons.shared.util.NumberRange;
 
 import java.text.DateFormat;
 import java.util.Calendar;
@@ -48,8 +48,8 @@ public class CalDate {
 
   /**
    * @param year The absolute year (e.g. 2014)
-   * @param month The month of the year, starting with 1 (NOTE: this is different from {@link Calendar#set(int, int, int)},
-   * which uses 0 for January)
+   * @param month The month of the year, starting with 1
+   *     (NOTE: this is different from {@link Calendar#set(int, int, int)}, which uses 0 for January)
    * @param day The day of the month (starting with 1)
    */
   public CalDate(int year, int month, int day) {
@@ -201,6 +201,9 @@ public class CalDate {
 
   /**
    * Same as {@link Calendar#add(int, int)}, but preserves immutability.
+   * <p>
+   * NOTE: this method is semi-deprecated, use {@link #add(Field, int)} instead.
+   *
    * @param field the unit to add: one of the constants defined in {@link Calendar}
    * @param offset the amount (of the unit) to add
    */
@@ -208,6 +211,16 @@ public class CalDate {
     CalDate result = new CalDate(cal);
     result.cal.add(field, offset);
     return result;
+  }
+
+  /**
+   * Creates a new instance with the given field offset from this one by the given amount.
+   *
+   * @param field the unit to add: one of the constants defined in {@link Calendar}
+   * @param offset the amount (of the unit) to add
+   */
+  public CalDate add(Field field, int offset) {
+    return add(field.getCalendarField(), offset);
   }
 
   @Override
@@ -224,6 +237,14 @@ public class CalDate {
   }
 
   /**
+   * Iterates over all the possible CalDate instances in the range [this date, limit), where each returned date is
+   * incremented by one of the constants defined in {@link Calendar}.
+   */
+  public RangeIterator iterateUpTo(CalDate limit, Field field, int increment) {
+    return new RangeIterator(this, limit, field.getCalendarField(), increment);
+  }
+
+  /**
    * Iterates over all the possible instances in the range [this date, limit), incrementing by a day each time.
    */
   public RangeIterator iterateDaysUpTo(CalDate limit) {
@@ -234,17 +255,21 @@ public class CalDate {
   /**
    * Iterates over all the possible CalDate instances between the two endpoints, using the given field and increment.
    */
-  public static class RangeIterator extends UnmodifiableIterator<CalDate> implements Iterable<CalDate> {
+  public static class RangeIterator implements Iterator<CalDate>, Iterable<CalDate> {
     private final int field;
     private final int increment;
     private final CalDate limit;
     private CalDate next;
 
-    public RangeIterator(CalDate startCalDate, CalDate endCalDate, int field, int increment) {
+    RangeIterator(CalDate startCalDate, CalDate endCalDate, int field, int increment) {
       this.field = field;
       this.increment = increment;
       this.next = startCalDate;
       this.limit = endCalDate;
+    }
+
+    public RangeIterator(CalDate startCalDate, CalDate endCalDate, Field field, int increment) {
+      this(startCalDate, endCalDate, field.getCalendarField(), increment);
     }
 
     @Override
@@ -265,4 +290,78 @@ public class CalDate {
     }
   }
 
+  public enum Field {
+    YEAR(Calendar.YEAR),
+    MONTH(Calendar.MONTH),
+    DAY(Calendar.DAY_OF_MONTH),
+    ;
+
+    /**
+     * The {@link Calendar} constant corresponding to this field (e.g. {@link Calendar#YEAR}, {@link Calendar#MONTH},
+     * or {@link Calendar#DAY_OF_MONTH}
+     */
+    private final int calField;
+
+    Field(int calField) {
+      this.calField = calField;
+    }
+
+    /**
+     * @return the {@link Calendar} constant corresponding to this field
+     *     (e.g. {@link Calendar#YEAR}, {@link Calendar#MONTH}, or {@link Calendar#DAY_OF_MONTH}
+     */
+    public int getCalendarField() {
+      return calField;
+    }
+
+    // TODO: unit test these methods
+
+    /**
+     * Converts the given value for this {@link CalDate} field to the value for the corresponding field in {@link Calendar}
+     * (the only difference is {@code MONTH} (which starts with 0 in {@link Calendar} but 1 in {@link CalDate}).
+     */
+    public int toCalendarValue(int value) {
+      if (this == MONTH)
+        return value - 1;
+      return value;
+    }
+
+    /**
+     * The opposite of {@link #toCalendarValue(int)}
+     */
+    public int fromCalendarValue(int value) {
+      if (this == MONTH)
+        return value + 1;
+      return value;
+    }
+
+    /**
+     * Calls {@link Calendar#getActualMinimum(int)} and {@link Calendar#getActualMaximum(int)} on the {@link Calendar}
+     * instance encapsulated by the given {@link CalDate} to check whether the given int represents a valid value
+     * for this {@link CalDate} field.
+     *
+     * @return {@code true} iff the given value is within the bounds for this fields.
+     */
+    public boolean isValid(CalDate calDate, int value) {
+      int cValue = toCalendarValue(value);
+      Calendar cal = calDate.cal;
+      return cValue >= cal.getActualMinimum(calField) && cValue <= cal.getActualMaximum(calField);
+    }
+
+    /**
+     * Calls {@link Calendar#getActualMinimum(int)} and {@link Calendar#getActualMaximum(int)} on the {@link Calendar}
+     * instance encapsulated by the given {@link CalDate} to get the range of valid values for this {@link CalDate}
+     * field.
+     *
+     * @return the range of valid values for this field in reference to the {@link Calendar} encapsulated by the given
+     *     {@link CalDate}.
+     */
+    public NumberRange<Integer> getValueRange(CalDate calDate) {
+      Calendar cal = calDate.cal;
+      return new NumberRange<>(
+          fromCalendarValue(cal.getActualMinimum(calField)),
+          fromCalendarValue(cal.getActualMaximum(calField))
+      );
+    }
+  }
 }

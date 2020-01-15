@@ -22,6 +22,11 @@ package solutions.trsoftware.commons.shared.util.callables;
  *
  * @author Alex
  */
+@FunctionalInterface
 public interface FunctionN<V> {
   V call(Object... args);
+
+  default V apply(Object... args) {
+    return call(args);
+  }
 }

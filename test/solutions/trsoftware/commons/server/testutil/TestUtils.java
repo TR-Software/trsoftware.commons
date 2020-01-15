@@ -18,6 +18,8 @@
 package solutions.trsoftware.commons.server.testutil;
 
 import com.google.common.testing.GcFinalization;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import junit.framework.TestCase;
 import solutions.trsoftware.commons.shared.util.MemoryUnit;
 import solutions.trsoftware.commons.shared.util.callables.Function0;
@@ -177,5 +179,10 @@ public class TestUtils {
       out.printf("  %s%n", elt);
     }
     out.println("]");
+  }
+
+  public static String toPrettyJson(Object o) {
+    Gson gson = new GsonBuilder().setPrettyPrinting().create();
+    return gson.toJson(o);
   }
 }

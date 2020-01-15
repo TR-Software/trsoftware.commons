@@ -26,6 +26,17 @@ import static solutions.trsoftware.commons.server.util.ServerStringUtils.toJavaI
  * @since 1/8/2019
  */
 public class DynamicRowImplGenerator {
+  /*
+  TODO: try to make this faster by using the Javassist library (https://www.javassist.org/)
+  instead of the current 2-step process (which first generates Java source code using the javapoet library
+  and then compiles the source string using openhft.compiler).  Should be able to use Javassist without writing
+  any actual bytecode:
+  "Unlike other similar bytecode editors, Javassist provides two levels of API: source level and bytecode level.
+   If the users use the source-level API, they can edit a class file without knowledge of the specifications of the Java bytecode.
+   The whole API is designed with only the vocabulary of the Java language.
+   You can even specify inserted bytecode in the form of source text; Javassist compiles it on the fly."
+   - https://www.javassist.org/
+  */
 
   /**
    * The generated classes will be in this package.

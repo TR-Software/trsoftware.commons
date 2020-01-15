@@ -17,8 +17,10 @@
 
 package solutions.trsoftware.commons.shared.util;
 
+import solutions.trsoftware.commons.shared.util.compare.RichComparable;
+
 /**
- * A GWT-compatible, simplified, version of {@link java.util.concurrent.TimeUnit}.
+ * A GWT-friendly, simplified, version of {@link java.util.concurrent.TimeUnit}.
  *
  * Notes:
  * <ul>
@@ -38,7 +40,7 @@ package solutions.trsoftware.commons.shared.util;
  * @see <a href="https://www.washingtonpost.com/news/speaking-of-science/wp/2017/02/24/think-you-know-how-many-days-are-in-a-year-think-again/">"Think you know how many days are in a year? Think again."</a>
  * @author Alex
  */
-public enum TimeUnit {
+public enum TimeUnit implements RichComparable<TimeUnit> {
   /**
    * Unit that represents the concept of a nanosecond, the smallest supported unit of time.
    * For the ISO calendar system, it is equal to the 1,000,000,000th part of the second unit.

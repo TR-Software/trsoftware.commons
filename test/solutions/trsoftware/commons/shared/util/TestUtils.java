@@ -15,7 +15,7 @@
  *
  */
 
-package solutions.trsoftware.commons.client.util;
+package solutions.trsoftware.commons.shared.util;
 
 import java.util.Random;
 
@@ -24,7 +24,7 @@ import java.util.Random;
  */
 public class TestUtils {
 
-  private static Random rnd = new Random();
+  private static final Random rnd = new Random();
 
   /**
    * Generates some {@code int}s useful for unit tests.

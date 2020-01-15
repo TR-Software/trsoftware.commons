@@ -52,15 +52,16 @@ public class CollectionUtils {
   }
 
   /**
-   * Turns any collection into a database!
+   * Creates a database-like index for the given collection.
    *
    * @return a mapping of all items in the collection matching each key (as defined by keyGetter).
    * @see java.util.stream.Collectors#toMap
    */
-  public static <K, V> Map<K, List<V>> buildIndex(Collection<V> items, Function1<V, K> keyGetter) {
-    Map<K, List<V>> map = new HashMap<K, List<V>>(items.size());
+  public static <K, V> Map<K, List<V>> buildIndex(Iterable<V> items, Function<V, K> keyGetter) {
+    // TODO: it might make more sense to use a Multimap here
+    Map<K, List<V>> map = new HashMap<>();
     for (V item : items) {
-      K key = keyGetter.call(item);
+      K key = keyGetter.apply(item);
       List<V> entriesMatchingKey;
       if (map.containsKey(key))
         entriesMatchingKey = map.get(key);

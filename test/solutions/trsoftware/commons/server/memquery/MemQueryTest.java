@@ -158,7 +158,7 @@ public class MemQueryTest extends MemQueryTestCase {
             "c,foo,1,81"
         ));
     assertResultSetEquals(runAndPrint(fromScore().select("uid", "modelId", "gameNumber", "score")
-            .where(new ColValueComparison<Integer>("gameNumber", ComparisonOperator.GEQ, 2))),
+            .where(new ColValueComparison<Integer>("gameNumber", ComparisonOperator.GE, 2))),
         joinCsvRows(
             "a,foo,2,30",
             "a,foo,3,38",
@@ -195,7 +195,7 @@ public class MemQueryTest extends MemQueryTestCase {
             "c,foo,1,81"
         ));
     assertResultSetEquals(runAndPrint(fromScore().selectAll()
-            .where(new ColValueComparison<Integer>("gameNumber", ComparisonOperator.GEQ, 2))),
+            .where(new ColValueComparison<Integer>("gameNumber", ComparisonOperator.GE, 2))),
         joinCsvRows(
             "a,foo,2,30",
             "a,foo,3,38",

@@ -17,6 +17,7 @@
 
 package solutions.trsoftware.commons.shared.util;
 
+import com.google.gwt.core.shared.GwtIncompatible;
 import junit.framework.TestCase;
 import solutions.trsoftware.commons.server.util.Clock;
 import solutions.trsoftware.commons.server.util.time.TemporalUnitImpl;
@@ -130,6 +131,7 @@ public class TimeUtilsJavaTest extends TestCase {
    * Compares {@link TimeUtils#truncateTime(long, long)} to {@link LocalDateTime#truncatedTo(TemporalUnit)}
    * and {@link Instant#truncatedTo(TemporalUnit)}.
    */
+  @GwtIncompatible
   public void testTruncateTime() {
     // test various truncation methods for rounding to the closest 15-minute time frame
     Clock clock = new Clock();

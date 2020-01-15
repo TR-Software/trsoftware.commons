@@ -243,9 +243,24 @@ public class Clock extends java.time.Clock {
     state = new InstrumentedTime(millis);
   }
 
-  /** Sets a fake time value to be returned by {@link #currentTimeMillis()} after {@link #stop()} was called */
+  /**
+   * Sets a fake time value to be returned by {@link #currentTimeMillis()} after {@link #stop()} was called.
+   *
+   * @param millis the value to be returned by all subsequent invocations of {@link #currentTimeMillis()}
+   */
   public static void set(long millis) {
     getInstance().setTime(millis);
+  }
+
+  /**
+   * Sets a fake time value to be returned by {@link #currentTimeMillis()}
+   * by first calling {@link #stop()} then {@link #set(long)}.
+   *
+   * @param millis the value to be returned by all subsequent invocations of {@link #currentTimeMillis()}
+   */
+  public static void stopAndSet(long millis) {
+    stop();
+    set(millis);
   }
 
   /**
@@ -264,6 +279,7 @@ public class Clock extends java.time.Clock {
    * @throws IllegalStateException iff {@link #state} is not an instance of {@link InstrumentedTime}
    */
   private void assertClockStopped() {
+    // TODO(1/14/2020): why are we requiring that the Clock was already stopped?
     if (!isTimeStopped())
       throw new IllegalStateException("Clock must be stopped before calling this method");
   }

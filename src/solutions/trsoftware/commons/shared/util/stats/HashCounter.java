@@ -74,6 +74,7 @@ public class HashCounter<K> implements CollectableStats<K, HashCounter<K>> {
    *
    * @see #HashCounter(Supplier)
    */
+  // TODO: make this constructor package-private, to ensure that the map doesn't leak and rewrite all callers to use the HashCounter(Supplier) constructor instead
   public HashCounter(Map<K, MutableInteger> mapImpl) {
     map = mapImpl;
   }

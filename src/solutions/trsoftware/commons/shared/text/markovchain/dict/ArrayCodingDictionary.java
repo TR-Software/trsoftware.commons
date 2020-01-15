@@ -56,7 +56,7 @@ public abstract class ArrayCodingDictionary<K,V extends Number> implements Codin
    * returns the provided nextIndex and adds it to the lookup table if applicable.
    */
   protected int lookup(K word, int nextIndex) {
-    int index = ArrayUtils.linearSearch(words.toArray(), word);
+    int index = ArrayUtils.indexOf(words.toArray(), word);
     if (index < 0)
       return nextIndex;
     return index;

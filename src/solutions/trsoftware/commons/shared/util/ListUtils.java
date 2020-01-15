@@ -177,8 +177,40 @@ public class ListUtils {
   /**
    * @return {@code true} iff the given list is either {@code null} or empty
    */
-  public static boolean isEmpty(List lst) {
-    return lst == null || lst.isEmpty();
+  public static boolean isEmpty(List list) {
+    return list == null || list.isEmpty();
+  }
+
+  /**
+   * Checks that the given list is neither {@code null} nor empty and throws an {@link IllegalArgumentException} if it is.
+   * This method is designed primarily for doing parameter validation, similar to {@link Objects#requireNonNull(Object)}.
+   *
+   * @param list the list to check
+   * @return {@code list} if neither {@code null} nor empty
+   * @throws IllegalArgumentException if {@code list} is either {@code null} or empty
+   * @see #requireNonEmpty(List, String)
+   */
+  public static <L extends List<?>> L requireNonEmpty(L list) throws IllegalArgumentException {
+    if (isEmpty(list))
+      throw new IllegalArgumentException();
+    return list;
+  }
+
+  /**
+   * Checks that the given list is neither {@code null} nor empty and throws a customized
+   * {@link IllegalArgumentException} if it is.  This method is designed primarily for doing parameter validation,
+   * similar to {@link Objects#requireNonNull(Object, String)}.
+   *
+   * @param list the list to check
+   * @param message detail message to be used in the event that an {@link IllegalArgumentException} is thrown
+   * @param <L> the type of the list
+   * @return {@code list} if neither {@code null} nor empty
+   * @throws IllegalArgumentException if {@code list} is either {@code null} or empty
+   */
+  public static <L extends List<?>> L requireNonEmpty(L list, String message) throws IllegalArgumentException {
+    if (isEmpty(list))
+      throw new IllegalArgumentException(message);
+    return list;
   }
 
   /**
@@ -196,7 +228,7 @@ public class ListUtils {
    *   list.stream().filter(predicate).collect(Collectors.toList());
    * </pre>
    *
-   * <i>NOTE: this method is not deprecated because it offers better performance than the above example</i>
+   * <i>NOTE: this method is not deprecated because it might have better performance than the above stream example</i>
    *
    * @return a new list containing the elements that satisfy the given predicate
    * @see CollectionUtils#filter(Iterable, Predicate)

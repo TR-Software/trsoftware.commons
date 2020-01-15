@@ -17,12 +17,15 @@
 
 package solutions.trsoftware.commons.shared.util;
 
-import com.google.common.base.Predicate;
-
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.function.IntPredicate;
+import java.util.function.Predicate;
+import java.util.function.Supplier;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
  * Date: Nov 7, 2007
@@ -57,57 +60,110 @@ public class ArrayUtils {
         return true;
     }
     return false;
-    // TODO: this method duplicates linearSearch(int[], int)
+    // TODO: this method duplicates indexOf(int[], int)
   }
 
   /** Linearly scans the array for the given element */
   public static boolean contains(Object[] array, Object element) {
     for (Object elt : array) {
-      if (elt != null && elt.equals(element))  // TODO: this seems inferior to linearSearch, which accounts for nulls; why not just delegate to linearSearch?
+      if (elt != null && elt.equals(element))  // TODO: this seems inferior to indexOf, which accounts for nulls; why not just delegate to indexOf?
         return true;
     }
     return false;
-    // TODO: this method duplicates linearSearch(Object[], int)
+    // TODO: this method duplicates indexOf(Object[], int)
   }
 
   /**
-   * Linearly scans the array for the given element.
-   * @return The index of the first matching element in the array or -1
-   * if not found.
+   * Linearly scans the given array for the first occurrence of the value {@code target}.
+   *
+   * @param array the array to be searched
+   * @param target the value to find
+   * @return the index of the first matching element in the array, or -1 if not found
    */
-  public static <T> int linearSearch(T[] array, T element) {
-    for (int i = 0; i < array.length; i++) {
-      if ((element == null && array[i] == null) || (element != null && element.equals(array[i])))
+  public static <T> int indexOf(T[] array, T target) {
+    int fromIndex = 0;
+    int toIndex = array.length;
+    return indexOf(array, target, fromIndex, toIndex);
+  }
+
+  /**
+   * Linearly scans a range of the given array for the first occurrence of the value {@code target}.
+   *
+   * @param array the array to be searched
+   * @param target the value to find
+   * @param fromIndex the index of the first element (inclusive) to be searched
+   * @param toIndex the index of the last element (exclusive) to be searched
+   * @return the index of the first matching element in the array, or -1 if not found
+   */
+  public static <T> int indexOf(T[] array, T target, int fromIndex, int toIndex) {
+    for (int i = fromIndex; i < toIndex; i++) {
+      if ((target == null && array[i] == null) || (target != null && target.equals(array[i])))
         return i;
     }
     return -1;
   }
 
   /**
-   * Linearly scans the array for the given element.
-   * @return The index of the first matching element in the array or -1
-   * if not found.
+   * Linearly scans the given array for the first occurrence of the value {@code target}.
+   *
+   * @param array the array to be searched
+   * @param target the value to find
+   * @return the index of the first matching element in the array, or -1 if not found
+   *
+   * @see com.google.common.primitives.Ints#indexOf(int[], int)
    */
-  public static int linearSearch(int[] array, int element) {
-    for (int i = 0; i < array.length; i++) {
-      if (array[i] == element)
+  public static int indexOf(int[] array, int target) {
+    return indexOf(array, target, 0, array.length);
+  }
+
+  /**
+   * Linearly scans a range of the given array for the first occurrence of the value {@code target}.
+   *
+   * @param array the array to be searched
+   * @param target the value to find
+   * @param fromIndex the index of the first element (inclusive) to be searched
+   * @param toIndex the index of the last element (exclusive) to be searched
+   * @return the index of the first matching element in the array, or -1 if not found
+   */
+  public static int indexOf(int[] array, int target, int fromIndex, int toIndex) {
+    for (int i = fromIndex; i < toIndex; i++) {
+      if (array[i] == target)
         return i;
     }
     return -1;
   }
 
   /**
-   * Linearly scans the array for the given element.
-   * @return The index of the first matching element in the array or -1
-   * if not found.
+   * Linearly scans the given array for the first occurrence of the value {@code target}.
+   *
+   * @param array the array to be searched
+   * @param target the value to find
+   * @return the index of the first matching element in the array, or -1 if not found
+   *
+   * @see com.google.common.primitives.Chars#indexOf(char[], char)
    */
-  public static int linearSearch(char[] array, char element) {
-    for (int i = 0; i < array.length; i++) {
-      if (array[i] == element)
+  public static int indexOf(char[] array, char target) {
+    return indexOf(array, target, 0, array.length);
+  }
+
+  /**
+   * Linearly scans a range of the given array for the first occurrence of the value {@code target}.
+   *
+   * @param array the array to be searched
+   * @param target the value to find
+   * @param fromIndex the index of the first element (inclusive) to be searched
+   * @param toIndex the index of the last element (exclusive) to be searched
+   * @return the index of the first matching element in the array, or -1 if not found
+   */
+  public static int indexOf(char[] array, char target, int fromIndex, int toIndex) {
+    for (int i = fromIndex; i < toIndex; i++) {
+      if (array[i] == target)
         return i;
     }
     return -1;
   }
+
+  // TODO: consider adding symmetric lastIndexOf methods for all the indexOf methods (see com.google.common.primitives.Ints.lastIndexOf(int[], int) for example)
 
   /**
    * Returns <tt>true</tt> if the two specified arrays of ints are
@@ -152,6 +208,7 @@ public class ArrayUtils {
    */
   public static <T> T[] flexibleArrayAdd(T[] array, int index, T value) {
     // can't instantiate T[] directly, so going through an intermediate ArrayList
+    // TODO(12/16/2019): can use Arrays.copyOf(T[], int) to avoid using an intermediate list
     if (array == null || index >= array.length) {
       ArrayList<T> newArrayList = new ArrayList<T>(index+1);
       // must append nulls to the array list since the index is greater than its size
@@ -197,6 +254,7 @@ public class ArrayUtils {
    */
   public static <T> T[] concat(T[]... arrays) {
     // can't instantiate T[] directly, so going through an intermediate list
+    // TODO(12/16/2019): can use Arrays.copyOf(T[], int) to avoid using an intermediate list
     LinkedList<T> list = new LinkedList<T>();
     for (T[] array : arrays) {
       for (T elt : array) {
@@ -211,6 +269,7 @@ public class ArrayUtils {
    */
   public static <T> T[] interleave(T[]... arrays) {
     // can't instantiate T[] directly, so going through an intermediate list
+    // TODO(12/16/2019): can use Arrays.copyOf(T[], int) to avoid using an intermediate list
     LinkedList<T> list = new LinkedList<T>();
     boolean allTapped;
     int i = 0;
@@ -229,43 +288,59 @@ public class ArrayUtils {
 
   /**
    * @return a new array containing only the elements from the given array that match the given predicate
-   * @see java.util.stream.Stream#filter(java.util.function.Predicate)
+   * @see java.util.stream.IntStream#filter(IntPredicate)
    */
-  public static int[] filter(int[] array, Predicate<Integer> predicate) {
-    ArrayList<Integer> matchingMembers = new ArrayList<Integer>();
-    for (int member : array) {
-      if (predicate.apply(member))
-        matchingMembers.add(member);
-    }
-    int[] result = new int[matchingMembers.size()];
-    for (int i = 0; i < result.length; i++) {
-      result[i] = matchingMembers.get(i);
-    }
-    return result;
+  public static int[] filter(int[] array, IntPredicate predicate) {
+    return Arrays.stream(array).filter(predicate).toArray();
   }
 
   /**
-   * @return a new array containing only the elements from the given array that match the given predicate
-   * @see java.util.stream.Stream#filter(java.util.function.Predicate)
+   * @return a new array list containing only the elements from the given array that match the given predicate
+   * @see Stream#filter(Predicate)
    */
   public static <T> ArrayList<T> filter(T[] array, Predicate<T> predicate) {
-    ArrayList<T> matchingMembers = new ArrayList<T>();
-    for (T member : array) {
-      if (predicate.apply(member))
-        matchingMembers.add(member);
-    }
-    return matchingMembers;
+    return Arrays.stream(array).filter(predicate).collect(Collectors.toCollection(ArrayList::new));
   }
 
+  /**
+   * Similar to {@link Arrays#fill(Object[], Object)}, but uses a supplier that is invoked every time to generate
+   * the new elements.
+   *
+   * @param array the array to be filled
+   * @param supplier will be invoked for each array index to generate the elements
+   * @return the same instance that was passed in, after the transformation has been applied
+   * @see Arrays#fill(Object[], Object)
+   * @see Stream#generate(Supplier)
+   */
+  public static <T> T[] fill(T[] array, Supplier<T> supplier) {
+    for (int i = 0; i < array.length; i++) {
+      array[i] = supplier.get();
+    }
+    return array;
+  }
+
+  /**
+   * @return {@code true} if the array is neither {@code null} nor empty
+   */
   public static boolean isEmpty(int[] array) {
     return array == null || array.length == 0;
   }
 
+  /**
+   * @return {@code true} if the array is neither {@code null} nor empty
+   */
   public static boolean isEmpty(Object[] array) {
     return array == null || array.length == 0;
   }
 
-  public static List<Double> asList(double[] array) {
+  /**
+   * Returns a list representation of the given primitive array.
+   * <p>
+   * NOTE: this is not the same as {@link Arrays#asList(Object[])}, which would always a list of size 1 when given
+   * a primitive array.
+   * @see com.google.common.primitives.Doubles#asList(double...)
+   */
+  public static ArrayList<Double> asList(double[] array) {
     ArrayList<Double> ret = new ArrayList<Double>();
     for (double d : array) {
       ret.add(d);
@@ -273,7 +348,14 @@ public class ArrayUtils {
     return ret;
   }
 
-  public static List<Integer> asList(int[] array) {
+  /**
+   * Returns a list representation of the given primitive array.
+   * <p>
+   * NOTE: this is not the same as {@link Arrays#asList(Object[])}, which would always a list of size 1 when given
+   * a primitive array.
+   * @see com.google.common.primitives.Ints#asList(int...)
+   */
+  public static ArrayList<Integer> asList(int[] array) {
     ArrayList<Integer> ret = new ArrayList<Integer>();
     for (int i : array) {
       ret.add(i);
@@ -315,7 +397,7 @@ public class ArrayUtils {
 
   /**
    * Returns a List with the selected (endIndex - startIndex + 1) elements
-   * of the given arary.
+   * of the given array.
    */
   public static <T> List<T> slice(T[] arr, int startIndex, int endIndex) {
     ArrayList<T> ret = new ArrayList<T>(endIndex - startIndex + 1);

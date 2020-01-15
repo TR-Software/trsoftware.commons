@@ -22,7 +22,7 @@ import com.google.gwt.json.client.JSONValue;
 import solutions.trsoftware.commons.client.bridge.json.JSONArray;
 import solutions.trsoftware.commons.client.bridge.json.JSONObject;
 
-import java.util.Collection;
+import java.util.Set;
 
 /**
  * Date: May 30, 2008 Time: 4:42:24 PM
@@ -88,7 +88,7 @@ public class GwtJSONObject implements JSONObject {
     return delegate.toString();
   }
 
-  public Collection<String> keys() {
+  public Set<String> keys() {
     return delegate.keySet();
   }
 }

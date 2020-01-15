@@ -1,5 +1,7 @@
 package solutions.trsoftware.commons.shared.util;
 
+import solutions.trsoftware.commons.shared.util.compare.RichComparable;
+
 import javax.annotation.Nonnull;
 import java.util.Arrays;
 

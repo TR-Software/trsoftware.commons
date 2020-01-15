@@ -93,9 +93,7 @@ public class SimpleDeckPanel extends Composite {
    * @param widget the widget to be shown, must have been present in the array passed to the constructor.
    */
   public void setWidget(Widget widget) {
-    setWidget(ArrayUtils.linearSearch(widgets, widget));
+    setWidget(ArrayUtils.indexOf(widgets, widget));
   }
-
-
 
 }

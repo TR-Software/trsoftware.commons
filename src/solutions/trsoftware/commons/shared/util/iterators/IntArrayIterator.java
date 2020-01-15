@@ -33,7 +33,7 @@ public class IntArrayIterator extends IndexedIterator<Integer> implements Primit
 
   private void checkBounds() throws ArrayIndexOutOfBoundsException {
     // force an ArrayIndexOutOfBoundsException if the starting index isn't valid (in client-side GWT code might throw a generic JavaScriptException otherwise)
-    ArrayUtils.checkBounds(arr.length, min);
+    ArrayUtils.checkBounds(arr.length, start);
     ArrayUtils.checkBounds(arr.length, limit);
   }
 

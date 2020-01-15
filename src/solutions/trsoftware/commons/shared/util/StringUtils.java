@@ -30,9 +30,10 @@ import java.util.*;
 import java.util.stream.IntStream;
 
 /**
- * Date: Dec 18, 2007 Time: 9:56:00 PM
+ * Static utility methods pertaining to {@link String} or {@link CharSequence} instances.
  *
  * @author Alex
+ * @see com.google.common.base.Strings
  */
 public class StringUtils {
 
@@ -468,25 +469,53 @@ public class StringUtils {
   /**
    * Similar to {@link #join(String, Iterator)}, but can specify a different delimiter for the last element.
    * This is useful for printing values such as {@code "a, b, and c"} or {@code "a, b, or c"}.
+   *
    * @param delimiter the delimiter to use for concatenating the elements
    * @param lastDelimiter the delimiter to use for concatenating the last element (pass {@code null} if the last delimiter
    * should be the same as {@code delimiter}
    * @param iter the elements to join
    */
   public static <T> String join(String delimiter, String lastDelimiter, Iterator<T> iter) {
-    StringBuilder str = new StringBuilder(128);
+    return appendJoined(new StringBuilder(128), delimiter, lastDelimiter, iter).toString();
+  }
+
+  /**
+   * Same as {@link #join(String, Iterator)}, but appends the joined result to the given builder
+   * instead of creating a new string.
+   *
+   * @param builder the output will be appended to this builder
+   * @param delimiter the delimiter to use for concatenating the elements
+   * @param lastDelimiter the delimiter to use for concatenating the last element (pass {@code null} if the last delimiter
+   * should be the same as {@code delimiter}
+   * @param iter the elements to join
+   * @return the given {@code builder} (after the joined result has been appended to it)
+   */
+  public static <T> StringBuilder appendJoined(StringBuilder builder, String delimiter, String lastDelimiter, Iterator<T> iter) {
     int iLastDelim = -1;
     while (iter.hasNext()) {
       T item = iter.next();
-      str.append(item);
+      builder.append(item);
       if (iter.hasNext()) {
-        iLastDelim = str.length();
-        str.append(delimiter);
+        iLastDelim = builder.length();
+        builder.append(delimiter);
       }
     }
     if (iLastDelim >= 0 && lastDelimiter != null)
-      str.replace(iLastDelim, iLastDelim + delimiter.length(), lastDelimiter);
-    return str.toString();
+      builder.replace(iLastDelim, iLastDelim + delimiter.length(), lastDelimiter);
+    return builder;
+  }
+
+  /**
+   * Same as {@link #join(String, String, Iterator)}, but appends the joined result to the given builder
+   * instead of creating a new string.
+   *
+   * @param builder the output will be appended to this builder
+   * @param delimiter the delimiter to use for concatenating the elements
+   * @param iter the elements to join
+   * @return the given {@code builder} (after the joined result has been appended to it)
+   */
+  public static <T> StringBuilder appendJoined(StringBuilder builder, String delimiter, Iterator<T> iter) {
+    return appendJoined(builder, delimiter, null, iter);
   }
 
   /**

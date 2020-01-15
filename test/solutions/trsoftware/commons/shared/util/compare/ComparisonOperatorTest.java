@@ -45,20 +45,20 @@ public class ComparisonOperatorTest extends TestCase {
   public void testTest() {
     int cmp = "foo".compareTo("bar");
     assertIntPredicateResult(LT, cmp, false);
-    assertIntPredicateResult(LEQ, cmp, false);
+    assertIntPredicateResult(LE, cmp, false);
     assertIntPredicateResult(EQ, cmp, false);
-    assertIntPredicateResult(NEQ, cmp, true);
+    assertIntPredicateResult(NE, cmp, true);
     assertIntPredicateResult(GT, cmp, true);
-    assertIntPredicateResult(GEQ, cmp, true);
+    assertIntPredicateResult(GE, cmp, true);
   }
 
   public void testCompare() {
     assertTrue(LT.compare(4, 5));
-    assertTrue(LEQ.compare(4, 5));
-    assertTrue(NEQ.compare(4, 5));
+    assertTrue(LE.compare(4, 5));
+    assertTrue(NE.compare(4, 5));
     assertFalse(EQ.compare(4, 5));
     assertFalse(GT.compare(4, 5));
-    assertFalse(GEQ.compare(4, 5));
+    assertFalse(GE.compare(4, 5));
   }
 
   /**
@@ -66,20 +66,20 @@ public class ComparisonOperatorTest extends TestCase {
    */
   public void testBiPredicate() {
     assertBiPredicateResult(LT::compare, 4, 5, true);
-    assertBiPredicateResult(LEQ::compare, 4, 5, true);
-    assertBiPredicateResult(NEQ::compare, 4, 5, true);
+    assertBiPredicateResult(LE::compare, 4, 5, true);
+    assertBiPredicateResult(NE::compare, 4, 5, true);
     assertBiPredicateResult(EQ::compare, 4, 5, false);
     assertBiPredicateResult(GT::compare, 4, 5, false);
-    assertBiPredicateResult(GEQ::compare, 4, 5, false);
+    assertBiPredicateResult(GE::compare, 4, 5, false);
   }
 
   public void testComparingTo() {
     assertPredicateResult(LT.comparingTo(5), 4, true);
-    assertPredicateResult(LEQ.comparingTo(5), 4, true);
-    assertPredicateResult(NEQ.comparingTo(5), 4, true);
+    assertPredicateResult(LE.comparingTo(5), 4, true);
+    assertPredicateResult(NE.comparingTo(5), 4, true);
     assertPredicateResult(EQ.comparingTo(5), 4, false);
     assertPredicateResult(GT.comparingTo(5), 4, false);
-    assertPredicateResult(GEQ.comparingTo(5), 4, false);
+    assertPredicateResult(GE.comparingTo(5), 4, false);
   }
 
   /**
@@ -90,11 +90,11 @@ public class ComparisonOperatorTest extends TestCase {
   private static final ImmutableBiMap<ComparisonOperator, String> STRINGS =
       ImmutableBiMap.<ComparisonOperator, String>builder()
           .put(LT, "<")
-          .put(LEQ, "<=")
-          .put(NEQ, "!=")
+          .put(LE, "<=")
+          .put(NE, "!=")
           .put(EQ, "==")
           .put(GT, ">")
-          .put(GEQ, ">=")
+          .put(GE, ">=")
           .build();
 
   public void testLookup() throws Exception {
@@ -105,7 +105,7 @@ public class ComparisonOperatorTest extends TestCase {
     assertNull(lookup("foo"));
     assertNull(lookup("+"));  // not a comparison op
     assertNull(lookup(">=="));  // close, but no
-    assertSame(GEQ, lookup(">="));  // this works
+    assertSame(GE, lookup(">="));  // this works
     // 3) finally, test all the valid args in bulk
     for (Map.Entry<ComparisonOperator, String> entry : STRINGS.entrySet()) {
       assertEquals(entry.getKey(), lookup(entry.getValue()));

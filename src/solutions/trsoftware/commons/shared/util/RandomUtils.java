@@ -18,7 +18,6 @@
 package solutions.trsoftware.commons.shared.util;
 
 import com.google.common.collect.Iterables;
-import com.google.gwt.core.shared.GWT;
 import solutions.trsoftware.commons.shared.util.random.RandomCharGenerator;
 import solutions.trsoftware.commons.shared.util.text.Alphabet;
 import solutions.trsoftware.commons.shared.util.text.CharRange;
@@ -237,12 +236,22 @@ public class RandomUtils {
     return sample;
   }
 
-  public static <T> T randomElement(T[] arr) {
+  @SafeVarargs
+  public static <T> T randomElement(T... arr) {
+    return randomElement(rnd, arr);
+  }
+
+  @SafeVarargs
+  public static <T> T randomElement(Random rnd, T... arr) {
     return arr[rnd.nextInt(arr.length)];
   }
 
   public static <T> T randomElement(List<T> list) {
-    if (!(list instanceof RandomAccess) && !GWT.isClient())
+    return randomElement(list, rnd);
+  }
+
+  public static <T> T randomElement(List<T> list, Random rnd) {
+    if (!(list instanceof RandomAccess))
       System.err.println("WARNING: RandomUtils.randomElement received a non-random-access list (" + list.getClass().getName() + ")");
     return list.get(rnd.nextInt(list.size()));
   }

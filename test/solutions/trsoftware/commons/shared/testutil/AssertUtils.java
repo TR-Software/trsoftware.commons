@@ -687,7 +687,7 @@ public abstract class AssertUtils {
 
     @Override
     public ComparableAssertionBuilder isNotEqualTo(T expected) {
-      return compare(ComparisonOperator.NEQ, expected);
+      return compare(ComparisonOperator.NE, expected);
     }
 
     public ComparableAssertionBuilder<T> isLessThan(T upperBound) {
@@ -695,7 +695,7 @@ public abstract class AssertUtils {
     }
 
     public ComparableAssertionBuilder<T> isLessThanOrEqualTo(T upperBound) {
-      return compare(ComparisonOperator.LEQ, upperBound);
+      return compare(ComparisonOperator.LE, upperBound);
     }
 
     public ComparableAssertionBuilder<T> isGreaterThan(T lowerBound) {
@@ -703,7 +703,7 @@ public abstract class AssertUtils {
     }
 
     public ComparableAssertionBuilder<T> isGreaterThanOrEqualTo(T lowerBound) {
-      return compare(ComparisonOperator.GEQ, lowerBound);
+      return compare(ComparisonOperator.GE, lowerBound);
     }
 
     /** Assert that {@link #value} is in the range {@code [lowerBound, upperBound]} */

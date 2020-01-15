@@ -22,9 +22,6 @@ import com.google.gson.JsonObject;
 import solutions.trsoftware.commons.client.bridge.json.JSONArray;
 import solutions.trsoftware.commons.client.bridge.json.JSONObject;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Map;
 import java.util.Set;
 
 /**
@@ -78,13 +75,8 @@ public class GsonJSONObject implements JSONObject {
     return delegate.has(key);
   }
 
-  public Collection<String> keys() {
-    Set<Map.Entry<String,JsonElement>> entries = delegate.entrySet();
-    ArrayList<String> keys = new ArrayList<>(entries.size());
-    for (Map.Entry<String, JsonElement> entry : entries) {
-      keys.add(entry.getKey());
-    }
-    return keys;
+  public Set<String> keys() {
+    return delegate.keySet();
   }
 
   public JsonObject getDelegate() {

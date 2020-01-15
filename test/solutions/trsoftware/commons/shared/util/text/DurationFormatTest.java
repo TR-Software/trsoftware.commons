@@ -51,26 +51,22 @@ public class DurationFormatTest extends TestCase {
     }
 
     {
-      for (DurationFormat fmt : new DurationFormat[]{
-          new DurationFormat(0),
-          new DurationFormat(Component.MINUTES, 0)}) {
-        System.out.println("================================================================================");
-        System.out.println(fmt);
-        System.out.println("================================================================================");
-        checkResult(fmt, 0, "00:00");
-        checkResult(fmt, 1, "00:00");
-        checkResult(fmt, 10, "00:00");
-        checkResult(fmt, 501, "00:01");
-        checkResult(fmt, MINUTES.toMillis(5.5), "05:30");
-        checkResult(fmt, HOURS.toMillis(5.5), "05:30:00");
-        checkResult(fmt, HOURS.toMillis(5.5) + 2_123, "05:30:02");
-        // 59.999 seconds should be rounded up to nearest minute
-        checkResult(fmt, 59_999, "01:00");
-        // and so on...
-        checkResult(fmt, MINUTES.toMillis(59) + 59_999, "01:00:00");
-        checkResult(fmt, HOURS.toMillis(23) + MINUTES.toMillis(59) + 59_999 + .99, "1 day, 00:00");
-
-      }
+      DurationFormat fmt = new DurationFormat(Component.MINUTES, 0);
+      System.out.println("================================================================================");
+      System.out.println(fmt);
+      System.out.println("================================================================================");
+      checkResult(fmt, 0, "00:00");
+      checkResult(fmt, 1, "00:00");
+      checkResult(fmt, 10, "00:00");
+      checkResult(fmt, 501, "00:01");
+      checkResult(fmt, MINUTES.toMillis(5.5), "05:30");
+      checkResult(fmt, HOURS.toMillis(5.5), "05:30:00");
+      checkResult(fmt, HOURS.toMillis(5.5) + 2_123, "05:30:02");
+      // 59.999 seconds should be rounded up to nearest minute
+      checkResult(fmt, 59_999, "01:00");
+      // and so on...
+      checkResult(fmt, MINUTES.toMillis(59) + 59_999, "01:00:00");
+      checkResult(fmt, HOURS.toMillis(23) + MINUTES.toMillis(59) + 59_999 + .99, "1 day, 00:00");
     }
 
     {
@@ -84,10 +80,10 @@ public class DurationFormatTest extends TestCase {
 
     {
       // check that seconds are rounded using the "half-up" rounding mode
-      checkResult(new DurationFormat(), 1500, "00:01.500");
-      checkResult(new DurationFormat(2), 1250, "00:01.25");
-      checkResult(new DurationFormat(1), 1250, "00:01.3");
-      checkResult(new DurationFormat(0), 1500, "00:02");
+      checkResult(new DurationFormat(), 1500, "00:00:01.500");
+      checkResult(new DurationFormat(2), 1250, "00:00:01.25");
+      checkResult(new DurationFormat(1), 1250, "00:00:01.3");
+      checkResult(new DurationFormat(0), 1500, "00:00:02");
     }
 
   }

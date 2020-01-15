@@ -1,22 +1,18 @@
 package solutions.trsoftware.commons.shared.util.stats;
 
 import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.ImmutableTable;
-import com.google.common.collect.Table;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
-import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Function;
-import java.util.function.Supplier;
 
 /**
- * A 2-dimensional version of {@link HashCounter}.
+ * A 2-dimensional version of {@link HashCounter}, similar to Guava's {@link com.google.common.collect.Table Table} class.
  *
  * @author Alex
  * @since 9/30/2019
  *
- * @see com.google.common.collect.Table
+ * @see HashCounter
  */
 public class HashCounterTable<R, C> implements Mergeable<HashCounterTable<R, C>> {
 
@@ -27,6 +23,12 @@ public class HashCounterTable<R, C> implements Mergeable<HashCounterTable<R, C>>
     this(new LinkedHashMap<>(), r -> new HashCounter<>());
   }
 
+  /**
+   * <p style="color: #0073BF; font-weight: bold;">
+   *   TODO: make this constructor package-private to ensure that the backing map doesn't leak:
+   *   replace it with a constructor that takes a supplier {@code Supplier<Map<R, HashCounter<C>>} for the backing map
+   * </p>
+   */
   public HashCounterTable(Map<R, HashCounter<C>> backingMap, Function<R, ? extends HashCounter<C>> rowFactory) {
     this.map = backingMap;
     this.rowFactory = rowFactory;
@@ -83,14 +85,6 @@ public class HashCounterTable<R, C> implements Mergeable<HashCounterTable<R, C>>
       mapBuilder.put(entry.getKey(), entry.getValue().asMap());
     }
     return mapBuilder.build();
-  }
-
-  public synchronized Table<R, C, Integer> asTable() {
-    ImmutableTable.Builder<R, C, Integer> builder = ImmutableTable.builder();
-    for (Map.Entry<R, HashCounter<C>> counterEntry : map.entrySet()) {
-      // TODO: impl this or remove this method
-    }
-    return builder.build();
   }
 
   @Override

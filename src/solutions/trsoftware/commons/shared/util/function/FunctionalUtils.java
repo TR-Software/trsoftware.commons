@@ -17,6 +17,8 @@
 
 package solutions.trsoftware.commons.shared.util.function;
 
+import solutions.trsoftware.commons.shared.util.callables.FunctionN;
+
 import java.util.function.*;
 import java.util.stream.Stream;
 
@@ -100,7 +102,7 @@ public class FunctionalUtils {
    * Creates a <a href="https://en.wikipedia.org/wiki/Partial_application">partial application</a> of the given function
    * by fixing both of its parameters to the given values, thus producing a function of smaller arity.
    *
-   * @param fun the function to which the given arg will be fixed
+   * @param fun the function to which the given args will be fixed
    * @param t fixed value for the first arg of the given function
    * @param u fixed value for the second arg of the given function
    * @return a new function that evaluates {@code () -> fun.apply(t, u)}
@@ -113,6 +115,24 @@ public class FunctionalUtils {
    */
   public static <T, U, R> Supplier<R> partial(BiFunction<T, U, R> fun, T t, U u) {
     return () -> fun.apply(t, u);
+  }
+
+  /**
+   * Creates a <a href="https://en.wikipedia.org/wiki/Partial_application">partial application</a> of the given function
+   * by fixing all of its parameters to the given values, thus producing a function of smaller arity.
+   *
+   * @param fun the function to which the given args will be fixed
+   * @param args fixed values for the args of the given function
+   * @return a new function that evaluates {@code () -> fun.apply(t, args)}
+   * @see #partial1(BiFunction, Object)
+   * @see #partial2(BiFunction, Object)
+   * @see <a href="https://en.wikipedia.org/wiki/Partial_application">Partial application</a>
+   * @see <a href="https://en.wikipedia.org/wiki/Currying#Contrast_with_partial_function_application">Partial application vs. Currying</a>
+   * @see <a href="https://en.wikipedia.org/wiki/Higher-order_function">Higher-order function</a>
+   * @see <a href="https://www.pgrs.net/2015/04/23/partial-function-application-in-java-8/">blog post that inspired this method</a>
+   */
+  public static <R> Supplier<R> partial(FunctionN<R> fun, Object... args) {
+    return () -> fun.apply(args);
   }
 
   /**

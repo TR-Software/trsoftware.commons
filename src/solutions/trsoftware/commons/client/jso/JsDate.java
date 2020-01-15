@@ -21,6 +21,7 @@ import com.google.gwt.core.client.JavaScriptObject;
 import solutions.trsoftware.commons.client.useragent.Polyfill;
 import solutions.trsoftware.commons.shared.util.TimeUnit;
 
+import java.util.Comparator;
 import java.util.Date;
 
 /**
@@ -32,7 +33,7 @@ import java.util.Date;
  * @author Alex
  * @since 7/15/2018
  */
-public class JsDate extends com.google.gwt.core.client.JsDate /*implements Comparable<JsDate>*/ {
+public class JsDate extends com.google.gwt.core.client.JsDate {
   /*
   NOTE: don't be tempted to implement Comparable<JsDate>: it will fail in hosted mode due to the
   "Overlay types cannot implement interfaces that define methods" limitation
@@ -428,9 +429,11 @@ public class JsDate extends com.google.gwt.core.client.JsDate /*implements Compa
    * Adds (or subtracts) the given quantity of the given time unit to/from this date, returning a new instance
    * of {@link JsDate} for the result (this is a non-mutating operation).
    *
-   * @param unit the time unit for the given amount (will be used to select the appropriate setter method)
+   * @param unit the time unit for the given amount (will be used to select the appropriate setter method);
+   *   must be at least {@link TimeUnit#MILLISECONDS MILLISECONDS} and at most {@link TimeUnit#YEARS YEARS}
    * @param amount the quantity to add (pass a negative value to subtract)
    * @return A new instance representing the result of adding the given quantity to this date
+   * @throws IllegalArgumentException if the given unit is less than {@link TimeUnit#MILLISECONDS MILLISECONDS}
    * @see java.util.Calendar#add(int, int)
    */
   public final JsDate add(TimeUnit unit, int amount) {
@@ -479,8 +482,9 @@ public class JsDate extends com.google.gwt.core.client.JsDate /*implements Compa
    * That seems to be a hook created by the GWT devs to enable this exact hack, because there's not a single native
    * object defined in standard JavaScript API that provides these methods.
    * </blockquote>
-   * On the other hand, there seems to be no way to implement {@link Comparable}, so comparison with {@link #equals(Object)}
-   * (using this hack) is the best we can do for comparing {@link JsDate} instances.
+   * On the other hand, there seems to be no way to implement {@link Comparable} (GWT Compiler will throw exception),
+   * so the only options for comparing instances are to use {@link #equals(Object)} (using this hack)
+   * or an external comparator (see {@link #comparator()}).
    */
   private static native void addEqualsAndHashCodeToPrototype() /*-{
     if (!Date.prototype.equals) {
@@ -494,5 +498,12 @@ public class JsDate extends com.google.gwt.core.client.JsDate /*implements Compa
       }
     }
   }-*/;
+
+  /**
+   * @return comparator based on {@link #getTime()}
+   */
+  public static Comparator<JsDate> comparator() {
+    return Comparator.comparingDouble(com.google.gwt.core.client.JsDate::getTime);
+  }
 
 }

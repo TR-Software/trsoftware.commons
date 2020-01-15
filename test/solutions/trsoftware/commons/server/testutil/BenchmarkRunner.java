@@ -22,6 +22,7 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import org.jetbrains.annotations.NotNull;
 import solutions.trsoftware.commons.shared.util.*;
+import solutions.trsoftware.commons.shared.util.compare.RichComparable;
 import solutions.trsoftware.commons.shared.util.stats.MaxComparable;
 import solutions.trsoftware.commons.shared.util.text.DurationFormat;
 import solutions.trsoftware.commons.shared.util.text.SharedNumberFormat;
@@ -52,7 +53,7 @@ import java.util.function.Supplier;
  * @author Alex
  * @since 1/2/14
  */
-public class Benchmark {
+public class BenchmarkRunner {
 
   /**
    * Represents a piece of code to be benchmarked.
@@ -413,7 +414,7 @@ public class Benchmark {
    * @param targetTimeNanos value for {@link #targetTimeNanos} (in nanoseconds)
    * @return this instance, for call chaining
    */
-  public Benchmark setTargetTimeNanos(long targetTimeNanos) {
+  public BenchmarkRunner setTargetTimeNanos(long targetTimeNanos) {
     this.targetTimeNanos = targetTimeNanos;
     return this;
   }
@@ -426,7 +427,7 @@ public class Benchmark {
    * @param targetMemoryDelta value for {@link #targetMemoryDelta} (in bytes)
    * @return this instance, for call chaining
    */
-  public Benchmark setTargetMemoryDelta(long targetMemoryDelta) {
+  public BenchmarkRunner setTargetMemoryDelta(long targetMemoryDelta) {
     this.targetMemoryDelta = targetMemoryDelta;
     return this;
   }
@@ -439,7 +440,7 @@ public class Benchmark {
    * @param equalNumIterations value for {@link #equalNumIterations}
    * @return this instance, for call chaining
    */
-  public Benchmark setEqualNumIterations(boolean equalNumIterations) {
+  public BenchmarkRunner setEqualNumIterations(boolean equalNumIterations) {
     this.equalNumIterations = equalNumIterations;
     return this;
   }
@@ -453,7 +454,7 @@ public class Benchmark {
    * @param debug unless {@code null}, will print debugging messages to this stream
    * @return this instance, for call chaining
    */
-  public Benchmark setDebug(PrintStream debug) {
+  public BenchmarkRunner setDebug(PrintStream debug) {
     this.debug = debug;
     return this;
   }
@@ -466,7 +467,7 @@ public class Benchmark {
    * @param incremental value for {@link #incremental}
    * @return this instance, for call chaining
    */
-  public Benchmark setIncremental(boolean incremental) {
+  public BenchmarkRunner setIncremental(boolean incremental) {
     this.incremental = incremental;
     return this;
   }
@@ -512,7 +513,7 @@ public class Benchmark {
     if (equalNumIterations) {
       // use the new algorithm that runs all tasks incrementally
       @SuppressWarnings("unchecked")
-      BenchmarkRunner runner = new CpuBenchmarkRunner((List<Task>)tasks, targetTimeNanos);
+      TaskRunner runner = new CpuTaskRunner((List<Task>)tasks, targetTimeNanos);
       return runner.runBenchmarks();
     }
     else {
@@ -533,7 +534,7 @@ public class Benchmark {
     if (equalNumIterations) {
       // use the new algorithm that runs all tasks incrementally
       @SuppressWarnings("unchecked")
-      BenchmarkRunner runner = new MemoryBenchmarkRunner((List<MemoryTask>)tasks, targetTimeNanos);
+      TaskRunner runner = new MemoryTaskRunner((List<MemoryTask>)tasks, targetTimeNanos);
       return runner.runBenchmarks();
     }
     else {
@@ -556,7 +557,7 @@ public class Benchmark {
    *    or uses at least some min amount of memory ({@linkplain BenchmarkType#MEMORY memory benchmarks})
    * 2. all tasks run the same number of iterations
    */
-  private abstract class BenchmarkRunner<T extends Task> {
+  private abstract class TaskRunner<T extends Task> {
     private final BenchmarkType type;
     /**
      * The number of iterations will be increased incrementally until this minimum measurement is satisfied for all tasks
@@ -566,7 +567,7 @@ public class Benchmark {
     private PriorityQueue<PQEntry> pq = new PriorityQueue<>();  // partial results prioritized by lowest time
     private long totalIterationCount = 0; // for debugging: the number of iterations that were actually run
 
-    BenchmarkRunner(BenchmarkType type, List<T> tasks, long measurementTarget) {
+    TaskRunner(BenchmarkType type, List<T> tasks, long measurementTarget) {
       this.type = type;
       this.tasks = tasks;
       this.target = measurementTarget;
@@ -720,9 +721,9 @@ public class Benchmark {
     }
   }
 
-  private class CpuBenchmarkRunner extends BenchmarkRunner<Task> {
+  private class CpuTaskRunner extends TaskRunner<Task> {
 
-    CpuBenchmarkRunner(List<Task> tasks, long measurementTarget) {
+    CpuTaskRunner(List<Task> tasks, long measurementTarget) {
       super(BenchmarkType.TIME, tasks, measurementTarget);
     }
 
@@ -738,9 +739,9 @@ public class Benchmark {
 
   }
 
-  private class MemoryBenchmarkRunner extends BenchmarkRunner<MemoryTask> {
+  private class MemoryTaskRunner extends TaskRunner<MemoryTask> {
 
-    MemoryBenchmarkRunner(List<MemoryTask> tasks, long measurementTarget) {
+    MemoryTaskRunner(List<MemoryTask> tasks, long measurementTarget) {
       super(BenchmarkType.MEMORY, tasks, measurementTarget);
     }
 

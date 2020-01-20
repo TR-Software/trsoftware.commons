@@ -84,7 +84,7 @@ public class CollectionUtils {
    * transformation on the collection.  For example, can be used to reduce
    * a collection of person objects to a list of name strings.
    *
-   * @return a mapping of all items in the collection matching each key (as defined by keyGetter).
+   * @return a list containing the results of the given transformation applied to the given items
    * @deprecated in Java 1.8+ can replace this method with {@code items.stream().map(transformation).collect(Collectors.toList())}
    */
   public static <I, O> List<O> collect(Collection<I> items, Function1<I, O> transformation) {

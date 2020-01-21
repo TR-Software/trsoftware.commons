@@ -48,11 +48,14 @@ import static solutions.trsoftware.commons.shared.util.StringUtils.isBlank;
 import static solutions.trsoftware.commons.shared.util.StringUtils.repeat;
 
 /**
- * Date: May 13, 2008 Time: 6:18:12 PM
+ * Supplements {@link StringUtils} with additional methods that cannot be implemented in client-side GWT code.
  *
  * @author Alex
+ * @since May 13, 2008
  */
 public class ServerStringUtils {
+
+  // TODO: move all methods to StringUtils (just annotate them as @GwtIncompatible if needed)
 
   /**
    * Returns the base64 encoding of the input encrypted with the desired number of

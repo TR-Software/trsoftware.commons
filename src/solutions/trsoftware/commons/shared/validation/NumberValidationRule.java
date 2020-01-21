@@ -26,27 +26,27 @@ import solutions.trsoftware.commons.shared.util.StringUtils;
  *
  * @author Alex
  */
-public class NumberValidationRule<V extends Number & Comparable<V>> extends BaseObjectValidationRule<V> {
-  private final NumberRange<V> acceptableRange;
+public class NumberValidationRule<N extends Number & Comparable<N>> extends BaseObjectValidationRule<N> {
+  private final NumberRange<N> acceptableRange;
 
-  public NumberValidationRule(String fieldName, NumberRange<V> acceptableRange, boolean acceptNull) {
+  public NumberValidationRule(String fieldName, NumberRange<N> acceptableRange, boolean acceptNull) {
     super(fieldName, acceptNull);
     this.acceptableRange = acceptableRange;
   }
 
-  public NumberValidationRule(String fieldName, V min, V max) {
-    this(fieldName, new NumberRange<V>(min, max), false);
+  public NumberValidationRule(String fieldName, N min, N max) {
+    this(fieldName, new NumberRange<N>(min, max), false);
   }
 
   @Override
-  protected ValidationResult applyValidationLogic(V value) {
+  protected ValidationResult applyValidationLogic(N value) {
     if (acceptableRange == null || acceptableRange.contains(value)) {
       return success();
     }
     else {
       String errorMsg = "must be a number";
-      V minValue = acceptableRange.min();
-      V maxValue = acceptableRange.max();
+      N minValue = acceptableRange.min();
+      N maxValue = acceptableRange.max();
       Number absoluteMin = NumberUtils.minValue(value.getClass());
       Number absoluteMax = NumberUtils.maxValue(value.getClass());
       if (!minValue.equals(absoluteMin) && !maxValue.equals(absoluteMax))
@@ -64,11 +64,11 @@ public class NumberValidationRule<V extends Number & Comparable<V>> extends Base
    * @return the result of {@link Object#toString()} for the given value, but subclasses may override to provide custom
    * formatting.
    */
-  protected String formatValue(V value) {
+  protected String formatValue(N value) {
     return String.valueOf(value);
   }
 
-  public NumberRange<V> getAcceptableRange() {
+  public NumberRange<N> getAcceptableRange() {
     return acceptableRange;
   }
 }

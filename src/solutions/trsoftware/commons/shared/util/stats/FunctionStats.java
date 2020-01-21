@@ -19,10 +19,12 @@ package solutions.trsoftware.commons.shared.util.stats;
 
 import com.google.common.collect.Iterators;
 import com.google.common.collect.PeekingIterator;
+import solutions.trsoftware.commons.shared.util.CollectionUtils;
 import solutions.trsoftware.commons.shared.util.Point;
 import solutions.trsoftware.commons.shared.util.iterators.FilteringIterator;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 
 import static solutions.trsoftware.commons.shared.util.stats.FunctionStats.Direction.DOWN;
@@ -50,7 +52,8 @@ public class FunctionStats<P extends Point> {
   private MinAndMaxDouble minAndMax = new MinAndMaxDouble();
 
   public FunctionStats(List<P> points) {
-    this.points = points;
+    // the points must be sorted by their x-values in order to find the inflections
+    this.points = CollectionUtils.sortedCopy(points, Comparator.comparingDouble(Point::getX));
     findInflections();
   }
 
@@ -108,6 +111,7 @@ public class FunctionStats<P extends Point> {
   }
 
   public List<P> getPoints() {
+    // TODO: defensive copy?
     return points;
   }
 
@@ -117,6 +121,7 @@ public class FunctionStats<P extends Point> {
    * @see #getMaximums()
    */
   public List<P> getInflections() {
+    // TODO: defensive copy?
     return inflections;
   }
 
@@ -124,6 +129,7 @@ public class FunctionStats<P extends Point> {
    * @return the local minimums of the function
    */
   public List<P> getMinimums() {
+    // TODO: defensive copy?
     return minimums;
   }
 
@@ -131,6 +137,7 @@ public class FunctionStats<P extends Point> {
    * @return the local maximums of the function
    */
   public List<P> getMaximums() {
+    // TODO: defensive copy?
     return maximums;
   }
 

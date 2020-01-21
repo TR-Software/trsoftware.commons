@@ -42,14 +42,14 @@ public class RequestAuthWithTimestamps extends RequestAuth {
   
   private long lastIncomingRequestDate;
 
-  private final Clock.TimeFunction clock;
+  private final Clock.TimeSupplier clock;
 
   public RequestAuthWithTimestamps(String macAlogorithm, String publicKey, String secretKey) {
-    this(macAlogorithm, publicKey, secretKey, Clock.SYSTEM_TIME_FCN);
+    this(macAlogorithm, publicKey, secretKey, Clock.SYSTEM_TIME_SUPPLIER);
   }
 
   /** Constructor exposed for unit testing (allows using an instrumented clock) */
-  RequestAuthWithTimestamps(String macAlogorithm, String publicKey, String secretKey, Clock.TimeFunction clock) {
+  RequestAuthWithTimestamps(String macAlogorithm, String publicKey, String secretKey, Clock.TimeSupplier clock) {
     super(macAlogorithm, publicKey, secretKey);
     this.clock = clock;
   }

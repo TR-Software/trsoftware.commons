@@ -37,7 +37,7 @@ public class RequestAuthWithTimestampsTest extends TestCaseCanStopClock {
   /** Bidirectional test: signs request then makes sure the same request validates */
   public void testRequestSigningAndValidation() throws Exception {
     Clock.stop();
-    final RequestAuth auth = new RequestAuthWithTimestamps("hmacSha1", "publicKeyString", "secretKeyString", Clock.INSTRUMENTED_TIME_FCN);
+    final RequestAuth auth = new RequestAuthWithTimestamps("hmacSha1", "publicKeyString", "secretKeyString", Clock.INSTRUMENTED_TIME_SUPPLIER);
     final HttpServletRequest request = newSignedRequest(auth);
 
     assertTrue(auth.authenticateIncomingRequest(request));

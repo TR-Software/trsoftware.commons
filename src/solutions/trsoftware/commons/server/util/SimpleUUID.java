@@ -20,34 +20,36 @@ package solutions.trsoftware.commons.server.util;
 import java.util.UUID;
 
 /**
- * Produces "universally unique" url-safe base64-encoded strings derived from
- * a {@linkplain UUID#randomUUID()} random (version 4) UUID}.
+ * Produces compact url-safe Base64-encoded strings derived from
+ * a {@linkplain UUID#randomUUID() random (version 4) UUID}.
+ * <p>
+ * Because this class encodes the binary UUID as Base64, it produces strings that are (approximately) only 24 chars long
+ * instead of the 36 produced by {@link UUID#toString()}.
  *
- * <a href="https://en.wikipedia.org/wiki/Universally_unique_identifier#Version_4_(random)">Version 4 (random) UUID (Wikipedia</a>
- * A simpler version of {@link java.util.UUID}: generates a "universally unique id"
- * by taking the result of {@link UUID#randomUUID()} and encoding the it using a url-safe
- * encoding in base64.  The base 64 algorithm is customized for encoding
- * a 128-bit number, and hence avoids trailing padding characters normally
- * present when using the standard base64 encoding on character data.
+ * <h3>Implementation Details</h3>
+ * The {@link #randomUUID()} method takes the result {@link UUID#randomUUID()} and encodes its 128-bit value using a
+ * url-safe Base64 variant specifically tailored for encoding 128-bit integers to avoid any trailing padding
+ * characters normally present when using the standard Base64 encoding on arbitrary binary data.
+ * <strong><em>This is a lossy encoding:</em></strong>
+ * in order to avoid padding chars, it doesn't preserve the sign of integer
+ * (leading 0-bits will be prepended to its binary representation such that the total number
+ * of bits is divisible by 6). Hence, it may not be possible to convert the result back to the original {@link UUID}.
  *
- * Because this class encodes the uuid as base 64, the string returned by this
- * class will be approximately 24 chars instead of the 36 by UUID.toString().
- *
- * @see UUID
- * @see <a href="https://en.wikipedia.org/wiki/Universally_unique_identifier#Version_4_(random)">Version 4 (random) UUID (Wikipedia</a>
- * @see NumberRadixEncoder
  * @author Alex
+ * @see UUID
+ * @see <a href="https://en.wikipedia.org/wiki/Universally_unique_identifier#Version_4_(random)">Version 4 (random) UUID
+ *     (Wikipedia)</a>
+ * @see NumberRadixEncoder#toStringBase64(long, long)
  */
 public abstract class SimpleUUID {
 
-  /** A url-safe b64 encoded version of UUID.random number */
+  /**
+   * @return a short, url-safe, Base64-encoded representation of a {@link UUID#randomUUID()}
+   * @see NumberRadixEncoder#toStringBase64(long, long)
+   */
   public static String randomUUID() {
     UUID uuid = UUID.randomUUID();
-//    byte[] uuidBytes = int128ToByteArray(uuid.getMostSignificantBits(), uuid.getLeastSignificantBits());
-//    return ServerStringUtils.bytesToStringUtf8(UrlSafeBase64.toStringBase64(uuidBytes));
     return NumberRadixEncoder.toStringBase64(uuid.getMostSignificantBits(), uuid.getLeastSignificantBits());
   }
-
-  // Utility methods
 
 }

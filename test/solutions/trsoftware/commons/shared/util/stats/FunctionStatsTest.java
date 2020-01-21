@@ -22,6 +22,7 @@ import solutions.trsoftware.commons.shared.util.ListUtils;
 import solutions.trsoftware.commons.shared.util.RealPoint;
 
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 import static solutions.trsoftware.commons.shared.util.stats.FunctionStatsTest.PointType.MAX;
@@ -46,13 +47,17 @@ public class FunctionStatsTest extends TestCase {
     List<Point> expectedInflectionPoints = ListUtils.filter(points, Point::isInflection);
     List<Point> expectedMinimums = ListUtils.filter(points, point -> point.type == MIN);
     List<Point> expectedMaximums = ListUtils.filter(points, point -> point.type == MAX);
-    FunctionStats fs = new FunctionStats<>(points);
-    assertEquals(expectedInflectionPoints, fs.getInflections());
-    assertEquals(expectedMinimums, fs.getMinimums());
-    assertEquals(expectedMaximums, fs.getMaximums());
-    assertEquals(2.0, fs.getPeriod());
-    assertEquals(0.0, fs.getMin());
-    assertEquals(1.0, fs.getMax());
+    // test with the points shuffled in various ways (to check that the class can handle points specified in any order)
+    for (int i = 0; i < 10; i++) {
+      FunctionStats fs = new FunctionStats<>(points);
+      assertEquals(expectedInflectionPoints, fs.getInflections());
+      assertEquals(expectedMinimums, fs.getMinimums());
+      assertEquals(expectedMaximums, fs.getMaximums());
+      assertEquals(2.0, fs.getPeriod());
+      assertEquals(0.0, fs.getMin());
+      assertEquals(1.0, fs.getMax());
+      Collections.shuffle(points);
+    }
   }
 
   enum PointType {MIN, MAX}

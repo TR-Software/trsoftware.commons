@@ -81,9 +81,7 @@ public class ArrayUtils {
    * @return the index of the first matching element in the array, or -1 if not found
    */
   public static <T> int indexOf(T[] array, T target) {
-    int fromIndex = 0;
-    int toIndex = array.length;
-    return indexOf(array, target, fromIndex, toIndex);
+    return indexOf(array, target, 0, array.length);
   }
 
   /**

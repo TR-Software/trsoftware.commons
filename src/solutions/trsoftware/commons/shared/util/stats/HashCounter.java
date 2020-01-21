@@ -24,6 +24,7 @@ import solutions.trsoftware.commons.shared.util.JsonBuilder;
 import solutions.trsoftware.commons.shared.util.mutable.MutableInteger;
 
 import java.util.*;
+import java.util.function.BiFunction;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
 
@@ -38,6 +39,8 @@ import java.util.stream.Stream;
  *
  * @param <K> type of the objects being counted
  * @author Alex
+ * @see Map#merge(Object, Object, BiFunction)
+ * @see com.google.common.collect.Multiset
  */
 public class HashCounter<K> implements CollectableStats<K, HashCounter<K>> {
   /*

@@ -27,7 +27,7 @@ package solutions.trsoftware.commons.server.util;
  * In particular, this scheme avoids the need for any padding characters that you often see at
  * the end of traditional base64 strings.
  * <p>
- * <em>This is a lossy encoding</em>:
+ * <strong><em>This is a lossy encoding</em></strong>:
  * in order to avoid padding chars, it doesn't preserve the sign of integer
  * (leading 0-bits will be prepended to its binary representation such that the total number
  * of bits is divisible by 6).  It was designed for the purpose of representing
@@ -80,12 +80,12 @@ public class NumberRadixEncoder {
 
 
   /**
-   * Uses a version of the base 64 encoding customized for encoding a single number
-   * rather than character data, and hence avoids the trailing padding characters
-   * normally present when using standard base64 encoding on character data.
+   * Uses a version of the base 64 encoding customized for encoding a single 64-bit integer
+   * rather than arbitrary binary data, and hence avoids the trailing padding characters
+   * normally present in a standard base64 encoding.
    *
    * <p>
-   *   <em>This is a lossy encoding:</em>
+   *   <strong><em>This is a lossy encoding</em></strong>:
    *   in order to avoid padding chars, it doesn't preserve the sign of integer
    *   (leading 0-bits will be prepended to its binary representation such that the total number
    *   of bits is divisible by 6).  It was designed for the purpose of representing
@@ -95,18 +95,19 @@ public class NumberRadixEncoder {
    *
    * @param i the value to encode
    * @return the number encoded in a url-safe base64 alphabet
+   * @see #toStringBase64(long, long)
    */
   public static String toStringBase64(long i) {
     return toStringBase64(0, i);
   }
 
   /**
-   * Uses a version of the base 64 encoding customized for encoding a single number
-   * rather than character data, and hence avoids the trailing padding characters
-   * normally present when using standard base64 encoding on character data.
+   * Uses a version of the base 64 encoding customized for encoding a single 128-bit integer
+   * rather than arbitrary binary data, and hence avoids the trailing padding characters
+   * normally present in a standard base64 encoding.
    *
    * <p>
-   *   <em>This is a lossy encoding:</em>
+   *   <strong><em>This is a lossy encoding</em></strong>:
    *   in order to avoid padding chars, it doesn't preserve the sign of integer
    *   (leading 0-bits will be prepended to its binary representation such that the total number
    *   of bits is divisible by 6).  It was designed for the purpose of representing
@@ -150,9 +151,9 @@ public class NumberRadixEncoder {
   /**
    * Produces a string representation of the given {@code long} in base 62 using the alphabet {@code [0-9][a-z][A-Z]}.
    * <p>
-   * This encoding algorithm works in the same manner as you might expect from {@link Long#toString(long, int) Long.toString(i, 62)}
-   * (if 62 would have been
-   * a {@linkplain Character#MAX_RADIX valid radix} for integer-string conversions in the {@link java.lang} classes).
+   * This encoding algorithm works in the same manner as you might expect from {@link Long#toString(long, int)
+   * Long.toString(i, 62)} (if 62 had been a {@linkplain Character#MAX_RADIX valid radix} for integer-string
+   * conversions in the {@link java.lang} classes).
    */
   public static String toStringBase62(long i) {
     // NOTE: this code was copied from Long.toString(i, radix), and slightly modified
@@ -178,6 +179,6 @@ public class NumberRadixEncoder {
     return new String(buf, charPos, (65 - charPos));
   }
 
-  // TODO: consider adding support encoding BigInteger in base62 (might be able to use an algorithm similar to Long.toString(i, radix))
+  // TODO: consider adding support for BigInteger encoding in base62 (might be able to use an algorithm similar to Long.toString(i, radix))
 
 }

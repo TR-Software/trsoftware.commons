@@ -24,6 +24,7 @@ import java.time.Instant;
 import java.time.ZoneId;
 import java.time.ZoneOffset;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.function.LongSupplier;
 
 /**
  * Can be used instead of {@link System#currentTimeMillis()} to allow testing time-based code.
@@ -49,13 +50,25 @@ import java.util.concurrent.atomic.AtomicReference;
 public class Clock extends java.time.Clock {
 
   @FunctionalInterface
-  public interface TimeFunction {
+  public interface TimeSupplier extends LongSupplier {
     long currentTimeMillis();
+
+    @Override
+    default long getAsLong() {
+      return currentTimeMillis();
+    }
   }
 
-  public static final TimeFunction SYSTEM_TIME_FCN = System::currentTimeMillis;
+  /**
+   * Provides the time returned by {@link System#currentTimeMillis()}
+   * @see SystemTime#INSTANCE
+   */
+  public static final TimeSupplier SYSTEM_TIME_SUPPLIER = System::currentTimeMillis;
 
-  public static final TimeFunction INSTRUMENTED_TIME_FCN = Clock::currentTimeMillis;
+  /**
+   * Provides the time returned by {@link Clock#currentTimeMillis()}
+   */
+  public static final TimeSupplier INSTRUMENTED_TIME_SUPPLIER = Clock::currentTimeMillis;
 
   /**
    * The singleton instance.
@@ -162,7 +175,7 @@ public class Clock extends java.time.Clock {
    * @return the current time as fixed by this call
    */
   public long stopTime() {
-    // assert that the Clock should only ever be stopped while unit testing
+    // ensure that the global (singleton) Clock instance can be stopped only while unit testing
     if (this == getInstance() && !ServerConstants.IS_CLOCK_STOPPABLE)
       throw new IllegalStateException("Clock.stop() cannot be called from this context.  Did you forget to inherit CanStopClock?");
     synchronized (this) {
@@ -276,10 +289,12 @@ public class Clock extends java.time.Clock {
   }
 
   /**
-   * @throws IllegalStateException iff {@link #state} is not an instance of {@link InstrumentedTime}
+   * This assertion ensures that the {@link #stopTime()} method has already verified that the clock
+   * {@linkplain ServerConstants#IS_CLOCK_STOPPABLE can be stopped in the current context}.
+   * @throws IllegalStateException if the {@linkplain #state current state} is not an instance of {@link InstrumentedTime}
    */
   private void assertClockStopped() {
-    // TODO(1/14/2020): why are we requiring that the Clock was already stopped?
+    // TODO(1/14/2020): can we get rid of this assertion?
     if (!isTimeStopped())
       throw new IllegalStateException("Clock must be stopped before calling this method");
   }
@@ -324,7 +339,7 @@ public class Clock extends java.time.Clock {
    * </ol>
    * @implNote Implementations should be immutable
    */
-  interface State extends TimeFunction {
+  interface State extends TimeSupplier {
   }
 
   /**

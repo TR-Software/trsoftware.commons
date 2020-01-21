@@ -44,7 +44,7 @@ public class LogicUtils {
    * Like {@link Object#equals(Object)}, but allows {@code null} values.
    * <p>
    * <b>NOTE:</b> the performance of this method (as well as of {@link java.util.Objects#equals(Object, Object)})
-   * might be worse than writing the equivalent logical expression inline where the argument types can be determined
+   * could be worse than writing the equivalent logical expression inline where the argument types can be determined
    * statically (see <a href="https://bugs.openjdk.java.net/browse/JDK-8015417">JDK-8015417</a>).
    *
    * @return true if the specified arguments are equal, or both null

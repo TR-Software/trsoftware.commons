@@ -121,7 +121,7 @@ public abstract class ReflectionUtils {
   }
 
   /**
-   * Creates a factory for the given class using the given constructor args.
+   * Creates a factory for the given class using the constructor corresponding to the given parameter types.
    * <p>
    * The returned function will rethrow any checked exception thrown by {@link Constructor#newInstance(Object...)} as a
    * {@link RuntimeException}.

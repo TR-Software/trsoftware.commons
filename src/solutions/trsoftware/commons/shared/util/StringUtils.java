@@ -480,7 +480,7 @@ public class StringUtils {
   }
 
   /**
-   * Same as {@link #join(String, Iterator)}, but appends the joined result to the given builder
+   * Same as {@link #join(String, String, Iterator)}, but appends the joined result to the given builder
    * instead of creating a new string.
    *
    * @param builder the output will be appended to this builder
@@ -506,7 +506,7 @@ public class StringUtils {
   }
 
   /**
-   * Same as {@link #join(String, String, Iterator)}, but appends the joined result to the given builder
+   * Same as {@link #join(String, Iterator)}, but appends the joined result to the given builder
    * instead of creating a new string.
    *
    * @param builder the output will be appended to this builder
@@ -519,11 +519,10 @@ public class StringUtils {
   }
 
   /**
-   * @return the integer represented by the last sequence of consecutive digits
-   * contained by the string, or null if the string does not contain
-   * any digits.
-   *
+   * @return the integer represented by the last sequence of consecutive decimal digits
+   * contained by the string, or {@code null} if the string does not contain any digits.
    */
+  // TODO: this method might be too special-purpose for inclusion in this class (also easy-enough to implement with a regex)
   public static Integer lastIntegerInString(String str) {
     int startIndex = -1, endIndex = -1;
 

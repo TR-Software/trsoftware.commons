@@ -25,6 +25,7 @@ import static solutions.trsoftware.commons.shared.util.StringUtils.firstNotBlank
 /**
  * Compares the performance of a number of iterations of each Runnable task specified.
  *
+ * @see BenchmarkRunner
  * @see BenchmarkingTestCase
  */
 public abstract class PerformanceComparison {
@@ -93,7 +94,6 @@ public abstract class PerformanceComparison {
         task2, task2.getName(),
         iterations);
   }
-
 
 
   public static abstract class NamedRunnable implements Runnable {

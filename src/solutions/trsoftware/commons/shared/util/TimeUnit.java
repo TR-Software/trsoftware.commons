@@ -120,7 +120,7 @@ public enum TimeUnit implements RichComparable<TimeUnit> {
   /**
    * The <a href="https://en.wikipedia.org/wiki/International_System_of_Units#Prefixes">SI abbreviation</a>
    * for this unit if it's 1 second or less, otherwise a conventional abbreviation resembling (but not necessarily
-   * compatible with) the format abbreviations used by used by {@link java.text.SimpleDateFormat},
+   * compatible with) the format specifiers used by used by {@link java.text.SimpleDateFormat},
    * {@link com.google.gwt.i18n.client.DateTimeFormat}, or {@link java.time.Duration#toString()}
    */
   public final String abbreviation;
@@ -131,8 +131,7 @@ public enum TimeUnit implements RichComparable<TimeUnit> {
   }
 
   /**
-   * Convert the given time duration in the given unit to this
-   * unit.
+   * Convert the given time duration in the given unit to this unit.
    * @param sourceUnit the unit of the <tt>sourceDuration</tt> argument
    * @param sourceDuration the time duration in the given <tt>sourceUnit</tt>
    * @return the converted duration in this unit, which could be a fraction.

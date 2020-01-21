@@ -98,7 +98,7 @@ public class CollectionUtils {
 
   /**
    * Removes all the entries matching predicate from the given collection.
-   * @return the same map to allow method chaining.
+   * @return the same collection, for call chaining.
    * @deprecated Java 1.8+ provides {@link Collection#removeIf(java.util.function.Predicate)} for this purpose
    */
   public static <V> Collection<V> removeMatchingEntries(Collection<V> collection, Predicate<V> predicate) {
@@ -400,6 +400,27 @@ public class CollectionUtils {
     ArrayList<E> reversedList = new ArrayList<>(collection);
     Collections.reverse(reversedList);
     return reversedList;
+  }
+
+  /**
+   * @param collection the collection to be shuffled
+   * @return a new list containing the same elements as the given collection, but shuffled using {@link Collections#shuffle(List)}
+   */
+  public static <T> ArrayList<T> shuffledCopy(Collection<T> collection) {
+    ArrayList<T> ret = new ArrayList<>(collection);
+    Collections.shuffle(ret);
+    return ret;
+  }
+
+  /**
+   * @param collection the collection to be shuffled
+   * @param rnd the source of randomness to use to shuffle the elements
+   * @return a new list containing the same elements as the given collection, but shuffled using {@link Collections#shuffle(List)}
+   */
+  public static <T> ArrayList<T> shuffledCopy(Collection<T> collection, Random rnd) {
+    ArrayList<T> ret = new ArrayList<>(collection);
+    Collections.shuffle(ret, rnd);
+    return ret;
   }
 
 }

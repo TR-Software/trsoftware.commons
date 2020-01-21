@@ -27,7 +27,7 @@ import solutions.trsoftware.commons.bridge.BridgeTypeFactory;
  * be compatible with {@code decodeURIComponent} (e.g. a cookie value that might be read client-side
  * with {@link com.google.gwt.user.client.Cookies}).
  * <p>
- * <b>Example:</b> JSON strings are particularly sensitive to the  {@code URLEncoder.encode("{a: 1, b: 2}", "UTF-8")}
+ * <b>Example:</b>  {@code URLEncoder.encode("{a: 1, b: 2}", "UTF-8")}
  * returns {@code "%7Ba%3A+1%2C+b%3A+2%7D"} (because it encodes spaces as {@code '+'}), but
  * {@code decodeURIComponent("%7Ba%3A+1%2C+b%3A+2%7D")} returns {@code "{a:+1,+b:+2}"}, which is invalid JSON!
  *

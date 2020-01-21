@@ -31,6 +31,8 @@ import java.util.function.Supplier;
  */
 public class ServerArrayUtils {
 
+  // TODO: move all methods to ArrayUtils (just annotate them as @GwtIncompatible if needed)
+
   /**
    * Fills the given array with array.length new instances of the given class.
    * @return the array

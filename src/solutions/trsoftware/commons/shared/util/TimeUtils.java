@@ -209,7 +209,7 @@ public class TimeUtils {
    *
    * <h3>Examples:</h3>
    * Given a {@code unitDurationMillis} equal to 900000ms (15 minutes), this method will produce the following results:
-   * <table>
+   * <table border=1>
    *   <tr>
    *     <th>argument</th>
    *     <th>result</th>
@@ -234,12 +234,9 @@ public class TimeUtils {
    * <em>NOTE:</em> the above results are identical to those produced by {@link Instant#truncatedTo(TemporalUnit)}
    * and {@link LocalDateTime#truncatedTo(TemporalUnit)} (given a {@link TemporalUnit} that represents 15 minutes).
    *
-   * TODO: could move this to the "shared.util" package
-   *
    * @param timeMillis the time to truncate (round down)
    * @param unitDurationMillis the modulus for the rounding
    * @return the highest value {@code T} such that {@code T <= timeMillis} and {@code T % unitDurationMillis == 0}
-   *
    *
    * @see Instant#truncatedTo(TemporalUnit)
    * @see LocalDateTime#truncatedTo(TemporalUnit)

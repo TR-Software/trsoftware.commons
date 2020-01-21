@@ -40,14 +40,14 @@ import java.util.TreeSet;
  * @author Alex
  * @see com.google.common.collect.Range
  */
-public class NumberRange<T extends Number & Comparable<T>> implements Iterable<T> {
+public class NumberRange<N extends Number & Comparable<N>> implements Iterable<N> {
 
   // NOTE: can't extend Comparable<T> because the fromDouble wouldn't compile under those circumstances.
 
-  private final T min;
-  private final T max;
+  private final N min;
+  private final N max;
 
-  public NumberRange(T min, T max) {
+  public NumberRange(N min, N max) {
     // make sure the range is valid
     if (min.doubleValue() > max.doubleValue())
       throw new IllegalArgumentException("min > max");
@@ -56,12 +56,12 @@ public class NumberRange<T extends Number & Comparable<T>> implements Iterable<T
   }
 
   /** The lowest number in this range */
-  public T min() {
+  public N min() {
     return min;
   }
 
   /** The highest number in this range */
-  public T max() {
+  public N max() {
     return max;
   }
 
@@ -81,7 +81,7 @@ public class NumberRange<T extends Number & Comparable<T>> implements Iterable<T
     return RandomUtils.nextIntInRange(lowerBound, upperBound+1);
   }
 
-  public boolean contains(T number) {
+  public boolean contains(N number) {
     return inRange(min, max, number);
   }
 
@@ -118,7 +118,7 @@ public class NumberRange<T extends Number & Comparable<T>> implements Iterable<T
    * @see MathUtils#restrict(double, double, double) 
    * @see MathUtils#restrict(float, float, float) 
    */
-  public T coerce(T number) {
+  public N coerce(N number) {
     if (contains(number))
       return number;
     else {
@@ -200,15 +200,15 @@ public class NumberRange<T extends Number & Comparable<T>> implements Iterable<T
    * @see java.util.stream.IntStream#rangeClosed(int, int)
    * @see java.util.stream.LongStream#rangeClosed(long, long)
    */
-  public Iterator<T> iterator() {
+  public Iterator<N> iterator() {
     return iterator(fromDouble(1));
   }
 
-  public Iterator<T> iterator(final T step) {
-    return new AbstractSequentialIterator<T>(min) {
+  public Iterator<N> iterator(final N step) {
+    return new AbstractSequentialIterator<N>(min) {
       @Override
-      protected T computeNext(T previous) {
-        T next = fromDouble(previous.doubleValue() + step.doubleValue());
+      protected N computeNext(N previous) {
+        N next = fromDouble(previous.doubleValue() + step.doubleValue());
         if (next.compareTo(max) <= 0)
           return next;
         return null;
@@ -217,8 +217,8 @@ public class NumberRange<T extends Number & Comparable<T>> implements Iterable<T
   }
 
   @SuppressWarnings("unchecked")
-  private T fromDouble(double v) {
-    return (T)NumberUtils.fromDouble(min.getClass(), v);
+  private N fromDouble(double v) {
+    return (N)NumberUtils.fromDouble(min.getClass(), v);
   }
 
   /**

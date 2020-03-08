@@ -18,6 +18,7 @@
 package solutions.trsoftware.commons.server.util;
 
 import junit.framework.TestCase;
+import solutions.trsoftware.commons.server.servlet.UrlUtils;
 import solutions.trsoftware.commons.shared.annotations.Slow;
 
 import java.util.HashSet;
@@ -44,7 +45,7 @@ public class SimpleUUIDTest extends TestCase {
       String uuid = SimpleUUID.randomUUID();
       assertTrue(uuidSet.add(uuid));
       // make sure the uuid is url-safe
-      assertEquals(uuid, ServerStringUtils.urlEncode(uuid));
+      assertEquals(uuid, UrlUtils.urlEncode(uuid));
     }
     return uuidSet;
   }
@@ -64,7 +65,7 @@ public class SimpleUUIDTest extends TestCase {
             // make sure the uuid is url-safe
             assertNull(uuidSet.put(uuid, true));
             // make sure the uuid is url-safe
-            assertEquals(uuid, ServerStringUtils.urlEncode(uuid));
+            assertEquals(uuid, UrlUtils.urlEncode(uuid));
           }
           barrier.await();
         }

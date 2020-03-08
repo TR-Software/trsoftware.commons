@@ -17,7 +17,7 @@
 
 package solutions.trsoftware.commons.server.io.file;
 
-import solutions.trsoftware.commons.server.util.ServerStringUtils;
+import solutions.trsoftware.commons.server.servlet.UrlUtils;
 import solutions.trsoftware.commons.shared.util.StringUtils;
 
 import java.io.File;
@@ -301,7 +301,7 @@ public class FileUtils {
    */
   public static String urlToFilepath(URL fileUrl) {
     // there's a bug in the JVM that fails on file paths with spaces (b/c spaces are url-encoded in a URL)
-    return ServerStringUtils.urlDecode(fileUrl.getFile());
+    return UrlUtils.urlDecode(fileUrl.getFile());
   }
 
   /**

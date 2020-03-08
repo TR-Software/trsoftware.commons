@@ -20,8 +20,8 @@ package solutions.trsoftware.commons.server.util;
 
 import org.apache.commons.codec.binary.Base64;
 import org.w3c.dom.Document;
-import solutions.trsoftware.commons.client.bridge.util.URIComponentEncoder;
 import solutions.trsoftware.commons.server.io.ServerIOUtils;
+import solutions.trsoftware.commons.server.servlet.UrlUtils;
 import solutions.trsoftware.commons.shared.util.Levenshtein;
 import solutions.trsoftware.commons.shared.util.StringUtils;
 
@@ -33,8 +33,6 @@ import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
 import java.io.*;
-import java.net.URLDecoder;
-import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
@@ -126,16 +124,16 @@ public class ServerStringUtils {
   }
 
   /**
-   * Checks if the argument satisfies the URL-encoding strategy employed by {@link #urlEncode(String)}
+   * Checks if the argument satisfies the URL-encoding strategy employed by {@link UrlUtils#urlEncode(String)}
    *
    * @return {@code true} if the given string can be safely used in a URL without having to be escaped.
    * NOTE: a {@code false} return value doesn't mean that it ca
    *
-   * @deprecated this test depends on the specific implementation of {@link #urlEncode(String)} and therefore
+   * @deprecated this test depends on the specific implementation of {@link UrlUtils#urlEncode(String)} and therefore
    * is subject to false negatives (and maybe even false positives)
    */
   public static boolean isUrlSafe(String str) {
-    return str.equals(urlEncode(str));
+    return str.equals(UrlUtils.urlEncode(str));
   }
 
   /**
@@ -143,42 +141,6 @@ public class ServerStringUtils {
    */
   public static String hashSHA256(String plaintext) {
     return hashSHA256(plaintext, 1);
-  }
-
-  /** Decodes the given percent-encoded string using {@link java.net.URLDecoder} (UTF-8 encoding is assumed). */
-  public static String urlDecode(String str) {
-    try {
-      return URLDecoder.decode(str, StringUtils.UTF8_CHARSET_NAME);
-    }
-    catch (UnsupportedEncodingException e) {
-      // will never happen - all Java VMs support UTF-8
-      throw new RuntimeException(e);
-    }
-    catch (IllegalArgumentException e) {
-      return str; // return the original string if the decoding fails
-    }
-  }
-
-  /**
-   * Percent-encodes the given string using {@link java.net.URLEncoder} (UTF-8 encoding is used).
-   * <p>
-   * <strong>Warning:</strong> the escaping strategy implemented by {@link java.net.URLEncoder} does not
-   * match the Javascript {@code encodeURIComponent} function and therefore the result is not guaranteed to be
-   * compatible with the Javascript {@code decodeURIComponent} function.
-   * In particular, this method should not be used for encoding cookie values that might be read client-side with
-   * {@link com.google.gwt.user.client.Cookies} (which uses the native JS {@code decodeURIComponent} function).
-   * To match the Javascript behavior, use {@link URIComponentEncoder#encode(String)} instead.
-   *
-   * @see URIComponentEncoder#encode(String)
-   */
-  public static String urlEncode(String str) {
-    try {
-      return URLEncoder.encode(str, StringUtils.UTF8_CHARSET_NAME);
-    }
-    catch (UnsupportedEncodingException e) {
-      // will never happen - all Java VMs support UTF-8
-      throw new RuntimeException(e);
-    }
   }
 
   /** Debugging util method that prints a w3c DOM Document to a string */

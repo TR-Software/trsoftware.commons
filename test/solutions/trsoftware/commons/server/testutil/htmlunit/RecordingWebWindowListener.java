@@ -22,10 +22,15 @@ import com.gargoylesoftware.htmlunit.html.HtmlPage;
 import solutions.trsoftware.commons.server.io.StringInputStream;
 import solutions.trsoftware.commons.server.io.file.FileUtils;
 
+import java.awt.*;
+import java.io.File;
 import java.io.IOException;
+import java.net.URI;
+import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.NotDirectoryException;
 import java.nio.file.Path;
+import java.util.ArrayList;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
@@ -38,7 +43,7 @@ public class RecordingWebWindowListener extends CurrentWebWindowContentChangeLis
 
   private Path outputDir;
   private AtomicInteger nextId = new AtomicInteger(1);
-
+  private ArrayList<SavedHtmlPage> savedHtmlPages = new ArrayList<>();
 
   /**
    * Will write the loaded pages to a new directory in the default temporary-file directory ({@value FileUtils#TEMP_DIR_PROP})
@@ -75,8 +80,12 @@ public class RecordingWebWindowListener extends CurrentWebWindowContentChangeLis
     }
   }
 
-  private void savePage(HtmlPage newPage) throws IOException {
-    WebResponse webResponse = newPage.getWebResponse();
+  private void savePage(HtmlPage htmlPage) throws IOException {
+    /*
+      TODO: can try using HtmlPage#save(File), which supposedly also saves the images from the page
+      see https://stackoverflow.com/q/2738464/
+     */
+    WebResponse webResponse = htmlPage.getWebResponse();
     String contentCharset = webResponse.getContentCharset();
     String content = webResponse.getContentAsString();
     // add a comment containing the request info at the top of the output file
@@ -92,6 +101,75 @@ public class RecordingWebWindowListener extends CurrentWebWindowContentChangeLis
         request,
         outFile
     );
+    savedHtmlPages.add(new SavedHtmlPage(webResponse, outFile));
+  }
+
+  /**
+   * @return a history of the pages that were written to disk by this listener, which can be used to open the saved files
+   * in a browser.
+   *
+   * @see SavedHtmlPage#openSavedFile()
+   */
+  public ArrayList<SavedHtmlPage> getSavedHtmlPages() {
+    return savedHtmlPages;
+  }
+
+  /**
+   * Record representing a file that was created by the {@link #savePage(HtmlPage)} method.
+   *
+   * @see #getSavedHtmlPages()
+   */
+  public static class SavedHtmlPage {
+    /** Location of the saved file */
+    private final Path outputFile;
+    /** URL of the request that loaded the page */
+    private final URL requestURL;
+    /** Time when the page was saved (epoch millis) */
+    private final long timestamp;
+
+    public SavedHtmlPage(WebResponse webResponse, Path outputFile) {
+      this.outputFile = outputFile;
+      requestURL = webResponse.getWebRequest().getUrl();
+      timestamp = System.currentTimeMillis();
+    }
+
+    public Path getOutputFile() {
+      return outputFile;
+    }
+
+    public URL getRequestURL() {
+      return requestURL;
+    }
+
+    public long getTimestamp() {
+      return timestamp;
+    }
+
+    /**
+     * Launches the associated application to open the saved file.
+     * <p>
+     * <i>Note:</i> if ".html" files are associated with a web browser, the outcome of this method is likely the same
+     * as {@link #browseSavedFile()}
+     *
+     * @see #browseSavedFile()
+     * @see Desktop#open(File)
+     */
+    public void openSavedFile() throws IOException {
+      Desktop.getDesktop().open(outputFile.toFile());
+    }
+
+    /**
+     * Launches the default web browser to open the saved file.
+     * <p>
+     * <i>Note:</i> if ".html" files are associated with a web browser, the outcome of this method is likely the same
+     * as {@link #openSavedFile()}
+     *
+     * @see #openSavedFile()
+     * @see Desktop#browse(URI)
+     */
+    public void browseSavedFile() throws IOException {
+      Desktop.getDesktop().browse(outputFile.toUri());
+    }
   }
 
 }

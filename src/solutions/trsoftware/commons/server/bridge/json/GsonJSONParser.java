@@ -23,7 +23,7 @@ import com.google.gson.JsonSyntaxException;
 import solutions.trsoftware.commons.client.bridge.json.AbstractJSONParser;
 import solutions.trsoftware.commons.client.bridge.json.JSONArray;
 import solutions.trsoftware.commons.client.bridge.json.JSONObject;
-import solutions.trsoftware.commons.server.util.ServerStringUtils;
+import solutions.trsoftware.commons.server.servlet.UrlUtils;
 
 /**
  * Jan 13, 2009
@@ -51,6 +51,6 @@ public class GsonJSONParser extends AbstractJSONParser {
 
   @Override
   protected String unsafeUrlDecode(String str) {
-    return ServerStringUtils.urlDecode(str);
+    return UrlUtils.urlDecode(str);
   }
 }

@@ -20,7 +20,7 @@ package solutions.trsoftware.commons.server.bridge.util;
 import com.google.common.net.PercentEscaper;
 import com.google.common.net.UrlEscapers;
 import solutions.trsoftware.commons.client.bridge.util.URIComponentEncoder;
-import solutions.trsoftware.commons.server.util.ServerStringUtils;
+import solutions.trsoftware.commons.server.servlet.UrlUtils;
 
 /**
  * Server-side implementation of {@link URIComponentEncoder}
@@ -59,6 +59,6 @@ public class URIComponentEncoderJavaImpl extends URIComponentEncoder {
    * {@inheritDoc}
    */
   public String decode(String value) {
-    return ServerStringUtils.urlDecode(value);
+    return UrlUtils.urlDecode(value);
   }
 }

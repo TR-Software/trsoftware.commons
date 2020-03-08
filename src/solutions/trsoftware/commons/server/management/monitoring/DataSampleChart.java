@@ -17,7 +17,7 @@
 
 package solutions.trsoftware.commons.server.management.monitoring;
 
-import solutions.trsoftware.commons.server.util.ServerStringUtils;
+import solutions.trsoftware.commons.server.servlet.UrlUtils;
 import solutions.trsoftware.commons.shared.gchart.GoogleChart;
 import solutions.trsoftware.commons.shared.util.StringUtils;
 import solutions.trsoftware.commons.shared.util.TimeUtils;
@@ -177,7 +177,7 @@ public class DataSampleChart {
   private String generateRelativeTimeLabel(double millis) {
     if (millis < 1000)
       return "now";
-    return ServerStringUtils.urlEncode(TimeUtils.timeIntervalToString(millis, "s", "s", "m", "m", "h", "h", "d", "d", "m", "m", "y", "y"));
+    return UrlUtils.urlEncode(TimeUtils.timeIntervalToString(millis, "s", "s", "m", "m", "h", "h", "d", "d", "m", "m", "y", "y"));
   }
 
   public String getTitle() {

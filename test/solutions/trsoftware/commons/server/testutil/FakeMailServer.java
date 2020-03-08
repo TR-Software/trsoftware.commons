@@ -47,7 +47,7 @@ public class FakeMailServer extends Assert implements AutoCloseable {
   private int lastCount = 0;
 
   public FakeMailServer(int port) {
-    String startMsg = String.format("Starting %s on port %d", Wiser.class.getSimpleName(), port);
+    String startMsg = String.format("Starting %s on port %d", Wiser.class.getName(), port);
     System.out.println(startMsg);
     Duration startupDuration = new Duration(startMsg);
     wiser = new Wiser(port);

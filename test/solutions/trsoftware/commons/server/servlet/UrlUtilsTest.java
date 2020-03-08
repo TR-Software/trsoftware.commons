@@ -17,7 +17,9 @@
 
 package solutions.trsoftware.commons.server.servlet;
 
+import com.google.common.collect.ImmutableMultimap;
 import junit.framework.TestCase;
+import solutions.trsoftware.commons.shared.util.RandomUtils;
 
 import java.net.URL;
 
@@ -69,5 +71,47 @@ public class UrlUtilsTest extends TestCase {
         replaceQueryStringParameter("foo=bar&baz=1", "baz", "2", "3"));  // param/value combination not present, so url returned unmodified
     assertEquals("foo=bar&baz=1",
         replaceQueryStringParameter("foo=bar&baz=1", "baz", "bar", "2")); // param/value combination not present, so url returned unmodified
+  }
+
+  public void testParseQueryString() throws Exception {
+    // 1) with 2 single-valued params
+    assertEquals(ImmutableMultimap.of("code", "xKyEiW9ku9S5", "id", "tr:foobar"),
+        parseQueryString(new URL("http://localhost:8080/confirm_email?code=xKyEiW9ku9S5&id=tr%3Afoobar")));
+    // 2) with 2 params, one of which having multiple values
+    assertEquals(ImmutableMultimap.of("code", "xKyEiW9ku9S5", "id", "tr:foobar", "id", "foo bar", "id", "foo bar"),
+        parseQueryString(new URL("http://localhost:8080/confirm_email?code=xKyEiW9ku9S5&id=tr%3Afoobar&id=foo+bar&id=foo%20bar")));
+    // 3) with 2 params, one of which having no value (unusual but possible; see https://stackoverflow.com/q/4557387)
+    assertEquals(ImmutableMultimap.of("code", "xKyEiW9ku9S5", "id", ""),
+        parseQueryString(new URL("http://localhost:8080/confirm_email?code=xKyEiW9ku9S5&id")));
+    assertEquals(ImmutableMultimap.of("code", "xKyEiW9ku9S5", "id", ""),
+        parseQueryString(new URL("http://localhost:8080/confirm_email?code=xKyEiW9ku9S5&id=")));
+    // 4) with a single param having no value
+    assertEquals(ImmutableMultimap.of("id", ""),
+        parseQueryString(new URL("http://localhost:8080/confirm_email?id")));
+    assertEquals(ImmutableMultimap.of("id", ""),
+        parseQueryString(new URL("http://localhost:8080/confirm_email?id=")));
+    // 5) with a single param whose name and value are both %-encoded
+    assertEquals(ImmutableMultimap.of("foo bar", "hello world"),
+        parseQueryString(new URL("http://localhost:8080/confirm_email?foo+bar=hello%20world")));
+  }
+
+  /**
+   * Tests that the results of {@link UrlUtils#urlEncode(String)} can be converted back using
+   * {@link UrlUtils#urlDecode(String)}
+   */
+  public void testUrlEncode() throws Exception {
+    for (int i = 0; i < 10_000; i++) {
+      String original = RandomUtils.randString(40);
+      String encoded = UrlUtils.urlEncode(original);
+      String decoded = UrlUtils.urlDecode(encoded);
+      String msg = String.format("'%s' -> '%s' -> '%s'", original, encoded, decoded);
+      assertEquals(msg, original, decoded);
+    }
+  }
+
+  public void testUrlDecode() throws Exception {
+    // check that it's able to decode spaces encoded as '+' chars as well as '%20'
+    assertEquals("foo bar", UrlUtils.urlDecode("foo+bar"));
+    assertEquals("foo bar", UrlUtils.urlDecode("foo%20bar"));
   }
 }

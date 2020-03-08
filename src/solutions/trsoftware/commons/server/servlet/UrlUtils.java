@@ -17,13 +17,17 @@
 
 package solutions.trsoftware.commons.server.servlet;
 
+import com.google.common.collect.ImmutableMultimap;
+import solutions.trsoftware.commons.client.bridge.util.URIComponentEncoder;
 import solutions.trsoftware.commons.shared.util.ArrayUtils;
 import solutions.trsoftware.commons.shared.util.MapUtils;
+import solutions.trsoftware.commons.shared.util.StringUtils;
 
+import java.io.UnsupportedEncodingException;
 import java.net.URL;
+import java.net.URLDecoder;
+import java.net.URLEncoder;
 import java.util.Map;
-
-import static solutions.trsoftware.commons.server.util.ServerStringUtils.urlEncode;
 
 /**
  * Basic utils for working with URL strings.
@@ -64,6 +68,36 @@ public class UrlUtils {
   }
 
   /**
+   * Extracts the query string parameters from the given URL.
+   *
+   * @return the name-value mapping of the query parameters contained in the given URL
+   *
+   * @see MapUtils#asMap(com.google.common.collect.Multimap)
+   */
+  public static ImmutableMultimap<String, String> parseQueryString(URL url) {
+    ImmutableMultimap.Builder<String, String> mapBuilder = ImmutableMultimap.builder();
+    String query = url.getQuery();
+    if (StringUtils.notEmpty(query)) {
+      String[] nameValuePairs = query.split("&");
+      for (String nvp : nameValuePairs) {
+        int iEq = nvp.indexOf('=');
+        String name, value;
+        if (iEq != -1) {
+          name = nvp.substring(0, iEq);
+          value = nvp.substring(iEq+1);
+        }
+        else {
+          // only name, no value (unusual but possible; see https://stackoverflow.com/q/4557387)
+          name = nvp;
+          value = "";
+        }
+        mapBuilder.put(urlDecode(name), urlDecode(value));
+      }
+    }
+    return mapBuilder.build();
+  }
+
+  /**
    * Rewrites the path and query string of the given URL.
    * <p style="color: #6495ed; font-weight: bold;">
    *   TODO: write something like {@link com.google.gwt.http.client.UrlBuilder} or use the
@@ -101,4 +135,39 @@ public class UrlUtils {
     return replaceQueryStringParameter(queryString, paramName, originalValue, paramName, newValue);
   }
 
+  /** Decodes the given percent-encoded string using {@link java.net.URLDecoder} (UTF-8 encoding is assumed). */
+  public static String urlDecode(String str) {
+    try {
+      return URLDecoder.decode(str, StringUtils.UTF8_CHARSET_NAME);
+    }
+    catch (UnsupportedEncodingException e) {
+      // will never happen - all Java VMs support UTF-8
+      throw new RuntimeException(e);
+    }
+    catch (IllegalArgumentException e) {
+      return str; // return the original string if the decoding fails
+    }
+  }
+
+  /**
+   * Percent-encodes the given string using {@link java.net.URLEncoder} (UTF-8 encoding is used).
+   * <p>
+   * <strong>Warning:</strong> the escaping strategy implemented by {@link java.net.URLEncoder} does not
+   * match the Javascript {@code encodeURIComponent} function and therefore the result is not guaranteed to be
+   * compatible with the Javascript {@code decodeURIComponent} function.
+   * In particular, this method should not be used for encoding cookie values that might be read client-side with
+   * {@link com.google.gwt.user.client.Cookies} (which uses the native JS {@code decodeURIComponent} function).
+   * To match the Javascript behavior, use {@link URIComponentEncoder#encode(String)} instead.
+   *
+   * @see URIComponentEncoder#encode(String)
+   */
+  public static String urlEncode(String str) {
+    try {
+      return URLEncoder.encode(str, StringUtils.UTF8_CHARSET_NAME);
+    }
+    catch (UnsupportedEncodingException e) {
+      // will never happen - all Java VMs support UTF-8
+      throw new RuntimeException(e);
+    }
+  }
 }

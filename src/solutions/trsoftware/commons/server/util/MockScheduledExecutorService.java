@@ -18,7 +18,6 @@
 package solutions.trsoftware.commons.server.util;
 
 import com.google.common.annotations.VisibleForTesting;
-import org.jetbrains.annotations.NotNull;
 import solutions.trsoftware.commons.server.io.StringPrintStream;
 
 import javax.annotation.Nonnull;
@@ -90,44 +89,86 @@ public class MockScheduledExecutorService implements ScheduledExecutorService {
 
   /**
    * Unlike {@link #advanceClockAndPump}, which advances the clock in one go, this method
-   * advances the mock clock incrementally, 1/64 th of the remaining interval
-   * on each iteration (or 1 millis whichever is larger),
-   * invoking all the tasks scheduled up to that point.
+   * advances the mock clock incrementally.
+   * <p>
+   * As a performance optimization, the clock will be advanced by 1/64th of the remaining interval
+   * on each iteration (or 1 millis, whichever is larger), invoking all the tasks scheduled up to that point.
    * The clock is guaranteed to stop exactly at the target time,
    * because we'll be pumping 1 ms at a time toward the end of the interval.
-   *
-   * This ensures that the scheduled events execute as close to their target time as possible.
+   * <p>
+   * <strong>NOTE:</strong> although this algorithm attempts to execute the scheduled tasks as close to their target time
+   * as possible, they may actually execute later than originally scheduled (because some ticks will be skipped over).
+   * To ensure that tasks are executed at exactly the right time, use the {@link #advanceClockAndPumpIncrementally(long, long)}
+   * method instead, with {@code tickMillis = 1} as the second argument.
    * 
-   * @param millis
+   * @param millis the clock will be advanced by this duration
    */
   public void advanceClockAndPumpIncrementally(long millis) {
     advanceClockAndPumpIncrementallyTo(Clock.currentTimeMillis() + millis);
   }
 
   /**
-   * Similar to {@link #advanceClockAndPumpIncrementally}, except instead
-   * of specifying the offset, you specify the target time to advance the clock
-   * to.
+   * Unlike {@link #advanceClockAndPump}, which advances the clock in one go, this method
+   * advances the mock clock incrementally, {@code tickMillis} at a time, and calls {@link #pumpEvents()}
+   * at the end of each iteration.
+   * <p>
+   * Passing {@code tickMillis = 1} ensures that tasks are executed exactly as scheduled; otherwise can improve speed
+   * at the expense of precision.
+   * For example: if argument {@code tickMillis < 1}, will advance the clock by 1/64th of the remaining interval on each
+   * iteration (using the algorithm described in {@link #advanceClockAndPumpIncrementally(long)}).
    *
-   * This ensures that the scheduled events execute as close to their target time as possible.
+   * @param millis the clock will be advanced by this duration
+   * @param tickMillis the clock will be advanced by this amount on each iteration; if less than 1,
+   * will advance the clock by 1/64th of the remaining interval on each iteration (which is the default
+   * behavior of the {@link #advanceClockAndPumpIncrementally(long)} method).
+   */
+  public void advanceClockAndPumpIncrementally(long millis, long tickMillis) {
+    advanceClockAndPumpIncrementallyTo(Clock.currentTimeMillis() + millis, tickMillis);
+  }
+
+  /**
+   * Similar to {@link #advanceClockAndPumpIncrementally(long, long)}, this method advances the mock clock incrementally,
+   * {@code tickMillis} at a time, and calls {@link #pumpEvents()} at the end of each iteration.  The only difference
+   * is that instead of specifying the offset, you specify the absolute time to advance the clock to.
+   * <p>
+   * Passing {@code tickMillis = 1} ensures that tasks are executed exactly as scheduled; otherwise can improve speed
+   * at the expense of precision.
+   * For example: if argument {@code tickMillis < 1}, will advance the clock by 1/64th of the remaining interval on each
+   * iteration (using the algorithm described in {@link #advanceClockAndPumpIncrementallyTo(long)}).
    *
    * @param targetTime an absolute timestamp
+   * @param tickMillis the clock will be advanced by this amount on each iteration; if less than 1,
+   * will advance the clock by 1/64th of the remaining interval on each iteration (which is the default
+   * behavior of the {@link #advanceClockAndPumpIncrementallyTo(long)} method).
+   *
+   * @param tickMillis the clock will be advanced by this amount on each iteration:
+   *   1) a value of 1 ensures that events
+   * if less than 1,
+   * will advance the clock by 1/64th of the remaining interval on each iteration (which is the default
+   * behavior of the {@link #advanceClockAndPumpIncrementally(long)} method).
    */
-  public void advanceClockAndPumpIncrementallyTo(long targetTime) {
-    // tick through the clock, 1/64 th of the interval at a time, until we reach the target date
-    // this means that only the last 64 millis will be ticked through 1 millis at the time
-    // (NOTE: can't tick one mills at a time because large gaps in the logs would take a really long time)
+  public void advanceClockAndPumpIncrementallyTo(long targetTime, long tickMillis) {
     int tickCount = 0;
     long timeGap = targetTime - Clock.currentTimeMillis();
     long now;
     while ((now = Clock.currentTimeMillis()) < targetTime) {
-      long delta = Math.max(1, (targetTime - now) >> 6);
-      if (now + delta*2 > targetTime) {
-        // if we're less than 2 deltas away from the target time, then might as well just jump the clock to the target time (to avoid falling short)
-        Clock.set(targetTime);
+      long gap = targetTime - now;  // millis remaining before targetTime
+      if (tickMillis > 0) {
+        // TODO: unit test this case
+        Clock.advance(Math.min(gap, tickMillis));
       }
       else {
-        Clock.advance(delta);
+        // tick through the clock, 1/64 th of the interval at a time, until we reach the target date
+        // this means that only the last 64 millis will be ticked through 1 millis at the time
+        // (NOTE: can't tick one mills at a time because large gaps in the logs would take a really long time)
+        long delta = Math.max(1, gap >> 6);
+        if (now + delta*2 > targetTime) {
+          // if we're less than 2 deltas away from the target time, then might as well just jump the clock to the target time (to avoid falling short)
+          Clock.set(targetTime);
+        }
+        else {
+          Clock.advance(delta);
+        }
       }
       tickCount++;
       pumpEvents();
@@ -136,6 +177,27 @@ public class MockScheduledExecutorService implements ScheduledExecutorService {
     }
     // debugging statnement
 //    System.out.printf("Advanced clock over time gap of %d millis using %d ticks%n", timeGap, tickCount);
+  }
+
+  /**
+   * Similar to {@link #advanceClockAndPumpIncrementally(long)}, this method advances the mock clock incrementally
+   * and calls {@link #pumpEvents()} at the end of each iteration.  The only difference
+   * is that instead of specifying the offset, you specify the absolute time to advance the clock to.
+   * <p>
+   * As a performance optimization, the clock will be advanced by 1/64th of the remaining interval
+   * on each iteration (or 1 millis, whichever is larger), invoking all the tasks scheduled up to that point.
+   * The clock is guaranteed to stop exactly at the target time,
+   * because we'll be pumping 1 ms at a time toward the end of the interval.
+   * <p>
+   * <strong>NOTE:</strong> although this algorithm attempts to execute the scheduled tasks as close to their target time
+   * as possible, they may actually execute later than originally scheduled (because some ticks will be skipped over).
+   * To ensure that tasks are executed at exactly the right time, use the
+   * {@link #advanceClockAndPumpIncrementallyTo(long, long)} method instead, with {@code tickMillis = 1}) as the second argument.
+   *
+   * @param targetTime an absolute timestamp
+   */
+  public void advanceClockAndPumpIncrementallyTo(long targetTime) {
+    advanceClockAndPumpIncrementallyTo(targetTime, 0);
   }
 
   /** Runs all the tasks whose time (as determined by {@link Clock#currentTimeMillis()}) has come (or passed) */

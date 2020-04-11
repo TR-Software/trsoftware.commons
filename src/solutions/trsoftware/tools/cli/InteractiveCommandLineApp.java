@@ -26,8 +26,11 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintStream;
 import java.lang.reflect.Modifier;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.List;
 import java.util.function.Function;
 
@@ -43,6 +46,9 @@ import java.util.function.Function;
  * @author Alex
  */
 public abstract class InteractiveCommandLineApp implements Runnable {
+
+  private static final String DATE_FORMAT_PATTERN = "yyyy-MM-dd";
+  private static final SimpleDateFormat DATE_FORMAT = new SimpleDateFormat(DATE_FORMAT_PATTERN);
 
   public interface CommandLineAction {
     String getLabel();
@@ -141,7 +147,7 @@ public abstract class InteractiveCommandLineApp implements Runnable {
       // keep rendering the main menu in a loop
       while (true) {
         printMainMenu(out);
-        String menuSelection = in.readLine().trim().toLowerCase();
+        String menuSelection = promptForInput(in, "Command: ").trim().toLowerCase();
         CommandLineAction selectedAction;
         if (menuSelection.matches("\\d+")) // a number was input
           selectedAction = selectorInts.inverse().get(new Integer(menuSelection));
@@ -206,6 +212,17 @@ public abstract class InteractiveCommandLineApp implements Runnable {
    */
   public static <T> T promptForInput(BufferedReader br, String prompt, Function<String, T> parser) throws IOException {
     return parser.apply(promptForInput(br, prompt));
+  }
+
+  /**
+   * Prompts for a string formatted as {@value #DATE_FORMAT_PATTERN} and returns the result parsed as a {@link Date}.
+   *
+   * @param in the input reader
+   * @param label short description of the requested value, to be included in the prompt message
+   * @return the entered date
+   */
+  public static Date promptForDate(BufferedReader in, String label) throws ParseException, IOException {
+    return DATE_FORMAT.parse(promptForInput(in, String.format("Enter %s (%s): ", label, DATE_FORMAT_PATTERN)));
   }
 
   /**

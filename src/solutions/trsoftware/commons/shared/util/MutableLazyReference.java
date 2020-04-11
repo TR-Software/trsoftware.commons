@@ -17,6 +17,8 @@
 
 package solutions.trsoftware.commons.shared.util;
 
+import java.util.function.Supplier;
+
 /**
  * Nov 15, 2010
  *
@@ -31,4 +33,17 @@ public abstract class MutableLazyReference<T> extends LazyReference<T> {
   public void refresh() {
     set(create());
   }
+
+  /**
+   * Factory method that uses the given supplier function to implement the {@link #create()} method.
+   */
+  public static <T> MutableLazyReference<T> fromSupplier(Supplier<T> supplier) {
+    return new MutableLazyReference<T>() {
+      @Override
+      protected T create() {
+        return supplier.get();
+      }
+    };
+  }
+
 }

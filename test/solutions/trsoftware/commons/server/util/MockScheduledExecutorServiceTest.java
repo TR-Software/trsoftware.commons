@@ -182,7 +182,7 @@ public class MockScheduledExecutorServiceTest extends TestCaseCanStopClock {
 
   public void testAdvanceClockAndPumpIncrementally() throws Exception {
     long startTime = Clock.stop();
-    // shedule a bunch of tasks at 1 millis intervals, and make sure the tasks
+    // schedule a bunch of tasks at 1 millis intervals, and make sure the tasks
     // will be executed exactly at their scheduled time
     DummyTask[] tasks = new DummyTask[64];  // 64 millis is the max interval on which the step size is 1ms
     for (int i = 0; i < tasks.length; i++) {

@@ -14,7 +14,7 @@ import java.util.Random;
 /**
  * GWT Version -- GWT Version -- GWT Version -- GWT Version -- GWT Version
  *
- * IMPORTANT: This the "emulated" GWT (non-Java) version of this class.
+ * IMPORTANT: This is the "emulated" GWT (non-Java) version of this class.
  * The Java version is located in the standard directory for this package.
  * <p>
  * This class serves to overcome the problem of having references to non-GWT-compilable classes from those that

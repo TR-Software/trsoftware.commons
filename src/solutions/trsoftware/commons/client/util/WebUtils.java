@@ -69,6 +69,10 @@ public abstract class WebUtils {
   }
 
   /**
+   * <p style="color: #0073BF; font-weight: bold;">
+   *   TODO: this impl doesn't allow duplicate keys because it delegates to {@link #urlQueryString(Map)};
+   *   instead, this should be implemented more like {@link #urlWithQueryString(String, String...)}
+   * </p>
    * @see #urlQueryStringEncode(Map)
    */
   public static String urlQueryStringEncode(String... keyValuePairs) {
@@ -83,12 +87,13 @@ public abstract class WebUtils {
   public static String urlWithQueryString(String url, String... nameValuePairs) {
     // the given list should have an even number of args
     if (ArrayUtils.isEmpty(nameValuePairs))
-      return "";
+      return "";  // TODO(3/26/2020): this is wrong - should return the url without query; NOT an empty string
     if (nameValuePairs.length % 2 != 0)
       throw new IllegalArgumentException("Uneven number of arguments.");
     boolean key = true;
     StringBuilder str = new StringBuilder(256);
     str.append(url);
+    // TODO(3/26/2020): should we URL-encode the key-value pairs? (see the urlQueryStringEncode method above)
     for (int i = 0; i < nameValuePairs.length; i++) {
       if (i % 2 == 0)
         str.append(i == 0 ? "?" : "&").append(nameValuePairs[i]);

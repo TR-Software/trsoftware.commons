@@ -27,7 +27,10 @@ import solutions.trsoftware.commons.shared.util.MathUtils;
  * @since 4/23/2018
  */
 public class CorrectedNumberFormat {
-  // TODO: contribute these bug-fixes to these to the GWT project (https://github.com/gwtproject/gwt/)
+  /*
+    Reported in https://github.com/gwtproject/gwt/issues/9611
+    TODO: contribute these bug-fixes to these to the GWT project (https://github.com/gwtproject/gwt/)
+   */
 
   /**
    * The delegate of this decorator.

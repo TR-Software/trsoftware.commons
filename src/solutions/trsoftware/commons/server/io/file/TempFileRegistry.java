@@ -92,11 +92,11 @@ import static solutions.trsoftware.commons.server.io.file.FileUtils.TEMP_DIR_PAT
  *     (see explanation above), it's possible that certain files (used by the other application hooks) will not be
  *     eligible for deletion until after those other hooks have finished.
  *   </li>
- *    <li>
- *      Tampering with the {@link Shutdown} sequence by forcing the directory hook (as described above) into
- *      {@link Shutdown#hooks slot 3}, thereby making it run only <em>after</em> all the application hooks
- *      (and the {@link java.io.DeleteOnExitHook}).
- *      The downside to this hack is that it may not be compatible with future versions of the JDK.
+ *   <li>
+ *     Tampering with the {@link Shutdown} sequence by forcing the directory hook (as described above) into
+ *     {@link Shutdown#hooks slot 3}, thereby making it run only <em>after</em> all the application hooks
+ *     (and the {@link java.io.DeleteOnExitHook}).
+ *     The downside to this hack is that it may not be compatible with future versions of the JDK.
  *   </li>
  * </ol>
  *

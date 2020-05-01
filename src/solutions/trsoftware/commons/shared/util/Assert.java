@@ -39,7 +39,7 @@ public class Assert {
 
 
   public static void assertFalse(boolean condition, String msg) {
-    assertTrue(!condition);
+    assertTrue(!condition, msg);
   }
 
   public static void assertFalse(boolean condition) {

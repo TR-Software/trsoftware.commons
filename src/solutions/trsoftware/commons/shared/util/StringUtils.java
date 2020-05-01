@@ -269,7 +269,7 @@ public class StringUtils {
    * are replaced with the given args.  Supports at most 9 arguments (to make parsing simpler).
    * For a more powerful implementation can use {@link SimpleTemplateParser} instead.
    * <p>
-   * This method exists because {@link String#format(String, Object...)} is not available in GWT.
+   * This method is intended as a substitute for {@link String#format(String, Object...)}, which is not available in GWT.
    *
    * @param format string which may contain symbols {@code $1}...{@code $9} to be substituted with the positional
    *     {@code args}

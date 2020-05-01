@@ -58,10 +58,11 @@ import java.util.LinkedList;
  *   </ol>
  * </p>
  * <p>
- *   This class is designed to {@linkplain #alert(String, ResponseHandler) provide safety} in those situations,
- *   and also implements a how this class handles those situations.}
- *   Tested in Chrome, FF, and IE8/9/10/11 on Windows.
+ *   This class is designed to ensure that the desired dialog gets displayed, by falling back on a
+ *   {@linkplain #softAlert(String, ResponseHandler) soft modal dialog} implementation when
+ *   the native dialog fails to display.
  * </p>
+ *   Tested in Chrome, FF, and IE8/9/10/11 on Windows.
  * <p>
  *   <strong>Example:</strong>
  *   <ol>
@@ -73,6 +74,8 @@ import java.util.LinkedList;
  *   </ol>
  * </p>
  * @author Alex, 10/4/2015
+ * @see #alert(String, ResponseHandler)
+ * @see #prompt(String, String, ResponseHandler)
  */
 public class ModalDialog {
 
@@ -269,6 +272,7 @@ public class ModalDialog {
   /**
    * Same as {@link #softAlert(String, ResponseHandler)} but does not invoke a response handler when user responds to the dialog.
    */
+  @SuppressWarnings("unchecked")
   public static void softAlert(String msg) {
     softAlert(msg, ResponseHandler.NOOP);
   }

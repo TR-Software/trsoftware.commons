@@ -22,6 +22,11 @@ import com.google.gwt.core.shared.GWT;
 /**
  * Prints all logging information to GWT's console in hosted mode.
  * Delegates to the LogImpl in web mode.
+ *
+ * <p style="color: #0073BF; font-weight: bold;">
+ *   TODO: this should be deprecated since GWT now supports {@link java.util.logging}
+ *   (see http://www.gwtproject.org/doc/latest/DevGuideLogging.html)
+ * </p>
  */
 public class Log {
 

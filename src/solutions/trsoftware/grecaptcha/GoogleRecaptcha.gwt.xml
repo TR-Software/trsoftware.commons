@@ -18,7 +18,7 @@
 <!DOCTYPE module PUBLIC "-//Google Inc.//DTD Google Web Toolkit 2.0//EN"
     "http://google-web-toolkit.googlecode.com/svn/releases/2.0/distro-source/core/src/gwt-module.dtd">
 <!--
-  This module wraps the Google Charts Javascript API (https://developers.google.com/chart) as a GWT library.
+  This module wraps the reCAPTCHA v2 Javascript API (https://developers.google.com/recaptcha/intro) as a GWT library.
 -->
 <module>
 
@@ -26,6 +26,6 @@
   <inherits name="com.google.gwt.logging.Logging"/>
   <inherits name="solutions.trsoftware.commons.Commons"/>
 
-  <entry-point class='solutions.trsoftware.gcharts.client.GoogleChartsEntryPoint'/>
+  <entry-point class='solutions.trsoftware.grecaptcha.client.ReCaptchaEntryPoint'/>
 
 </module>

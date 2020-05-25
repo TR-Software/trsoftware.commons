@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 TR Software Inc.
+ * Copyright 2020 TR Software Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -17,13 +17,23 @@
 
 package solutions.trsoftware.commons.server.servlet.testutil;
 
+import com.google.common.collect.ImmutableMultimap;
+import com.google.common.collect.Multimap;
+import org.apache.tomcat.util.http.FastHttpDateFormat;
+
 import javax.servlet.*;
 import javax.servlet.http.*;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.security.Principal;
+import java.text.SimpleDateFormat;
 import java.util.*;
+
+import static java.util.Collections.enumeration;
+import static java.util.Collections.singletonList;
+import static solutions.trsoftware.commons.shared.util.CollectionUtils.first;
+import static solutions.trsoftware.commons.shared.util.CollectionUtils.isEmpty;
 
 
 /**
@@ -40,10 +50,23 @@ public class DummyHttpServletRequest implements HttpServletRequest {
   private String queryString;
   private Map<String,String> paramMap = new HashMap<>();
   private String remoteAddr = "127.0.0.1";
-  private Locale locale = Locale.getDefault();
+  private List<Locale> locales;
   private String method;
   private List<Cookie> cookies = new ArrayList<>();
   private Map<String, Object> attributes = new LinkedHashMap<>();
+  private Multimap<String, String> headers;
+
+  /**
+   * Date formats to use in {@link #getDateHeader(String)}.
+   *
+   * Based on the implementation of {@link org.apache.catalina.connector.Request}
+   */
+  private static ThreadLocal<SimpleDateFormat[]> dateFormats = ThreadLocal.withInitial(() ->
+      new SimpleDateFormat[] {
+          new SimpleDateFormat(FastHttpDateFormat.RFC1123_DATE, Locale.US),
+          new SimpleDateFormat("EEEEEE, dd-MMM-yy HH:mm:ss zzz", Locale.US),
+          new SimpleDateFormat("EEE MMMM d HH:mm:ss yyyy", Locale.US)
+      });
 
   public DummyHttpServletRequest() {
   }
@@ -119,29 +142,50 @@ public class DummyHttpServletRequest implements HttpServletRequest {
     return cookies.toArray(new Cookie[cookies.size()]);
   }
 
-  public long getDateHeader(String val) {
-    System.err.println("Method DummyHttpServletRequest.getDateHeader has not been fully implemented yet.");
-    return 0;
+  public DummyHttpServletRequest setHeaders(Multimap<String, String> headers) {
+    this.headers = headers;
+    return this;
   }
 
-  public String getHeader(String val) {
-    System.err.println("Method DummyHttpServletRequest.getHeader has not been fully implemented yet.");
+  /**
+   * @see org.apache.catalina.connector.Request
+   */
+  public long getDateHeader(String name) {
+    // NOTE: this code was borrowed from org.apache.catalina.connector.Request
+    String value = getHeader(name);
+    if (value == null)
+      return -1L;
+
+    // Attempt to convert the date header in a variety of formats
+    long result = FastHttpDateFormat.parseDate(value, dateFormats.get());
+    if (result != -1L)
+      return result;
+    throw new IllegalArgumentException(value);
+  }
+
+  @Override
+  public String getHeader(String name) {
+    if (headers != null && headers.containsKey(name))
+      return first(headers.get(name));
     return null;
   }
 
-  public Enumeration<String> getHeaders(String val) {
-    System.err.println("Method DummyHttpServletRequest.getHeaders has not been fully implemented yet.");
-    return null;
+  private Multimap<String, String> getHeaders() {
+    return headers != null ? headers : ImmutableMultimap.of();  // empty multimap if the field is null
+  }
+
+  @Override
+  public Enumeration<String> getHeaders(String name) {
+    return enumeration(getHeaders().get(name));
   }
 
   public Enumeration<String> getHeaderNames() {
-    System.err.println("Method DummyHttpServletRequest.getHeaderNames has not been fully implemented yet.");
-    return null;
+    return enumeration(getHeaders().keySet());
   }
 
-  public int getIntHeader(String val) {
-    System.err.println("Method DummyHttpServletRequest.getIntHeader has not been fully implemented yet.");
-    return 0;
+  public int getIntHeader(String name) {
+    String val = getHeader(name);
+    return val != null ? Integer.parseInt(val) : -1;
   }
 
   public String getMethod() {
@@ -275,7 +319,7 @@ public class DummyHttpServletRequest implements HttpServletRequest {
   }
 
   public Enumeration<String> getAttributeNames() {
-    return Collections.enumeration(attributes.keySet());
+    return enumeration(attributes.keySet());
   }
 
   public String getCharacterEncoding() {
@@ -391,18 +435,32 @@ public class DummyHttpServletRequest implements HttpServletRequest {
     attributes.put(name, object);
   }
 
-  public void removeAttribute(String val) {
-    System.err.println("Method DummyHttpServletRequest.removeAttribute has not been fully implemented yet.");
-
+  public void removeAttribute(String name) {
+    attributes.remove(name);
   }
 
   public Locale getLocale() {
-    return locale;
+    if (!isEmpty(locales))
+      return locales.get(0);
+    else
+      return Locale.getDefault();
   }
 
   public Enumeration<Locale> getLocales() {
-    System.err.println("Method DummyHttpServletRequest.getLocales has not been fully implemented yet.");
-    return null;
+    if (!isEmpty(locales))
+      return enumeration(locales);
+    else
+      return enumeration(singletonList(Locale.getDefault()));
+  }
+
+  public DummyHttpServletRequest setLocales(List<Locale> locales) {
+    this.locales = locales;
+    return this;
+  }
+
+  public DummyHttpServletRequest setLocale(Locale locale) {
+    this.locales = singletonList(locale);
+    return this;
   }
 
   public boolean isSecure() {

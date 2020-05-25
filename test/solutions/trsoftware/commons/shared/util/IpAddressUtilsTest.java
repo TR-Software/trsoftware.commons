@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 TR Software Inc.
+ * Copyright 2020 TR Software Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -18,6 +18,7 @@
 package solutions.trsoftware.commons.shared.util;
 
 import junit.framework.TestCase;
+import solutions.trsoftware.commons.shared.testutil.AssertUtils;
 
 import static solutions.trsoftware.commons.shared.util.IpAddressUtils.*;
 
@@ -27,7 +28,6 @@ import static solutions.trsoftware.commons.shared.util.IpAddressUtils.*;
  */
 public class IpAddressUtilsTest extends TestCase {
 
-  /** Meta test (tests the functionality of this test class) */
   public void testIp4LongToString() throws Exception {
     // test a few values manually to be sure
     assertEquals("0.0.0.0", ip4LongToString(0));
@@ -48,12 +48,29 @@ public class IpAddressUtilsTest extends TestCase {
   }
 
   public void testIp4StringToLong() throws Exception {
-    assertEquals(0L, ip4StringToLong(null));
+    // good arguments:
     assertEquals(0L, ip4StringToLong("0.0.0.0"));
     assertEquals(1L, ip4StringToLong("0.0.0.1"));
     assertEquals(0x7f7f7f7fL, ip4StringToLong("127.127.127.127"));
     assertEquals(0x7fff7fffL, ip4StringToLong("127.255.127.255"));
     assertEquals(0xffffffffL, ip4StringToLong("255.255.255.255"));
+    // bad arguments:
+    AssertUtils.assertThrows(NullPointerException.class, (Runnable)() -> ip4StringToLong(null));
+    for (String ip : badIPv4AddressArgs()) {
+      AssertUtils.assertThrows(IllegalArgumentException.class, (Runnable)() -> ip4StringToLong(ip));
+    }
+  }
+
+  static String[] badIPv4AddressArgs() {
+    return new String[]{
+        "",
+        "foo",
+        "0.1.2.foo",
+        "0.-1.2.3",
+        "0.1.256.3",
+        "0.1.2.3.4",
+        "2400:cb00:f00d:dead:beef:1111:2222:3333"
+    };
   }
 
   public void testIp4IntToString() throws Exception {
@@ -76,12 +93,17 @@ public class IpAddressUtilsTest extends TestCase {
   }
 
   public void testIp4StringToInt() throws Exception {
-    assertEquals(ip4LongToInt(0), ip4StringToInt(null));
+    // good arguments:
     assertEquals(ip4LongToInt(0L), ip4StringToInt("0.0.0.0"));
     assertEquals(ip4LongToInt(1L), ip4StringToInt("0.0.0.1"));
     assertEquals(ip4LongToInt(0x7f7f7f7fL), ip4StringToInt("127.127.127.127"));
     assertEquals(ip4LongToInt(0x7fff7fffL), ip4StringToInt("127.255.127.255"));
     assertEquals(ip4LongToInt(0xffffffffL), ip4StringToInt("255.255.255.255"));
+    // bad arguments:
+    AssertUtils.assertThrows(NullPointerException.class, (Runnable)() -> ip4StringToInt(null));
+    for (String ip : badIPv4AddressArgs()) {
+      AssertUtils.assertThrows(IllegalArgumentException.class, (Runnable)() -> ip4StringToInt(ip));
+    }
   }
 
   public static long randomIpLong() {

@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 TR Software Inc.
+ * Copyright 2020 TR Software Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -32,11 +32,11 @@ import java.util.*;
  * <p>
  * This class decorates {@link LinkedHashMap} with fixed-time logic.
  * <p>
- * <strong>This class must be synchronized externally.</strong>  There is no way to avoid
- * locking, because a cache cannot be built using the {@link java.util.concurrent}
- * classes. (Trust me, I spent a lot of time trying).
+ * <strong>This class must be synchronized externally.</strong>
+ * For a concurrent cache implementation, see {@link com.google.common.cache.CacheBuilder}.
  *
  * @author Alex
+ * @see <a href="https://github.com/google/guava/wiki/CachesExplained">Guava Caches</a>
  */
 public class FixedTimeCache<K,V> implements Map<K,V> {
 

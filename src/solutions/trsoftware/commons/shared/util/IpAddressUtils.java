@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 TR Software Inc.
+ * Copyright 2020 TR Software Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -17,6 +17,8 @@
 
 package solutions.trsoftware.commons.shared.util;
 
+import java.util.Objects;
+
 /**
  * IP address conversions.
  * 
@@ -25,48 +27,75 @@ package solutions.trsoftware.commons.shared.util;
  */
 public class IpAddressUtils {
 
+  /**
+   * Packs the 4 unsigned bytes of the given IP address string into a {@code long} integer.
+   *
+   * For example, {@code "127.255.127.255"} will be converted to {@code 0x7fff7fffL}
+   *
+   * @param ip an IPv4 address string in dot-decimal notation (e.g. "203.0.113.1")
+   * @return the bytes of the given address packed into a {@code long} integer
+   * @throws IllegalArgumentException if the given string is not a valid IPv4 address in dot-decimal notation
+   * @throws NullPointerException if the argument is null
+   * @see #ip4StringToInt(String)
+   */
   public static long ip4StringToLong(String ip) {
-    if (ip == null)
-      return 0L;
+    Objects.requireNonNull(ip, "Argument is null");
     String[] parts = ip.split("\\.");
-    assert parts.length == 4;
+    if (parts.length != 4)
+      throw new IllegalArgumentException(formatErrorMessage(ip));
     long ipLong = 0;
     for (int i = 0; i < 4; i++) {
-      ipLong |= (Long.parseLong(parts[i]) << ((3-i)*8));
+      try {
+        long part = Long.parseLong(parts[i]);
+        if (part < 0 || part > 255)
+          throw new IllegalArgumentException(formatErrorMessage(ip));
+        ipLong |= (part << ((3-i)*8));
+      }
+      catch (NumberFormatException e) {
+        throw new IllegalArgumentException(formatErrorMessage(ip));
+      }
     }
     return ipLong;
   }
 
+  private static String formatErrorMessage(String ip) {
+    return new StringBuilder().append('"').append(ip).append('"').append(" is not a valid IPv4 address").toString();
+  }
+
+  /**
+   * Inverse of {@link #ip4StringToLong(String)}
+   */
   public static String ip4LongToString(long ip) {
     StringBuilder str = new StringBuilder();
     for (int i = 3; i >= 0; i--) {
-      str.append(Long.toString( (ip >> (8*i)) & 0xff) );
+      str.append(ip >> 8 * i & 0xff);
       if (i > 0)
         str.append(".");
     }
     return str.toString();
   }
 
-  public static String ip4LongToString(Long ip) {
-    // this overloaded method avoids NPE that would arise when calling ip4LongToString(long) with a Long value that's null
-    if (ip == null)
-      return null;
-    return ip4LongToString(ip.longValue());
-  }
-
+  /**
+   * Packs the 4 unsigned bytes of the given IP address string into a signed {@code int} using
+   * {@link MathUtils#packUnsignedInt(long)}.
+   *
+   * For example, {@code "127.255.127.255"} will be converted to {@code -32769} ({@code 0xFFFF7FFF}).
+   *
+   * @param ip an IPv4 address string in dot-decimal notation (e.g. "203.0.113.1")
+   * @return the bytes of the given address packed into a signed {@code int}
+   * @throws IllegalArgumentException if the given string is not a valid IPv4 address in dot-decimal notation
+   * @throws NullPointerException if the argument is null
+   * @see #ip4StringToLong(String)
+   */
   public static int ip4StringToInt(String ip) {
     return ip4LongToInt(ip4StringToLong(ip));
   }
 
+  /**
+   * Inverse of {@link #ip4StringToInt(String)}.
+   */
   public static String ip4IntToString(int ip) {
     return ip4LongToString(ip4IntToLong(ip));
-  }
-
-  public static String ip4IntToString(Integer ip) {
-    // this overloaded method avoids NPE that would arise when calling ip4IntegerToString(integer) with a Integer value that's null
-    if (ip == null)
-      return null;
-    return ip4IntToString(ip.intValue());
   }
 
   public static int ip4LongToInt(long ip) {

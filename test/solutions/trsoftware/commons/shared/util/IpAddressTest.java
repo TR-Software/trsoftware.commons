@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 TR Software Inc.
+ * Copyright 2020 TR Software Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -18,7 +18,9 @@
 package solutions.trsoftware.commons.shared.util;
 
 import junit.framework.TestCase;
+import solutions.trsoftware.commons.shared.testutil.AssertUtils;
 
+import static solutions.trsoftware.commons.shared.util.IpAddressUtilsTest.badIPv4AddressArgs;
 import static solutions.trsoftware.commons.shared.util.TestUtils.randomInts;
 
 /**
@@ -33,6 +35,15 @@ public class IpAddressTest extends TestCase {
       assertEquals(ip, new IpAddress(ip.toString()));
       assertEquals(ip, new IpAddress(ip.toInt()));
       assertEquals(ip, new IpAddress(ip.toLong()));
+    }
+  }
+
+  public void testConstructorFromString() throws Exception {
+    assertEquals("203.0.113.1", new IpAddress("203.0.113.1").toString());
+    // bad arguments:
+    AssertUtils.assertThrows(NullPointerException.class, () -> new IpAddress(null));
+    for (String ip : badIPv4AddressArgs()) {
+      AssertUtils.assertThrows(IllegalArgumentException.class, () -> new IpAddress(ip));
     }
   }
 

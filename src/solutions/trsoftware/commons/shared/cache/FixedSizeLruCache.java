@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 TR Software Inc.
+ * Copyright 2020 TR Software Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -23,14 +23,13 @@ import java.util.Map;
 /**
  * Implements an LRU cache which starts evicting the oldest-put entries
  * after the size limit (in number of entries) is exceeded.
- *
- * This class decorates LinkedHashMap with fixed-size logic.
- *
- * This class must be synchronized externally.  There is no way to avoid
- * locking, because an LRU cache cannot be built using the java.util.concurrent
- * classes. (Trust me, I spent a lot of time trying).
+ * <p>
+ * This class extends {@link LinkedHashMap} with fixed-size logic and <strong>must be synchronized externally.</strong>
+ * <p>
+ * For a concurrent cache implementation, see {@link com.google.common.cache.CacheBuilder}.
  *
  * @author Alex
+ * @see <a href="https://github.com/google/guava/wiki/CachesExplained">Guava Caches</a>
  */
 public class FixedSizeLruCache<K, V> extends LinkedHashMap<K,V> {
   private int sizeLimit;

@@ -31,7 +31,7 @@ import java.util.zip.GZIPInputStream;
 
 // License for the underlying CSV database: DonationWare (i.e. completely open, see the ZIP file for more info)
 // Update Instructions: Download the latest version by running
-// wget software77.net/geo-ip/?DL=1 -O /path/IpToCountry.csv.gz
+// wget software77.net/geo-ip/?DL=1 -O IpToCountry.csv.gz
 // NOTE: Run IpToCountryMapperTest after updating
 
 /**
@@ -39,15 +39,14 @@ import java.util.zip.GZIPInputStream;
  * ISO 3166-1 alpha-2</a> country codes.
  * <p>
  * Uses the CSV data downloaded from <a href="http://software77.net/geo-ip/">http://software77.net/geo-ip/</a> with
- * <pre>wget software77.net/geo-ip/?DL=1 -O /path/IpToCountry.csv.gz</pre>
+ * <pre>wget software77.net/geo-ip/?DL=1 -O IpToCountry.csv.gz</pre>
  * This license for the underlying CSV database is "DonationWare" (i.e. completely open, see the csv file contained
  * in {@code IpToCountry.csv.gz} for more info, and give them a donation if you're able to!)
  *
  * <p style="font-style: italic;">
  *   The database bundled with this library was last updated on
- *   Sun Mar 25 12:40:01 2018 UTC
- *   and currently uses 525.813 KB of memory (benchmarked with {@code IpToCountryMapperTest})
- * </P>
+ *   Tue May 26 00:40:04 2020 UTC
+ * </p>
  *
  * @author Alex
  * @since Nov 6, 2009

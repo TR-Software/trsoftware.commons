@@ -19,6 +19,7 @@ package solutions.trsoftware.tools.cli;
 
 import com.google.common.collect.BiMap;
 import com.google.common.collect.HashBiMap;
+import solutions.trsoftware.commons.shared.util.NumberRange;
 import solutions.trsoftware.tools.util.TablePrinter;
 
 import java.io.BufferedReader;
@@ -212,6 +213,44 @@ public abstract class InteractiveCommandLineApp implements Runnable {
    */
   public static <T> T promptForInput(BufferedReader br, String prompt, Function<String, T> parser) throws IOException {
     return parser.apply(promptForInput(br, prompt));
+  }
+
+  /**
+   * Prints the given message and reads the next line of user input from the given reader, interpreting it as an integer.
+   *
+   * @param br the input reader
+   * @param prompt the prompt message to print
+   * @return input entered by the user in response to this prompt, parsed as an integer
+   */
+  public static int promptForInteger(BufferedReader br, String prompt) throws IOException {
+    try {
+      return Integer.parseInt(promptForInput(br, prompt));
+    }
+    catch (NumberFormatException e) {
+      return promptForInteger(br, "ERROR: Unable to parse input as integer; please try again: ");
+    }
+  }
+
+  /**
+   * Prints the given message and reads the next line of user input from the given reader, interpreting it as an integer
+   * within the given bounds.  If the input is out of range, the user will be prompted to redo the entry.
+   *
+   * @param br the input reader
+   * @param prompt the prompt message to print
+   * @param min the lowest acceptable input value (inclusive)
+   * @param max the highest acceptable input value (inclusive)
+   * @return input entered by the user in response to this prompt, parsed as an integer
+   */
+  public static int promptForInteger(BufferedReader br, String prompt, int min, int max) throws IOException {
+    do {
+      int val = promptForInteger(br, prompt);
+      if (!NumberRange.inRange(min, max, val)) {
+        String errMsg = String.format("ERROR: Please enter an integer within the range %d..%d: ", min, max);
+        return promptForInteger(br, errMsg, min, max);
+      } else {
+        return val;
+      }
+    } while (true);
   }
 
   /**

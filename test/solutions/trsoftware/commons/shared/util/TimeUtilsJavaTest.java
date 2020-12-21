@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 TR Software Inc.
+ * Copyright 2020 TR Software Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -149,7 +149,7 @@ public class TimeUtilsJavaTest extends TestCase {
       Instant ldtTruncInstant = ldtTrunc.toInstant(ZoneOffset.UTC);
       Instant instantTrunc = timeInstant.truncatedTo(unit);
       long dur = unit.getDuration().toMillis();
-      long longTrunc = solutions.trsoftware.commons.shared.util.TimeUtils.truncateTime(timeMillis, dur);
+      long longTrunc = TimeUtils.truncateTime(timeMillis, dur);
       Instant longTruncInstant = Instant.ofEpochMilli(longTrunc);
       System.out.printf("%42s,%22s,%22s,%38s%n",
           String.format("%d (%s)", timeMillis, timeInstant),
@@ -159,5 +159,15 @@ public class TimeUtilsJavaTest extends TestCase {
       AssertUtils.assertAllEqual(instantTrunc, ldtTruncInstant, longTruncInstant);
       clock.advanceTime(increment);
     }
+  }
+
+  @GwtIncompatible
+  public void testSecondsToInstant() throws Exception {
+    double seconds = 1606363944.125;
+    Instant result = secondsToInstant(seconds);
+    assertEquals(Instant.parse("2020-11-26T04:12:24.125Z"), result);
+    // verify that it has both a whole seconds integer and a nanoseconds component
+    assertEquals(1606363944, result.getEpochSecond());
+    assertEquals(125000000, result.getNano());
   }
 }

@@ -17,9 +17,9 @@
 
 package solutions.trsoftware.commons.server.servlet.testutil;
 
-import com.google.common.collect.ImmutableMultimap;
+import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.Multimap;
-import org.apache.tomcat.util.http.FastHttpDateFormat;
+import solutions.trsoftware.commons.server.servlet.HttpHeaders;
 
 import javax.servlet.*;
 import javax.servlet.http.*;
@@ -27,12 +27,10 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.security.Principal;
-import java.text.SimpleDateFormat;
 import java.util.*;
 
 import static java.util.Collections.enumeration;
 import static java.util.Collections.singletonList;
-import static solutions.trsoftware.commons.shared.util.CollectionUtils.first;
 import static solutions.trsoftware.commons.shared.util.CollectionUtils.isEmpty;
 
 
@@ -54,19 +52,7 @@ public class DummyHttpServletRequest implements HttpServletRequest {
   private String method;
   private List<Cookie> cookies = new ArrayList<>();
   private Map<String, Object> attributes = new LinkedHashMap<>();
-  private Multimap<String, String> headers;
-
-  /**
-   * Date formats to use in {@link #getDateHeader(String)}.
-   *
-   * Based on the implementation of {@link org.apache.catalina.connector.Request}
-   */
-  private static ThreadLocal<SimpleDateFormat[]> dateFormats = ThreadLocal.withInitial(() ->
-      new SimpleDateFormat[] {
-          new SimpleDateFormat(FastHttpDateFormat.RFC1123_DATE, Locale.US),
-          new SimpleDateFormat("EEEEEE, dd-MMM-yy HH:mm:ss zzz", Locale.US),
-          new SimpleDateFormat("EEE MMMM d HH:mm:ss yyyy", Locale.US)
-      });
+  private HttpHeaders headers = new HttpHeaders(ArrayListMultimap.create());  // start with empty multimap for headers
 
   public DummyHttpServletRequest() {
   }
@@ -143,49 +129,37 @@ public class DummyHttpServletRequest implements HttpServletRequest {
   }
 
   public DummyHttpServletRequest setHeaders(Multimap<String, String> headers) {
-    this.headers = headers;
+    this.headers = new HttpHeaders(headers);
     return this;
   }
 
-  /**
-   * @see org.apache.catalina.connector.Request
-   */
+  @Override
   public long getDateHeader(String name) {
-    // NOTE: this code was borrowed from org.apache.catalina.connector.Request
-    String value = getHeader(name);
-    if (value == null)
-      return -1L;
-
-    // Attempt to convert the date header in a variety of formats
-    long result = FastHttpDateFormat.parseDate(value, dateFormats.get());
-    if (result != -1L)
-      return result;
-    throw new IllegalArgumentException(value);
+    return headers.getDateHeader(name);
   }
 
   @Override
   public String getHeader(String name) {
-    if (headers != null && headers.containsKey(name))
-      return first(headers.get(name));
-    return null;
-  }
-
-  private Multimap<String, String> getHeaders() {
-    return headers != null ? headers : ImmutableMultimap.of();  // empty multimap if the field is null
+    return headers.getHeader(name);
   }
 
   @Override
   public Enumeration<String> getHeaders(String name) {
-    return enumeration(getHeaders().get(name));
+    return headers.getHeaders(name);
   }
 
+  @Override
   public Enumeration<String> getHeaderNames() {
-    return enumeration(getHeaders().keySet());
+    return headers.getHeaderNames();
   }
 
+  @Override
   public int getIntHeader(String name) {
-    String val = getHeader(name);
-    return val != null ? Integer.parseInt(val) : -1;
+    return headers.getIntHeader(name);
+  }
+
+  public Multimap<String, String> getHeadersAsMultimap() {
+    return headers.getHeadersAsMultimap();
   }
 
   public String getMethod() {

@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 TR Software Inc.
+ * Copyright 2020 TR Software Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -255,11 +255,11 @@ public class CollectionUtils {
   @SafeVarargs
   public static <A extends Iterable<T>, T> Iterable<T> concatIter(final A... iterables) {
     return new Iterable<T>() {
-          @Override
-          public Iterator<T> iterator() {
-            return ChainedIterator.fromIterables(new ArrayIterator<A>(iterables));
-          }
-        };
+      @Override
+      public Iterator<T> iterator() {
+        return ChainedIterator.fromIterables(new ArrayIterator<A>(iterables));
+      }
+    };
   }
 
   // TODO: unit test this version

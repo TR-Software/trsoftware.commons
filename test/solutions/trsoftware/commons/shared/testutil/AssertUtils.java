@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 TR Software Inc.
+ * Copyright 2020 TR Software Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -237,6 +237,11 @@ public abstract class AssertUtils {
   public static <T> void assertSameSequence(Iterator<T> expected, Iterator<T> actual) {
     assertEquals(asList(expected), asList(actual));
   }
+
+  /*
+   TODO: can get rid of all the assertArraysEqual methods, because they duplicate those already provided by JUnit
+    (see org.junit.Assert.assertArrayEquals(int[], int[]))
+  */
 
   /**
    * Passes if the two specified arrays of longs are <i>equal</i> to one

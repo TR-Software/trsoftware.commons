@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 TR Software Inc.
+ * Copyright 2020 TR Software Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -17,8 +17,8 @@
 
 package solutions.trsoftware.commons.server.servlet.testutil;
 
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
+import com.google.common.collect.Multimap;
+import com.google.gson.*;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
@@ -26,6 +26,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.lang.reflect.Type;
 
 /**
  * A simple servlet implementation for testing purposes.
@@ -38,6 +39,13 @@ public class DummyHttpServlet extends HttpServlet {
 
   protected Gson gson = new GsonBuilder()
       .disableHtmlEscaping()
+      .setPrettyPrinting()
+      .registerTypeHierarchyAdapter(Multimap.class, new JsonSerializer<Multimap>() {
+        @Override
+        public JsonElement serialize(Multimap multimap, Type type, JsonSerializationContext jsonSerializationContext) {
+          return jsonSerializationContext.serialize(multimap.asMap());
+        }
+      })
       .create();
 
   @Override

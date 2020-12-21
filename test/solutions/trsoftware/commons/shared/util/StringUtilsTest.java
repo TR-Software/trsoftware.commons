@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 TR Software Inc.
+ * Copyright 2020 TR Software Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -17,11 +17,13 @@
 
 package solutions.trsoftware.commons.shared.util;
 
+import com.google.gwt.core.shared.GwtIncompatible;
 import junit.framework.TestCase;
 import solutions.trsoftware.commons.shared.testutil.AssertUtils;
 
 import java.util.*;
 
+import static org.junit.Assert.assertArrayEquals;
 import static solutions.trsoftware.commons.shared.util.StringUtils.*;
 import static solutions.trsoftware.commons.shared.util.function.FunctionalUtils.partial;
 
@@ -863,5 +865,26 @@ public class StringUtilsTest extends TestCase {
     assertEquals('o', lastChar("foo"));
     AssertUtils.assertThrows(IllegalArgumentException.class, partial(StringUtils::lastChar, null));
     AssertUtils.assertThrows(IllegalArgumentException.class, partial(StringUtils::lastChar, ""));
+  }
+
+  public void testIsLowercase() throws Exception {
+    assertFalse(isLowercase(null));
+    assertFalse(isLowercase(""));
+    assertFalse(isLowercase("fooBar123"));
+    assertTrue(isLowercase("foobar&*(&(*12--3"));
+  }
+
+  @GwtIncompatible
+  @SuppressWarnings("NonJREEmulationClassesInClientCode")
+  public void testCodePoints() throws Exception {
+    String inputString = StringUtilsTest.THREE_MONKEYS;
+    assertArrayEquals(inputString.codePoints().toArray(), codePoints(inputString));
+  }
+
+  @GwtIncompatible
+  @SuppressWarnings("NonJREEmulationClassesInClientCode")
+  public void testCodePointsStream() throws Exception {
+    String inputString = StringUtilsTest.THREE_MONKEYS;
+    assertArrayEquals(inputString.codePoints().toArray(), codePointsStream(inputString).toArray());
   }
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 TR Software Inc.
+ * Copyright 2020 TR Software Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -79,7 +79,7 @@ public class CSVWriterTest extends TestCase {
    * Checks that the output of CSVWriter matches the expectation, and also that
    * it will be read in as the original input by the CSVReader
    */
-  private void checkWritingAndReading(String expectedOutput, String[] input) throws IOException {
+  private void checkWritingAndReading(String expectedOutput, Object[] input) throws IOException {
     StringWriter stringWriter = new StringWriter();
     CSVWriter csvWriter = new CSVWriter(stringWriter);
     csvWriter.writeNext(input);
@@ -93,11 +93,15 @@ public class CSVWriterTest extends TestCase {
   }
 
   public void testWriteCsvLine() throws Exception {
-    assertEquals("1,foo,1.5" + sep, CSVWriter.writeCsvLine(new Object[]{1, "foo", 1.5}));
+    assertEquals("1,foo,1.5" + sep, CSVWriter.writeCsvLine(1, "foo", 1.5));
   }
 
   public void testProperlyQuotesLineBreaks() throws Exception {
-    checkWritingAndReading("A,\"B\nC\nD\",E"+ sep, new String[]{"A", "B\nC\nD", "E"});
-    checkWritingAndReading("\"1\n23\n4\",5,6"+ sep, new String[]{"1\n23\n4", "5", "6"});
+    checkWritingAndReading("A,\"B\nC\nD\",E" + sep, new String[]{"A", "B\nC\nD", "E"});
+    checkWritingAndReading("\"1\n23\n4\",5,6" + sep, new String[]{"1\n23\n4", "5", "6"});
+  }
+
+  public void testNullValuesInRow() throws Exception {
+    assertEquals("foo,123,,bar" + sep, CSVWriter.writeCsvLine("foo", 123, null, "bar"));
   }
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 TR Software Inc.
+ * Copyright 2020 TR Software Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -26,8 +26,8 @@ import com.google.common.collect.Multimap;
 import junit.framework.TestCase;
 import org.apache.catalina.Context;
 import org.apache.catalina.core.ApplicationFilterFactory;
-import org.apache.tomcat.util.http.FastHttpDateFormat;
 import solutions.trsoftware.commons.server.io.ResourceLocator;
+import solutions.trsoftware.commons.server.servlet.HttpDateParser;
 import solutions.trsoftware.commons.server.servlet.config.InitParameterParseException;
 import solutions.trsoftware.commons.server.servlet.filters.CachePolicyFilter.CachePolicy;
 import solutions.trsoftware.commons.server.servlet.filters.CachePolicyFilter.CachePolicyMatcher;
@@ -157,8 +157,7 @@ public class CachePolicyFilterTest extends TestCase {
     {
       String baseUrl = "http://localhost:" + embeddedTomcatServer.getPortNumber() + contextPath;
       WebClient webClient = new WebClient();
-      SimpleDateFormat httpDateFormat = new SimpleDateFormat(FastHttpDateFormat.RFC1123_DATE, Locale.US);
-      httpDateFormat.setTimeZone(TimeZone.getTimeZone("GMT"));
+      SimpleDateFormat httpDateFormat = HttpDateParser.DateFormats.RFC_1123.createSimpleDateFormat();
       for (Map.Entry<CachePolicy, String> entry : testCases.entries()) {
         CachePolicy cachePolicy = entry.getKey();
         String uri = entry.getValue();

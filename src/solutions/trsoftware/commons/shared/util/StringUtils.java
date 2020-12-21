@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 TR Software Inc.
+ * Copyright 2020 TR Software Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -26,6 +26,7 @@ import solutions.trsoftware.commons.shared.util.template.SimpleTemplateParser;
 import solutions.trsoftware.commons.shared.util.template.Template;
 import solutions.trsoftware.commons.shared.util.text.CharRange;
 
+import javax.annotation.Nonnull;
 import java.util.*;
 import java.util.stream.IntStream;
 
@@ -120,6 +121,24 @@ public class StringUtils {
    */
   public static boolean notEmpty(String str) {
     return !isEmpty(str);
+  }
+
+  /**
+   * @return {@code true} iff the string doesn't contain any uppercase letters (as determined by {@link Character#isUpperCase(char)});
+   * if the argument is {@code null} or an empty string, returns {@code false}
+   */
+  public static boolean isLowercase(String s) {
+    if (isEmpty(s)) {
+      return false;
+    }
+    for (int i = 0; i < s.length(); i++) {
+      if (Character.isUpperCase(s.charAt(i)))
+        return false;
+    }
+    return true;
+    /*
+      NOTE: can generalize this method to test for uppercase, camelCase, etc.
+    */
   }
 
   /**
@@ -1022,8 +1041,9 @@ public class StringUtils {
    * whose value is an empty string after trimming.
    * @param str a string like "a, b, c"
    * @param delimRegex a regular expression like ","
-   * @return a list like ["a", "b", "c"]
+   * @return a list like ["a", "b", "c"], or an empty list if the string didn't contain any non-blank tokens after the split.
    */
+  @Nonnull
   public static List<String> splitAndTrim(String str, String delimRegex) {
     String[] parts = str.trim().split(delimRegex);
     List<String> ret = new ArrayList<String>(parts.length);

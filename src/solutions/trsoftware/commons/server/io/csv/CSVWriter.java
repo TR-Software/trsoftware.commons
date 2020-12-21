@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 TR Software Inc.
+ * Copyright 2020 TR Software Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -167,8 +167,9 @@ public class CSVWriter implements Flushable, Closeable {
 
     StringBuilder sb = new StringBuilder(INITIAL_STRING_SIZE);
     for (int i = 0; i < nextLine.length; i++) {
-      String nextElement = String.valueOf(nextLine[i]);
-      writeNextElement(sb, nextElement, i == 0);
+      Object nextEntry = nextLine[i];
+      // emit an empty string (empty cell) for null values and toString repr of the object otherwise
+      writeNextElement(sb, nextEntry == null ? "" : nextEntry.toString(), i == 0);
     }
     sb.append(lineEnd);
     pw.write(sb.toString());
@@ -250,7 +251,7 @@ public class CSVWriter implements Flushable, Closeable {
     pw.close();
   }
 
-  public static String writeCsvLine(Object[] items) {
+  public static String writeCsvLine(Object... items) {
     StringWriter buffer = new StringWriter();
     CSVWriter writer = new CSVWriter(buffer);
     writer.writeNext(items);

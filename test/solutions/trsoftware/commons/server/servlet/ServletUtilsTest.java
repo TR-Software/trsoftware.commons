@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 TR Software Inc.
+ * Copyright 2020 TR Software Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -19,6 +19,7 @@ package solutions.trsoftware.commons.server.servlet;
 
 import com.gargoylesoftware.htmlunit.TextPage;
 import com.gargoylesoftware.htmlunit.WebClient;
+import com.google.common.collect.ImmutableListMultimap;
 import junit.framework.TestCase;
 import solutions.trsoftware.commons.server.servlet.testutil.DummyHttpServletRequest;
 import solutions.trsoftware.commons.server.servlet.testutil.LiveServletTestCase;
@@ -222,6 +223,42 @@ public class ServletUtilsTest extends TestCase {
     }
   }
 
+  public void testGetClientIpAddress() throws Exception {
+    // in the absence of "X-Forwarded-For" header, should just return the REMOTE_ADDR
+    assertEquals("66.249.68.66", getClientIpAddress(new DummyHttpServletRequest().setRemoteAddr("66.249.68.66")));
+    // otherwise should return the first address listed in the "X-Forwarded-For" header
+    assertEquals("203.0.113.195", getClientIpAddress(new DummyHttpServletRequest().setRemoteAddr("66.249.68.66")
+        .setHeaders(ImmutableListMultimap.of("X-Forwarded-For", "203.0.113.195"))));
+    assertEquals("203.0.113.195", getClientIpAddress(new DummyHttpServletRequest().setRemoteAddr("66.249.68.66")
+        .setHeaders(ImmutableListMultimap.of("X-Forwarded-For", "203.0.113.195, 70.41.3.18, 150.172.238.178"))));
+    // with IPv6 addresses:
+    assertEquals("2001:db8:85a3:8d3:1319:8a2e:370:7348", getClientIpAddress(new DummyHttpServletRequest().setRemoteAddr("66.249.68.66")
+        .setHeaders(ImmutableListMultimap.of("X-Forwarded-For", "2001:db8:85a3:8d3:1319:8a2e:370:7348"))));
+    assertEquals("2001:db8:85a3:8d3:1319:8a2e:370:7348", getClientIpAddress(new DummyHttpServletRequest().setRemoteAddr("66.249.68.66")
+        .setHeaders(ImmutableListMultimap.of("X-Forwarded-For", "2001:db8:85a3:8d3:1319:8a2e:370:7348,2001:db8:cafe::17"))));
+    // ip6 and ip4 addresses with port numbers:
+    assertEquals("[2001:db8:cafe::17]:1111", getClientIpAddress(new DummyHttpServletRequest().setRemoteAddr("66.249.68.66")
+            .setHeaders(ImmutableListMultimap.of("X-Forwarded-For", "[2001:db8:cafe::17]:1111, 6.5.4.3:2222"))));
+
+    // TODO: see https://github.com/eclipse/jetty.project/issues/3630#issuecomment-490117162 for other possible test cases
+  }
+
+  public void testGetRequestHeadersAsMultimap() throws Exception {
+    DummyHttpServletRequest mockRequest = new DummyHttpServletRequest().setHeaders(
+        ImmutableListMultimap.<String, String>builder()
+            .put("Accept-Encoding", "gzip, deflate, br")
+            .put("Connection", "keep-alive")
+            .putAll("FooBar", "value1", "value2", "value3")
+            .build()
+    );
+    // the returned multimap should be the same as above, but with all keys converted to lowercase
+    ImmutableListMultimap<String, String> expected = ImmutableListMultimap.<String, String>builder()
+        .put("accept-encoding", "gzip, deflate, br")
+        .put("connection", "keep-alive")
+        .putAll("foobar", "value1", "value2", "value3")
+        .build();
+    assertEquals(expected, getRequestHeadersAsMultimap(mockRequest));
+  }
 
   private static class GetRequestURLBenchmarkServlet extends BaseHttpServlet {
     @Override

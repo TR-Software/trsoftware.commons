@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 TR Software Inc.
+ * Copyright 2020 TR Software Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -19,6 +19,7 @@ package solutions.trsoftware.commons.shared.util;
 
 import com.google.gwt.core.client.Duration;
 import com.google.gwt.core.shared.GWT;
+import com.google.gwt.core.shared.GwtIncompatible;
 
 import java.time.Instant;
 import java.time.LocalDateTime;
@@ -139,8 +140,11 @@ public class TimeUtils {
    * A bridge between the long millisecond time representation in Java and
    * the UTC double fractional seconds representation used in Python and other
    * languages.
+   *
+   * @see #secondsToInstant(double)
    */
   public static long secondsToMillisLong(double seconds) {
+    // TODO(11/26/2020): why Math.round? it's probaly more accurate to just cast to long (and avoid the value being rounded up to the next millis)
     return Math.round(secondsToMillis(seconds));
   }
 
@@ -148,6 +152,8 @@ public class TimeUtils {
    * A bridge between the long millisecond time representation in Java and
    * the UTC double fractional seconds representation used in Python and other
    * languages.
+   *
+   * @see #secondsToInstant(double)
    */
   public static double secondsToMillis(double seconds) {
     return SECONDS.to(MILLISECONDS, seconds);
@@ -244,5 +250,18 @@ public class TimeUtils {
   public static long truncateTime(long timeMillis, long unitDurationMillis) {
     // TODO: test this with negative values (might need to use floorMod here)
     return timeMillis - (timeMillis % unitDurationMillis);
+  }
+
+  /**
+   * Converts a floating-point epoch seconds value to an {@link Instant} with {@link Instant#ofEpochSecond(long, long)}.
+   *
+   * @param seconds the floating-point "Unix time" value to convert
+   * @return the corresponding {@link Instant}
+   */
+  @GwtIncompatible
+  public static Instant secondsToInstant(double seconds) {
+    long whole = (long)seconds;
+    long nanos = (long)TimeUnit.SECONDS.to(TimeUnit.NANOSECONDS, seconds - whole);
+    return Instant.ofEpochSecond(whole, nanos);
   }
 }

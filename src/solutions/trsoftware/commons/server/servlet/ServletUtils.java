@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 TR Software Inc.
+ * Copyright 2020 TR Software Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -17,8 +17,11 @@
 
 package solutions.trsoftware.commons.server.servlet;
 
+import com.google.common.collect.ImmutableListMultimap;
+import com.google.common.collect.Iterators;
 import solutions.trsoftware.commons.client.util.WebUtils;
 import solutions.trsoftware.commons.server.servlet.listeners.HttpSessionMutexListener;
+import solutions.trsoftware.commons.shared.util.StringUtils;
 
 import javax.annotation.Nonnull;
 import javax.servlet.http.HttpServletRequest;
@@ -29,10 +32,8 @@ import java.net.URL;
 import java.util.*;
 
 /**
- * Date: Jul 20, 2007
- * Time: 7:12:40 PM
- *
  * @author Alex
+ * @since Jul 20, 2007
  */
 public abstract class ServletUtils {
 
@@ -41,7 +42,17 @@ public abstract class ServletUtils {
   public static final String USER_AGENT_HEADER = "User-Agent";
 
   /**
-   * {@link #getRequestURL(HttpServletRequest)} will save the parsed {@link URL} in the request under this attribute name.
+   * De-facto standard header for identifying the originating IP address of a client connecting to a web server
+   * through an HTTP proxy or a load balancer.
+   *
+   * @see <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/X-Forwarded-For">MDN Reference</a>
+   * @see <a href="https://en.wikipedia.org/wiki/X-Forwarded-For">Wikipedia</a>
+   */
+  public static final String X_FORWARDED_FOR_HEADER = "X-Forwarded-For";
+
+  /**
+   * {@link #getRequestURL(HttpServletRequest)} will save the parsed {@link URL} in the request under this attribute
+   * name.
    */
   public static final String PARSED_URL_ATTR = ServletUtils.class.getName() + ".requestURL";
 
@@ -83,7 +94,7 @@ public abstract class ServletUtils {
 
   /**
    * @return The value of the request's {@value #USER_AGENT_HEADER} header, or {@code null} if the request
-   * doesn't have this header.
+   *     doesn't have this header.
    */
   public static String getUserAgentHeader(HttpServletRequest request) {
     return request.getHeader(USER_AGENT_HEADER);
@@ -102,11 +113,11 @@ public abstract class ServletUtils {
   }
 
   /**
-   * Sets a P3P "compact policy" header with TypeRacer's compacy privacy policy description.
+   * Sets a P3P "compact policy" header with TypeRacer's compact privacy policy description.
    * This is required by IE browsers to enable reading cross-domain iframe cookies.
    * See compact.txt and other files in the public/privacy dir.  They can be
    * edited using IBM's privacy policy editor, installed in C:/Programming/Tools/p3pGenerator
-   * or downloaded from http://www.alphaworks.ibm.com/tech/p3peditor. 
+   * or downloaded from http://www.alphaworks.ibm.com/tech/p3peditor.
    */
   public static void setP3PHeader(HttpServletResponse response) {
     response.setHeader("P3P", "policyref=\"/privacy/p3p.xml\"," +
@@ -118,14 +129,15 @@ public abstract class ServletUtils {
    * which is often redundant, because most of the time there is only one value for every parameter.
    *
    * @return The a name-value mapping of the parameters, sorted by name
-   * @throws IllegalArgumentException if one of the {@code String[]} value arrays in the given map contains more than one element.
+   * @throws IllegalArgumentException if one of the {@code String[]} value arrays in the given map contains more than
+   *                                  one element.
    */
   public static SortedMap<String, String> getRequestParametersAsSortedStringMap(Map<String, String[]> requestParamMap) {
     SortedMap<String, String> singleValueMap = new TreeMap<>();
     for (Map.Entry<String, String[]> entry : requestParamMap.entrySet()) {
       String[] valueArr = entry.getValue();
       if (valueArr.length > 1)
-        throw new IllegalArgumentException(""+entry.getKey() + ": " + Arrays.toString(valueArr) + " contains more than one value.");
+        throw new IllegalArgumentException("" + entry.getKey() + ": " + Arrays.toString(valueArr) + " contains more than one value.");
       else
         singleValueMap.put(entry.getKey(), valueArr[0]);
     }
@@ -142,7 +154,7 @@ public abstract class ServletUtils {
    *
    * @return The a name-value mapping of the parameters, sorted by name
    * @throws IllegalArgumentException if one of the value arrays from {@link HttpServletRequest#getParameterMap()}
-   * contains more than one element.
+   *                                  contains more than one element.
    */
   public static SortedMap<String, String> getRequestParametersAsSortedStringMap(HttpServletRequest request) {
     return getRequestParametersAsSortedStringMap(request.getParameterMap());
@@ -153,7 +165,8 @@ public abstract class ServletUtils {
    *
    * @param names the names of the parameters to return
    * @return the name-value mapping for the selected parameters, in the same order they appear in the {@code names} arg.
-   * <b>Note:</b> if the request contains multiple values for any of these parameters, will include only the first value.
+   *     <b>Note:</b> if the request contains multiple values for any of these parameters, will include only the first
+   *     value.
    * @see WebUtils#getUrlParameterMap(Iterable)
    */
   @Nonnull
@@ -168,10 +181,29 @@ public abstract class ServletUtils {
   }
 
   /**
+   * Creates a multimap of the headers contained in the given request.  All header names will be converted to lowercase,
+   * to facilitate case-insensitive lookup.
+   *
+   * @return a (possibly-empty) immutable multimap containing all the headers and their values
+   */
+  public static ImmutableListMultimap<String, String> getRequestHeadersAsMultimap(HttpServletRequest request) {
+    ImmutableListMultimap.Builder<String, String> builder = ImmutableListMultimap.builder();
+    Enumeration<String> headerNames = request.getHeaderNames();
+    if (headerNames != null) {
+      while (headerNames.hasMoreElements()) {
+        String name = headerNames.nextElement();
+        Enumeration<String> values = request.getHeaders(name);
+        builder.putAll(name.toLowerCase(), () -> Iterators.forEnumeration(values));
+      }
+    }
+    return builder.build();
+  }
+
+  /**
    * @return the first path element of the requested URL
-   * (e.g. http://special.typeracer.com/foo/gameserv => "foo")
-   * or null if the path doesn't contain at least one path element
-   * (e.g. http://special.typeracer.com/gameserv or http://special.typeracer.com)
+   *     (e.g. http://special.typeracer.com/foo/gameserv => "foo")
+   *     or null if the path doesn't contain at least one path element
+   *     (e.g. http://special.typeracer.com/gameserv or http://special.typeracer.com)
    */
   public static String extractFirstPathElement(HttpServletRequest request) {
     String uri = request.getRequestURI();
@@ -188,9 +220,9 @@ public abstract class ServletUtils {
 
   /**
    * @return an array of all the path elements of the requested URL
-   * (e.g. http://special.typeracer.com/foo/gameserv => ["foo", "gameserv"]
-   * or null if the path doesn't contain at least one path element
-   * (e.g. http://special.typeracer.com)
+   *     (e.g. http://special.typeracer.com/foo/gameserv => ["foo", "gameserv"]
+   *     or null if the path doesn't contain at least one path element
+   *     (e.g. http://special.typeracer.com)
    */
   public static StringTokenizer extractAllPathElements(HttpServletRequest request) {
     return new StringTokenizer(request.getRequestURI(), "/", false);
@@ -198,7 +230,7 @@ public abstract class ServletUtils {
 
   /**
    * Sends a 301 (permanent) redirect to the specified URL.
-   * By contrast request.sendRedirect sends a 302 (temporary) redirect. 
+   * By contrast request.sendRedirect sends a 302 (temporary) redirect.
    */
   public static void sendPermanentRedirect(HttpServletResponse response, String newLocation) {
     //send HTTP 301 status code to browser
@@ -281,10 +313,9 @@ public abstract class ServletUtils {
 
   /**
    * @return an instance of {@link URL}, derived from invoking {@link HttpServletRequest#getRequestURL()} on
-   * {@link #threadLocalRequestCopy}
-   *
+   *     {@link #threadLocalRequestCopy}
    * @throws IllegalStateException if {@link #setThreadLocalRequestCopy(RequestCopy)} hasn't
-   * been invoked by the thread handling the current request.
+   *                               been invoked by the thread handling the current request.
    */
   public static URL getThreadLocalRequestURL() throws IllegalStateException {
     RequestCopy threadLocalRequest = threadLocalRequestCopy.get();
@@ -304,14 +335,47 @@ public abstract class ServletUtils {
   }
 
   /**
+   * Should be used instead of {@link HttpServletRequest#getRemoteAddr()} to get the originating client IP address,
+   * taking into account the possibility that the client request is being forwarded by a proxy or load balancer.
+   * <p>
+   * This is particularly important when Cloudflare is being used as a frontend for the web app, in which case
+   * {@link HttpServletRequest#getRemoteAddr()} will always return the IP address of a Cloudflare proxy.
+   *
+   * @return the client IP address extracted from the {@value #X_FORWARDED_FOR_HEADER} header, if present, otherwise
+   *     {@link HttpServletRequest#getRemoteAddr()}
+   * @see <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/X-Forwarded-For">X-Forwarded-For Header</a>
+   * @see <a href="https://support.cloudflare.com/hc/en-us/articles/200170986-How-does-Cloudflare-handle-HTTP-Request-headers-">
+   *     How does Cloudflare handle HTTP Request headers?</a>
+   */
+  public static String getClientIpAddress(HttpServletRequest request) {
+    String xff = request.getHeader(X_FORWARDED_FOR_HEADER); // comma-separated list of IP addresses (see https://en.wikipedia.org/wiki/X-Forwarded-For#Format)
+    if (StringUtils.notBlank(xff)) {
+      List<String> ipList = StringUtils.splitAndTrim(xff, ",");
+      // the first address in this list is the originating client IP
+      if (!ipList.isEmpty()) {
+        return ipList.get(0);
+      }
+    }
+    return request.getRemoteAddr();
+    /*
+    TODO: should we add support for the other variants of this header, like the standards-compliant "Forwarded", "Via",
+      "CF-Connecting-IP", etc.?
+      @see https://en.wikipedia.org/wiki/X-Forwarded-For#Alternatives_and_variations
+           https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Via
+           https://support.cloudflare.com/hc/en-us/articles/200170986-How-does-Cloudflare-handle-HTTP-Request-headers-
+    */
+  }
+
+  /**
    * Sets multiple parameters with the same name prefix.
    * Example: given ("x", "a", 25, "foo"),
    * will add entries ("x0", "a"), ("x1", 25), and ("x2", "foo") to the given map.
+   *
    * @return the same map, for method chaining.
    */
   public static <T extends Map<String, String>> T addIndexedMultivaluedParams(T map, String namePrefix, Object... values) {
     for (int i = 0; i < values.length; i++) {
-      map.put(namePrefix+i, String.valueOf(values[i]));
+      map.put(namePrefix + i, String.valueOf(values[i]));
     }
     return map;
   }
@@ -325,8 +389,9 @@ public abstract class ServletUtils {
    * ordinal suffixes of the parameter names:
    * Exemple 2: given params x1=1 and x2=2, will return [] because there is no "x0"
    * Exemple 3: given params x0=0 and x2=2, will return ["0"] because there is no "x1"
+   *
    * @return a list of the parameter values, or an empty list if no parameters are present
-   * in the request.
+   *     in the request.
    */
   public static ArrayList<String> readIndexedMultivaluedParams(HttpServletRequest request, String paramNamePrefix) {
     ArrayList<String> ret = new ArrayList<>();
@@ -354,44 +419,46 @@ public abstract class ServletUtils {
    * @return the given {@link StringBuilder} after appending the request info to it
    */
   public static StringBuilder appendGwtRequestInfo(StringBuilder str, HttpServletRequest request, String permutationStrongName) {
-    str.append("permutation ").append(permutationStrongName).append(" from ").append(request.getRemoteAddr()).append(" [").append(getUserAgentHeader(request)).append("]");
+    str.append("permutation ").append(permutationStrongName)
+        .append(" from ").append(getClientIpAddress(request))
+        .append(" [").append(getUserAgentHeader(request)).append("]");
     return str;
   }
 
   /**
- 	 * Returns the best available mutex for the given session:
- 	 * that is, an object to synchronize on for the given session.
- 	 * <p>
+   * Returns the best available mutex for the given session:
+   * that is, an object to synchronize on for the given session.
+   * <p>
    * Returns the session mutex attribute if available; usually,
- 	 * this means that the {@link HttpSessionMutexListener} needs to be defined
- 	 * in {@code web.xml}. Falls back to the {@link HttpSession} itself
- 	 * if no mutex attribute found.
+   * this means that the {@link HttpSessionMutexListener} needs to be defined
+   * in {@code web.xml}. Falls back to the {@link HttpSession} itself
+   * if no mutex attribute found.
    * <p>
- 	 * The session mutex is guaranteed to be the same object during
- 	 * the entire lifetime of the session, available under the key defined
- 	 * by the {@link #SESSION_MUTEX_ATTRIBUTE} constant. It serves as a
- 	 * safe reference to synchronize on for locking on the current session.
+   * The session mutex is guaranteed to be the same object during
+   * the entire lifetime of the session, available under the key defined
+   * by the {@link #SESSION_MUTEX_ATTRIBUTE} constant. It serves as a
+   * safe reference to synchronize on for locking on the current session.
    * <p>
- 	 * In many cases, the {@link HttpSession} reference itself is a safe mutex
- 	 * as well, since it will always be the same object reference for the
- 	 * same active logical session. However, this is not guaranteed across
- 	 * different servlet containers; the only 100% safe way is a session mutex.
+   * In many cases, the {@link HttpSession} reference itself is a safe mutex
+   * as well, since it will always be the same object reference for the
+   * same active logical session. However, this is not guaranteed across
+   * different servlet containers; the only 100% safe way is a session mutex.
    * For example, when running Tomcat with persistent or replicated sessions,
    * the {@link HttpSession} could be a different object deserialized from the datastore.
    *
- 	 * @param session the HttpSession to find a mutex for
- 	 * @return the mutex object (never {@code null})
- 	 * @see #SESSION_MUTEX_ATTRIBUTE
- 	 * @see HttpSessionMutexListener
- 	 */
+   * @param session the HttpSession to find a mutex for
+   * @return the mutex object (never {@code null})
+   * @see #SESSION_MUTEX_ATTRIBUTE
+   * @see HttpSessionMutexListener
+   */
   // NOTE: this code borrowed from Spring (https://github.com/spring-projects/spring-framework/blob/9be327985b61588d5f8c7050a5558ef36a33b321/spring-web/src/main/java/org/springframework/web/util/WebUtils.java#L417-L444)
- 	public static Object getSessionMutex(HttpSession session) {
- 		Objects.requireNonNull(session, "Session must not be null");
- 		Object mutex = session.getAttribute(SESSION_MUTEX_ATTRIBUTE);
- 		if (mutex == null) {
- 			mutex = session;
- 		}
- 		return mutex;
- 	}
+  public static Object getSessionMutex(HttpSession session) {
+    Objects.requireNonNull(session, "Session must not be null");
+    Object mutex = session.getAttribute(SESSION_MUTEX_ATTRIBUTE);
+    if (mutex == null) {
+      mutex = session;
+    }
+    return mutex;
+  }
 
 }

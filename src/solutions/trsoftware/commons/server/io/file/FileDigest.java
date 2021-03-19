@@ -72,6 +72,7 @@ public class FileDigest extends LinkedHashMap<String, File> {
    */
   public byte[] md5sum(File file) throws IOException {
     md5.reset();
+    // TODO(3/1/2021): no need to use a DigestInputStream/NullOutputStream - can just update the MessageDigest directly with MessageDigest.update(byte[])
     try (DigestInputStream inputStream = new DigestInputStream(new FileInputStream(file), md5)) {
       ServerIOUtils.copyInputToOutput(inputStream, nullOutputStream, 1 << 23);  // using an 8-meg buffer for better perf
     }

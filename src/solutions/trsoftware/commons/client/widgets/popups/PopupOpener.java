@@ -236,11 +236,22 @@ public abstract class PopupOpener<W extends Widget, P extends EnhancedPopup> imp
     }
     else {
       getOrCreatePopup();
-      if (popupPosition != null)
-        popup.showRelativeTo(popupPosition); // TODO: move the popupPosition pref field to EnhancedPopup?
-      else
-        popup.show();
+      doShowPopup();
     }
+  }
+
+  /**
+   * Displays the popup using {@link EnhancedPopup#showRelativeTo(RelativePosition)} (if {@link #popupPosition} is not
+   * null) or just {@link EnhancedPopup#show()} if no relative position is specified.
+   * <p>
+   * Subclasses can override to use a different method, such as {@link EnhancedPopup#showCenteredInWindow()}
+   * or {@link EnhancedPopup#showRelativeToWindow(double, double)}.
+   */
+  protected void doShowPopup() {
+    if (popupPosition != null)
+      popup.showRelativeTo(popupPosition); // TODO: perhaps move the popupPosition pref field to EnhancedPopup?
+    else
+      popup.show();
   }
 
   public P getOrCreatePopup() {

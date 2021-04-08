@@ -16,49 +16,19 @@
  */
 package solutions.trsoftware.commons.client.widgets;
 
-import com.google.gwt.dom.client.Document;
-import com.google.gwt.dom.client.Element;
-import com.google.gwt.user.client.ui.*;
+import com.google.gwt.dom.client.SpanElement;
+import com.google.gwt.user.client.ui.FlowPanel;
 
 /**
  * Works just like {@link FlowPanel}, but uses a {@code span} instead of a {@code div}.
  *
- * @deprecated GWT now provides the {@link FlowPanel#FlowPanel(String)} constructor, which allows any tag name,
- * including {@code span}
+ * @see FlowPanel#FlowPanel(String)
  */
-public class InlineFlowPanel extends ComplexPanel implements InsertPanel.ForIsWidget {
+public class InlineFlowPanel extends FlowPanel {
   /**
    * Creates an empty flow panel.
    */
   public InlineFlowPanel() {
-    setElement(Document.get().createSpanElement());
+    super(SpanElement.TAG);
   }
-
-  /**
-   * Adds a new child widget to the panel.
-   * 
-   * @param w the widget to be added
-   */
-  @Override
-  public void add(Widget w) {
-    add(w, (Element)getElement());
-  }
-
-
-  public void insert(IsWidget w, int beforeIndex) {
-    insert(asWidgetOrNull(w), beforeIndex);
-  }
-
-  /**
-   * Inserts a widget before the specified index.
-   * 
-   * @param w the widget to be inserted
-   * @param beforeIndex the index before which it will be inserted
-   * @throws IndexOutOfBoundsException if <code>beforeIndex</code> is out of
-   *           range
-   */
-  public void insert(Widget w, int beforeIndex) {
-    insert(w, (Element)getElement(), beforeIndex, true);
-  }
-
 }

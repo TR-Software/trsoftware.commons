@@ -303,7 +303,7 @@ public class Widgets {
 
   /**
    * Adds all the given widgets to the given panel.
-   * @return the given cellPanel, to allow chaining
+   * @return the given panel, to allow chaining
    */
   public static <T extends Widget & HasWidgets> T addAll(T panel, Widget... children) {
     for (Widget child : children)

@@ -28,7 +28,7 @@ import com.google.gwt.user.client.ui.Composite;
  * @author Alex
  */
 public abstract class ToggleAnchor extends Composite {
-  private Anchor lnk;
+  private final Anchor lnk;
   /** The current state of the toggle */
   private boolean on;
 

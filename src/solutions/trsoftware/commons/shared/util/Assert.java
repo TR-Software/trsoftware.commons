@@ -64,10 +64,7 @@ public class Assert {
    */
   public static <T> T assertNotNull(T arg, String msg) {
     if (arg == null) {
-      if (msg != null)
-        throw new NullPointerException(msg);
-      else
-        throw new NullPointerException();
+      throw new NullPointerException(msg);
     }
     return arg;
   }
@@ -77,8 +74,12 @@ public class Assert {
   }
 
   public static void assertEquals(Object expected, Object actual) {
+    assertEquals(DEFAULT_ERROR_MSG, expected, actual);
+  }
+
+  public static void assertEquals(String message, Object expected, Object actual) {
     if (!LogicUtils.eq(expected, actual))
-      fail(formatNotEqualsMsg(DEFAULT_ERROR_MSG, expected, actual));
+      fail(formatNotEqualsMsg(message, expected, actual));
   }
 
   private static String formatNotEqualsMsg(String message, Object expected, Object actual) {

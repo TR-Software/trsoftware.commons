@@ -38,7 +38,7 @@ public class GenericSimplePanel extends SimplePanel {
    *
    * @param elem the element to use for this widget.
    */
-  public GenericSimplePanel(Element elem) {
+  protected GenericSimplePanel(Element elem) {
     super(elem);
   }
 
@@ -48,7 +48,7 @@ public class GenericSimplePanel extends SimplePanel {
    * @param elem the element to use for this widget.
    * @param child the child widget to add to it
    */
-  public GenericSimplePanel(Element elem, Widget child) {
+  protected GenericSimplePanel(Element elem, Widget child) {
     this(elem);
     setWidget(child);
   }

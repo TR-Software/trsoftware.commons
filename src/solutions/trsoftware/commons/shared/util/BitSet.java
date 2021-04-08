@@ -21,6 +21,8 @@ import java.util.Arrays;
 
 import static solutions.trsoftware.commons.shared.util.Assert.checkArraySize;
 
+// TODO(4/2/2021): why do we still need this if GWT already emulates java.util.BitSet? Unless we still want to support old GWT versions
+
 /**
  * <p>
  * Backported from {@code gwt/user/super/com/google/gwt/emul/java/util/BitSet.java} in the

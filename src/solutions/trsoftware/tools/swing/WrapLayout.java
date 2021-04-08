@@ -1,3 +1,19 @@
+/*
+ * Copyright 2021 TR Software Inc.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not
+ * use this file except in compliance with the License. You may obtain a copy of
+ * the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+ * License for the specific language governing permissions and limitations under
+ * the License.
+ */
+
 package solutions.trsoftware.tools.swing;
 
 import javax.swing.*;
@@ -5,39 +21,6 @@ import java.awt.*;
 
 // NOTE: this code borrowed from http://tips4java.wordpress.com/2008/11/06/wrap-layout/
 
-/**
- * FlowLayout subclass that fully supports wrapping of components.
- * 
- * <blockquote cite="https://tips4java.wordpress.com/2008/11/06/wrap-layout/">
- <div class="entrytext">
- 			<p>A layout manager has two main functions:</p>
- <ul>
- <li>determine the preferred size of the container</li>
- <li>layout the components in the container based on the layout rules</li>
- </ul>
- <p>The <strong>FlowLayout</strong> is a strange animal. It does both of these functions. The preferred size of the container assumes all components will be laid out in a single row. The layout code will wrap components to the next row when the maximum width of the container is encountered. However, the problem is that the functions don’t talk to one another. When the components are wrapped to a new row, the preferred size doesn’t change so you never see the components on the extra row.<br>
- <span id="more-194"></span></p>
- <p>What we want is the preferred size to be dynamically calculated as the size of the container is changed. In other words, as the width of the container changes the height will need to be recalculated as well. The <strong>WrapLayout</strong> extends the FlowLayout to implement this functionality. This will result in synchronizing the preferred size of the container with the layout of the container.</p>
- <p>In the following example, the button panel was added to the north of a BorderLayout and the blue panel added to the center. You use the <strong>WrapLayout</strong> the same as you would use the FlowLayout:</p>
- <p><code>buttons.setLayout(new WrapLayout());</code></p>
- <p style="text-align:center;"><a href="https://tips4java.files.wordpress.com/2008/11/wrap-layout.jpg"><img data-attachment-id="195" data-permalink="https://tips4java.wordpress.com/2008/11/06/wrap-layout/wrap-layout/" data-orig-file="https://tips4java.files.wordpress.com/2008/11/wrap-layout.jpg" data-orig-size="600,160" data-comments-opened="1" data-image-meta="{&quot;aperture&quot;:&quot;0&quot;,&quot;credit&quot;:&quot;&quot;,&quot;camera&quot;:&quot;&quot;,&quot;caption&quot;:&quot;&quot;,&quot;created_timestamp&quot;:&quot;0&quot;,&quot;copyright&quot;:&quot;&quot;,&quot;focal_length&quot;:&quot;0&quot;,&quot;iso&quot;:&quot;0&quot;,&quot;shutter_speed&quot;:&quot;0&quot;,&quot;title&quot;:&quot;&quot;}" data-image-title="wrap-layout" data-image-description="" data-medium-file="https://tips4java.files.wordpress.com/2008/11/wrap-layout.jpg?w=300" data-large-file="https://tips4java.files.wordpress.com/2008/11/wrap-layout.jpg?w=450" class="aligncenter size-large wp-image-195" style="border:0;" title="wrap-layout" src="https://tips4java.files.wordpress.com/2008/11/wrap-layout.jpg?w=450&amp;h=120" alt="wrap-layout" width="450" height="120" srcset="https://tips4java.files.wordpress.com/2008/11/wrap-layout.jpg?w=450&amp;h=120 450w, https://tips4java.files.wordpress.com/2008/11/wrap-layout.jpg?w=128&amp;h=34 128w, https://tips4java.files.wordpress.com/2008/11/wrap-layout.jpg?w=300&amp;h=80 300w, https://tips4java.files.wordpress.com/2008/11/wrap-layout.jpg 600w" sizes="(max-width: 450px) 100vw, 450px"></a></p>
- <p>As the frame is resized smaller, the button panel will increase in height and the blue panel will decrease:</p>
- <p style="text-align:center;"><a href="https://tips4java.files.wordpress.com/2008/11/wrap-layout2.jpg"><img data-attachment-id="196" data-permalink="https://tips4java.wordpress.com/2008/11/06/wrap-layout/wrap-layout2/" data-orig-file="https://tips4java.files.wordpress.com/2008/11/wrap-layout2.jpg" data-orig-size="400,160" data-comments-opened="1" data-image-meta="{&quot;aperture&quot;:&quot;0&quot;,&quot;credit&quot;:&quot;&quot;,&quot;camera&quot;:&quot;&quot;,&quot;caption&quot;:&quot;&quot;,&quot;created_timestamp&quot;:&quot;0&quot;,&quot;copyright&quot;:&quot;&quot;,&quot;focal_length&quot;:&quot;0&quot;,&quot;iso&quot;:&quot;0&quot;,&quot;shutter_speed&quot;:&quot;0&quot;,&quot;title&quot;:&quot;&quot;}" data-image-title="wrap-layout2" data-image-description="" data-medium-file="https://tips4java.files.wordpress.com/2008/11/wrap-layout2.jpg?w=300" data-large-file="https://tips4java.files.wordpress.com/2008/11/wrap-layout2.jpg?w=400" class="aligncenter size-medium wp-image-196" style="border:0;" title="wrap-layout2" src="https://tips4java.files.wordpress.com/2008/11/wrap-layout2.jpg?w=300&amp;h=120" alt="wrap-layout2" width="300" height="120" srcset="https://tips4java.files.wordpress.com/2008/11/wrap-layout2.jpg?w=300&amp;h=120 300w, https://tips4java.files.wordpress.com/2008/11/wrap-layout2.jpg?w=128&amp;h=51 128w, https://tips4java.files.wordpress.com/2008/11/wrap-layout2.jpg 400w" sizes="(max-width: 300px) 100vw, 300px"></a></p>
- <p>When the panel is added to a scroll pane,&nbsp;the size of the scroll pane won’t change, but horizontal and vertical scrollbars will appear as required.</p>
- <p>The initial preferred size calculation of the layout manager still assumes all components will be displayed on a single row. So if you pack() a frame the preferred width may be excessive. You can limit the width of the container by using:</p>
- <p><code>buttons.setSize(new Dimension(300, 1));</code></p>
- <p>Note, you must use the setSize() method, this will still allow the preferred size to be dynamically changed.</p>
- <h3>Get The Code</h3>
- <p><a href="http://www.camick.com/java/source/WrapLayout.java">WrapLayout.java</a></p>
- <h3>Related Reading</h3>
- <p><a href="http://java.sun.com/docs/books/tutorial/uiswing/layout/flow.html">How to Use Flow Layout</a></p>
- </div>
- * </blockquote>
- *
- * <p style="color: #0073BF; font-weight: bold;">
- *   TODO: is this the same as {@link com.google.gwt.dev.shell.WrapLayout}?
- * </p>
- */
 public class WrapLayout extends FlowLayout {
   private Dimension preferredLayoutSize;
 

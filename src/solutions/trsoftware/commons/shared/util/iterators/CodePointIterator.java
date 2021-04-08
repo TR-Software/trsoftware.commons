@@ -1,11 +1,19 @@
 
 /*
-Additional copyright/license notice:
-
-This code was modified from http://hg.openjdk.java.net/jdk8u/jdk8u/jdk/raw-file/9db1950723f1/src/share/classes/java/lang/CharSequence.java
-and therefore the terms of the "GNU General Public License, version 2, with the Classpath Exception"
-(https://openjdk.java.net/legal/gplv2+ce.html) apply to this code as well.
-*/
+ * Copyright 2021 TR Software Inc.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not
+ * use this file except in compliance with the License. You may obtain a copy of
+ * the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+ * License for the specific language governing permissions and limitations under
+ * the License.
+ */
 package solutions.trsoftware.commons.shared.util.iterators;
 
 import java.util.NoSuchElementException;

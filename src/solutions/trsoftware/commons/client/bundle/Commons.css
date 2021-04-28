@@ -30,6 +30,7 @@
 
 .ImageButtonWithText {
   display: inline-block;
+  white-space: nowrap;
 }
 
 .ImageButtonWithText .ImageButton {

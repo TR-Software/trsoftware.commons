@@ -98,8 +98,7 @@ public final class FileTemplateParser implements TemplateParser {
   }
 
   /**
-   * @param resource a string suitable for {@link ClassLoader#getResource(String)} (i.e. it should include the full
-   * path without a leading {@code /})
+   * @param resource the template resource
    * @return the template compiled from the given resource file
    */
   public final Template getTemplate(ResourceLocator resource) {

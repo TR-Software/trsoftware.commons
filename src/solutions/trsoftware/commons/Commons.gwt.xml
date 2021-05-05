@@ -18,7 +18,10 @@
 <module>
   <inherits name='com.google.gwt.user.User'/>
   <inherits name="com.google.gwt.json.JSON"/>
+  <!-- Guava: -->
   <inherits name="com.google.common.collect.Collect"/>
+  <inherits name="com.google.common.net.Net"/>
+  <!-- Enable stack traces with Java line numbers in production: -->
   <inherits name="solutions.trsoftware.commons.StackTraceDeobfuscator"/>
 
   <!-- TODO: attempting to replace ARI with CssResource; see CommonsCss interface -->

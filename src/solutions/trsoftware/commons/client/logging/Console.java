@@ -29,6 +29,7 @@ import solutions.trsoftware.commons.client.jso.JsConsole;
  * NOTE: most of the Javadoc comments in this class were copied from the Firebug console
  *
  * @see JsConsole
+ * @see <a href="https://developer.mozilla.org/en-US/docs/Web/API/Console">Console Reference on MDN</a>
  * @see <a href="http://getfirebug.com/wiki/index.php/Console_API">Firebug Console Reference</a>
  * @see <a href="https://developers.google.com/chrome-developer-tools/docs/console-api">Chrome Dev Tools Console Reference</a>
  *

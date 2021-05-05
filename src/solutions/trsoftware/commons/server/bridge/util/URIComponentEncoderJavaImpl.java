@@ -28,7 +28,7 @@ import solutions.trsoftware.commons.server.servlet.UrlUtils;
  */
 public class URIComponentEncoderJavaImpl extends URIComponentEncoder {
 
-  private static URIComponentEncoderJavaImpl instance = new URIComponentEncoderJavaImpl();
+  private static final URIComponentEncoderJavaImpl instance = new URIComponentEncoderJavaImpl();
 
   public static URIComponentEncoderJavaImpl getInstance() {
     return instance;
@@ -38,7 +38,7 @@ public class URIComponentEncoderJavaImpl extends URIComponentEncoder {
    * This is similar to {@link UrlEscapers#urlFragmentEscaper()}, but uses a different set of {@code safeChars} to
    * match the behavior of the JavaScript {@code encodeURIComponent} function.
    */
-  private PercentEscaper escaper = new PercentEscaper(
+  private final PercentEscaper escaper = new PercentEscaper(
       "!'()*-._~",
       false
   );

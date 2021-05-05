@@ -105,10 +105,9 @@ public abstract class WebUtils {
   /**
    * Returns a URL based on the current page URL, but with the given parameter
    * added (or replaced if was already present).
+   *
    * @param newValue the new value of the URL parameter; pass null if the
    * parameter is to be removed from the URL.
-   * @deprecated This implementation is buggy; should instead use {@link UrlBuilder}
-   * obtained by calling {@link Window.Location#createUrlBuilder()}
    */
   public static String replaceUrlParameter(String paramName, String newValue) {
     UrlBuilder urlBuilder = Window.Location.createUrlBuilder();

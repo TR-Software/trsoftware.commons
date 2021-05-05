@@ -17,6 +17,7 @@
 package solutions.trsoftware.commons.client.event;
 
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.dom.client.Element;
 import com.google.gwt.dom.client.NativeEvent;
 import com.google.gwt.event.dom.client.MouseEvent;
 import com.google.gwt.user.client.Event;
@@ -50,6 +51,16 @@ public abstract class Events {
     event.stopPropagation();
     event.preventDefault();
   }
+
+  /**
+   * Simulates a mouse click on the given element.
+   * 
+   * @see elemental.dom.Element#click()
+   * @see <a href="https://developer.mozilla.org/en-US/docs/Web/API/HTMLElement/click">HTMLElement.click() on MDN</a>
+   */
+  public static native void click(Element element) /*-{
+    element.click();
+  }-*/;
 
 
   /** Debugging method */

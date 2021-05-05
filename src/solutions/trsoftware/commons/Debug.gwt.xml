@@ -66,6 +66,11 @@
    -->
   <collapse-property name="debug" values="*" />
 
+  <replace-with class="solutions.trsoftware.commons.client.debug.Debug.Impl">
+    <when-type-is class="solutions.trsoftware.commons.client.debug.Debug"/>
+    <when-property-is name="debug" value="on"/>
+	</replace-with>
+
   <replace-with class="solutions.trsoftware.commons.client.logging.LogImplFull">
     <when-type-is class="solutions.trsoftware.commons.client.logging.LogImpl"/>
     <when-property-is name="debug" value="on"/>

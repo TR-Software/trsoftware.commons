@@ -32,7 +32,7 @@ import java.util.Map;
  * Basic utils for working with URL strings.
  *
  * <p style="color: #6495ed; font-weight: bold;">
- *   TODO: some of this something like {@link com.google.gwt.http.client.UrlBuilder} or use the
+ *   TODO: implement something like {@link com.google.gwt.http.client.UrlBuilder} or use the
  *   <a href="https://github.com/square/okhttp/blob/master/okhttp/src/main/java/okhttp3/HttpUrl.java">HttpUrl</a>
  *   class from the <a href="https://github.com/square/okhttp">OkHttp project</a>
  *   (see <a href="https://medium.com/square-corner-blog/okhttps-new-url-class-515460eea661">Square Engineering blog</a>)

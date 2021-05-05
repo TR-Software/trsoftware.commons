@@ -23,6 +23,8 @@ import com.google.gwt.regexp.shared.RegExp;
 import com.google.gwt.user.client.Window;
 import solutions.trsoftware.commons.shared.util.VersionNumber;
 
+import javax.annotation.Nullable;
+
 /**
  * A simple interface to the browser's userAgent string, which allows getting
  * more detailed info about the browser than GWT's "user.agent" selection property.
@@ -75,6 +77,11 @@ public class UserAgent {
   public boolean isIE() {
     /*
       TODO: add support for IE11+ and MS Edge?
+        - MS Edge 90.0.818.49 UA Header:
+          "Mozilla/5.0 (Windows NT 6.3; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/90.0.4430.85 Safari/537.36 Edg/90.0.818.49"
+        - IE 11 header:
+          "Mozilla/5.0 (Windows NT 6.3; WOW64; Trident/7.0; MALCJS; rv:11.0) like Gecko"
+          - perhaps could use the "MALCJS; rv:11.0" part?
      */
     return userAgentStringLowercase.contains("msie");
   }
@@ -89,9 +96,9 @@ public class UserAgent {
    * @return the value of JS {@code navigator.userAgent}
    * @see Window.Navigator#getUserAgent()
    */
-  public static native String getUAString() /*-{
-    return navigator.userAgent || ""
-  }-*/;
+  public static String getUAString() {
+    return Window.Navigator.getUserAgent();
+  };
 
   /**
    * Internet Explorer versions starting with 8 define a document.documentMode property, which, by default, returns
@@ -106,14 +113,23 @@ public class UserAgent {
 
 
   /**
-   * Modern browsers list several products in their user agent string, for example
-   * <pre>Mozilla/5.0 (Windows NT 6.3; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/67.0.3396.99 Safari/537.36</pre>
-   * Therefore this method takes a specific browser name, and attempts to extract the version of that particular
-   * browser from the user agent string.
+   * This method takes a specific browser/engine name, and attempts to extract the version of that particular
+   * product from the user agent string.
+   * <p>
+   * For example, this method returns {@link VersionNumber#VersionNumber(int...) VersionNumber(5, 0)}
+   * when given the argument {@code "Mozilla"}, if {@code navigator.userAgent} is
+   * <code style="white-space: nowrap;">
+   *   "Mozilla/5.0 (Windows NT 6.3; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/67.0.3396.99 Safari/537.36"
+   * </code>
+   * <p>
+   * NOTE: some browsers also provide a <a href="https://web.dev/user-agent-client-hints/#javascript-api">{@code navigator.userAgentData}</a>
+   * property, which serves a similar purpose.
+   *
    * @param browserName the name of the product to look for in the UA string, e.g. {@code Chrome}, {@code Mozilla}, etc.
    * @return the version number of the given browser from the UA string, if present, or {@code null} if the given browser
    * name isn't mentioned anywhere in the UA string
    */
+  @Nullable
   public VersionNumber parseVersionNumber(String browserName) {
     return parseVersionNumber(this.userAgentStringLowercase, browserName);
   }
@@ -128,6 +144,7 @@ public class UserAgent {
    * @return the version number of the given browser from the UA string, if present, or {@code null} if the given browser
    * name isn't mentioned anywhere in the UA string
    */
+  @Nullable
   public static VersionNumber parseVersionNumber(String uaString, String browserName) {
     RegExp regExp = RegExp.compile(".*?" + browserName + "/([\\d.]+).*", "i");
     MatchResult match = regExp.exec(uaString);

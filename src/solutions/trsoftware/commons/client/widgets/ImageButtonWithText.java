@@ -32,51 +32,98 @@ import solutions.trsoftware.commons.client.event.MultiHandlerRegistration;
  * @author Alex
  */
 public class ImageButtonWithText extends Composite implements HasClickHandlers {
-  private ImageButton imgButton;
-  private Anchor link;
+  private final ImageButton imageButton;
+  private final Anchor link;
 
-  private ImageButtonWithText(AbstractImagePrototype img, boolean imgFirst, String linkText, boolean lnkTextAsHtml) {
-    imgButton = new ImageButton(img);
-    link = new Anchor(linkText, lnkTextAsHtml);
+  private ImageButtonWithText(AbstractImagePrototype img, boolean imgFirst, Anchor link) {
+    imageButton = new ImageButton(img);
+    this.link = link;
     FlowPanel panel = new FlowPanel();
     if (imgFirst) {
-      panel.add(imgButton);
+      panel.add(imageButton);
       panel.add(link);
     } else {
       panel.add(link);
-      panel.add(imgButton);
+      panel.add(imageButton);
     }
     initWidget(panel);
     setStyleName(CommonsClientBundleFactory.INSTANCE.getCss().ImageButtonWithText());
   }
 
-  /** Simplified constructor, for convenience.  The image will be left of text. */
+  private ImageButtonWithText(AbstractImagePrototype img, boolean imgFirst, String linkText, boolean lnkTextAsHtml) {
+    this(img, imgFirst, new Anchor(linkText, lnkTextAsHtml));
+  }
+
+  /**
+   * Combines an image button with a scripting {@link Anchor} that displays the given text to the right of the image.
+   *
+   * @param text the anchor text
+   * @param asHtml {@code true} to treat the specified text as html
+   *
+   * @see Anchor#Anchor(String, boolean)
+   */
   public ImageButtonWithText(AbstractImagePrototype img, String text, boolean textAsHtml) {
-    this(img, true, text, textAsHtml);
+    this(img, true, new Anchor(text, textAsHtml));
   }
 
-
-  /** Simplified constructor, for convenience.  The image will be left of text. */
+  /**
+   * Combines an image button with a scripting {@link Anchor} that displays the given text to the right of the image.
+   *
+   * @param text the anchor text
+   * @see Anchor#Anchor(String)
+   */
   public ImageButtonWithText(AbstractImagePrototype img, String text) {
-    this(img, text, false);
+    this(img, true, new Anchor(text));
   }
 
-  /** Simplified constructor, for convenience. The image will be to the right of text. */
+  /**
+   * Combines an image button with the given pre-initialized {@link Anchor} on its right side.
+   *
+   * @param link a new instance of {@link Anchor}
+   */
+  public ImageButtonWithText(AbstractImagePrototype img, Anchor link) {
+    this(img, true, link);
+  }
+
+  /**
+   * Combines an image button with a scripting {@link Anchor} that displays the given text to the left of the image.
+   *
+   * @param text the anchor text
+   * @param asHtml {@code true} to treat the specified text as html
+   *
+   * @see Anchor#Anchor(String, boolean)
+   */
   public ImageButtonWithText(String text, AbstractImagePrototype img, boolean textAsHtml) {
     this(img, false, text, textAsHtml);
   }
 
-  /** Simplified constructor, for convenience. The image will be to the right of text. */
+  /**
+   * Combines an image button with a scripting {@link Anchor} that displays the given text to the left of the image.
+   *
+   * @param text the anchor text
+   * @see Anchor#Anchor(String)
+   */
   public ImageButtonWithText(String text, AbstractImagePrototype img) {
     this(text, img, false);
   }
 
   /**
+   * Combines an image button with the given pre-initialized {@link Anchor} on its left side.
+   *
+   * @param asHtml {@code true} to treat the specified text as html
+   * @param link a new instance of an {@link Anchor}
+   */
+  public ImageButtonWithText(Anchor link, AbstractImagePrototype img) {
+    this(img, false, link);
+  }
+
+  /**
    * Adds the given handler to both the {@link ImageButton} and the {@link Anchor}
+   * @see #onClick(ClickHandler)
    */
   public HandlerRegistration addClickHandler(ClickHandler handler) {
     return new MultiHandlerRegistration(
-        imgButton.addClickHandler(handler),
+        imageButton.addClickHandler(handler),
         link.addClickHandler(handler)
     ).asLegacyGwtRegistration();
   }
@@ -85,8 +132,9 @@ public class ImageButtonWithText extends Composite implements HasClickHandlers {
    * Allows adding the click handler using method chaining after the constructor.  This allows creating the widget
    * with a single expression, when the {@link HandlerRegistration} returned by {@link #addClickHandler(ClickHandler)}
    * is not needed.
+   * @see #addClickHandler(ClickHandler)
    */
-  public ImageButtonWithText withClickHandler(ClickHandler handler) {
+  public ImageButtonWithText onClick(ClickHandler handler) {
     addClickHandler(handler);
     return this;
   }
@@ -101,5 +149,11 @@ public class ImageButtonWithText extends Composite implements HasClickHandlers {
     return this;
   }
 
+  public ImageButton getImageButton() {
+    return imageButton;
+  }
 
+  public Anchor getLink() {
+    return link;
+  }
 }

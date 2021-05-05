@@ -317,14 +317,14 @@ public class ArrayUtils {
   }
 
   /**
-   * @return {@code true} if the array is neither {@code null} nor empty
+   * @return {@code true} if the array is either {@code null} or empty
    */
   public static boolean isEmpty(int[] array) {
     return array == null || array.length == 0;
   }
 
   /**
-   * @return {@code true} if the array is neither {@code null} nor empty
+   * @return {@code true} if the array is either {@code null} or empty
    */
   public static boolean isEmpty(Object[] array) {
     return array == null || array.length == 0;

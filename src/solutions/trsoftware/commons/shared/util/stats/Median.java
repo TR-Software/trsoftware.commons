@@ -25,11 +25,11 @@ import java.util.Objects;
  * the median could be interpolated by taking the mean of the two central values, but then the result would not be
  * an actual element from the sample.
  * <p>
- * This class is intended to be used to disambiguate whether the median is {@link Median#isUnique() unique},
- * and if it isn't, to get the {@link Median#getLower() lower}, {@link Median#getUpper() upper},
- * or {@link Median#interpolate() interpolated} median.
+ * This class is intended to be used to disambiguate whether the median is {@linkplain Median#isUnique() unique},
+ * and if it isn't, to get the {@linkplain Median#getLower() lower}, {@linkplain Median#getUpper() upper},
+ * or {@linkplain Median#interpolate() interpolated} median.
  * (If the distinction is unimportant to the application, the simplest usage is to just call {@link #getValue()},
- * which returns the {@link Median#getUpper() upper} median).
+ * which returns the {@linkplain Median#getUpper() upper} median).
  *
  * @see <a href="https://en.wikipedia.org/wiki/Median#Finite_set_of_numbers">Median of a finite set of numbers</a>
  * @see NumberSample#getMedian()
@@ -97,8 +97,8 @@ public class Median<N extends Number & Comparable<N>> {
    * This could be true if <i>either</i> the sample has an odd number of values or the two values closest to the
    * center are equal.
    *
-   * @return {@code true} iff the {@link Median#getLower() lower} and {@link Median#getUpper() upper} medians
-   * {@link Comparable#compareTo(Object) compare} as equal.
+   * @return {@code true} iff the {@linkplain Median#getLower() lower} and {@linkplain Median#getUpper() upper} medians
+   * {@linkplain Comparable#compareTo(Object) compare} as equal.
    * @see Median
    */
   public boolean isUnique() {

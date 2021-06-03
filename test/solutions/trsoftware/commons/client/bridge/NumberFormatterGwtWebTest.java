@@ -119,7 +119,7 @@ public class NumberFormatterGwtWebTest extends CommonsGwtWebTestCase {
         patternsUsedByGwtNumberFormat[i] = ((NumberFormatterGwtImpl)formatter).getPattern();
       }
 
-      protected void loopFinished() {
+      protected void loopFinished(boolean interrupted) {
         // 2) now that we have all the test data pre-computed, feed it to the server
         // in a batch to get the java.text.NumberFormat results for this test data,
         // and compare the outputs pairwise
@@ -164,7 +164,7 @@ public class NumberFormatterGwtWebTest extends CommonsGwtWebTestCase {
                     }
                   }
 
-                  protected void loopFinished() {
+                  protected void loopFinished(boolean interrupted) {
                     double errorRate = (double)errorCount.get() / nStrings;
                     assertEquals(nStrings, errorCount.get() + warningCount.get() + perfectMatchCount.get());
                     System.out.println("nStrings = " + nStrings);

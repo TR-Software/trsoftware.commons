@@ -674,7 +674,7 @@ public abstract class AssertUtils {
    * The simplest way to use this class is by calling {@link #assertThat(Comparable)} and chaining the assertions
    * to the result.
    */
-  public static class ComparableAssertionBuilder<T extends Comparable<T>> extends AssertionBuilder<T, ComparableAssertionBuilder> {
+  public static class ComparableAssertionBuilder<T extends Comparable<T>> extends AssertionBuilder<T, ComparableAssertionBuilder<T>> {
 
     public ComparableAssertionBuilder(T value) {
       super(value);
@@ -686,12 +686,12 @@ public abstract class AssertUtils {
     }
 
     @Override
-    public ComparableAssertionBuilder isEqualTo(T expected) {
+    public ComparableAssertionBuilder<T> isEqualTo(T expected) {
       return compare(ComparisonOperator.EQ, expected);
     }
 
     @Override
-    public ComparableAssertionBuilder isNotEqualTo(T expected) {
+    public ComparableAssertionBuilder<T> isNotEqualTo(T expected) {
       return compare(ComparisonOperator.NE, expected);
     }
 

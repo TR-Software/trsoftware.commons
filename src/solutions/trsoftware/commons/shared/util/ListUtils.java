@@ -115,7 +115,7 @@ public class ListUtils {
   }
 
   /**
-   * @return {@code true} iff the given list is sorted in ascending order (as defined by its comparator).
+   * @return {@code true} iff the given list is sorted in ascending order (as defined by the natural ordering of the elements).
    */
   public static <T extends Comparable<T>> boolean isSorted(List<T> list) {
     return CollectionUtils.isSorted(list);
@@ -142,7 +142,7 @@ public class ListUtils {
   }
 
   /**
-   * Including this method for symmetry with getLast.
+   * Including this method for symmetry with {@link #last(List)}.
    *
    * @return the first element of the given list
    * @throws IndexOutOfBoundsException if the list is empty

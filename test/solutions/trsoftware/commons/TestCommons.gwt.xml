@@ -24,6 +24,10 @@
   -->
   <inherits name="com.google.gwt.logging.Logging"/>
   <set-property name="gwt.logging.enabled" value="TRUE"/>
+
+  <inherits name="solutions.trsoftware.commons.Debug"/>
+  <set-property name="debug" value="on"/>
+
   <!--
     We don't want remote logging though, because it clutters the console with duplicated messages.
     Normally, it would suffice to set "gwt.logging.simpleRemoteHandler" to "DISABLED",

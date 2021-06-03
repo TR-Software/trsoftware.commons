@@ -90,6 +90,7 @@ public class ImmutableStats<N extends Number> implements SampleStatistics<N>, Se
     final StringBuilder sb = new StringBuilder();
     sb.append("ImmutableStats");
     sb.append("(size=").append(size);
+    sb.append(", sum=").append(sum);
     sb.append(", mean=").append(mean);
     sb.append(", min=").append(min);
     sb.append(", median=").append(median);

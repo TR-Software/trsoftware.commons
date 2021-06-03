@@ -20,91 +20,88 @@ import com.google.gwt.core.client.Duration;
 import com.google.gwt.core.client.Scheduler;
 
 /**
- * Runs a for loop in one or more increments as needed to avoid
- * "unresponsive script" warnings in the browser.
- *
- * Subclasses should implement the loop body logic in {@link #loopBody(int)}
- *
+ * Facilitates splitting a time-consuming task into multiple increments (in order to avoid "unresponsive script" warnings
+ * in the browser) by using an abstraction similar to an indexed {@code for} loop.
+ * <p>
+ * The behavior of this {@linkplain Scheduler#scheduleIncremental(Scheduler.RepeatingCommand) incremental command}
+ * is similar to the following loop:
+ * <pre>
+ *   {@link #loopStarted}();
+ *   for (int i = start; (step > 0 && i < limit) || (step < 0 && i > limit); i+=step) {
+ *     {@link #loopBody}(i);
+ *   }
+ *   {@link #loopFinished}(false);
+ * </pre>
+ * The main difference is that the body of the loop will be interrupted whenever the current increment exceeds
+ * the time allotted to it, and will be continued on the next increment.
+ * <p>
+ * Subclasses are required only to implement {@link #loopBody(int)}, but can also override {@link #loopStarted()}
+ * / {@link #loopFinished(boolean)} and {@link #incrementStarted()} / {@link #incrementFinished(Duration)},
+ * to be notified of the loop lifecycle events.  Execution can be cancelled at any time by calling {@link #stop()}.
+ * <p>
  * NOTE: We also have {@link PeriodicForLoop}, which is a similar class that runs only 1 iteration per time increment.
  *
  * @author Alex
+ * @see IncrementalLoop
+ * @see IncrementalJob
  */
-public abstract class IncrementalForLoop implements Scheduler.RepeatingCommand {
-  private int limit;
-  private int step;
-  /**
-   * The currently-executing loop increment will be pre-empted after this
-   * many milliseconds have elapsed.
-   */
-  private int incrementMillis;
+public abstract class IncrementalForLoop extends IncrementalLoop {
+  private final int start;
+  private final int limit;
+  private final int step;
 
   /**
-   * The last value of the loop variable before the loop was interrupted
-   * i.e. if lastValue=5, then the iteration of the loop with i=5 has
-   * already been executed.
-   */
-  private int lastValue;
-
-  /** For reporting and testing how the loop performed */
-  private int incrementsExecuted = 0;
-  private boolean finished = false;
-
-  /**
-   * Equivalent to for (int i = start; i < limit; i+=step)
-   * @param limit
+   * Creates an {@linkplain Scheduler#scheduleIncremental(Scheduler.RepeatingCommand) incremental} version of the following loop:
+   * <pre>
+   *   for (int i = start; (step > 0 && i < limit) || (step < 0 && i > limit); i+=step) {
+   *     {@link #loopBody}(i);
+   *   }
+   * </pre>
+   * @param start initial value for the loop variable
+   * @param limit limiting value for the loop variable
+   * @param step will be added to the loop variable after each iteration
+   * @param incrementMillis execution will be preempted after this duration has elapsed, and the loop will resume
+   * on the next execution
    */
   public IncrementalForLoop(int start, int limit, int step, int incrementMillis) {
+    super(incrementMillis);
+    this.start = start;
     this.limit = limit;
     this.step = step;
-    this.incrementMillis = incrementMillis;
-    lastValue = start-step;
+    /*
+      TODO: throw an exception if the given params would create an infinite loop?
+        For example: if (distance(start, limit) + step) > distance(start, limit))  // i.e. moving farther away from limit with each step
+     */
   }
 
   /**
-   * Equivalent to for (int i = 0; i < limit; i++) which will be pre-empted
-   * every 1000 milliseconds;
-   * @param limit
+   * Creates an {@linkplain Scheduler#scheduleIncremental(Scheduler.RepeatingCommand) incremental} version of the following loop:
+   * <pre>
+   *   for (int i = 0; i < limit; i++) {
+   *     {@link #loopBody}(i);
+   *   }
+   * </pre>
+   * The loop's execution will be paused every 1000 milliseconds.
+   * @see #IncrementalForLoop(int, int, int, int)
    */
   public IncrementalForLoop(int limit) {
     this(0, limit, 1, 1000);
   }
 
-  public final boolean execute() {
-    incrementsExecuted++;
-    Duration incrementDuration = new Duration();
-    for (int i = lastValue+step; (step > 0 && i < limit) || (step < 0 && i > limit); i+=step) {
-      // invoking the body before checking the time ensures that the
-      // loop makes progress on each iteration (otherwise it could run forever)
-      loopBody(i);
-      if (incrementDuration.elapsedMillis() > incrementMillis) {
-        // this increment has been running too long and needs to be pre-empted
-        lastValue = i;  // save the counter value
-        return true;
-      }
-    }
-    // the loop finished without having been pre-empted - no more work left to do
-    loopFinished();
-    finished = true;
+  @Override
+  public boolean hasMoreWork() {
+    int i = computeLoopVariable();
+    if (step > 0)
+      return i < limit;
+    if (step < 0)
+      return i > limit;
     return false;
   }
 
-  public int getIncrementsExecuted() {
-    return incrementsExecuted;
+  @Override
+  protected int computeLoopVariable() {
+    int i = getIterationCount();
+    return start + i * step;
   }
 
-  public boolean isFinished() {
-    return finished;
-  }
-
-  /**
-   * Subclasses should override this method to implement the loop body logic.
-   * @param i The value of the loop variable on this iteration.
-   */
-  protected abstract void loopBody(int i);
-
-  /**
-   * Subclasses should override this method to implement logic to be executed
-   * once after the loop has terminated.
-   */
-  protected abstract void loopFinished();
 }

@@ -20,6 +20,7 @@ import com.google.common.base.Preconditions;
 import com.google.common.base.Strings;
 import solutions.trsoftware.commons.shared.util.NumberRange;
 
+import javax.annotation.Nullable;
 import java.io.Serializable;
 import java.util.*;
 import java.util.function.Supplier;
@@ -132,14 +133,17 @@ public class NumberSample<N extends Number & Comparable<N>> implements SampleSta
   }
 
   public synchronized N min() {
+    if (size() == 0) return null;
     return sort().get(0);
   }
 
   public synchronized N max() {
+    if (size() == 0) return null;
     return sort().get(size() - 1);
   }
 
   public synchronized double mean() {
+    if (size() == 0) return 0;  // avoid divide-by-zero
     return sum() / size();
   }
 
@@ -159,16 +163,17 @@ public class NumberSample<N extends Number & Comparable<N>> implements SampleSta
    * closest to the center).
    * <p>
    * When the sample size is odd, the result will be the actual median, otherwise it will be the
-   * {@link Median#getUpper() "upper"} median.
+   * {@linkplain Median#getUpper() "upper"} median.
    *
    * @deprecated use {@link #getMedian()} instead
    *
-   * @return an actual value from the sample that is closest to the median.
+   * @return an actual value from the sample that is closest to the median, or {@code null} if the sample is empty.
    * Equivalent to <code>{@link #getMedian()}.{@link Median#getUpper() getUpper()}</code>
    * @see #getMedian()
    * @see <a href="https://en.wikipedia.org/wiki/Median#Finite_set_of_numbers">Median of a finite set of numbers</a>
    */
   public synchronized N median() {
+    if (size() == 0) return null;
     return sort().get(size() / 2);
   }
 
@@ -181,16 +186,19 @@ public class NumberSample<N extends Number & Comparable<N>> implements SampleSta
    * <p>
    * This method returns a {@link Median wrapper} that leaves the decision up to the caller.
    *
-   * @return a wrapper for the two middle values in the sample.  This can be used to determine whether the median
-   * is {@link Median#isUnique() unique}, and if it isn't, to get the {@link Median#getLower() lower},
-   * {@link Median#getUpper() upper}, or {@link Median#interpolate() interpolated} median.
+   * @return a wrapper for the two middle values in the sample, or {@code null} if the sample is empty.
+   * The returned object can be used to determine whether the median is {@link Median#isUnique() unique},
+   * and if it isn't, to get the {@linkplain Median#getLower() lower}, {@linkplain Median#getUpper() upper},
+   * or {@linkplain Median#interpolate() interpolated} median.
    *
    * @see <a href="https://en.wikipedia.org/wiki/Median#Finite_set_of_numbers">Median of a finite set of numbers</a>
    * @see #median()
    * @see Median
    * @see #percentile
-   * @see #orderStatistic
+   * @see #orderStatistic(int)
+   * @see #orderStatistic(double)
    */
+  @Nullable
   // TODO: consider replacing the original median() method with this (and pull up to SampleStatistics interface)
   public synchronized Median<N> getMedian() {
     int n = size();
@@ -226,6 +234,7 @@ public class NumberSample<N extends Number & Comparable<N>> implements SampleSta
   }
 
   public synchronized double variance() {
+    if (size() == 0) return 0;  // avoid divide-by-zero
     double mean = mean();
     double sumSquaredDiffs = 0;
     for (N sample : samples) {
@@ -286,8 +295,8 @@ public class NumberSample<N extends Number & Comparable<N>> implements SampleSta
    *   1.0 -> 9
    * </pre>
    * <h3>Relationship with {@link #getMedian() median} and {@link #percentile}:</h3>
-   * When {@code kPct = .50}, this method will return the {@link Median#getUpper() upper} median of the sample
-   * (unlike {@link #percentile(int) percentile(50)}, which returns the {@link Median#getLower() lower} median).
+   * When {@code kPct = .50}, this method will return the {@linkplain Median#getUpper() upper} median of the sample
+   * (unlike {@link #percentile(int) percentile(50)}, which returns the {@linkplain Median#getLower() lower} median).
    *
    * @param kPct a fraction of the total number of elements that are &le; the desired element
    *   (expressed as a unit fraction in the range [0,1])
@@ -338,8 +347,8 @@ public class NumberSample<N extends Number & Comparable<N>> implements SampleSta
    * </blockquote>
    *
    * <h3>Relationship with {@link #getMedian() median} and {@link #orderStatistic}:</h3>
-   * When {@code p = 50}, this method will return the {@link Median#getLower() lower} median of the sample
-   * (unlike {@link #orderStatistic(double) orderStatistic(.50)}, which returns the {@link Median#getUpper() upper} median).
+   * When {@code p = 50}, this method will return the {@linkplain Median#getLower() lower} median of the sample
+   * (unlike {@link #orderStatistic(double) orderStatistic(.50)}, which returns the {@linkplain Median#getUpper() upper} median).
    *
    * @param p the desired percentile (0..100)
    * @return the smallest element in the sample that is greater than {@code p} percent of the elements.

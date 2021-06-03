@@ -89,7 +89,7 @@ public abstract class EditSequence<T> implements Iterable<EditSequence.EditOpera
   }
 
   /**
-   * Represents either inserting, deleting, or substituting a particular character
+   * Represents either inserting, deleting, or substituting a particular element
    * at a specific position.
    */
   public static abstract class EditOperation<T> {
@@ -327,7 +327,7 @@ public abstract class EditSequence<T> implements Iterable<EditSequence.EditOpera
   }
 
   public static <T> boolean equal(T a, T b) {
-    // TODO: impl this properly (allow passing custom equality testers)
+    // TODO: allow passing custom equality testers
     return LogicUtils.eq(a, b);
   }
 

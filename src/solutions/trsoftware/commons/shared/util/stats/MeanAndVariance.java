@@ -127,6 +127,8 @@ public class MeanAndVariance implements Serializable, SampleStatisticsDouble, Co
   }
 
   public synchronized double variance() {
+    if (n == 0) return 0;  // avoid divide-by-zero
+
     // variance_n = M2/n      # Population variance
     // variance = M2/(n - 1)  # Sample variance
     // NOTE: NumberSample uses the Population variance, so we use the same here

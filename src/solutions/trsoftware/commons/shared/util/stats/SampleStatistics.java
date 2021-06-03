@@ -16,6 +16,8 @@
 
 package solutions.trsoftware.commons.shared.util.stats;
 
+import javax.annotation.Nullable;
+
 /**
  * Mar 26, 2009
  *
@@ -23,17 +25,32 @@ package solutions.trsoftware.commons.shared.util.stats;
  * @see com.google.common.math.Stats
  */
 public interface SampleStatistics<N extends Number> extends Updatable<N> {
+  /**
+   * @return the number of values in the sample
+   */
   int size();
 
+  /**
+   * @return the smallest number in the sample, or {@code null} if the sample is empty.
+   */
+  @Nullable
   N min();
 
+  /**
+   * @return the largest number in the sample, or {@code null} if the sample is empty.
+   */
+  @Nullable
   N max();
 
   double sum();
 
   double mean();
 
-  /** The upper median of the dataset (if there are 2 medians) */
+  /**
+   * @return the upper median of the dataset (if there are 2 medians), or {@code null} if the sample is empty.
+   * @see NumberSample#getMedian()
+   */
+  @Nullable
   N median();
 
   default double stdev() {

@@ -18,6 +18,7 @@
 package solutions.trsoftware.commons.shared.util;
 
 import java.util.Random;
+import java.util.function.BooleanSupplier;
 
 /**
  * @author Alex, 10/23/2017
@@ -50,4 +51,27 @@ public class TestUtils {
     return ret;
   }
 
+  /**
+   * Busy waits until the condition evaluates to true or the timeout has
+   * elapsed.
+   *
+   * @return true if the condition was met within timeoutMs, false otherwise.
+   */
+  public static boolean waitFor(BooleanSupplier endCondition, long timeoutMs) throws Exception {
+    long startTime = System.currentTimeMillis();
+    while (!endCondition.getAsBoolean()) {
+      if (System.currentTimeMillis() > startTime + timeoutMs) {
+        return false;
+      }
+    }
+    return true;
+  }
+
+  /**
+   * Busy waits for the given number of milliseconds.
+   */
+  public static void busyWait(long millis) {
+    long startTime = System.currentTimeMillis();
+    while (System.currentTimeMillis() < startTime + millis);
+  }
 }

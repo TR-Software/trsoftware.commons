@@ -22,9 +22,10 @@ import java.math.MathContext;
 import static java.lang.Math.*;
 
 /**
- * Date: Oct 23, 2008 Time: 3:59:50 PM
- *
+ * @since Oct 23, 2008
  * @author Alex
+ *
+ * @see com.google.common.math
  */
 public class MathUtils {
 
@@ -87,7 +88,16 @@ public class MathUtils {
   public static int unsignedByte(byte b) {
     return (int)b - Byte.MIN_VALUE;
   }
-  
+
+  /**
+   * Computes {@code n!}
+   *
+   * @throws IllegalArgumentException is {@code n} is negative
+   * @throws ArithmeticException if the result doesn't fit in a {@code long} (i.e. if {@code n > 20})
+   *
+   * @see com.google.common.math.LongMath#factorial(int)
+   * @see com.google.common.math.IntMath#factorial(int)
+   */
   public static long factorial(int n) {
     if (n < 0)
       throw new IllegalArgumentException("Factorial is not defined for negative numbers.");
@@ -95,17 +105,18 @@ public class MathUtils {
   }
 
   /**
-   * How many permutations (order matters) of r elements from a sequence of n?
-   * n!/(n-r)!
+   * Computes the number of permutations (order matters) of {@code r} elements from a sequence of {@code n}.
+   * <p>
+   * Equal to {@code n!/(n-r)!}
    *
-   * see: http://en.wikipedia.org/wiki/Permutation
+   * @see <a href="http://en.wikipedia.org/wiki/Permutation">"Permutation" on Wikipedia</a>
    */
   public static long nPr(int n, int r) {
     if (n < 0 || r < 0 || n < r)
       throw new IllegalArgumentException("nPr is not defined for inputs " + n + " and " + r);
     long product = 1;
     for (int i = n-r+1; i <= n; i++) {
-      product *= i;
+      product = Math.multiplyExact(product, i);
       if (product < 0)
         throw new ArithmeticException("Result is too large to be represented by the long integer type.");
     }
@@ -113,10 +124,11 @@ public class MathUtils {
   }
 
   /**
-   * How many subsets (order irrelevant) of r elements from a set of n?
-   * n!/(r!(n-r)!)
-   * 
-   * see: http://en.wikipedia.org/wiki/Choose_function
+   * Computes <i>n choose r</i>, which is the number of subsets (order irrelevant) of {@code r} elements from a set of {@code n}.
+   * <p>
+   * Equal to {@code n!/(r!(n-r)!)}
+   *
+   * @see <a href="http://en.wikipedia.org/wiki/Choose_function">"Choose function" on Wikipedia</a>
    */
   public static long nCr(int n, int r) {
     return nPr(n, r) / factorial(r);

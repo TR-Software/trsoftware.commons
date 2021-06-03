@@ -22,12 +22,10 @@ import com.google.gwt.core.client.Scheduler;
 import solutions.trsoftware.commons.client.CommonsGwtTestCase;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 /**
- * Dec 4, 2008
- *
+ * @since Dec 4, 2008
  * @author Alex
  */
 public class IncrementalForLoopTest extends CommonsGwtTestCase {
@@ -37,67 +35,76 @@ public class IncrementalForLoopTest extends CommonsGwtTestCase {
 
   protected void gwtSetUp() throws Exception {
     super.gwtSetUp();
-    values = new ArrayList<Integer>();
+    values = new ArrayList<>();
   }
 
+  @Override
+  protected void gwtTearDown() throws Exception {
+    values = null;
+    super.gwtTearDown();
+  }
 
-  /** Checks a loop that runs within a single incremet */
+  /** Tests a loop similar to {@code for (int i = 0; i < 5; i++) } */
   public void testQuickIncrementalForLoopWithSimpleConstructor() throws Exception {
-    delayTestFinish(1000); // the AssertListsEqual command will call finishTest
+    delayTestFinish(1000);  // the assertListsEqual method will call finishTest()
+    ArrayList<Integer> expected = new ArrayList<>();
+    for (int i = 0; i < 5; i++) {
+      expected.add(i);
+    }
     Scheduler.get().scheduleIncremental(loop = new IncrementalForLoop(5) {
       protected void loopBody(int i) {
-        // do nothing
+        values.add(i);
       }
-      protected void loopFinished() {
-        finishTest();
+      protected void loopFinished(boolean interrupted) {
+        assertListsEqual(expected);
+        assertTrue(isFinished());
+        assertFalse(hasMoreWork());
       }
     });
   }
 
 
-  /** Checks a loop that runs within a single incremet */
+  /** Tests a loop similar to {@code for (int i = -1; i < 4; i += 2) } */
   public void testQuickIncrementalForLoopMinus1To4By2() throws Exception {
-    delayTestFinish(1000); // the AssertListsEqual command will call finishTest
+    delayTestFinish(1000);  // the assertListsEqual method will call finishTest()
+    ArrayList<Integer> expected = new ArrayList<>();
+    for (int i = -1; i < 4; i += 2) {
+      expected.add(i);
+    }
     Scheduler.get().scheduleIncremental(loop = new IncrementalForLoop(-1, 4, 2, 1000) {
       protected void loopBody(int i) {
-        loopBodyThatAppendsIndexToList(i);
+        values.add(i);
       }
-      protected void loopFinished() {
-        assertListsEqual(Arrays.asList(-1, 1, 3));
+      protected void loopFinished(boolean interrupted) {
+        assertListsEqual(expected);
+        assertTrue(isFinished());
+        assertFalse(hasMoreWork());
       }
     });
   }
 
 
-  /** Checks a loop that runs within a single incremet */
+  /** Tests a loop similar to {@code for (int i = 5; i > -5; i -= 2) } */
   public void testQuickIncrementalForLoopMinus1To5By2() throws Exception {
-    delayTestFinish(1000); // the AssertListsEqual command will call finishTest
-    Scheduler.get().scheduleIncremental(loop = new IncrementalForLoop(-1, 5, 2, 1000) {
+    delayTestFinish(1000);  // the assertListsEqual method will call finishTest()
+    ArrayList<Integer> expected = new ArrayList<>();
+    for (int i = 5; i > -5; i -= 2) {
+      expected.add(i);
+    }
+    Scheduler.get().scheduleIncremental(loop = new IncrementalForLoop(5, -5, -2, 1000) {
       protected void loopBody(int i) {
-        loopBodyThatAppendsIndexToList(i);
+        values.add(i);
       }
-      protected void loopFinished() {
-        assertListsEqual(Arrays.asList(-1,1,3));
+      protected void loopFinished(boolean interrupted) {
+        assertListsEqual(expected);
+        assertTrue(isFinished());
+        assertFalse(hasMoreWork());
       }
     });
   }
 
 
-  /** Checks a loop that runs within a single incremet */
-  public void testQuickIncrementalForLoopMinus1To6By2() throws Exception {
-    delayTestFinish(1000); // the AssertListsEqual command will call finishTest
-    Scheduler.get().scheduleIncremental(loop = new IncrementalForLoop(-1, 6, 2, 1000) {
-      protected void loopBody(int i) {
-        loopBodyThatAppendsIndexToList(i);
-      }
-      protected void loopFinished() {
-        assertListsEqual(Arrays.asList(-1,1,3,5));
-      }
-    });
-  }
-
-
-  /** Checks a loop that will have to pre-empt and use up multiple increments */
+  /** Tests a loop that will have to preempt itself and use up multiple increments */
   public void testLongIncrementalForLoop() throws Exception {
     delayTestFinish(10000); // give the loop enough time to finish
     // NOTE: the following test depends on CPU speed - it could fail on faster or slower systems
@@ -106,11 +113,12 @@ public class IncrementalForLoopTest extends CommonsGwtTestCase {
     final Duration duration = new Duration();
     Scheduler.get().scheduleIncremental(loop = new IncrementalForLoop(0, maxIterations, 1, timeLimit) {
       protected void loopBody(int i) {
-        loopBodyThatAppendsIndexToList(i);
+        values.add(i);
       }
-      protected void loopFinished() {
-        int increments = loop.getIncrementsExecuted();
-        int iterations = values.size();
+      protected void loopFinished(boolean interrupted) {
+        int increments = loop.getIncrementCount();
+        int iterations = loop.getIterationCount();
+        assertEquals(values.size(), iterations);
         int elapsed = duration.elapsedMillis();
         String msg = "Loop executed " + increments + " increments and ran for " + iterations + " iterations (" + elapsed + " ms).";
         System.out.println(msg);
@@ -122,15 +130,39 @@ public class IncrementalForLoopTest extends CommonsGwtTestCase {
     });
   }
 
-
-  private void loopBodyThatAppendsIndexToList(int i) {
-    values.add(i);
-  }
-
   /** Asserts that the expected List is equal to the actual list */
   private void assertListsEqual(List<Integer> expected) {
     assertEquals(expected, values);
     finishTest();
   }
+
+  /**
+   * Tests that the {@link IncrementalForLoop#stop()} method interrupts the loop.
+   */
+  public void testStop() throws Exception {
+    delayTestFinish(10000);
+    final Duration duration = new Duration();
+    Scheduler.get().scheduleIncremental(loop = new IncrementalForLoop(0, 10000, 1, 100) {
+      protected void loopBody(int i) {
+        // stop the loop while executing the second increment
+        if (getIncrementCount() == 1)
+          stop();
+        values.add(i);  // do some work
+      }
+      protected void loopFinished(boolean interrupted) {
+        assertTrue(interrupted);
+        assertTrue(isStopped());
+        assertFalse(isFinished());
+        assertTrue(hasMoreWork());
+        int increments = getIncrementCount();
+        assertEquals(2, increments);
+        int iterations = values.size();
+        int elapsed = duration.elapsedMillis();
+        System.out.println("Loop executed " + increments + " increments and ran for " + iterations + " iterations (" + elapsed + " ms).");
+        finishTest();
+      }
+    });
+  }
+
 
 }

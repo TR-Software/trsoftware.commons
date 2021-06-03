@@ -31,6 +31,9 @@ import com.google.gwt.core.client.Scheduler;
  * {@link #scheduleFixedPeriod(int)} are used to run the loop instead of their counter-parts defined in {@link Scheduler}.
  *
  * @author Alex
+ * @see IncrementalLoop
+ * @see IncrementalForLoop
+ * @see IncrementalJob
  */
 public abstract class PeriodicForLoop implements Scheduler.RepeatingCommand {
   private final int start;

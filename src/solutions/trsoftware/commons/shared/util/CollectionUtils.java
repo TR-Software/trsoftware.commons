@@ -226,9 +226,9 @@ public class CollectionUtils {
   /**
    * @return A String array containing the {@link String#valueOf(Object)} representation of each item in the given collection.
    */
-  public static String[] toStringArray(Collection items) {
+  public static String[] toStringArray(Collection<?> items) {
     String[] ret = new String[items.size()];
-    Iterator it = items.iterator();
+    Iterator<?> it = items.iterator();
     for (int i = 0; it.hasNext(); i++) {
       ret[i] = String.valueOf(it.next());
     }

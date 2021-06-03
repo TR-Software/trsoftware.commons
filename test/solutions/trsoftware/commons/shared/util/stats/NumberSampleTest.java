@@ -70,6 +70,9 @@ public class NumberSampleTest extends CollectableStatsTestCase {
   }
 
   public void testMedian() throws Exception {
+    // will be null for an empty sample
+    assertNull(new NumberSample<>().median());
+
     // there is an even number of samples in the given data set, make sure that the upper median is used
     assertEquals(5, (int)numberSample.median());
     // add one more value to get rid of the two medians ambiguity
@@ -248,9 +251,15 @@ public class NumberSampleTest extends CollectableStatsTestCase {
     assertEquals(numberSample.median(), summary.median());
     assertEquals(numberSample.stdev(), summary.stdev());
     assertEquals(numberSample.variance(), summary.variance());
+
+    // test with empty sample:
+    System.out.println(new NumberSample<>().summarize());
   }
 
   public void testMin() throws Exception {
+    // will be null for an empty sample
+    assertNull(new NumberSample<>().min());
+
     assertEquals(0, (int)numberSample.min());
     numberSample.update(-1);
     assertEquals(-1, (int)numberSample.min());
@@ -259,6 +268,9 @@ public class NumberSampleTest extends CollectableStatsTestCase {
   }
 
   public void testMax() throws Exception {
+    // will be null for an empty sample
+    assertNull(new NumberSample<>().max());
+
     assertEquals(9, (int)numberSample.max());
     numberSample.update(-1);
     assertEquals(9, (int)numberSample.max());

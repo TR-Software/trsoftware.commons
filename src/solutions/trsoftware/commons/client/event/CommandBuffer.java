@@ -59,13 +59,13 @@ public class CommandBuffer implements KeyDownHandler {
             commandIterator = values.listIterator(commandHistory.size());
           }
           if (commandIterator.hasPrevious())
-            textBox.setText(commandIterator.previous());
+            setText(commandIterator.previous());
         }
         break;
       case KeyCodes.KEY_DOWN:
         if (commandIterator != null)
           if (commandIterator.hasNext())
-            textBox.setText(commandIterator.next());
+            setText(commandIterator.next());
           else
             // stop the iteration
             commandIterator = null;
@@ -75,6 +75,11 @@ public class CommandBuffer implements KeyDownHandler {
         commandIterator = null;
         break;
     }
+  }
+
+  private void setText(String command) {
+    textBox.setText(command);
+    textBox.setCursorPos(command.length());  // place the cursor at the end of the command
   }
 
   public TextBox getTextBox() {

@@ -178,27 +178,14 @@ public class MathUtilsJavaTest extends TestCase {
     assertEquals(24, factorial(4));
     assertEquals(120, factorial(5));
     assertEquals(1307674368000L, factorial(15));
+    // 20! is the largest factorial that can be represented by a long
     assertEquals(2432902008176640000L, factorial(20));
 
     // factorial is undefined for negative numbers
-
-    AssertUtils.assertThrows(IllegalArgumentException.class, new Runnable() {
-      public void run() {
-        factorial(-1);
-      }
-    });
-
-    AssertUtils.assertThrows(IllegalArgumentException.class, new Runnable() {
-      public void run() {
-        factorial(-12345);
-      }
-    });
-
-    AssertUtils.assertThrows(ArithmeticException.class, new Runnable() {
-      public void run() {
-        factorial(21);  // 21! overflows a 64-bit long
-      }
-    });
+    AssertUtils.assertThrows(IllegalArgumentException.class, (Runnable)() -> factorial(-1));
+    AssertUtils.assertThrows(IllegalArgumentException.class, (Runnable)() -> factorial(-12345));
+    // 21! overflows a 64-bit long
+    AssertUtils.assertThrows(ArithmeticException.class, (Runnable)() -> factorial(21));
   }
 
   public void testNPr() throws Exception {

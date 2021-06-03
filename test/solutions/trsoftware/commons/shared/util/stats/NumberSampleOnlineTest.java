@@ -33,21 +33,17 @@ public class NumberSampleOnlineTest extends CollectableStatsTestCase {
     // for other numeric types if it works for Integers
     NumberSampleOnline<Integer> ons = new NumberSampleOnline<Integer>();
     NumberSample<Integer> ns = new NumberSample<Integer>();
+    assertEquals(ns, ons);
     int[] values = new int[]{2,3,65,123,435,123,69,34,23,42,123,12,3,-123,34,-34};
     for (int v : values) {
       ons.update(v);
       ns.update(v);
       // compare all the stats at each step
-      assertEquals(ns.size(), ons.size());
-      assertEquals(ns.min(), ons.min());
-      assertEquals(ns.max(), ons.max());
-      assertEquals(ns.mean(), ons.mean(), .01);
-      assertEquals(ns.variance(), ons.variance(), .01);
-      assertEquals(ns.stdev(), ons.stdev(), .01);
+      assertEquals(ns, ons);
     }
   }
 
-  public static void assertEquals(SampleStatistics expected, SampleStatistics actual) {
+  public static <N extends Number> void assertEquals(SampleStatistics<N> expected, SampleStatistics<N> actual) {
     assertEquals(expected.size(), actual.size());
     assertEquals(expected.min(), actual.min());
     assertEquals(expected.max(), actual.max());

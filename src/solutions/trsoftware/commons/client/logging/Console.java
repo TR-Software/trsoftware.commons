@@ -38,6 +38,8 @@ import solutions.trsoftware.commons.client.jso.JsConsole;
  */
 public interface Console {
 
+  // TODO: reconcile code duplication with solutions.trsoftware.commons.client.jso.JsConsole
+
   Console instance = GWT.create(Console.class);
 
   void log(Object arg);

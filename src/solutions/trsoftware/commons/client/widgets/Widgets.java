@@ -241,13 +241,11 @@ public class Widgets {
   }
 
   public static HTML html(String html, String styleName) {
-    return html(html, styleName, true);
+    return maybeSetStyleName(new HTML(html), styleName);
   }
 
   public static HTML html(String html, String styleName, boolean wordWrap) {
-    HTML h = new HTML(html, wordWrap);
-    maybeSetStyleName(h, styleName);
-    return h;
+    return maybeSetStyleName(new HTML(html, wordWrap), styleName);
   }
 
   public static SimplePanel simplePanel(WidgetStyle style, Widget widget) {

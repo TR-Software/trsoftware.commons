@@ -167,7 +167,7 @@ public class RandomUtils {
    * @see #nextGaussian(Random, double, double)
    */
   public static double nextGaussian(double mean, double stdev) {
-    return rnd.nextGaussian() * stdev + mean;
+    return nextGaussian(rnd, mean, stdev);
   }
 
   /**

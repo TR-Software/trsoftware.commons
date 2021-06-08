@@ -568,7 +568,7 @@ public abstract class AssertUtils {
    * @throws AssertionFailedError if {@code equalityAssertion} throws an exception for any pair of elements
    */
   public static <E> void assertListsEqual(List<E> expected, List<E> actual, BiConsumerThrows<E, E, Throwable> equalityAssertion) {
-    assertEquals(expected.size(), actual.size());
+    assertEquals("Lists differ in size", expected.size(), actual.size());
     for (int i = 0; i < expected.size(); i++) {
       E a = expected.get(i);
       E b = actual.get(i);

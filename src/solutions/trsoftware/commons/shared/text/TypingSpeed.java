@@ -17,23 +17,21 @@
 package solutions.trsoftware.commons.shared.text;
 
 import solutions.trsoftware.commons.shared.util.MathUtils;
+import solutions.trsoftware.commons.shared.util.compare.RichComparable;
 import solutions.trsoftware.commons.shared.util.text.SharedNumberFormat;
 
+import javax.annotation.Nonnull;
 import javax.validation.constraints.NotNull;
+import java.util.Objects;
 
 /**
- * Encapsulates a typing speed, expressed in a particular {@link Unit}, and provides operations to
- * calculate it and convert units.
+ * Encapsulates a typing speed, expressed in either {@link Unit#WPM WPM} or {@link Unit#CPM CPM},
+ * and provides operations to calculate it and convert between the units.
  *
  * @author Alex, 10/30/2017
  */
-public class TypingSpeed extends Number {
+public class TypingSpeed extends Number implements RichComparable<TypingSpeed> {
 
-  /**
-   * Oct 31, 2009
-   *
-   * @author Alex
-   */
   public enum Unit {
     /** Characters per minute */
     CPM {
@@ -93,7 +91,8 @@ public class TypingSpeed extends Number {
   }
 
   /**
-   * The precision to be used for {@link #toString()}, {@link #equals(Object)}, and {@link #hashCode()}
+   * The precision (number of decimal fractional digits) to be used for
+   * {@link #toString()}, {@link #equals(Object)}, {@link #hashCode()}, and {@link #compareTo(TypingSpeed)}
    */
   public static final int MAX_PRECISION = 8;
 
@@ -110,7 +109,8 @@ public class TypingSpeed extends Number {
    * and instances are mutually comparable.
    */
   private double cpm;
-  /** This field is needed to convert between {@link Unit units} */
+
+  /** This field is needed to convert between the {@linkplain Unit units} */
   @NotNull
   private Language language;
 
@@ -120,8 +120,8 @@ public class TypingSpeed extends Number {
 
   /** Initializes instance from a computed value in the given {@link Unit} */
   public TypingSpeed(double value, Unit unit, Language language) {
-    if (language == null)
-      throw new NullPointerException();
+    Objects.requireNonNull(language, "language");
+    // TODO: throw exception if value too high (such that scaledCpm() > Long.MAX_VALUE)?
     this.cpm = unit.to(Unit.CPM, value, language);
     this.language = language;
   }
@@ -170,22 +170,46 @@ public class TypingSpeed extends Number {
   }
 
   /**
-   * Uses {@link #toString()} to avoid precision pitfalls (as described in {@link MathUtils#equal(double, double, double)})
+   * Uses a {@linkplain #scaledCpm() scaled integer representation} of the CPM to avoid floating-point arithmetic precision pitfalls
+   * (as described in {@link MathUtils#equal(double, double, double)})
+   *
+   * @return true if the given typing speed matches this one (within {@value #MAX_PRECISION} decimal places of precision),
+   * and has the same {@link #language}.
    */
   @Override
   public boolean equals(Object o) {
     if (this == o) return true;
     if (o == null || getClass() != o.getClass()) return false;
     TypingSpeed other = (TypingSpeed)o;
-    return language == other.language && toString().equals(o.toString());  // using toString
+    return language == other.language && scaledCpm() == other.scaledCpm();
   }
 
   /**
-   * Uses {@link #toString()} to avoid precision pitfalls (as described in {@link MathUtils#equal(double, double, double)})
+   * Uses a {@linkplain #scaledCpm() scaled integer representation} of the CPM to avoid floating-point arithmetic precision pitfalls
+   * (as described in {@link MathUtils#equal(double, double, double)})
    */
   @Override
   public int hashCode() {
-    return language.hashCode() + 31 * toString().hashCode();
+    return language.hashCode() + 31 * Long.hashCode(scaledCpm());
+  }
+
+  /**
+   * Compares the {@linkplain #scaledCpm() scaled integer representation} of the given typing speed to this one.
+   */
+  @Override
+  public int compareTo(@Nonnull TypingSpeed o) {
+    return Long.compare(scaledCpm(), o.scaledCpm());
+  }
+
+  /**
+   * Returns an integer representation of the {@link #cpm CPM}, which can be used to implement {@link #equals(Object)},
+   * {@link #hashCode()}, and {@link #compareTo(TypingSpeed)}, such that small differences in WPM/CPM conversion results
+   * (due to floating point arithmetic) can be disregarded when comparing two instances of this class.
+   *
+   * @return <code>{@link #cpm} &times; 10<sup>{@value #MAX_PRECISION}</sup></code>
+   */
+  private long scaledCpm() {
+    return Math.round(cpm * Math.pow(10, MAX_PRECISION));
   }
 
   /**

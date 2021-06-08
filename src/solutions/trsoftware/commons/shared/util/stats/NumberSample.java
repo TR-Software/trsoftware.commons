@@ -67,21 +67,35 @@ public class NumberSample<N extends Number & Comparable<N>> implements SampleSta
   private boolean dirty;
 
   /**
-   * @param backingList The data structure that will be used to store the data.
-   * @throws IllegalArgumentException if the given list does not implement {@link RandomAccess}
+   * Creates a new instance representing the data in the given list.
+   * Equivalent to
+   * <pre>
+   *   NumberSample ns = new NumberSample(data.size());
+   *   ns.{@link #addAll}(data);
+   * </pre>
+   * @param data the existing data
    */
-  public NumberSample(List<N> backingList) {
-    if (!(backingList instanceof RandomAccess))
-      throw new IllegalArgumentException("The backing list should provide random access");
-    this.samples = backingList;
+  public NumberSample(List<N> data) {
+    this(data.size());
+    addAll(data);
   }
 
-  public NumberSample(int estimatedNumberOfSamples) {
-    this(new ArrayList<N>(estimatedNumberOfSamples));
+  public NumberSample(int estimatedSize) {
+    samples = createBackingList(estimatedSize);
+    samples.clear();
   }
 
   public NumberSample() {
-    this(8192);
+    this(1024);
+  }
+
+  /**
+   * Creates a new {@link ArrayList} that will be used to store the data.
+   * Subclasses can override to use a different {@linkplain RandomAccess random access} list implementation.
+   * NOTE: when overriding this method, might want to also override {@link #trimToSize()}.
+   */
+  protected List<N> createBackingList(int initialCapacity) {
+    return new ArrayList<>(initialCapacity);
   }
 
   public synchronized void update(N sample) {
@@ -119,12 +133,12 @@ public class NumberSample<N extends Number & Comparable<N>> implements SampleSta
    * Can be called after data collection is finished to free up some memory.
    * <p>
    * Delegates to {@link ArrayList#trimToSize()} if the backing list is an {@link ArrayList}
-   * (which would be true unless the {@link #NumberSample(List)} constructor was used to provide a different
+   * (which would be true unless the {@link #createBackingList(int)} method was overridden to provide a different
    * implementation).
    */
   public synchronized void trimToSize() {
     if (samples instanceof ArrayList) {
-      ((ArrayList)samples).trimToSize();
+      ((ArrayList<N>)samples).trimToSize();
     }
   }
 

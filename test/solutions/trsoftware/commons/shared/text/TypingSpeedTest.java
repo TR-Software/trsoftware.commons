@@ -21,8 +21,7 @@ import junit.framework.TestCase;
 
 import java.util.Random;
 
-import static solutions.trsoftware.commons.shared.testutil.AssertUtils.assertEqualsAndHashCode;
-import static solutions.trsoftware.commons.shared.testutil.AssertUtils.assertNotEqualsAndHashCode;
+import static solutions.trsoftware.commons.shared.testutil.AssertUtils.*;
 import static solutions.trsoftware.commons.shared.text.TypingSpeed.*;
 
 /**
@@ -31,7 +30,7 @@ import static solutions.trsoftware.commons.shared.text.TypingSpeed.*;
 public class TypingSpeedTest extends TestCase {
 
   /** Precision to use for comparing {@code double} values */
-  private static final double DELTA = .00001;
+  private static final double DELTA = Math.pow(10, -MAX_PRECISION);
 
   public void testCalcWpm() throws Exception {
     assertEquals(20d, calcWpm(100, 60000, Language.ENGLISH));
@@ -173,5 +172,14 @@ public class TypingSpeedTest extends TestCase {
     TypingSpeed speedCpm = new TypingSpeed(cpm, Unit.CPM, Language.ENGLISH);
     assertEquals("25.123 WPM", speedWpm.toString());
     assertEquals("25.123 WPM", speedCpm.toString());
+  }
+
+  public void testCompareTo() throws Exception {
+    TypingSpeed english100wpm = new TypingSpeed(100d, Unit.WPM, Language.ENGLISH);
+    assertThat(english100wpm)
+        .isEqualTo(new TypingSpeed(100d, Unit.WPM, Language.ENGLISH))
+        .isEqualTo(new TypingSpeed(500d, Unit.CPM, Language.ENGLISH))
+        .isLessThan(new TypingSpeed(101d, Unit.WPM, Language.ENGLISH))
+        .isGreaterThan(new TypingSpeed(100d, Unit.WPM, Language.CHINESE));
   }
 }

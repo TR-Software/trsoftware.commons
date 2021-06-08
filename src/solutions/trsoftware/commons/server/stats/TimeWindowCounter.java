@@ -19,8 +19,9 @@ package solutions.trsoftware.commons.server.stats;
 import solutions.trsoftware.commons.server.cache.FixedTimeCache;
 import solutions.trsoftware.commons.server.util.Clock;
 import solutions.trsoftware.commons.shared.util.MapUtils;
-import solutions.trsoftware.commons.shared.util.callables.Function0;
 import solutions.trsoftware.commons.shared.util.mutable.MutableInteger;
+
+import java.util.function.Supplier;
 
 /**
  * A counter that keeps its entries for a limited amount of time.
@@ -38,15 +39,9 @@ import solutions.trsoftware.commons.shared.util.mutable.MutableInteger;
  * @author Alex
  */
 public class TimeWindowCounter extends Counter {
-  private final FixedTimeCache<Long,MutableInteger> map;
+  private final FixedTimeCache<Long, MutableInteger> cache;
   private final long maxAgeMillis;
   private final long granularityMillis;
-
-  private final Function0<MutableInteger> newValueFactory = new Function0<MutableInteger>() {
-    public MutableInteger call() {
-      return new MutableInteger(0);
-    }
-  };
 
   /**
    * @param maxAgeMillis The value of the counter, retrieved using the get method
@@ -84,15 +79,16 @@ public class TimeWindowCounter extends Counter {
       throw new IllegalArgumentException("granularityMillis must be in the range [1, maxAgeMillis) and must evenly divide maxAgeMillis.");
     }
     this.granularityMillis = granularityMillis;
-    map = new FixedTimeCache<Long, MutableInteger>(maxAgeMillis);
+    cache = new FixedTimeCache<>(maxAgeMillis);
   }
 
   /** Adds the given value to the counter */
   public void add(int delta) {
     Long key = Clock.currentTimeMillis() / granularityMillis;
     MutableInteger value;
-    synchronized (map) {
-      value = MapUtils.getOrInsert(map, key, newValueFactory);
+    // NOTE: because FixedTimeCache is not a real map, can't use Map.merge here, as tempting as it may be
+    synchronized (cache) {
+      value = MapUtils.getOrInsert(cache, key, (Supplier<MutableInteger>)MutableInteger::new);
     }
     synchronized (value) {
       value.getAndAdd(delta);
@@ -105,10 +101,10 @@ public class TimeWindowCounter extends Counter {
   }
 
   private int sumOfAllEntries() {
-    synchronized (map) {
+    synchronized (cache) {
       int sum = 0;
-      for (Long time : map.keySet()) {
-        sum += map.get(time).get();
+      for (Long time : cache.keySet()) {
+        sum += cache.get(time).get();
       }
       return sum;
     }
@@ -119,7 +115,7 @@ public class TimeWindowCounter extends Counter {
    * @return number of underlying entries in use.
    */
   int size() {
-    return map.size();
+    return cache.size();
   }
 
   public long getMaxAgeMillis() {

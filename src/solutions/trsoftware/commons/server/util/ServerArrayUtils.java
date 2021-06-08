@@ -28,7 +28,7 @@ import java.util.function.Supplier;
  * @author Alex
  * @see ArrayUtils
  */
-public class ServerArrayUtils {
+public class ServerArrayUtils extends ArrayUtils {
 
   // TODO: move all methods to ArrayUtils (just annotate them as @GwtIncompatible if needed)
 

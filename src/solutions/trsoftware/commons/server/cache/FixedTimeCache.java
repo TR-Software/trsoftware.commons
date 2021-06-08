@@ -258,7 +258,7 @@ public class FixedTimeCache<K,V> implements Map<K,V> {
     }
   }
 
-  // we chose not to support these two methods to avoid the hassle of unwrapping values:
+  // we chose not to support these two methods to avoid the hassle of unwrapping values and filtering expired entries:
 
   public Set<Entry<K, V>> entrySet() {
     throw new UnsupportedOperationException("Method solutions.trsoftware.commons.server.cache.FixedTimeCache.entrySet is not supported.");

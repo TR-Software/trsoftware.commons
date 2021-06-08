@@ -23,13 +23,14 @@ import solutions.trsoftware.commons.shared.util.callables.Function2;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentMap;
+import java.util.function.Supplier;
 
 /**
  * Sep 30, 2009
  *
  * @author Alex
  */
-public class ServerMapUtils {
+public class ServerMapUtils extends MapUtils {
 
   /**
    * Inserts a new instance of the given class into the map for the given key
@@ -43,19 +44,13 @@ public class ServerMapUtils {
    * was already contained by the map.
    */
   public static <K,V> V getOrInsert(Map<K,V> map, K key, final Class<? extends V> valueClass) {
-    return MapUtils.getOrInsert(map, key, new Function0<V>() {
-      public V call() {
-        try {
-          return valueClass.newInstance();
-        }
-        catch (InstantiationException e) {
-          e.printStackTrace();
-          throw new RuntimeException(e);
-        }
-        catch (IllegalAccessException e) {
-          e.printStackTrace();
-          throw new RuntimeException(e);
-        }
+    return MapUtils.getOrInsert(map, key, (Supplier<V>)() -> {
+      try {
+        return valueClass.newInstance();
+      }
+      catch (InstantiationException | IllegalAccessException e) {
+        e.printStackTrace();
+        throw new RuntimeException(e);
       }
     });
   }

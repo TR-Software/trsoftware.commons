@@ -17,17 +17,15 @@
 
 package solutions.trsoftware.commons.server.testutil;
 
-import junit.framework.AssertionFailedError;
 import solutions.trsoftware.commons.server.util.reflect.MemberSet;
 import solutions.trsoftware.commons.server.util.reflect.ObjectDiffs;
+import solutions.trsoftware.commons.shared.testutil.AssertUtils;
 import solutions.trsoftware.commons.shared.util.StringUtils;
-import solutions.trsoftware.commons.shared.util.function.BiConsumerThrows;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Member;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
-import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
 import java.util.regex.Pattern;
@@ -39,7 +37,7 @@ import static junit.framework.Assert.*;
  *
  * @author Alex
  */
-public abstract class ServerAssertUtils {
+public abstract class ServerAssertUtils extends AssertUtils {
 
   /**
    * Asserts that the given instances have equal values for all public members of their class.

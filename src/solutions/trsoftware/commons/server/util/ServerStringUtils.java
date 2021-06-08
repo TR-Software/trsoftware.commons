@@ -41,16 +41,13 @@ import java.util.regex.Pattern;
 import java.util.zip.DeflaterOutputStream;
 import java.util.zip.InflaterInputStream;
 
-import static solutions.trsoftware.commons.shared.util.StringUtils.isBlank;
-import static solutions.trsoftware.commons.shared.util.StringUtils.repeat;
-
 /**
  * Supplements {@link StringUtils} with additional methods that cannot be implemented in client-side GWT code.
  *
  * @author Alex
  * @since May 13, 2008
  */
-public class ServerStringUtils {
+public class ServerStringUtils extends StringUtils {
 
   // TODO: move all methods to StringUtils (just annotate them as @GwtIncompatible if needed)
 

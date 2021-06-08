@@ -33,9 +33,8 @@ import static solutions.trsoftware.commons.server.util.ServerMapUtils.getOrInser
  * @author Alex
  */
 public class ServerMapUtilsTest extends TestCase {
-  ServerMapUtils serverMapUtils;
 
-  public void testgetOrInsertConcurrentConcurrent() throws Exception {
+  public void testGetOrInsertConcurrentConcurrent() throws Exception {
     ConcurrentMap<String, String> map = new ConcurrentHashMap<String, String>();
     map.put("a", "x");
     final String foo = "foo";

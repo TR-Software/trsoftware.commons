@@ -30,7 +30,6 @@ public class MutableInteger extends MutableNumber {
   private volatile int n;
 
   public MutableInteger() {
-    n = 0;
   }
 
   public MutableInteger(int n) {

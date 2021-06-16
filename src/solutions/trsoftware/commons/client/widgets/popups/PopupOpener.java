@@ -16,6 +16,7 @@
 
 package solutions.trsoftware.commons.client.widgets.popups;
 
+import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.event.dom.client.*;
 import com.google.gwt.event.logical.shared.AttachEvent;
 import com.google.gwt.event.shared.HandlerRegistration;
@@ -23,7 +24,8 @@ import com.google.gwt.user.client.ui.Widget;
 import solutions.trsoftware.commons.client.event.MultiHandlerRegistration;
 import solutions.trsoftware.commons.client.util.geometry.Alignment;
 import solutions.trsoftware.commons.client.util.geometry.RelativePosition;
-import solutions.trsoftware.commons.shared.util.callables.Function0;
+
+import java.util.function.Supplier;
 
 /**
  * Encapsulates the logic associated with showing a popup in response to a click or mouse hover event on a widget
@@ -68,10 +70,10 @@ public abstract class PopupOpener<W extends Widget, P extends EnhancedPopup> imp
   private boolean shakeIfAlreadyShowing = true;
 
   /** The "opener" - i.e. the widget to which event handlers will be added */
-  private W widget;
+  private final W widget;
 
   protected P popup = null;
-  private RelativePosition popupPosition;
+  private final RelativePosition popupPosition;
   private HandlerRegistration clickHandlerReg;
   private HandlerRegistration mouseHoverHandlersReg;
   private HandlerRegistration attachmentHandlerReg;
@@ -157,12 +159,8 @@ public abstract class PopupOpener<W extends Widget, P extends EnhancedPopup> imp
 
   /** This option controls whether the popup should be hidden when the opener widget is detached from the DOM. */
   public PopupOpener<W, P> setHideOnDetach(boolean enable) {
-    attachmentHandlerReg = addOrRemoveHandlers(attachmentHandlerReg, enable, new Function0<HandlerRegistration>() {
-      @Override
-      public HandlerRegistration call() {
-        return getWidget().addAttachHandler(PopupOpener.this);
-      }
-    });
+    attachmentHandlerReg = addOrRemoveHandlers(attachmentHandlerReg, enable,
+        () -> getWidget().addAttachHandler(PopupOpener.this));
     return this;  // for method chaining
   }
 
@@ -170,13 +168,17 @@ public abstract class PopupOpener<W extends Widget, P extends EnhancedPopup> imp
     return clickHandlerReg != null;
   }
 
+  /**
+   * If enabled, the popup will be shown when the widget is clicked.
+   * <p>
+   * NOTE: this method is invoked implicitly when the {@link #CLICK} flag is passed to the constructor.
+   *
+   * @param enable whether to enable or disable this behavior
+   * @return self-reference, for chaining
+   */
   public PopupOpener<W, P> setShowPopupOnClick(boolean enable) {
-    clickHandlerReg = addOrRemoveHandlers(clickHandlerReg, enable, new Function0<HandlerRegistration>() {
-      @Override
-      public HandlerRegistration call() {
-        return getWidget().addDomHandler(PopupOpener.this, ClickEvent.getType());
-      }
-    });
+    clickHandlerReg = addOrRemoveHandlers(clickHandlerReg, enable,
+        () -> getWidget().addDomHandler(PopupOpener.this, ClickEvent.getType()));
     return this;  // for method chaining
   }
 
@@ -184,28 +186,38 @@ public abstract class PopupOpener<W extends Widget, P extends EnhancedPopup> imp
     return mouseHoverHandlersReg != null;
   }
 
+  /**
+   * If enabled, the popup will be shown when the mouse pointer is hovering over the widget.
+   * <p>
+   * NOTE: this method is invoked implicitly when the {@link #HOVER} flag is passed to the constructor.
+   *
+   * @param enable whether to enable or disable this behavior
+   * @return self-reference, for chaining
+   * @see #addHoverShowHandler()
+   */
   public PopupOpener<W, P> setShowPopupOnMouseHover(boolean enable) {
-    mouseHoverHandlersReg = addOrRemoveHandlers(mouseHoverHandlersReg, enable, new Function0<HandlerRegistration>() {
-      @Override
-      public HandlerRegistration call() {
-        return new MultiHandlerRegistration(
+    mouseHoverHandlersReg = addOrRemoveHandlers(mouseHoverHandlersReg, enable,
+        () -> new MultiHandlerRegistration(
             addHoverShowHandler(),
             getWidget().addDomHandler(PopupOpener.this, MouseOutEvent.getType())
-        ).asLegacyGwtRegistration();
-      }
-    });
+        ).asLegacyGwtRegistration());
     return this;  // for method chaining
   }
 
+  /**
+   * Helper for {@link #setShowPopupOnMouseHover(boolean)}: adds a {@link MouseOverHandler} to
+   * the widget in order to show the popup when the mouse pointer is over the widget.
+   * <p>
+   * Subclasses may override this method to use a different type of handler for this purpose (e.g. {@link MouseMoveHandler}).
+   * @see #onMouseOver(MouseOverEvent)
+   */
   protected HandlerRegistration addHoverShowHandler() {
-    // we allow subclasses to override this method because PIP needs to be able to handle MouseMove instead of MouseOver
-    // events, because it doesn't want the popup to appear a player's car enters the mouse cursor
     return getWidget().addDomHandler(PopupOpener.this, MouseOverEvent.getType());
   }
 
-  private static HandlerRegistration addOrRemoveHandlers(HandlerRegistration priorRegistration, boolean enable, Function0<HandlerRegistration> addHandlers) {
+  private static HandlerRegistration addOrRemoveHandlers(HandlerRegistration priorRegistration, boolean enable, Supplier<HandlerRegistration> addHandlers) {
     if (enable && priorRegistration == null)
-      return addHandlers.call();
+      return addHandlers.get();
     else if (!enable && priorRegistration != null) {
       priorRegistration.removeHandler();
       return null;
@@ -259,16 +271,40 @@ public abstract class PopupOpener<W extends Widget, P extends EnhancedPopup> imp
     return popup;
   }
 
+  /**
+   * Shows the popup on "click", if enabled via {@link #setShowPopupOnClick(boolean)} (or by passing
+   * the {@link #CLICK} flag to the constructor).
+   */
   public void onClick(ClickEvent event) {
     showPopup();
   }
 
+  /**
+   * Shows the popup on "mouseover", if enabled via {@link #setShowPopupOnMouseHover(boolean)} (or by passing
+   * the {@link #HOVER} flag to the constructor).
+   */
   public void onMouseOver(MouseOverEvent event) {
     showPopup();
   }
 
+  /**
+   * Hides the popup on "mouseout", if enabled via {@link #setShowPopupOnMouseHover(boolean)} (or by passing
+   * the {@link #HOVER} flag to the constructor).
+   */
   public void onMouseOut(MouseOutEvent event) {
-    hidePopup();
+    /*
+    NOTE: we defer hiding the popup on mouseout in order to allow processing click events inside the popup on touch devices.
+
+    For example, on a touch device, the mouseover event (which displays the popup) is fired when user touches the opener widget,
+    but the mouseout event isn't fired until the user touches some other location on the screen, so the popup stays
+    visible until that 2nd touch.  But if that 2nd touch was intended to click on a link or button inside the popup,
+    and we hide the popup immediately on the mouseout event (which is fired before the click), that click event
+    will never reach its intended target, but instead will go to whatever element was underneath the popup in that location.
+    If that other element was also a link, the user would inadvertently end up clicking on the wrong link.
+
+    (see https://addictinggames.atlassian.net/browse/TR-325?focusedCommentId=29150)
+    */
+    Scheduler.get().scheduleDeferred(this::hidePopup);
   }
 
   @Override

@@ -17,12 +17,11 @@
 package solutions.trsoftware.commons.client.event;
 
 
+import com.google.common.annotations.VisibleForTesting;
 import com.google.web.bindery.event.shared.HandlerRegistration;
-import solutions.trsoftware.commons.shared.util.callables.Function1_;
-import solutions.trsoftware.commons.shared.util.callables.Functions;
+import solutions.trsoftware.commons.shared.util.CollectionUtils;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -32,10 +31,13 @@ import java.util.List;
  */
 public class MultiHandlerRegistration implements HandlerRegistration {
 
-  private final List<HandlerRegistration> registrations = new ArrayList<>();
+  private final List<HandlerRegistration> handlerRegistrations = new ArrayList<>();
 
   public MultiHandlerRegistration(HandlerRegistration... registrations) {
-    this.registrations.addAll(Arrays.asList(registrations));
+    for (HandlerRegistration reg : registrations) {
+      if (reg != null)
+        handlerRegistrations.add(reg);
+    }
   }
 
   /**
@@ -43,18 +45,22 @@ public class MultiHandlerRegistration implements HandlerRegistration {
    * @return a reference to this object, for call chaining
    */
   public MultiHandlerRegistration addHandlerRegistration(HandlerRegistration handlerRegistration) {
-    registrations.add(handlerRegistration);
+    if (handlerRegistration != null) {
+      handlerRegistrations.add(handlerRegistration);
+    }
     return this;
+  }
+
+  @VisibleForTesting
+  public List<HandlerRegistration> getHandlerRegistrations() {
+    return handlerRegistrations;
   }
 
   @Override
   public void removeHandler() {
-    Functions.tryCall(registrations, new Function1_<HandlerRegistration>() {
-      @Override
-      public void call(HandlerRegistration reg) {
-        if (reg != null)
-          reg.removeHandler();
-      }
+    CollectionUtils.safeForEach(handlerRegistrations, reg -> {
+      if (reg != null)
+        reg.removeHandler();
     });
   }
 

@@ -17,9 +17,11 @@
 package solutions.trsoftware.commons.shared.util.callables;
 
 import com.google.web.bindery.event.shared.UmbrellaException;
+import solutions.trsoftware.commons.shared.util.CollectionUtils;
 
 import java.util.HashSet;
 import java.util.Set;
+import java.util.function.Consumer;
 
 /**
  * Jan 12, 2010
@@ -42,6 +44,9 @@ public abstract class Functions {
    * Use this method when you want to be sure that some code will be executed for all elements in a collection,
    * regardless of exceptions.
    * @throws UmbrellaException if the function throws an exception for any of the items.
+   *
+   * @see CollectionUtils#safeForEach(Iterable, Consumer)
+   * @deprecated use {@link CollectionUtils#safeForEach(Iterable, Consumer)} instead
    */
   public static <T> void tryCall(Iterable<T> items, Function1_<T> func) {
     Set<Throwable> caught = null;

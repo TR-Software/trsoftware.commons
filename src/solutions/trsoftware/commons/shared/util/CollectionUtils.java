@@ -19,12 +19,14 @@ package solutions.trsoftware.commons.shared.util;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Iterators;
 import com.google.common.collect.Lists;
+import com.google.gwt.event.shared.UmbrellaException;
 import solutions.trsoftware.commons.shared.util.callables.Function1;
 import solutions.trsoftware.commons.shared.util.compare.ComparisonOperator;
 import solutions.trsoftware.commons.shared.util.iterators.ArrayIterator;
 import solutions.trsoftware.commons.shared.util.iterators.ChainedIterator;
 
 import java.util.*;
+import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
@@ -422,4 +424,26 @@ public class CollectionUtils {
     return ret;
   }
 
+  /**
+   * Similar to {@link Iterable#forEach(Consumer)}, but guarantees that the given function will be applied to all elements,
+   * regardless of any exceptions thrown by the function on any particular element.
+   * <p>
+   * Any individual exceptions will be collected into a single single {@link UmbrellaException},
+   * which will be thrown at the end, after all the elements have been processed.
+   * @throws UmbrellaException if the function throws an exception for any of the items.
+   */
+  public static <T> void safeForEach(Iterable<T> items, Consumer<? super T> action) {
+    Set<Throwable> caught = null;
+    for (T item : items) {
+      try {
+        action.accept(item);
+      } catch (Throwable e) {
+        if (caught == null)
+          caught = new LinkedHashSet<>();
+        caught.add(e);
+      }
+    }
+    if (caught != null)
+      throw new UmbrellaException(caught);
+  }
 }

@@ -46,6 +46,7 @@ import solutions.trsoftware.commons.shared.util.MultimapDecorator;
 import solutions.trsoftware.commons.shared.util.TimeUnit;
 import solutions.trsoftware.commons.shared.util.callables.Function0_t;
 
+import javax.annotation.Nonnull;
 import javax.servlet.FilterRegistration;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
@@ -420,6 +421,7 @@ public class CachePolicyFilterTest extends TestCase {
      *     {@link CachePolicy#CACHE_FOREVER} if the filename has a <i>.cache.*</i> extension,
      *     or {@code null} if neither.
      */
+    @Nonnull
     @Override
     public CachePolicy inferCachePolicy(String uri) {
       Matcher matcher = filenameRegex.matcher(uri);

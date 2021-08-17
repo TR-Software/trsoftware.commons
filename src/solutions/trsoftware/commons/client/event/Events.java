@@ -34,7 +34,7 @@ import static solutions.trsoftware.commons.shared.util.StringUtils.methodCallToS
  */
 public abstract class Events {
 
-  /** Singleton event bus to be used across the application. */
+  /** Singleton global event bus to be used across the application. */
   public static final EventBus BUS = GWT.create(EventBus.class);
 
   private Events() {

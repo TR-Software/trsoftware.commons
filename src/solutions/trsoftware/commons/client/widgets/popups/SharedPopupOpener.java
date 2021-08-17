@@ -28,21 +28,27 @@ import java.util.Map;
 import java.util.Set;
 
 /**
- * Convenience class to save code when multiple instances of {@link PopupOpener} should open the same instance of
- * {@link P}.  Provides a static cache of {@link P} instances by key, so that {@link #createPopup()} is only
+ * Convenience class for when multiple opener widgets should open the same instance of a popup.
+ * Provides a static cache of popup instances by key, so that {@link #createPopup()} is only
  * invoked when there is no corresponding entry in the static cache.
+ *
+ * @param <W> opener widget type
+ * @param <P> popup type
+ * @param <K> cache key type for the static popup cache
  *
  * @author Alex, 2/17/2016
  */
 public abstract class SharedPopupOpener<W extends Widget, P extends EnhancedPopup, K> extends PopupOpener<W, P> {
+  // TODO: unit test this class
 
   /**
    * A static cache of popup instances by key, such that {@link #createPopup()} is only
    * invoked when there is no corresponding entry in this static cache.
    */
-  private static final Map<Object, EnhancedPopup> popupCache = new HashMap<Object, EnhancedPopup>();
+  // TODO(8/4/2021): to avoid global collisions, perhaps prefix the key with P's class (e.g. Pair<Class<P>, K>), or just leave it up to the user to ensure no collisions?
+  private static final Map<Object, EnhancedPopup> popupCache = new HashMap<>();
 
-  private static final LinkedHashMultimap<Object, SharedPopupOpener> attachedOpeners = LinkedHashMultimap.create();
+  private static final LinkedHashMultimap<Object, SharedPopupOpener<?,?,?>> attachedOpeners = LinkedHashMultimap.create();
 
   /** This opener's key for {@link #popupCache} and {@link #attachedOpeners} */
   protected final K key;
@@ -104,6 +110,7 @@ public abstract class SharedPopupOpener<W extends Widget, P extends EnhancedPopu
   }
 
   @Override
+  @SuppressWarnings("unchecked")
   public P getOrCreatePopup() {
     if (popup == null) {
       P cachedPopup = (P)popupCache.get(key);
@@ -127,7 +134,7 @@ public abstract class SharedPopupOpener<W extends Widget, P extends EnhancedPopu
       attachedOpeners.put(key, this);
     }
     else {
-      Set<SharedPopupOpener> siblings = attachedOpeners.get(key);
+      Set<SharedPopupOpener<?,?,?>> siblings = attachedOpeners.get(key);
       Assert.assertTrue(siblings.remove(this));
       if (siblings.isEmpty()) {
         EnhancedPopup cachedPopup = popupCache.get(key);

@@ -27,6 +27,8 @@ import solutions.trsoftware.commons.client.styles.HtmlTableStyle;
 import solutions.trsoftware.commons.client.styles.WidgetStyle;
 import solutions.trsoftware.commons.shared.util.HtmlUtils;
 
+import javax.annotation.Nonnull;
+
 /** A collections of convenience factory methods for creating widgets */
 public class Widgets {
 
@@ -126,8 +128,14 @@ public class Widgets {
   }
 
   public static DisclosurePanel disclosurePanel(String headerText, boolean startOpened, Widget content) {
-    DisclosurePanel dp = new DisclosurePanel(headerText);
+    DisclosurePanel dp = disclosurePanel(headerText, content);
     dp.setOpen(startOpened);
+    return dp;
+  }
+
+  @Nonnull
+  public static DisclosurePanel disclosurePanel(String headerText, Widget content) {
+    DisclosurePanel dp = new DisclosurePanel(headerText);
     dp.setContent(content);
     return dp;
   }

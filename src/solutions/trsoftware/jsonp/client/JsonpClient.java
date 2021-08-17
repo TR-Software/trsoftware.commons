@@ -18,6 +18,7 @@ package solutions.trsoftware.jsonp.client;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.core.client.JavaScriptObject;
+import com.google.gwt.json.client.JSONValue;
 import com.google.gwt.user.client.Random;
 import com.google.gwt.user.client.Timer;
 
@@ -25,18 +26,27 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
+ * TODO: improve this javadoc
+ *
  * Usage example:
+ * <pre>
  *   String gdata = "http://www.google.com/base/feeds/snippets?alt=json-in-script&callback=";
  *   String callbackName = reserveCallbackName();
  *   addCallbackFunction(this, callbackName);
  *   addScript(callbackName, gdata + callbackName);
- *
+ * </pre>
  * @author Alex
  */
 public class JsonpClient {
   /** How long before a call is considered timed out */
-  public static final int TIMEOUT_MS = 45000; // 45 seconds
-  
+  public static final int TIMEOUT_MS = 45_000; // 45 seconds
+
+  /**
+   * Occurrences of this substring in URLs passed to {@link #callRemote} will be substituted with the
+   * name of the dynamically-generated javascript function.
+   */
+  public static final String JS_CALLBACK_FCN_NAME_TEMPLATE = "@@jsCallback@@";
+
   /**
    * Contains the callbacks for which no response has been received yet,
    * so that timeouts may be detected.
@@ -62,21 +72,21 @@ public class JsonpClient {
         checkForTimeout(jsCallbackName);
       }
     }.schedule(TIMEOUT_MS);
-    addScript(jsCallbackName, url.replaceAll("@@jsCallback@@", jsCallbackName));
+    addScript(jsCallbackName, url.replaceAll(JS_CALLBACK_FCN_NAME_TEMPLATE, jsCallbackName));
   }
 
   /**
-   * Makes a new JSONP call to the given URL.  If the URL contains the substring @@jsCallback@@,
+   * Makes a new JSONP call to the given URL.  If the URL contains the substring {@value #JS_CALLBACK_FCN_NAME_TEMPLATE},
    * this substring is replaced with the name of an automatically generated
    * callback function.
    * This method transparently inserts an auto-generated name of a callback function,
-   * and registers it to trigger the given JsonpCallback's execute method.
-   * @param callback The actual callback action to be given the results of the
-   * JSONP call
+   * and registers it to invoke {@link JsonpCallback#execute(JSONValue)} on the given instance.
+   *
+   * @param callback The actual callback action to be given the results of the JSONP call
    */
   public void callRemote(String url, JsonpCallback callback) {
     String jsCallbackName = reserveCallbackName();
-    callRemote(url.replaceAll("@@jsCallback@@", jsCallbackName), jsCallbackName, callback);
+    callRemote(url.replaceAll(JS_CALLBACK_FCN_NAME_TEMPLATE, jsCallbackName), jsCallbackName, callback);
   }
 
   /**
@@ -127,8 +137,7 @@ public class JsonpClient {
 
   /**
    * This method is called by the native JS callback function.
-   * It simply forwards the JSON result to the registered JsonpCallback instance.
-   * and cleans up.
+   * It simply forwards the JSON result to the registered {@link JsonpCallback} instance and cleans up.
    */
   private void handleResult(String callbackFunctionName, JsonpCallback callback, JavaScriptObject result) {
     // Since this method is not called from GWT we must explicitly catch and handle all

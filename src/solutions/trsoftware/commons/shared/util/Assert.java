@@ -68,6 +68,14 @@ public class Assert {
     return arg;
   }
 
+  public static void assertNull(Object obj) {
+    assertTrue(obj == null);
+  }
+
+  public static void assertNull(Object obj, String msg) {
+    assertTrue(obj == null, msg);
+  }
+
   public static void fail(String msg) {
     throw new AssertionError(msg);
   }

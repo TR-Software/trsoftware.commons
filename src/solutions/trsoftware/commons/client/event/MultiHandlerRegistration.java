@@ -58,18 +58,13 @@ public class MultiHandlerRegistration implements HandlerRegistration {
 
   @Override
   public void removeHandler() {
-    CollectionUtils.safeForEach(handlerRegistrations, reg -> {
+    CollectionUtils.tryForEach(handlerRegistrations, reg -> {
       if (reg != null)
         reg.removeHandler();
     });
   }
 
   public com.google.gwt.event.shared.HandlerRegistration asLegacyGwtRegistration() {
-    return new com.google.gwt.event.shared.HandlerRegistration() {
-      @Override
-      public void removeHandler() {
-        MultiHandlerRegistration.this.removeHandler();
-      }
-    };
+    return MultiHandlerRegistration.this::removeHandler;
   }
 }

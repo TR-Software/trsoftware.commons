@@ -33,7 +33,7 @@ import solutions.trsoftware.commons.client.bundle.CommonsCss;
  */
 public class ImageButton extends Composite implements HasClickHandlers {
 
-  private Image im;
+  private Image img;
 
   public ImageButton(AbstractImagePrototype img) {
     this(img.createImage());
@@ -59,7 +59,7 @@ public class ImageButton extends Composite implements HasClickHandlers {
   }
 
   public ImageButton(Image img) {
-    initWidget(im = img);
+    initWidget(this.img = img);
     
     /*// must explicitly set the size on the widget in order for its opacity style to work in IE6
     // hence we propagate whatever CSS width/height properties are present on the child image
@@ -74,10 +74,10 @@ public class ImageButton extends Composite implements HasClickHandlers {
   }
 
   public Image getImage() {
-    return im;
+    return img;
   }
 
   public HandlerRegistration addClickHandler(ClickHandler handler) {
-    return im.addClickHandler(handler);
+    return img.addClickHandler(handler);
   }
 }

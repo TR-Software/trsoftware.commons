@@ -257,6 +257,7 @@ public class CachePolicyFilter extends HttpFilterAdapter {
      *     {@link CachePolicy#CACHE_FOREVER} if the filename has a <i>.cache.*</i> extension,
      *     or {@link CachePolicy#DEFAULT} if neither.
      */
+    @Nonnull
     @Override
     public CachePolicy inferCachePolicy(String uri) {
       int iLastDot = uri.lastIndexOf('.');
@@ -286,6 +287,7 @@ public class CachePolicyFilter extends HttpFilterAdapter {
      *  {@link CachePolicy#CACHE_FOREVER} if the filename has a <i>.cache.*</i> extension,
      *  or {@code null} if neither.
      */
+    @Nonnull
     @Override
     public CachePolicy inferCachePolicy(String uri) {
       Scanner.State scanResult = new Scanner().scan(uri);

@@ -69,25 +69,26 @@ public class Pair<K, V> implements Map.Entry<K,V>, Serializable {
 
   @Override
   public String toString() {
-    String k = first != null ? first.toString() : null;
-    String v = second != null ? second.toString() : null;
-    return StringUtils.template("($1,$2)", k, v);
+    return StringUtils.template("($1, $2)", String.valueOf(first), String.valueOf(second));
   }
 
+  @Override
   public boolean equals(Object o) {
-    if (this == o) return true;
-    if (!(o instanceof Pair)) return false;
-    Pair pair = (Pair)o;
+    if (this == o)
+      return true;
+    if (o == null || getClass() != o.getClass())
+      return false;
+
+    Pair<?, ?> pair = (Pair<?, ?>)o;
+
     if (first != null ? !first.equals(pair.first) : pair.first != null)
-      return false;  // fail if firsts don't match
-    if (second != null ? !second.equals(pair.second) : pair.second != null)
-      return false;  // fail if seconds don't match
-    return true;
+      return false;
+    return second != null ? second.equals(pair.second) : pair.second == null;
   }
 
+  @Override
   public int hashCode() {
-    int result;
-    result = (first != null ? first.hashCode() : 0);
+    int result = first != null ? first.hashCode() : 0;
     result = 31 * result + (second != null ? second.hashCode() : 0);
     return result;
   }

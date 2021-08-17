@@ -19,7 +19,7 @@ package solutions.trsoftware.commons.shared.util;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Iterators;
 import com.google.common.collect.Lists;
-import com.google.gwt.event.shared.UmbrellaException;
+import com.google.web.bindery.event.shared.UmbrellaException;
 import solutions.trsoftware.commons.shared.util.callables.Function1;
 import solutions.trsoftware.commons.shared.util.compare.ComparisonOperator;
 import solutions.trsoftware.commons.shared.util.iterators.ArrayIterator;
@@ -432,7 +432,7 @@ public class CollectionUtils {
    * which will be thrown at the end, after all the elements have been processed.
    * @throws UmbrellaException if the function throws an exception for any of the items.
    */
-  public static <T> void safeForEach(Iterable<T> items, Consumer<? super T> action) {
+  public static <T> void tryForEach(Iterable<T> items, Consumer<? super T> action) {
     Set<Throwable> caught = null;
     for (T item : items) {
       try {

@@ -68,10 +68,10 @@ public class HashCounterJavaTest extends CollectableStatsTestCase {
     assertEquals(1, counter.get(3));
 
     // test the sorting of entries
-    assertEquals("[(0,4), (1,3), (2,2), (3,1)]", counter.entriesSortedByKeyAscending().toString());
-    assertEquals("[(3,1), (2,2), (1,3), (0,4)]", counter.entriesSortedByValueAscending().toString());
-    assertEquals("[(3,1), (2,2), (1,3), (0,4)]", counter.entriesSortedByKeyDescending().toString());
-    assertEquals("[(0,4), (1,3), (2,2), (3,1)]", counter.entriesSortedByValueDescending().toString());
+    assertEquals("[(0, 4), (1, 3), (2, 2), (3, 1)]", counter.entriesSortedByKeyAscending().toString());
+    assertEquals("[(3, 1), (2, 2), (1, 3), (0, 4)]", counter.entriesSortedByValueAscending().toString());
+    assertEquals("[(3, 1), (2, 2), (1, 3), (0, 4)]", counter.entriesSortedByKeyDescending().toString());
+    assertEquals("[(0, 4), (1, 3), (2, 2), (3, 1)]", counter.entriesSortedByValueDescending().toString());
 
     // now test decrementing the counter
     counter.add(0, -1);
@@ -89,10 +89,10 @@ public class HashCounterJavaTest extends CollectableStatsTestCase {
     assertEquals(-11, counter.sumOfAllEntries());
 
     // test the sorting of entries again, now that we have some negative numbers present
-    assertEquals("[(0,3), (1,3), (2,-18), (3,1)]", counter.entriesSortedByKeyAscending().toString());
-    assertEquals("[(2,-18), (3,1), (0,3), (1,3)]", counter.entriesSortedByValueAscending().toString());
-    assertEquals("[(3,1), (2,-18), (1,3), (0,3)]", counter.entriesSortedByKeyDescending().toString());
-    assertEquals("[(1,3), (0,3), (3,1), (2,-18)]", counter.entriesSortedByValueDescending().toString());
+    assertEquals("[(0, 3), (1, 3), (2, -18), (3, 1)]", counter.entriesSortedByKeyAscending().toString());
+    assertEquals("[(2, -18), (3, 1), (0, 3), (1, 3)]", counter.entriesSortedByValueAscending().toString());
+    assertEquals("[(3, 1), (2, -18), (1, 3), (0, 3)]", counter.entriesSortedByKeyDescending().toString());
+    assertEquals("[(1, 3), (0, 3), (3, 1), (2, -18)]", counter.entriesSortedByValueDescending().toString());
 
     // test merging with another counter
     HashCounter<Integer> other = new HashCounter<Integer>();
@@ -126,10 +126,10 @@ public class HashCounterJavaTest extends CollectableStatsTestCase {
     assertEquals(1, counter.get(3));
 
     // test the sorting of entries
-    assertEquals("[(1,1), (2,1), (3,1)]", counter.entriesSortedByKeyAscending().toString());
-    assertEquals("[(1,1), (2,1), (3,1)]", counter.entriesSortedByValueAscending().toString());
-    assertEquals("[(3,1), (2,1), (1,1)]", counter.entriesSortedByKeyDescending().toString());
-    assertEquals("[(3,1), (2,1), (1,1)]", counter.entriesSortedByValueDescending().toString());
+    assertEquals("[(1, 1), (2, 1), (3, 1)]", counter.entriesSortedByKeyAscending().toString());
+    assertEquals("[(1, 1), (2, 1), (3, 1)]", counter.entriesSortedByValueAscending().toString());
+    assertEquals("[(3, 1), (2, 1), (1, 1)]", counter.entriesSortedByKeyDescending().toString());
+    assertEquals("[(3, 1), (2, 1), (1, 1)]", counter.entriesSortedByValueDescending().toString());
   }
 
   @Slow

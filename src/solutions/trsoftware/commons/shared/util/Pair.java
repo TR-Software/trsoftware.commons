@@ -18,6 +18,7 @@ package solutions.trsoftware.commons.shared.util;
 
 import java.io.Serializable;
 import java.util.Map;
+import java.util.Objects;
 
 /**
  * Convenience class for representing a pair of two objects. Extends {@link Map.Entry} with some additional convenience
@@ -76,14 +77,14 @@ public class Pair<K, V> implements Map.Entry<K,V>, Serializable {
   public boolean equals(Object o) {
     if (this == o)
       return true;
-    if (o == null || getClass() != o.getClass())
+    if (!(o instanceof Pair))
       return false;
 
     Pair<?, ?> pair = (Pair<?, ?>)o;
 
-    if (first != null ? !first.equals(pair.first) : pair.first != null)
+    if (!Objects.equals(first, pair.first))
       return false;
-    return second != null ? second.equals(pair.second) : pair.second == null;
+    return Objects.equals(second, pair.second);
   }
 
   @Override

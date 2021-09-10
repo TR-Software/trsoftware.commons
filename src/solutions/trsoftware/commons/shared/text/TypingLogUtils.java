@@ -20,7 +20,7 @@ import solutions.trsoftware.commons.shared.util.Levenshtein;
 import solutions.trsoftware.commons.shared.util.TimeUnit;
 
 import java.util.ArrayList;
-import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -46,7 +46,7 @@ public class TypingLogUtils {
     for (int w = 0; w < words.length; w++) {
       String word = words[w];
       for (int c = 0; c < word.length(); c++) {
-        ret.add(new TypingEdit(textCharCounts.getCharCountUpToWord(w), Arrays.<Levenshtein.EditOperation>asList(new Levenshtein.Insertion(c, word.charAt(c))), totalTime += delayBetweenChars));
+        ret.add(new TypingEdit(textCharCounts.getCharCountUpToWord(w), Collections.singletonList(new Levenshtein.Insertion(c, word.charAt(c))), totalTime += delayBetweenChars));
       }
     }
     return ret;

@@ -19,6 +19,7 @@ package solutions.trsoftware.tools.cli;
 import com.google.common.collect.BiMap;
 import com.google.common.collect.HashBiMap;
 import solutions.trsoftware.commons.shared.util.NumberRange;
+import solutions.trsoftware.commons.shared.util.StringUtils;
 import solutions.trsoftware.tools.util.TablePrinter;
 
 import java.io.BufferedReader;
@@ -212,6 +213,23 @@ public abstract class InteractiveCommandLineApp implements Runnable {
    */
   public static <T> T promptForInput(BufferedReader br, String prompt, Function<String, T> parser) throws IOException {
     return parser.apply(promptForInput(br, prompt));
+  }
+
+  /**
+   * Prints the given message and reads the next line of user input from the given reader, interpreting it as
+   * a comma-separated list of values.  Each value will be parsed using the given parser.
+   *
+   * @param br the input reader
+   * @param prompt the prompt message to print
+   * @param itemParser will be used to parse each comma-separated value to the desired type
+   * @return input entered by the user in response to this prompt, parsed as a list of {@code T} values.
+   */
+  public static <T> List<T> promptForList(BufferedReader br, String prompt, Function<String, T> itemParser) throws IOException {
+    String input = promptForInput(br, prompt);
+    ArrayList<T> ret = new ArrayList<T>();
+    for (String token : StringUtils.splitAndTrim(input, ","))
+      ret.add(itemParser.apply(token));
+    return ret;
   }
 
   /**

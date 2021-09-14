@@ -27,8 +27,7 @@ import java.util.List;
  * by the user while typing a particular text.  Provides feedback to the UI
  * during the race and generates a TypingLog at the end of the race.
  *
- * Nov 19, 2012
- *
+ * @since Nov 19, 2012
  * @author Alex
  */
 public class TextInputModel {

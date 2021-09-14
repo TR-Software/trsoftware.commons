@@ -79,6 +79,7 @@ public class AdvancedTextBox extends TextBox implements FocusHandler, BlurHandle
   }
 
   public void setPromptText(final String promptText) {
+    // TODO(9/14/2021): can try using the "placeholder" attribute instead of this ad-hoc implementation (see https://developer.mozilla.org/en-US/docs/Web/HTML/Element/input#attr-placeholder)
     if (StringUtils.isBlank(promptText)) {
       // setting an empty prompt is equivalent to having no prompt
       this.promptText = null;

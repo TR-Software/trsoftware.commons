@@ -23,8 +23,6 @@ import java.util.Iterator;
 
 /**
  * A {@link Reader} that concatenates multiple readers.
- *
- *
  */
 public class MultiReader extends Reader {
   private final Iterator<? extends Reader> it;

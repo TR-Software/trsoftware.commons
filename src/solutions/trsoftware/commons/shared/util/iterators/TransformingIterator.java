@@ -20,13 +20,16 @@ import java.util.Iterator;
 
 /**
  * Returns an output element after applying a transformation on the corresponding input element.
+ *
  * @author Alex, 1/12/14
+ * @see com.google.common.collect.TransformedIterator
+ * @see com.google.common.collect.Iterators#transform(Iterator, com.google.common.base.Function)
  */
 public abstract class TransformingIterator<I, O> implements Iterator<O> {
 
-  protected Iterator<I> delegate;
+  protected Iterator<? extends I> delegate;
 
-  public TransformingIterator(Iterator<I> delegate) {
+  public TransformingIterator(Iterator<? extends I> delegate) {
     this.delegate = delegate;
   }
 

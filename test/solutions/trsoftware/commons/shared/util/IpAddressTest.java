@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 TR Software Inc.
+ * Copyright 2021 TR Software Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -12,7 +12,6 @@
  * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
  * License for the specific language governing permissions and limitations under
  * the License.
- *
  */
 
 package solutions.trsoftware.commons.shared.util;
@@ -20,8 +19,8 @@ package solutions.trsoftware.commons.shared.util;
 import junit.framework.TestCase;
 import solutions.trsoftware.commons.shared.testutil.AssertUtils;
 
+import static solutions.trsoftware.commons.shared.testutil.TestData.randomInts;
 import static solutions.trsoftware.commons.shared.util.IpAddressUtilsTest.badIPv4AddressArgs;
-import static solutions.trsoftware.commons.shared.util.TestUtils.randomInts;
 
 /**
  * @author Alex

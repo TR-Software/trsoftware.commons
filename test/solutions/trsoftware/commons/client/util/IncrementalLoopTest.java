@@ -21,8 +21,8 @@ import com.google.gwt.core.client.Duration;
 import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.junit.client.GWTTestCase;
 import solutions.trsoftware.commons.client.CommonsGwtTestCase;
+import solutions.trsoftware.commons.shared.testutil.TestUtils;
 import solutions.trsoftware.commons.shared.util.MathUtils;
-import solutions.trsoftware.commons.shared.util.TestUtils;
 import solutions.trsoftware.commons.shared.util.stats.HashCounter;
 
 import java.util.ArrayList;

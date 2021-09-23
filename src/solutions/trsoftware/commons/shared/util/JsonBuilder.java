@@ -155,12 +155,8 @@ public class JsonBuilder implements Jsonizable {
   }
 
   /**
-   * The fallback method for all arguments that aren't obviously strings,
-   * numbers, or booleans.  It will convert the argument to the closest
-   * match to the above 3 types.
-   * 
-   * @param value
-   * @return
+   * Fallback method for values that aren't obviously strings, numbers, or booleans.
+   * Will convert the argument to the closest matching type.
    */
   public JsonBuilder value(Object value) {
     if (value == null)
@@ -172,9 +168,9 @@ public class JsonBuilder implements Jsonizable {
     else if (value instanceof Boolean)
       value(((Boolean)value).booleanValue());
     else if (value instanceof Iterable)
-      value((Iterable)value);
+      value((Iterable<?>)value);
     else if (value instanceof Map)
-      value((Map)value);
+      value((Map<?,?>)value);
     else if (value instanceof Jsonizable)
       value((Jsonizable) value);
     else
@@ -184,13 +180,13 @@ public class JsonBuilder implements Jsonizable {
 
   // these are "macro" methods for easily dumping maps and collections into the JSON stream
 
-  public JsonBuilder value(Iterable iterable) {
+  public JsonBuilder value(Iterable<?> iterable) {
     writeIterable(iterable);
     s.append(", ");
     return this;
   }
 
-  private JsonBuilder writeIterable(Iterable iterable) {
+  private JsonBuilder writeIterable(Iterable<?> iterable) {
     beginArray();
     for (Object elt : iterable)
       value(elt);
@@ -218,7 +214,7 @@ public class JsonBuilder implements Jsonizable {
    * An alternative to using this class as a builder.
    * @return the complete JSON string representation of the given map. 
    */
-  public static String mapToJson(Map map) {
+  public static String mapToJson(Map<?,?> map) {
     return new JsonBuilder().writeMap(map).toString();
   }
 
@@ -226,7 +222,7 @@ public class JsonBuilder implements Jsonizable {
    * An alternative to using this class as a builder.
    * @return the complete JSON string representation of the given collection. 
    */
-  public static String iterableToJson(Iterable iterable) {
+  public static String iterableToJson(Iterable<?> iterable) {
     return new JsonBuilder().writeIterable(iterable).toString();
   }
 

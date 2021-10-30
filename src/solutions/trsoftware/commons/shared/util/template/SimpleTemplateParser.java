@@ -26,7 +26,7 @@ import static solutions.trsoftware.commons.shared.util.template.SimpleTemplatePa
 /**
  * An FSA-based scanner (a.k.a lexer) that recognizes a simple regular language consisting simply of:
  * <ol>
- *   <li><b>text</b> spans</li>
+ *   <li><i>text</i> spans</li>
  *   <li>
  *     <i>variable</i> spans between opening and closing tags defined by {@link #vO} and {@link #vC}
  *     (e.g. <code>${</code> and <code>}</code>)

@@ -16,6 +16,7 @@
 
 package solutions.trsoftware.commons.rebind.util.template;
 
+import com.google.gwt.core.client.GWT;
 import com.google.gwt.core.ext.Generator;
 import com.google.gwt.core.ext.GeneratorContext;
 import com.google.gwt.core.ext.TreeLogger;
@@ -34,6 +35,7 @@ import solutions.trsoftware.commons.shared.util.template.TemplateBundle.Resource
 import java.io.PrintWriter;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 
@@ -53,6 +55,10 @@ import java.util.List;
  *</p>
  */
 public class TemplateBundleGenerator extends Generator {
+  /*
+  NOTE: this generator can be tested by running solutions.trsoftware.commons.shared.util.template.TemplateBundleTest
+  and examining the compiler output in the "-gen" directory
+   */
 
   /**
    * Simple wrapper around JMethod that allows for unit test mocking.
@@ -111,16 +117,21 @@ public class TemplateBundleGenerator extends Generator {
 
   /* private */static final String MSG_NO_FILE_BASED_ON_METHOD_NAME = "No matching template resource was found; any of the following filenames would have matched had they been present:";
 
-  private static final String TEMPLATE_QNAME = "solutions.trsoftware.commons.shared.util.template.Template";
-  private static final String TEMPLATEPART_QNAME = "solutions.trsoftware.commons.shared.util.template.TemplatePart";
-  private static final String STRINGPART_QNAME = "solutions.trsoftware.commons.shared.util.template.StringPart";
-  private static final String VARIABLEPART_QNAME = "solutions.trsoftware.commons.shared.util.template.VariablePart";
+  /*
+    The following constants cache the results of Class.getSimpleName() in order to improve GWT compile times when there
+    are many TemplateBundle instances that need to be generated for a module.
 
-  private static final String GWT_QNAME = "com.google.gwt.core.client.GWT";
+    We do this because Class.getSimpleName() is potentially expensive to compute, unlike Class.getName() (which
+    caches its return value). NOTE: this was fixed in OpenJDK 11 and later (see https://bugs.openjdk.java.net/browse/JDK-8187123).
+
+    @see https://stackoverflow.com/questions/17369304/why-is-class-getsimplename-not-cached
+  */
+
+  private static final String TEMPLATE_CLASS_NAME = Template.class.getSimpleName();
+  private static final String VARIABLEPART_CLASS_NAME = VariablePart.class.getSimpleName();
+  private static final String STRINGPART_CLASS_NAME = StringPart.class.getSimpleName();
 
   private static final String[] TEMPLATE_FILE_EXTENSIONS = {"html", "txt"};
-
-  private static final String TEMPLATEBUNDLE_QNAME = "solutions.trsoftware.commons.shared.util.template.TemplateBundle";
 
   /* private */static String msgCannotFindTemplateFromMetaData(String resName) {
     return "Unable to find template resource '" + resName + "'";
@@ -207,7 +218,8 @@ public class TemplateBundleGenerator extends Generator {
     String name = method.getName();
     String fieldName = name + "_field";
     sw.println();
-    sw.println("private static Template " + fieldName + " = null;");
+    // Example: private static Template field = null;
+    sw.println(String.format("private static %s %s = null;", TEMPLATE_CLASS_NAME, fieldName));
     sw.println();
     String decl = method.getReadableDeclaration(false, true, true, true, true);
     {
@@ -218,16 +230,19 @@ public class TemplateBundleGenerator extends Generator {
         sw.println("if (" + fieldName + " == null) {");
         {
           sw.indent();
-          sw.println(fieldName + " = new Template(java.util.Arrays.<TemplatePart>asList(");
+          // Example: field = new Template(Arrays.<TemplatePart>asList(
+          sw.println(String.format("%s = new %s(Arrays.asList(", fieldName, TEMPLATE_CLASS_NAME));
           {
             sw.indent();
             while (partIterator.hasNext()) {
               TemplatePart part = partIterator.next();
               sw.print("new ");
               if (part instanceof VariablePart)
-                sw.print("VariablePart(\"" + ((VariablePart)part).getVarName() + "\")");
+                // Example: VariablePart("varName")
+                sw.print(String.format("%s(\"%s\")", VARIABLEPART_CLASS_NAME, ((VariablePart)part).getVarName()));
               else if (part instanceof StringPart)
-                sw.print("StringPart(\"" + escape(part.toString()) + "\")");
+                // Example: StringPart("text string")
+                sw.print(String.format("%s(\"%s\")", STRINGPART_CLASS_NAME, escape(part.toString())));
               if (partIterator.hasNext())
                 sw.println(", ");
             }
@@ -253,12 +268,11 @@ public class TemplateBundleGenerator extends Generator {
       throws UnableToCompleteException {
     // Lookup the type info for Template so that we can check for the proper return type on the TemplateBundle methods.
     final JClassType templateClass;
+    String templateTypeName = Template.class.getName();
     try {
-      templateClass = userType.getOracle().getType(
-          TEMPLATE_QNAME);
+      templateClass = userType.getOracle().getType(templateTypeName);
     } catch (NotFoundException e) {
-      logger.log(TreeLogger.ERROR, TEMPLATE_QNAME
-          + " class is not available", e);
+      logger.log(TreeLogger.ERROR, templateTypeName + " class is not available", e);
       throw new UnableToCompleteException();
     }
 
@@ -267,13 +281,12 @@ public class TemplateBundleGenerator extends Generator {
     String subName = computeSubclassName(userType);
 
     // Begin writing the generated source.
-    ClassSourceFileComposerFactory f = new ClassSourceFileComposerFactory(
-        pkgName, subName);
-    f.addImport(TEMPLATE_QNAME);
-    f.addImport(TEMPLATEPART_QNAME);
-    f.addImport(STRINGPART_QNAME);
-    f.addImport(VARIABLEPART_QNAME);
-    f.addImport(GWT_QNAME);
+    ClassSourceFileComposerFactory f = new ClassSourceFileComposerFactory(pkgName, subName);
+    f.addImport(templateTypeName);
+    f.addImport(StringPart.class.getName());
+    f.addImport(VariablePart.class.getName());
+    f.addImport(GWT.class.getName());
+    f.addImport(Arrays.class.getName());
     f.addImplementedInterface(userType.getQualifiedSourceName());
 
     PrintWriter pw = context.tryCreate(logger, pkgName, subName);
@@ -290,8 +303,7 @@ public class TemplateBundleGenerator extends Generator {
 
         // Verify that this method is valid on an template bundle.
         if (method.getReturnType() != templateClass) {
-          branch.log(TreeLogger.ERROR, "Return type must be "
-              + TEMPLATE_QNAME, null);
+          branch.log(TreeLogger.ERROR, "Return type must be " + templateTypeName, null);
           throw new UnableToCompleteException();
         }
 
@@ -301,8 +313,7 @@ public class TemplateBundleGenerator extends Generator {
         }
 
         // Find the associated templated resource.
-        String templateResName = getTemplateResourceName(branch,
-            new JMethodOracleImpl(method));
+        String templateResName = getTemplateResourceName(branch, new JMethodOracleImpl(method));
         assert (templateResName != null);
         templateResNames.add(templateResName);
       }
@@ -350,8 +361,8 @@ public class TemplateBundleGenerator extends Generator {
     String methodName = method.getName();
     String pkgAndMethodName = pkgPrefix + methodName;
     List<String> testFileNames = new ArrayList<String>();
-    for (int i = 0; i < TEMPLATE_FILE_EXTENSIONS.length; i++) {
-      String testFileName = pkgAndMethodName + '.' + TEMPLATE_FILE_EXTENSIONS[i];
+    for (String ext : TEMPLATE_FILE_EXTENSIONS) {
+      String testFileName = pkgAndMethodName + '.' + ext;
       if (resLocator.isResourcePresent(testFileName)) {
         return testFileName;
       }
@@ -374,7 +385,7 @@ public class TemplateBundleGenerator extends Generator {
       JClassType userType = typeOracle.getType(typeName);
 
       // Get the type this generator is designed to support.
-      JClassType magicType = typeOracle.findType(TEMPLATEBUNDLE_QNAME);
+      JClassType magicType = typeOracle.findType(TemplateBundle.class.getName());
 
       // Ensure it's an interface.
       if (userType.isInterface() == null) {

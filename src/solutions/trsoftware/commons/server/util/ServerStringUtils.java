@@ -518,6 +518,7 @@ public class ServerStringUtils extends StringUtils {
    * @see SourceVersion#isName(CharSequence)
    * @see SourceVersion#isKeyword(CharSequence)
    * @see <a href="https://docs.oracle.com/javase/specs/jls/se8/html/jls-3.html">JLS Chapter 3 (Lexical Structure)</a>
+   * @see com.google.gwt.core.ext.Generator#escapeClassName(java.lang.String)
    */
   public static String toJavaIdentifier(String str) {
     if (isBlank(str))

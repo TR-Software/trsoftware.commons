@@ -26,23 +26,24 @@ import solutions.trsoftware.commons.shared.util.template.TemplateParser;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Path;
 
 /**
- * Provides a lightweight templating facility that reads a template file written in the syntax recognized
- * by {@link SimpleTemplateParser#parseDefault(String)}.
- *
- * Loading and parsing template file usually takes longer than rendering the template, therefore this class
- * caches the loaded {@link Template} instances (which makes sense, because they are immutable).
- *
- * This class is also immutable, so instances may be freely shared by threads.
- *
- * The name of the template should be a resource file name,
- * starting with "/".  This name is loaded via ServerStringUtils.class.getResource()
- * which is for some reason different from ServerStringUtils.class.getClassLoader().getResource()
+ * Provides a lightweight file-based templating facility.
+ * <p>
+ * The default instance (obtained by {@link #getInstance()}) will parse files according to the
+ * {@linkplain SimpleTemplateParser#DEFAULT_SYNTAX default syntax}.  A custom syntax can be specified
+ * by passing a custom {@link TemplateParser} instance to {@link #getInstance(TemplateParser)}.
+ * <p>
+ * The template source file can be specified either directly (see {@link #getTemplate(File)} and {@link #getTemplate(Path)}),
+ * or as a classpath resource (see {@link #getTemplate(String)} and {@link #getTemplate(ResourceLocator)}).
+ * It's also possible to use a custom data source by passing a custom {@link DataResource} implementation
+ * to {@link #getTemplate(DataResource)}.
  *
  * @author Alex
  */
 public final class FileTemplateParser implements TemplateParser {
+  // TODO(10/27/2021): rename to TemplateFileLoader or TemplateFileParser (in a separate commit)
 
   /**
    * Caches parsed templates
@@ -61,16 +62,6 @@ public final class FileTemplateParser implements TemplateParser {
   public static FileTemplateParser getInstance(TemplateParser templateSyntax) {
     return instances.get(templateSyntax);
   }
-
-  /**
-   * Caches parsed templates
-   */
-  private final DefaultMap<DataResource, Template> cache = new DefaultMap<DataResource, Template>() {
-    @Override
-    public Template computeDefault(DataResource key) {
-      return parseTemplate(key);
-    }
-  };
 
   private final TemplateParser templateSyntax;
 
@@ -98,24 +89,54 @@ public final class FileTemplateParser implements TemplateParser {
   }
 
   /**
+   * Loads a template from the given data source.
+   *
    * @param resource the template resource
-   * @return the template compiled from the given resource file
+   * @return the template compiled from the given data source
    */
-  public final Template getTemplate(ResourceLocator resource) {
-    return cache.get(new DataResource.JavaResource(resource));
+  public Template getTemplate(DataResource resource) {
+    return parseTemplate(resource);
   }
 
   /**
+   * Loads a template from the classpath resource specified by the given {@link ResourceLocator}.
+   *
+   * @param resourceLocator the template resource
+   * @return the template compiled from the given resource file
+   */
+  public final Template getTemplate(ResourceLocator resourceLocator) {
+    return getTemplate(new DataResource.JavaResource(resourceLocator));
+  }
+
+  /**
+   * Loads a template from the classpath resource specified by the given string.
+   *
    * @param resourceName a string suitable for {@link ClassLoader#getResource(String)} (i.e. it should include the full
-   * path without a leading {@code /})
+   * path relative to the root package without a leading {@code '/'} char)
    * @return the template compiled from the given resource file
    */
   public final Template getTemplate(String resourceName) {
-    return cache.get(new DataResource.JavaResource(new ResourceLocator(resourceName)));
+    return getTemplate(new ResourceLocator(resourceName));
   }
 
+  /**
+   * Loads a template from the given file.
+   *
+   * @param file the template file
+   * @return the template compiled from the given file
+   */
   public final Template getTemplate(File file) {
-    return cache.get(new DataResource.FileResource(file));
+    return getTemplate(new DataResource.FileResource(file));
+  }
+
+  /**
+   * Loads a template from the given file path.
+   *
+   * @param path the template file path
+   * @return the template compiled from the given file
+   */
+  public final Template getTemplate(Path path) {
+    return getTemplate(new DataResource.NioFileResource(path));
   }
 
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 TR Software Inc.
+ * Copyright 2021 TR Software Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -12,7 +12,6 @@
  * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
  * License for the specific language governing permissions and limitations under
  * the License.
- *
  */
 
 package solutions.trsoftware.commons.server.util;
@@ -23,6 +22,7 @@ import solutions.trsoftware.commons.shared.util.template.SimpleTemplateParser;
 import solutions.trsoftware.commons.shared.util.template.Template;
 
 import java.io.File;
+import java.nio.file.Path;
 
 import static solutions.trsoftware.commons.shared.util.MapUtils.hashMap;
 
@@ -48,39 +48,40 @@ public class FileTemplateParserTest extends TestCase {
     assertSame(djangoSyntaxInstance, FileTemplateParser.getInstance(new SimpleTemplateParser("{{ ", " }}", "{# ", " #}")));
   }
 
-  /** Checks variable substitution in a template referenced by either resource name or {@link File} object */
+  /**
+   * Checks that all versions of the {@link FileTemplateParser#getTemplate} method load the same template
+   * regardless of how the source file is referenced (e.g. resource name, {@link File} object, etc.).
+   * This is confirmed by asserting that the returned {@link Template} objects produce the same result when
+   * rendered with the same variables.
+   */
   public void testGetTemplate() throws Exception {
-    FileTemplateParser instance = FileTemplateParser.getInstance();
-    ResourceLocator templateResource = new ResourceLocator("FileTemplateParserTest_template.txt", getClass());
-    {
-      Template t = instance.getTemplate(templateResource);
-      assertNotNull(t);
-      // make sure the parsed template files are cached
-      assertSame(t, instance.getTemplate(templateResource));
-      renderTemplate(t, "resource " + templateResource);
+    FileTemplateParser loader = FileTemplateParser.getInstance();
 
-      String templateResourceName = templateResource.getCanonicalName();
-      // if we use the resource FQN instead of the ResourceLocator, should return the same cached result
-      assertSame(t, instance.getTemplate(templateResourceName));
-      renderTemplate(t, "resource " + templateResourceName);
-    }
-    File templateFile = templateResource.toFile();
-    {
-      Template t = instance.getTemplate(templateFile);
-      assertNotNull(t);
-      // make sure the parsed template files are cached
-      assertSame(t, instance.getTemplate(templateFile));
-      renderTemplate(t, "file " + templateFile);
-    }
+    // the following variables are all the different ways of referencing the same template file
+    ResourceLocator resourceLocator = new ResourceLocator("FileTemplateParserTest_template.txt", getClass());
+    String resourceName = resourceLocator.getCanonicalName();
+    File templateFile = resourceLocator.toFile();
+    Path templatePath = resourceLocator.toPath();
+
+    // calling getTemplate with each of those args should produce the same result:
+    renderTemplate(loader.getTemplate(resourceLocator), String.format("ResourceLocator(%s)", resourceLocator));
+    // if we use the resource FQN instead of the ResourceLocator we should get the same result
+    renderTemplate(loader.getTemplate(resourceName), String.format("resource name \"%s\"", resourceName));
+    // should also be the same with a File or Path object
+    renderTemplate(loader.getTemplate(templateFile), String.format("File(%s)", templateFile));
+    renderTemplate(loader.getTemplate(templatePath), String.format("Path(%s)", templatePath));
   }
 
+  /**
+   * Renders the given {@link Template} object to make sure it matches {@code FileTemplateParserTest_template.txt}
+   */
   private void renderTemplate(Template t, String dataSourceName) {
+    assertNotNull(t);
     String name = "Foo";
     int number = 1234;
     String result = t.render(hashMap("NAME", name, "ACCT_NUM", number));
     // apply and print the templates
-    System.out.println();
-    System.out.println("Rendering template from " + dataSourceName + ":");
+    System.out.printf("------%nRendering template from %s:%n------%n", dataSourceName);
     System.out.println(result);
     assertEquals(
         String.format("Hello %s,%nYour account number is %d.%nTake care!", name, number),

@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 TR Software Inc.
+ * Copyright 2021 TR Software Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -12,7 +12,6 @@
  * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
  * License for the specific language governing permissions and limitations under
  * the License.
- *
  */
 
 package solutions.trsoftware.commons.server.servlet.testutil;
@@ -406,7 +405,11 @@ public class DummyHttpServletRequest implements HttpServletRequest {
   }
 
   public void setAttribute(String name, Object object) {
-    attributes.put(name, object);
+    // setting a null value is the same as removeAttribute (see org.apache.catalina.connector.Request.setAttribute)
+    if (object == null)
+      removeAttribute(name);
+    else
+      attributes.put(name, object);
   }
 
   public void removeAttribute(String name) {

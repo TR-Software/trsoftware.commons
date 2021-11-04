@@ -474,8 +474,13 @@ public abstract class AssertUtils {
     assertEquals(0, collection.size());
   }
 
+  public static void assertEmpty(Enumeration<?> e) {
+    assertFalse(e.hasMoreElements());
+  }
+
   /**
-   * Asserts that {@code a == b}, as defined by their {@link Comparable#compareTo(Object)} method.
+   * Asserts that {@code a} and {@code b} be are "equal" to each-other,
+   * according to their {@link Comparable#compareTo(Object)} methods.
    */
   public static <T extends Comparable<T>> void assertComparablesEqual(T a, T b) {
     assertTrue(a.compareTo(b) == 0);

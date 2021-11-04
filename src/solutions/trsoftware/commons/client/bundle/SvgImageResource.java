@@ -20,6 +20,7 @@ import com.google.gwt.resources.client.ClientBundle;
 import com.google.gwt.resources.client.DataResource;
 import com.google.gwt.resources.ext.ResourceGeneratorType;
 import com.google.gwt.user.client.ui.AbstractImagePrototype;
+import com.google.gwt.user.client.ui.Image;
 import com.google.gwt.user.client.ui.ImageBundle;
 import solutions.trsoftware.commons.rebind.bundle.SvgImageResourceGenerator;
 
@@ -42,6 +43,16 @@ public interface SvgImageResource extends DataResource {
 
   /**
    * Allows using this {@link ClientBundle} resource with older {@link ImageBundle}-based APIs.
+   * <p>
+   * NOTE: Because the underlying implementation is already a subclass of {@link AbstractImagePrototype},
+   * this method call incurs no additional cost.
+   *
+   * @return this instance cast to {@link AbstractImagePrototype}
    */
   AbstractImagePrototype asImagePrototype();
+
+  /**
+   * Creates a new {@link Image} instance based on the image represented by this resource.
+   */
+  Image createImage();
 }

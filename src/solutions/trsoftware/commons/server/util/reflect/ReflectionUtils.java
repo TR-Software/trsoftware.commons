@@ -47,7 +47,7 @@ public abstract class ReflectionUtils {
   }
 
   /**
-   * Maps the primitive wrapper types to their corresponding primitive types.
+   * Maps the primitive wrapper classes to their corresponding primitive types.
    * @see com.google.common.primitives.Primitives
    */
   public static final ImmutableBiMap<Class, Class> WRAPPER_TYPES = ImmutableBiMap.<Class, Class>builder()
@@ -238,13 +238,6 @@ public abstract class ReflectionUtils {
     return null;
   }
 
-  public static void assertType(Object input, Class<?> expectedType) {
-    Class givenType = input.getClass();
-    if (!expectedType.isAssignableFrom(givenType))
-      throw new IllegalArgumentException(String.format(
-          "The object %s must be of type %s, but is actually of type %s", String.valueOf(input), expectedType, givenType));
-  }
-
   /**
    * @return the names of all fields declared by the given class (excluding any synthetic fields like "this$0").
    */
@@ -293,10 +286,16 @@ public abstract class ReflectionUtils {
   }
 
   /**
-   * @return The set of all types that all of the args can be cast to. In other words, will return the
-   * intersection of sets:
-   * <code>T<sub>1</sub> &cap; T<sub>2</sub> &hellip; &cap; T<sub>n</sub></code>, where
-   * <code>T<sub>i</sub></code> is the set returned by {@link #getAllTypesAssignableFrom(Class)} for <code>args[i]</code>.
+   * Computes the set of all types that all of the args can be cast to.
+   * <p>
+   * In other words, will return the intersection of sets
+   * <code style="white-space: nowrap;">
+   *   {T<sub>1</sub> &cap; T<sub>2</sub> &hellip; &cap; T<sub>n</sub>}
+   * </code>
+   * where
+   * <code style="white-space: nowrap;">
+   *   T<sub>i</sub> = {@link #getAllTypesAssignableFrom(Class) getAllTypesAssignableFrom}(args<sub>i</sub>)
+   * </code>
    */
   public static Set<Class<?>> getAllTypesAssignableFromAll(Class<?>... args) {
     if (args.length == 0)

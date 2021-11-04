@@ -17,9 +17,11 @@
 package solutions.trsoftware.commons.client.bundle;
 
 import com.google.gwt.resources.client.ClientBundle;
+import com.google.gwt.resources.client.DataResource;
 import com.google.gwt.resources.client.ImageResource;
 import com.google.gwt.safehtml.shared.SafeHtml;
 import com.google.gwt.user.client.ui.AbstractImagePrototype;
+import com.google.gwt.user.client.ui.Image;
 
 /**
  * Provides utility methods for working with resources defined in a {@link ClientBundle}
@@ -29,8 +31,22 @@ import com.google.gwt.user.client.ui.AbstractImagePrototype;
  */
 public class ClientBundleUtils {
 
+  /**
+   * @see AbstractImagePrototype#create(ImageResource)
+   */
   public static AbstractImagePrototype toImagePrototype(ImageResource imageResource) {
     return AbstractImagePrototype.create(imageResource);
+  }
+
+  /**
+   * @return a new instance of {@link DataResourceImagePrototype} that allows the URL of the given
+   * data resource to be used for creating {@link Image} widgets and {@code <img>} elements.
+   *
+   * @see SvgImageResource
+   * @see SvgImageResourcePrototype
+   */
+  public static AbstractImagePrototype toImagePrototype(DataResource dataResource) {
+    return new DataResourceImagePrototype(dataResource);
   }
 
   public static SafeHtml toHTML(ImageResource imageResource) {

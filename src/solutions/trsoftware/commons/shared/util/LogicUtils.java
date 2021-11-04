@@ -16,6 +16,10 @@
 
 package solutions.trsoftware.commons.shared.util;
 
+import com.google.common.base.MoreObjects;
+
+import javax.annotation.Nullable;
+
 /**
  * Can be used to shorten some if statements that are too long.
  *
@@ -54,9 +58,16 @@ public class LogicUtils {
   }
 
   /**
-   * Similar to the Javascript expression {@code o1 || o2} when applied to non-boolean objects.
-   * @return {@code o1} if it's not {@code null}, otherwise {@code o2} (which could be null).
+   * Returns the first of the two given args that is not {@code null}. If both are {@code null}, returns {@code null}.
+   * <p>
+   * NOTE: this is different from {@link MoreObjects#firstNonNull(Object, Object)}, which throws a {@link NullPointerException}
+   * when both args are {@code null}.
+   *
+   * @return {@code o1} if it's not {@code null}, otherwise {@code o2} (which could be {@code null})
+   * @see #firstNonNull(Object[])
+   * @see MoreObjects#firstNonNull(Object, Object)
    */
+  @Nullable
   public static <T> T firstNonNull(T o1, T o2) {
     if (o1 != null)
       return o1;
@@ -64,9 +75,13 @@ public class LogicUtils {
   }
 
   /**
-   * @return the first of the given elements which is not {@code null},
-   * or {@code null} if there isn't a non-{@code null} input element.
+   * Returns the first of the given args that is not {@code null}. If all are {@code null}, returns {@code null}.
+   *
+   * @return the first of the given args which is not {@code null},
+   *     or {@code null} if there isn't a non-{@code null} input element.
+   * @see #firstNonNull(Object, Object)
    */
+  @Nullable
   @SafeVarargs
   public static <T> T firstNonNull(T... objects) {
     for (T x : objects) {

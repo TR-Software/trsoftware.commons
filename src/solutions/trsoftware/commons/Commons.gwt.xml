@@ -68,9 +68,4 @@
     <when-type-is class="solutions.trsoftware.commons.client.bundle.CommonsClientBundleFactory"/>
   </replace-with>
 
-  <!-- TODO: temp: -->
-  <replace-with class="solutions.trsoftware.commons.client.bundle.MyClientBundleFactoryImpl">
-    <when-type-is class="solutions.trsoftware.commons.client.bundle.MyClientBundleFactory"/>
-  </replace-with>
-
 </module>

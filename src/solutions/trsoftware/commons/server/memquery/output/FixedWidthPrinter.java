@@ -73,6 +73,7 @@ public class FixedWidthPrinter extends ResultSetPrinter<FixedWidthPrinter> {
    * <li><b>row indices</b>: 0 for top row, 1 for middle, and 2 for last</li>
    * <li><b>col indices</b>: 0 for first col, 1 for middle, and 2 for last</li>
    * </ul>
+   * @see <a href="https://en.wikipedia.org/wiki/Box-drawing_character#Block_Elements">Box-drawing characters</a>
    */
   public static final char[][] CORNER_CHARS = {
       new char[]{'\u2554', '\u2566', '\u2557'},

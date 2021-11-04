@@ -20,14 +20,16 @@ import com.google.common.collect.ImmutableBiMap;
 import com.google.common.collect.ImmutableMap;
 import solutions.trsoftware.commons.shared.util.iterators.CharSequenceIterator;
 import solutions.trsoftware.commons.shared.util.iterators.CodePointIterator;
-import solutions.trsoftware.commons.shared.util.stats.MaxComparable;
 import solutions.trsoftware.commons.shared.util.template.SimpleTemplateParser;
 import solutions.trsoftware.commons.shared.util.template.Template;
 import solutions.trsoftware.commons.shared.util.text.CharRange;
 
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import java.util.*;
 import java.util.stream.IntStream;
+
+import static com.google.common.base.Preconditions.checkArgument;
 
 /**
  * Static utility methods pertaining to {@link String} or {@link CharSequence} instances.
@@ -148,27 +150,32 @@ public class StringUtils {
   }
 
   /**
-   * @return the first arg for which {@link #notBlank(String)} returns {@code true}.
-   * If neither arg satisfies {@link #notBlank(String)}, the second arg will be returned.
+   * Returns the first of the two given strings for which {@link #notBlank(String)} is {@code true}.
+   * If neither arg satisfies {@link #notBlank(String)}, will return the second arg (which could be blank).
+   *
    * @see LogicUtils#firstNonNull(Object, Object)
    */
+  @Nullable
   public static String firstNotBlank(String a, String b) {
     return notBlank(a) ? a : b;
   }
 
   /**
-   * @return the first of the given strings for which {@link #notBlank(String)} returns {@code true}.
-   * If none of the strings satisfy {@link #notBlank(String)}, will return {@code null}
-   * (<b>NOTE</b>: this behavior is different from {@link #firstNotBlank(String, String)}, which returns its second
-   * argument when both strings are blank)
-   * @see LogicUtils#firstNonNull(Object, Object)
+   * Returns the first of the given strings for which {@link #notBlank(String)} is {@code true}.
+   * If none of the strings satisfy {@link #notBlank(String)}, will return the last element (which could be blank),
+   * or {@code null} if the array is empty.
+   *
+   * @see LogicUtils#firstNonNull(Object[])
    */
+  @Nullable
   public static String firstNotBlank(String... strings) {
+    String ret = null;
     for (String str : strings) {
+      ret = str;
       if (notBlank(str))
-        return str;
+        break;
     }
-    return null;
+    return ret;
   }
   
   /**
@@ -978,61 +985,78 @@ public class StringUtils {
   }
 
   /**
-   * Another debugging method that pretty prints a 2d matrix into a string,
-   * such that the indices are visible and all values are aligned.
-   * @param matrix
-   * @return
+   * Pretty-prints a 2-dimensional array into a multiline string, such that columns are fixed-width and
+   * right-justified.  The column values will be delimited by the given separator string.
+   *
+   * <p style="color: #0073BF; font-weight: bold;">
+   * TODO: replace this method with a richer table printing facility
+   *  (see {@link solutions.trsoftware.tools.util.TablePrinter} and {@link solutions.trsoftware.commons.server.memquery.output.FixedWidthPrinter})
+   * </p>
+   *
+   * @param colSep the column values will be delimited by this string
+   *     (e.g. blank space, a box-drawing character like {@code \u2551}, etc.)
+   * @see <a href="https://en.wikipedia.org/wiki/Box-drawing_character#Block_Elements">Box-drawing characters</a>
+   * @deprecated this implementation might be replaced by a richer table printing facility in the future
    */
-  public static String matrixToPrettyString(final String[][] matrix) {
-    MaxComparable<Integer> maxWidth = new MaxComparable<Integer>();
-    MaxComparable<Integer> maxColIndex = new MaxComparable<Integer>();
-    for (int i = 0; i < matrix.length; i++) {
-      int m = matrix[i].length;
-      maxColIndex.update(m-1);
-      for (int j = 0; j < m; j++) {
-        maxWidth.update(matrix[i][j].length());
+  public static String matrixToPrettyString(String[][] matrix, String colSep) {
+    checkArgument(!ArrayUtils.isEmpty(matrix), "Empty or null array given");
+    // 1) construct the matrix to print from the given input (computing the min col widths, replacing null elements with empty strings, etc.)
+    final int nRows = matrix.length;
+    int nCols = -1;  // will be computed in the loop body
+    // ensure that we have a perfectly square array (filling missing cells with empty strings)
+    String[][] table = new String[nRows][];
+    int[] colWidths = null;  // the min width required for each column
+    for (int i = 0; i < nRows; i++) {
+      String[] row = matrix[i];
+      // make sure the row is not null or empty TODO: perhaps just fill with empty strings in that case?
+      checkArgument(!ArrayUtils.isEmpty(row), "Empty or null row (%s)", i);
+      if (colWidths == null) {
+        assert i == 0;
+        // this is the 1st iteration: will use the 1st row's length for the entire table
+        nCols = row.length;
+        colWidths = new int[nCols];
+      }
+      else {
+        // make sure this row has the same size as the preceding rows
+        checkArgument(row.length == nCols,
+            "Length of row %s (%s) doesn't match the others (%s)", i, row.length, nCols);
+      }
+      String[] rowCopy = new String[nCols];
+      // copy the row, replacing any null elements with empty strings, and updating the required column widths
+      for (int j = 0; j < row.length; j++) {
+        String val = nonNull(row[j]);
+        colWidths[j] = Math.max(colWidths[j], val.length());
+        rowCopy[j] = val;
+      }
+      table[i] = rowCopy;
+    }
+
+    // 2) print the result
+    StringBuilder out = new StringBuilder();
+    for (int i = 0; i < nRows; i++) {
+      // print a newline after the previous row
+      if (i > 0)
+        out.append('\n');
+      for (int j = 0; j < nCols; j++) {
+        String val = table[i][j];
+        out.append(justifyRight(val, colWidths[j])).append(colSep);
       }
     }
-    maxWidth.update((maxColIndex.get()-1) / 10 + 1); // account for the width of the largest index
-    final StringBuilder str = new StringBuilder();
-    final int w = maxWidth.get();
-    class Printer {
-      void printValue(String value, int maxWidth) {
-        if (value == null)
-          value = "";
-        int dLen = maxWidth - value.length();
-        for (int i = 0; i < dLen; i++) {
-          // pad the value with spaces on the left
-          str.append(' ');
-        }
-        str.append(value);
-        str.append(' ');  // delimit columns with a space
-      }
-      void printValue(String value) {
-        printValue(value, w);
-      }
-      void printRowIndex(int i) {
-        String s = (i >= 0) ? Integer.toString(i) : "";
-        printValue(s, (matrix.length-1) / 10 + 1);
-      }
-    }
-    Printer p = new Printer();
-    // first print the column indices
-    p.printRowIndex(-1);
-    for (int j = 0; j <= maxColIndex.get(); j++) {
-      p.printValue(Integer.toString(j));
-    }
-    str.append('\n');
-    // now print the values
-    for (int i = 0; i < matrix.length; i++) {
-      int m = matrix[i].length;
-      p.printRowIndex(i);
-      for (int j = 0; j < m; j++) {
-        p.printValue(matrix[i][j]);
-      }
-      str.append('\n');
-    }
-    return str.toString();
+    return out.toString();
+  }
+
+  /**
+   * Pretty-prints a 2-dimensional array into a multiline string, such that columns are fixed-width and
+   * right-justified.  The column values will be delimited by a single empty space character.
+   *
+   * @param matrix a non-empty rectangular array such that all rows have the same length
+   * @throws IllegalArgumentException if the array is {@code null}, empty, or not all rows have the same length
+   *
+   * @see #matrixToPrettyString(String[][], String)
+   * @deprecated this implementation might be replaced by a richer table printing facility in the future
+   */
+  public static String matrixToPrettyString(String[][] matrix) {
+    return matrixToPrettyString(matrix, " ");
   }
 
   /**
@@ -1229,29 +1253,53 @@ public class StringUtils {
 
 
   /**
-   * Generates the same toString representation of the given object that would be produced by
-   * {@link Object#toString()} if the object's class didn't override either {@link Object#toString()}
-   * or {@link Object#hashCode()}.
-   *
+   * Generates the same default string representation of the given object as the one that would been produced by
+   * {@link Object#toString()} if the object's class didn't override either {@link Object#toString()} or {@link Object#hashCode()}).
+   * <p>
+   * In other words, this method returns a string equal to the value of:
+   * <pre>
+   *   o.getClass().getName() + '@' + Integer.toHexString(System.identityHashCode(o))
+   * </pre>
    * <p>
    * Examples:
    * <pre>
-   * identityToString(null)         = null
-   * identityToString("")           = "java.lang.String@1e23"
-   * identityToString(Boolean.TRUE) = "java.lang.Boolean@7fa"
+   * {@link #identityToString}(null)         = "null"
+   * {@link #identityToString}("")           = "java.lang.String@1e23"
+   * {@link #identityToString}(Boolean.TRUE) = "java.lang.Boolean@7fa"
    * </pre>
    *
-   * @param object  the object to create a toString for, may be {@code null}
-   * @return the default toString text, or {@code null} if {@code null} passed in
+   * @param o the object to create a toString for, may be {@code null}
+   * @return the default toString text, or {@code "null"} if the arg was {@code null}
    *
    * @see Object#toString()
    * @see System#identityHashCode(Object)
    * @see org.apache.commons.lang3.ObjectUtils#identityToString(java.lang.Object)
    */
-  public static String identityToString(final Object object) {
-    if (object == null)
-      return null;
-    return object.getClass().getName() + "@" + Integer.toHexString(System.identityHashCode(object));
+  public static String identityToString(Object o) {
+    if (o == null)
+      return "null";
+    return o.getClass().getName() + "@" + Integer.toHexString(System.identityHashCode(o));
   }
 
+  /**
+   * Similar to {@link #identityToString(Object)}, but produces shorter strings (using {@link Class#getSimpleName()}
+   * and only the first 4 hex chars of {@link System#identityHashCode(Object)}.
+   * <p>
+   * In other words, this method returns a string equal to the value of:
+   * <pre>
+   *   o.getClass().getSimpleName() + "@" + Integer.toHexString(System.identityHashCode(o)).substring(0, 4)
+   * </pre>
+   * <p>
+   * Examples:
+   * <pre>
+   *   {@link #idToString}(null)         = "null"
+   *   {@link #idToString}("")           = "String@7b1d"
+   *   {@link #idToString}(Boolean.TRUE) = "Boolean@299a"
+   * </pre>
+   */
+  public static String idToString(Object o) {
+    if (o == null)
+      return "null";
+    return o.getClass().getSimpleName() + "@" + Integer.toHexString(System.identityHashCode(o)).substring(0, 4);
+  }
 }

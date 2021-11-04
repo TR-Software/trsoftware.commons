@@ -80,9 +80,12 @@ public class DialogBox extends EnhancedPopup {
 
   public static class CaptionWithIcon extends CompositeCaption {
     public CaptionWithIcon(AbstractImagePrototype icon, String text) {
-      Image img = icon.createImage();
-      img.setStyleName("icon");
-      initWidget(Widgets.flowPanel(img, Widgets.inlineLabel(text, "text")));
+      this(icon.createImage(), text);
+    }
+
+    public CaptionWithIcon(Image icon, String text) {
+      icon.setStyleName("icon");
+      initWidget(Widgets.flowPanel(icon, Widgets.inlineLabel(text, "text")));
       addStyleName(CommonsClientBundleFactory.INSTANCE.getCss().CaptionWithIcon());
     }
   }

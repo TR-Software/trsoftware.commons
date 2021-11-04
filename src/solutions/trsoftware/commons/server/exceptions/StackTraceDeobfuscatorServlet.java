@@ -76,6 +76,22 @@ public class StackTraceDeobfuscatorServlet extends RemoteServiceServlet implemen
   public String deobfuscateStackTrace(StackTraceElement[] obfStackTrace, String exceptionMessage, String moduleName) {
     StringBuilder str = new StringBuilder(1024);
     StackTraceElement[] stackTrace = getDeobfuscator(moduleName).resymbolize(obfStackTrace, getPermutationStrongName());
+    /*
+      TODO(11/3/2021):
+        allow customizing the format of the stringified trace (for logging purposes); for example
+        to match the Throwable.printStackTrace format instead of just joining lines with "\n" chars;
+        (see Throwable.printStackTrace(PrintStreamOrWriter), on line java/lang/Throwable.java:658)
+
+        Here's how traces are formatted by Throwable.printStackTrace:
+          java.lang.RuntimeException: Dummy Exception
+            at solutions.trsoftware.commons.server.exceptions.StackTraceDeobfuscatorServlet.deobfuscateStackTrace(StackTraceDeobfuscatorServlet.java:79)
+            at sun.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
+            ...
+
+        Also:
+          - figure out how to display multiline exception messages
+          - what about causes (Throwable.getCause())?
+     */
     for (StackTraceElement ste : stackTrace) {
       str.append(ste).append("\n");
     }

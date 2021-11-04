@@ -18,6 +18,7 @@ package solutions.trsoftware.tools.util;
 
 import solutions.trsoftware.commons.server.memquery.output.FixedWidthPrinter;
 import solutions.trsoftware.commons.server.memquery.output.HtmlTablePrinter;
+import solutions.trsoftware.commons.shared.util.StringUtils;
 
 import java.io.PrintStream;
 import java.util.List;
@@ -28,10 +29,13 @@ import static solutions.trsoftware.commons.shared.util.StringUtils.*;
 /**
  * Utilities for printing tabular data.
  * <p style="color: #6495ed; font-weight: bold;">
- *   TODO: extract the functionality provided by {@link FixedWidthPrinter} and {@link HtmlTablePrinter}
+ *   TODO: extract the table-printing functionality from the MemQuery package (e.g {@link FixedWidthPrinter} and {@link HtmlTablePrinter})
+ *     to create a general-purpose, GWT-compatible, rich table printing facility.
+ *     Also see the limited implementation in {@link StringUtils#matrixToPrettyString(String[][], String)}
  * </p>
  * @author Alex
  * @since 5/13/2018
+ * @see StringUtils#matrixToPrettyString(String[][], String)
  */
 public class TablePrinter {
 

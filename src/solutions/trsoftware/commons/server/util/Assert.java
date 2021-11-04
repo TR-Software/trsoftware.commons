@@ -16,6 +16,7 @@
 
 package solutions.trsoftware.commons.server.util;
 
+import com.google.common.base.Preconditions;
 import solutions.trsoftware.commons.server.ServerConstants;
 
 /**
@@ -23,7 +24,7 @@ import solutions.trsoftware.commons.server.ServerConstants;
  *
  * @author Alex
  */
-public class Assert extends solutions.trsoftware.commons.shared.util.Assert {
+public abstract class Assert extends solutions.trsoftware.commons.shared.util.Assert {
 
   public static void assertInUnitTestOrCanStopClock() {
     if (!ServerConstants.IN_UNIT_TEST && !ServerConstants.IS_CLOCK_STOPPABLE)
@@ -35,4 +36,12 @@ public class Assert extends solutions.trsoftware.commons.shared.util.Assert {
       throw new IllegalStateException("This code is not intended for unit testing and should not be invoked from this context.");
   }
 
+  /**
+   * @throws IllegalArgumentException if the given object is not an instance of the given type
+   *                                  (in the same sense as the {@code instanceof} operator)
+   */
+  public static void assertIsInstanceOf(Object obj, Class<?> expectedType) {
+    Preconditions.checkArgument(expectedType.isInstance(obj),
+        "The given argument (%s) must be an instance of %s", obj, expectedType);
+  }
 }

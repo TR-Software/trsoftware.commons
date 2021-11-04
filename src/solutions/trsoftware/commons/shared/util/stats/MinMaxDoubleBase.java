@@ -29,6 +29,8 @@ import java.util.stream.DoubleStream;
  * @author Alex
  */
 public abstract class MinMaxDoubleBase<R extends MinMaxDoubleBase<R>> implements CollectableStats<Double, R>, UpdatableDouble, Serializable {
+  // TODO(11/3/2021): create a similar implementation for primitive ints
+
   /** The current max or min value of all the samples that have been given */
   private double best = absoluteWorst();
 

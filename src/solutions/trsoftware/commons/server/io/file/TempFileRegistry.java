@@ -174,9 +174,10 @@ public final class TempFileRegistry {
    *   java.lang.IllegalStateException: Illegal access: this web application instance has been stopped already. Could not load [solutions.trsoftware.commons.server.io.file.FileDeletionScheduler]
    * </pre>
    * <p style="color: #0073BF; font-weight: bold;">
-   *   TODO: to avoid this servlet-related exception, use a ServletContextListener (configured via @WebListener annotation rather than in a web.xml),
-   *   and use that to clean up temp files (from its ServletContextListener.contextDestroyed method) instead of adding a shutdown hook when running in webapp
+   * TODO: to avoid this servlet-related exception, use a ServletContextListener (configured via @WebListener annotation rather than in a web.xml),
+   *   and use that to clean up temp files (from its ServletContextListener.contextDestroyed method) instead of adding a shutdown hook when running in a webapp
    *   (can use the ServletContextListener.contextInitialized to figure out whether we actually need a JVM shutdown hook)
+   *   - another approach: see https://stackoverflow.com/a/2976983/
    * </p>
    */
   private void maybeAddShutdownHook() {

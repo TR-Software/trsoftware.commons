@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 TR Software Inc.
+ * Copyright 2021 TR Software Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -12,7 +12,6 @@
  * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
  * License for the specific language governing permissions and limitations under
  * the License.
- *
  */
 
 package solutions.trsoftware.commons.shared.util;
@@ -605,20 +604,34 @@ public class StringUtilsTest extends TestCase {
 
   public void testFirstNotBlank() throws Exception {
     // 1) test the 2-arg version (which always returns the 2nd arg if the 1st doesn't satisfy)
-    assertEquals("", firstNotBlank("", ""));
-    assertEquals("", firstNotBlank(null, ""));
-    assertEquals(null, firstNotBlank("", null));
-    assertEquals("foo", firstNotBlank(null, "foo"));
-    assertEquals("foo", firstNotBlank("   ", "foo"));
-    assertEquals("foo", firstNotBlank("foo", ""));
-    assertEquals("foo", firstNotBlank("foo", "bar"));
+    assertFirstNotBlankEquals("", "", "");
+    assertFirstNotBlankEquals("", null, "");
+    assertFirstNotBlankEquals(null, "", null);
+    assertFirstNotBlankEquals("foo", null, "foo");
+    assertFirstNotBlankEquals("foo", "   ", "foo");
+    assertFirstNotBlankEquals("foo", "foo", "");
+    assertFirstNotBlankEquals("foo", "foo", "bar");
 
-    // 2) test the var-arg version (which always returns null if none satisfy)
-    assertEquals(null, firstNotBlank("", null, "   "));
-    assertEquals(null, firstNotBlank("", null));
-    assertEquals("foo", firstNotBlank(null, "foo", "bar"));
-    assertEquals("foo", firstNotBlank("  ", "foo", "bar"));
-    assertEquals("foo", firstNotBlank("  ", null, "foo", "bar"));
+    // 2) test the var-arg version (which always returns the last arg if none satisfy)
+    assertFirstNotBlankEquals("   ", "", null, "   ");
+    assertFirstNotBlankEquals("foo", null, "foo", "bar");
+    assertFirstNotBlankEquals("foo", "  ", "foo", "bar");
+    assertFirstNotBlankEquals("foo", "  ", null, "foo", "bar");
+    assertFirstNotBlankEquals("bar", "  ", null, "", "bar");
+    // test var-arg invocation with a single arg
+    assertFirstNotBlankEquals(null, (String)null);
+    assertFirstNotBlankEquals(" ", " ");
+    assertFirstNotBlankEquals("foo", "foo");
+    // test var-arg invocation with an empty args array
+    assertFirstNotBlankEquals(null);
+  }
+
+  private static void assertFirstNotBlankEquals(String expected, String... args) {
+    // test both the 2-arg version (if applicable) and the var-arg version
+    if (args.length == 2) {
+      assertEquals(expected, firstNotBlank(args[0], args[1]));
+    }
+    assertEquals(expected, firstNotBlank(args));
   }
 
   public void testTrim() throws Exception {
@@ -887,4 +900,29 @@ public class StringUtilsTest extends TestCase {
     String inputString = StringUtilsTest.THREE_MONKEYS;
     assertArrayEquals(inputString.codePoints().toArray(), codePointsStream(inputString).toArray());
   }
+
+  public void testIdentityToString() throws Exception {
+    // 1) print out some examples to verify visually (and compare to the shorter version produced by idToString)
+    /*
+      TODO: might want to extract this code to TestUtils, to allow visually comparing the output of various method calls
+        (can pass it an array of args and method references to invoke)
+    */
+    Object[] inputs = new Object[]{null, "", Boolean.TRUE, "foo", 45, new Pair<>("foo", 45)};
+    String[][] outputs = new String[inputs.length+1][3];
+    outputs[0] = new String[]{"x", "identityToString(x)", "idToString(x)"};  // table header
+    for (int i = 0; i < inputs.length; i++) {
+      Object input = inputs[i];
+      String longVersion = identityToString(input);
+      String shortVerion = idToString(input);
+      outputs[i+1][0] = valueToString(input);
+      outputs[i+1][1] = longVersion;
+      outputs[i+1][2] = shortVerion;
+      if (input == null)
+        AssertUtils.assertAllEqualTo("null", longVersion, shortVerion);
+      else
+        AssertUtils.assertThat(shortVerion.length()).isLessThan(longVersion.length());
+    }
+    System.out.println(matrixToPrettyString(outputs, " \u2551 "));
+  }
+
 }

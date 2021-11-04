@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 TR Software Inc.
+ * Copyright 2021 TR Software Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -12,7 +12,6 @@
  * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
  * License for the specific language governing permissions and limitations under
  * the License.
- *
  */
 
 package solutions.trsoftware.commons.shared.testutil;
@@ -60,6 +59,14 @@ public abstract class AssertUtils {
     for (int i = 1; i < args.length; i++) {
       assertNotNull(args[i - 1]);
       assertEquals(args[i - 1], args[i]);
+    }
+  }
+
+  /** Makes sure all the arguments are equal to the first argument */
+  @SafeVarargs
+  public static <T> void assertAllEqualTo(T expected, T... args) {
+    for (int i = 1; i < args.length; i++) {
+      assertEquals(expected, args[i]);
     }
   }
 

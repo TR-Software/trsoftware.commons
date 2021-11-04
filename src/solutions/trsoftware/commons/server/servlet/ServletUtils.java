@@ -325,6 +325,10 @@ public abstract class ServletUtils {
 
   /** @return the requested URL minus the path (e.g. http://example.com/foo -> http://example.com) */
   public static StringBuffer getBaseURL(HttpServletRequest request) {
+    /* TODO(11/2/2021): instead of string parsing, might be safer to use the URL object returned by
+         ServletUtils.getRequestURL(HttpServletRequest); the performance cost should be negligible
+         since getRequestURL caches the URL object
+     */
     StringBuffer url = request.getRequestURL();
     // NOTE: we don't simply strip off the query string because that creates a discrepancy between different versions of tomcat (see https://issues.apache.org/bugzilla/show_bug.cgi?id=28222 )
     // instead, we just strip off everything after the 3rd slash in the URL (which seems to work for all imaginable types of http urls)

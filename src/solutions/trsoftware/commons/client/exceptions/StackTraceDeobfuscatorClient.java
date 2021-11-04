@@ -183,7 +183,7 @@ public class StackTraceDeobfuscatorClient {
    * {@link StackTraceElement#hashCode()} return different values for the same entry in a different stack trace,
    * even if the two stack traces are logically identical)
    *
-   * Therefore we use the {@link StackTraceElement#toString()} representations to ensure that we get the same has code
+   * Therefore we use the {@link StackTraceElement#toString()} representations to ensure that we get the same hash code
    * for a logically-equivalent stack trace.
    *
    * @return The stack trace of the given exception as a list of strings.

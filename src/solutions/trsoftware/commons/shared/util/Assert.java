@@ -23,7 +23,7 @@ package solutions.trsoftware.commons.shared.util;
  * @author Alex
  * @see com.google.common.base.Preconditions
  */
-public class Assert {
+public abstract class Assert {
 
   public static final String DEFAULT_ERROR_MSG = "Assertion failed";
 

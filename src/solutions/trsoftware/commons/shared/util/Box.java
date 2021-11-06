@@ -22,36 +22,41 @@ package solutions.trsoftware.commons.shared.util;
  *
  * @author Alex
  */
-public class Box<T> implements TakesValue<T> {
-  private T value;
+public class Box<V> implements TakesValue<V> {
+  private V value;
   private boolean initialized;
 
   public Box() {
   }
 
-  public Box(T value) {
+  public Box(V value) {
     setValue(value);
   }
 
-  public T getValue() {
+  public V getValue() {
     return value;
   }
 
-  public void setValue(T value) {
+  public void setValue(V value) {
     this.value = value;
     initialized = true;
   }
 
   /**
    * Sets a new value and returns the old one.
+   *
+   * @param value the new value
    * @return the old {@link #value}
    */
-  public T replaceValue(T value) {
-    T oldValue = this.value;
+  public V getAndSet(V value) {
+    V oldValue = this.value;
     setValue(value);
     return oldValue;
   }
 
+  /**
+   * @return {@code true} iff the value has ever been set (even if it's {@code null})
+   */
   public boolean hasValue() {
     return initialized;
   }

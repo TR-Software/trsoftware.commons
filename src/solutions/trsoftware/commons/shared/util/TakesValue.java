@@ -16,12 +16,19 @@
 
 package solutions.trsoftware.commons.shared.util;
 
+import java.util.function.Consumer;
+
 /**
  * Date: Nov 14, 2008 Time: 2:55:18 PM
  *
  * @author Alex
  */
-public interface TakesValue<V> extends HasValue<V> {
+public interface TakesValue<V> extends HasValue<V>, Consumer<V> {
 
   void setValue(V value);
+
+  @Override
+  default void accept(V value) {
+    setValue(value);
+  }
 }

@@ -1,0 +1,82 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+        "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+  <title>Exception Stack Test Page</title>
+  <script type="text/javascript">
+    function print(str) {
+      var txtArea = document.getElementById("txtOutput");
+      txtArea.value += str + "\n"
+      txtArea.scrollTop = 9999999;  // hack to scroll the text area to the end: http://stackoverflow.com/questions/642353/dynamically-scrolling-a-textarea
+    }
+
+
+    function dummyFunc1() {
+      return dummyFunc2();
+    }
+
+    function dummyFunc2() {
+      return printStackTrace();
+    }
+
+    function makeException() {
+      try {
+        return null.a();
+      } catch (e) {
+        return e;
+      }
+    }
+
+
+    function printStackTrace() {
+      var e = makeException();
+      if (e.stack) {
+        print(e.stack)
+      }
+      else {
+        print("No stack available in this browser")
+      }
+    }
+
+    function browserProvidesBothLineAndColNumbers() {
+      // the stack trace is just a string; we want to check if it matches something like this
+      /*
+      TypeError: Cannot call method 'a' of null
+          at makeException (file:///C:/Programming/Projects/TypeRacer2/TypeRacerGame/trunk/src/html/admin/js_exception_stack_tester.html:24:21)
+          at printStackTrace (file:///C:/Programming/Projects/TypeRacer2/TypeRacerGame/trunk/src/html/admin/js_exception_stack_tester.html:32:15)
+          at dummyFunc2 (file:///C:/Programming/Projects/TypeRacer2/TypeRacerGame/trunk/src/html/admin/js_exception_stack_tester.html:19:14)
+          at dummyFunc1 (file:///C:/Programming/Projects/TypeRacer2/TypeRacerGame/trunk/src/html/admin/js_exception_stack_tester.html:15:14)
+          at HTMLAnchorElement.onclick (file:///C:/Programming/Projects/TypeRacer2/TypeRacerGame/trunk/src/html/admin/js_exception_stack_tester.html:47:138)
+      */
+      var e = makeException();
+      if (e.stack) {
+        // split the stack trace into constituent elements
+        var stackLines = e.stack.split("\n")
+        if (stackLines && stackLines.length > 1) {
+          // we just check that the first real element of the stack trace ends in something like ":12:34" or ":12:34)" or ":12:34\n", etc. (there aren't necesarrily going to be parens at the end)
+          return /:\d+:\d+\)?\s*$/.test(stackLines[1])
+        }
+      }
+      return false
+    }
+  </script>
+</head>
+<body>
+<h1>Exception Stack Test Page</h1>
+<p>This page allows testing what kind of the stack trace info is available from the current browser.  Click on "Test" to print the info</p>
+<a href="javascript:void(0)" onclick="dummyFunc1()">Test</a>
+
+<h2>Output</h2>
+<a href='javascript:;' onclick='document.getElementById("txtOutput").value = "";'>Clear</a>
+<br>
+<textarea id="txtOutput" rows="20" cols="160"></textarea>
+
+<script type="text/javascript">
+  if (browserProvidesBothLineAndColNumbers())
+    print("The current browser provides both line and column numbers for stack traces")
+  else
+    print("The current browser does not provide line and/or column numbers for stack traces")
+</script>
+
+</body>
+</html>

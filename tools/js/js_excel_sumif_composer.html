@@ -1,0 +1,177 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+        "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+  <title>SUMIF Composer (Multi-Sheet)</title>
+  <style type="text/css">
+    .mainForm td:first-child {vertical-align:top; font-weight:bold;}
+    tr.helpRow td:first-child {font-weight:normal; font-style:italic;}
+  </style>
+  <script type="text/javascript">
+    function print(str) {
+      var txtArea = document.getElementById("txtOutput");
+      txtArea.value += str + "\n"
+      txtArea.scrollTop = 9999999;  // hack to scroll the text area to the end: http://stackoverflow.com/questions/642353/dynamically-scrolling-a-textarea
+    }
+    function $(id) {
+      return document.getElementById(id);
+    }
+
+    function $input(name) {
+      return $("input"+name)
+    }
+
+    // returns the closest number to n in the range start..end
+    function coerce(n, min, max) {
+      if (n < min)
+        return min;
+      else if (n > max)
+        return max;
+      return n;
+    }
+
+    function asArray(args) {
+      // converts an array-like object (e.g. Arguments) to a proper array
+      var ret = []
+      for (var i = 0; i < args.length; i++) {
+        ret.push(args[i])
+      }
+      return ret
+    }
+
+    function func(name) {
+      return name + parens(asArray(arguments).slice(1, arguments.length).join("; "))
+    }
+
+    function parens(str) {
+      return "(" + str + ")"
+    }
+
+    function product() {
+      return asArray(arguments).join("*")
+    }
+
+    function isBlank(str) {
+      return str == null || str.strip() == ""
+    }
+
+    function compose() {
+      var searchString = $input("SearchString").value
+      if (!$input("SearchStringAsFormula").checked) {
+        searchString = '"' + searchString + '"'
+      }
+      var sheetNames = $input("SheetNames").value.trim().split(",")
+      var sumifs = []
+      for (var i = 0; i < sheetNames.length; i++) {
+        var sheetName = sheetNames[i]
+        if (sheetName != "")
+          sheetName += "."
+        sumifs.push(func("SUMIF",
+            sheetName + getRange("Search"),
+            searchString,
+            sheetName + getRange("Sum")))
+      }
+
+      print('='+sumifs.join("+"))
+    }
+
+    function getRange(type) {
+      var fixed = $input(type+"Fixed").checked
+      var sep = fixed ? "$" : ""
+      var colLetter = $input(type+"ColLetter").value
+      var firstRow = $input(type+"FirstRow").value
+      var lastRow = $input(type+"LastRow").value
+      return [sep, colLetter, sep, firstRow, ':', sep, colLetter, sep, lastRow].join('')
+    }
+
+    function decorateInputsWithNameAttrs(form) {
+      // add a name attribute matching the id to all inputs in the given form
+      for (var i = 0; i < form.elements.length; i++) {
+        var elt = form.elements[i]
+        if (!!elt.id && !elt.name) {
+          elt.name = elt.id
+        }
+      }
+    }
+
+// Example: =SUMPRODUCT((ISNUMBER(FIND(F13;B$27:B$200)))*(C$27:C$200))
+  </script>
+</head>
+<body>
+<h1>SUMIF Composer (Multi-Sheet)</h1>
+<p>This page helps you to compose conditional summation formulas for Excel and OpenOffice</p>
+<form id="mainForm" action="javascript:compose();">
+<table class="mainForm">
+  <tr>
+    <td>Text to find</td>
+    <td><input id="inputSearchString" type="text" size="50"></td>
+    <td><label><input id="inputSearchStringAsFormula" type="checkbox" checked> Formula / reference</label></td>
+  </tr>
+  <tr>
+    <td>Range to search</td>
+    <td>
+      <table>
+        <tr>
+          <td><input id="inputSearchColLetter" type="text" size="2" value="B"></td>
+          <td><input id="inputSearchFirstRow" type="text" size="4" value="24"></td>
+          <td><input id="inputSearchLastRow" type="text" size="4" value="37"></td>
+          <td><label><input id="inputSearchFixed" type="checkbox" checked> Fixed</label></td>
+        </tr>
+        <tr class="helpRow">
+          <td colspan="4">(Example: B, 24, 37 will search B24:B37)</td>
+        </tr>
+      </table>
+    </td>
+  </tr>
+  <tr>
+    <td>Range to sum</td>
+    <td>
+      <table>
+        <tr>
+          <td><input id="inputSumColLetter" type="text" size="2" value="C"></td>
+          <td><input id="inputSumFirstRow" type="text" size="4" value="24"></td>
+          <td><input id="inputSumLastRow" type="text" size="4" value="37"></td>
+          <td><label><input id="inputSumFixed" type="checkbox" checked> Fixed</label></td>
+        </tr>
+        <tr class="helpRow">
+          <td colspan="4">(Example: C, 24, 37 will add up C24:C37)</td>
+        </tr>
+      </table>
+    </td>
+  </tr>
+  <tr>
+    <td>Sheet Names</td>
+    <td>
+      <table>
+        <tr>
+          <td><input id="inputSheetNames" type="text" size="40" value="Sheet1,Sheet2,Sheet3"></td>
+        </tr>
+        <tr class="helpRow">
+          <td colspan="4">(Example: Sheet1,Sheet2,Sheet3)</td>
+        </tr>
+      </table>
+    </td>
+  </tr>
+  <tr>
+    <td>
+      <input type="submit" value="Compose"/>
+    </td>
+  </tr>
+</table>
+</form>
+
+
+<h2>Output</h2>
+<a href='javascript:;' onclick='document.getElementById("txtOutput").value = "";'>Clear</a>
+<br>
+<textarea id="txtOutput" rows="20" cols="160"></textarea>
+
+<script type="text/javascript">
+  decorateInputsWithNameAttrs($("mainForm"))
+</script>
+
+<!-- TODO: can launch this as a standalone website: domain names available: scalc-formulas.com; check google keyword tool for search demand -->
+<!-- TODO: can try using Google Spreadsheets API to embed a play area for these formulas -->
+<!-- TODO: generate a multi-sheet SUMIF generator -->
+</body>
+</html>

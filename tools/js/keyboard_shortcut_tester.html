@@ -1,0 +1,41 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+        "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+  <title>Keyboard Shortcut Test Page</title>
+</head>
+
+<body>
+<h1>Keyboard Shortcut Test Page</h1>
+
+<p>This page tests how various browsers handle various keyboard shortcuts using
+  the <code>accesskey</code> attribute.</p>
+
+<p>
+  See the <a href="https://developer.mozilla.org/en-US/docs/Web/HTML/Global_attributes/accesskey">MDN reference page</a>
+  for the modifier keys to use in each browser (e.g. <code>Alt + Shift + <i>key</i></code> in Chrome & Firefox).
+</p>
+
+<table>
+  <tr>
+    <td id="tdLinks" width="100"></td>
+    <td id="tdLetter" style="font-size:300%;width:400px;text-align:center;">
+      The selected access key will be displayed here
+    </td>
+  </tr>
+</table>
+
+<!-- Generate the links-->
+<script type="text/javascript">
+  var allChars = "qwertyuiopasdfghjklzxcvbnm[];";
+  var html = "";
+  for (var i = 0; i < allChars.length; i++) {
+    var c = allChars[i];
+    html += "<div><a href=\"javascript:;\" onclick=\"document.getElementById('tdLetter').innerHTML = '" + c + "';\" accesskey=\""
+        + c + "\">Link " + c + "</a><div>";
+  }
+  document.getElementById("tdLinks").innerHTML = html;
+</script>
+
+</body>
+</html>

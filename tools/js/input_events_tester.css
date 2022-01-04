@@ -1,0 +1,64 @@
+#txtInput {
+  font-size: 1.2em;
+}
+
+#htmlInput {
+  margin: 1em 0;
+  border: 1px dotted;
+  font-size: 1.2em;
+  padding: 0.5em;
+}
+
+table, th, td {
+  border: 1px solid black;
+  border-collapse: collapse;
+}
+
+th, td {
+  padding: 4px;
+}
+
+td:first-child {
+  text-align: left;
+  font-weight: bold;
+}
+
+label {
+  cursor: pointer;
+}
+
+label input {
+  cursor: pointer;
+}
+
+.evToggle {
+  display: inline-block;
+  background-color: lightgray;
+  padding: 4px 6px 4px 4px;
+  border-radius: 5px;
+}
+
+.evToggle + .evToggle {
+  margin-left: 10px;
+}
+
+.evToggle.enabled {
+  background-color: lightgreen;
+}
+
+.evCount {
+  margin-left: 2px;
+  visibility: hidden;
+}
+
+.evCount::before {
+  content: "(";
+}
+
+.evCount::after {
+  content: ")";
+}
+
+.evToggle.enabled .evCount {
+  visibility: unset;
+}

@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 TR Software Inc.
+ * Copyright 2022 TR Software Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -12,12 +12,12 @@
  * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
  * License for the specific language governing permissions and limitations under
  * the License.
- *
  */
 
 package solutions.trsoftware.commons.client.bridge.rpc;
 
 import com.google.gwt.user.client.rpc.RemoteService;
+import com.google.gwt.user.client.rpc.RemoteServiceRelativePath;
 
 /**
  * Allows comparing the output of GWT's NumberFormat to that of
@@ -26,6 +26,7 @@ import com.google.gwt.user.client.rpc.RemoteService;
  *
  * @author Alex
  */
+@RemoteServiceRelativePath("numberFormatterServlet")
 public interface NumberFormatTestService extends RemoteService {
 
   /**

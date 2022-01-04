@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 TR Software Inc.
+ * Copyright 2022 TR Software Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -21,7 +21,7 @@ import solutions.trsoftware.commons.shared.util.ArrayUtils;
 import java.util.Arrays;
 
 /**
- * Immutable object containing character counts for a text.
+ * Immutable object containing character counts for the words a text.
  *
  * @author Alex
  */
@@ -64,7 +64,12 @@ public class TextCharCounts {
     return wordCount;
   }
 
-  /** Gives the total number of characters in the text up to word i (excluding word i) */
+  /**
+   * Returns the number of characters in the text before word {@code i}.
+   * This is equal to the index (in the full text string) of the first character in this word.
+   *
+   * @param i the word index (0-indexed)
+   */
   public int getCharCountUpToWord(int i) {
     if (i <= 0)
       return 0;
@@ -75,8 +80,11 @@ public class TextCharCounts {
   }
 
   /**
-   * Returns the number of words typed if the user has typed the given
-   * number of characters. This is the inverse of getCharCountUpToWord(int).
+   * Returns the word index at the given char index (i.e. the inverse of {@link #getCharCountUpToWord(int)}).
+   * <p>
+   * This is equal to the number of whole words typed when the given number of characters have been typed.
+   *
+   * @param charPosition index of a character in the full text string
    */
   public int getWordCountAtCharPosition(int charPosition) {
     if (charPosition >= charCount)
@@ -86,6 +94,16 @@ public class TextCharCounts {
       return i;  // found an exact match
     else
       return Math.max(0, ((i+1)*-1)-1);  // (i+1)*-1 gives the insertion position for the match, from which we subtract 1 to get the word count
+  }
+
+  /**
+   * @param charPosition index of a character in the full text string
+   * @return {@code true} iff the given char index is the last character of one of the words in the text
+   */
+  public boolean isWordBoundary(int charPosition) {
+    if (charPosition < 0 || charPosition >= charCount)
+      return false;
+    return getWordCountAtCharPosition(charPosition + 1) > getWordCountAtCharPosition(charPosition);
   }
 
 }

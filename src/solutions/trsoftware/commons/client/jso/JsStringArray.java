@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 TR Software Inc.
+ * Copyright 2022 TR Software Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -32,13 +32,26 @@ public class JsStringArray extends JsArrayString {
   }
 
   /**
-   * Factory method
-   * @return a new array
+   * @return a new empty array
    */
   public static JsStringArray create() {
-    return (JsStringArray)JavaScriptObject.createArray();
+    return JavaScriptObject.createArray().cast();
   }
 
+  /**
+   * @return a new empty array with the given size
+   * @see JavaScriptObject#createArray(int)
+   */
+  public static JsStringArray create(int size) {
+    return JavaScriptObject.createArray(size).cast();
+  }
+
+  /**
+   * @return a new instance containing the same elements as the given Java array
+   */
+  public static JsStringArray create(String[] arr) {
+    return JsUtils.toJsArray(arr).cast();
+  }
 
   /**
    * Appends an element to the end of the array.
@@ -47,6 +60,10 @@ public class JsStringArray extends JsArrayString {
   public final JsStringArray add(String value) {
     push(value);
     return this;
+  }
+
+  public final String[] toJavaArray() {
+    return JsUtils.toJavaArray(this);
   }
 
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 TR Software Inc.
+ * Copyright 2022 TR Software Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -33,6 +33,6 @@ public class PrintVisitor<T extends Node> extends AbstractVisitor<T> {
 
   @Override
   public void visit(T node) {
-    System.out.println(StringUtils.repeat(' ', node.depth()*2) + "+ " + node.toString());
+    System.out.println(StringUtils.indent(node.depth()*2, "+ " + node.toString()));
   }
 }

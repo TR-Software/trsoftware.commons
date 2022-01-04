@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 TR Software Inc.
+ * Copyright 2022 TR Software Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -12,7 +12,6 @@
  * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
  * License for the specific language governing permissions and limitations under
  * the License.
- *
  */
 
 package solutions.trsoftware.commons.client.util;
@@ -20,6 +19,7 @@ package solutions.trsoftware.commons.client.util;
 import com.google.gwt.core.client.Duration;
 import com.google.gwt.core.client.Scheduler;
 import solutions.trsoftware.commons.client.CommonsGwtTestCase;
+import solutions.trsoftware.commons.shared.testutil.TestUtils;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -106,14 +106,15 @@ public class IncrementalForLoopTest extends CommonsGwtTestCase {
 
   /** Tests a loop that will have to preempt itself and use up multiple increments */
   public void testLongIncrementalForLoop() throws Exception {
-    delayTestFinish(10000); // give the loop enough time to finish
+    delayTestFinish(5000); // give the loop enough time to finish
     // NOTE: the following test depends on CPU speed - it could fail on faster or slower systems
-    final int maxIterations = 10000;  // do enough iterations to need more than one time increment
-    final int timeLimit = 100;  // the time limit per increment in millis (should be long enough to give accurate results)
+    final int maxIterations = 200;  // do enough iterations to need more than one time increment
+    final int incrementMillis = 10;  // the time limit per increment in millis (should be long enough to give accurate results)
     final Duration duration = new Duration();
-    Scheduler.get().scheduleIncremental(loop = new IncrementalForLoop(0, maxIterations, 1, timeLimit) {
+    Scheduler.get().scheduleIncremental(loop = new IncrementalForLoop(0, maxIterations, 1, incrementMillis) {
       protected void loopBody(int i) {
         values.add(i);
+        TestUtils.busyWait(1);
       }
       protected void loopFinished(boolean interrupted) {
         int increments = loop.getIncrementCount();
@@ -148,6 +149,7 @@ public class IncrementalForLoopTest extends CommonsGwtTestCase {
         if (getIncrementCount() == 1)
           stop();
         values.add(i);  // do some work
+        TestUtils.busyWait(1);
       }
       protected void loopFinished(boolean interrupted) {
         assertTrue(interrupted);

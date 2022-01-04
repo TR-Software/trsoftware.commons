@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 TR Software Inc.
+ * Copyright 2022 TR Software Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -19,8 +19,6 @@ package solutions.trsoftware.commons.client.util;
 import com.google.gwt.core.shared.GWT;
 
 /**
- * Date: Apr 16, 2008 Time: 4:09:43 PM
- *
  * @author Alex
  */
 public class JavascriptUtils {

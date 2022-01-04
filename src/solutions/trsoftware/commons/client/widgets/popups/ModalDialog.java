@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 TR Software Inc.
+ * Copyright 2022 TR Software Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -117,8 +117,11 @@ public class ModalDialog {
   // user-modifiable prefs:
 
   /**
-   * If this setting is changed to {@code false}, all calls to {@link #alert(String)}, {@link #confirm(String)},
+   * If this setting is {@code false}, all calls to {@link #alert(String)}, {@link #confirm(String)},
    * and {@link #prompt(String, String)} will use the "soft" implementations instead of delegating to {@link Window}.
+   * @see #softAlert
+   * @see #softConfirm
+   * @see #softPrompt
    */
   private static boolean nativeDialogsEnabled = true;
 
@@ -205,7 +208,7 @@ public class ModalDialog {
           waitingTimer.schedule(minDelayBetweenDialogs);
         }
         else if (getMillisUntilReadyToShowNextDialog() == 0 && !keyHoldDetector.isAnyKeyHeld()) {
-          // we're ready to show it right now (this will cancel the waitingTime if needed
+          // we're ready to show it right now (this will cancel the waitingTimer)
           showNextInQueue();
           return true;
         }

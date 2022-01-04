@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 TR Software Inc.
+ * Copyright 2022 TR Software Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -22,7 +22,7 @@ import solutions.trsoftware.commons.shared.util.stats.NumberSample;
 
 /**
  * Facilitates splitting a time-consuming task into multiple increments (in order to avoid "unresponsive script" warnings
- * in the browser) by using an abstraction similar to an iterator.
+ * in the browser) via an abstraction similar to an iterator.
  * <p>
  * The behavior of this {@linkplain Scheduler#scheduleIncremental(Scheduler.RepeatingCommand) incremental command}
  * is similar to the following loop:

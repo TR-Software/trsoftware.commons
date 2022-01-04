@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 TR Software Inc.
+ * Copyright 2022 TR Software Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -12,7 +12,6 @@
  * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
  * License for the specific language governing permissions and limitations under
  * the License.
- *
  */
 
 package solutions.trsoftware.commons.client;
@@ -20,6 +19,7 @@ package solutions.trsoftware.commons.client;
 import com.google.gwt.dom.client.Element;
 import com.google.gwt.user.client.DOM;
 import com.google.gwt.user.client.ui.RootPanel;
+import solutions.trsoftware.commons.client.widgets.popups.ModalDialog;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -40,24 +40,16 @@ public abstract class CommonsGwtTestCase extends BaseGwtTestCase {
     return MODULE_NAME;
   }
 
-  /**
-   * Removes all elements in the body, except scripts and iframes.
-   */
+  @Override
+  protected void gwtSetUp() throws Exception {
+    super.gwtSetUp();
+    // prevent locking up the page with window.alert / prompt / confirm  (this is important for running tests under "-runStyle Manual"
+    ModalDialog.setNativeDialogsEnabled(false);
+  }
+
   @Override
   protected void gwtTearDown() throws Exception {
-    Element bodyElem = RootPanel.getBodyElement();
-
-    List<Element> toRemove = new ArrayList<Element>();
-    for (int i = 0, n = DOM.getChildCount(bodyElem); i < n; ++i) {
-      Element elem = DOM.getChild(bodyElem, i);
-      String nodeName = elem.getNodeName();
-      if (!"script".equals(nodeName) && !"iframe".equals(nodeName)) {
-        toRemove.add(elem);
-      }
-    }
-    for (Element element : toRemove) {
-      bodyElem.removeChild(element);
-    }
+    RootPanel.get().clear();
     super.gwtTearDown();
   }
 
@@ -79,7 +71,7 @@ public abstract class CommonsGwtTestCase extends BaseGwtTestCase {
   }
 
   /**
-   * Prints a simple message to the default logger for the current test (at {@link Level#INFO} level)
+   * Prints a simple message to the default logger for the current test (at the {@link Level#INFO} level)
    * @param msg string to be logged
    * @see #getLogger()
    */

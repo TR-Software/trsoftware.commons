@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 TR Software Inc.
+ * Copyright 2022 TR Software Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -16,6 +16,8 @@
 
 package solutions.trsoftware.commons.shared.util;
 
+import com.google.common.base.Splitter;
+import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableBiMap;
 import com.google.common.collect.ImmutableMap;
 import solutions.trsoftware.commons.shared.util.iterators.CharSequenceIterator;
@@ -710,6 +712,7 @@ public class StringUtils {
 
   /**
    * @return {@code str} surrounded by {@code wrapper} on both sides.
+   * @see #bracket(String, String)
    */
   public static String surround(String str, String wrapper) {
     return wrapper + str + wrapper;
@@ -812,6 +815,7 @@ public class StringUtils {
    * @return {@code str} with the desired number of space chars prepended on the left.
    * @see #pad(String, int)
    * @see #padRight(String, int)
+   * @see Strings#padStart(String, int, char)
    */
   public static String padLeft(String str, int nSpaces) {
     return padLeft(str, nSpaces, ' ');
@@ -820,6 +824,7 @@ public class StringUtils {
   /**
    * @return {@code str} with {@code n} {@code pad} chars prepended on the left.
    * @see #padLeft(String, int)
+   * @see Strings#padStart(String, int, char)
    */
   public static String padLeft(String str, int n, char pad) {
     return repeat(pad, n) + str;
@@ -829,6 +834,7 @@ public class StringUtils {
    * @return {@code str} with the desired number of space chars appended on the right.
    * @see #pad(String, int)
    * @see #padLeft(String, int)
+   * @see Strings#padEnd(String, int, char)
    */
   public static String padRight(String str, int nSpaces) {
     return padRight(str, nSpaces, ' ');
@@ -838,6 +844,7 @@ public class StringUtils {
    * @return {@code str} with {@code n} {@code pad} chars appended on the right.
    * @see #pad(String, int)
    * @see #padLeft(String, int)
+   * @see Strings#padEnd(String, int, char)
    */
   public static String padRight(String str, int n, char pad) {
     return str + repeat(pad, n);
@@ -934,6 +941,7 @@ public class StringUtils {
    *
    * @return the given string padded on the right to the desired width.  The result is guaranteed to have
    * the desired width unless the input string is longer than that, in which case it will not be truncated.
+   * @see Strings#padEnd(String, int, char)
    */
   public static String justifyLeft(String str, int width) {
     if (str == null || width <= str.length())
@@ -961,6 +969,7 @@ public class StringUtils {
    *
    * @return the given string padded on the left to the desired width.  The result is guaranteed to have
    * the desired width unless the input string is longer than that, in which case it will not be truncated.
+   * @see Strings#padStart(String, int, char)
    */
   public static String justifyRight(String str, int width) {
     if (str == null || width <= str.length())
@@ -1065,6 +1074,7 @@ public class StringUtils {
    * @param str a string like "a, b, c"
    * @param delimRegex a regular expression like ","
    * @return a list like ["a", "b", "c"], or an empty list if the string didn't contain any non-blank tokens after the split.
+   * @see Splitter
    */
   @Nonnull
   public static List<String> splitAndTrim(String str, String delimRegex) {
@@ -1095,6 +1105,7 @@ public class StringUtils {
    * <pre>["","","a","","","b","","","c","","",""]</pre>
    *
    * @see <a href="https://stackoverflow.com/q/31670822">StackOverflow: "Java vs JavaScript split behavior"</a>
+   * @see Splitter
    */
   public static List<String> split(String str, String separator) {
     int start = 0;
@@ -1160,7 +1171,10 @@ public class StringUtils {
   }
 
   /**
-   * Useful for printing field values in a {@link #toString()} method.
+   * If the argument is a {@link CharSequence} it will be quoted to resemble a string literal (which
+   * can be useful for printing field values in a {@link #toString()} method).
+   * Otherwise same as {@link String#valueOf(Object)}.
+   *
    * @param value the value to print
    * @return the result of {@link String#valueOf(Object)}, quoted if {@code value} is a string.
    */
@@ -1196,6 +1210,7 @@ public class StringUtils {
    * {@link Character#isSurrogate(char) surrogate}.
    *
    * @return the last Unicode code point in the string
+   * @throws IllegalArgumentException if the string is {@code null} or empty
    * @see String#codePointBefore(int)
    * @see #codePoints(String)
    * @see CodePointIterator
@@ -1207,12 +1222,10 @@ public class StringUtils {
   }
 
   /**
-   * Returns the last Java {@code char} in the given string (i.e. {@code str.charAt(str.length()-1)}), which may or may
-   * not represent a valid Unicode code point, depending on whether this {@code char} is part of a
-   * {@link Character#isSurrogate(char) surrogate pair} encoding a
-   * {@link Character#isSupplementaryCodePoint(int) supplementary character}.
+   * Returns the last {@code char} in the given string (i.e. {@code str.charAt(str.length()-1)}).
    *
    * @return {@code str.charAt(str.length()-1)}
+   * @throws IllegalArgumentException if the string is {@code null} or empty
    * @see #lastCodePoint(String)
    */
   public static char lastChar(String str) {

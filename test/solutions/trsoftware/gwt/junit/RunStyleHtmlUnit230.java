@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 TR Software Inc.
+ * Copyright 2022 TR Software Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -12,7 +12,6 @@
  * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
  * License for the specific language governing permissions and limitations under
  * the License.
- *
  */
 package solutions.trsoftware.gwt.junit;
 
@@ -24,6 +23,7 @@ import com.gargoylesoftware.htmlunit.javascript.host.Window;
 import com.gargoylesoftware.htmlunit.util.WebClientUtils;
 import com.google.gwt.core.ext.TreeLogger;
 import com.google.gwt.dev.shell.HostedModePluginObject;
+import com.google.gwt.junit.DoNotRunWith;
 import com.google.gwt.junit.JUnitShell;
 import com.google.gwt.junit.Platform;
 import com.google.gwt.junit.RunStyle;
@@ -37,31 +37,29 @@ import java.net.URL;
 import java.util.*;
 
 /**
- * Launches a web-mode test via HTMLUnit.
+ * Custom version of {@link com.google.gwt.junit.RunStyleHtmlUnit} that allows using <b>HtmlUnit 2.30</b>
+ * instead of the default version that's bundled with GWT (currently HtmlUnit 2.18).
+ * <p></p>
+ * <h3>Usage:</h3>
+ * After making sure that the HtmlUnit 2.55 jars are on the classpath (and overriding the GWT jars), replace the
+ * <pre>{@code -runStyle HtmlUnit:<BROWSER_LIST>}</pre> argument in {@code gwt.args} with:
+ * <pre>{@code -runStyle solutions.trsoftware.gwt.junit.RunStyleHtmlUnit230:<BROWSER_LIST>}</pre>
+ * <em>For example:</em>
+ * <pre>{@code -runStyle solutions.trsoftware.gwt.junit.RunStyleHtmlUnit230:Chrome,FF52,IE}</pre>
  *
+ * <hr>
  * <p>
- *   This is a custom version of {@link com.google.gwt.junit.RunStyleHtmlUnit} to allow using HtmlUnit 2.30
- *   (GWT 2.5 ships with HtmlUnit 2.9, which contains bugs that we don't want, and GWT 2.8 ships with HtmlUnit 2.19,
- *   which breaks some unit tests that clearly should not be failing.
- * </p>
- * <p>
- *   To use this class instead of the default {@link com.google.gwt.junit.RunStyleHtmlUnit}, use it with the
- *   <nobr>{@code -runStyle solutions.trsoftware.gwt.junit.RunStyleHtmlUnit230:<BROWSER_LIST>}</nobr> flag 
- *   in the {@code gwt.args} system property. For example:
- *   <nobr>{@code -runStyle solutions.trsoftware.gwt.junit.RunStyleHtmlUnit230:Chrome}</nobr>
- * </p>
- * <p style="font-style: italic;">
- *   NOTE: Our testing has established that HtmlUnit 2.30 doesn't work any better that HtmlUnit 2.19 with respect
- *   to those tests that shouldn't be failing, so it's our recommendation to keep using the default HtmlUnit
- *   bundled with GWT. 
- *   
- *   To see which version of HtmlUnit is shipped with your GWT distro, look at
-  *  <a href="https://github.com/gwtproject/gwt/blob/2.8.2/dev/build.xml">/dev/build.xml on GitHub</a>
-  *  (selecting the appropriate tag for the new release from the dropdown).
- * </p>
- * <p style="font-style: italic;">
- *   NOTE: 
- * </p>
+ * <strong>NOTE:</strong> Our testing has shown that HtmlUnit 2.30 doesn't work any better that HtmlUnit 2.19 with respect
+ * to tests that shouldn't be failing.
+ * Therefore, we recommend sticking with the default version and running the tests that fail under HtmlUnit
+ * with <nobr>"{@code -runStyle Manual}"</nobr>. Such tests can also be annotated with
+ * {@link DoNotRunWith @DoNotRunWith(Platform.HtmlUnitUnknown)} to be excluded from a suite that runs under HtmlUnit.
+ *
+ * @see <a href="https://github.com/gwtproject/gwt/blob/2.8.2/dev/build.xml"><code>gwt/dev/build.xml</code></a> 
+ *   (to check which version of HtmlUnit is bundled with your GWT release)
+ * @see <a href="http://www.gwtproject.org/doc/latest/DevGuideTestingHtmlUnit.html">Running tests with HtmlUnit</a>
+ * @see <a href="http://www.gwtproject.org/doc/latest/DevGuideTesting.html#Manual_Mode">Running tests in Manual mode</a>
+ *
  */
 public class RunStyleHtmlUnit230 extends RunStyle {
 

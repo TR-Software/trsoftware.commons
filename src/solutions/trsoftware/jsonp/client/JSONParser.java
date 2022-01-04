@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 TR Software Inc.
+ * Copyright 2022 TR Software Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -45,7 +45,7 @@ public class JSONParser {
     if (jsonString == null) {
       throw new NullPointerException();
     }
-    if (jsonString == "") {
+    if (jsonString.length() == 0) {
       throw new IllegalArgumentException("empty argument");
     }
     try {
@@ -136,8 +136,11 @@ public class JSONParser {
    */
   private static native JavaScriptObject evaluate(String jsonString) /*-{
     var x = eval('(' + jsonString + ')');
-    if (typeof x == 'number' || typeof x == 'string' || typeof x == 'array' || typeof x == 'boolean') {
-      x = (Object(x));
+    switch (typeof x) {
+      case 'number':
+      case 'string':
+      case 'boolean':
+        x = (Object(x));
     }
     return x;
   }-*/;

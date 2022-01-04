@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 TR Software Inc.
+ * Copyright 2022 TR Software Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -12,7 +12,6 @@
  * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
  * License for the specific language governing permissions and limitations under
  * the License.
- *
  */
 
 package solutions.trsoftware.commons.server.testutil.htmlunit;
@@ -27,6 +26,7 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URL;
+import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.NotDirectoryException;
 import java.nio.file.Path;
@@ -83,7 +83,7 @@ public class RecordingWebWindowListener extends CurrentWebWindowContentChangeLis
   private void savePage(HtmlPage htmlPage) throws IOException {
     /*
       TODO: can try using HtmlPage#save(File), which supposedly also saves the images from the page
-      see https://stackoverflow.com/q/2738464/
+        see https://stackoverflow.com/q/2738464/
      */
     WebResponse webResponse = htmlPage.getWebResponse();
     String contentCharset = webResponse.getContentCharset();

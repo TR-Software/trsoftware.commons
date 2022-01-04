@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 TR Software Inc.
+ * Copyright 2022 TR Software Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -178,7 +178,7 @@ public abstract class EditSequence<T> implements Iterable<EditSequence.EditOpera
     }
   }
 
-
+  // TODO(11/12/2021): refactor these EditSequence implementations the same way as those of solutions.trsoftware.commons.shared.util.Levenshtein.EditSequence
 
   static class ArrayListEditSequence<T> extends EditSequence<T> {
     protected ArrayList<EditOperation<T>> operations;

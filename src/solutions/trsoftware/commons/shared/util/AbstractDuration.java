@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 TR Software Inc.
+ * Copyright 2022 TR Software Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -43,14 +43,42 @@ public abstract class AbstractDuration implements Duration {
   /** Optional action verb for pretty printing the duration */
   protected String verb;
 
+
+  /**
+   * Creates a new instance whose start time is now.
+   * <p>
+   * The {@link #toString()} representation of this instance will be equal to the
+   * elapsed duration formatted with {@link DurationFormat}.
+   *
+   * @see #AbstractDuration(String, String)
+   * @see #AbstractDuration(String)
+   */
+  protected AbstractDuration() {
+    this("");
+  }
+
+  /**
+   * Creates a new instance whose start time is now, with an optional name (for pretty-printing).
+   * <p>
+   * The name arg, if non-empty, will be used in the {@link #toString()} representation of this instance
+   * (e.g. {@code "{name} took {duration}"}).
+   *  @param name action name for pretty printing (optional)
+   *
+   */
+  protected AbstractDuration(String name) {
+    this(name, "took");
+  }
+
   /**
    * Creates a new instance whose start time is now, with an optional name and action verb.
    * <p>
-   * The {@link #toString()} method will return something like {@code "{name} {verb} {duration}"}
+   * The name and verb args, if non-empty, will be used in the {@link #toString()} representation of this instance
+   * (e.g. {@code "{name} {verb} {duration}"}).
+   *
    * @param name action name for pretty printing (optional)
    * @param verb action verb for pretty printing (optional)
    */
-  public AbstractDuration(String name, String verb) {
+  protected AbstractDuration(String name, String verb) {
     this.name = name;
     this.verb = verb;
   }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 TR Software Inc.
+ * Copyright 2022 TR Software Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -12,23 +12,26 @@
  * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
  * License for the specific language governing permissions and limitations under
  * the License.
- *
  */
 
 package solutions.trsoftware.commons.shared.util;
 
-import com.google.gwt.core.client.JavaScriptException;
-import com.google.gwt.core.shared.GWT;
 import junit.framework.TestCase;
 import solutions.trsoftware.commons.bridge.BridgeTypeFactory;
 import solutions.trsoftware.commons.shared.annotations.Slow;
 import solutions.trsoftware.commons.shared.testutil.AssertUtils;
 import solutions.trsoftware.commons.shared.util.callables.Function3_;
 
+import javax.annotation.Nonnull;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
+import static solutions.trsoftware.commons.shared.testutil.AssertUtils.*;
 import static solutions.trsoftware.commons.shared.util.Levenshtein.*;
+import static solutions.trsoftware.commons.shared.util.RandomUtils.rnd;
 import static solutions.trsoftware.commons.shared.util.StringUtils.methodCallToString;
 
 /**
@@ -134,8 +137,10 @@ public class LevenshteinTest extends TestCase {
     checkDistance(8, "hippo", "zzzzzzzz");
     checkDistance(8, "zzzzzzzz", "hippo");
     checkDistance(1, "hello", "hallo");
-    assertDistanceThrowsNPE("a", null);
-    assertDistanceThrowsNPE(null, "a");
+    assertThrows(NullPointerException.class, (Runnable)() ->
+        editDistance("a", null));
+    assertThrows(NullPointerException.class, (Runnable)() ->
+        editDistance(null, "a"));
   }
 
 
@@ -151,16 +156,10 @@ public class LevenshteinTest extends TestCase {
     checkEditDistanceIncremental(8, "hippo", "zzzzzzzz");
     checkEditDistanceIncremental(8, "zzzzzzzz", "hippo");
     checkEditDistanceIncremental(1, "hello", "hallo");
-    assertThrowsNPE(new Runnable() {
-      public void run() {
-        editDistanceIncremental("a", null, null);
-      }
-    });
-    assertThrowsNPE(new Runnable() {
-      public void run() {
-        editDistanceIncremental(null, "a", null);
-      }
-    });
+    assertThrows(NullPointerException.class, (Runnable)() ->
+        editDistanceIncremental("a", null, null));
+    assertThrows(NullPointerException.class, (Runnable)() ->
+        editDistanceIncremental(null, "a", null));
     // now try continuing the incremental computations
     {
       IncrementalEditDistanceResult result0 = checkEditDistanceIncremental(1, "hello", "hallo");
@@ -266,6 +265,7 @@ public class LevenshteinTest extends TestCase {
 
 
   public void testEditSequence() throws Exception {
+    // 1) test editSequence(String, String)
     // These examples are from org.apache.commons.lang3.StringUtilsTest.java
     checkSequence(0, "", "");
     checkSequence(1, "", "a");
@@ -278,8 +278,10 @@ public class LevenshteinTest extends TestCase {
     checkSequence(8, "hippo", "zzzzzzzz");
     checkSequence(8, "zzzzzzzz", "hippo");
     checkSequence(1, "hello", "hallo");
-    assertSequenceThrowsNPE("a", null);
-    assertSequenceThrowsNPE(null, "a");
+    assertThrows(NullPointerException.class, (Runnable)() -> editSequence("a", null));
+    assertThrows(NullPointerException.class, (Runnable)() -> editSequence(null, "a"));
+    // TODO: figure out why some of the editSequence calls are returning +(1,'o') instead of +(2,'o') for ("Fo", "Foo")
+    checkSequence(1, "Fo", "Foo");
   }
 
   private void checkSequence(int expectedDistance, String s, String t) {
@@ -294,15 +296,15 @@ public class LevenshteinTest extends TestCase {
         EditSequence editSequence;
         if (useOptimizations) {
           // use the optimized version of the algorithm
-          System.out.println("Calling " + methodCallToString("editSequence", s, t, a1, a2));
+          System.out.println(methodCallToString("editSequence", s, t, a1, a2) + ":");
           editSequence = editSequence(s, t, a1, a2);
         }
         else {
           // use the default version of the algorithm
-          System.out.println("Calling " + methodCallToString("editSequence", s, t));
+          System.out.println(methodCallToString("editSequence", s, t) + ":");
           editSequence = editSequence(s, t);
         }
-        System.out.println("Got the following edit sequence:\n" + editSequence);
+        System.out.println("  " + editSequence);
         assertEquals(expectedDistance, editSequence.length());
         assertEquals(t, editSequence.apply(s));
       }
@@ -423,34 +425,6 @@ public class LevenshteinTest extends TestCase {
     }
   }
 
-  private void assertDistanceThrowsNPE(final String s, final String t) {
-    assertThrowsNPE(new Runnable() {
-      public void run() {
-        editDistance(s, t);
-      }
-    });
-  }
-
-  private void assertSequenceThrowsNPE(final String s, final String t) {
-    assertThrowsNPE(new Runnable() {
-      public void run() {
-        editSequence(s, t);
-      }
-    });
-  }
-
-  private void assertThrowsNPE(Runnable code) {
-    // for some reason, the code will throw a JS exception instead of NPE (at least when the tests run in IE)
-    /*Caused by: com.google.gwt.core.client.JavaScriptException: (TypeError): 'length' is null or not an object
-     number: -2146823281
-     description: 'length' is null or not an object
-     description: 'length' is null or not an object*/
-    if (GWT.isScript())
-      AssertUtils.assertThrows(JavaScriptException.class, code);
-    else
-      AssertUtils.assertThrows(NullPointerException.class,code);
-  }
-
   public void testDiffHelperAddDiffsNoCS() throws Exception {
     checkAddDiffsNoCS("", "", "[]");
     checkAddDiffsNoCS("", "a", "[+a]");
@@ -529,7 +503,6 @@ public class LevenshteinTest extends TestCase {
     assertTrue(isSubsequence("abc", "abc"));
   }
 
-  // The slowest tests should be at the end so they run last
   @Slow
   public void testRandomStrings() throws Exception {
     // test the distance and sequence methods random strings with all lengths up to 20
@@ -548,5 +521,50 @@ public class LevenshteinTest extends TestCase {
     assertDistanceMatchesSequence(t, s);
     System.out.println();  // empty line
   }
+
+
+  // test the internal data structures
+
+  /**
+   * Tests {@link LinkedEditSequence}
+   */
+  public void testLinkedEditSequence() throws Exception {
+    // create a list of n random edit ops, which will be used to construct a recursive LinkedEditSequence instances
+    int n = 100;
+    ArrayList<EditOperation> ops = Stream.generate(LevenshteinTest::randomEditOp).limit(n).collect(Collectors.toCollection(ArrayList::new));
+    // at the base of the chain, we'll start with an ImmutableEditSequence of the first 10 ops
+    int i = 10;
+    ImmutableEditSequence base = new ImmutableEditSequence(ops.subList(0, i));
+    assertEquals(ops.subList(0, i), base.getOperations());
+    LinkedEditSequence seq = new LinkedEditSequence(base, ops.get(i++));
+    assertEquals(i, seq.length());
+    while (i < n) {
+      seq = new LinkedEditSequence(seq, ops.get(i++));
+      assertEquals(i, seq.length());
+    }
+    // verify that LinkedEditSequence.getOperations() returns the full sequence of edit ops
+    assertEquals(ops, seq.getOperations());
+  }
+
+
+  /**
+   * @return an arbitrary {@link EditOperation} with a random position value between 0 and 10, and a random alphanumeric char.
+   */
+  private static EditOperation randomEditOp() {
+    String chars = StringUtils.ASCII_LETTERS_AND_NUMBERS;
+    char c = chars.charAt(rnd.nextInt(chars.length()));
+    int pos = rnd.nextInt(10);
+    switch (rnd.nextInt(3)) {
+      case 0:
+        return new Insertion(pos, c);
+      case 1:
+        return new Deletion(pos, c);
+      case 2:
+        return new Substitution(pos, c);
+      default:
+        throw new IllegalArgumentException();
+    }
+  }
+
 
 }

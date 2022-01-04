@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 TR Software Inc.
+ * Copyright 2022 TR Software Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -16,11 +16,14 @@
 
 package solutions.trsoftware.commons.shared.web;
 
+import com.google.common.base.MoreObjects;
 import solutions.trsoftware.commons.client.bridge.util.URIComponentEncoder;
 import solutions.trsoftware.commons.shared.util.TimeUnit;
 import solutions.trsoftware.commons.shared.util.TimeValue;
 
+import javax.annotation.Nullable;
 import javax.servlet.http.Cookie;
+import java.util.Date;
 
 /**
  * Encapsulates all the info needed to set a particular cookie.
@@ -50,6 +53,7 @@ public class CookieSpec {
   /**
    * Name of the cookie.
    */
+  @Nullable
   private String name;
 
   /**
@@ -65,6 +69,7 @@ public class CookieSpec {
    *
    * @see Cookie#setValue(String)
    */
+  @Nullable
   private String value;
 
   /**
@@ -82,6 +87,7 @@ public class CookieSpec {
    * If {@code null}, cookie will be removed after browser shutdown.
    * @see Cookie#getMaxAge()
    */
+  @Nullable
   private TimeValue maxAge;
 
   /**
@@ -89,6 +95,7 @@ public class CookieSpec {
    * Defaults to the current request host if {@code null}.
    * @see Cookie#setDomain(java.lang.String)
    */
+  @Nullable
   private String domain;
 
   /**
@@ -106,6 +113,7 @@ public class CookieSpec {
    *   </li>
    * </ul>
    */
+  @Nullable
   private String path;
 
   /**
@@ -184,10 +192,12 @@ public class CookieSpec {
     return cookie;
   }
 
+  @Nullable
   public String getName() {
     return name;
   }
 
+  @Nullable
   public String getValue() {
     return value;
   }
@@ -196,14 +206,27 @@ public class CookieSpec {
     return version;
   }
 
+  @Nullable
   public TimeValue getMaxAge() {
     return maxAge;
   }
 
+  /**
+   * @param currentTimeMillis time in epoch millis
+   * @return a {@link Date} constructed by adding {@link #maxAge} to the current time,
+   *     or {@code null} if {@link #maxAge} is {@code null}
+   */
+  @Nullable
+  public Date getExpirationDate(long currentTimeMillis) {
+    return maxAge != null ? new Date(currentTimeMillis + maxAge.toLongMillis()) : null;
+  }
+
+  @Nullable
   public String getDomain() {
     return domain;
   }
 
+  @Nullable
   public String getPath() {
     return path;
   }
@@ -253,6 +276,20 @@ public class CookieSpec {
     result = 31 * result + (secure ? 1 : 0);
     result = 31 * result + (httpOnly ? 1 : 0);
     return result;
+  }
+
+  @Override
+  public String toString() {
+    return MoreObjects.toStringHelper(this)
+        .add("name", name)
+        .add("value", value)
+        .add("version", version)
+        .add("maxAge", maxAge)
+        .add("domain", domain)
+        .add("path", path)
+        .add("secure", secure)
+        .add("httpOnly", httpOnly)
+        .toString();
   }
 
   /**

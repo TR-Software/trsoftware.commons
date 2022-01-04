@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 TR Software Inc.
+ * Copyright 2022 TR Software Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -21,7 +21,8 @@ import java.util.List;
 import java.util.SortedSet;
 
 /**
- * Calculates various statistics about a {@link TypingLog}.
+ * Calculates various statistics about a {@link TypingLog}, such as accuracy, segment WPMs, and a list of all
+ * the words with errors.
  *
  * For now, this class exists just to calculate the accuracy,
  * but in the future, it can be used to compute other statistics to the

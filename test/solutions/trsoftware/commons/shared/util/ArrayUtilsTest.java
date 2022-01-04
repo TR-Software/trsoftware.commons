@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 TR Software Inc.
+ * Copyright 2022 TR Software Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -12,7 +12,6 @@
  * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
  * License for the specific language governing permissions and limitations under
  * the License.
- *
  */
 
 package solutions.trsoftware.commons.shared.util;
@@ -22,6 +21,7 @@ import junit.framework.TestCase;
 import java.util.Arrays;
 import java.util.function.Supplier;
 
+import static org.junit.Assert.assertArrayEquals;
 import static solutions.trsoftware.commons.shared.testutil.AssertUtils.assertArraysEqual;
 import static solutions.trsoftware.commons.shared.testutil.AssertUtils.assertThrows;
 import static solutions.trsoftware.commons.shared.util.ArrayUtils.*;
@@ -29,18 +29,14 @@ import static solutions.trsoftware.commons.shared.util.ArrayUtils.*;
 public class ArrayUtilsTest extends TestCase {
 
   public void testFlexibleArrayAdd() {
-    assertTrue(Arrays.equals(
-        new String[]{"a", "b", "c", "d"},
-        flexibleArrayAdd(new String[]{"a", "b", "c"}, 3, "d")));
-    assertTrue(Arrays.equals(
-        new String[]{"a", "b", "c", null, "d"},
-        flexibleArrayAdd(new String[]{"a", "b", "c"}, 4, "d")));
-    assertTrue(Arrays.equals(
-        new String[]{null, null, null, "d"},
-        flexibleArrayAdd(null, 3, "d")));
-    assertTrue(Arrays.equals(
-        new String[]{"a", "b", "d"},
-        flexibleArrayAdd(new String[]{"a", "b", "c"}, 2, "d")));
+    assertArrayEquals(new String[]{"a", "b", "c", "d"},
+        flexibleArrayAdd(new String[]{"a", "b", "c"}, 3, "d"));
+    assertArrayEquals(new String[]{"a", "b", "c", null, "d"},
+        flexibleArrayAdd(new String[]{"a", "b", "c"}, 4, "d"));
+    assertArrayEquals(new String[]{null, null, null, "d"},
+        flexibleArrayAdd(null, 3, "d"));
+    assertArrayEquals(new String[]{"a", "b", "d"},
+        flexibleArrayAdd(new String[]{"a", "b", "c"}, 2, "d"));
   }
 
   public void testFlexibleArrayPrimitiveFloat() {
@@ -147,6 +143,7 @@ public class ArrayUtilsTest extends TestCase {
     assertEquals(-1, indexOf(new int[]{1}, 4));
     assertEquals(-1, indexOf(new int[0], 4));
     assertEquals(0, indexOf(new int[]{1, 2, 3}, 1));
+    assertEquals(0, indexOf(new int[]{1, 1, 2, 3}, 1));  // should return first match if more than one
     assertEquals(1, indexOf(new int[]{1, 2, 3}, 2));
     assertEquals(2, indexOf(new int[]{1, 2, 3}, 3));
     assertEquals(0, indexOf(new int[]{1, 2}, 1));
@@ -159,6 +156,7 @@ public class ArrayUtilsTest extends TestCase {
     assertEquals(-1, indexOf(new String[]{"a"}, "d"));
     assertEquals(-1, indexOf(new String[0], "d"));
     assertEquals(0, indexOf(new String[]{"a", "b", "c"}, "a"));
+    assertEquals(0, indexOf(new String[]{"a", "a", "b", "c"}, "a"));  // should return first match if more than one
     assertEquals(1, indexOf(new String[]{"a", "b", "c"}, "b"));
     assertEquals(2, indexOf(new String[]{"a", "b", "c"}, "c"));
     assertEquals(0, indexOf(new String[]{"a", "b"}, "a"));
@@ -169,6 +167,35 @@ public class ArrayUtilsTest extends TestCase {
     assertEquals(0, indexOf(new String[]{null}, null));
     assertEquals(1, indexOf(new String[]{"a", null}, null));
     assertEquals(-1, indexOf(new String[]{"a", "b"}, null));
+  }
+
+  public void testContains() throws Exception {
+    assertFalse(contains(new String[]{"a", "b", "c"}, "d"));
+    assertFalse(contains(new String[]{"a"}, "d"));
+    assertFalse(contains(new String[0], "d"));
+    assertTrue(contains(new String[]{"a", "b", "c"}, "a"));
+    assertTrue(contains(new String[]{"a", "b", "c"}, "b"));
+    assertTrue(contains(new String[]{"a", "b", "c"}, "c"));
+    assertTrue(contains(new String[]{"a", "b"}, "a"));
+    assertTrue(contains(new String[]{"a", "b"}, "b"));
+    assertTrue(contains(new String[]{"a"}, "a"));
+    // also test null values
+    assertFalse(contains(new String[]{null}, "a"));
+    assertFalse(contains(new String[]{"a", "b"}, null));
+    assertTrue(contains(new String[]{null}, null));
+    assertTrue(contains(new String[]{"a", null}, null));
+  }
+
+  public void testContainsInt() throws Exception {
+    assertFalse(contains(new int[]{1, 2, 3}, 4));
+    assertFalse(contains(new int[]{1}, 4));
+    assertFalse(contains(new int[0], 4));
+    assertTrue(contains(new int[]{1, 1, 2, 3}, 1));
+    assertTrue(contains(new int[]{1, 2, 3}, 2));
+    assertTrue(contains(new int[]{1, 2, 3}, 3));
+    assertTrue(contains(new int[]{1, 2}, 1));
+    assertTrue(contains(new int[]{1, 2}, 2));
+    assertTrue(contains(new int[]{1}, 1));
   }
 
   public void testSlice() throws Exception {
@@ -233,5 +260,12 @@ public class ArrayUtilsTest extends TestCase {
     });
     assertSame(array, result);
     assertArraysEqual(expected, result);
+  }
+
+  public void testMerge() throws Exception {
+    assertArraysEqual(new String[]{"a", "b", "c", "d"}, merge(new String[]{"a", "b"}, new String[]{"c", "d"}));
+    assertArraysEqual(new String[]{"a", "b", "c", "d"}, merge(new String[]{"a", "b", "c", "d"}, new String[]{}));
+    assertArraysEqual(new String[]{"a", "b", "c", "d"}, merge(new String[]{}, new String[]{"a", "b", "c", "d"}));
+    assertArraysEqual(new String[]{}, merge(new String[]{}, new String[]{}));
   }
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 TR Software Inc.
+ * Copyright 2022 TR Software Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -88,11 +88,14 @@ public class PageVisibility {
   }
 
   /**
-   * This event is only fired on the {@code document} element, and therefore it neither captures nor bubbles to
-   * any other element on the page (since {@code document} is the root of the DOM tree).
+   * This event is only fired on the {@code Document} node, and therefore it neither captures nor bubbles to
+   * any other element on the page (since {@code Document} is the root of the DOM tree).
    *
    * Use {@link #isHidden()} to check whether this event is being fired in response to the page
    * being hidden or the opposite.
+   *
+   * @see <a href="https://developer.mozilla.org/en-US/docs/Web/API/Document/visibilitychange_event">
+   *   "visibilitychange" event documentation (MDN)</a>
    */
   public static class ChangeEvent extends Event {
     public static final String NAME = "visibilitychange";

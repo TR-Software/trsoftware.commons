@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 TR Software Inc.
+ * Copyright 2022 TR Software Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -17,14 +17,18 @@
 package solutions.trsoftware.commons.shared.util.text;
 
 /**
- * Treats every char as a word for logographic languages.
+ * Treats every char in a text as an individual word for logographic languages.
+ * <p>
+ * <strong>NOTE</strong>: this implementation might fail if the text uses "supplemental" Unicode characters
+ * (which are represented by 2-char "code pairs" in Java).
+ * If that ever becomes an issue, something like {@link java.text.BreakIterator} might be more appropriate.
  *
- * Oct 19, 2009
  * @author Alex
+ * @see WhitespaceTokenizer
  */
 public class LogographicTokenizer implements TextTokenizer {
 
-  // TODO: this might fail if the text uses "supplemental" Unicode characters (which are represented by 2-char "code pairs" in Java)
+  public static final transient LogographicTokenizer INSTANCE = new LogographicTokenizer();
 
   @Override
   public String getDelimiter() {

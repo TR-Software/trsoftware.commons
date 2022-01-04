@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 TR Software Inc.
+ * Copyright 2022 TR Software Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -270,7 +270,7 @@ public abstract class AssertUtils {
 
   /**
    * Passes if the two specified arrays of ints are <i>equal</i> to one another.
-   *  Two arrays are considered equal if both arrays contain the same number of
+   * Two arrays are considered equal if both arrays contain the same number of
    * elements, and all corresponding pairs of elements in the two arrays are
    * equal.  In other words, two arrays are equal if they contain the same
    * elements in the same order.  Also, two array references are considered
@@ -296,7 +296,7 @@ public abstract class AssertUtils {
    * @param a one array to be tested for equality
    * @param a2 the other array to be tested for equality
    */
-  public static void assertArraysEqual(short[] a, short a2[]) {
+  public static void assertArraysEqual(short[] a, short[] a2) {
     boolean pass = Arrays.equals(a, a2);
     if (!pass)
       fail(formatComparisonFailedMessage("Arrays not equal.", Arrays.toString(a), Arrays.toString(a2)));
@@ -414,7 +414,7 @@ public abstract class AssertUtils {
    * @param a2 the other array to be tested for equality
    */
   public static void assertArraysEqual(Object[] a, Object[] a2) {
-    boolean pass = Arrays.equals(a, a2);
+    boolean pass = Arrays.deepEquals(a, a2);
     if (!pass)
       fail(formatComparisonFailedMessage("Arrays not equal.", Arrays.toString(a), Arrays.toString(a2)));
   }

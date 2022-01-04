@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 TR Software Inc.
+ * Copyright 2022 TR Software Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -26,13 +26,23 @@ import solutions.trsoftware.commons.client.event.EventHandlers;
 import solutions.trsoftware.commons.shared.util.StringUtils;
 
 /**
- * A text box containing some prompt text which disappears when the box
- * gains focus.  The prompt text is not returned by getText(), which only
- * returns a value if the user has typed something into the box.
- * 
- * The CSS class AdvancedTextBox-unfocused should be defined by the app's
- * stylesheet to specify the color to be used for the prompt text, if any.
+ * A text box containing some prompt text which disappears when the box gains focus.
+ * This default prompt text is not returned by {@link #getText()}.
+ * <p>
+ * The CSS class {@code AdvancedTextBox-unfocused} can be used to style the prompt text.
+ * <p>
+ * <b>Update</b> (11/30/2021): The HTML standard now includes a {@code placeholder} attribute
+ * (for {@code <input>} / {@code <textarea>}) and a {@code ::placeholder} pseudo-element (in CSS).
+ * When combined, those two features make this widget somewhat obsolete.
  *
+ * @see <a href="https://developer.mozilla.org/en-US/docs/Web/HTML/Element/input#attr-placeholder">
+ *   HTMLInputElement.placeholder</a>
+ * @see <a href="https://developer.mozilla.org/en-US/docs/Web/CSS/::placeholder">
+ *   ::placeholder (CSS)</a>
+ * @see <a href="https://caniuse.com/?search=placeholder">
+ *   Can I use "placeholder"?</a>
+ *
+ * @deprecated
  * @author Alex
  */
 public class AdvancedTextBox extends TextBox implements FocusHandler, BlurHandler {
@@ -79,7 +89,7 @@ public class AdvancedTextBox extends TextBox implements FocusHandler, BlurHandle
   }
 
   public void setPromptText(final String promptText) {
-    // TODO(9/14/2021): can try using the "placeholder" attribute instead of this ad-hoc implementation (see https://developer.mozilla.org/en-US/docs/Web/HTML/Element/input#attr-placeholder)
+    // TODO(9/14/2021): can try setting the "placeholder" attribute instead of this ad-hoc implementation (see https://developer.mozilla.org/en-US/docs/Web/HTML/Element/input#attr-placeholder)
     if (StringUtils.isBlank(promptText)) {
       // setting an empty prompt is equivalent to having no prompt
       this.promptText = null;
@@ -122,7 +132,10 @@ public class AdvancedTextBox extends TextBox implements FocusHandler, BlurHandle
   }
 
 
-  /** Returns text only if it's not equal to the original prompt */
+  /**
+   * @return the entered input text or an empty string if the current value is equal to the original prompt.
+   * @see #getTextUnfiltered()
+   */
   public String getText() {
     String actualText = getTextUnfiltered();
     if (!usePrompt || !actualText.equals(promptText))

@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 TR Software Inc.
+ * Copyright 2022 TR Software Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -16,99 +16,187 @@
 
 package solutions.trsoftware.commons.shared.text;
 
-import com.google.gwt.core.client.Duration;
+import com.google.common.annotations.VisibleForTesting;
+import com.google.common.base.MoreObjects;
+import com.google.common.base.Preconditions;
+import solutions.trsoftware.commons.bridge.BridgeTypeFactory;
+import solutions.trsoftware.commons.shared.util.Duration;
 import solutions.trsoftware.commons.shared.util.Levenshtein;
 
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.List;
 
+import static java.util.Objects.requireNonNull;
+
 /**
- * Models the state of correctness of a stream of characters being input
- * by the user while typing a particular text.  Provides feedback to the UI
- * during the race and generates a TypingLog at the end of the race.
+ * Models the state of correctness of a stream of characters being input by a user into a text input field
+ * while typing a particular text.
+ *
+ * Provides feedback to the UI during the text input session and generates a {@link TypingLog} at the end.
  *
  * @since Nov 19, 2012
  * @author Alex
  */
 public class TextInputModel {
-  /** The text to be typed */
+  /** The complete text to be typed */
   private final String text;
   /** The language of {@link #text} */
   private final Language textLanguage;
-  /** The language of the text */
-  private TextCharCounts textCharCounts;
+  /** The character counts for the words in {@link #text} */
+  private final TextCharCounts textCharCounts;
   /**
-   * This setting decides whether correct input prefixes will be "accepted"
-   * (i.e. cleared from the text box). This is the case for NewInputPanel with
-   * normal languages, but not the case with NewInputPanelLogographic for
-   * logographic languages.
-    */
-  private boolean enableAcceptingPrefixes;
-  /** Stores the time when each char in the text was accepted as correct */
-  private int[] acceptedCharTimings;
-
-  /** The last-touched index in acceptedCharTimings */
-  private int lastAcceptedCharIndex;
-
-  /**
-   * The position in the text (and consequently in the acceptedCharTimings array)
-   * at which the user's current input text field starts.
-   * (For example if the text is "Hello world" and the user is about to type 'r',
-   * then cursor position is 6 - just at the start of "world", because the
-   * word "Hello " has been accepted, but the "wo" have not yet been accepted.
-   * (unless we start clearing correct chars as the user types).
-   *
-   * This value is used to know what the text input element in the UI represents.
+   * This setting determines whether the UI intends to remove "accepted" prefixes from the text input element
+   * after each {@linkplain #update(String) update}. This is typically the case for standard languages
+   * (but not for {@link Language#isLogographic() logographic} languages).
    */
-  private int charCursor = 0;
+  private final boolean enableAcceptingPrefixes;
 
   /**
-   * The number of words that have been accepted.
-   *
-   * This value is used for WPM and for highlighting the next word
-   * in WordsView.
+   * Stores the time when each char in the text was accepted as correct.
+   * @see TypingLog#getCharTimings()
+   * @see #update(String)
+   */
+  private final int[] acceptedCharTimings;
+
+  /** The last-touched index in {@link #acceptedCharTimings} */
+  private int lastAcceptedCharIndex = -1;
+
+  /**
+   * The character position in the {@link #text} corresponding to the first character in the text input element.
+   * This value is used by {@link #update(String)} to correlate the given input with the full text.
+   * <p>
+   * <strong>NOTE:</strong> this value does not indicate the number of chars that have been accepted (see {@link #lastAcceptedCharIndex}
+   * for that information).  As a matter of fact, it never changes if {@link #enableAcceptingPrefixes} is disabled.
+   * <p>
+   * Example (assuming {@link #enableAcceptingPrefixes} is enabled):
+   * If the full text is "Hello world" and the user is about to type 'r',
+   * then the cursor position is 6 (just at the start of "world"), because the complete
+   * word "Hello " has been accepted (and cleared out of the input element),
+   * but the "wo" prefix of "world" hasn't been accepted ye.
+   */
+  private int charCursor = 0;  // TODO(11/17/2021): come up with a better name for this field (e.g. inputStartPosition)
+
+  /**
+   * The number of complete words that have been accepted.
+   * <p>
+   * This value is used by the UI for updating the WPM and highlighting the next word in the text.
    */
   private int wordCursor = 0;
 
-  /** A full log of each update to the user's input */
-  private List<TypingEdit> editLog = new ArrayList<TypingEdit>();
+  /**
+   * A log of the updates to the user's input.
+   *
+   * @see TypingLog#getEditLog()
+   * @see #update(String)
+   */
+  private final List<TypingEdit> editLog = new ArrayList<>();
 
   /**
-   * What the current value in the text box should be (might be updated
-   * as a result of a call to update() if some of the correct chars
-   * in the beginning are to be "accepted" (i.e. deleted from the text box).
+   * What the current value in the text input field should be after the latest invocation of {@link #update(String)}.
+   * This may or may not be the same as the argument passed to the last invocation of {@link #update(String)}, depending
+   * on whether {@link #enableAcceptingPrefixes} is enabled.
+   * The UI must ensure that its input element is always updated accordingly.
+   *
+   * @see TextInputUpdate#getNewInputValue()
    */
   private String lastInput = "";
 
-  /** Result of the last call to update */
+  /** Result of the last invocation of {@link #update(String)} */
   private TextInputUpdate lastUpdateResult;
 
-  /** The official start time of the race */
+  /** The official start time of the recording */
   private Duration duration;
 
-  /** Constructor */
-  public TextInputModel(String text, Language language, TextCharCounts charCounts, boolean enableAcceptingPrefixes) {
-    this.enableAcceptingPrefixes = enableAcceptingPrefixes;
-    this.text = text;
-    textLanguage = language;
-    textCharCounts = charCounts;
-    acceptedCharTimings = new int[this.text.length()];
-  }
-
-  public void startTimer() {
-    duration = new Duration();  // timing starts as soon as this object is created
+  /**
+   * Alternate constructor that doesn't require a pre-existing {@link TextCharCounts} instance for the text
+   * (it will be constructed automatically based on the text language).
+   *
+   * @param text The complete text to be typed
+   * @param language The language of the text
+   * @param enableAcceptingPrefixes see {@link #enableAcceptingPrefixes}
+   * @see #TextInputModel(String, Language, TextCharCounts, boolean)
+   */
+  public TextInputModel(@Nonnull String text, @Nonnull Language language, boolean enableAcceptingPrefixes) {
+    this(text, language, new TextCharCounts(language.getTokenizer().tokenize(text), language), enableAcceptingPrefixes);
   }
 
   /**
-   * To be called when an ordinary character was typed (or backspace).
-   * @param input the value of the text input field after this character
-   * will be typed.
-   * @return the result of this update: what's changed.
+   * @param text The complete text to be typed
+   * @param language The language of the text
+   * @param charCounts The character counts for the words in the text
+   * @param enableAcceptingPrefixes see {@link #enableAcceptingPrefixes}
+   * @see #TextInputModel(String, Language, boolean)
    */
-  public TextInputUpdate update(final String input) {
-    if (input.equals(lastInput))
+  public TextInputModel(@Nonnull String text, @Nonnull Language language, @Nonnull TextCharCounts charCounts, boolean enableAcceptingPrefixes) {
+    this.enableAcceptingPrefixes = enableAcceptingPrefixes;
+    this.text = requireNonNull(text, "text");
+    textLanguage = requireNonNull(language, "language");
+    textCharCounts = requireNonNull(charCounts, "charCounts");
+    acceptedCharTimings = new int[this.text.length()];
+  }
+
+  /**
+   * Start the clock that will be used to populate {@link #acceptedCharTimings}.
+   *
+   * @throws IllegalStateException if already invoked
+   * @see TypingLog#getCharTimings()
+   */
+  public void startTiming() {
+    startTiming(BridgeTypeFactory.newDuration());  // timing starts as soon as the Duration object is created
+  }
+
+  /**
+   * Unit tests can call this method instead of {@link #startTiming()} to use a mock timer.
+   */
+  @VisibleForTesting
+  void startTiming(Duration duration) {
+    Preconditions.checkState(this.duration == null, "Already timing");
+    this.duration = duration;
+  }
+
+  /**
+   * @return {@code true} iff all the characters in the {@link #text} have been "accepted".
+   */
+  public boolean isFinished() {
+    return wordCursor >= textCharCounts.getWordCount();
+  }
+
+  /**
+   * Should be called every time the value of the text input element is modified.
+   * <p>
+   * If a prefix of the input matches the next substring of the {@link #text}, the chars in that prefix are considered
+   * "accepted", and {@link #acceptedCharTimings} are updated accordingly for each one.
+   * Either way, a new {@link TypingEdit} (representing the {@linkplain Levenshtein#editSequence(String, String) diffs}
+   * from the {@linkplain #lastInput last input value}) is appended to the {@link #editLog}.
+   * <p>
+   * If the "accepted" prefix spans one or more {@linkplain TextCharCounts#isWordBoundary word boundaries} in the text,
+   * the {@link #wordCursor} will be updated accordingly, and, if {@link #enableAcceptingPrefixes} is enabled,
+   * the the result will indicate what the {@linkplain TextInputUpdate#newInputValue new value} of text input field
+   * should be after this update.
+   * <strong>NOTE:</strong> in order for this method to function correctly, the UI must ensure that its
+   * input element is kept in-sync with this value.
+   * <p>
+   * If the given argument is equal to the {@linkplain TextInputUpdate#newInputValue new value} from the last update,
+   * or if the recording is {@linkplain #isFinished() finished}, this method returns {@code null}.
+   * To disambiguate the meaning of a {@code null} return value, the caller can check {@link #isFinished()}.
+   *
+   * @param input current the value of the text input field
+   * @return the result of this update (i.e. what's changed since the last invocation of this method);
+   *     returns {@code null} if nothing's changed or the text is {@linkplain #isFinished() finished}.
+   * @throws IllegalStateException if {@link #startTiming()} hasn't been invoked yet
+   */
+  public @Nullable TextInputUpdate update(@Nonnull final String input) {
+    Preconditions.checkNotNull(input);
+    Preconditions.checkState(duration != null, "startTiming() hasn't been called yet");
+
+    if (isFinished() || input.equals(lastInput)) {
       return null;  // the input hasn't changed since last time (e.g. del key pressed at the end of the word, or a letter overwrites the same letter that was selected)
-    final int time = duration.elapsedMillis();
+      // TODO: consider providing a better way to disambiguate (maybe never return null, and instead use a different subclass of TextInputUpdate)
+    }
+
+    final int time = (int)duration.elapsedMillis();
 
     // update the accepted chars, one at a time, with special handling of each word boundary
     int acceptedPrefixLength = 0; // the index of the last char of the last full word accepted from the input
@@ -130,7 +218,7 @@ public class TextInputModel {
         acceptedCharTimings[newCursor] = time;
         lastAcceptedCharIndex = newCursor;
       }
-      if (enableAcceptingPrefixes && (newCursor == text.length()-1 || acceptedChar == ' '))  {
+      if (enableAcceptingPrefixes && textCharCounts.isWordBoundary(newCursor))  {
         // this is either the end of the last word or a word boundary
         // how should the UI input field be updated as a result of this word boundary transition?
         // 1) for normal languages, all the correct input (up to this point) should be cleared
@@ -145,14 +233,26 @@ public class TextInputModel {
   private TextInputUpdate finishUpdate(String input, int time, int acceptedPrefixLength, int correctCharCount) {
 
     // now update the edit history
-    Levenshtein.EditSequence edits = Levenshtein.editSequence(lastInput, input, true, true);
+    Levenshtein.EditSequence edits = Levenshtein.editSequence(lastInput, input, true, false);
     editLog.add(new TypingEdit(charCursor, edits.getOperations(), time));
+    /*
+    NOTE: the above call to Levenshtein.editSequence deliberately sets the commonPrefixPossible=true
+    and commonSuffixPossible=false in order to more-accurately reflect the use-case of typing text.
+
+    For example, if the user types "F", "o", "o":
+      editSequence("Fo", "Foo", true, true) returns [+(1, 'o')] whereas
+      editSequence("Fo", "Foo", true, false) returns [+(2, 'o')], which is the one we want
+
+    TODO:
+      Perhaps could use info from the UI event (e.g. cursor position before/after, InputEvent.inputType, etc.)
+      to improve the edit sequence to more accurately reflect the user's action
+    */
 
     // what do we want to know after the update:
-    // 0) acceptedPrefixLength: have any words been accepted (i.e. are to be cleared)? 
+    // 0) acceptedPrefixLength: have any words been accepted (i.e. are to be cleared)?
     // 1) what the new value of the text field should be (some words might have been accepted and are to be cleared)
     // 2) charCursor where the text field now starts (i.e. how much of the text that's been accepted)
-    // 3) how many chars remaining in the text field are correct (used for error highlighting in the UI)
+    // 3) how many chars remaining in the input field are correct (used for error highlighting in the UI)
     // 4) how many words have been typed correctly (used for sending player progress updates to server)
 
     // compute (1): what the new value of the text field should be
@@ -167,50 +267,59 @@ public class TextInputModel {
     // compute (3): how many chars remaining in the text field are correct
     correctCharCount -= acceptedPrefixLength;
     // compute (4): how many words have been typed correctly (used for sending player progress updates to server)
-    if (lastAcceptedCharIndex > 0) {
-      // NOTE: the following computation will fail for logographic languages when lastAcceptedCharIndex == 0, so we special case it
+    if (lastAcceptedCharIndex >= 0) {
       wordCursor = textCharCounts.getWordCountAtCharPosition(lastAcceptedCharIndex + 1);
     }
     return new TextInputUpdate(acceptedPrefixLength, lastInput, charCursor, correctCharCount, wordCursor);
   }
 
   /**
-   * As a result of each call to update, the caller will want to know these 3 quantities:
-   * 0) have any words been accepted (i.e. are to be cleared)?
-   * 1) what the new value of the text field should be (some words might have been accepted and are to be cleared)
-   * 2) charCursor where the text field now starts (i.e. how much of the text that's been accepted)
-   * 3) how many chars remaining in the text field are correct (used for error highlighting in the UI)
-   * 4) how many words have been typed correctly (used for sending player progress updates to server)
+   * The return value of each call to {@link #update(String)}; provides the following information:
+   * <ul>
+   *   <li>have any words been accepted (i.e. are to be cleared)?
+   *     &mdash; {@link #getAcceptedInputPrefixLength()}</li>
+   *   <li>what the new value of the text field should be (some words might have been accepted and are to be cleared).
+   *     &mdash; {@link #getNewInputValue()}</li>
+   *   <li>char position within the {@link #text} where the input field now starts (i.e. how much of the text that's been accepted)
+   *     &mdash; {@link #getNewCharCursor()}</li>
+   *   <li>how many chars remaining in the text field are correct (used for error highlighting in the UI)
+   *     &mdash; {@link #getCorrectInputPrefixLength()}</li>
+   *   <li>how many full words have been typed correctly (used for sending progress updates to server)
+   *     &mdash; {@link #getNewWordCursor()}</li>
+   * </ul>
    */
   public static class TextInputUpdate {
     /**
-     * If words have been accepted, this will give the length of the prefix
-     * that is to be cleared out of the text box as a result of this update.
+     * The length of the prefix that should be cleared out of the text input field,
+     * if any words have been accepted and have to be cleared from the text input field as a result of this update.
+     * @see #enableAcceptingPrefixes
      */
-    private int acceptedInputPrefixLength;
+    private final int acceptedInputPrefixLength;
     /**
-     * What the new value of the text field should be (some words might have been accepted and are to be cleared)
+     * What the new value of the text input element should be
+     * (after stripping the prefix of {@link #acceptedInputPrefixLength}).
+     * @see #enableAcceptingPrefixes
+     * @see #lastInput
      */
-    private String newInputValue;
-
+    private final String newInputValue;
     /**
-     * Cursor in the full text where the text field now starts (i.e. how much of the text that's been accepted)
+     * Character position within the full text where the text field should now start.
+     * In other words, this indicates how much of the text has been accepted and removed from the input field at this point.
      */
-    private int newCharCursor;
-
+    private final int newCharCursor;
     /**
-     * How many chars remaining in the text field are correct (used for error highlighting in the UI)
+     * The number of leading chars in {@link #newInputValue} that are correct.
+     * This can be used for error highlighting in the UI.
      */
-    private int correctInputPrefixLength;
-
+    private final int correctInputPrefixLength;
     /**
-     * How many words have been typed correctly (used for sending player progress updates to server)
+     * How many full words of the text have been accepted at this point.
      */
-    private int newWordCursor;
+    private final int newWordCursor;
 
-    public TextInputUpdate(int acceptedInputPrefixLength, String newInputValue, int newCharCursor, int correctInputPrefixLength, int newWordCursor) {
+    public TextInputUpdate(int acceptedInputPrefixLength, @Nonnull String newInputValue, int newCharCursor, int correctInputPrefixLength, int newWordCursor) {
       this.acceptedInputPrefixLength = acceptedInputPrefixLength;
-      this.newInputValue = newInputValue;
+      this.newInputValue = requireNonNull(newInputValue, "newInputValue");
       this.newCharCursor = newCharCursor;
       this.correctInputPrefixLength = correctInputPrefixLength;
       this.newWordCursor = newWordCursor;
@@ -248,29 +357,74 @@ public class TextInputModel {
       sb.append(')');
       return sb.toString();
     }
+
+    @Override
+    public boolean equals(Object o) {
+      if (this == o)
+        return true;
+      if (o == null || getClass() != o.getClass())
+        return false;
+
+      TextInputUpdate that = (TextInputUpdate)o;
+
+      if (acceptedInputPrefixLength != that.acceptedInputPrefixLength)
+        return false;
+      if (newCharCursor != that.newCharCursor)
+        return false;
+      if (correctInputPrefixLength != that.correctInputPrefixLength)
+        return false;
+      if (newWordCursor != that.newWordCursor)
+        return false;
+      return newInputValue.equals(that.newInputValue);
+    }
+
+    @Override
+    public int hashCode() {
+      int result = acceptedInputPrefixLength;
+      result = 31 * result + newInputValue.hashCode();
+      result = 31 * result + newCharCursor;
+      result = 31 * result + correctInputPrefixLength;
+      result = 31 * result + newWordCursor;
+      return result;
+    }
   }
 
   @Override
   public String toString() {
-    final StringBuilder sb = new StringBuilder();
-    sb.append("TextInputModel");
-    sb.append("(text='").append(text).append('\'');
-    sb.append(", acceptedCharTimings=").append(acceptedCharTimings == null ? "null" : "");
-    for (int i = 0; acceptedCharTimings != null && i < acceptedCharTimings.length; ++i)
-      sb.append(i == 0 ? "" : ", ").append(acceptedCharTimings[i]);
-    sb.append(", editLog=").append(editLog);
-    sb.append(')');
-    return sb.toString();
+    return MoreObjects.toStringHelper(this)
+        .add("text", text)
+        .add("charCursor", charCursor)
+        .add("wordCursor", wordCursor)
+        .add("acceptedCharTimings", acceptedCharTimings)
+        .add("editLog", editLog)
+        .toString();
   }
 
   public int getWordCursor() {
     return wordCursor;
   }
 
+  public int getCharCursor() {
+    return charCursor;
+  }
+
+  /**
+   * @return the number of characters from the {@link #text} that have been recorded in {@link #acceptedCharTimings}.
+   */
+  public int getNumCharsAccepted() {
+    return lastAcceptedCharIndex + 1;
+  }
+
+  public boolean isEnableAcceptingPrefixes() {
+    // TODO(11/17/2021): come up with a better name for this field (and its getter)
+    return enableAcceptingPrefixes;
+  }
+
   public String getText() {
     return text;
   }
 
+  @Nullable
   public TextInputUpdate getLastUpdateResult() {
     return lastUpdateResult;
   }

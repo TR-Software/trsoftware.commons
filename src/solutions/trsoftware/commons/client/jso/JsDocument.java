@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 TR Software Inc.
+ * Copyright 2022 TR Software Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -19,6 +19,7 @@ package solutions.trsoftware.commons.client.jso;
 import com.google.gwt.dom.client.Document;
 import com.google.gwt.dom.client.Element;
 import com.google.gwt.dom.client.NodeList;
+import solutions.trsoftware.commons.client.dom.DomUtils;
 import solutions.trsoftware.commons.client.dom.ParentNode;
 
 import javax.annotation.Nullable;
@@ -80,6 +81,8 @@ public class JsDocument extends Document {
    * @see <a href="https://developer.mozilla.org/en-US/docs/Web/API/Document/querySelectorAll#Browser_compatibility">Browser compatibility</a>
    * @see <a href="https://caniuse.com/#feat=queryselector">Can I use querySelector/querySelectorAll?</a>
    * @see #querySelector(String)
+   * @see ParentNode#querySelectorAll(String)
+   * @see DomUtils#asList(NodeList)
    */
   @Nullable
   public final NodeList<Element> querySelectorAll(String selectors) {
@@ -102,10 +105,12 @@ public class JsDocument extends Document {
    * the specified set of CSS selectors, or {@code null} if there are no matches (or if the browser doesn't support this
    * method).
    *
-   * @see #querySelectorAll(String)
    * @see <a href="https://developer.mozilla.org/en-US/docs/Web/API/Document/querySelector">MDN Reference</a>
    * @see <a href="https://developer.mozilla.org/en-US/docs/Web/API/Document/querySelector#Browser_compatibility">Browser compatibility</a>
    * @see <a href="https://caniuse.com/#feat=queryselector">Can I use querySelector/querySelectorAll?</a>
+   * @see #querySelectorAll(String)
+   * @see ParentNode#querySelector(String)
+   * @see DomUtils#asList(NodeList)
    */
   @Nullable
   public final Element querySelector(String selectors) {

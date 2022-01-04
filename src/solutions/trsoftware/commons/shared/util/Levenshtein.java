@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 TR Software Inc.
+ * Copyright 2022 TR Software Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -16,12 +16,14 @@
 
 package solutions.trsoftware.commons.shared.util;
 
+import com.google.common.collect.ImmutableList;
 import solutions.trsoftware.commons.shared.util.stats.ArgMax;
 
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
+import java.util.*;
 
+import static java.util.Objects.requireNonNull;
 import static solutions.trsoftware.commons.shared.util.ListUtils.arrayList;
 
 /**
@@ -39,24 +41,32 @@ public class Levenshtein {
 
   /**
    * Represents either inserting, deleting, or substituting a particular character
-   * at a specific position.
+   * at a specific position in a string.
    */
   public static abstract class EditOperation {
-    protected int pos;
-    protected char c;
+    protected final int pos;
+    protected final char c;
 
     protected EditOperation(int pos, char c) {
       this.pos = pos;
       this.c = c;
     }
 
+    /**
+     * Applies this edit operation to the given string buffer.
+     * @return the same buffer after the edit
+     */
     public abstract StringBuilder apply(StringBuilder str);
 
-    public abstract String getPrettyName();
+    /**
+     * @return a compact operator-like string describing this operation (e.g. '+', '-', or '$'), to be used in
+     * its {@link #toString()} representation.
+     */
+    public abstract String getOpCode();
 
     @Override
     public String toString() {
-      return getPrettyName() + "(" + pos + ", " + c + ")";
+      return getOpCode() + "(" + pos + ", " + c + ")";
     }
 
     public char getChar() {
@@ -67,27 +77,32 @@ public class Levenshtein {
       return pos;
     }
 
+    /**
+     * Returns a copy of this operation with the position shifted by the given offset.
+     */
+    abstract EditOperation shift(int offset);
+
+    @Override
     public boolean equals(Object o) {
       if (this == o) return true;
-      if (!(o instanceof EditOperation)) return false;
+      if (o == null || getClass() != o.getClass()) return false;
 
       EditOperation that = (EditOperation)o;
 
-      if (c != that.c) return false;
       if (pos != that.pos) return false;
-      if (getClass() != that.getClass()) return false;
-      return true;
+      return c == that.c;
     }
 
+    @Override
     public int hashCode() {
-      int result;
-      result = pos;
+      int result = pos;
       result = 31 * result + (int)c;
       return result;
     }
   }
 
   public static class Insertion extends EditOperation {
+    public static final String OP_CODE = "+";
     public Insertion(int pos, char c) {
       super(pos, c);
     }
@@ -95,24 +110,34 @@ public class Levenshtein {
       str.ensureCapacity(pos);
       return str.insert(pos, c);
     }
-    public String getPrettyName() {
-      return "+";
+    public String getOpCode() {
+      return OP_CODE;
+    }
+    @Override
+    Insertion shift(int offset) {
+      return new Insertion(pos + offset, c);
     }
   }
 
   public static class Deletion extends EditOperation {
+    public static final String OP_CODE = "-";
     public Deletion(int pos, char c) {
       super(pos, c);
     }
     public StringBuilder apply(StringBuilder str) {
       return str.deleteCharAt(pos);
     }
-    public String getPrettyName() {
-      return "-";
+    public String getOpCode() {
+      return OP_CODE;
+    }
+    @Override
+    Deletion shift(int offset) {
+      return new Deletion(pos + offset, c);
     }
   }
 
   public static class Substitution extends EditOperation {
+    public static final String OP_CODE = "$";
     public Substitution(int pos, char c) {
       super(pos, c);
     }
@@ -120,8 +145,12 @@ public class Levenshtein {
       str.setCharAt(pos, c);
       return str;
     }
-    public String getPrettyName() {
-      return "$";
+    public String getOpCode() {
+      return OP_CODE;
+    }
+    @Override
+    Substitution shift(int offset) {
+      return new Substitution(pos + offset, c);
     }
   }
 
@@ -156,27 +185,34 @@ public class Levenshtein {
     }
 
     /**
-     * @return length of the edit sequence, which is equal to the Levenshtein
-     * distance if this is the optimal sequence.
+     * The individual edit ops that comprise this sequence.
      */
     public abstract List<EditOperation> getOperations();
 
-    /** The length of the edit sequence (number of operations) */
+    /**
+     * @return length of the edit sequence, which is equal to the Levenshtein
+     * distance if this is the optimal sequence.
+     */
     public abstract int length();
 
     /**
-     * Returns an analogous edit sequence, but with each operation
-     * shifted n positions to the right.
+     * Returns a copy of this edit sequence with the char position of each operation shifted by the given offset.
      */
-    public EditSequence shift(int n) {
-      return new ShiftedEditSequence(this, n);
+    public EditSequence shift(int offset) {
+      return new ImmutableEditSequence(getOperations().stream().map(op -> op.shift(offset)).collect(ImmutableList.toImmutableList()));
     }
   }
 
-  static class ArrayListEditSequence extends EditSequence {
-    protected ArrayList<EditOperation> operations;
-    ArrayListEditSequence(ArrayList<EditOperation> operations) {
+  /**
+   * Simple implementation of {@link EditSequence} backed by an {@link ImmutableList}.
+   */
+  static class ImmutableEditSequence extends EditSequence {
+    private final ImmutableList<EditOperation> operations;
+    ImmutableEditSequence(ImmutableList<EditOperation> operations) {
       this.operations = operations;
+    }
+    ImmutableEditSequence(List<EditOperation> operations) {
+      this(ImmutableList.copyOf(operations));
     }
     public List<EditOperation> getOperations() {
       return operations;
@@ -187,93 +223,54 @@ public class Levenshtein {
   }
 
 
-  static class ShiftedEditSequence extends ArrayListEditSequence {
-    /**
-     * Creates a copy of the given sequence but with each operation right-shifted
-     * by the given number of places.
-     */
-    ShiftedEditSequence(EditSequence baseSequence, int shift) {
-      this(baseSequence.getOperations(), shift);
-    }
-    /**
-     * Creates a copy of the given sequence but with each operation right-shifted
-     * by the given number of places.
-     */
-    ShiftedEditSequence(List<EditOperation> baseSequenceOps, int shift) {
-      super(new ArrayList<EditOperation>(baseSequenceOps.size()));
-      for (EditOperation op : baseSequenceOps) {
-        int shiftedPos = op.pos + shift;
-        if (op instanceof Deletion)
-          operations.add(new Deletion(shiftedPos, op.c));
-        else if (op instanceof Insertion)
-          operations.add( new Insertion(shiftedPos, op.c));
-        else {
-          assert op instanceof Substitution;
-          operations.add(new Substitution(shiftedPos, op.c));
-        }
-      }
-    }
-  }
+  /**
+   * Recursive implementation of {@link EditSequence} that makes it efficient to append a single {@link EditOperation}
+   * to an existing sequence.
+   */
+  static class LinkedEditSequence extends EditSequence {
+    private final EditSequence prev;
+    private final EditOperation op;
+    private final int length;
 
-  /** Immutable edit sequence implemented using a linked structure. */
-  private static class LinkedEditSequence extends EditSequence {
-    // Benchmark Results (Intel Core 2 Duo T9300):
-    // sequence(lengths 683, 823) took 250 ms.
-    // sequence(lengths 823, 683) took 140 ms.
-
-    private EditSequence prev;
-    private EditOperation op;
-    private int length;
-
-    /** Copy constructor, extending the given sequence with the given operation */
-    private LinkedEditSequence(EditSequence s, EditOperation op) {
+    /** Extends the given sequence with the given operation */
+    LinkedEditSequence(@Nullable EditSequence s, @Nonnull EditOperation op) {
       prev = s;
-      this.op = op;
-      length = s.length() + 1;
+      this.op = requireNonNull(op);
+      // the length of this sequence will be 1 more than the length of the previous sequence
+      length = (s != null ? s.length() : 0) + 1;
     }
 
     public int length() {
       return length;
     }
 
-    /**
-     * @return length of the edit sequence, which is equal to the Levenshtein
-     * distance if this is the optimal sequence.
-     */
     public List<EditOperation> getOperations() {
-      EditOperation[] ret = new EditOperation[length];
-      EditSequence cursor = this;
-      // to avoid too much recursion (stack overflow, go as far back as possible using iteration
-      int i;
-      for (i = length-1; i >= 0; i--) {
-        if (cursor instanceof LinkedEditSequence) {
-          LinkedEditSequence linkedCursor = (LinkedEditSequence)cursor;
-          ret[i] = linkedCursor.op;
-          cursor = linkedCursor.prev;
-        }
-        else
-          break;
+      // collect all the nested operations within this LinkedEditSequence
+      LinkedList<EditOperation> tail = new LinkedList<>();
+      EditSequence current = this;
+      // to avoid any chance of stack overflow due to recursion, go as far back as possible using iteration
+      while (current instanceof LinkedEditSequence) {
+        tail.push(((LinkedEditSequence)current).op);
+        current = ((LinkedEditSequence)current).prev;
       }
-      if (i >= 0) {
-        // if reached the beggining i would have been -1
-        // didn't reach the beginning because cursor isn't a LinkedEditSequence, must use recursion now
-        List<EditOperation> priorOps = cursor.getOperations();
-        // append what we achieved above to the recursive result
-        for (i = i+1; i < ret.length; i++) {
-          priorOps.add(ret[i]);
-        }
-        return priorOps;
+      // we've reached the base of this daisy chain; construct the final list
+      ImmutableList.Builder<EditOperation> ret = ImmutableList.builderWithExpectedSize(length);
+      if (current != null) {
+        ret.addAll(current.getOperations());
       }
-      else
-        return arrayList(ret);
+      ret.addAll(tail);
+      return ret.build();
+      // TODO: maybe cache the result?
     }
   }
 
   /**
-   * This class uses less memory for long edit sequences consisting of the
-   * same operation that LinkedEditSequence.
+   * Efficient implementation of {@link EditSequence} specialized for sequences consisting of just 1 type of operation.
+   *
+   * This class uses less memory than {@link LinkedEditSequence} for long edit sequences consisting of the
+   * same operation.
    */
-  private static abstract class UniformSequence extends EditSequence {
+  static abstract class UniformSequence<T extends EditOperation> extends EditSequence {
     private final String str;
 
     /**
@@ -285,12 +282,12 @@ public class Levenshtein {
       this.str = str;
     }
 
-    protected abstract EditOperation makeOp(int pos, char c);
+    protected abstract T newOp(int pos, char c);
 
     public List<EditOperation> getOperations() {
       ArrayList<EditOperation> ret = new ArrayList<EditOperation>(length());
       for (int i = 0; i < length(); i++) {
-        ret.add(makeOp(i, str.charAt(i)));
+        ret.add(newOp(i, str.charAt(i)));
       }
       return ret;
     }
@@ -300,7 +297,7 @@ public class Levenshtein {
     }
   }
 
-  static class InsertionSequence extends UniformSequence {
+  static class InsertionSequence extends UniformSequence<Insertion> {
     /**
      * Creates a sequence to construct the given string from scratch using
      * repeated insertions.
@@ -308,20 +305,20 @@ public class Levenshtein {
     InsertionSequence(String str) {
       super(str);
     }
-    protected EditOperation makeOp(int pos, char c) {
+    protected Insertion newOp(int pos, char c) {
       return new Insertion(pos, c);  // always insert at the end
     }
   }
 
-  private static class DeletionSequence extends UniformSequence {
+  static class DeletionSequence extends UniformSequence<Deletion> {
     /**
      * Creates a sequence to go from the given string to the empty string
      * via repeated deletions.
      */
-    private DeletionSequence(String str) {
+    DeletionSequence(String str) {
       super(str);
     }
-    protected EditOperation makeOp(int pos, char c) {
+    protected Deletion newOp(int pos, char c) {
       return new Deletion(0, c);  // always delete at the beginning
     }
   }
@@ -331,15 +328,22 @@ public class Levenshtein {
   /**
    * Computes the Levenshtein distance between two strings as well as the
    * corresponding edit sequence.
+   * <p><strong>Caution:</strong>
+   * Although the computed sequence will correctly (and optimally) transform {@code s} into {@code t}, it might not
+   * accurately reflect the desired use-case.
+   * For example, let's consider you're trying to figure out the sequence of characters typed into a text field,
+   * and the user types 'o' following "Fo", {@code editSequence("Fo", "Foo")} will return {@code [+(1, 'o')]},
+   * whereas {@code [+(2, 'o')]} is probably the one you want in this scenario.
    *
-   * @return The shortest edit sequence to transform s into t (which also
-   * gives the Levenshtein distance).
+   * @return The shortest edit sequence to transform s into t (which also gives the Levenshtein distance).
    * @throws NullPointerException if either string is null
    * @throws OutOfMemoryError if the strings are too long (this method uses O(n^2) memory)
    * @see <a href="http://en.wikipedia.org/wiki/Levenshtein_distance">Wikipedia article on Levenshtein distance</a>
    * @author Alex Epshteyn
    */
-  public static EditSequence editSequence(String s, String t) {
+  public static EditSequence editSequence(@Nonnull String s, @Nonnull String t) {
+    requireNonNull(s, "s");  // explicit null check for GWT
+    requireNonNull(t, "t");
     // NOTE: see http://en.wikipedia.org/wiki/Levenshtein_distance to learn how the algorithm works
     // this implementation differs from the simple implementaion given by Wikipedia in 2 ways:
     // 1) only the first two rows of the matrix are kept in memory (to use O(md) <= O(n^2) space instead of O(mdn) <= O(n^3) space, where n is the length of the longest input string, m is the length of the shortest input, and d is the edit distance)
@@ -359,11 +363,11 @@ public class Levenshtein {
 //    System.out.println("Computing edit sequence on strings lengths " + n + "," + m + ": \"" + s + "\", \"" + t + "\"");
     // NOTE: to save memory, could put the shorter string into columns to save memory (i.e. if s < t, call d(t,s) and reverse the output)
 
-    EditSequence p[] = new EditSequence[m + 1]; // 'previous' row of the matrix
-    EditSequence d[] = new EditSequence[m + 1]; // latest row of the matrix
+    EditSequence[] p = new EditSequence[m + 1]; // 'previous' row of the matrix
+    EditSequence[] d = new EditSequence[m + 1]; // latest row of the matrix
 
     // Algorithm Overview: at each step we're asking how to go from the first i chars of t to the first j chars of s
-    // in the dynamic programming matrx, string s is in rows (indices i) and string t is in columns (indices j)
+    // in this dynamic programming matrix, string s is in rows (indices i) and string t is in columns (indices j)
 
     // compute row 0: how to go from the empty string (i.e. first 0 chars of s) to each char of t
     for (int j = 0; j <= m; j++) {
@@ -372,9 +376,9 @@ public class Levenshtein {
 
     for (int i = 1; i <= n; i++) {
       d[0] = new DeletionSequence(s.substring(0, i));  // how to go from the first i chars of s to the empty string (first 0 chars of t)
+      char s_i = s.charAt(i - 1);
       for (int j = 1; j <= m; j++) {
         int jMinus1 = j - 1; // extracted frequently used calculation to speed things up
-        char s_i = s.charAt(i - 1);
         char t_j = t.charAt(jMinus1);
         // we are looking for the best way to go from char s_i to char t_j
 
@@ -408,9 +412,9 @@ public class Levenshtein {
         d[j] = new LinkedEditSequence(best, op);
       }
       // swap the last row and previous row references
-      EditSequence _d[] = p; // placeholder to assist in swapping p and d
+      EditSequence[] tmp = p; // placeholder to assist in swapping p and d
       p = d;
-      d = _d;  // reuse the old array for the next row to avoid extra allocation
+      d = tmp;  // reuse the old array for the next row to avoid extra allocation
     }
 
     // our last action in the above loop was to switch d and p, so p now
@@ -425,9 +429,9 @@ public class Levenshtein {
    * (approximately 25x).
    *
    * <p>
-   * NOTES(Alex E):
+   * Notes:
    * <br>
-   * This code is based on org.apache.commons.lang.StringUtils.getLevenshteinDistance
+   * This code is based on {@link org.apache.commons.lang.StringUtils#getLevenshteinDistance}
    * (which is distributed under the Apache 2.0 license).
    * <br>
    * The space complexity is O(m), where m is the length of the shorter string,
@@ -442,7 +446,10 @@ public class Levenshtein {
    * @throws IllegalArgumentException if either String input <code>null</code>
    * @see <a href="http://en.wikipedia.org/wiki/Levenshtein_distance">Levenshtein Distance (Wikipedia)</a>
    */
-  public static int editDistance(String s, String t) {
+  public static int editDistance(@Nonnull String s, @Nonnull String t) {
+    requireNonNull(s, "s");  // explicit null check for GWT
+    requireNonNull(t, "t");
+
     int n = s.length();
     int m = t.length();
     // base case optimizations
@@ -528,20 +535,20 @@ public class Levenshtein {
   }
 
   /**
-   * This is an incremental version the editDistance method that continues from
+   * This is an incremental version of {@link #editDistance(String, String)} that continues from
    * where a prior computation on shorter strings left off.  If the strings
    * are appended to over time.
-   *
+   * <p>
    * The following example demonstrates the redundant computations that this method
    * can save even after the common prefix and suffix has been removed from the strings.
-   *
+   * <pre>
    * args -> args after prefix stripped -> args after suffix stripped:
-   * ("Hellr W", "Hello World") -> ("r Wo", "o Wo") -> ("r", "o")
-   * ("Hellr Wo", "Hello World") -> ("r Wo", "o Wo") -> ("r", "o")
-   * ("Hellr Woz", "Hello World") -> ("r Woz", "o Wor") -> ("r Woz", "o Wor")
-   * ("Hellr Wozni", "Hello World") -> ("r Wozn", "o Worl") -> ("r Wozn", "o Worl")
+   * ("Hellr W",     "Hello World") -> ("r Wo",    "o Wo")    -> ("r", "o")
+   * ("Hellr Wo",    "Hello World") -> ("r Wo",    "o Wo")    -> ("r", "o")
+   * ("Hellr Woz",   "Hello World") -> ("r Woz",   "o Wor")   -> ("r Woz", "o Wor")
+   * ("Hellr Wozni", "Hello World") -> ("r Wozn",  "o Worl")  -> ("r Wozn", "o Worl")
    * ("Hellr Wozni", "Hello World") -> ("r Wozni", "o World") -> ("r Wozni", "o World")
-   *
+   * </pre>
    * @param s The resulting distance will be for transforming this string into t
    * @param t The resulting distance will be for getting this string from s
    * @param priorResult The result of a prior computation on substrings (proper
@@ -549,6 +556,9 @@ public class Levenshtein {
    * @return
    */
   public static IncrementalEditDistanceResult editDistanceIncremental(String s, String t, IncrementalEditDistanceResult priorResult) {
+    requireNonNull(s, "s");  // explicit null check for GWT
+    requireNonNull(t, "t");
+
     int n = s.length();
     int m = t.length();
 
@@ -660,7 +670,7 @@ public class Levenshtein {
       d = _d; // recycle the array for the next iteration, so we don't have to allocate a new object
     }
 
-    // at this point, the referents of p and d variables may or may not match the orignal
+    // at this point, the referents of p and d variables may or may not match the original
     // by-reference parameters; if they don't match, we have to swap the values
     // of the physical arrays (overwriting their values)
     if (p != pRef) {
@@ -683,7 +693,7 @@ public class Levenshtein {
     String suffix = StringUtils.commonSuffix(s, t);
     int suffixLen = suffix.length();
     if (suffixLen > 0) {
-      // the suffix can be safely ignored without affecting the edit sequence
+      // the suffix can be safely ignored without affecting the edit sequence // TODO(11/11/2021): maybe not... (example "Fo" -> "Foo")
       strings[0] = s.substring(0, s.length() - suffixLen);
       strings[1] = t.substring(0, t.length() - suffixLen);
     }
@@ -727,11 +737,25 @@ public class Levenshtein {
   }
 
   /**
-   * A version of editSequence optimized for strings sharing a common prefix and/or suffix.
-   * Since the time of the algorithm is O(n^2), anything that reduces n helps.
+   * A version of {@link #editSequence(String, String)} optimized for strings sharing a common prefix and/or suffix.
+   * Since the time of the algorithm is <code>O(n<sup>2</sup>)</code>, anything that reduces <code>n</code> helps.
+   * <p><strong>Caution:</strong>
+   * Although the computed sequence will correctly (and optimally) transform {@code s} into {@code t} in either case,
+   * the actual edit operations within it might be different. For example:
+   * <pre>
+   *   // the following invocations all return [+(1, o)]
+   *   editSequence("Fo", "Foo")
+   *   editSequence("Fo", "Foo", false, false)
+   *   editSequence("Fo", "Foo", false, true)
+   *   editSequence("Fo", "Foo", true, true)
+   *   // whereas the following returns [+(2, o)]
+   *   editSequence("Fo", "Foo", true, false):
+   * </pre>
+   *
+   *
    * @param commonPrefixPossible pass true to activate the common prefix optimization
    * @param commonSuffixPossible pass true to activate the common suffix optimization
-   * @return the edit sequence transforming s into t
+   * @return an optimal edit sequence transforming {@code s} into {@code t}
    *  */
   public static EditSequence editSequence(String s, String t, boolean commonPrefixPossible, boolean commonSuffixPossible) {
     // if the strings share a common prefix and/or suffix, we can speed up the
@@ -739,7 +763,7 @@ public class Levenshtein {
     // later (the suffix has no bearing on the edit sequence)
     String[] strings = new String[]{s, t};
     if (commonSuffixPossible)
-      stripCommonSuffix(strings); // we can forget about the suffix now, since it has no bearing on the output
+      stripCommonSuffix(strings); // we can forget about the suffix now, since it has no bearing on the output  TODO: or does it? ("Fo" -> "Foo" example)
     int prefixLen = 0;
     if (commonPrefixPossible)
       prefixLen = stripCommonPrefix(strings);
@@ -887,7 +911,7 @@ public class Levenshtein {
   /**
    * Produces a list of TextRuns, which account for all the similarities
    * and differences between strings s and t (i.e. how to transform s into t).
-   * Uses longestCommonSubsequence to come up with an answer.
+   * Uses {@link #longestCommonSubsequence(String, String)} to come up with an answer.
    */
   public static Diffs diff(String s, String t) {
     Diffs diffs = diffHelperUnmergedDiffsGivenLCS(s, t, longestCommonSubsequence(s, t));
@@ -997,7 +1021,7 @@ public class Levenshtein {
   }
 
   public static class Diffs implements Iterable<TextRun> {
-    private ArrayList<TextRun> runs = new ArrayList<TextRun>();
+    private ArrayList<TextRun> runs;
     public Diffs(ArrayList<TextRun> runs) {
       this.runs = runs;
     }

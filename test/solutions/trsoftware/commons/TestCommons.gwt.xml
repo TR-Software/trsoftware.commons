@@ -1,5 +1,5 @@
 <!--
-  ~ Copyright 2021 TR Software Inc.
+  ~ Copyright 2022 TR Software Inc.
   ~
   ~ Licensed under the Apache License, Version 2.0 (the "License"); you may not
   ~ use this file except in compliance with the License. You may obtain a copy of
@@ -27,17 +27,51 @@
   <inherits name="solutions.trsoftware.commons.Debug"/>
   <set-property name="debug" value="on"/>
 
+  <inherits name="com.google.gwt.junit.JUnit"/>
+
   <!--
-    We don't want remote logging though, because it clutters the console with duplicated messages.
-    Normally, it would suffice to set "gwt.logging.simpleRemoteHandler" to "DISABLED",
-    but `gwt-user.jar!/com/google/gwt/junit/JUnit.gwt.xml` sets it to "ENABLED", which trumps our setting,
-    so we have to got a step further and actually replace com.google.gwt.logging.client.SimpleRemoteLogHandler
-    with an explicit deferred binding rule (see `gwt-user.jar!/com/google/gwt/logging/LoggingDisabled.gwt.xml`)
+    We define 2 new properties that allow unit tests to alter their behavior depending on whether or not they are running
+    with HtmlUnit (which doesn't fully emulate modern browsers, and may cause some tests to fail).
+
+    1) runStyleHtmlUnit:
+          boolean property that allows deferred binding based on whether the module is running in HtmlUnit
+    2) junit.runStyle:
+          the complete string value of the "-runStyle" arg in the "gwt.args" system property
+
+    These properties are automatically set in BaseGwtTestCase based on the "gwt.args" system property and can be
+    accessed at runtime via solutions.trsoftware.commons.client.testutil.RunStyleInfo.
+
+    @see
+      - http://www.gwtproject.org/doc/latest/DevGuideTesting.html
+      - http://www.gwtproject.org/doc/latest/DevGuideTestingHtmlUnit.html
   -->
-  <set-property name="gwt.logging.simpleRemoteHandler" value="DISABLED"/>
-  <replace-with class="com.google.gwt.logging.client.NullLogHandler">
-    <when-type-is class="com.google.gwt.logging.client.SimpleRemoteLogHandler" />
-  </replace-with>
+  <define-property name="runStyleHtmlUnit" values="true,false"/>
+  <collapse-property name="runStyleHtmlUnit" values="*" />
+  <!-- TODO: provide a default value for runStyleHtmlUnit? (Just in case running a test that doesn't extend BaseGwtTestCase, which sets it) -->
+  <define-configuration-property name="junit.runStyle" is-multi-valued="false"/>
+
+  <generate-with class="solutions.trsoftware.commons.rebind.RunStyleInfoGenerator">
+    <when-type-assignable class="solutions.trsoftware.commons.client.testutil.RunStyleInfo"/>
+  </generate-with>
+
+  <!--
+    We use the "runStyleHtmlUnit" property (defined above) to disable "gwt.logging.simpleRemoteHandler" when
+    running with HtmlUnit (otherwise every message would appear twice in the test runner GUI), but keep it
+    enabled for "-runStyle Manual" (otherwise the test runner GUI will not display any logging output at all).
+
+    NOTE: In order to make this work, we must explicitly inherit com.google.gwt.junit.JUnit in this module.
+    Otherwise, GWT's JUnitShell will create a "synthetic" version of this module (e.g. "solutions.trsoftware.commons.TestCommons.JUnit")
+    in which any property settings that are also defined in com.google.gwt.junit.JUnit will overwrite the ones here.
+    One such property is "gwt.logging.simpleRemoteHandler", which the com.google.gwt.junit.JUnit module sets to ENABLED.
+
+    @see
+      - gwt-user.jar!/com/google/gwt/junit/JUnit.gwt.xml
+      - com.google.gwt.junit.CompileStrategy.maybeCompileModuleImpl2
+  -->
+  <set-property name="gwt.logging.simpleRemoteHandler" value="DISABLED">
+    <when-property-is name="runStyleHtmlUnit" value="true"/>
+  </set-property>
+
 
   <source path="client">
     <!-- All tests that don't extend GWTTestCase and use code that's not GWT-compatible
@@ -46,6 +80,10 @@
   </source>
 
   <!-- These servlets are used by unit tests to run code in a JVM instead of GWT -->
+  <!--
+    TODO(12/19/2021): maybe unify these servlets into a single "CommonsTestServlet"?
+      - this would allow adding future test functionality without creating a new servlet for each new test case
+  -->
   <servlet path="/numberFormatterServlet"
            class="solutions.trsoftware.commons.server.bridge.rpc.NumberFormatTestServiceImpl"/>
 

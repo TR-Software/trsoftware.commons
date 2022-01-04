@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 TR Software Inc.
+ * Copyright 2022 TR Software Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -21,8 +21,13 @@ import com.google.gwt.dom.client.Node;
 import com.google.gwt.dom.client.NodeList;
 import solutions.trsoftware.commons.client.jso.JsDocument;
 
+import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.*;
+import java.util.stream.Stream;
+import java.util.stream.StreamSupport;
+
+import static solutions.trsoftware.commons.client.dom.DomQuery.NodeVisitor.*;
 
 /**
  * Performs lookups on the native DOM hierarchy.
@@ -33,8 +38,18 @@ import java.util.*;
  */
 public class DomQuery {
 
+  // TODO(12/10/2021): move all methods to DomUtils and get rid of this class
 
-  /** Returns all children of parent matching the given tag name */
+  /**
+   * Returns all children of parent matching the given tag name.
+   *
+   * <p style="color: #0073BF; font-weight: bold;">
+   *   TODO(12/7/2021): delete this unused method, or repurpose it as a BFS version of {@link #walkNodeTree(Node, NodeVisitor, int)}
+   *   and {@link NodeTreeIterator}
+   * </p>
+   *
+   * @deprecated use {@link ParentNode#querySelectorAll(String)} instead
+   */
   public static <T extends Element> Set<T> findChildrenByTagName(Element parent, String tagName, int maxIterations) {
     if (parent == null)
       return Collections.emptySet();
@@ -59,11 +74,14 @@ public class DomQuery {
     return matched;
   }
 
+
   /**
    * Adds the given node's children from a NodeList (which isn't a
    * java.util - compatible collection) to a standard List structure.
    *
-   * This method may be overridden to facilitate unit testing.
+   * <p style="color: #0073BF; font-weight: bold;">
+   *   TODO: can use {@link DomUtils#asList(NodeList)} for this
+   * </p>
    */
   private static void enqueueChildren(Node node, List<Node> queue) {
     NodeList<Node> childNodes = node.getChildNodes();
@@ -75,55 +93,151 @@ public class DomQuery {
   }
 
   /**
-   * Returns a {@link NodeList} of all of the document's {@link Element Elements}
-   * matching the specified group of selectors.
+   * Performs a recursive depth-first (pre-order) traversal of a DOM subtree using the given visitor,
+   * which receives the node and its depth as arguments for every element visited.
+   * To stop the traversal at any time, the visitor can return {@code false} from {@link NodeVisitor#visit(Node, int)}.
    * <p>
-   * <b>Example:</b> {@code document.querySelectorAll("#main, p.warning, p.note")}
+   * This implementation assumes that the node tree contains no reference cycles (otherwise the traversal will continue
+   * until a stack overflow error).
    *
-   * @param selectors A DOMString containing one or more selectors to match against.
-   * This string must be a valid CSS selector string; if it's not, a SyntaxError exception is thrown.
-   * See <a href="https://developer.mozilla.org/en-US/docs/Web/API/Document_object_model/Locating_DOM_elements_using_selectors">
-   *   Locating DOM elements using selectors</a> for more information about using selectors to identify elements.
-   * Multiple selectors may be specified by separating them using commas.
-   *
-   * @return A non-live {@link NodeList} containing one {@link Element} object for each element that matches at least one
-   * of the specified selectors or an empty {@link NodeList} in case of no matches.  Returns {@code null} if the method
-   * is not supported by the current browser.
-   *
-   * @see <a href="https://developer.mozilla.org/en-US/docs/Web/API/Document/querySelectorAll">MDN Reference</a>
-   * @see <a href="https://developer.mozilla.org/en-US/docs/Web/API/Document/querySelectorAll#Browser_compatibility">Browser compatibility</a>
-   * @see <a href="https://caniuse.com/#feat=queryselector">Can I use querySelector/querySelectorAll?</a>
-   * @see #querySelector(String)
+   * @param root the root of the DOM subtree (at depth 0).
+   * @param visitor to receive the visited nodes and control the traversal
+   * @return {@code true} iff the traversal visited every node in the subtree (i.e. wasn't interrupted by the visitor
+   *     returning {@code false}).
+   * @see <a href="https://developer.mozilla.org/en-US/docs/Web/API/Node#recurse_through_child_nodes">
+   *     JavaScript code that inspired this implementation</a>
    */
-  @Nullable
-  public static NodeList<Element> querySelectorAll(String selectors) {
-    return JsDocument.get().querySelectorAll(selectors);
+  public static void walkNodeTree(Node root, NodeVisitor visitor) {
+    walkNodeTree(root, visitor, 0);
   }
 
   /**
-   * Returns the first {@link Element} within the document that matches the specified selector, or group of selectors.
-   * If no matches are found, null is returned.
-   * <p>
-   * <b>Example:</b> {@code document.querySelector("#main, p.warning, p.note")}
+   * Recursive implementation of {@link #walkNodeTree(Node, NodeVisitor)}.
    *
-   * @param selectors A DOMString containing one or more selectors to match against.
-   * This string must be a valid CSS selector string; if it's not, a SyntaxError exception is thrown.
-   * See <a href="https://developer.mozilla.org/en-US/docs/Web/API/Document_object_model/Locating_DOM_elements_using_selectors">
-   *   Locating DOM elements using selectors</a> for more information about using selectors to identify elements.
-   * Multiple selectors may be specified by separating them using commas.
-   *
-   * @return An {@link Element HTMLElement} representing the first element in the document that matches
-   * the specified set of CSS selectors, or {@code null} if there are no matches (or if the browser doesn't support this
-   * method).
-   *
-   * @see #querySelectorAll(String)
-   * @see <a href="https://developer.mozilla.org/en-US/docs/Web/API/Document/querySelector">MDN Reference</a>
-   * @see <a href="https://developer.mozilla.org/en-US/docs/Web/API/Document/querySelector#Browser_compatibility">Browser compatibility</a>
-   * @see <a href="https://caniuse.com/#feat=queryselector">Can I use querySelector/querySelectorAll?</a>
+   * @param depth the depth of the given root node (typically 0)
    */
-  @Nullable
-  public static Element querySelector(String selectors) {
-    return JsDocument.get().querySelector(selectors);
-  };
+  private static int walkNodeTree(Node root, NodeVisitor visitor, int depth) {
+    /*
+      TODO: consider generalizing this to allow more traversal types, like BFS (see solutions.trsoftware.commons.shared.util.trees.TraversalStrategy)
+        - can repurpose the old DomQuery.findChildrenByTagName implementation for BFS
+    */
 
+    int result = visitor.visit(root, depth);
+    if ((result & TERMINATE) != 0)
+      return TERMINATE;
+    else if ((result & SKIP_SUBTREE) == 0 && root.hasChildNodes()) {
+      NodeList<Node> childNodes = root.getChildNodes();
+      for (int i = 0; i < childNodes.getLength(); i++) {
+        Node child = childNodes.getItem(i);
+        int childResult = walkNodeTree(child, visitor, depth + 1);
+        if ((childResult & TERMINATE) != 0)
+          return TERMINATE;
+        else if ((childResult & SKIP_SIBLINGS) != 0)
+          break;
+      }
+    }
+    return result;
+  }
+
+  /**
+   * Callback invoked during a DOM traversal with {@link #walkNodeTree(Node, NodeVisitor)}
+   */
+  public interface NodeVisitor {
+    /**
+     * Continue the traversal, visiting all children and siblings of the current node.
+     */
+    int CONTINUE = 0;
+    /**
+     * Terminate the traversal immediately without visiting any more nodes.
+     */
+    int TERMINATE = 1;
+    /**
+     * Skip the subtree of the current node,
+     * but still visit its siblings (unless combined with {@link #SKIP_SIBLINGS}).
+     */
+    int SKIP_SUBTREE = 2;
+    /**
+     * Don't visit any other siblings of the current node,
+     * but still visit its subtree (unless combined with {@link #SKIP_SUBTREE}).
+     */
+    int SKIP_SIBLINGS = 4;
+    /**
+     * Skip both the subtree and the siblings of the current node.
+     */
+    int SKIP_SUBTREE_AND_SIBLINGS = SKIP_SUBTREE | SKIP_SIBLINGS;
+
+    /**
+     * Invoked for every node visited during a DOM traversal with {@link #walkNodeTree(Node, NodeVisitor)}.
+     *
+     * @param node the current node being visited
+     * @param depth the depth of the node in the tree (starting with {@code 0} for the root node).
+     * @return a bitfield that determines how to continue (or terminate) the traversal:
+     *   either {@link #CONTINUE}, {@link #TERMINATE}, {@link #SKIP_SUBTREE}, {@link #SKIP_SIBLINGS},
+     *   or {@link #SKIP_SUBTREE_AND_SIBLINGS}
+     */
+    int visit(Node node, int depth);
+  }
+
+  /**
+   * Streams all the nodes encountered during a depth-first (pre-order) traversal of a DOM subtree starting at the given node.
+   * The main differences from {@link #walkNodeTree(Node, NodeVisitor)} are that this doesn't report the node depth
+   * nor provides a way to control the traversal.
+   * <p>
+   * The behavior of the returned stream is undefined in the presence of structural modifications to the given node's
+   * subtree, therefore it's best to consume the stream immediately upon receipt.
+   *
+   * @param root the root of the DOM subtree (at depth 0).
+   * @return a stream that iterates over all the nodes in the subtree, in depth-first order
+   * @see NodeTreeIterator
+   * @see #walkNodeTree(Node, NodeVisitor)
+   */
+  public static Stream<Node> walkNodeTree(Node root) {
+    return StreamSupport.stream(Spliterators.spliteratorUnknownSize(new NodeTreeIterator(root),
+        Spliterator.ORDERED | Spliterator.DISTINCT | Spliterator.NONNULL), false);
+  }
+
+
+  /**
+   * Iterates over all the nodes encountered during a depth-first (pre-order) traversal of a DOM subtree starting at
+   * a given node.
+   * <p>
+   * NOTE: This iterator doesn't provide any "fail-fast" guarantee in the presence of structural modifications
+   * to the given node's subtree, therefore it's best to consume it immediately upon construction.
+   *
+   * @see #walkNodeTree(Node)
+   * @see #walkNodeTree(Node, NodeVisitor)
+   */
+  public static class NodeTreeIterator implements Iterator<Node> {
+    /*
+      TODO: consider generalizing this to allow more traversal types (see solutions.trsoftware.commons.shared.util.trees.TraversalStrategy)
+        - can use the LinkedList as a queue instead of a stack for a bread-first traversal
+      TODO: can try to implement "fail-fast" behavior using a MutationObserver (https://developer.mozilla.org/en-US/docs/Web/API/MutationObserver)
+    */
+    private final LinkedList<Node> stack = new LinkedList<>();
+
+    /**
+     * @param root the starting node for the traversal
+     */
+    public NodeTreeIterator(Node root) {
+      stack.push(root);
+    }
+
+    @Override
+    public boolean hasNext() {
+      return !stack.isEmpty();
+    }
+
+    @Override
+    public Node next() {
+      Node node = stack.pop();  // NOTE: this throws NoSuchElementException, as required by the Iterator contract
+      if (node.hasChildNodes()) {
+        NodeList<Node> childNodes = node.getChildNodes();
+        // push child nodes in reverse order to maintain left-to-right encounter order (see https://en.wikipedia.org/wiki/Depth-first_search#:~:text=These%20two%20variations,D%2C%20C%2C%20G.)
+        for (int i = childNodes.getLength() - 1; i >= 0; i--) {
+          stack.push(childNodes.getItem(i));
+        }
+      }
+      return node;
+    }
+  }
 }

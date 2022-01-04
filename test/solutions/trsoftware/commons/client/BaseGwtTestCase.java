@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 TR Software Inc.
+ * Copyright 2022 TR Software Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -12,13 +12,14 @@
  * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
  * License for the specific language governing permissions and limitations under
  * the License.
- *
  */
 
 package solutions.trsoftware.commons.client;
 
 import com.gargoylesoftware.htmlunit.BrowserVersion;
 import com.google.gwt.junit.client.GWTTestCase;
+import solutions.trsoftware.commons.client.testutil.RunStyleValue;
+import solutions.trsoftware.commons.rebind.RunStyleInfoGenerator;
 import solutions.trsoftware.commons.server.io.file.FileUtils;
 import solutions.trsoftware.commons.shared.util.MapUtils;
 import solutions.trsoftware.gwt.GwtArgs;
@@ -35,10 +36,11 @@ import java.util.Map;
  * (see {@link #maybeModifyGwtArgs()}).
  *
  * <p>
- * There are two versions of this class. This version is the binary version that is able to override {@link #runTest()},
- * but it's not compilable with GWT.  The other version is a translatable class that is used within the browser.
- * See the <code>translatable</code> subpackage for the translatable implementation.
- * </p>
+ * <b>NOTE:</b> There are two versions of this class. This is the binary version that is able to override
+ * {@link #runTest()}, but is not compilable with GWT.
+ *
+ * The other version is just an empty stub for the GWT-compiled code
+ * (see {@link solutions.trsoftware.commons.translatable}).
  *
  * @see GwtArgs
  * @author Alex
@@ -82,12 +84,14 @@ public abstract class BaseGwtTestCase extends GWTTestCase {
             (JDK1.6 will incorrectly parse the -Dgwt.args from the command line when it contains spaces
          So instead of adding -localWorkers, we have to make sure that they are not being used at all:
         */
-        if (gwtArgs.remove(GwtArgs.LOCAL_WORKERS) != null) {
+        // TODO(12/30/2021): maybe try that again now that we're using Java 8 and GWT 2.8.2?
+        if (gwtArgs.remove(GwtArgs.LOCAL_WORKERS)) {
           System.err.printf("%s is removing %s from %s to avoid errors (see inline comment for explanation)%n", ourClassName, GwtArgs.LOCAL_WORKERS, GwtArgs.SYS_PROP_GWT_ARGS);
         }
       }
 
       if (gwtArgs.isWebMode()) {
+        // TODO(11/30/2021): make sure this can handle a different RunStyleHtmlUnit impl (e.g. solutions.trsoftware.gwt.junit.RunStyleHtmlUnit255)
         if (modifyRunStyle && !gwtArgs.containsKey(GwtArgs.RUN_STYLE) && !gwtArgs.containsKey(GwtArgs.USER_AGENTS)) {
           // if no -runStyle specified, we'll use our own setting, so that we can restrict the -userAgent property to
           // only include permutations for the browsers that will be testing on (otherwise,
@@ -120,9 +124,16 @@ public abstract class BaseGwtTestCase extends GWTTestCase {
             BrowserVersion.EDGE.getNickname(), GwtArgs.RUN_STYLE, gwtArgs.get(GwtArgs.RUN_STYLE));
       }
 
+      // append additional -setProperty args based on current -runStyle
+      RunStyleValue runStyle = gwtArgs.getRunStyle();
+      if (runStyle != null) {
+        gwtArgs.setProperty(RunStyleInfoGenerator.PROPERTY_RUN_STYLE, runStyle.toString());
+        boolean htmlUnit = runStyle.getName().contains("HtmlUnit");
+        gwtArgs.setProperty(RunStyleInfoGenerator.PROPERTY_HTML_UNIT, String.valueOf(htmlUnit));
+      }
+
       // we need to use separate dirs depending on the configuration of the running tests to avoid a race condition
       // arising from tests using different builds using the same -war dir (see the doc for this method for more details)
-      String userDir = System.getProperty("user.dir");
       String targetSubdirName = gwtArgs.isWebMode() ? "gwtWebModeTests" : "gwtHostedModeTests";
 
       if (gwtArgs.containsKey(GwtArgs.USER_AGENTS))
@@ -136,10 +147,6 @@ public abstract class BaseGwtTestCase extends GWTTestCase {
       gwtArgs.put(GwtArgs.GEN, genDir.toString());
       gwtArgs.put(GwtArgs.WAR, warDir.toString());
       gwtArgs.put(GwtArgs.WORK_DIR, workDir.toString());
-
-//      gwtArgs.putIfValueNotStartsWith(GwtArgs.GEN, userDir, ServerIOUtils.joinPath(userDir, targetSubdir, GwtArgs.GEN));
-//      gwtArgs.putIfValueNotStartsWith(GwtArgs.WAR, userDir, ServerIOUtils.joinPath(userDir, targetSubdir, GwtArgs.WAR));
-//      gwtArgs.putIfValueNotStartsWith(GwtArgs.WORK_DIR, userDir, ServerIOUtils.joinPath(userDir, targetSubdir, "temp"));
 
       LinkedHashMap<String, String> newSysProps = MapUtils.linkedHashMap(
           GwtArgs.SYS_PROP_GWT_ARGS, gwtArgs.toString()/*,

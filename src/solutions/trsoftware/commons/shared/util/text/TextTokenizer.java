@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 TR Software Inc.
+ * Copyright 2022 TR Software Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -20,19 +20,23 @@ import solutions.trsoftware.commons.shared.util.StringUtils;
 
 /**
  * A way to convert text to tokens and back to text again, which can
- * be implemented depending on source language (e.g. English vs. Chinese).
+ * be implemented in different ways, depending on the source language (e.g. English vs. Chinese).
  * <p>
- * All implementing classes should be stateless (the same instance can be
- * reused and shared between threads)
+ * All implementing classes should be stateless (so that the same instance can be
+ * reused and shared between threads).
  *
  * <p style="color: #0073BF; font-weight: bold;">
  * TODO: see {@link java.text.BreakIterator} which might be a better choice than this class
  * </p>
  *
  * @author Alex
+ * @see java.text.BreakIterator
  */
 public interface TextTokenizer {
 
+  /**
+   * @return the word separator to be used for {@linkplain #join(String[]) joining} the tokens into a full text string.
+   */
   String getDelimiter();
 
   /** Breaks up the given text into tokens */

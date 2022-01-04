@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 TR Software Inc.
+ * Copyright 2022 TR Software Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -64,8 +64,8 @@ public abstract class Events {
 
 
   /** Debugging method */
-  public static String toString(MouseEvent event) {
-    return event.getAssociatedType().getName() + "[" + StringUtils.join(",",
+  public static String toDebugString(MouseEvent<?> event) {
+    return event.toDebugString() + "[" + StringUtils.join(",",
         methodCallToString("coords", event.getX(), event.getY()),
         methodCallToString("screen=", event.getScreenX(), event.getScreenY()),
         methodCallToString("client=", event.getClientX(), event.getClientY())

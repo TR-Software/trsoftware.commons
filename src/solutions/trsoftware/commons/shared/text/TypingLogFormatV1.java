@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 TR Software Inc.
+ * Copyright 2022 TR Software Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -23,32 +23,42 @@ import java.util.Iterator;
 import java.util.List;
 
 /**
- * Provides a parser and a formatter for the TypingLog v1 string encoding.
+ * Defines a parser and a formatter for the "TLv1" encoding of a {@link TypingLog}.
+ * <p>
+ * The format can be described by the following pseudo-grammar:
+ * <pre>
+ * {@code <TypingLog>}:
+ *   {@code <version> "," <language> "," <charTimings> "|" <editLog>}
+ * {@code <version>}:
+ *    "TLv" <i>N</i>
+ *      (where <i>N</i> is the version number, e.g. "TLv1")
+ * {@code <language>}:
+ *    "<i>xx</i>"
+ *      (where "<i>xx</i>" is an ISO 639-1 language code, e.g. "en")
+ * {@code <charTimings>}:
+ *    N "," C<sub>1</sub>T<sub>1</sub> "," &hellip; "," T<sub>N</sub>C<sub>N</sub>
+ *      (where <i>N</i> is the length of the text,
+ *             <i>C</i><sub>i</sub> is the <i>i</i>-th char in the text,
+ *             <i>T</i><sub>i</sub> is the {@link TypingLog#charTimings time} elapsed since <i>T</i><sub>i-1</sub>)
+ * {@code <editLog>}:
+ *   {@code *<editGroup>}
+ * {@code <editGroup>}:
+ *    offset "," N "," &lt;TypingEdit<sub>1</sub>&gt; "," &hellip; "," &lt;TypingEdit<sub>N</sub>&gt;
+ *      (a group of <i>N</i> {@link TypingEdit}s sharing the same {@link TypingEdit#offset offset})
+ * {@code <TypingEdit>}:
+ *    T<sub>i</sub> "," &lt;EditOperation<sub>1</sub>&gt; "," &hellip; "," &lt;EditOperation<sub>k</sub>&gt;
+ *      (where <i>T<sub>i</sub></i> is the {@link TypingEdit#time time} elapsed since <i>T<sub>i-1</sub></i>)
+ * {@code <EditOperation>}:
+ *    p "+" c  (character <i>c</i> inserted at position <i>p</i>)
+ *    p "-" c  (character <i>c</i> deleted at position <i>p</i>)
+ *    p "$" c  (character <i>c</i> substituted at position <i>p</i>)
+ * </pre>
  *
- * The string serialization format is described by the following grammar spec,
- * which aims to eliminate redundancy as much as possible.  For instance,
- * the time values are all offsets from the previous value to reduce the number
- * of characters needed to represent it.
- *
- * TypingLog:
- *   version,language,charTimings,editLog
- * version:
- *   "TLvX"  (where X is the version number, e.g. "TLv1")
- * language:
- *   ISO 639-1 language code (2 chars)
- * charTimings:
- *   N,T_1,...,T_N  (where N = charTimings.length and T_i is the time elapsed since T_i-1)
- * editLog:
- *   wordCursor,N,TypingEdit_1,...,TypingEdit_N, (where N = number of TypingEdits at this same wordCursor)
- * TypingEdit:
- *   time,EditOperation_1...EditOperation_k
- * EditOperation:
- *   p$c  (character c substituted at position p)
- *   p-c  (character c deleted at position p)
- *   p+c  (character c inserted at position p)
- *
+ * This encoding aims to reduce the size of the output as much possible.
+ * For instance, each time value is represented as an offset from the previous value, and separators
+ * are omitted wherever possible (e.g. the entries in {@code <charTimings>}).
  * 
- * Nov 23, 2012
+ * @since Nov 23, 2012
  * @author Alex
  */
 public class TypingLogFormatV1 {

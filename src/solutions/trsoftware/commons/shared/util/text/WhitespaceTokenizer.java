@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 TR Software Inc.
+ * Copyright 2022 TR Software Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -21,12 +21,16 @@ import solutions.trsoftware.commons.shared.util.StringTokenizer;
 
 import java.util.List;
 
-
 /**
- * Oct 19, 2009
+ * Uses {@code " "} as the delimiter to tokenize a text into an array of individual words.
+ *
  * @author Alex
+ * @see StringTokenizer#StringTokenizer(String)
+ * @see LogographicTokenizer
  */
 public class WhitespaceTokenizer implements TextTokenizer {
+
+  public static final transient WhitespaceTokenizer INSTANCE = new WhitespaceTokenizer();
 
   @Override
   public String getDelimiter() {

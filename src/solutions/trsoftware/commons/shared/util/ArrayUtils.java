@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 TR Software Inc.
+ * Copyright 2022 TR Software Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -52,24 +52,23 @@ public class ArrayUtils {
     return StringUtils.join(delimiter, array);
   }
 
-  /** Linearly scans the array for the given element */
+  /**
+   * Linearly scans the array for the given element.
+   *
+   * @return {@code true} iff found
+   * @see com.google.common.primitives.Ints#contains(int[], int)
+   */
   public static boolean contains(int[] array, int element) {
-    for (int elt : array) {
-      if (elt == element)
-        return true;
-    }
-    return false;
-    // TODO: this method duplicates indexOf(int[], int)
+    return indexOf(array, element) >= 0;
   }
 
-  /** Linearly scans the array for the given element */
-  public static boolean contains(Object[] array, Object element) {
-    for (Object elt : array) {
-      if (elt != null && elt.equals(element))  // TODO: this seems inferior to indexOf, which accounts for nulls; why not just delegate to indexOf?
-        return true;
-    }
-    return false;
-    // TODO: this method duplicates indexOf(Object[], int)
+  /**
+   * Linearly scans the array for the given element.
+   *
+   * @return {@code true} iff found
+   */
+  public static <T> boolean contains(T[] array, T element) {
+    return indexOf(array, element) >= 0;
   }
 
   /**
@@ -202,10 +201,11 @@ public class ArrayUtils {
    *
    * @return The reference to the same array if it wasn't resized or a new
    * one if it was.
+   * @deprecated
    */
   public static <T> T[] flexibleArrayAdd(T[] array, int index, T value) {
     // can't instantiate T[] directly, so going through an intermediate ArrayList
-    // TODO(12/16/2019): can use Arrays.copyOf(T[], int) to avoid using an intermediate list
+    // TODO(12/16/2019): can use Arrays.copyOf(T[], int) and System.arraycopy() to avoid using an intermediate list
     if (array == null || index >= array.length) {
       ArrayList<T> newArrayList = new ArrayList<T>(index+1);
       // must append nulls to the array list since the index is greater than its size
@@ -216,6 +216,7 @@ public class ArrayUtils {
       return (T[])newArrayList.toArray();
     }
     else {
+      // TODO(1/3/2022): potential bug: this overwrites the existing element at array[index]
       array[index] = value;
       return array;
     }
@@ -241,6 +242,7 @@ public class ArrayUtils {
       System.arraycopy(array, 0, newArray, 0, array.length);
       array = newArray;
     }
+    // TODO(1/3/2022): potential bug: this overwrites the existing element at array[index]
     array[index] = value;
     return array;
   }
@@ -395,6 +397,9 @@ public class ArrayUtils {
   /**
    * Returns a List with the selected (endIndex - startIndex + 1) elements
    * of the given array.
+   *
+   * @deprecated
+   * @see Arrays#copyOfRange(Object[], int, int)
    */
   public static <T> List<T> slice(T[] arr, int startIndex, int endIndex) {
     ArrayList<T> ret = new ArrayList<T>(endIndex - startIndex + 1);
@@ -422,6 +427,12 @@ public class ArrayUtils {
   public static Object copy(Object srcArr, Object destArr, int length) {
     System.arraycopy(srcArr, 0, destArr, 0, length);
     return destArr;
+  }
+
+  public static String[] merge(String[] a, String[] b) {
+    String[] ret = Arrays.copyOf(a, a.length + b.length);
+    System.arraycopy(b, 0, ret, a.length, b.length);
+    return ret;
   }
 
   public static int[] grow(int[] original, int newLen) {

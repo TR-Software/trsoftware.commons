@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 TR Software Inc.
+ * Copyright 2022 TR Software Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -50,8 +50,8 @@ public class IncrementalJob extends IncrementalLoop {
   private Task currentTask;
 
   /**
-   * We use this state variable to minimize the number of times currentTask.hasNext() needs to be called during the job
-   * execution and to avoid executing any more iterations than necessary.
+   * We use this state variable to minimize the number of times <code>currentTask.{@link Task#hasNext() hasNext()}</code>
+   * needs to be called during the job execution and to avoid executing any more iterations than necessary.
    * <p>
    * This idea was borrowed from {@link com.google.common.collect.AbstractIterator}
    */
@@ -60,7 +60,7 @@ public class IncrementalJob extends IncrementalLoop {
   private enum State {
     /** We don't yet know what chunk to execute next or have already executed it */
     NOT_READY,
-    /** We have determined what chunk to execute next and haven't executed it yet */
+    /** We have determined what chunk to execute next but haven't executed it yet */
     READY,
     /** We have reached the end of the tasks and are finished */
     DONE,

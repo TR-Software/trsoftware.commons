@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 TR Software Inc.
+ * Copyright 2022 TR Software Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -94,11 +94,12 @@ public enum Language {
    * http://en.wikipedia.org/wiki/Korean_alphabet) "In contrast to Chinese and
    * Japanese, Korean is typed in a similar way to Western languages."
    * (http://en.wikipedia.org/wiki/Keyboard_layout)
+   * @see <a href="http://en.wikipedia.org/wiki/Korean_alphabet">"Korean alphabet" on Wikipedia</a>
    */
   KOREAN("ko") {
     @Override
     public double charsPerWord() {
-      return 2.5;  // based on observation that English text translated into Thai uses 50% of the number of chars the English text had (run TextFileTranslationPruner.java to get the actual numbers)
+      return 2.5;  // based on observation that English text translated into Korean uses approx. 50% fewer chars (run TextFileTranslationPruner.java to get the actual numbers)
     }},
   LATVIAN("lv"),
   LITHUANIAN("lt"),
@@ -135,12 +136,11 @@ public enum Language {
   SWAHILI("sw"),
   SWEDISH("sv"),
   /**
-   * Thai is an alphabetic language but has no spaces between words, hence its
+   * Thai is an alphabetic language that has no spaces between words, hence its
    * strings are a bit shorter than English. However, we lump Thai with
-   * logographic languages because the UI support and tokenization needed for it
-   * is the same as these, but it overrides charsPerWord to provide more
-   * accurate WPM calculations (if we used 1 char per word for it, people would
-   * get kicked out for cheating).
+   * the {@linkplain #isLogographic() logographic} languages because the UI support and tokenization needed for it
+   * is the same as those, but it overrides {@link #charsPerWord()} to provide more
+   * accurate WPM calculations.
    */
   THAI("th") {
     @Override
@@ -148,7 +148,7 @@ public enum Language {
       // since we can't tokenize Thai properly into words without serious machine
       // learning, we'll tokenize it into individual characters like Chinese,
       // but will return a different charsPerWord value from Chinese, to not throw off the WPM calculations
-      return 3.75;  // based on observation that English text translated into Thai uses 75% of the number of chars the English text had (run TextFileTranslationPruner.java to get the actual numbers)
+      return 3.75;  // based on observation that English text translated into Thai uses approx. 25% fewer chars (run TextFileTranslationPruner.java to get the actual numbers)
     }},
   TURKISH("tr"),
   UKRAINIAN("uk"),
@@ -160,13 +160,16 @@ public enum Language {
 
   public static final String MODEL_ID_PREFIX = "lang_";
 
-  private static final transient WhitespaceTokenizer WHITESPACE_TOKENIZER = new WhitespaceTokenizer();
-  private static final transient LogographicTokenizer LOGOGRAPHIC_TOKENIZER = new LogographicTokenizer();
-
   Language(String isoCode) {
     this.isoCode = isoCode;
   }
 
+  /**
+   * Used for WPM calculations.
+   *
+   * @return approximate average number of characters per word in this language
+   * @see <a href="https://en.wikipedia.org/wiki/Words_per_minute">"Words per minute" on Wikipedia</a>
+   */
   public double charsPerWord() {
     // we tokenize Chinese, and the other logographic languages to one char per word.
     // this helps to make sure the bots aren't too fast and enough time is given for the race
@@ -188,11 +191,15 @@ public enum Language {
     return MODEL_ID_PREFIX + isoCode;  // ENGLISH and CODE should override this
   }
 
+  /**
+   * @return an instance of either {@link WhitespaceTokenizer} or {@link LogographicTokenizer}, depending on
+   * whether this language is {@linkplain #isLogographic() logographic}
+   */
   public TextTokenizer getTokenizer() {
     if (isLogographic())
-      return LOGOGRAPHIC_TOKENIZER;
+      return LogographicTokenizer.INSTANCE;
     else
-      return WHITESPACE_TOKENIZER;
+      return WhitespaceTokenizer.INSTANCE;
   }
 
 
@@ -252,14 +259,31 @@ public enum Language {
   }
 
   /**
-   * Most (but not all) words in these languages are written using one
-   * character
+   * Most (but not all) words in these languages are written using one character, with no spaces in-between.
+   * <p>
+   * <ul>
+   *   <b>Notes:</b>
+   *   <li>{@linkplain #THAI Thai} is included in this category only because it has no spaces between characters, although
+   *     it's actually alphabetic. We include it here only because it needs the same kind of UI support
+   *     and tokenization rules as the logographic languages. We just override its {@link #charsPerWord()} method
+   *     to provide more accurate WPM calculations.</li>
+   *   <li>{@linkplain #KOREAN Korean} is not included in this category because its characters represent syllables
+   *     rather than individual words, and its words are separated by spaces.
+   *     (see <a href="http://en.wikipedia.org/wiki/Korean_alphabet">"Korean alphabet" on Wikipedia</a>)</li>
+   * </ul>
+   * @see <a href="https://en.wikipedia.org/wiki/Logogram">"Logogram" on Wikipedia</a>
    */
   private static final Set<Language> logographicLanguages = EnumSet.of(CHINESE, CHINESE_TRADITIONAL, JAPANESE, THAI);
   // Thai is a special case because it's alphabetic but has no spaces between characters
   // We lump Thai with logographic languages because the UI support and tokenization needed for it is the same as these, but it overrides charsPerWord to provide better WPM calculations
   // NOTE: Korean is an alphabetic language despite its letters looking blocky - it has spaces between words.  The reason its strings are shorter is because most characters represent a syllable rather than a letter (see: http://en.wikipedia.org/wiki/Korean_alphabet )
 
+  /**
+   * We consider a language to be "logographic" if its words are typically written using only one character
+   * with no spaces in-between.
+   * @see #logographicLanguages
+   * @see <a href="https://en.wikipedia.org/wiki/Logogram">"Logogram" on Wikipedia</a>
+   */
   public boolean isLogographic() {
     return logographicLanguages.contains(this);
   }
@@ -274,6 +298,9 @@ public enum Language {
     return languages;
   }
 
+  /**
+   * @return the English name of this language
+   */
   public String getEnglishPrettyName() {
     return StringUtils.capitalize(name().toLowerCase());
   }
@@ -333,6 +360,9 @@ public enum Language {
       Language.WELSH, "Cymraeg",
       Language.YIDDISH, "\u05d9\u05d9\u05b4\u05d3\u05d9\u05e9");
 
+  /**
+   * @return the local name of this language (potentially containing non-ASCII characters)
+   */
   public String getNativePrettyName() {
     return nativePrettyNames.get(this);
   }

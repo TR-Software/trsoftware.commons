@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 TR Software Inc.
+ * Copyright 2022 TR Software Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -16,12 +16,13 @@
 
 package solutions.trsoftware.commons.client.event;
 
+import com.google.gwt.event.dom.client.MouseEvent;
 import com.google.gwt.user.client.DOM;
 import com.google.gwt.user.client.Event;
 
 /**
  * Some browsers periodically send "mousemove" events as long as the mouse is located over the element that's
- * listening for these events (or if it's {@link Event.NativePreviewEvent}, then anywhere withing the browser window),
+ * listening for these events (or if it's {@link Event.NativePreviewEvent}, then anywhere within the browser window),
  * even when the mouse hasn't actually moved since the last time this event was fired.
  * This is true with IE and Chrome on Windows (and maybe other platforms).
  *
@@ -47,6 +48,10 @@ public class MouseMoveFilter {
       lastY = y;
     }
     return ret;
+  }
+
+  public boolean isDuplicate(MouseEvent event) {
+    return isDuplicate(Event.as(event.getNativeEvent()));
   }
 
 }

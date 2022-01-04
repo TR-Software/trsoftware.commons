@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 TR Software Inc.
+ * Copyright 2022 TR Software Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -55,7 +55,7 @@ public enum Alphabet {
   LETTERS_AND_NUMBERS(LETTERS.chars + NUMBERS.chars)
   ; // WARNING: if adding new enum values, add them at the end, so to not affect the values that might have already been persisted in a DB
 
-  private String chars;
+  private final String chars;
 
   Alphabet(String chars) {
     this.chars = chars;

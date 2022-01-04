@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 TR Software Inc.
+ * Copyright 2022 TR Software Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -35,7 +35,7 @@ public class FocusTrap extends Anchor implements FocusHandler {
 
   public FocusTrap(FocusWidget master) {
     super("", true);
-    // NOTE: if we hide this widget using CSS (visibility:hidden or display:none), it will nto receive keyboard focus,
+    // NOTE: if we hide this widget using CSS (visibility:hidden or display:none), it will not receive keyboard focus,
     // so instead we make it "invisible" by making the anchor text empty and removing the underline
     getElement().getStyle().setTextDecoration(Style.TextDecoration.NONE);
     this.master = master;

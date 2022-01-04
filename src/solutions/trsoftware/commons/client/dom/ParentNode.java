@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 TR Software Inc.
+ * Copyright 2022 TR Software Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -24,15 +24,14 @@ import com.google.gwt.dom.client.NodeList;
 import javax.annotation.Nullable;
 
 /**
- * Provides an implementation of the DOM <a href="https://developer.mozilla.org/en-US/docs/Web/API/ParentNode">ParentNode</a>
- * mixin, which is missing from {@link com.google.gwt.dom.client} package.
+ * Provides an implementation of the DOM {@code ParentNode} mixin.
  * 
- * <blockquote cite="https://developer.mozilla.org/en-US/docs/Web/API/ParentNode">
+ * <blockquote cite="https://web.archive.org/web/20210509083527/https://developer.mozilla.org/en-US/docs/Web/API/ParentNode">
  *   The ParentNode mixin contains methods and properties that are common to all types of Node objects
  *   that can have children.  It's implemented by Element, Document, and DocumentFragment objects.
  * </blockquote>
  *
- * @see <a href="https://developer.mozilla.org/en-US/docs/Web/API/ParentNode">MDN Reference</a>
+ * @see <a href="https://web.archive.org/web/20210509083527/https://developer.mozilla.org/en-US/docs/Web/API/ParentNode">MDN Reference</a>
  * @author Alex
  * @since 4/12/2019
  */
@@ -94,8 +93,8 @@ public class ParentNode extends Node {
    * at least one of the specified selectors, or an empty {@link NodeList} in case of no matches.  Returns {@code null} if the method
    * is not supported by the current browser.
    *
-   * @see <a href="https://developer.mozilla.org/en-US/docs/Web/API/ParentNode/querySelectorAll">MDN Reference</a>
-   * @see <a href="https://developer.mozilla.org/en-US/docs/Web/API/ParentNode/querySelectorAll#Browser_compatibility">Browser compatibility</a>
+   * @see <a href="https://web.archive.org/web/20210509083527/https://developer.mozilla.org/en-US/docs/Web/API/ParentNode/querySelectorAll">MDN Reference</a>
+   * @see <a href="https://web.archive.org/web/20210509083527/https://developer.mozilla.org/en-US/docs/Web/API/ParentNode/querySelectorAll#Browser_compatibility">Browser compatibility</a>
    * @see <a href="https://caniuse.com/#feat=queryselector">Can I use querySelector/querySelectorAll?</a>
    * @see #querySelector(String)
    */
@@ -125,8 +124,8 @@ public class ParentNode extends Node {
    * method).
    *
    * @see #querySelectorAll(String)
-   * @see <a href="https://developer.mozilla.org/en-US/docs/Web/API/ParentNode/querySelector">MDN Reference</a>
-   * @see <a href="https://developer.mozilla.org/en-US/docs/Web/API/ParentNode/querySelector#Browser_compatibility">Browser compatibility</a>
+   * @see <a href="https://web.archive.org/web/20210509083527/https://developer.mozilla.org/en-US/docs/Web/API/ParentNode/querySelector">MDN Reference</a>
+   * @see <a href="https://web.archive.org/web/20210509083527/https://developer.mozilla.org/en-US/docs/Web/API/ParentNode/querySelector#Browser_compatibility">Browser compatibility</a>
    * @see <a href="https://caniuse.com/#feat=queryselector">Can I use querySelector/querySelectorAll?</a>
    */
   @Nullable

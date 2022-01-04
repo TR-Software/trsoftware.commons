@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 TR Software Inc.
+ * Copyright 2022 TR Software Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -12,32 +12,35 @@
  * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
  * License for the specific language governing permissions and limitations under
  * the License.
- *
  */
 
 package solutions.trsoftware.gwt;
 
+import com.google.common.annotations.VisibleForTesting;
+import com.google.common.base.Splitter;
+import com.google.common.collect.*;
 import com.google.gwt.dev.About;
 import com.google.gwt.dev.GwtVersion;
+import com.google.gwt.dev.util.arg.ArgHandlerFilterJsInteropExports;
+import com.google.gwt.dev.util.arg.ArgHandlerSetProperties;
 import com.google.gwt.junit.JUnitShell;
 import com.google.gwt.junit.client.GWTTestCase;
-import solutions.trsoftware.commons.shared.util.SetUtils;
+import solutions.trsoftware.commons.client.testutil.RunStyleValue;
 import solutions.trsoftware.commons.shared.util.StringUtils;
 import solutions.trsoftware.commons.shared.util.compare.ComparisonOperator;
 
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
- * Parses the value of the {@value #SYS_PROP_GWT_ARGS} system property (which is consumed by JUnitShell) into a map,
+ * Parses the value of the {@value #SYS_PROP_GWT_ARGS} system property (which is consumed by JUnitShell) into a multimap,
  * and allows modifying it dynamically prior to running the unit tests.
  * <p>
- * <b>Reference</b>:
- * <br>
- * <i>output from running an instance of {@link GWTTestCase} with {@code -Dgwt.args="-help"}:</i>
- * <ul>
- *   <li>GWT 2.5.0
+ * <b>Reference</b> (output from running an instance of {@link GWTTestCase} with {@code -Dgwt.args="-help"}):
+ * <p>
  * <pre>
  Google Web Toolkit 2.5.0
  JUnitShell [-port port-number | "auto"] [-whitelist whitelist-string] [-blacklist blacklist-string] [-logdir directory] [-logLevel level] [-gen dir] [-codeServerPort port-number | "auto"] [-war dir] [-deploy dir] [-extra dir] [-workDir dir] [-style style] [-ea] [-XdisableClassMetadata] [-XdisableCastChecking] [-draftCompile] [-localWorkers count] [-prod] [-testMethodTimeout minutes] [-testBeginTimeout minutes] [-runStyle runstyle[:args]] [-notHeadless] [-standardsMode] [-quirksMode] [-Xtries 1] [-userAgents userAgents]
@@ -69,10 +72,8 @@ import java.util.regex.Pattern;
  -Xtries                 EXPERIMENTAL: Sets the maximum number of attempts for running each test method
  -userAgents             Specify the user agents to reduce the number of permutations for remote browser tests; e.g. ie6,ie8,safari,gecko1_8,opera
  * </pre>
- * </li>
- *
- * <li>GWT 2.8
- *   <pre>
+ * <p>
+ * <pre>
  Google Web Toolkit 2.8.2
  JUnitShell [-port port-number | "auto"] [-logdir directory] [-logLevel (ERROR|WARN|INFO|TRACE|DEBUG|SPAM|ALL)] [-gen dir] [-codeServerPort port-number | "auto"] [-war dir] [-deploy dir] [-extra dir] [-workDir dir] [-sourceLevel [auto, 1.8]] [-style (DETAILED|OBFUSCATED|PRETTY)] [-[no]checkAssertions] [-X[no]checkCasts] [-X[no]classMetadata] [-[no]draftCompile] [-localWorkers count] [-Xnamespace (NONE|PACKAGE)] [-optimize level] [-[no]incremental] [-[no]generateJsInteropExports] [-includeJsInteropExports/excludeJsInteropExports regex] [-setProperty name=value,value...] [-X[no]closureFormattedOutput] [-[no]devMode] [-testMethodTimeout minutes] [-testBeginTimeout minutes] [-runStyle runstyle[:args]] [-[no]showUi] [-Xtries 1] [-userAgents userAgents]
  where
@@ -106,15 +107,13 @@ import java.util.regex.Pattern;
  -[no]showUi                                       Causes the log window and browser windows to be displayed; useful for debugging. (defaults to OFF)
  -Xtries                                           EXPERIMENTAL: Sets the maximum number of attempts for running each test method
  -userAgents                                       Specify the user agents to reduce the number of permutations for remote browser tests; e.g. ie8,safari,gecko1_8
- *   </pre>
- * </li>
- * </ul>
+ * </pre>
  *
  * @see JUnitShell
  * @see <a href="http://www.gwtproject.org/doc/latest/DevGuideTesting.html#passingTestArguments">
  *   "Passing Arguments to the Test Infrastructure" (GWT Testing Guide)</a>
  */
-public class GwtArgs extends LinkedHashMap<String, String> {
+public class GwtArgs /*extends LinkedHashMap<String, String>*/ {
 
   public static final String SYS_PROP_GWT_ARGS = "gwt.args";
 
@@ -131,6 +130,24 @@ public class GwtArgs extends LinkedHashMap<String, String> {
    * Property added in GWT 2.8.x: "Runs tests in Development Mode, using the Java virtual machine. (defaults to OFF)"
    */
   public static final String DEV_MODE = "devMode";
+  /**
+   * @see ArgHandlerSetProperties
+   */
+  public static final String SET_PROPERTY = "setProperty";
+
+  /**
+   * Args that may appear more than once.
+   * @see ArgHandlerSetProperties
+   * @see ArgHandlerFilterJsInteropExports
+   */
+  @VisibleForTesting
+  static final Set<String> multiArgs = ImmutableSet.of(SET_PROPERTY, "includeJsInteropExports", "excludeJsInteropExports");
+
+  /**
+   * Splits the value of a {@value SET_PROPERTY} argument into a name-value pair.
+   * Uses the same splitter settings as {@link ArgHandlerSetProperties#setString(String)}.
+   */
+  private static final Splitter nameValueSplitter = Splitter.on("=").trimResults().omitEmptyStrings();
 
   private static GwtArgs instance;
 
@@ -140,7 +157,10 @@ public class GwtArgs extends LinkedHashMap<String, String> {
     return instance;
   }
 
+  private final ListMultimap<String, String> argsMultimap;
+
   public GwtArgs(String argsString) {
+    argsMultimap = MultimapBuilder.linkedHashKeys().arrayListValues().build();
     // parse gwt.args into a map
     String[] args = synthesizeArgs(argsString);
     String prevArg = null;
@@ -196,14 +216,190 @@ public class GwtArgs extends LinkedHashMap<String, String> {
     return argList.toArray(new String[argList.size()]);
   }
 
+  // java.util.Map-like interface methods for compatibility with the old Map-based implementation:
+
   /**
-   * Sets key=newValue if the existing value for the given key does not start with the given prefix.
+   * Returns the current value for the given argument.
+   * <p><strong>Note:</strong>
+   * A {@code null} return value could mean one of 2 things: either the argument doesn't exist
+   * or it exists but doesn't have a value. Use {@link #containsKey(String)} to disambiguate.
+   *
+   * @param key the arg name
+   * @return current value for the given argument or {@code null} if either it doesn't exist or doesn't have a value
    */
-  public void putIfValueNotStartsWith(String key, String valuePrefix, String newValue) {
-    String value = get(key);
-    if (value == null || !value.startsWith(valuePrefix)) {
-      put(key, newValue);
+  @Nullable
+  public String get(String key) {
+    List<String> values = argsMultimap.get(key);
+    if (values.size() > 1) {
+      assert multiArgs.contains(key);
+      // TODO: rather than throwing, maybe just print a warning and return the last value?
+      throw new IllegalArgumentException("Multiple values present for the -" + key + " arg; use getAll(\"" + key + "\")");  // TODO: impl getAll
     }
+    return Iterables.getLast(values, null);  // TODO: maybe Iterables.getFirst instead?
+  }
+
+  /**
+   * @return all the values for the given arg as an unmodifiable list; if the arg is missing this will be an empty
+   * list rather than {@code null}.
+   */
+  @Nonnull
+  public List<String> getAll(String key) {
+    // returning an unmodifiable list to force all changes to the underlying multimap to be made via put or setProperty
+    return Collections.unmodifiableList(argsMultimap.get(key));
+  }
+
+  public boolean containsKey(String key) {
+    return argsMultimap.containsKey(key);
+  }
+
+  public void put(String key, String value) {
+    // TODO: check for null value?  especially if it's a multi-valued arg
+    if (SET_PROPERTY.equals(key)) {
+      Map.Entry<String, String> nvPair = splitProperty(value);
+      setProperty(nvPair.getKey(), nvPair.getValue());
+    }
+    else if (multiArgs.contains(key)) {
+      argsMultimap.put(key, value);
+    }
+    else {
+      // this arg cannot be repeated
+      argsMultimap.replaceValues(key, Collections.singletonList(value));
+    }
+  }
+
+  /**
+   * Removes all occurrences of the given arg.
+   *
+   * @param key the arg name
+   * @return {@code true} if anything was removed by this operation
+   */
+  public boolean remove(String key) {
+    return !argsMultimap.removeAll(key).isEmpty();
+  }
+
+  /**
+   * Removes a specific occurrence of the given arg.
+   *
+   * @param key the arg name
+   * @param value the arg value
+   * @return {@code true} if anything was removed by this operation
+   */
+  public boolean remove(String key, String value) {
+    return argsMultimap.remove(key, value);
+  }
+
+  /**
+   * @return all args as key-value pairs (NOTE: changes to the returned collection or its entries will change
+   * the internal state of this class)
+   * @see Multimap#entries()
+   */
+  public Collection<Map.Entry<String, String>> getEntries() {
+    return argsMultimap.entries();
+  }
+
+  // TODO: provide special accessors for -setProperty? (i.e. to get current value / set a new value of a specific property)
+
+  /**
+   * Adds or modifies a {@value SET_PROPERTY} argument for the given property name.
+   * @param name property name
+   * @param value a comma-separated string of values for this property
+   * @return {@code true} if replaced an existing property setting or {@code false} if added a new one.
+   */
+  public boolean setProperty(String name, String value) {
+    Objects.requireNonNull(name, "property name");
+    Objects.requireNonNull(value, "property value");
+    List<String> nameValuePairs = argsMultimap.get(SET_PROPERTY);
+    // search existing properties in reverse order
+    ListIterator<String> it = nameValuePairs.listIterator(nameValuePairs.size());
+    if (findProperty(name, it) != null) {
+      // property was already defined: replace its value
+      it.set(joinProperty(name, value));
+      return true;
+    }
+    else {
+      // property was't already defined
+      nameValuePairs.add(joinProperty(name, value));
+      return false;
+    }
+  }
+
+  /**
+   * Searches through the existing {@value SET_PROPERTY} arguments for the given property name.
+   *
+   * @param name property name
+   * @return the current setting for the given property (as a comma-separated string of values),
+   * or {@code null} if not found.
+   */
+  @Nullable
+  public String getProperty(String name) {
+    Objects.requireNonNull(name, "property name");
+    // TODO: maybe extract code duplicated in our setProperty method?
+    List<String> nameValuePairs = argsMultimap.get(SET_PROPERTY);
+    // search existing properties in reverse order
+    ListIterator<String> it = nameValuePairs.listIterator(nameValuePairs.size());
+    return findProperty(name, it);
+  }
+
+  /**
+   * Removes the {@value SET_PROPERTY} argument corresponding to the given property name.
+   * @param name property name
+   * @return {@code true} if the property was found and removed or {@code false} if not found
+   */
+  public boolean removeProperty(String name) {
+    Objects.requireNonNull(name, "property name");
+    List<String> nameValuePairs = argsMultimap.get(SET_PROPERTY);
+    // search existing properties in reverse order
+    ListIterator<String> it = nameValuePairs.listIterator(nameValuePairs.size());
+    if (findProperty(name, it) != null) {
+      // property was already defined: replace its value
+      it.remove();
+      return true;
+    }
+    return false;
+  }
+
+  /**
+   * Searches through the existing {@value SET_PROPERTY} arguments for the given property name
+   * using an iterator obtained from the list returned by {@code argsMultimap.get(SET_PROPERTY)}.
+   * <p>
+   * If the property is found, returns its current value and leaves the iterator in a state
+   * where {@link ListIterator#set(Object)} and {@link ListIterator#remove()} can be used to modify or remove
+   * the corresponding {@value SET_PROPERTY} argument.
+   *
+   * @param name property name
+   * @param it an iterator obtained from the list returned by {@code argsMultimap.get(SET_PROPERTY)},
+   * initialized to start iteration from the back of the list
+   * @return the current value for the existing property or {@code null} if not found.
+   */
+  @Nullable
+  private String findProperty(String name, ListIterator<String> it) {
+    while (it.hasPrevious()) {
+      Map.Entry<String, String> nvPair = splitProperty(it.previous());
+      if (nvPair.getKey().equals(name)) {
+        return nvPair.getValue();
+      }
+    }
+    return null;
+  }
+
+  /**
+   * Splits the value of a {@value SET_PROPERTY} argument into a {@code name=values} pair.
+   * @param propertyString e.g. {@code "foo=a,b,c"}
+   * @return an entry with property name as the key
+   * @throws IllegalArgumentException if the given string is not a valid {@value SET_PROPERTY} argument.
+   */
+  private static Map.Entry<String, String> splitProperty(String propertyString) {
+    List<String> nvPair = nameValueSplitter.splitToList(propertyString);
+    if (nvPair.size() != 2)
+      throw new IllegalArgumentException("Invalid value for -" + SET_PROPERTY + ": " + StringUtils.quote(propertyString));
+    return new AbstractMap.SimpleEntry<>(nvPair.get(0), nvPair.get(1));
+  }
+
+  /**
+   * @return "name=value"
+   */
+  private static String joinProperty(String name, String value) {
+    return name + '=' + value;
   }
 
   /**
@@ -232,20 +428,21 @@ public class GwtArgs extends LinkedHashMap<String, String> {
   }
 
   /**
-   * @return the args formatted as a string that can be used as the value for the system property.
+   * @return the args formatted as a string that can be used as a new value for the {@value SYS_PROP_GWT_ARGS} system property.
    */
   @Override
   public String toString() {
     StringBuilder ret = new StringBuilder();
-    for (Map.Entry<String, String> entry : entrySet()) {
+    for (Map.Entry<String, String> entry : getEntries()) {
       if (ret.length() > 0)
         ret.append(" ");
       ret.append("-").append(entry.getKey());
       String value = entry.getValue();
+      // TODO: check for empty string?
       if (value != null) {
         ret.append(" ");
-        if (!value.matches("\\w*"))
-          // quote the value if it has any non-word chars
+        if (!value.matches("[\\w,=]+"))
+          // quote the value if it has any non-word chars ('=' and ',' also okay)
           ret.append("\"").append(value).append("\"");
         else
           ret.append(value);
@@ -274,39 +471,6 @@ public class GwtArgs extends LinkedHashMap<String, String> {
       return runStyle.getArgs();
     }
     return Collections.emptySet();
-  }
-
-  /**
-   * Parsed value of the {@code -runStyle} arg.
-   * @see <a href="http://www.gwtproject.org/doc/latest/DevGuideTesting.html">GWT Testing Guide</a>
-   * @see <a href="http://www.gwtproject.org/doc/latest/DevGuideTestingHtmlUnit.html">GWT Testing HTML Unit Guide</a>
-   */
-  public static class RunStyleValue {
-    private String name;
-    private Set<String> args;
-
-    /**
-     * @param value the {@code -runStyle} arg
-     */
-    public RunStyleValue(String value) {
-      name = value;
-      int colon = value.indexOf(':');
-      if (colon >= 0) {
-        name = value.substring(0, colon);
-        String args = value.substring(colon + 1);
-        this.args = SetUtils.newSet(args.split(","));
-      } else {
-        this.args = Collections.emptySet();
-      }
-    }
-
-    public String getName() {
-      return name;
-    }
-
-    public Set<String> getArgs() {
-      return args;
-    }
   }
 
 }

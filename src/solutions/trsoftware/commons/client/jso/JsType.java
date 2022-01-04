@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 TR Software Inc.
+ * Copyright 2022 TR Software Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -34,7 +34,19 @@ public enum JsType {
   /** Either an actual object or a {@code null} */
   OBJECT,
   /** This type is new in ECMAScript 2015 */
-  SYMBOL;
+  SYMBOL,
+  /** This type is new in ECMAScript 2020 */
+  BIGINT,
+  ;
+
+  /**
+   * @return the corresponding JavaScript {@code typeof} string
+   * @see #parse(String)
+   * @see <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Operators/typeof">Javascript typeof operator</a>
+   */
+  public String getNativeName() {
+    return name().toLowerCase();
+  }
 
   /**
    * @param nativeName value obtained using a JS {@code typeof} expression

@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 TR Software Inc.
+ * Copyright 2022 TR Software Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -26,7 +26,7 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 
 /**
- * Registers itself as a handler on the event preview stack to to disclose whether a key is currently being held down.
+ * Registers itself as a handler on the event preview stack in order to find out whether a key is currently being held down.
  * <p>
  * <strong>Caveat:</strong>
  * Since we only receive keyboard events that happen while the page is in focus, don't know about keyDown or keyUp

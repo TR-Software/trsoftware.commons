@@ -1,5 +1,5 @@
 <!--
-  ~ Copyright 2021 TR Software Inc.
+  ~ Copyright 2022 TR Software Inc.
   ~
   ~ Licensed under the Apache License, Version 2.0 (the "License"); you may not
   ~ use this file except in compliance with the License. You may obtain a copy of
@@ -40,24 +40,23 @@
   -->
   <property-provider name="debug">
 		<![CDATA[
-		try {
-          var value = null;
+      try {
+        var value = null;
 
-          // get the property value from the "debug" url parameter
-          var match = /[?&]debug=(.*?)(?:&|$)/.exec(location.search);
-          if (match)
-            value = match[1];
+        // get the property value from the "debug" url parameter
+        var match = /[?&]debug=(.*?)(?:&|$)/.exec(location.search);
+        if (match)
+          value = match[1];
 
-          if (value == null || !__gwt_isKnownPropertyValue("debug",  value)) {
-            // the url parameter was missing or its value is not valid
-            return "off";
-          }
-
-          return value;
-        } catch(e){
-          alert("Unexpected exception in debug mode detection, debug mode will be disabled: " + e);
+        if (value == null || !__gwt_isKnownPropertyValue("debug",  value)) {
+          // the url parameter was missing or its value is not valid
           return "off";
         }
+        return value;
+      } catch(e){
+        alert("Unexpected exception in debug mode detection, debug mode will be disabled: " + e);
+        return "off";
+      }
 		]]>
 	</property-provider>
   <!--

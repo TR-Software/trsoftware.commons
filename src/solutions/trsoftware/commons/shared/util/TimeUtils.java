@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 TR Software Inc.
+ * Copyright 2022 TR Software Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -143,7 +143,7 @@ public class TimeUtils {
    * @see #secondsToInstant(double)
    */
   public static long secondsToMillisLong(double seconds) {
-    // TODO(11/26/2020): why Math.round? it's probaly more accurate to just cast to long (and avoid the value being rounded up to the next millis)
+    // TODO(11/26/2020): why Math.round? it's probably more accurate to just cast to long (and avoid the value being rounded up to the next millis)
     return Math.round(secondsToMillis(seconds));
   }
 

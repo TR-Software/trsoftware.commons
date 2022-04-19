@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 TR Software Inc.
+ * Copyright 2022 TR Software Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -217,6 +217,7 @@ public class RandomUtils {
     if (sampleSize > collection.size())
       throw new IllegalArgumentException("sampleSize > collection.size()");
 
+    // TODO: this can be made more efficient (no need to shuffle the entire collection)
     ArrayList<T> copy = new ArrayList<T>(collection);
     Collections.shuffle(copy, rnd);
     return ListUtils.subList(copy, 0, sampleSize);

@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 TR Software Inc.
+ * Copyright 2022 TR Software Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -49,6 +49,10 @@ public class TextInputPanel<V, F extends JFormattedTextField> extends JPanel {
   public TextInputPanel<V, F> setTextFieldWidth(int columns) {
     txtField.setColumns(columns);
     return this;
+  }
+
+  public F getTextField() {
+    return txtField;
   }
 
   public V getValue() {

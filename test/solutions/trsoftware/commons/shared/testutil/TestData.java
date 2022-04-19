@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 TR Software Inc.
+ * Copyright 2022 TR Software Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -19,15 +19,18 @@ package solutions.trsoftware.commons.shared.testutil;
 import solutions.trsoftware.commons.server.io.ResourceLocator;
 import solutions.trsoftware.commons.server.servlet.filters.CachePolicyFilterTest;
 import solutions.trsoftware.commons.shared.util.LazyReference;
+import solutions.trsoftware.commons.shared.util.NumberRange;
 import solutions.trsoftware.commons.shared.util.RandomUtils;
 import solutions.trsoftware.commons.shared.util.StringUtils;
 
+import javax.annotation.Nonnull;
 import javax.servlet.http.HttpServletRequest;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
+import static com.google.common.base.Preconditions.checkArgument;
 import static solutions.trsoftware.commons.server.io.ServerIOUtils.readLines;
 
 /**
@@ -199,5 +202,45 @@ public class TestData {
       ret[i] = rnd.nextInt();
     }
     return ret;
+  }
+
+  // TODO: consider moving the following random[X]NotEqualTo methods to RandomUtils
+
+  /**
+   * @param lowerBound inclusive
+   * @param upperBound exclusive
+   * @return a random integer in the given range that's different from the given value
+   */
+  public static int randomIntNotEqualTo(int valueToExclude, int lowerBound, int upperBound) {
+    int newValue;
+    do {
+      newValue = RandomUtils.nextIntInRange(lowerBound, upperBound);
+    } while (newValue == valueToExclude);
+    return newValue;
+  }
+
+  /**
+   * @return a random integer in the given range that's different from the given value
+   */
+  public static int randomIntNotEqualTo(int valueToExclude, @Nonnull NumberRange<Integer> validRange) {
+    int newValue;
+    do {
+      newValue = validRange.randomInt();
+    } while (newValue == valueToExclude);
+    return newValue;
+  }
+
+  /**
+   * @return a random constant of the given enum type that's different from the given value
+   */
+  public static <E extends Enum<E>> E randomEnumConstantNotEqualTo(@Nonnull Class<E> enumType, E valueToExclude) {
+    E[] enumConstants = enumType.getEnumConstants();
+    checkArgument(enumConstants != null, "%s is not an enum", enumType.getName());
+    checkArgument(enumConstants.length > 0, "%s doesn't define any enum constants", enumType.getName());
+    E newValue;
+    do {
+      newValue = RandomUtils.randomElement(enumConstants);
+    } while (newValue == valueToExclude);
+    return newValue;
   }
 }

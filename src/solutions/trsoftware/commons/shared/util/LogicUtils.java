@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 TR Software Inc.
+ * Copyright 2022 TR Software Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -19,6 +19,8 @@ package solutions.trsoftware.commons.shared.util;
 import com.google.common.base.MoreObjects;
 
 import javax.annotation.Nullable;
+import java.util.Optional;
+import java.util.function.Supplier;
 
 /**
  * Can be used to shorten some if statements that are too long.
@@ -89,5 +91,19 @@ public class LogicUtils {
         return x;
     }
     return null;
+  }
+
+  /**
+   * Returns the given object if it's not {@code null}, otherwise returns the value produced by the given supplier.
+   *
+   * @return {@code obj} if it's not {@code null}, otherwise {@code supplier.get()}
+   * @see #firstNonNull(Object, Object)
+   * @see Optional#orElseGet(Supplier)
+   */
+  @Nullable
+  public static <T> T nonNullOrElse(T obj, Supplier<T> supplier) {
+    if (obj != null)
+      return obj;
+    return supplier.get();
   }
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 TR Software Inc.
+ * Copyright 2022 TR Software Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -12,7 +12,6 @@
  * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
  * License for the specific language governing permissions and limitations under
  * the License.
- *
  */
 
 package solutions.trsoftware.commons.server.auth;
@@ -46,39 +45,23 @@ public class RequestAuthWithoutReplayDefenseTest extends TestCase {
     {
       final DummyHttpServletRequest request = newSignedRequest();
       request.removeParameter(RequestAuth.PARAM_NAME_ACCESS_KEY);
-      AssertUtils.assertThrows(SecurityException.class, new Runnable() {
-        public void run() {
-          auth.authenticateIncomingRequest(request);
-        }
-      });
+      AssertUtils.assertThrows(SecurityException.class, (Runnable)() -> auth.authenticateIncomingRequest(request));
     }
     {
       final DummyHttpServletRequest request = newSignedRequest();
       request.removeParameter(RequestAuth.PARAM_NAME_SIGNATURE);
-      AssertUtils.assertThrows(SecurityException.class, new Runnable() {
-        public void run() {
-          auth.authenticateIncomingRequest(request);
-        }
-      });
+      AssertUtils.assertThrows(SecurityException.class, (Runnable)() -> auth.authenticateIncomingRequest(request));
     }
     // should throw if either parameter is incorrect
     {
       final DummyHttpServletRequest request = newSignedRequest();
-      request.putParameter(RequestAuth.PARAM_NAME_ACCESS_KEY, "bad value");
-      AssertUtils.assertThrows(SecurityException.class, new Runnable() {
-        public void run() {
-          auth.authenticateIncomingRequest(request);
-        }
-      });
+      request.replaceParameterValues(RequestAuth.PARAM_NAME_ACCESS_KEY, "bad value");
+      AssertUtils.assertThrows(SecurityException.class, (Runnable)() -> auth.authenticateIncomingRequest(request));
     }
     {
       final DummyHttpServletRequest request = newSignedRequest();
-      request.putParameter(RequestAuth.PARAM_NAME_SIGNATURE, "bad value");
-      AssertUtils.assertThrows(SecurityException.class, new Runnable() {
-        public void run() {
-          auth.authenticateIncomingRequest(request);
-        }
-      });
+      request.replaceParameterValues(RequestAuth.PARAM_NAME_SIGNATURE, "bad value");
+      AssertUtils.assertThrows(SecurityException.class, (Runnable)() -> auth.authenticateIncomingRequest(request));
     }
   }
 

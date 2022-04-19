@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 TR Software Inc.
+ * Copyright 2022 TR Software Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -16,10 +16,13 @@
 
 package solutions.trsoftware.commons.shared.util.stats;
 
+import javax.annotation.Nonnull;
 import java.util.function.Supplier;
 
+import static java.util.Objects.requireNonNull;
+
 /**
- * A superclass for the {@link ArgMax} and {@link ArgMin} classes.
+ * Base class for {@link ArgMax} and {@link ArgMin}.
  *
  * @param <A> the arg type
  * @param <V> the value type produced by the arg
@@ -34,7 +37,9 @@ public abstract class AbstractArgMinMax<A, V extends Comparable<V>> implements S
   private A bestArg;
 
   /** Updates the mean with a new sample, returning the new argmax */
-  public V update(A arg, V value) {
+  public V update(@Nonnull A arg, @Nonnull V value) {
+    requireNonNull(arg, "arg");
+    requireNonNull(value, "value");
     if (bestValue == null) {
       bestValue = value;
       bestArg = arg;
@@ -48,6 +53,9 @@ public abstract class AbstractArgMinMax<A, V extends Comparable<V>> implements S
 
   protected abstract int getMultiplier();
 
+  /**
+   * @return the arg associated with the best value, or {@code null} if the {@link #update} method was never invoked.
+   */
   public A get() {
     return bestArg;
   }

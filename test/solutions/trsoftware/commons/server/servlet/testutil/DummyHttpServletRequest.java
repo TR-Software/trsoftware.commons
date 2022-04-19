@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 TR Software Inc.
+ * Copyright 2022 TR Software Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -16,9 +16,11 @@
 
 package solutions.trsoftware.commons.server.servlet.testutil;
 
-import com.google.common.collect.ArrayListMultimap;
-import com.google.common.collect.Multimap;
+import com.google.common.collect.*;
+import com.google.errorprone.annotations.CanIgnoreReturnValue;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import solutions.trsoftware.commons.server.servlet.HttpHeaders;
+import solutions.trsoftware.commons.shared.util.MapUtils;
 
 import javax.servlet.*;
 import javax.servlet.http.*;
@@ -41,11 +43,12 @@ import static solutions.trsoftware.commons.shared.util.CollectionUtils.isEmpty;
  */
 public class DummyHttpServletRequest implements HttpServletRequest {
 
-  private DummyHttpSession session = new DummyHttpSession();
+  private HttpSession session;
+  private String requestedSessionId;
   private String uri;
   private String url;
   private String queryString;
-  private Map<String,String> paramMap = new HashMap<>();
+  private final Multimap<String, String> paramMap = LinkedHashMultimap.create();
   private String remoteAddr = "127.0.0.1";
   private List<Locale> locales;
   private String method;
@@ -60,12 +63,21 @@ public class DummyHttpServletRequest implements HttpServletRequest {
     this(null, null, paramMap);
   }
 
+  public DummyHttpServletRequest(Multimap<String, String> paramMap) {
+    this(null, null, paramMap);
+  }
+
   public DummyHttpServletRequest(String url, String queryString) {
     this.url = url;
     this.queryString = queryString;
   }
 
   public DummyHttpServletRequest(String url, String queryString, Map<String, String> paramMap) {
+    this(url, queryString);
+    MapUtils.putAllToMultimap(this.paramMap, paramMap);
+  }
+
+  public DummyHttpServletRequest(String url, String queryString, Multimap<String, String> paramMap) {
     this(url, queryString);
     this.paramMap.putAll(paramMap);
   }
@@ -75,7 +87,12 @@ public class DummyHttpServletRequest implements HttpServletRequest {
     this.method = method;
   }
 
-  public DummyHttpServletRequest(DummyHttpSession session) {
+  public DummyHttpServletRequest(String method, String url, String queryString, Multimap<String, String> paramMap) {
+    this(url, queryString, paramMap);
+    this.method = method;
+  }
+
+  public DummyHttpServletRequest(HttpSession session) {
     this.session = session;
   }
 
@@ -93,7 +110,7 @@ public class DummyHttpServletRequest implements HttpServletRequest {
     return this;
   }
 
-  public DummyHttpServletRequest setSession(DummyHttpSession session) {
+  public DummyHttpServletRequest setSession(HttpSession session) {
     this.session = session;
     return this;
   }
@@ -161,68 +178,88 @@ public class DummyHttpServletRequest implements HttpServletRequest {
     return headers.getHeadersAsMultimap();
   }
 
+  @Override
   public String getMethod() {
     return method;
   }
 
+  @Override
   public String getPathInfo() {
     System.err.println("Method DummyHttpServletRequest.getPathInfo has not been fully implemented yet.");
     return null;
   }
 
+  @Override
   public String getPathTranslated() {
     System.err.println("Method DummyHttpServletRequest.getPathTranslated has not been fully implemented yet.");
     return null;
   }
 
+  @Override
   public String getContextPath() {
     System.err.println("Method DummyHttpServletRequest.getContextPath has not been fully implemented yet.");
     return null;
   }
 
+  @Override
   public String getQueryString() {
     return queryString;
   }
 
+  @Override
   public String getRemoteUser() {
     System.err.println("Method DummyHttpServletRequest.getRemoteUser has not been fully implemented yet.");
     return null;
   }
 
+  @Override
   public boolean isUserInRole(String val) {
     System.err.println("Method DummyHttpServletRequest.isUserInRole has not been fully implemented yet.");
     return false;
   }
 
+  @Override
   public Principal getUserPrincipal() {
     System.err.println("Method DummyHttpServletRequest.getUserPrincipal has not been fully implemented yet.");
     return null;
   }
 
+  @Override
   public String getRequestedSessionId() {
-    System.err.println("Method DummyHttpServletRequest.getRequestedSessionId has not been fully implemented yet.");
-    return null;
+    return requestedSessionId;
   }
 
+  public DummyHttpServletRequest setRequestedSessionId(String requestedSessionId) {
+    this.requestedSessionId = requestedSessionId;
+    return this;
+  }
+
+  @Override
   public String getRequestURI() {
     return uri;
   }
 
+  @Override
   public StringBuffer getRequestURL() {
     return new StringBuffer(url != null ? url : ""); 
   }
 
+  @Override
   public String getServletPath() {
     System.err.println("Method DummyHttpServletRequest.getServletPath has not been fully implemented yet.");
     return null;
   }
 
-  public HttpSession getSession(boolean b) {
-    return getSession();
+  @Override
+  public HttpSession getSession(boolean create) {
+    if (session == null && create)
+      session = new DummyHttpSession();
+    return session;
   }
 
+  @Override
   public HttpSession getSession() {
-    return session;
+    return getSession(true);
   }
 
   @Override
@@ -231,21 +268,25 @@ public class DummyHttpServletRequest implements HttpServletRequest {
     return null;
   }
 
+  @Override
   public boolean isRequestedSessionIdValid() {
     System.err.println("Method DummyHttpServletRequest.isRequestedSessionIdValid has not been fully implemented yet.");
     return false;
   }
 
+  @Override
   public boolean isRequestedSessionIdFromCookie() {
     System.err.println("Method DummyHttpServletRequest.isRequestedSessionIdFromCookie has not been fully implemented yet.");
     return false;
   }
 
+  @Override
   public boolean isRequestedSessionIdFromURL() {
     System.err.println("Method DummyHttpServletRequest.isRequestedSessionIdFromURL has not been fully implemented yet.");
     return false;
   }
 
+  @Override
   public boolean isRequestedSessionIdFromUrl() {
     System.err.println("Method DummyHttpServletRequest.isRequestedSessionIdFromUrl has not been fully implemented yet.");
     return false;
@@ -287,24 +328,28 @@ public class DummyHttpServletRequest implements HttpServletRequest {
     return null;
   }
 
+  @Override
   public Object getAttribute(String name) {
     return attributes.get(name);
   }
 
+  @Override
   public Enumeration<String> getAttributeNames() {
     return enumeration(attributes.keySet());
   }
 
+  @Override
   public String getCharacterEncoding() {
     System.err.println("Method DummyHttpServletRequest.getCharacterEncoding has not been fully implemented yet.");
     return null;
   }
 
-  public void setCharacterEncoding(String val) throws UnsupportedEncodingException {
+  @Override
+  public void setCharacterEncoding(String env) throws UnsupportedEncodingException {
     System.err.println("Method DummyHttpServletRequest.setCharacterEncoding has not been fully implemented yet.");
-
   }
 
+  @Override
   public int getContentLength() {
     System.err.println("Method DummyHttpServletRequest.getContentLength has not been fully implemented yet.");
     return 0;
@@ -316,94 +361,124 @@ public class DummyHttpServletRequest implements HttpServletRequest {
     return 0;
   }
 
+  @Override
   public String getContentType() {
     System.err.println("Method DummyHttpServletRequest.getContentType has not been fully implemented yet.");
     return null;
   }
 
+  @Override
   public ServletInputStream getInputStream() throws IOException {
     System.err.println("Method DummyHttpServletRequest.getInputStream has not been fully implemented yet.");
     return null;
   }
 
-  public String getParameter(String val) {
-    return paramMap.get(val);
+  @Override
+  public String getParameter(String name) {
+    return Iterables.getFirst(paramMap.get(name), null);
   }
 
   /**
-   * This method is for unit testing; allows removing parameters from the map
-   * @return the previous value associated with <tt>key</tt>, or
-   *         <tt>null</tt> if there was no mapping for <tt>key</tt>.
+   * Removes all values of the given request parameter.
+   *
+   * @return the values that were removed (possibly empty)
    */
-  public String removeParameter(String name) {
-    return paramMap.remove(name);
+  public Collection<String> removeParameter(String name) {
+    return paramMap.removeAll(name);
   }
 
   /**
-   * This method is for unit testing; allows adding parameters to the map
-   * @return the previous value associated with <tt>key</tt>, or
-   *         <tt>null</tt> if there was no mapping for <tt>key</tt>.
-   *         (A <tt>null</tt> return can also indicate that the map
-   *         previously associated <tt>null</tt> with <tt>key</tt>,
-   *         if the implementation supports <tt>null</tt> values.)
+   * Adds a new request parameter mapping.
+   *
+   * @return {@code true} if the parameter multimap was changed as a result,
+   *     or {@code false} if the given mapping already existed
    */
-  public String putParameter(String name, String value) {
+  public boolean putParameter(String name, String value) {
     return paramMap.put(name, value);
   }
 
+  /**
+   * Replaces any existing values for the given parameter with the given values.
+   * @return the (possibly empty) collection of the previous values of this parameter
+   */
+  @CanIgnoreReturnValue
+  public Collection<String> replaceParameterValues(@Nullable String name, Iterable<? extends String> newValues) {
+    return paramMap.replaceValues(name, newValues);
+  }
+
+  /**
+   * Replaces any existing values for the given parameter with the given single value.
+   * @return the (possibly empty) collection of the previous values of this parameter
+   */
+  @CanIgnoreReturnValue
+  public Collection<String> replaceParameterValues(@Nullable String name, String... newValues) {
+    return paramMap.replaceValues(name, Arrays.asList(newValues));
+  }
+
+  @Override
   public Enumeration<String> getParameterNames() {
-    System.err.println("Method DummyHttpServletRequest.getParameterNames has not been fully implemented yet.");
+    return enumeration(paramMap.keySet());
+  }
+
+  @Override
+  public String[] getParameterValues(String name) {
+    if (paramMap.containsKey(name))
+      return paramMap.get(name).toArray(new String[0]);
     return null;
   }
 
-  public String[] getParameterValues(String val) {
-    System.err.println("Method DummyHttpServletRequest.getParameterValues has not been fully implemented yet.");
-    return new String[0];
-  }
-
+  @Override
   public Map<String, String[]> getParameterMap() {
     // must return a map with array values to match the Servlet API spec
-    Map<String, String[]> arrayMap = new HashMap<>();
-    for (Map.Entry<String, String> entry : paramMap.entrySet()) {
-      arrayMap.put(entry.getKey(), new String[]{entry.getValue()});
+    ImmutableMap.Builder<String, String[]> builder = ImmutableMap.builder();
+    for (String name : paramMap.keySet()) {
+      builder.put(name, getParameterValues(name));
     }
-    return arrayMap;
+    return builder.build();
   }
 
+  @Override
   public String getProtocol() {
     System.err.println("Method DummyHttpServletRequest.getProtocol has not been fully implemented yet.");
     return null;
   }
 
+  @Override
   public String getScheme() {
     System.err.println("Method DummyHttpServletRequest.getScheme has not been fully implemented yet.");
     return null;
   }
 
+  @Override
   public String getServerName() {
     System.err.println("Method DummyHttpServletRequest.getServerName has not been fully implemented yet.");
     return null;
   }
 
+  @Override
   public int getServerPort() {
     System.err.println("Method DummyHttpServletRequest.getServerPort has not been fully implemented yet.");
     return 0;
   }
 
+  @Override
   public BufferedReader getReader() throws IOException {
     System.err.println("Method DummyHttpServletRequest.getReader has not been fully implemented yet.");
     return null;
   }
 
+  @Override
   public String getRemoteAddr() {
     return remoteAddr;
   }
 
+  @Override
   public String getRemoteHost() {
     System.err.println("Method DummyHttpServletRequest.getRemoteHost has not been fully implemented yet.");
     return null;
   }
 
+  @Override
   public void setAttribute(String name, Object object) {
     // setting a null value is the same as removeAttribute (see org.apache.catalina.connector.Request.setAttribute)
     if (object == null)
@@ -412,10 +487,12 @@ public class DummyHttpServletRequest implements HttpServletRequest {
       attributes.put(name, object);
   }
 
+  @Override
   public void removeAttribute(String name) {
     attributes.remove(name);
   }
 
+  @Override
   public Locale getLocale() {
     if (!isEmpty(locales))
       return locales.get(0);
@@ -423,6 +500,7 @@ public class DummyHttpServletRequest implements HttpServletRequest {
       return Locale.getDefault();
   }
 
+  @Override
   public Enumeration<Locale> getLocales() {
     if (!isEmpty(locales))
       return enumeration(locales);
@@ -440,36 +518,43 @@ public class DummyHttpServletRequest implements HttpServletRequest {
     return this;
   }
 
+  @Override
   public boolean isSecure() {
     System.err.println("Method DummyHttpServletRequest.isSecure has not been fully implemented yet.");
     return false;
   }
 
-  public RequestDispatcher getRequestDispatcher(String val) {
+  @Override
+  public RequestDispatcher getRequestDispatcher(String path) {
     System.err.println("Method DummyHttpServletRequest.getRequestDispatcher has not been fully implemented yet.");
     return null;
   }
 
+  @Override
   public String getRealPath(String val) {
     System.err.println("Method DummyHttpServletRequest.getRealPath has not been fully implemented yet.");
     return null;
   }
 
+  @Override
   public int getRemotePort() {
     System.err.println("Method DummyHttpServletRequest.getRemotePort has not been fully implemented yet.");
     return 0;
   }
 
+  @Override
   public String getLocalName() {
     System.err.println("Method DummyHttpServletRequest.getLocalName has not been fully implemented yet.");
     return null;
   }
 
+  @Override
   public String getLocalAddr() {
     System.err.println("Method DummyHttpServletRequest.getLocalAddr has not been fully implemented yet.");
     return null;
   }
 
+  @Override
   public int getLocalPort() {
     System.err.println("Method DummyHttpServletRequest.getLocalPort has not been fully implemented yet.");
     return 0;

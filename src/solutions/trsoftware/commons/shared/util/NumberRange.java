@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 TR Software Inc.
+ * Copyright 2022 TR Software Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -43,9 +43,15 @@ public class NumberRange<N extends Number & Comparable<N>> implements Iterable<N
 
   // NOTE: can't extend Comparable<T> because the fromDouble wouldn't compile under those circumstances.
 
+  // TODO(3/30/2022): can provide primitive specializations of this class (e.g. IntRange, DoubleRange, etc.)
+
   private final N min;
   private final N max;
 
+  /**
+   * @param min lower bound (inclusive)
+   * @param max upper bound (inclusive)
+   */
   public NumberRange(N min, N max) {
     // make sure the range is valid
     if (min.doubleValue() > max.doubleValue())
@@ -134,7 +140,18 @@ public class NumberRange<N extends Number & Comparable<N>> implements Iterable<N
   }
 
   public String toString() {
-    return String.valueOf(min) + ".." + max;
+    return min + ".." + max;
+  }
+
+  /**
+   * Factory method.
+   *
+   * @param min lower bound (inclusive)
+   * @param max upper bound (inclusive)
+   * @return a new (immutable) instance representing the closed integer range {@code [min, max]}
+   */
+  public static NumberRange<Integer> of(int min, int max) {
+    return new NumberRange<>(min, max);
   }
 
 // This beautiful code, alas, would only work on the server side, not GWT-side

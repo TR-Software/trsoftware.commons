@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 TR Software Inc.
+ * Copyright 2022 TR Software Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -561,6 +561,7 @@ public class StringUtilsTest extends TestCase {
     assertEquals("null", valueToString(null));
     assertEquals("123", valueToString(123));
     assertEquals("\"foo\"", valueToString("foo"));
+    assertEquals("[1, 2, [a, b, c]]", valueToString(new Object[]{1, 2, new char[]{'a', 'b', 'c'}}));
   }
 
   public void testCapitalize() throws Exception {

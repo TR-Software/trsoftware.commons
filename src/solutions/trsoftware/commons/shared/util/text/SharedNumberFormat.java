@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 TR Software Inc.
+ * Copyright 2022 TR Software Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -16,7 +16,7 @@
 
 package solutions.trsoftware.commons.shared.util.text;
 
-import solutions.trsoftware.commons.client.bridge.text.AbstractNumberFormatter;
+import com.google.common.base.MoreObjects;
 import solutions.trsoftware.commons.shared.util.StringUtils;
 
 import java.math.RoundingMode;
@@ -53,16 +53,14 @@ import java.text.ParseException;
  * with a {@link java.math.BigDecimal} argument (the "exact" representation of any double can be obtained via
  * {@link java.math.BigDecimal#valueOf(double)}).
  *
- * <p style="color: #6495ed; font-weight: bold;">
- *   TODO: use this class to replace {@link AbstractNumberFormatter}
- * </p>
- *
  * @see <a href="http://www.gwtproject.org/doc/latest/RefJreEmulation.html">JRE emulation library</a>
  * @author Alex, 10/31/2017
  */
 public class SharedNumberFormat {
 
-  private DecimalFormat format;
+  // TODO: use this class to replace solutions.trsoftware.commons.client.bridge.text.AbstractNumberFormatter
+
+  private final DecimalFormat format;
 
   /**
    * Creates a {@link DecimalFormat} with the given pattern.
@@ -157,5 +155,12 @@ public class SharedNumberFormat {
    */
   public String getPattern() {
     return format.toPattern();
+  }
+
+  @Override
+  public String toString() {
+    return MoreObjects.toStringHelper(this)
+        .addValue(StringUtils.quote(getPattern()))
+        .toString();
   }
 }

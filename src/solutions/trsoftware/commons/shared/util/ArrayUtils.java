@@ -20,6 +20,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.function.IntFunction;
 import java.util.function.IntPredicate;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
@@ -306,7 +307,7 @@ public class ArrayUtils {
    * the new elements.
    *
    * @param array the array to be filled
-   * @param supplier will be invoked for each array index to generate the elements
+   * @param supplier will be invoked to generate each array element
    * @return the same instance that was passed in, after the transformation has been applied
    * @see Arrays#fill(Object[], Object)
    * @see Stream#generate(Supplier)
@@ -314,6 +315,24 @@ public class ArrayUtils {
   public static <T> T[] fill(T[] array, Supplier<T> supplier) {
     for (int i = 0; i < array.length; i++) {
       array[i] = supplier.get();
+    }
+    return array;
+  }
+
+  /**
+   * Similar to {@link Arrays#fill(Object[], Object)}, but uses a supplier that is invoked for each array index
+   * to generate the new element values.
+   *
+   * @param array the array to be filled
+   * @param supplier will be invoked for each array index to generate the elements:
+   *   takes the array index and returns a value for the corresponding element
+   * @return the same instance that was passed in, after the transformation has been applied
+   * @see Arrays#fill(Object[], Object)
+   * @see Stream#generate(Supplier)
+   */
+  public static <T> T[] fill(T[] array, IntFunction<T> supplier) {
+    for (int i = 0; i < array.length; i++) {
+      array[i] = supplier.apply(i);
     }
     return array;
   }

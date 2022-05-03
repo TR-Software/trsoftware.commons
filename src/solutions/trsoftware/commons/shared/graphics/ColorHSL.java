@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 TR Software Inc.
+ * Copyright 2022 TR Software Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -21,7 +21,6 @@ import com.google.gwt.regexp.shared.MatchResult;
 import com.google.gwt.regexp.shared.RegExp;
 import com.google.gwt.text.shared.AbstractRenderer;
 import com.google.gwt.user.client.ui.ValueBox;
-import solutions.trsoftware.commons.shared.util.MathUtils;
 import solutions.trsoftware.commons.shared.util.StringUtils;
 import solutions.trsoftware.commons.shared.util.text.SharedNumberFormat;
 
@@ -240,7 +239,7 @@ public final class ColorHSL {
       b = hue2rgb(p, q, h - 1d / 3);
     }
 
-    return new ColorRGB(MathUtils.round(r * 255), MathUtils.round(g * 255), MathUtils.round(b * 255));
+    return new ColorRGB(Math.round((float)(r * 255)), Math.round((float)(g * 255)), Math.round((float)(b * 255)));
   }
 
   private static double hue2rgb(double p, double q, double t) {

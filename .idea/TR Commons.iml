@@ -438,5 +438,48 @@
         </SOURCES>
       </library>
     </orderEntry>
+    <orderEntry type="module-library">
+      <library name="org.openjdk.jmh:jmh-core:1.35" type="repository">
+        <properties maven-id="org.openjdk.jmh:jmh-core:1.35" />
+        <CLASSES>
+          <root url="jar://$PROGRAMMING_LIBS_DIR$/jmh-1.35/jmh-core-1.35.jar!/" />
+          <root url="jar://$PROGRAMMING_LIBS_DIR$/jmh-1.35/jopt-simple-5.0.4.jar!/" />
+          <root url="jar://$PROGRAMMING_LIBS_DIR$/jmh-1.35/commons-math3-3.2.jar!/" />
+        </CLASSES>
+        <JAVADOC>
+          <root url="jar://$PROGRAMMING_LIBS_DIR$/jmh-1.35/jmh-core-1.35-javadoc.jar!/" />
+          <root url="jar://$PROGRAMMING_LIBS_DIR$/jmh-1.35/jopt-simple-5.0.4-javadoc.jar!/" />
+          <root url="jar://$PROGRAMMING_LIBS_DIR$/jmh-1.35/commons-math3-3.2-javadoc.jar!/" />
+        </JAVADOC>
+        <SOURCES>
+          <root url="jar://$PROGRAMMING_LIBS_DIR$/jmh-1.35/jmh-core-1.35-sources.jar!/" />
+          <root url="jar://$PROGRAMMING_LIBS_DIR$/jmh-1.35/jopt-simple-5.0.4-sources.jar!/" />
+          <root url="jar://$PROGRAMMING_LIBS_DIR$/jmh-1.35/commons-math3-3.2-sources.jar!/" />
+        </SOURCES>
+      </library>
+    </orderEntry>
+    <orderEntry type="module-library">
+      <library name="org.openjdk.jmh:jmh-generator-annprocess:1.35" type="repository">
+        <properties maven-id="org.openjdk.jmh:jmh-generator-annprocess:1.35" />
+        <CLASSES>
+          <root url="jar://$PROGRAMMING_LIBS_DIR$/jmh-1.35/jmh-generator-annprocess-1.35.jar!/" />
+          <root url="jar://$PROGRAMMING_LIBS_DIR$/jmh-1.35/jmh-core-1.35.jar!/" />
+          <root url="jar://$PROGRAMMING_LIBS_DIR$/jmh-1.35/jopt-simple-5.0.4.jar!/" />
+          <root url="jar://$PROGRAMMING_LIBS_DIR$/jmh-1.35/commons-math3-3.2.jar!/" />
+        </CLASSES>
+        <JAVADOC>
+          <root url="jar://$PROGRAMMING_LIBS_DIR$/jmh-1.35/jmh-generator-annprocess-1.35-javadoc.jar!/" />
+          <root url="jar://$PROGRAMMING_LIBS_DIR$/jmh-1.35/jmh-core-1.35-javadoc.jar!/" />
+          <root url="jar://$PROGRAMMING_LIBS_DIR$/jmh-1.35/jopt-simple-5.0.4-javadoc.jar!/" />
+          <root url="jar://$PROGRAMMING_LIBS_DIR$/jmh-1.35/commons-math3-3.2-javadoc.jar!/" />
+        </JAVADOC>
+        <SOURCES>
+          <root url="jar://$PROGRAMMING_LIBS_DIR$/jmh-1.35/jmh-generator-annprocess-1.35-sources.jar!/" />
+          <root url="jar://$PROGRAMMING_LIBS_DIR$/jmh-1.35/jmh-core-1.35-sources.jar!/" />
+          <root url="jar://$PROGRAMMING_LIBS_DIR$/jmh-1.35/jopt-simple-5.0.4-sources.jar!/" />
+          <root url="jar://$PROGRAMMING_LIBS_DIR$/jmh-1.35/commons-math3-3.2-sources.jar!/" />
+        </SOURCES>
+      </library>
+    </orderEntry>
   </component>
 </module>

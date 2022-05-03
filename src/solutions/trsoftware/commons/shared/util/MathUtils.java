@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 TR Software Inc.
+ * Copyright 2022 TR Software Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -17,7 +17,7 @@
 package solutions.trsoftware.commons.shared.util;
 
 import java.math.BigDecimal;
-import java.math.MathContext;
+import java.math.RoundingMode;
 
 import static java.lang.Math.*;
 
@@ -209,48 +209,69 @@ public class MathUtils {
   }
 
   /**
-   * Attempts to use {@link BigDecimal} to round a {@code double} to the given number of decimal places, as suggested
-   * by <a href="http://www.baeldung.com/java-round-decimal-number">this article</a>.
+   * Returns {@code x} rounded to {@code n} digits after the decimal point
+   * (just like the <a href="https://docs.python.org/2.7/library/functions.html#round">{@code round}</a> function in Python).
+   * <p>
+   * Values are rounded to the closest multiple of <code>10<sup>-n</sup></code>;
+   * if two multiples are equally close, rounding is done away from 0
+   * (so, for example, {@code round(0.5, 0)} is 1.0 and {@code round(-0.5, 0)} is -1.0).
+   * <p>
+   * <b>Warning</b>: The rounding behavior of this method can be surprising due to the fact that most decimal fractions can't be
+   * represented exactly with floating point values.
+   * For example, {@code round(2.675, 2)} gives {@code 2.67} instead of the expected {@code 2.68}.
+   * <p>
+   * <em>Note:</em>
+   * Since this method has to instantiates a {@link BigDecimal} to do the rounding
+   * (unless the given {@code double} is zero, NaN, or Infinity), you might as well use {@link #round(BigDecimal, int)}
+   * whenever possible, in order to avoid the aforementioned floating-point representation errors.
+   * However, in most cases, it's probably even better to just avoid this method entirely and use string formatting
+   * (e.g. {@link java.text.DecimalFormat}, {@link String#format}, etc.) if that's ultimately the desired use-case.
    *
-   * <p style="color: red; font-weight: bold;">
-   *   DO NOT USE this method because it often doesn't return the desired result.  Use string formatting instead.
-   * </p>
+   * @param x the number to round
+   * @param n decimal places
+   * @return {@code x} rounded to {@code n} decimal places
    *
-   * @return {@code value} rounded to {@code nPlaces} decimal places.
-   *
-   * @deprecated this method still exists simply as a warning to never attempt to solve this problem again; it's pointless.
-   * It doesn't even make sense to attempt to round a {@code double} to a given number of decimal places because
-   * floating-point numbers are so imprecise.  Most of the solutions described on the web don't actually work well,
-   * and it seems that the only way to do it properly is to use the string formatting classes (e.g. DecimalFormat, printf, etc).
-   * It actually makes a lot more sense to use string formatting to achieve this kind of rounding,
-   * because the only real need for this operation is to pretty-print a number as text.
+   * @see <a href="https://docs.python.org/2.7/tutorial/floatingpoint.html">Floating Point Arithmetic: Issues and Limitations</a>
+   * @see #round(BigDecimal, int)
    */
-  public static double round(double value, int nPlaces) {
-    if (nPlaces < 0)
-      throw new IllegalArgumentException(String.valueOf(nPlaces));
-    double rint = Math.rint(value);
-    if (nPlaces == 0 || rint == value)
-      return rint;  // can't pass precision=0 to BigDecimal.round (this would cancel rounding)
+  public static double round(double x, int n) {
+    /*
+     * This code was borrowed from the Jython implementation of Python's round function
+     * (see https://github.com/jython/jython/blob/3f01873cdf41c0a536425152e1357892f681ea49/src/org/python/core/util/ExtraMath.java#L39-L86)
+     *
+     * Except that in order to make it GWT-compatible, we had to remove certain fast-path optimizations performed in
+     * the Jython code source code. However, some basic testing (with 1000 random doubles in range [0,300])
+     * showed that their fast path doesn't apply 99.9% of the time anyway.
+     */
+    // see https://github.com/jython/jython/blob/3f01873cdf41c0a536425152e1357892f681ea49/src/org/python/core/util/ExtraMath.java#L39-L86
+    if (Double.isNaN(x) || Double.isInfinite(x) || x == 0.0) {
+      // NaNs, infinities, and zeros round to themselves
+      return x;
+    }
     else {
-      /*
-      We can only use BigDecimal to round the fractional part of the number, because
-      new BigDecimal(245.245678).round(new MathContext(2, RoundingMode.HALF_UP)) returns 250.0, whereas we want 245.25
-      Furthermore, it won't even work for the fractional part some of the time, for example:
-      - round(0.04584203269100395, 1) = 0.05 // instead of 0.0
-      - round(0.013107220012424037, 3) = 0.0131  // instead of 0.013
-      */
-      double floor = Math.floor(value);
-      double fraction = value - floor;
-      return floor + new BigDecimal(fraction).round(new MathContext(nPlaces)).doubleValue();
+      // go straight to BigDecimal, since GWT doesn't support Math.getExponent(x), which is used in Jython's fast-path
+      // (NOTE: the BigDecimal constructor throws a NumberFormatException if the double is infinite or NaN, but we've already checked for that)
+      return round(new BigDecimal(x), n).doubleValue();
     }
   }
 
   /**
-   * Casts {@code x} to {@code float} and invokes {@link Math#round(float)} on it. This is preferable to using
-   * {@link Math#round(double)} when we want to avoid {@code long} emulation in compiled GWT code.
+   * Rounds {@code x} to {@code n} digits after the decimal point by invoking
+   * {@link BigDecimal#setScale(int, RoundingMode) x.setScale(n, RoundingMode.HALF_UP)}.
+   * <p>
+   * Working with {@link BigDecimal} values allows avoiding the various floating point representation pitfalls,
+   * so this method should be used instead of {@link #round(double, int)} whenever possible.
+   * Just make sure you instantiate the value with {@link BigDecimal#valueOf(double)} and
+   * <em>not</em> {@link BigDecimal#BigDecimal(double)}.
+   *
+   * @param x the number to round
+   * @param n decimal places
+   * @return {@code x} rounded to {@code n} decimal places
+   *
+   * @see <a href="https://docs.python.org/2.7/library/functions.html#round">The <code>round</code> function in Python</a>
    */
-  public static int round(double x) {
-    return Math.round((float)x);
+  public static BigDecimal round(BigDecimal x, int n) {
+    return x.setScale(n, RoundingMode.HALF_UP);
   }
 
   /**

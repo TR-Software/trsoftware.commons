@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 TR Software Inc.
+ * Copyright 2022 TR Software Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -15,6 +15,8 @@
  */
 
 package solutions.trsoftware.commons.shared.util;
+
+import com.google.common.collect.Lists;
 
 import java.util.*;
 import java.util.function.Predicate;
@@ -123,14 +125,26 @@ public class ListUtils {
 
 
   /**
-   * Returns a standard {@link ArrayList} with the given elements (in contrast to {@link Arrays#asList},
+   * Returns a new (mutable) instance of {@link ArrayList} containing the given elements (in contrast with {@link Arrays#asList},
    * which returns a very limited implementation of {@link List}).
    * @see Arrays#asList(Object[])
    * @see com.google.common.collect.Lists#newArrayList(Object[])
    */
   @SafeVarargs
-  public static <T> ArrayList<T> arrayList(T... a) {
-    return new ArrayList<T>(Arrays.asList(a));
+  public static <T> ArrayList<T> arrayList(T... elements) {
+    ArrayList<T> ret = new ArrayList<>();
+    Collections.addAll(ret, elements);
+    return ret;
+  }
+
+  /**
+   * Returns a new instance of {@link LinkedList} containing the given elements.
+   */
+  @SafeVarargs
+  public static <T> LinkedList<T> linkedList(T... elements) {
+    LinkedList<T> ret = new LinkedList<>();
+    Collections.addAll(ret, elements);
+    return ret;
   }
 
   /**
@@ -151,7 +165,11 @@ public class ListUtils {
     return lst.get(0);
   }
 
-  /** @return a new array list containing the elements of the given collection, in reverse order */
+  /**
+   * @return a new list containing the same elements as the given collection, but in reversed order
+   * @see Lists#reverse(List)
+   * @see Collections#reverse(List)
+   */
   public static <T> ArrayList<T> reversedCopy(Collection<T> inputs) {
     ArrayList<T> copy = new ArrayList<T>(inputs);
     Collections.reverse(copy);

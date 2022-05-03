@@ -317,7 +317,7 @@ public class StringUtils {
       char indexChar = format.charAt(lastMatch + 1);
       if (indexChar >= '1' && indexChar <= '9') {
         int index = indexChar - '1';
-        result.append(format.substring(nextCopyRegionStart, lastMatch));
+        result.append(format, nextCopyRegionStart, lastMatch);
         result.append(args[index]);
         nextCopyRegionStart = lastMatch+2;
         lastMatch = format.indexOf("$", lastMatch+2);
@@ -675,31 +675,37 @@ public class StringUtils {
     return buf;
   }
 
-  private static void appendValue(StringBuilder buf, Object arg) {
-    if (arg instanceof String)
-      appendSurrounded(buf, arg, "\"");
-    else if (arg instanceof Character)
-      appendSurrounded(buf, arg, "\'");
-    else if (arg instanceof Object[])
-      buf.append(Arrays.deepToString((Object[])arg));
-    else if (arg instanceof byte[])
-      buf.append(Arrays.toString((byte[])arg));
-    else if (arg instanceof short[])
-      buf.append(Arrays.toString((short[])arg));
-    else if (arg instanceof int[])
-      buf.append(Arrays.toString((int[])arg));
-    else if (arg instanceof long[])
-      buf.append(Arrays.toString((long[])arg));
-    else if (arg instanceof float[])
-      buf.append(Arrays.toString((float[])arg));
-    else if (arg instanceof double[])
-      buf.append(Arrays.toString((double[])arg));
-    else if (arg instanceof boolean[])
-      buf.append(Arrays.toString((boolean[])arg));
-    else if (arg instanceof char[])
-      buf.append(Arrays.toString((char[])arg));
+  /**
+   * @see #valueToString(Object)
+   */
+  public static void appendValue(StringBuilder buf, Object value) {
+    if (value instanceof CharSequence)
+      appendSurrounded(buf, value, "\"");
+    else if (value instanceof Character)
+      appendSurrounded(buf, value, "'");
+    else if (value instanceof Object[])
+      /* TODO: Arrays.deepToString doesn't quote strings and chars the way we want;
+       *   might want to implement our own version (similar to the private method Arrays.deepToString(Object[], StringBuilder, Set<Object[]>))
+       */
+      buf.append(Arrays.deepToString((Object[])value));
+    else if (value instanceof byte[])
+      buf.append(Arrays.toString((byte[])value));
+    else if (value instanceof short[])
+      buf.append(Arrays.toString((short[])value));
+    else if (value instanceof int[])
+      buf.append(Arrays.toString((int[])value));
+    else if (value instanceof long[])
+      buf.append(Arrays.toString((long[])value));
+    else if (value instanceof float[])
+      buf.append(Arrays.toString((float[])value));
+    else if (value instanceof double[])
+      buf.append(Arrays.toString((double[])value));
+    else if (value instanceof boolean[])
+      buf.append(Arrays.toString((boolean[])value));
+    else if (value instanceof char[])
+      buf.append(Arrays.toString((char[])value));
     else
-      buf.append(arg);
+      buf.append(value);
   }
 
   /**
@@ -1171,17 +1177,19 @@ public class StringUtils {
   }
 
   /**
-   * If the argument is a {@link CharSequence} it will be quoted to resemble a string literal (which
-   * can be useful for printing field values in a {@link #toString()} method).
+   * If the argument is a {@link CharSequence} or {@link Character}, it will be quoted to resemble a string or char literal.
+   * If it's an array, it will be converted using the appropriate version of {@link Arrays#toString} / {@link Arrays#deepToString}.
    * Otherwise same as {@link String#valueOf(Object)}.
+   * <p>
+   * This can be useful for printing field values in a {@link #toString()} method.
    *
    * @param value the value to print
    * @return the result of {@link String#valueOf(Object)}, quoted if {@code value} is a string.
    */
   public static String valueToString(Object value) {
-    if (value instanceof CharSequence)
-      return "\"" + value + "\"";
-    return String.valueOf(value);
+    StringBuilder buf = new StringBuilder();
+    appendValue(buf, value);
+    return buf.toString();
   }
 
   /**

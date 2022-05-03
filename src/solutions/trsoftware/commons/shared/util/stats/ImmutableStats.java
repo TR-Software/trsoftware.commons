@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 TR Software Inc.
+ * Copyright 2022 TR Software Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -15,6 +15,8 @@
  */
 
 package solutions.trsoftware.commons.shared.util.stats;
+
+import com.google.common.base.MoreObjects;
 
 import java.io.Serializable;
 
@@ -87,18 +89,16 @@ public class ImmutableStats<N extends Number> implements SampleStatistics<N>, Se
 
   @Override
   public String toString() {
-    final StringBuilder sb = new StringBuilder();
-    sb.append("ImmutableStats");
-    sb.append("(size=").append(size);
-    sb.append(", sum=").append(sum);
-    sb.append(", mean=").append(mean);
-    sb.append(", min=").append(min);
-    sb.append(", median=").append(median);
-    sb.append(", max=").append(max);
-    sb.append(", stdev=").append(stdev());
-    sb.append(", variance=").append(variance);
-    sb.append(')');
-    return sb.toString();
+    return MoreObjects.toStringHelper(this)
+        .add("size", size)
+        .add("min", min)
+        .add("max", max)
+        .add("median", median)
+        .add("sum", sum)
+        .add("mean", mean)
+        .add("variance", variance)
+        .add("stdev", stdev())
+        .toString();
   }
 
   @Override

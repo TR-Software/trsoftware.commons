@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 TR Software Inc.
+ * Copyright 2022 TR Software Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -12,20 +12,25 @@
  * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
  * License for the specific language governing permissions and limitations under
  * the License.
- *
  */
 
 package solutions.trsoftware.commons.shared.util;
 
+import com.google.common.collect.LinkedHashMultimap;
+import com.google.common.collect.Multimap;
+import com.google.gwt.core.shared.GwtIncompatible;
 import junit.framework.TestCase;
 import solutions.trsoftware.commons.server.util.ServerArrayUtils;
 import solutions.trsoftware.commons.shared.testutil.AssertUtils;
+import solutions.trsoftware.commons.shared.util.text.SharedNumberFormat;
 
+import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.*;
 
 import static solutions.trsoftware.commons.shared.util.MathUtils.*;
 
+@SuppressWarnings("NonJREEmulationClassesInClientCode")
 public class MathUtilsJavaTest extends TestCase {
 
   public void testInt128ToByteArray() throws Exception {
@@ -403,5 +408,63 @@ public class MathUtilsJavaTest extends TestCase {
       int x = RandomUtils.rnd.nextInt();
       assertEquals(powersOf2.contains(x), isPowerOf2(x));
     }
+  }
+
+  @GwtIncompatible
+  public void testRound() throws Exception {
+    // very basic test
+    assertEquals(1.0, round(0.5, 0));
+    assertEquals(-1.0, round(-0.5, 0));
+    assertEquals(2.67, round(2.675, 2));  // example of float representation limitation (from https://docs.python.org/2.7/library/functions.html#round)
+    assertEquals(BigDecimal.valueOf(2.68), round(BigDecimal.valueOf(2.675), 2));  // same input produces a more-accurate result with BigDecimal instead of double
+
+    // some random values
+    Random rnd = new Random(1);
+    int n = 1000;
+//    int n = 100;
+    double[] inputs = new double[n];
+    for (int i = 0; i < inputs.length; i++) {
+      inputs[i] = RandomUtils.nextDoubleInRange(rnd,0, 300);
+    }
+
+
+    Multimap<String, String> warnings = LinkedHashMultimap.create();
+    int iMax = 5;
+//    SharedNumberFormat[] formats = ArrayUtils.fill(new SharedNumberFormat[iMax], i -> new SharedNumberFormat(0, 1, i, false));
+    SharedNumberFormat[] formats = ArrayUtils.fill(new SharedNumberFormat[iMax], SharedNumberFormat::new);
+
+    System.out.println("---- Testing round(double, int) ----");
+    for (int i = 0; i < iMax; i++) {
+      SharedNumberFormat fmt = formats[i];
+      for (double x : inputs) {
+        double rx = round(x, i);
+        String fx = fmt.format(x);
+        String msg = String.format("round(double, %d): %20s -> %s", i, x, rx);
+        if (!fx.equals(fmt.format(rx)) || !MathUtils.equal(fmt.parse(fx), rx, Math.pow(10, -i))) {
+          warnings.put("double", msg);
+          msg += " -- WARNING";
+        }
+        System.out.println(msg);
+      }
+    }
+
+    System.out.println("\n\n---- Testing round(BigDecimal, int) ----");
+    // repeat the same test with BigDecimals
+    for (int i = 0; i < iMax; i++) {
+      SharedNumberFormat fmt = formats[i];
+      for (double input : inputs) {
+        BigDecimal x = BigDecimal.valueOf(input);
+        BigDecimal rx = round(x, i);
+        String fx = fmt.format(x);
+        String msg = String.format("round(BigDecimal, %d): %20s -> %s", i, x, rx);
+        if (!fx.equals(fmt.format(rx))) {
+          warnings.put("BigDecimal", msg);
+          msg += " -- WARNING";
+        }
+        System.out.println(msg);
+      }
+    }
+
+    assertEquals(warnings.toString(), 0, warnings.size());
   }
 }

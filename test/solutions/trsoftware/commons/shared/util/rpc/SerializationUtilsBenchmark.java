@@ -14,13 +14,12 @@
  * the License.
  */
 
-package solutions.trsoftware.tools.benchmarks;
+package solutions.trsoftware.commons.shared.util.rpc;
 
 import org.openjdk.jmh.annotations.*;
 import org.openjdk.jmh.infra.Blackhole;
 import solutions.trsoftware.commons.shared.util.MathUtils;
 import solutions.trsoftware.commons.shared.util.RandomUtils;
-import solutions.trsoftware.commons.shared.util.rpc.SerializationUtils;
 
 import java.util.Random;
 

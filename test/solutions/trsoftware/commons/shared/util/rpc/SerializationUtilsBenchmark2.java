@@ -14,7 +14,7 @@
  * the License.
  */
 
-package solutions.trsoftware.tools.benchmarks;
+package solutions.trsoftware.commons.shared.util.rpc;
 
 import org.openjdk.jmh.annotations.*;
 import org.openjdk.jmh.infra.Blackhole;

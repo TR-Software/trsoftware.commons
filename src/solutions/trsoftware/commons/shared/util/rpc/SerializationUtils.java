@@ -23,7 +23,6 @@ import com.google.gwt.user.client.rpc.SerializationStreamReader;
 import com.google.gwt.user.client.rpc.SerializationStreamWriter;
 import solutions.trsoftware.commons.shared.util.MathUtils;
 import solutions.trsoftware.commons.shared.util.text.SharedNumberFormat;
-import solutions.trsoftware.tools.benchmarks.SerializationUtilsBenchmark2;
 
 /**
  * Utilities for implementing
@@ -109,8 +108,9 @@ public class SerializationUtils {
   private static final int MAX_CACHED_POW_10 = 10;
   /**
    * Pre-computed results of {@code Math.pow(10, i)} for {@code i} &isin; [0,10).
-   * Our {@linkplain SerializationUtilsBenchmark2 benchmarks} showed that this optimization doubles the throughput
-   * of {@link #doubleToScaledInt(double, int)}
+   * <p>
+   * Our benchmarks showed that this optimization doubles the throughput
+   * of {@link #doubleToScaledInt(double, int)} (see {@code SerializationUtilsBenchmark2} in the test source tree).
    * @see #pow10(int)
    */
   private static final double[] powersOf10 = new double[MAX_CACHED_POW_10];

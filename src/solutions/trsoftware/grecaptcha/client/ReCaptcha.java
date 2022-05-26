@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 TR Software Inc.
+ * Copyright 2022 TR Software Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -33,6 +33,12 @@ import java.util.logging.Logger;
  * @see ReCaptchaWidget
  */
 public class ReCaptcha {
+
+  /* TODO(5/26/2022):
+       the deferred loading logic for the ReCaptcha library can be simplified by using
+       solutions.trsoftware.commons.client.util.ScriptLoader instead of ScriptInjector
+   */
+
   public static final String RECAPTCHA_SCRIPT_URL = "https://www.google.com/recaptcha/api.js";
 
   private static final Logger LOG = Logger.getLogger(ReCaptcha.class.getName());

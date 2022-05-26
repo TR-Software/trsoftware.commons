@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 TR Software Inc.
+ * Copyright 2022 TR Software Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -30,6 +30,11 @@ import java.util.logging.Logger;
  * @author Alex, 5/6/2017
  */
 public class GoogleCharts {
+
+  /* TODO(5/26/2022):
+       the deferred loading logic for the Google Charts library can be simplified by using
+       solutions.trsoftware.commons.client.util.ScriptLoader instead of ScriptInjector
+   */
 
   public static final String GOOGLE_CHARTS_JS_URL = "https://www.gstatic.com/charts/loader.js";
 

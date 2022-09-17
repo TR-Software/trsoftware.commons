@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 TR Software Inc.
+ * Copyright 2022 TR Software Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -12,7 +12,6 @@
  * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
  * License for the specific language governing permissions and limitations under
  * the License.
- *
  */
 
 package solutions.trsoftware.commons.server.servlet.testutil;
@@ -22,6 +21,7 @@ import solutions.trsoftware.commons.shared.util.StringUtils;
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpSession;
 import javax.servlet.http.HttpSessionContext;
+import java.util.Collections;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Map;
@@ -33,13 +33,18 @@ import java.util.Map;
  */
 public class DummyHttpSession implements HttpSession {
 
-  Map<String, Object> attributeMap = new HashMap<>();
+  private Map<String, Object> attributeMap = new HashMap<>();
 
   private final String sessionId = "DummySession_" + StringUtils.randString(8);
 
+  private final long creationTime;
+
+  public DummyHttpSession() {
+    creationTime = System.currentTimeMillis();
+  }
+
   public long getCreationTime() {
-    System.err.println("Method DummyHttpSession.getCreationTime has not been fully implemented yet.");
-    return 0;
+    return creationTime;
   }
 
   public String getId() {
@@ -71,47 +76,42 @@ public class DummyHttpSession implements HttpSession {
     return null;
   }
 
-  public Object getAttribute(String val) {
-    return attributeMap.get(val);
+  public Object getAttribute(String name) {
+    return attributeMap.get(name);
   }
 
-  public Object getValue(String val) {
-    System.err.println("Method DummyHttpSession.getValue has not been fully implemented yet.");
-    return null;
+  @Deprecated
+  public Object getValue(String name) {
+    return getAttribute(name);
   }
 
   public Enumeration<String> getAttributeNames() {
-    System.err.println("Method DummyHttpSession.getAttributeNames has not been fully implemented yet.");
-    return null;
+    return Collections.enumeration(attributeMap.keySet());
   }
 
+  @Deprecated
   public String[] getValueNames() {
-    System.err.println("Method DummyHttpSession.getValueNames has not been fully implemented yet.");
-    return new String[0];
+    return attributeMap.keySet().toArray(new String[0]);
   }
 
-  public void setAttribute(String val, Object object) {
-    attributeMap.put(val, object);
+  public void setAttribute(String name, Object value) {
+    attributeMap.put(name, value);
   }
 
-  public void putValue(String val, Object object) {
-    System.err.println("Method DummyHttpSession.putValue has not been fully implemented yet.");
-
+  public void putValue(String name, Object value) {
+    setAttribute(name, value);
   }
 
-  public void removeAttribute(String val) {
-    System.err.println("Method DummyHttpSession.removeAttribute has not been fully implemented yet.");
-
+  public void removeAttribute(String name) {
+    attributeMap.remove(name);
   }
 
-  public void removeValue(String val) {
-    System.err.println("Method DummyHttpSession.removeValue has not been fully implemented yet.");
-
+  public void removeValue(String name) {
+    removeAttribute(name);
   }
 
   public void invalidate() {
-    System.err.println("Method DummyHttpSession.invalidate has not been fully implemented yet.");
-
+    attributeMap.clear();
   }
 
   public boolean isNew() {

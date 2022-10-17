@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 TR Software Inc.
+ * Copyright 2022 TR Software Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -12,7 +12,6 @@
  * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
  * License for the specific language governing permissions and limitations under
  * the License.
- *
  */
 
 package solutions.trsoftware.commons.client.util;
@@ -29,7 +28,7 @@ public class SmartTimerTest extends CommonsGwtTestCase {
 
   private final int periodMillis = 200;
   private final int partialPeriodMillis = periodMillis / 2;
-  private final double leeway = partialPeriodMillis  / 2;   // allow some leeway for all time comparisons because we're using the wall clock time
+  private final double leeway = partialPeriodMillis  * .75;   // allow some leeway for all time comparisons because we're using the wall clock time
   private final int fullPeriodsToWait = 3;
   private final int verificationDelay = periodMillis * fullPeriodsToWait + partialPeriodMillis + (int)leeway;
 

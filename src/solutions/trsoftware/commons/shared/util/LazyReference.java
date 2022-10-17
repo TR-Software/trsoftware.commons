@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 TR Software Inc.
+ * Copyright 2022 TR Software Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -21,11 +21,11 @@ import java.util.function.Supplier;
 /**
  * A cache for an instance that will be created only once (on the first invocation of {@link #get()}).
  *
- * @param <T> the type of object referred to by this reference
+ * @param <V> the type of object referred to by this reference
  *
  * @author Alex
  */
-public abstract class LazyReference<T> {
+public abstract class LazyReference<V> {
 
   /**
    * The value computed by {@link #create()}.
@@ -35,9 +35,9 @@ public abstract class LazyReference<T> {
    *   (can also use an {@link java.util.concurrent.atomic.AtomicBoolean} for this purpose).
    * </p>
    */
-  protected volatile T value;
+  protected volatile V value;
 
-  public T get(boolean create) {
+  public V get(boolean create) {
     if (value == null && create) {
       // lazy init using the double-checked locking paradigm
       synchronized (this) {
@@ -48,7 +48,7 @@ public abstract class LazyReference<T> {
     return value;
   }
 
-  public T get() {
+  public V get() {
     return get(true);
   }
 
@@ -56,7 +56,7 @@ public abstract class LazyReference<T> {
     return value != null;
   }
 
-  protected abstract T create();
+  protected abstract V create();
 
   /**
    * Factory method that uses the given supplier function to implement the {@link #create()} method.

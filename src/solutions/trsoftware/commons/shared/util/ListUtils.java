@@ -18,6 +18,7 @@ package solutions.trsoftware.commons.shared.util;
 
 import com.google.common.collect.Lists;
 
+import javax.annotation.Nonnull;
 import java.util.*;
 import java.util.function.Predicate;
 
@@ -151,7 +152,7 @@ public class ListUtils {
    * @return the last element of the given list
    * @throws IndexOutOfBoundsException if the list is empty
    */
-  public static <T> T last(List<T> list) {
+  public static <T> T last(@Nonnull List<T> list) {
     return list.get(list.size()-1);
   }
 

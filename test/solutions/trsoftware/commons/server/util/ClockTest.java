@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 TR Software Inc.
+ * Copyright 2022 TR Software Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -12,7 +12,6 @@
  * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
  * License for the specific language governing permissions and limitations under
  * the License.
- *
  */
 
 package solutions.trsoftware.commons.server.util;
@@ -22,6 +21,8 @@ import solutions.trsoftware.commons.shared.annotations.Slow;
 import solutions.trsoftware.commons.shared.util.StringUtils;
 
 import java.util.concurrent.TimeUnit;
+
+import static solutions.trsoftware.commons.shared.testutil.AssertUtils.assertThrows;
 
 public class ClockTest extends TestCaseCanStopClock {
 
@@ -33,9 +34,10 @@ public class ClockTest extends TestCaseCanStopClock {
       // assertApproximatelyEquals(System.currentTimeMillis(), Clock.currentTimeMillis(), 10);   // not more than 10 millis should have elapsed between those two calls
 
       // make sure that no operations are possible while the clock is ticking in normal mode
-      try { Clock.advance(100); fail(); } catch (IllegalStateException e) {}
-      try { Clock.set(112934); fail(); } catch (IllegalStateException e) {}
-      try { Clock.startTicking(); fail(); } catch (IllegalStateException e) {}
+      assertThrows(IllegalStateException.class, (Runnable)() -> Clock.advance(100));
+      assertThrows(IllegalStateException.class, (Runnable)() -> Clock.advance(100));
+      assertThrows(IllegalStateException.class, (Runnable)() -> Clock.set(112934));
+      assertThrows(IllegalStateException.class, (Runnable)Clock::startTicking);
 
       long stoppedTime = Clock.stop();
       assertEquals(stoppedTime, Clock.currentTimeMillis());
@@ -44,29 +46,29 @@ public class ClockTest extends TestCaseCanStopClock {
       assertEquals(stoppedTime, Clock.currentTimeMillis());
       // the clock is now 1000 ms behind
       Clock.advance(2000);
-      long clock = Clock.currentTimeMillis();
-      assertEquals(stoppedTime + 2000, clock);
+      long time = Clock.currentTimeMillis();
+      assertEquals(stoppedTime + 2000, time);
       // the clock is now 1000 ms ahead
 
       // the clock shouldn't change after we start it ticking in fake mode
-      clock = Clock.currentTimeMillis();
+      time = Clock.currentTimeMillis();
       Clock.startTicking();
-      assertEquals(clock, Clock.currentTimeMillis());
+      assertEquals(time, Clock.currentTimeMillis());
       // the difference between the clock and real time should be preserved
       Thread.sleep(1000);
-      assertApproximatelyEquals(clock + 1000, Clock.currentTimeMillis(), 10);
+      assertApproximatelyEquals(time + 1000, Clock.currentTimeMillis(), 10);
 
       // make sure that no operations are possible while the clock is ticking in fake mode
-      try { Clock.advance(100); fail(); } catch (IllegalStateException e) {}
-      try { Clock.set(112934); fail(); } catch (IllegalStateException e) {}
-      try { Clock.startTicking(); fail(); } catch (IllegalStateException e) {}
+      assertThrows(IllegalStateException.class, (Runnable)() -> Clock.advance(100));
+      assertThrows(IllegalStateException.class, (Runnable)() -> Clock.set(112934));
+      assertThrows(IllegalStateException.class, (Runnable)Clock::startTicking);
 
       // make sure that when the clock is stopped in fake mode it's still showing the fake time
-      clock = Clock.currentTimeMillis();
+      time = Clock.currentTimeMillis();
       Clock.stop();
-      assertEquals(clock, Clock.currentTimeMillis());
+      assertEquals(time, Clock.currentTimeMillis());
       Clock.advance(2000);
-      assertEquals(clock + 2000, Clock.currentTimeMillis());
+      assertEquals(time + 2000, Clock.currentTimeMillis());
 
       // resume normal operation
       Clock.resetToNormal();

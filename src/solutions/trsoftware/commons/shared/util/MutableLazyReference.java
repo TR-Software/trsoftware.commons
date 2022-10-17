@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 TR Software Inc.
+ * Copyright 2022 TR Software Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -19,13 +19,13 @@ package solutions.trsoftware.commons.shared.util;
 import java.util.function.Supplier;
 
 /**
- * Nov 15, 2010
+ * A {@link LazyReference} that can be modified
  *
  * @author Alex
  */
-public abstract class MutableLazyReference<T> extends LazyReference<T> {
+public abstract class MutableLazyReference<V> extends LazyReference<V> {
 
-  public synchronized void set(T value) {
+  public synchronized void set(V value) {
     this.value = value;
   }
 

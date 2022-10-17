@@ -16,16 +16,20 @@
 
 package solutions.trsoftware.commons.shared.testutil;
 
+import com.google.common.collect.Iterables;
 import com.google.common.collect.Multimap;
 import com.google.gwt.user.client.Element;
 import junit.framework.Assert;
 import junit.framework.AssertionFailedError;
 import solutions.trsoftware.commons.client.util.GwtUtils;
+import solutions.trsoftware.commons.shared.util.ArrayUtils;
 import solutions.trsoftware.commons.shared.util.StringUtils;
 import solutions.trsoftware.commons.shared.util.callables.Function0_t;
 import solutions.trsoftware.commons.shared.util.compare.ComparisonOperator;
 import solutions.trsoftware.commons.shared.util.function.BiConsumerThrows;
 
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import java.util.*;
 import java.util.function.BiPredicate;
 import java.util.function.IntPredicate;
@@ -117,7 +121,7 @@ public abstract class AssertUtils {
    * this method uses {@link GwtUtils#isAssignableFrom(Class, Class)} to check whether the thrown exception is of the
    * expected type)
    */
-  public static <T extends Throwable> T assertThrows(Class<T> expectedThrowableClass, final Supplier code) {
+  public static <T extends Throwable> T assertThrows(Class<T> expectedThrowableClass, final Supplier<?> code) {
     return assertThrows(expectedThrowableClass, (Function0_t<T>)code::get);
   }
 
@@ -131,7 +135,7 @@ public abstract class AssertUtils {
    * this method uses {@link GwtUtils#isAssignableFrom(Class, Class)} to check whether the thrown exception is of the
    * expected type)
    */
-  public static <T extends Throwable> T assertThrows(Class<T> expectedThrowableClass, Function0_t<? extends Throwable> code) {
+  public static <T extends Throwable> T assertThrows(Class<T> expectedThrowableClass, Function0_t<?> code) {
     // TODO: move this code to one of the other overloads (e.g. assertThrows(Class, Runnable)), and get rid of this method
     // TODO: or make this method take java.util.function.Function instead of Function0_t
     if (expectedThrowableClass.isInterface())
@@ -416,7 +420,7 @@ public abstract class AssertUtils {
   public static void assertArraysEqual(Object[] a, Object[] a2) {
     boolean pass = Arrays.deepEquals(a, a2);
     if (!pass)
-      fail(formatComparisonFailedMessage("Arrays not equal.", Arrays.toString(a), Arrays.toString(a2)));
+      fail(formatComparisonFailedMessage("Arrays not equal.", Arrays.deepToString(a), Arrays.deepToString(a2)));
   }
 
   /**
@@ -464,25 +468,52 @@ public abstract class AssertUtils {
     assertFalse(a.hashCode() == b.hashCode());
   }
 
-  public static <M extends Map> void assertEmpty(M map) {
+  /*
+    NOTE: although the following overloaded methods (assertEmpty & assertContains) don't seem necessary,
+    they allow implementations to change the underlying collection type without having to modify the unit tests
+   */
+
+  public static void assertEmpty(Map<?, ?> map) {
     assertTrue(map.isEmpty());
     assertEquals(0, map.size());
   }
 
-  public static <C extends Collection> void assertEmpty(C collection) {
-    assertTrue(collection.isEmpty());
-    assertEquals(0, collection.size());
+  public static void assertEmpty(Iterable<?> iterable) {
+    assertTrue(Iterables.isEmpty(iterable));
+  }
+
+  public static <T> void assertEmpty(T[] array) {
+    assertTrue(ArrayUtils.isEmpty(array));
   }
 
   public static void assertEmpty(Enumeration<?> e) {
     assertFalse(e.hasMoreElements());
   }
 
+  public static void assertContains(Iterable<?> iterable, @Nullable Object element) {
+    assertTrue(Iterables.contains(iterable, element));
+  }
+
+  public static <T> void assertContains(T[] array, @Nullable T element) {
+    assertTrue(ArrayUtils.contains(array, element));
+  }
+
+  /**
+   * Asserts that the given list contains exactly 1 element and returns that element
+   * @return the only element from the list
+   * @throws AssertionFailedError if list size != 1
+   * @see Iterables#getOnlyElement(Iterable)
+   */
+  public static <T> T getOnlyElement(List<T> list) {
+    assertEquals(1, list.size());
+    return list.get(0);
+  }
+
   /**
    * Asserts that {@code a} and {@code b} be are "equal" to each-other,
-   * according to their {@link Comparable#compareTo(Object)} methods.
+   * according to their {@link Comparable#compareTo(Object)} methods, without checking {@link Object#equals(Object)}.
    */
-  public static <T extends Comparable<T>> void assertComparablesEqual(T a, T b) {
+  public static <T extends Comparable<T>> void assertComparablesEqual(@Nonnull T a, @Nonnull T b) {
     assertTrue(a.compareTo(b) == 0);
     assertTrue(b.compareTo(a) == 0);
   }
@@ -490,7 +521,7 @@ public abstract class AssertUtils {
   /**
    * Asserts that {@code a != b}, as defined by their {@link Comparable#compareTo(Object)} method.
    */
-  public static <T extends Comparable<T>> void assertComparablesNotEqual(T a, T b) {
+  public static <T extends Comparable<T>> void assertComparablesNotEqual(@Nonnull T a, @Nonnull T b) {
     assertTrue(a.compareTo(b) != 0);
     assertTrue(b.compareTo(a) != 0);
   }

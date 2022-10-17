@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 TR Software Inc.
+ * Copyright 2022 TR Software Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -12,7 +12,6 @@
  * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
  * License for the specific language governing permissions and limitations under
  * the License.
- *
  */
 
 package solutions.trsoftware.commons.server;
@@ -25,6 +24,7 @@ import solutions.trsoftware.commons.server.util.CanStopClock;
 
 import java.io.IOException;
 import java.lang.reflect.Field;
+import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -121,6 +121,18 @@ public abstract class SuperTestCase extends TestCase implements CanStopClock {
     Path tempDir = Files.createTempDirectory(String.format("%s.%s", getClass().getName(), getName()));
     FileUtils.deleteOnExit(tempDir);
     return tempDir;
+  }
+
+  /**
+   * @return the test method currently being executed
+   */
+  protected Method getMethod() {
+    try {
+      return getClass().getMethod(getName(), (Class<?>[])null);
+    }
+    catch (NoSuchMethodException e) {
+      throw new RuntimeException(e);  // should never happen
+    }
   }
 
 }

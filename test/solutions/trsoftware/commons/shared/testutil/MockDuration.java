@@ -56,6 +56,10 @@ public class MockDuration extends AbstractDuration {
     return this.elapsedMillis = elapsedMillis;
   }
 
+  public void reset() {
+    elapsedMillis = 0;
+  }
+
   /**
    * Adds the given increment to {@link #elapsedMillis}.
    *

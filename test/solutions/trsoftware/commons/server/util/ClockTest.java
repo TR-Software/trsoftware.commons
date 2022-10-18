@@ -54,6 +54,7 @@ public class ClockTest extends TestCaseCanStopClock {
       time = Clock.currentTimeMillis();
       Clock.startTicking();
       assertEquals(time, Clock.currentTimeMillis());
+      assertApproximatelyEquals(time, Clock.currentTimeMillis(), 5);  // allow some leeway due to potential delay caused by system load
       // the difference between the clock and real time should be preserved
       Thread.sleep(1000);
       assertApproximatelyEquals(time + 1000, Clock.currentTimeMillis(), 10);

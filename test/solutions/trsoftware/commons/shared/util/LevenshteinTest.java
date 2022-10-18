@@ -18,18 +18,16 @@ package solutions.trsoftware.commons.shared.util;
 
 import junit.framework.TestCase;
 import solutions.trsoftware.commons.bridge.BridgeTypeFactory;
+import solutions.trsoftware.commons.shared.annotations.ExcludeFromSuite;
 import solutions.trsoftware.commons.shared.annotations.Slow;
-import solutions.trsoftware.commons.shared.testutil.AssertUtils;
 import solutions.trsoftware.commons.shared.util.callables.Function3_;
 
-import javax.annotation.Nonnull;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import static solutions.trsoftware.commons.shared.testutil.AssertUtils.*;
+import static solutions.trsoftware.commons.shared.testutil.AssertUtils.assertThrows;
 import static solutions.trsoftware.commons.shared.util.Levenshtein.*;
 import static solutions.trsoftware.commons.shared.util.RandomUtils.rnd;
 import static solutions.trsoftware.commons.shared.util.StringUtils.methodCallToString;
@@ -189,6 +187,7 @@ public class LevenshteinTest extends TestCase {
   }
 
   @Slow
+  @ExcludeFromSuite
   public void testEditDistanceIncrementalPerformance() throws Exception {
     // generate strings that are long-enough to make an impact on performance in JVM but not take too long to compute
     String s = StringUtils.randString(14000);

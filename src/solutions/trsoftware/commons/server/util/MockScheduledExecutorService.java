@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 TR Software Inc.
+ * Copyright 2022 TR Software Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -23,6 +23,7 @@ import javax.annotation.Nonnull;
 import java.io.PrintStream;
 import java.util.*;
 import java.util.concurrent.*;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicLong;
 
 /**
@@ -50,6 +51,7 @@ public class MockScheduledExecutorService implements ScheduledExecutorService {
 
 
   private NavigableSet<ScheduledTask> tasks = new ConcurrentSkipListSet<ScheduledTask>();
+  private AtomicBoolean wasShutDown = new AtomicBoolean();
 
   public MockScheduledExecutorService() {
 
@@ -244,13 +246,16 @@ public class MockScheduledExecutorService implements ScheduledExecutorService {
   }
 
   private <V> MockScheduledFuture<V> scheduleTask(ScheduledTask<V> task) {
-    tasks.add(task);
-    return new MockScheduledFuture<>(task);
+    if (!wasShutDown.get()) {
+      tasks.add(task);
+      return new MockScheduledFuture<>(task);
+    }
+    throw new RejectedExecutionException(this + " has been shut down");
   }
 
   private ScheduledFuture<?> scheduleRepeatingTask(RepeatingTask task) {
     ScheduledFuture<?> taskFuture = scheduleTask(task);
-    task.repeatingFuture = new RepeatingTaskFuture(taskFuture);
+    task.repeatingFuture = new RepeatingTaskFuture<>(taskFuture);
     return task.repeatingFuture;
   }
 
@@ -272,15 +277,22 @@ public class MockScheduledExecutorService implements ScheduledExecutorService {
   }
 
   public void shutdown() {
-
+    shutdownNow();
   }
 
   public List<Runnable> shutdownNow() {
-    return Collections.emptyList();
+    ArrayList<Runnable> ret = new ArrayList<>();
+    if (wasShutDown.compareAndSet(false, true)) {
+      for (Iterator<ScheduledTask> it = tasks.iterator(); it.hasNext(); ) {
+        ret.add(it.next());
+        it.remove();
+      }
+    }
+    return ret;
   }
 
   public boolean isShutdown() {
-    throw new UnsupportedOperationException("Method .isShutdown has not been fully implemented yet.");
+    return wasShutDown.get();
   }
 
   public boolean isTerminated() {
@@ -291,16 +303,16 @@ public class MockScheduledExecutorService implements ScheduledExecutorService {
     return true;
   }
 
-  public <T> Future<T> submit(Callable<T> task) {
-    throw new UnsupportedOperationException("Method .submit has not been fully implemented yet.");
+  public <T> MockScheduledFuture<T> submit(Callable<T> task) {
+    return schedule(task, 0, TimeUnit.MILLISECONDS);
   }
 
-  public <T> Future<T> submit(Runnable task, T result) {
-    throw new UnsupportedOperationException("Method .submit has not been fully implemented yet.");
+  public <T> MockScheduledFuture<T> submit(Runnable task, T result) {
+    return submit(Executors.callable(task, result));
   }
 
   public Future<?> submit(Runnable task) {
-    throw new UnsupportedOperationException("Method .submit has not been fully implemented yet.");
+    return schedule(task, 0, TimeUnit.MILLISECONDS);
   }
 
   public <T> List<Future<T>> invokeAll(Collection<? extends Callable<T>> tasks) throws InterruptedException {
@@ -320,7 +332,7 @@ public class MockScheduledExecutorService implements ScheduledExecutorService {
   }
 
   public void execute(Runnable command) {
-    throw new UnsupportedOperationException("Method .execute has not been fully implemented yet.");
+    submit(command);
   }
 
   /** @return a list of currently scheduled tasks */
@@ -346,7 +358,7 @@ public class MockScheduledExecutorService implements ScheduledExecutorService {
   private static final AtomicLong nextSequenceNumber = new AtomicLong(0);
 
   @VisibleForTesting
-  public abstract class ScheduledTask<V> implements Runnable, Comparable<ScheduledTask> {
+  public abstract static class ScheduledTask<V> implements Runnable, Comparable<ScheduledTask<V>> {
     // TODO: rewrite this to be like java.util.concurrent.ScheduledThreadPoolExecutor.ScheduledFutureTask
     /** Used to deterministically resolve timing collisions (see compareTo) */
     protected final long id = nextSequenceNumber.getAndIncrement();
@@ -523,7 +535,7 @@ public class MockScheduledExecutorService implements ScheduledExecutorService {
   }
 
   /** Delegates to the future for the latest instance of the task */
-  private class RepeatingTaskFuture<V> implements ScheduledFuture<V> {
+  private static class RepeatingTaskFuture<V> implements ScheduledFuture<V> {
     private ScheduledFuture<V> delegate;
 
     public RepeatingTaskFuture(ScheduledFuture<V> delegate) {

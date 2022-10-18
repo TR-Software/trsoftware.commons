@@ -466,7 +466,7 @@ public class CachedValue<V> {
      * @see #onReloadTimeout(long, int)
      */
     class FailedReloadAction<V> {
-      enum Action {
+      public enum Action {
         /**
          * Will retry reloading the value using the provided future as soon as possible.
          * In the meantime, {@link #get()} will keep returning the current value.

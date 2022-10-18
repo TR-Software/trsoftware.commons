@@ -16,6 +16,8 @@
 
 package solutions.trsoftware.commons.shared.testutil;
 
+import com.google.common.base.MoreObjects;
+
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.Objects;
@@ -86,5 +88,15 @@ public class InvocationRecord {
 
   public long getTimestamp() {
     return timestamp;
+  }
+
+  @Override
+  public String toString() {
+    return MoreObjects.toStringHelper(this)
+        .add("target", target)
+        .add("methodName", methodName)
+        .add("args", args)
+        .add("timestamp", timestamp)
+        .toString();
   }
 }

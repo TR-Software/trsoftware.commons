@@ -30,8 +30,8 @@ import java.util.List;
 /**
  * Can be used to record method invocations on a particular object instance.
  *
+ * @see InvocationRecorder
  * @see java.lang.reflect.Proxy
- * @see java.lang.reflect.InvocationHandler
  *
  * @author Alex
  * @since 9/28/2022

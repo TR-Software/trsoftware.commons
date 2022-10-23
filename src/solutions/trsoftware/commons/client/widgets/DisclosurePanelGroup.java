@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 TR Software Inc.
+ * Copyright 2022 TR Software Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -25,10 +25,9 @@ import java.util.Iterator;
 import java.util.List;
 
 /**
- * Ensures that at most one of a group of disclosure panels is open at any given time.
+ * Ensures that at most one of a group of {@linkplain DisclosurePanel disclosure panels} is open at any given time.
  * 
- * Nov 5, 2009
- *
+ * @since Nov 5, 2009
  * @author Alex
  */
 public class DisclosurePanelGroup implements OpenHandler<DisclosurePanel>, Iterable<DisclosurePanel> {
@@ -36,6 +35,9 @@ public class DisclosurePanelGroup implements OpenHandler<DisclosurePanel>, Itera
   private final List<DisclosurePanel> disclosurePanels = new ArrayList<DisclosurePanel>();
   private final boolean enableAnimations;
 
+  /**
+   * @deprecated constructor will be made private in the future; use {@link #create(boolean, DisclosurePanel...)} instead.
+   */
   public DisclosurePanelGroup(boolean enableAnimations, DisclosurePanel... panels) {
     this.enableAnimations = enableAnimations;
     for (DisclosurePanel panel : panels) {
@@ -43,10 +45,11 @@ public class DisclosurePanelGroup implements OpenHandler<DisclosurePanel>, Itera
     }
   }
 
-  public void add(DisclosurePanel panel) {
+  public DisclosurePanelGroup add(DisclosurePanel panel) {
     disclosurePanels.add(panel);
     panel.addOpenHandler(this);
     panel.setAnimationEnabled(enableAnimations);
+    return this;
   }
 
   public List<DisclosurePanel> getPanels() {
@@ -62,5 +65,10 @@ public class DisclosurePanelGroup implements OpenHandler<DisclosurePanel>, Itera
 
   public Iterator<DisclosurePanel> iterator() {
     return disclosurePanels.iterator();
+  }
+
+
+  public static DisclosurePanelGroup create(boolean enableAnimations, DisclosurePanel... panels) {
+    return new DisclosurePanelGroup(enableAnimations, panels);
   }
 }

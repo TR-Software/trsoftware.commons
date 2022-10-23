@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 TR Software Inc.
+ * Copyright 2022 TR Software Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -286,6 +286,14 @@ public class Widgets {
     return initPanel(new FlowPanel(), style, widgets);
   }
 
+  public static FlowPanel flowPanel(Iterable<? extends Widget> widgets) {
+    return initPanel(new FlowPanel(), null, widgets);
+  }
+
+  public static FlowPanel flowPanel(WidgetStyle style, Iterable<? extends Widget> widgets) {
+    return initPanel(new FlowPanel(), style, widgets);
+  }
+
   public static InlineFlowPanel inlineFlowPanel(Widget... widgets) {
     return initPanel(new InlineFlowPanel(), null, widgets);
   }
@@ -336,6 +344,22 @@ public class Widgets {
 
   private static <T extends Widget & HasWidgets> T initPanel(T panel, WidgetStyle style, Widget... children) {
     addAll(panel, children);
+    if (style != null)
+      style.apply(panel);
+    return panel;
+  }
+
+  private static <T extends Widget & HasWidgets> T initPanel(T panel, WidgetStyle style, Iterable<? extends Widget> children) {
+    if (children instanceof Widget) {
+      /*
+       In case the iterable is a single widget (like a Panel, which implements Iterable<Widget>),
+       we want to add just the widget itself, not its children.
+       Otherwise, for example, if that panel is empty, nothing would be added.
+      */
+      addChild(panel, (Widget)children);
+    }
+    else
+      addAll(panel, children);
     if (style != null)
       style.apply(panel);
     return panel;

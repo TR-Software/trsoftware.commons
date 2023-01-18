@@ -44,4 +44,6 @@ public interface CommonsImages extends ClientBundle {
   ImageResource clipboard24();
   ImageResource warn24();
   ImageResource loading_circle();
+  ImageResource mail24();
+
 }

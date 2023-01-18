@@ -21,6 +21,8 @@ import com.google.gwt.text.shared.AbstractRenderer;
 import java.io.Serializable;
 import java.text.ParseException;
 
+import static com.google.common.base.Preconditions.checkArgument;
+
 /**
  * @author Alex, 9/20/2017
  */
@@ -36,7 +38,8 @@ public class Area2d implements Serializable, Comparable<Area2d> {
   }
 
   public Area2d(int width, int height) {
-    assert width >= 0 && height >= 0;
+    checkArgument(width >= 0, "Negative width (%s)", width);
+    checkArgument(height >= 0, "Negative height (%s)", height);
     this.width = width;
     this.height = height;
   }

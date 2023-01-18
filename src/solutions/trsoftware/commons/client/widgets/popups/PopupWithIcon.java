@@ -21,6 +21,9 @@ import com.google.gwt.user.client.ui.*;
 import solutions.trsoftware.commons.client.bundle.CommonsClientBundleFactory;
 import solutions.trsoftware.commons.client.widgets.Widgets;
 
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
+
 /**
  * Date: Apr 8, 2008 Time: 4:33:12 PM
  *
@@ -53,12 +56,12 @@ public class PopupWithIcon extends DialogBox {
     this(autoHide, icon, headingText, styleName, (Widget)null, closeLinkText);
   }
 
-  public PopupWithIcon(boolean autoHide, AbstractImagePrototype icon, String headingText, String styleName, Widget bodyWidget) {
+  public PopupWithIcon(boolean autoHide, AbstractImagePrototype icon, String headingText, String styleName, @Nullable Widget bodyWidget) {
     this(autoHide, icon, headingText, styleName, bodyWidget, CLOSE_LINK_TEXT_DEFAULT);
   }
 
   /** Creates a popup with the given body widget and a link that closes the popup */
-  public PopupWithIcon(boolean autoHide, AbstractImagePrototype icon, String headingText, String styleName, Widget bodyWidget, String closeLinkText) {
+  public PopupWithIcon(boolean autoHide, AbstractImagePrototype icon, String headingText, String styleName, @Nullable Widget bodyWidget, String closeLinkText) {
     super(autoHide, false, new CaptionWithIcon(icon, headingText));
     if (bodyWidget != null)
       bodyWidgetHolder.setWidget(bodyWidget);
@@ -90,7 +93,7 @@ public class PopupWithIcon extends DialogBox {
     return bodyWidgetHolder.getWidget();
   }
 
-  public void setBodyWidget(Widget bodyWidget) {
+  public void setBodyWidget(@Nonnull Widget bodyWidget) {
     this.bodyWidgetHolder.setWidget(bodyWidget);
   }
 

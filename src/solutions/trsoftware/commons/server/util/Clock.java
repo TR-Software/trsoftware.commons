@@ -45,6 +45,7 @@ import java.util.function.LongSupplier;
  *     offset is derived automatically from the current instrumented time value.
  *   </li>
  * </ol>
+ * @deprecated Superceded by {@link solutions.trsoftware.commons.shared.util.time.Clock}
  */
 public class Clock extends java.time.Clock {
 

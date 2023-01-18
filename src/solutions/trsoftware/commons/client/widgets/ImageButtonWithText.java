@@ -24,6 +24,7 @@ import com.google.gwt.user.client.ui.Anchor;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.FlowPanel;
 import solutions.trsoftware.commons.client.bundle.CommonsClientBundleFactory;
+import solutions.trsoftware.commons.client.event.Events;
 import solutions.trsoftware.commons.client.event.MultiHandlerRegistration;
 
 /**
@@ -48,6 +49,9 @@ public class ImageButtonWithText extends Composite implements HasClickHandlers {
     }
     initWidget(panel);
     setStyleName(CommonsClientBundleFactory.INSTANCE.getCss().ImageButtonWithText());
+    // click the link when the button is clicked
+    // TODO: make this behavior user-configurable (can be undesirable in some cases)
+    imageButton.addClickHandler(event -> Events.click(link.getElement()));
   }
 
   private ImageButtonWithText(AbstractImagePrototype img, boolean imgFirst, String linkText, boolean lnkTextAsHtml) {
@@ -58,7 +62,7 @@ public class ImageButtonWithText extends Composite implements HasClickHandlers {
    * Combines an image button with a scripting {@link Anchor} that displays the given text to the right of the image.
    *
    * @param text the anchor text
-   * @param asHtml {@code true} to treat the specified text as html
+   * @param textAsHtml {@code true} to treat the specified text as html
    *
    * @see Anchor#Anchor(String, boolean)
    */
@@ -89,7 +93,7 @@ public class ImageButtonWithText extends Composite implements HasClickHandlers {
    * Combines an image button with a scripting {@link Anchor} that displays the given text to the left of the image.
    *
    * @param text the anchor text
-   * @param asHtml {@code true} to treat the specified text as html
+   * @param textAsHtml {@code true} to treat the specified text as html
    *
    * @see Anchor#Anchor(String, boolean)
    */
@@ -110,7 +114,6 @@ public class ImageButtonWithText extends Composite implements HasClickHandlers {
   /**
    * Combines an image button with the given pre-initialized {@link Anchor} on its left side.
    *
-   * @param asHtml {@code true} to treat the specified text as html
    * @param link a new instance of an {@link Anchor}
    */
   public ImageButtonWithText(Anchor link, AbstractImagePrototype img) {

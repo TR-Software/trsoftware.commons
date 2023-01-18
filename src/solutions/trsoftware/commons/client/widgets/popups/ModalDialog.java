@@ -104,8 +104,8 @@ public class ModalDialog {
   /** Will be set while waiting for {@link #minDelayBetweenDialogs} to elapse */
   private static Duration sinceLastDialogClosed;
 
-  /** Will be started when we have wait before showing a dialog */
-  private static SmartTimer waitingTimer = new SmartTimer() {
+  /** Will be started when we have to wait before showing a dialog */
+  private static final SmartTimer waitingTimer = new SmartTimer() {
     @Override
     public void doRun() {
       // Waiting for minDelayBetweenDialogs or keyRelease

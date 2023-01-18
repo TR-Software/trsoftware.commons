@@ -41,8 +41,10 @@ import java.util.concurrent.atomic.AtomicLong;
  * @see #advanceClockAndPumpIncrementallyTo(long)
  * @see com.google.common.util.concurrent.MoreExecutors#newDirectExecutorService()
  * @author Alex
+ * @deprecated Superceded by {@link solutions.trsoftware.commons.server.testutil.MockScheduledExecutorService}
  */
 public class MockScheduledExecutorService implements ScheduledExecutorService {
+  // TODO(01/18/2023): remove this class from deployed production code
   /*
   TODO(11/13/2019): refactor this class:
     - extend java.util.concurrent.AbstractExecutorService

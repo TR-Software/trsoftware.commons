@@ -16,14 +16,23 @@
 
 package solutions.trsoftware.commons.shared.util.callables;
 
+import solutions.trsoftware.commons.shared.util.function.ThrowingRunnable;
+
 /**
- * A function &empty; &rarr; &empty; that might throw exception {@link E}
+ * A function &empty; &rarr; &empty; that might throw exception {@link E}.
  *
- * This is basically a {@link Runnable} that declares an exception
+ * This is basically a {@link Runnable} that declares an exception.
+ *
+ * @see ThrowingRunnable
  *
  * @author Alex
  */
 @FunctionalInterface
-public interface Function0_t<E extends Throwable> {
+public interface Function0_t<E extends Throwable> extends ThrowingRunnable {
   void call() throws E;
+
+  @Override
+  default void run() throws Throwable {
+    call();
+  }
 }

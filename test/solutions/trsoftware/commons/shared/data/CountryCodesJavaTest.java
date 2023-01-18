@@ -17,9 +17,13 @@
 
 package solutions.trsoftware.commons.shared.data;
 
+import com.google.gwt.core.shared.GwtIncompatible;
 import junit.framework.TestCase;
 import solutions.trsoftware.commons.client.images.flags.CountryFlagsBundle;
+import solutions.trsoftware.commons.shared.util.SetUtils;
 
+import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Locale;
 
@@ -29,12 +33,19 @@ import java.util.Locale;
  * @author Alex
  * @since 11/20/2017
  */
+@GwtIncompatible
 public class CountryCodesJavaTest extends TestCase {
 
   public void testGetCountryName() throws Exception {
     // check that the class contains all the ISO codes available in Java Locales
-    boolean complete = true;
     String[] isoCountries = Locale.getISOCountries();
+    LinkedHashMap<String, String> mismatchedNames = new LinkedHashMap<>();
+    LinkedHashMap<String, String> expectedNames = new LinkedHashMap<>();
+    /* Treat the following countries a special case:
+       1) Hong Kong (JRE wants to call it "Hong Kong SAR China")
+       1) Macao (JRE wants to call it "Macao SAR China")
+     */
+    LinkedHashSet<String> exclusions = SetUtils.newSet("HK", "MO");
     for (String code : isoCountries) {
       Locale loc = new Locale("", code);
       String jreName = loc.getDisplayName();
@@ -43,14 +54,19 @@ public class CountryCodesJavaTest extends TestCase {
           loc.getDisplayName(Locale.forLanguageTag("ru")), loc.getDisplayName(Locale.forLanguageTag("es")));
       if (ourName == null) {
         System.out.printf("WARNING: %s not in %s%n", code, CountryCodes.class.getSimpleName());
-        complete = false;
+        mismatchedNames.put(code, ourName);
+        expectedNames.put(code, jreName);
       }
       else if (!ourName.equalsIgnoreCase(jreName)) {
         System.out.printf("WARNING: our name for %s doesn't match the one provided by the JRE%n", code);
-        complete = false;
+        if (!exclusions.contains(code)) {
+          mismatchedNames.put(code, ourName);
+          expectedNames.put(code, jreName);
+        }
       }
     }
-    assertTrue("Our list of countries is incomplete", complete);
+    assertTrue(String.format("Our list of countries is incomplete; our names: %s; expected: %s", mismatchedNames, expectedNames),
+        mismatchedNames.isEmpty());
   }
 
   public void testFlagIcons() throws Exception {

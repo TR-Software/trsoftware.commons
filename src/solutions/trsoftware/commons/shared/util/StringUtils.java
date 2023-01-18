@@ -507,6 +507,31 @@ public class StringUtils {
   }
 
   /**
+   * Generates a string enumerating the given items using proper English punctuation, such that the delimiter is
+   * placed between each item and the conjunction is inserted before the last item (e.g. "a, b, and c").
+   * If there are only 2 items, the delimiter is omitted (e.g. "a or b").  Whitespace will be added after each delimiter
+   * and around the conjunction as needed.
+   * <p>
+   * Examples:
+   * <pre>{@code
+   *   joinEnumerated(",", "and", Arrays.asList("a", "b", "c", "d"));  // returns "a, b, c, and d"
+   *   joinEnumerated(",", "or",  Arrays.asList("a", "b", "c"));       // returns "a, b, or c"
+   *   joinEnumerated(",", "and", Arrays.asList("a", "b"));            // returns "a and b"
+   *   joinEnumerated(",", "and", Arrays.asList("a"));                 // returns "a"
+   * }</pre>
+   *
+   * NOTE: this method differs from {@link #join(String, String, Iterator)} in the special case of the delimiter being
+   * omitted when there are only 2 elements.
+   *
+   * @param delimiter the delimiter to use for concatenating the elements (shouldn't contain any trailing whitespace)
+   * @param conjunction the word to be inserted before the last element (shouldn't be surrounded by any whitespace)
+   * @param items the elements to join
+   */
+  public static <T> String joinEnumerated(String delimiter, String conjunction, List<T> items) {
+    return appendEnumerated(new StringBuilder(128), delimiter, conjunction, items).toString();
+  }
+
+  /**
    * Same as {@link #join(String, String, Iterator)}, but appends the joined result to the given builder
    * instead of creating a new string.
    *
@@ -531,6 +556,32 @@ public class StringUtils {
       builder.replace(iLastDelim, iLastDelim + delimiter.length(), lastDelimiter);
     return builder;
   }
+
+  /**
+   * Same as {@link #joinEnumerated(String, String, List)}, but appends the joined result to the given builder
+   * instead of creating a new string.
+   *
+   * @param builder the enumerated elements will be appended to this builder
+   * @param delimiter the delimiter to use for concatenating the elements (shouldn't contain any trailing whitespace)
+   * @param conjunction the word to be inserted before the last element (shouldn't be surrounded by any whitespace)
+   * @param items the elements to join
+   * @return the given {@code builder} (after the joined result has been appended to it)
+   */
+  public static <T> StringBuilder appendEnumerated(StringBuilder builder, String delimiter, String conjunction, List<T> items) {
+    int n = items.size();
+    if (n == 2)
+      return builder.append(items.get(0)).append(' ').append(conjunction).append(' ').append(items.get(1));
+    for (int i = 0; i < n; i++) {
+      builder.append(items.get(i));
+      if (i < n-1) {
+        builder.append(delimiter).append(' ');
+        if (i == n-2)
+          builder.append(conjunction).append(' ');
+      }
+    }
+    return builder;
+  }
+
 
   /**
    * Same as {@link #join(String, Iterator)}, but appends the joined result to the given builder
@@ -590,6 +641,13 @@ public class StringUtils {
       return maybeCapitalize(plural, singular);
     }
     return singular + "s";
+  }
+
+  /**
+   * @return {@code number == 1 ? singular : plural}
+   */
+  public static String pluralize(int number, String singular, String plural) {
+    return number == 1 ? singular : plural;
   }
 
   /**

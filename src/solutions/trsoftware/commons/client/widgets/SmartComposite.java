@@ -27,6 +27,9 @@ import com.google.gwt.user.client.ui.Widget;
 public class SmartComposite extends Composite {
 
   /**
+   * Can be used to check whether {@link #initWidget(Widget)} has already been called on this {@link Composite},
+   * to avoid a potential {@link IllegalStateException} from accidentally invoking that method a second time.
+   *
    * @return {@code true} iff this {@link Composite} has a widget (i.e. {@link #initWidget(Widget)} has already been called)
    */
   public boolean isInitialized() {

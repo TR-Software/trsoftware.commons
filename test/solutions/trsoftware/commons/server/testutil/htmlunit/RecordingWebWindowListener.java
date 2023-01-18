@@ -86,7 +86,7 @@ public class RecordingWebWindowListener extends CurrentWebWindowContentChangeLis
         see https://stackoverflow.com/q/2738464/
      */
     WebResponse webResponse = htmlPage.getWebResponse();
-    String contentCharset = webResponse.getContentCharset();
+    Charset contentCharset = webResponse.getContentCharset();
     String content = webResponse.getContentAsString();
     // add a comment containing the request info at the top of the output file
     WebRequest request = webResponse.getWebRequest();

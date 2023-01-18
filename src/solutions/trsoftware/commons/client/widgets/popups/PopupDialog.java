@@ -20,6 +20,8 @@ import com.google.gwt.user.client.ui.AbstractImagePrototype;
 import com.google.gwt.user.client.ui.Widget;
 import solutions.trsoftware.commons.client.bundle.CommonsClientBundleFactory;
 
+import javax.annotation.Nullable;
+
 /**
  * All dialogs in the web app should extend this class.  It simply ensures a consistent
  * look & feel by providing a shared CSS class name.
@@ -47,11 +49,11 @@ public class PopupDialog extends PopupWithIcon {
     super(autoHide, icon, headingText, styleName, closeLinkText);
   }
 
-  public PopupDialog(boolean autoHide, AbstractImagePrototype icon, String headingText, String styleName, Widget bodyWidget) {
+  public PopupDialog(boolean autoHide, AbstractImagePrototype icon, String headingText, String styleName, @Nullable Widget bodyWidget) {
     super(autoHide, icon, headingText, styleName, bodyWidget);
   }
 
-  public PopupDialog(boolean autoHide, AbstractImagePrototype icon, String headingText, String styleName, Widget bodyWidget, String closeLinkText) {
+  public PopupDialog(boolean autoHide, AbstractImagePrototype icon, String headingText, String styleName, @Nullable Widget bodyWidget, String closeLinkText) {
     super(autoHide, icon, headingText, styleName, bodyWidget, closeLinkText);
   }
 

@@ -93,12 +93,7 @@ public class Area2dTest extends TestCase {
   }
 
   private static void assertConstructorFails(final int width, final int height) {
-    AssertUtils.assertThrows(AssertionError.class, new Runnable() {
-      @Override
-      public void run() {
-        new Area2d(width, height);
-      }
-    });
+    AssertUtils.assertThrows(IllegalArgumentException.class, (Runnable)() -> new Area2d(width, height));
   }
 
   public void testParse() throws Exception {

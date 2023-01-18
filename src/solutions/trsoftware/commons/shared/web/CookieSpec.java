@@ -85,6 +85,11 @@ public class CookieSpec {
   /**
    * How long the cookie should persist on the client.
    * If {@code null}, cookie will be removed after browser shutdown.
+   *
+   * <p style="color: #0073BF; font-weight: bold;">
+   * TODO: {@link Cookie#setMaxAge(int)} defines special meanings for 0 and negative args; should probably
+   *   document those here as well (Note: {@link Cookie#getMaxAge()} defaults to {@code -1})
+   * </p>
    * @see Cookie#getMaxAge()
    */
   @Nullable
@@ -103,13 +108,13 @@ public class CookieSpec {
    * <ul>
    *   <li>
    *     If not explicitly specified (i.e. {@code null}), defaults to the path of the current request URL,
-   *     up to, but not including, the right-most {@code /}
+   *     up to, but not including, the right-most slash
    *   </li>
    *   <li>
    *     Must be a prefix of the current request URI (otherwise rejected)
    *   </li>
    *   <li>
-   *     Value of {@code /} makes the cookie apply to all URIs in the domain
+   *     Value of {@code "/"} makes the cookie apply to all paths in the domain
    *   </li>
    * </ul>
    */
@@ -127,7 +132,7 @@ public class CookieSpec {
    *   indicating that it is in the session's interest to protect the cookie contents.
    * </blockquote>
    */
-  private boolean secure = false;
+  private boolean secure;
 
   /**
    * Flag that controls if this cookie will be hidden from scripts on the client side.
@@ -175,23 +180,6 @@ public class CookieSpec {
     return new Builder(this);
   }
 
-  /**
-   * @return a new instance of {@link Cookie}, initialized from this object.
-   */
-  public Cookie toCookie() {
-    Cookie cookie = new Cookie(name, value);
-    cookie.setVersion(version);
-    if (maxAge != null)
-      cookie.setMaxAge((int)maxAge.to(TimeUnit.SECONDS).getValue());
-    if (domain != null)
-      cookie.setDomain(domain);
-    if (path != null)
-      cookie.setPath(path);
-    cookie.setSecure(secure);
-    cookie.setHttpOnly(httpOnly);
-    return cookie;
-  }
-
   @Nullable
   public String getName() {
     return name;
@@ -237,6 +225,23 @@ public class CookieSpec {
 
   public boolean isHttpOnly() {
     return httpOnly;
+  }
+
+  /**
+   * @return a new instance of {@link Cookie}, initialized from this object.
+   */
+  public Cookie toCookie() {
+    Cookie cookie = new Cookie(name, value);
+    cookie.setVersion(version);
+    if (maxAge != null)
+      cookie.setMaxAge((int)maxAge.to(TimeUnit.SECONDS).getValue());
+    if (domain != null)
+      cookie.setDomain(domain);
+    if (path != null)
+      cookie.setPath(path);
+    cookie.setSecure(secure);
+    cookie.setHttpOnly(httpOnly);
+    return cookie;
   }
 
   @Override
@@ -346,7 +351,9 @@ public class CookieSpec {
     }
 
     /**
-     * Optional, defaults to {@code 0}
+     * Optional, defaults to {@code 0}.
+     * <p>
+     * <em>Note:</em> IE7 & Safari don't recognize expiration dates in version 1, and hence don't retain the cookies past the session
      * @see CookieSpec#version
      */
     public Builder setVersion(int version) {
@@ -356,10 +363,24 @@ public class CookieSpec {
 
     /**
      * Optional, defaults to end of browser session.
-     * @see CookieSpec#maxAge
+     * @see Cookie#setMaxAge(int)
      */
     public Builder setMaxAge(TimeValue maxAge) {
       this.maxAge = maxAge;
+      return this;
+    }
+
+    /**
+     * Optional, defaults to end of browser session.
+     * @param maxAgeMillis the max age specified in milliseconds (should be a positive integer; otherwise
+     *  will set {@link #maxAge} to {@code null})
+     * @see Cookie#setMaxAge(int)
+     * @see #setMaxAge(TimeValue)
+     */
+    public Builder setMaxAge(long maxAgeMillis) {
+      this.maxAge = maxAgeMillis > 0 ?
+          new TimeValue(maxAgeMillis, TimeUnit.MILLISECONDS)
+          : null;
       return this;
     }
 
@@ -399,7 +420,7 @@ public class CookieSpec {
       return this;
     }
 
-    public CookieSpec create() {
+    public CookieSpec build() {
       return new CookieSpec(name, value, version, maxAge, domain, path, secure, httpOnly);
     }
   }

@@ -30,38 +30,34 @@ import static solutions.trsoftware.commons.shared.util.ListUtils.*;
 
 public class ListUtilsTest extends TestCase {
 
+  /**
+   * Tests {@link ListUtils#subList(List, int, int)}
+   */
   public void testSubList() {
-    Integer[] arr = new Integer[]{1, 2, 3, 4, 5, 6};
+    List<Integer> list = Arrays.asList(1, 2, 3, 4, 5, 6);
 
-    assertTrue(Arrays.equals(
-        new Integer[]{1, 2, 3},
-        subList(Arrays.asList(arr), 0, 3).toArray()
-    ));
-    assertTrue(Arrays.equals(
-        new Integer[]{2, 3, 4},
-        subList(Arrays.asList(arr), 1, 4).toArray()
-    ));
-    assertTrue(Arrays.equals(
-        arr,
-        subList(Arrays.asList(arr), 0, 6).toArray()
-    ));
-    boolean oobException = false;
-    try {
-      subList(Arrays.asList(arr), 0, 7);
-    }
-    catch (ArrayIndexOutOfBoundsException e) {
-      oobException = true;
-    }
-    assertTrue(oobException);
+    assertEquals(Arrays.asList(1, 2, 3), subList(list, 0, 3));
+    assertEquals(Arrays.asList(2, 3, 4), subList(list, 1, 4));
+    assertEquals(list, subList(list, 0, 6));
+    AssertUtils.assertThrows(IndexOutOfBoundsException.class, () -> subList(list, 0, 7));
+
+    // test that it returns a copy of the range rather than a view of the original list:
+    List<Integer> subList = subList(list, 0, 3);
+    assertEquals(1, (int)list.get(0));
+    assertEquals(1, (int)subList.get(0));
+    subList.set(0, 10);
+    assertEquals(10, (int)subList.get(0));
+    // the above operation shouldn't have modified the original list
+    assertEquals(1, (int)list.get(0));
   }
 
   public void testSafeSubList() throws Exception {
     List<Integer> list = Arrays.asList(1,2,3,4,5);
-    // test some sub-lists that are equivalent to the original
+    // test some sub-lists that are equivalent to the original:
     assertEquals(list, safeSubList(list, 0, 5));
     assertEquals(list, safeSubList(list, 0, 50));
     assertEquals(list, safeSubList(list, -50, 50));
-    // test some sub-lists that are empty
+    // test some sub-lists that are empty:
     assertEquals(Collections.emptyList(), safeSubList(list, 0, 0));
     assertEquals(Collections.emptyList(), safeSubList(list, -50, 0));
     assertEquals(Collections.emptyList(), safeSubList(list, -50, -1));
@@ -70,6 +66,8 @@ public class ListUtilsTest extends TestCase {
     assertEquals(Collections.emptyList(), safeSubList(list, 5, 50));
     assertEquals(Collections.emptyList(), safeSubList(list, 5, 4));
     assertEquals(Collections.emptyList(), safeSubList(list, 3, 3));
+    // test some typical usages:
+    assertEquals(Arrays.asList(3,4,5), safeSubList(list, 2, 50));
     // now test all the valid sub-lists
     for (int i = 0; i <= list.size(); i++) {
       for (int n = i; n <=  list.size(); n++) {

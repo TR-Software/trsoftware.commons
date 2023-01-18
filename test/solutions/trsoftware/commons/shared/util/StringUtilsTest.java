@@ -16,6 +16,7 @@
 
 package solutions.trsoftware.commons.shared.util;
 
+import com.google.common.collect.Iterators;
 import com.google.gwt.core.shared.GwtIncompatible;
 import junit.framework.TestCase;
 import solutions.trsoftware.commons.shared.testutil.AssertUtils;
@@ -293,13 +294,22 @@ public class StringUtilsTest extends TestCase {
     assertEquals("", join(" - ", ""));
     assertEquals("One,Two,Three, Two,Two,Three, Three,Two,Three, One", join(",Two,Three, ", "One", "Two", "Three", "One"));  // musical counting in 3/4 ;)
     // test optionally specifying a different delimiter for the last element
-    assertEquals("a, b, c, and d", join(", ", ", and ", Arrays.asList("a", "b", "c", "d").iterator()));
-    assertEquals("a, b, or c", join(", ", ", or ", Arrays.asList("a", "b", "c").iterator()));
-    assertEquals("a, and b", join(", ", ", and ", Arrays.asList("a", "b").iterator()));
-    assertEquals("a", join(", ", ", and ", Collections.singletonList("a").iterator()));
-    assertEquals("", join(", ", ", and ", Collections.emptyList().iterator()));
+    assertEquals("a, b, c, and d", join(", ", ", and ", Iterators.forArray("a", "b", "c", "d")));
+    assertEquals("a, b, or c", join(", ", ", or ", Iterators.forArray("a", "b", "c")));
+    assertEquals("a, and b", join(", ", ", and ", Iterators.forArray("a", "b")));
+    assertEquals("a", join(", ", ", and ", Iterators.forArray("a")));
+    assertEquals("", join(", ", ", and ", Collections.emptyIterator()));
   }
 
+  public void testJoinEnumerated() throws Exception {
+    assertEquals("a, b, c, and d", joinEnumerated(",", "and", Arrays.asList("a", "b", "c", "d")));
+    assertEquals("a, b, or c", joinEnumerated(",", "or", Arrays.asList("a", "b", "c")));
+    assertEquals("a and b", joinEnumerated(",", "and", Arrays.asList("a", "b")));
+    assertEquals("a", joinEnumerated(",", "and", Collections.singletonList("a")));
+    assertEquals("", joinEnumerated(",", "and", Collections.emptyList()));
+  }
+
+  @SuppressWarnings("ConstantConditions")
   public void testLastIntegerInString() throws Exception {
     assertEquals(0, (int)lastIntegerInString("0"));
     assertEquals(1, (int)lastIntegerInString("1"));

@@ -66,7 +66,7 @@ public abstract class ReflectionUtils {
    * @return true iff the given type is one of the wrapper classes for a primitive.
    * @see Class#isPrimitive()
    */
-  public static boolean isPrimitiveWrapper(Class type) {
+  public static boolean isPrimitiveWrapper(Class<?> type) {
     return WRAPPER_TYPES.containsKey(type);
   }
 
@@ -75,7 +75,7 @@ public abstract class ReflectionUtils {
    * a wrapper type.
    * @see #unwrap(Class)
    */
-  public static Class primitiveTypeFor(Class wrapper) {
+  public static Class<?> primitiveTypeFor(Class<?> wrapper) {
     return WRAPPER_TYPES.get(wrapper);
   }
 
@@ -86,7 +86,7 @@ public abstract class ReflectionUtils {
    * @see #wrapperTypeFor(Class)
    * @see com.google.common.primitives.Primitives#unwrap
    */
-  public static Class unwrap(Class type) {
+  public static Class<?> unwrap(Class<?> type) {
     if (isPrimitiveWrapper(type))
       return primitiveTypeFor(type);
     return type;
@@ -97,7 +97,7 @@ public abstract class ReflectionUtils {
    * a primitive type.
    * @see com.google.common.primitives.Primitives#wrap
    */
-  public static Class wrapperTypeFor(Class primitive) {
+  public static Class<?> wrapperTypeFor(Class<?> primitive) {
     return WRAPPER_TYPES.inverse().get(primitive);
   }
 
@@ -683,4 +683,19 @@ public abstract class ReflectionUtils {
     return stream.filter(o -> type.isAssignableFrom(o.getClass())).map(type::cast);
   }  // TODO: unit test this method
 
+  /**
+   * Calls {@link AccessibleObject#setAccessible(boolean) setAccessible(true)} on the given member if it's not
+   * already accessible.
+   * @return the given argument (for call chaining)
+   */
+  public static <T extends AccessibleObject & Member> T ensureAccessible(T member) {
+    boolean isAccessible = member.isAccessible();
+    boolean needsAccessOverride = !isAccessible
+        && !java.lang.reflect.Modifier.isPublic(member.getModifiers());
+    if (needsAccessOverride) {
+      // Override the access restrictions
+      member.setAccessible(true);
+    }
+    return member;
+  }
 }

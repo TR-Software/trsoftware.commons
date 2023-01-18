@@ -21,8 +21,12 @@ import com.google.gwt.user.client.rpc.CustomFieldSerializer;
 import com.google.gwt.user.client.rpc.SerializationException;
 import com.google.gwt.user.client.rpc.SerializationStreamReader;
 import com.google.gwt.user.client.rpc.SerializationStreamWriter;
+import com.google.gwt.user.client.rpc.impl.AbstractSerializationStreamReader;
+import com.google.gwt.user.client.rpc.impl.AbstractSerializationStreamWriter;
 import solutions.trsoftware.commons.shared.util.MathUtils;
 import solutions.trsoftware.commons.shared.util.text.SharedNumberFormat;
+
+import java.io.Serializable;
 
 /**
  * Utilities for implementing
@@ -178,4 +182,17 @@ public class SerializationUtils {
   public static double doubleFromScaledInt(int scaledInt, int precision) {
     return (double)scaledInt / pow10(precision);
   }
+
+  public static String serialize(Serializable obj, AbstractSerializationStreamWriter writer) throws SerializationException {
+    writer.prepareToWrite();
+    writer.writeObject(obj);
+    return writer.toString();
+  }
+
+  @SuppressWarnings("unchecked")
+  public static <T> T deserialize(String encoded, AbstractSerializationStreamReader reader) throws SerializationException {
+    reader.prepareToRead(encoded);
+    return (T)reader.readObject();
+  }
+
 }

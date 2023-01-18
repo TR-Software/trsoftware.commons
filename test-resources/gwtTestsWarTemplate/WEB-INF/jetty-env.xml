@@ -1,0 +1,119 @@
+<?xml version="1.0"?>
+<!DOCTYPE Configure PUBLIC "-//Jetty//Configure//EN" "https://www.eclipse.org/jetty/configure_10_0.dtd">
+<!--
+ ================================================================================
+ Custom Jetty context config.
+ Place this file in the WEB-INF subdir of the -war dir used for running GWT's JUnitShell, which starts an embedded Jetty.
+ ================================================================================
+ The purpose of this config is to exclude non-Jetty ServletContainerInitializer (SCIs) found on the classpath,
+ in order to avoid a ClassCastException when 0Tomcat is also present on the classpath (see bottom of this file for details).
+
+ Place this file in the WEB-INF subdir of the war dir used for running GWT's JUnitShell, which starts an embedded Jetty.
+ It will be processed org.eclipse.jetty.plus.webapp.EnvConfiguration during the server's startup sequence.
+
+ After a thorough debugging session, we found that none of the following standard solutions had any effect:
+ 1) web.xml:
+    <web-app ... metadata-complete="true">
+    <absolute-ordering/>
+    <context-param>
+      <param-name>org.eclipse.jetty.containerInitializerExclusionPattern</param-name>
+      <param-value>org.apache.*</param-value>
+    </context-param>
+ 2) defining the "org.eclipse.jetty.containerInitializerExclusionPattern" context attribute doesn't work
+    because org.eclipse.jetty.annotations.AnnotationConfiguration.preConfigure is called before either
+    web.xml or jetty-env.xml are processed.
+
+ The only solution that worked was explicitly listing the Jetty SCIs in the "org.eclipse.jetty.containerInitializerOrder",
+ which excludes any other SCIs that Jetty finds during its classpath scanning.
+
+ @see org.eclipse.jetty.annotations.AnnotationConfiguration.getNonExcludedInitializers
+-->
+<Configure class="org.eclipse.jetty.webapp.WebAppContext">
+  <!--
+   NOTE: unfortunately "org.eclipse.jetty.containerInitializerExclusionPattern" doesn't work,
+   because org.eclipse.jetty.annotations.AnnotationConfiguration.preConfigure is invoked before this config is processed
+   -->
+  <Call name="setAttribute">
+    <Arg>org.eclipse.jetty.containerInitializerExclusionPattern</Arg>
+    <Arg>org.apache.*</Arg>
+  </Call>
+  <!--
+   When we set "org.eclipse.jetty.containerInitializerOrder" to explicitly include only the jetty SCIs,
+   the other SCIs will be ignored by org.eclipse.jetty.annotations.AnnotationConfiguration.getNonExcludedInitializers.
+   Without this, Jetty would run all of the following: [
+     org.eclipse.jetty.websocket.jsr356.server.deploy.WebSocketServerContainerInitializer,
+     org.eclipse.jetty.apache.jsp.JettyJasperInitializer,
+     org.apache.tomcat.websocket.server.WsSci,
+     org.apache.jasper.servlet.JasperInitializer]
+   (The presence of org.apache.tomcat.websocket.server.WsSci causes the Jetty startup to fail with a ClassCastException)
+   -->
+  <Call name="setAttribute">
+    <Arg>org.eclipse.jetty.containerInitializerOrder</Arg>
+    <Arg>
+      org.eclipse.jetty.websocket.jsr356.server.deploy.WebSocketServerContainerInitializer,org.eclipse.jetty.apache.jsp.JettyJasperInitializer
+    </Arg>
+  </Call>
+</Configure>
+
+<!--
+================================================================================
+Error Details
+  (what happens when running at GWT test suite without the above config present in war/WEB-INF)
+================================================================================
+
+Starting Jetty on port 0
+   Logging initialized @4055ms to com.google.gwt.dev.shell.jetty.JettyLauncher$JettyTreeLogger
+   jetty-9.4.44.v20210927; built: 2021-09-27T23:02:44.612Z; git: 8da83308eeca865e495e53ef315a249d63ba9332; jvm 1.8.0_311-b11
+   Scanning elapsed time=0ms
+   Warning: No org.apache.tomcat.JarScanner set in ServletContext. Falling back to default JarScanner implementation.
+   DefaultSessionIdManager workerName=node0
+   No SessionScavenger set, using defaults
+   node0 Scavenging every 600000ms
+   [WARN] Failed startup of context c.g.g.j.@7161d8d1{/,file:///C:/Users/Alex/Documents/Projects/TR%20Commons/gwtTestsStaging/gwtHostedModeTests/war/,UNAVAILABLE}{C:\Users\Alex\Documents\Projects\TR Commons\gwtTestsStaging\gwtHostedModeTests\war}
+java.lang.ClassCastException: org.eclipse.jetty.websocket.jsr356.server.ServerContainer cannot be cast to org.apache.tomcat.websocket.server.WsServerContainer
+	at org.apache.tomcat.websocket.server.WsFilter.init(WsFilter.java:40)
+	at org.eclipse.jetty.servlet.FilterHolder.initialize(FilterHolder.java:140)
+	at org.eclipse.jetty.servlet.ServletHandler.lambda$initialize$0(ServletHandler.java:731)
+	at java.util.Spliterators$ArraySpliterator.forEachRemaining(Spliterators.java:948)
+	at java.util.stream.Streams$ConcatSpliterator.forEachRemaining(Streams.java:742)
+	at java.util.stream.ReferencePipeline$Head.forEach(ReferencePipeline.java:580)
+	at org.eclipse.jetty.servlet.ServletHandler.initialize(ServletHandler.java:755)
+	at org.eclipse.jetty.servlet.ServletContextHandler.startContext(ServletContextHandler.java:379)
+	at org.eclipse.jetty.webapp.WebAppContext.startWebapp(WebAppContext.java:1449)
+	at org.eclipse.jetty.webapp.WebAppContext.startContext(WebAppContext.java:1414)
+	at org.eclipse.jetty.server.handler.ContextHandler.doStart(ContextHandler.java:910)
+	at org.eclipse.jetty.servlet.ServletContextHandler.doStart(ServletContextHandler.java:288)
+	at org.eclipse.jetty.webapp.WebAppContext.doStart(WebAppContext.java:524)
+	at org.eclipse.jetty.util.component.AbstractLifeCycle.start(AbstractLifeCycle.java:73)
+	at org.eclipse.jetty.util.component.ContainerLifeCycle.start(ContainerLifeCycle.java:169)
+	at org.eclipse.jetty.util.component.ContainerLifeCycle.doStart(ContainerLifeCycle.java:110)
+	at org.eclipse.jetty.server.handler.AbstractHandler.doStart(AbstractHandler.java:97)
+	at org.eclipse.jetty.util.component.AbstractLifeCycle.start(AbstractLifeCycle.java:73)
+	at org.eclipse.jetty.util.component.ContainerLifeCycle.start(ContainerLifeCycle.java:169)
+	at org.eclipse.jetty.server.Server.start(Server.java:423)
+	at org.eclipse.jetty.util.component.ContainerLifeCycle.doStart(ContainerLifeCycle.java:110)
+	at org.eclipse.jetty.server.handler.AbstractHandler.doStart(AbstractHandler.java:97)
+	at org.eclipse.jetty.server.Server.doStart(Server.java:387)
+	at org.eclipse.jetty.util.component.AbstractLifeCycle.start(AbstractLifeCycle.java:73)
+	at com.google.gwt.dev.shell.jetty.JettyLauncher.start(JettyLauncher.java:776)
+	at com.google.gwt.dev.DevMode.doStartUpServer(DevMode.java:636)
+	at com.google.gwt.dev.DevModeBase.startUp(DevModeBase.java:898)
+	at com.google.gwt.junit.JUnitShell.getUnitTestShell(JUnitShell.java:707)
+	at com.google.gwt.junit.JUnitShell.runTest(JUnitShell.java:681)
+	at com.google.gwt.junit.client.GWTTestCase.runTest(GWTTestCase.java:421)
+	at solutions.trsoftware.commons.client.BaseGwtTestCase.runTest(BaseGwtTestCase.java:57)
+	at junit.framework.TestCase.runBare(TestCase.java:127)
+	at junit.framework.TestResult$1.protect(TestResult.java:106)
+	at junit.framework.TestResult.runProtected(TestResult.java:124)
+	at junit.framework.TestResult.run(TestResult.java:109)
+	at junit.framework.TestCase.run(TestCase.java:118)
+	at com.google.gwt.junit.client.GWTTestCase.run(GWTTestCase.java:247)
+	at junit.framework.TestSuite.runTest(TestSuite.java:208)
+	at junit.framework.TestSuite.run(TestSuite.java:203)
+	at org.junit.internal.runners.JUnit38ClassRunner.run(JUnit38ClassRunner.java:90)
+	at org.junit.runner.JUnitCore.run(JUnitCore.java:137)
+	at com.intellij.junit4.JUnit4IdeaTestRunner.startRunnerWithArgs(JUnit4IdeaTestRunner.java:68)
+	at com.intellij.rt.junit.IdeaTestRunner$Repeater.startRunnerWithArgs(IdeaTestRunner.java:33)
+	at com.intellij.rt.junit.JUnitStarter.prepareStreamsAndStart(JUnitStarter.java:230)
+	at com.intellij.rt.junit.JUnitStarter.main(JUnitStarter.java:58)
+-->

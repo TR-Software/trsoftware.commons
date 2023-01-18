@@ -17,6 +17,8 @@
 package solutions.trsoftware.commons.shared.util;
 
 import com.google.common.collect.Lists;
+import com.google.gwt.core.client.JavaScriptException;
+import solutions.trsoftware.commons.shared.util.collections.FluentList;
 
 import javax.annotation.Nonnull;
 import java.util.*;
@@ -24,6 +26,7 @@ import java.util.function.Predicate;
 
 /**
  * @author Alex
+ * @see FluentList
  */
 public class ListUtils {
 
@@ -40,8 +43,11 @@ public class ListUtils {
    * @throws IndexOutOfBoundsException for an illegal endpoint index value
    *         (<tt>fromIndex &lt; 0 || toIndex &gt; size ||
    *         fromIndex &gt; toIndex</tt>)
+   * @see FluentList#subList(int, int)
+   * @see FluentList#subList(int)
    */
   public static <T> List<T> subList(List<T> list, int fromIndex, int toIndex) {
+    // TODO: rename this method to copyOfRange, since it most-closely resembles Arrays#copyOfRange(Object[], int, int) rather than List#subList(int, int)
     // NOTE: this implementation only runs fast on random-access lists
     // (this is true for all lists in javascript code compiled with GWT, since it uses JS arrays for all list implementations)
     ArrayList<T> ret = new ArrayList<T>();
@@ -52,19 +58,22 @@ public class ListUtils {
   }
 
   /**
-   * Returns a new list that contains the elements in the specified range of the given list, but doesn't throw
+   * Returns a sublist that contains the elements in the specified range of the given list, but doesn't throw
    * {@link IndexOutOfBoundsException} if the specified range is invalid, in which case we use a valid range that
    * most closely resembles the given range.
-   *
+   * <p>
    * Examples:
-   * <pre>
-   *   // TODO: give some examples
-   * </pre>
+   * <pre>{@code
+   *   List<Integer> list = Arrays.asList(1,2,3,4,5);
+   *   assertEquals(list, safeSubList(list, -50, 50));
+   *   assertEquals(Collections.emptyList(), safeSubList(list, -50, -1));
+   *   assertEquals(Arrays.asList(3,4,5), safeSubList(list, 2, 50));
+   * }</pre>
    *
    * @param list the original list
    * @param fromIndex low endpoint (inclusive) of the subList
    * @param toIndex high endpoint (exclusive) of the subList
-   * @return a copy of the elements in the given list that in a valid range within the given bounds
+   * @return a valid sublist of the given list that most-closely resembles the given range
    * @see #subList(List, int, int)
    */
   public static <T> List<T> safeSubList(List<T> list, int fromIndex, int toIndex) {
@@ -78,7 +87,7 @@ public class ListUtils {
       toIndex = size;
     if (toIndex < fromIndex)
       toIndex = fromIndex;
-    return subList(list, fromIndex, toIndex);
+    return list.subList(fromIndex, toIndex);
   }
 
   /**
@@ -86,7 +95,7 @@ public class ListUtils {
    * @param list should already be sorted
    * @return A reference to the given list, to allow method chaining.
    */
-  public static <T extends Comparable> List<T> insertInOrder(List<T> list, T newElement) {
+  public static <T extends Comparable<T>> List<T> insertInOrder(List<T> list, T newElement) {
     /*
      * TODO: improve performance using Collections.binarySearch when list has non-trivial length
      * Our current algorithm is O(n): uses a linear scan of the list
@@ -171,10 +180,8 @@ public class ListUtils {
    * @see Lists#reverse(List)
    * @see Collections#reverse(List)
    */
-  public static <T> ArrayList<T> reversedCopy(Collection<T> inputs) {
-    ArrayList<T> copy = new ArrayList<T>(inputs);
-    Collections.reverse(copy);
-    return copy;
+  public static <E> ArrayList<E> reversedCopy(Collection<E> inputs) {
+    return CollectionUtils.reversedCopy(inputs);
   }
 
   /**
@@ -265,5 +272,33 @@ public class ListUtils {
     if (list.size() > maxSize) {
       list.subList(maxSize, list.size()).clear();
     }
+  }
+
+  /**
+   * Throws an {@link IndexOutOfBoundsException} if the given index is not in range for the given list size.
+   * This method is useful for client-side GWT code, which might throw a generic {@link JavaScriptException}
+   * instead.
+   * @param size the size of the list
+   * @param index the index to check for being within the list's bounds
+   * @return the given index if it's valid
+   * @throws IndexOutOfBoundsException if the given index is not in the range {@code [0, size[}
+   */
+  public static int checkBounds(int size, int index) {
+    if (index < 0 || index >= size)
+      throw new IndexOutOfBoundsException(Integer.toString(index));
+    return index;
+  }
+
+  /**
+   * Throws an {@link IndexOutOfBoundsException} if the given index is not in range for the given list size.
+   * This method is useful for client-side GWT code, which might throw a generic {@link JavaScriptException}
+   * instead.
+   * @param size the size of the list
+   * @param index the index to check for being within the list's bounds
+   * @return the given index if it's valid
+   * @throws IndexOutOfBoundsException if the given index is not in the range {@code [0, size[}
+   */
+  public static int checkBounds(List<?> list, int index) {
+    return checkBounds(list.size(), index);
   }
 }

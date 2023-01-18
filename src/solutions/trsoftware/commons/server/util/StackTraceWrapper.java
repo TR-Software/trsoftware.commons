@@ -17,7 +17,7 @@
 package solutions.trsoftware.commons.server.util;
 
 /**
- * Utility class that can be used for obtaining or printing a stack trace without
+ * A marker class that can be used for obtaining or printing a stack trace without
  * implying that any actual exception or error has occurred.
  * <p>
  * Should be instantiated at the call site whose stack trace is desired, and can be passed around the application,
@@ -26,8 +26,8 @@ package solutions.trsoftware.commons.server.util;
  *
  * <h3>Examples:</h3>
  * <pre>
- *   new StackTraceRecord(message).printStackTrace(System.out);
- *   new StackTraceRecord(message).getStackTrace();
+ *   new StackTraceWrapper(message).printStackTrace(System.out);
+ *   new StackTraceWrapper(message).getStackTrace();
  * </pre>
  *
  */

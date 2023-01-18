@@ -16,6 +16,8 @@
 
 package solutions.trsoftware.commons.shared.util;
 
+import com.google.gwt.core.client.JavaScriptException;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.LinkedList;
@@ -505,8 +507,8 @@ public class ArrayUtils {
   }
 
   /**
-   * Forces an {@link ArrayIndexOutOfBoundsException} if the given index is not in range for the given array length.
-   * This method is useful for client-side GWT code, which might throw a generic {@link com.google.gwt.core.client.JavaScriptException}
+   * Throws an {@link ArrayIndexOutOfBoundsException} if the given index is not in range for the given array length.
+   * This method is useful for client-side GWT code, which might throw a generic {@link JavaScriptException}
    * instead.
    * @param arrayLength length of the array whose bounds are to be checked
    * @param idx the index to check for being within the array's bounds

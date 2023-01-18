@@ -20,11 +20,13 @@ import com.gargoylesoftware.htmlunit.BrowserVersion;
 import com.google.gwt.junit.client.GWTTestCase;
 import solutions.trsoftware.commons.client.testutil.RunStyleValue;
 import solutions.trsoftware.commons.rebind.RunStyleInfoGenerator;
+import solutions.trsoftware.commons.server.io.ResourceLocator;
 import solutions.trsoftware.commons.server.io.file.FileUtils;
 import solutions.trsoftware.commons.shared.util.MapUtils;
 import solutions.trsoftware.gwt.GwtArgs;
 
 import java.io.IOException;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.LinkedHashMap;
@@ -45,6 +47,7 @@ import java.util.Map;
  * @see GwtArgs
  * @author Alex
  */
+@SuppressWarnings("NonJREEmulationClassesInClientCode")
 public abstract class BaseGwtTestCase extends GWTTestCase {
 
   private static boolean gwtArgsProcessed;
@@ -127,7 +130,8 @@ public abstract class BaseGwtTestCase extends GWTTestCase {
       // append additional -setProperty args based on current -runStyle
       RunStyleValue runStyle = gwtArgs.getRunStyle();
       if (runStyle != null) {
-        gwtArgs.setProperty(RunStyleInfoGenerator.PROPERTY_RUN_STYLE, runStyle.toString());
+        gwtArgs.setProperty(RunStyleInfoGenerator.PROPERTY_RUN_STYLE,
+            RunStyleInfoGenerator.escapeRunStylePropertyValue(runStyle.toString()));
         boolean htmlUnit = runStyle.getName().contains("HtmlUnit");
         gwtArgs.setProperty(RunStyleInfoGenerator.PROPERTY_HTML_UNIT, String.valueOf(htmlUnit));
       }
@@ -141,7 +145,7 @@ public abstract class BaseGwtTestCase extends GWTTestCase {
       Path stagingDir = getStagingDir();
       Path targetSubdir = FileUtils.maybeCreateDirectory(stagingDir.resolve(targetSubdirName));
       Path genDir = FileUtils.maybeCreateDirectory(targetSubdir.resolve(GwtArgs.GEN));
-      Path warDir = FileUtils.maybeCreateDirectory(targetSubdir.resolve(GwtArgs.WAR));
+      Path warDir = setUpWarDir(targetSubdir);
       Path workDir = FileUtils.maybeCreateDirectory(targetSubdir.resolve(GwtArgs.WORK_DIR));
 
       gwtArgs.put(GwtArgs.GEN, genDir.toString());
@@ -159,6 +163,20 @@ public abstract class BaseGwtTestCase extends GWTTestCase {
         System.setProperty(name, val);
       }
     }
+  }
+
+  /**
+   * Creates the WAR directory and ensures it contains the {@code jetty-env.xml} we need to work around a Jetty/GWT bug.
+   */
+  private static Path setUpWarDir(Path parentDir) throws IOException {
+    Path warDir = FileUtils.maybeCreateDirectory(parentDir.resolve(GwtArgs.WAR));
+    Path webInfDir = FileUtils.maybeCreateDirectory(warDir.resolve("WEB-INF"));
+    Path jettyEnvXml = webInfDir.resolve("jetty-env.xml");
+    if (!Files.exists(jettyEnvXml)) {
+      ResourceLocator resourceLocator = new ResourceLocator("/gwtTestsWarTemplate/WEB-INF/jetty-env.xml", BaseGwtTestCase.class);
+      Files.copy(resourceLocator.toPath(), jettyEnvXml);
+    }
+    return warDir;
   }
 
   private static Path getStagingDir() throws IOException {

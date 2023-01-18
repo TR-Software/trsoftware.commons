@@ -24,9 +24,9 @@ import junit.framework.AssertionFailedError;
 import solutions.trsoftware.commons.client.util.GwtUtils;
 import solutions.trsoftware.commons.shared.util.ArrayUtils;
 import solutions.trsoftware.commons.shared.util.StringUtils;
-import solutions.trsoftware.commons.shared.util.callables.Function0_t;
 import solutions.trsoftware.commons.shared.util.compare.ComparisonOperator;
 import solutions.trsoftware.commons.shared.util.function.BiConsumerThrows;
+import solutions.trsoftware.commons.shared.util.function.ThrowingRunnable;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -86,7 +86,7 @@ public abstract class AssertUtils {
    * Asserts that running the given code capsule results in an exception of the same type and having the same
    * message as the given argument.
    */
-  public static <T extends Throwable> void assertThrows(T expected, Function0_t<? extends Throwable> code) {
+  public static <T extends Throwable> void assertThrows(T expected, ThrowingRunnable code) {
     assertThrowableMessageEquals(expected, assertThrows(expected.getClass(), code));
   }
 
@@ -108,7 +108,7 @@ public abstract class AssertUtils {
    * expected type)
    */
   public static <T extends Throwable> T assertThrows(Class<T> expectedThrowableClass, final Runnable code) {
-    return assertThrows(expectedThrowableClass, (Function0_t<T>)code::run);
+    return assertThrows(expectedThrowableClass, (ThrowingRunnable)code::run);
   }
 
   /**
@@ -122,7 +122,7 @@ public abstract class AssertUtils {
    * expected type)
    */
   public static <T extends Throwable> T assertThrows(Class<T> expectedThrowableClass, final Supplier<?> code) {
-    return assertThrows(expectedThrowableClass, (Function0_t<T>)code::get);
+    return assertThrows(expectedThrowableClass, (ThrowingRunnable)code::get);
   }
 
   /**
@@ -135,14 +135,13 @@ public abstract class AssertUtils {
    * this method uses {@link GwtUtils#isAssignableFrom(Class, Class)} to check whether the thrown exception is of the
    * expected type)
    */
-  public static <T extends Throwable> T assertThrows(Class<T> expectedThrowableClass, Function0_t<?> code) {
-    // TODO: move this code to one of the other overloads (e.g. assertThrows(Class, Runnable)), and get rid of this method
-    // TODO: or make this method take java.util.function.Function instead of Function0_t
+  @SuppressWarnings("unchecked")
+  public static <T extends Throwable> T assertThrows(Class<T> expectedThrowableClass, ThrowingRunnable code) {
     if (expectedThrowableClass.isInterface())
       throw new IllegalArgumentException(expectedThrowableClass + " must be a class (not an interface)");
     Throwable caught = null;
     try {
-      code.call();
+      code.run();
     }
     catch (Throwable ex) {
       caught = ex;
@@ -510,6 +509,17 @@ public abstract class AssertUtils {
   }
 
   /**
+   * Asserts that the given array contains exactly 1 element and returns that element
+   * @return the only element from the array
+   * @throws AssertionFailedError if list size != 1
+   * @see #getOnlyElement(List)
+   */
+  public static <T> T getOnlyElement(T[] arr) {
+    assertEquals(1, arr.length);
+    return arr[0];
+  }
+
+  /**
    * Asserts that {@code a} and {@code b} be are "equal" to each-other,
    * according to their {@link Comparable#compareTo(Object)} methods, without checking {@link Object#equals(Object)}.
    */
@@ -605,10 +615,11 @@ public abstract class AssertUtils {
    * This is similar to {@link junit.framework.Assert#assertEquals(Object, Object) assertEquals(List, List)}, but
    * allows the elements to be tested for equality using something other than {@link Object#equals(Object)}
    *
-   * @param equalityAssertion a function that takes a pair of elements and throws an exception if it doesn't consider
-   * them to be equal.
+   * @param equalityAssertion a function that takes a pair of elements and throws an exception if it doesn't
+   *     consider them to be equal.
    * @param <E> the type of elements in the given lists
-   * @throws AssertionFailedError if {@code equalityAssertion} throws an exception for any pair of elements
+   * @throws AssertionFailedError if the lists differ in size or
+   *                              if {@code equalityAssertion} throws an exception for any pair of elements
    */
   public static <E> void assertListsEqual(List<E> expected, List<E> actual, BiConsumerThrows<E, E, Throwable> equalityAssertion) {
     assertEquals("Lists differ in size", expected.size(), actual.size());
@@ -627,18 +638,29 @@ public abstract class AssertUtils {
   }
 
   /**
+   * Calls {@link #assertListsEqual(List, List, BiPredicate)} with {@link Objects#equals(Object, Object)}
+   * as the predicate.
+   *
+   * @throws AssertionFailedError if the lists differ in size or any pair of elements are not equal
+   */
+  public static <E extends Object> void assertListsEqual(List<E> expected, List<E> actual) {
+    assertListsEqual(expected, actual, (BiPredicate<E, E>)Objects::equals);
+  }
+
+  /**
    * Tests two lists for equality using a custom comparison function to compare the elements.
    * <p>
    * This is similar to {@link junit.framework.Assert#assertEquals(Object, Object) assertEquals(List, List)}, but
    * allows the elements to be tested for equality using something other than {@link Object#equals(Object)}
    *
    * @param equalityPredicate a predicate that takes a pair of elements and returns {@code true} if it considers
-   * them equal
+   *     them equal
    * @param <E> the type of elements in the given lists
-   * @throws AssertionFailedError if the given predicate returns {@code false} for any pair of elements
+   * @throws AssertionFailedError if the lists differ in size or
+   *                              if the given predicate returns {@code false} for any pair of elements
    */
   public static <E> void assertListsEqual(List<E> expected, List<E> actual, BiPredicate<E, E> equalityPredicate) {
-    assertEquals(expected.size(), actual.size());
+    assertEquals("Lists differ in size", expected.size(), actual.size());
     for (int i = 0; i < expected.size(); i++) {
       E a = expected.get(i);
       E b = actual.get(i);

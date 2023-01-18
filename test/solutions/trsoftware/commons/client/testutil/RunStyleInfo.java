@@ -20,6 +20,7 @@ import com.google.common.base.MoreObjects;
 import com.google.gwt.core.client.GWT;
 import solutions.trsoftware.commons.shared.util.StringUtils;
 
+import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
 /**
@@ -46,8 +47,10 @@ public interface RunStyleInfo {
    * Getter for the {@code junit.runStyle} property defined in {@code TestCommons.gwt.xml}.
    *
    * @return the full value of the actual {@code -runStyle} arg in {@code gwt.args}
+   *   or an empty string if not specified
    * @see #getRunStyleValue()
    */
+  @Nonnull
   String getRunStyleString();
 
   /**

@@ -34,6 +34,7 @@ public class PopupCloserButton extends PopupCloser<HTML> {
     the specific font. However, we still include the multiplication symbol char inside the <svg> tag to support older
     browsers (IE8 and older) which should render that char if they don't support SVG.
      */
+    // TODO(11/17/2022): maybe use a template for this? or an SvgImageResource?
     super(popup, new HTML("<svg viewBox=\"0 0 20 20\">\n" +
         "&times;" +  // unicode multiplication symbol to support IE8 and older
         // we group both strokes of the X under the style name "xShape" (its stroke color and width are defined in CSS)

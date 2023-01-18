@@ -18,6 +18,8 @@ package solutions.trsoftware.commons.shared.testutil;
 
 import com.google.common.base.MoreObjects;
 import com.google.common.base.Strings;
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
 import com.google.gwt.user.client.rpc.CustomFieldSerializer;
 import com.google.gwt.user.client.rpc.SerializationException;
@@ -25,9 +27,12 @@ import com.google.gwt.user.client.rpc.SerializationStreamWriter;
 import com.google.gwt.user.client.rpc.impl.AbstractSerializationStreamWriter;
 import com.google.gwt.user.client.rpc.impl.ClientSerializationStreamWriter;
 import com.google.gwt.user.server.rpc.impl.ServerSerializationStreamWriter;
+import solutions.trsoftware.commons.shared.testutil.rpc.CustomFieldSerializerFactory;
+import solutions.trsoftware.commons.shared.testutil.rpc.VectorWriter;
 import solutions.trsoftware.commons.shared.util.ListUtils;
 import solutions.trsoftware.commons.shared.util.StringUtils;
 
+import javax.annotation.Nullable;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -48,8 +53,9 @@ import java.util.stream.Collectors;
  * @since 4/23/2022
  */
 public class MockSerializationStreamWriter extends AbstractSerializationStreamWriter {
+
   private final ArrayList<String> tokenList = new ArrayList<>();
-  private final Map<Class<?>, CustomFieldSerializer<Object>> classSerializers = new LinkedHashMap<>();
+  private final ArrayList<String> header = new ArrayList<>();
   /**
    * We save the class instances so that {@link MockSerializationStreamReader} can
    * {@linkplain MockSerializationStreamReader#deserialize(String) deserialize} them when running in
@@ -57,9 +63,30 @@ public class MockSerializationStreamWriter extends AbstractSerializationStreamWr
    */
   private final Map<String, Class<?>> classesByTypeSignature = new LinkedHashMap<>();
 
+  private final CustomFieldSerializerFactory serializerFactory;
+
+  public MockSerializationStreamWriter() {
+    this(new CustomFieldSerializerFactory());
+  }
+
+  public MockSerializationStreamWriter(CustomFieldSerializerFactory serializerFactory) {
+    this.serializerFactory = serializerFactory;
+  }
+
+  @SuppressWarnings("unchecked")
   public <T> MockSerializationStreamWriter setClassSerializer(Class<T> key, CustomFieldSerializer<T> serializer) {
-    classSerializers.put(key, (CustomFieldSerializer<Object>)serializer);
+    serializerFactory.setCustomFieldSerializer(key, (CustomFieldSerializer<Object>)serializer);
     return this;
+  }
+
+  @Override
+  public void prepareToWrite() {
+    super.prepareToWrite();
+    tokenList.clear();
+    header.clear();
+    classesByTypeSignature.clear();
+    header.add(String.valueOf(getFlags()));
+    header.add(String.valueOf(getVersion()));
   }
 
   @Override
@@ -85,7 +112,19 @@ public class MockSerializationStreamWriter extends AbstractSerializationStreamWr
   protected void serialize(Object instance, String typeSignature) throws SerializationException {
     // NOTE: this code is based on com.google.gwt.user.server.rpc.impl.ServerSerializationStreamWriter.serializeImpl
     Class<?> instanceClass = getClassForSerialization(instance);
-    if (instanceClass.isArray()) {
+    serializeImpl(instance, instanceClass);
+  }
+
+  /**
+   * @see ServerSerializationStreamWriter#serializeImpl(java.lang.Object, java.lang.Class)
+   */
+  protected void serializeImpl(Object instance, Class<?> instanceClass) throws SerializationException {
+    assert instance != null;
+    CustomFieldSerializer<Object> customFieldSerializer = getCustomFieldSerializer(instanceClass);
+    if (customFieldSerializer != null) {
+      customFieldSerializer.serializeInstance(this, instance);
+    }
+    else if (instanceClass.isArray()) {
       serializeArray(instance, instanceClass);
     }
     else if (instanceClass.isEnum()) {
@@ -97,19 +136,26 @@ public class MockSerializationStreamWriter extends AbstractSerializationStreamWr
     }
   }
 
-  private void serializeClass(Object instance, Class<?> instanceClass) throws SerializationException {
+  @Nullable
+  protected CustomFieldSerializer<Object> getCustomFieldSerializer(Class<?> instanceClass) throws SerializationException {
+    return serializerFactory.getCustomFieldSerializer(instanceClass);
+  }
+
+  /**
+   * Serializes an instance that doesn't have a {@link CustomFieldSerializer} and is neither an array nor enum.
+   */
+  protected void serializeClass(Object instance, Class<?> instanceClass) throws SerializationException {
     /*
      * In order to make this work both client-side and server-side, we require a CustomFieldSerializer for any
      * non-array and non-enum class.
      */
-    CustomFieldSerializer<Object> serializer = Objects.requireNonNull(classSerializers.get(instanceClass),
-        () -> Strings.lenientFormat("%s requires a %s for %s", getClass().getSimpleName(), CustomFieldSerializer.class.getSimpleName(), instanceClass.getName()));
-    serializer.serializeInstance(this, instance);
+    throw new UnsupportedOperationException(Strings.lenientFormat("%s requires a %s for %s",
+        getClass().getSimpleName(), CustomFieldSerializer.class.getSimpleName(), instanceClass.getName()));
   }
 
-  private void serializeArray(Object instance, Class<?> instanceClass) {
-    // TODO: impl this
-    throw new UnsupportedOperationException("TODO");
+  private void serializeArray(Object instance, Class<?> instanceClass) throws SerializationException {
+    assert (instanceClass.isArray());
+    VectorWriter.forClass(instanceClass).write(this, instance);
   }
 
   /**
@@ -140,8 +186,7 @@ public class MockSerializationStreamWriter extends AbstractSerializationStreamWr
     // 2) string table
     out.add(stringTableToString());
     // 3) header
-    out.add(String.valueOf(getFlags()));
-    out.add(String.valueOf(getVersion()));
+    header.forEach(out::add);
     return out.toString();
   }
 
@@ -157,16 +202,23 @@ public class MockSerializationStreamWriter extends AbstractSerializationStreamWr
   }
 
   @Override
-  public List<String> getStringTable() {
+  public ImmutableList<String> getStringTable() {
     // overriding to make public
-    return super.getStringTable();
+    return ImmutableList.copyOf(super.getStringTable());
   }
 
   /**
    * @return the tokens emitted by this writer
    */
-  public ArrayList<String> getTokenList() {
-    return tokenList;
+  public ImmutableList<String> getTokenList() {
+    return ImmutableList.copyOf(tokenList);
+  }
+
+  /**
+   * @return the tokens emitted by this writer
+   */
+  public ImmutableList<String> getHeader() {
+    return ImmutableList.copyOf(header);
   }
 
   /**
@@ -174,15 +226,16 @@ public class MockSerializationStreamWriter extends AbstractSerializationStreamWr
    */
   public String getLastToken() {
     if (tokenList.isEmpty())
-      throw new IllegalStateException("No tokens written yet");
+      throw new NoSuchElementException("No tokens written yet");
     return ListUtils.last(tokenList);
   }
 
-  public Map<Class<?>, CustomFieldSerializer<Object>> getClassSerializers() {
-    return classSerializers;
+  public ImmutableMap<Class<?>, CustomFieldSerializer<Object>> getClassSerializers() {
+    return ImmutableMap.copyOf(serializerFactory.getSerializers());
   }
 
-  public Map<String, Class<?>> getClassesByTypeSignature() {
-    return classesByTypeSignature;
+  public ImmutableMap<String, Class<?>> getClassesByTypeSignature() {
+    return ImmutableMap.copyOf(classesByTypeSignature);
   }
+
 }

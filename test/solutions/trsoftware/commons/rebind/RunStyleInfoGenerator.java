@@ -25,11 +25,14 @@ import com.google.gwt.core.ext.typeinfo.TypeOracle;
 import com.google.gwt.user.rebind.ClassSourceFileComposerFactory;
 import com.google.gwt.user.rebind.SourceWriter;
 import solutions.trsoftware.commons.client.BaseGwtTestCase;
+import solutions.trsoftware.commons.client.bridge.util.URIComponentEncoder;
 import solutions.trsoftware.commons.client.testutil.RunStyleInfo;
 import solutions.trsoftware.commons.shared.util.StringUtils;
 
 import java.io.PrintWriter;
 import java.util.List;
+
+import static solutions.trsoftware.commons.shared.util.LogicUtils.firstNonNull;
 
 /**
  * Generator for {@link RunStyleInfo}, using the {@value RunStyleInfoGenerator#PROPERTY_HTML_UNIT} and
@@ -69,7 +72,8 @@ public class RunStyleInfoGenerator extends Generator {
     try {
       ConfigurationProperty configurationProperty = propertyOracle.getConfigurationProperty(PROPERTY_RUN_STYLE);
       List<String> values = configurationProperty.getValues();
-      runStyleValue = Iterables.getOnlyElement(values, "");
+      runStyleValue = unescapeRunStylePropertyValue(
+          firstNonNull(Iterables.getOnlyElement(values, ""), ""));
       assert runStyleValue != null;
     }
     catch (BadPropertyValueException e) {
@@ -115,5 +119,13 @@ public class RunStyleInfoGenerator extends Generator {
       sw.commit(logger);
     }
     return composerFactory.getCreatedClassName();
+  }
+
+  public static String escapeRunStylePropertyValue(String value) {
+    return URIComponentEncoder.getInstance().encode(value);
+  }
+
+  public static String unescapeRunStylePropertyValue(String escaped) {
+    return URIComponentEncoder.getInstance().decode(escaped);
   }
 }

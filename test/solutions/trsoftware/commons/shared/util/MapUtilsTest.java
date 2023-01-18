@@ -22,10 +22,11 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableMultimap;
 import com.google.common.collect.Multimap;
 import junit.framework.TestCase;
-import solutions.trsoftware.commons.shared.testutil.AssertUtils;
+import solutions.trsoftware.commons.shared.testutil.MockException;
 import solutions.trsoftware.commons.shared.util.callables.Function0;
 import solutions.trsoftware.commons.shared.util.callables.Function1;
 import solutions.trsoftware.commons.shared.util.callables.Function2;
+import solutions.trsoftware.commons.shared.util.function.ThrowingRunnable;
 import solutions.trsoftware.commons.shared.util.mutable.MutableFloat;
 import solutions.trsoftware.commons.shared.util.mutable.MutableInteger;
 import solutions.trsoftware.commons.shared.util.mutable.MutableNumber;
@@ -33,6 +34,7 @@ import solutions.trsoftware.commons.shared.util.mutable.MutableNumber;
 import java.util.*;
 import java.util.function.BiFunction;
 
+import static solutions.trsoftware.commons.shared.testutil.AssertUtils.assertThrows;
 import static solutions.trsoftware.commons.shared.util.MapUtils.*;
 
 public class MapUtilsTest extends TestCase {
@@ -234,8 +236,8 @@ public class MapUtilsTest extends TestCase {
     assertEquals(2, map.size());
     assertNull(map.get("foo"));
     // however accessing keys with multiple values on this result will raise an IllegalArgumentException
-    AssertUtils.assertThrows(IllegalArgumentException.class, (Runnable)() -> map.get("even"));
-    AssertUtils.assertThrows(IllegalArgumentException.class, (Runnable)() -> new HashMap<>(map));
+    assertThrows(IllegalArgumentException.class, (Runnable)() -> map.get("even"));
+    assertThrows(IllegalArgumentException.class, (Runnable)() -> new HashMap<>(map));
     // the inverse of the multimap, on the other hand, is going to be single-valued
     Map<Integer, String> inverseMap = asMap(multimap.inverse());
     System.out.println("inverseMap = " + inverseMap);
@@ -268,6 +270,54 @@ public class MapUtilsTest extends TestCase {
     Map<String, Integer> map2 = hashMap("a", 3, "b", -1, "d", 5);
     assertEquals(
         hashMap("a", 4, "b", 1, "c", 3, "d", 5),
-        mergeAll(map1, map2, (a, b) -> a + b));
+        mergeAll(map1, map2, Integer::sum));
   }
+
+  public void testComputeIfAbsent() throws Exception {
+    Map<String, Integer> map = linkedHashMap("a", 1, "b", 2, "c", 3);
+    Map<String, Integer> expected = new LinkedHashMap<>(map);
+
+    // 1) with a method reference that doesn't throw an exception
+    computeIfAbsent(map, "asdf", this::lengthOrThrow);
+    assertEquals(put(expected, "asdf", 4), map);
+
+    // 2) with a lambda that does the same thing as lengthOrThrow
+    computeIfAbsent(map, "foo", message -> {
+      if ("throw".equals(message))
+        throw new MockException(message);
+      return message.length();
+    });
+    assertEquals(put(expected, "foo", 3), map);
+
+    // 3) with an arg that triggers an exception in lengthOrThrow (which should be rethrown)
+    assertThrows(MockException.class,
+        (ThrowingRunnable)() -> computeIfAbsent(map, "throw", this::lengthOrThrow));
+    assertEquals(expected, map);  // not modified
+  }
+
+  /**
+   * Returns the length of the given message or throws a {@link MockException} if the message is "throw"
+   */
+  private Integer lengthOrThrow(String message) throws MockException {
+    if ("throw".equals(message))
+      throw new MockException(message);
+    return message.length();
+  }
+
+
+  public void testFirstKey() throws Exception {
+    Map<String, Integer> map = linkedHashMap("a", 1, "b", 2);
+    assertEquals("a", firstKey(map));
+  }
+
+  public void testFirstValue() throws Exception {
+    Map<String, Integer> map = linkedHashMap("a", 1, "b", 2);
+    assertEquals((Integer)1, firstValue(map));
+  }
+
+  public void testFirstEntry() throws Exception {
+    Map<String, Integer> map = linkedHashMap("a", 1, "b", 2);
+    assertEquals(new AbstractMap.SimpleEntry<>("a", 1), firstEntry(map));
+  }
+
 }

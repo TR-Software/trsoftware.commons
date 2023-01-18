@@ -21,12 +21,18 @@ import com.google.gwt.user.client.ui.Widget;
 import solutions.trsoftware.commons.client.bundle.CommonsClientBundleFactory;
 import solutions.trsoftware.commons.client.images.CommonsImages;
 
+import javax.annotation.Nullable;
+
 /**
  * @author Alex, 9/26/2017
  */
 public class ErrorMessagePopup extends PopupDialog {
 
-  public ErrorMessagePopup(boolean autoHide, String headingText, Widget bodyWidget) {
+  public ErrorMessagePopup(boolean autoHide, String headingText) {
+    this(autoHide, headingText, null);
+  }
+
+  public ErrorMessagePopup(boolean autoHide, String headingText, @Nullable Widget bodyWidget) {
     super(autoHide, AbstractImagePrototype.create(CommonsImages.INSTANCE.warn24()), headingText, CommonsClientBundleFactory.INSTANCE.getCss().ErrorMessagePopup(), bodyWidget);
   }
 

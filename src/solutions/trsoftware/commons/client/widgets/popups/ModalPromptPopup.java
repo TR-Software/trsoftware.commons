@@ -21,6 +21,8 @@ import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.ui.*;
 import solutions.trsoftware.commons.client.bundle.CommonsClientBundleFactory;
 
+import javax.annotation.Nonnull;
+
 /**
  * @author Alex
  * @since 12/8/2017
@@ -45,7 +47,7 @@ public class ModalPromptPopup extends PopupDialog implements ClickHandler {
   }
 
   @Override
-  public void setBodyWidget(Widget bodyWidget) {
+  public void setBodyWidget(@Nonnull Widget bodyWidget) {
     throw new UnsupportedOperationException(STYLE_NAME + " bodyWidget set by constructor");
   }
 

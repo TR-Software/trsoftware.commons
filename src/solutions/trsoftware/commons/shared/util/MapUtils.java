@@ -20,6 +20,7 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Multimap;
+import solutions.trsoftware.commons.shared.util.function.ThrowingFunction;
 import solutions.trsoftware.commons.shared.util.stats.Mergeable;
 
 import java.util.*;
@@ -562,4 +563,60 @@ public class MapUtils {
   public static <K,V> int maxValuesPerKey(Multimap<K, V> multimap) {
     return multimap.keySet().stream().mapToInt(k -> multimap.get(k).size()).max().orElse(0);
   }
+  
+  /**
+   * Invokes {@link Map#computeIfAbsent(Object, Function)} on the given map using a mapping function that might throw
+   * a checked exception.  This allows using the map's {@code computeIfAbsent} functionality with a lambda or a method
+   * reference that throws a checked exception.
+   * <p>
+   * If an exception is thrown, it will be propagated to the caller,
+   * while {@link Map#computeIfAbsent(Object, Function)} gets a
+   * {@link RuntimeException} (specifically, {@link ThrowingFunction.WrappedException}),
+   * which is caught in this method.
+   *
+   * @param <K> the key type
+   * @param <V> the value type
+   * @param <E> the checked exception declared by the mapping function
+   * @return the result of {@link Map#computeIfAbsent(Object, Function)}
+   * @throws E the exception thrown by the mapping function
+   * @see ThrowingFunction
+   */
+  @SuppressWarnings("unchecked")
+  public static <K, V, E extends Exception> V computeIfAbsent(Map<K, V> map, K key,
+                                                              ThrowingFunction<? super K, ? extends V, E> mappingFunction) throws E {
+    try {
+      return map.computeIfAbsent(key, mappingFunction);
+    }
+    catch (ThrowingFunction.WrappedException e) {
+      throw (E)e.getCause();
+    }
+  }
+
+  /**
+   * @return the first element returned by the map's {@link Map#keySet() keySet()} iterator
+   * @throws NoSuchElementException if the map is empty
+   * @see Iterables#getFirst(Iterable, Object)
+   */
+  public static <K,V> K firstKey(Map<K, V> map) {
+    return map.keySet().iterator().next();
+  }
+
+  /**
+   * @return the first element returned by the map's {@link Map#values() values()} iterator
+   * @throws NoSuchElementException if the map is empty
+   * @see Iterables#getFirst(Iterable, Object)
+   */
+  public static <K,V> V firstValue(Map<K, V> map) {
+    return map.values().iterator().next();
+  }
+
+  /**
+   * @return the first element returned by the map's {@link Map#entrySet() entrySet()} iterator
+   * @throws NoSuchElementException if the map is empty
+   * @see Iterables#getFirst(Iterable, Object)
+   */
+  public static <K,V> Map.Entry<K, V> firstEntry(Map<K, V> map) {
+    return map.entrySet().iterator().next();
+  }
+
 }

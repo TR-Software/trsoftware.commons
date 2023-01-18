@@ -21,6 +21,7 @@ import solutions.trsoftware.commons.server.io.file.FileUtils;
 import solutions.trsoftware.commons.server.testutil.TestCaseMixin;
 import solutions.trsoftware.commons.server.testutil.TestCaseMixinList;
 import solutions.trsoftware.commons.server.util.CanStopClock;
+import solutions.trsoftware.commons.shared.BaseTestCase;
 
 import java.io.IOException;
 import java.lang.reflect.Field;
@@ -49,7 +50,7 @@ import java.nio.file.Path;
  *
  * @author Alex
  */
-public abstract class SuperTestCase extends TestCase implements CanStopClock {
+public abstract class SuperTestCase extends BaseTestCase implements CanStopClock {
 
   private TestCaseMixinList mixins;
   

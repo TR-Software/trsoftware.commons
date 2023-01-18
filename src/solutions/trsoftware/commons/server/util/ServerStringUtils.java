@@ -17,6 +17,7 @@
 package solutions.trsoftware.commons.server.util;
 
 
+import com.google.common.base.Preconditions;
 import org.apache.commons.codec.binary.Base64;
 import org.w3c.dom.Document;
 import solutions.trsoftware.commons.server.io.ServerIOUtils;
@@ -24,6 +25,7 @@ import solutions.trsoftware.commons.server.servlet.UrlUtils;
 import solutions.trsoftware.commons.shared.util.Levenshtein;
 import solutions.trsoftware.commons.shared.util.StringUtils;
 
+import javax.annotation.Nonnull;
 import javax.lang.model.SourceVersion;
 import javax.xml.transform.OutputKeys;
 import javax.xml.transform.Transformer;
@@ -520,7 +522,51 @@ public class ServerStringUtils extends StringUtils {
    * @see <a href="https://docs.oracle.com/javase/specs/jls/se8/html/jls-3.html">JLS Chapter 3 (Lexical Structure)</a>
    * @see com.google.gwt.core.ext.Generator#escapeClassName(java.lang.String)
    */
+  @Nonnull
   public static String toJavaIdentifier(String str) {
+    char replacement = '_';
+    return toJavaIdentifier(str, replacement);
+  }
+
+  /**
+   * Transforms the given input string to satisfy the JLS definition of an <em>identifier</em> (as defined in
+   * <a href="https://docs.oracle.com/javase/specs/jls/se8/html/jls-3.html#jls-3.8">JLS §3.8</a>), such that
+   * the resulting string can be used as a method name, variable name, or (simple) class name.
+   * <p>
+   * Any character in the given string that doesn't satisfy {@link Character#isJavaIdentifierPart(char)} or
+   * {@link Character#isJavaIdentifierStart(char)} (if it's the first char) will be replaced with the given
+   * replacement char.
+   *
+   * <em>Implementation Note</em>: we're using the predicates {@link Character#isJavaIdentifierStart}
+   * and {@link Character#isJavaIdentifierPart} to escape invalid chars, and {@link SourceVersion#isName}
+   * to exclude reserved keywords).
+   * <p>
+   * NOTE: Despite the fact that JLS §3.8 says "<i>An identifier cannot have the same spelling as a keyword</i>",
+   * {@link SourceVersion#isIdentifier} does allow reserved keywords (because it uses only the methods
+   * methods {@link Character#isJavaIdentifierStart} and {@link Character#isJavaIdentifierPart}, which examine only
+   * one char at a time).
+   * <p>
+   * The result of this method should satisfy <em>both</em> {@link SourceVersion#isIdentifier}, which allows keywords
+   * but doesn't allow chars like dots, and {@link SourceVersion#isName}, which allows dots (they're valid in class
+   * FQNs,
+   * e.g. {@code "java.util.Map"}) but doesn't allow keywords.  The intersection of those 2 predicates is the sweet
+   * spot we're aiming for here.
+   *
+   * @param replacement will be used to replace any chars that don't satisfy {@link Character#isJavaIdentifierPart(char)}
+   *   or {@link Character#isJavaIdentifierStart(char)} (if it's the first char).
+   * @return the closest string resembling the input that can be used as a valid method name, variable name,
+   * or (simple) class name in the latest Java language version supported by the current runtime
+   * (i.e. satisfies both {@link SourceVersion#isName} and {@link SourceVersion#isIdentifier})
+   * @throws IllegalArgumentException if replacement char is invalid for a Java identifier
+   * @see SourceVersion#isName(CharSequence)
+   * @see SourceVersion#isKeyword(CharSequence)
+   * @see <a href="https://docs.oracle.com/javase/specs/jls/se8/html/jls-3.html">JLS Chapter 3 (Lexical Structure)</a>
+   * @see com.google.gwt.core.ext.Generator#escapeClassName(java.lang.String)
+   */
+  @Nonnull
+  public static String toJavaIdentifier(String str, char replacement) {
+    Preconditions.checkArgument(Character.isJavaIdentifierStart(replacement) && Character.isJavaIdentifierPart(replacement),
+        "Not a valid Java identifier char: %s", replacement);
     if (isBlank(str))
       return "__";  // NOTE: we were previously returning just "_" here, but single underscores not allowed starting Java 9
     /*
@@ -530,12 +576,12 @@ public class ServerStringUtils extends StringUtils {
     StringBuilder builder = new StringBuilder(str);
     // we prepend a valid starting char "_" if the first char isn't valid
     if (!Character.isJavaIdentifierStart(builder.charAt(0)))
-      builder.setCharAt(0, '_');
+      builder.setCharAt(0, replacement);
     // and replace all the invalid chars in the name
     for (int i = 1; i < builder.length(); i++) {
       char c = builder.charAt(i);
       if (!Character.isJavaIdentifierPart(c))
-        builder.setCharAt(i, '_');
+        builder.setCharAt(i, replacement);
     }
 
     // now, if we still don't have a valid name, we probably have a reserved

@@ -18,6 +18,7 @@
 package solutions.trsoftware.commons.server.util;
 
 import junit.framework.TestCase;
+import solutions.trsoftware.commons.shared.annotations.Slow;
 
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
@@ -49,6 +50,7 @@ public class RuntimeUtilsTest extends TestCase {
     assertFalse(outerThread.getRanInJUnit()); // the outer thread was not launched by JUnit
   }
 
+  @Slow
   public void testBuildNewJavaProcess() throws Exception {
     ProcessBuilder processBuilder = buildNewJavaProcess();
     processBuilder.command().add(PrintClassPath.class.getName());

@@ -18,6 +18,7 @@ package solutions.trsoftware.commons.server.auth;
 
 import junit.framework.TestCase;
 import solutions.trsoftware.commons.server.servlet.testutil.DummyHttpServletRequest;
+import solutions.trsoftware.commons.shared.annotations.Slow;
 import solutions.trsoftware.commons.shared.testutil.AssertUtils;
 import solutions.trsoftware.commons.shared.util.MapUtils;
 
@@ -35,6 +36,7 @@ public class RequestAuthWithoutReplayDefenseTest extends TestCase {
       "hmacSha1", "publicKeyString", "secretKeyString");
 
   /** Bidirectional test: signs request then makes sure the same request validates */
+  @Slow
   public void testRequestSigningAndValidation() throws Exception {
     {
       // this should succeed

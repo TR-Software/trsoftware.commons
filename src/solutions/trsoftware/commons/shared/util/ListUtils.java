@@ -23,6 +23,7 @@ import solutions.trsoftware.commons.shared.util.collections.FluentList;
 import javax.annotation.Nonnull;
 import java.util.*;
 import java.util.function.Predicate;
+import java.util.function.Supplier;
 
 /**
  * @author Alex
@@ -31,13 +32,15 @@ import java.util.function.Predicate;
 public class ListUtils {
 
   /**
-   * Copies the specified range of the given list into a new {@link ArrayList}.
+   * Copies the specified range of the given list into a new list.
    * <p>
    * This method was originally created because the views returned by {@link List#subList(int, int)}
-   * were not serializable by GWT, but can also just be used as shorthand for {@code new ArrayList<>(list.subList(from, to)})
+   * were not serializable by GWT, but is still valid because many implementations of {@link List#subList}
+   * (e.g. {@link ArrayList.SubList}) are not serializable.
    *
    * @param fromIndex low endpoint (inclusive) of the subList
    * @param toIndex high endpoint (exclusive) of the subList
+   * @param newListSupplier used to create the destination list; could use a method reference to a list constructor
    * @return a <i>new</i> {@link ArrayList} that contains the elements in the specified range of the given list;
    * not a <i>view</i> (modifications do not propagate to the original list and vice-versa)
    * @throws IndexOutOfBoundsException for an illegal endpoint index value
@@ -46,15 +49,24 @@ public class ListUtils {
    * @see FluentList#subList(int, int)
    * @see FluentList#subList(int)
    */
-  public static <T> List<T> subList(List<T> list, int fromIndex, int toIndex) {
+  public static <E, L extends List<E>> L copyOfRange(List<E> list, int fromIndex, int toIndex, Supplier<L> newListSupplier) {
     // TODO: rename this method to copyOfRange, since it most-closely resembles Arrays#copyOfRange(Object[], int, int) rather than List#subList(int, int)
     // NOTE: this implementation only runs fast on random-access lists
     // (this is true for all lists in javascript code compiled with GWT, since it uses JS arrays for all list implementations)
-    ArrayList<T> ret = new ArrayList<T>();
+    L ret = newListSupplier.get();
     for (int i = fromIndex; i < toIndex; i++) {
       ret.add(list.get(i));
     }
     return ret;
+  }
+
+  /**
+   * Copies the specified range of the given list into a new {@link ArrayList}.
+   *
+   * @see #copyOfRange(List, int, int, Supplier)
+   */
+  public static <E> List<E> copyOfRange(List<E> list, int fromIndex, int toIndex) {
+    return copyOfRange(list, fromIndex, toIndex, ArrayList::new);
   }
 
   /**
@@ -74,9 +86,9 @@ public class ListUtils {
    * @param fromIndex low endpoint (inclusive) of the subList
    * @param toIndex high endpoint (exclusive) of the subList
    * @return a valid sublist of the given list that most-closely resembles the given range
-   * @see #subList(List, int, int)
+   * @see #copyOfRange(List, int, int)
    */
-  public static <T> List<T> safeSubList(List<T> list, int fromIndex, int toIndex) {
+  public static <E> List<E> safeSubList(List<E> list, int fromIndex, int toIndex) {
     // fix the range bounds, if needed
     int size = list.size();
     if (fromIndex < 0)
@@ -88,6 +100,19 @@ public class ListUtils {
     if (toIndex < fromIndex)
       toIndex = fromIndex;
     return list.subList(fromIndex, toIndex);
+  }
+
+  /**
+   * Same as {@link #safeSubList(List, int, int)}, but returns a new list rather than a view of the original list.
+   *
+   * @param list the original list
+   * @param fromIndex low endpoint (inclusive) of the subList
+   * @param toIndex high endpoint (exclusive) of the subList
+   * @return copy of a valid range within the the given list that most-closely resembles the given bounds
+   * @see #copyOfRange(List, int, int)
+   */
+  public static <E> ArrayList<E> safeCopyOfRange(List<E> list, int fromIndex, int toIndex) {
+    return new ArrayList<>(safeSubList(list, fromIndex, toIndex));
   }
 
   /**

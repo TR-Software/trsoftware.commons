@@ -71,7 +71,7 @@ EOF
 
 display_error_and_exit () {
   # prints the given error message along with usage help to stderr (1>&2) and exits with error status 1
-  echo $1 1>&2
+  echo "$1" 1>&2
   show_help 1>&2
   exit 1
 }

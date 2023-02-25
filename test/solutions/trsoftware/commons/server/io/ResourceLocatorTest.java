@@ -181,8 +181,8 @@ public class ResourceLocatorTest extends SuperTestCase {
     assertEquals(RESOURCE_TEXT, readCharactersIntoString(relativeResource.getReader()));
     assertEquals(RESOURCE_TEXT, readCharactersIntoString(absoluteResource.getReader()));
     assertEquals(RESOURCE_TEXT, readCharactersIntoString(absoluteResourceWithClassLoader.getReader()));
-    assertThrows(NullPointerException.class, (Runnable)nonExistentResourceAbs::getReader);
-    assertThrows(NullPointerException.class, (Runnable)nonExistentResourceRel::getReader);
+    assertNull(nonExistentResourceAbs.getReader());
+    assertNull(nonExistentResourceRel.getReader());
   }
 
   public void testGetReaderUTF8() throws Exception {
@@ -190,8 +190,8 @@ public class ResourceLocatorTest extends SuperTestCase {
     assertEquals(RESOURCE_TEXT, readCharactersIntoString(absoluteResource.getReaderUTF8()));
     assertEquals(RESOURCE_TEXT, readCharactersIntoString(absoluteResourceWithClassLoader.getReaderUTF8()));
 
-    assertThrows(NullPointerException.class, (Runnable)nonExistentResourceAbs::getReaderUTF8);
-    assertThrows(NullPointerException.class, (Runnable)nonExistentResourceRel::getReaderUTF8);
+    assertNull(nonExistentResourceAbs.getReaderUTF8());
+    assertNull(nonExistentResourceRel.getReaderUTF8());
   }
 
   public void testGetContentAsString() throws Exception {

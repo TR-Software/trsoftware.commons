@@ -199,7 +199,9 @@ public class TimeUtils {
   }
 
   /**
-   * WARNING: it's preferable to use {@link #isElapsed(double, double, double)} in client-side GWT code to avoid the performance penalty of GWT's {@code long} emulation.
+   * NOTE: it's preferable to use {@link #isElapsed(double, double, double)} in client-side GWT code
+   * to avoid the performance penalty of GWT's {@code long} emulation.
+   *
    * @return {@code true} iff the difference between {@code startTime} and {@code currentTime} is greater than {@code duration}
    */
   public static boolean isElapsed(long duration, long startTime, long currentTime) {

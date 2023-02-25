@@ -42,7 +42,7 @@ import java.util.Set;
  *
  * <h3>Usage</h3>
  * Refer to the code in {@link CachePolicyFilterTest#testIntegration()} and the webapp defined in
- * {@code /test-resources/CachePolicyFilterTest_webapp}.
+ * {@code test/resources/CachePolicyFilterTest_webapp}.
  * <p>
  * <strong>NOTE</strong>: the {@code Context} element (defined in your {@code context.xml}) should have the attribute
  * {@code containerSciFilter="jetty"}, otherwise the {@link ServletContainerInitializer}s found in the jetty jars

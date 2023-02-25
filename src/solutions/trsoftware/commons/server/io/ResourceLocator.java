@@ -18,6 +18,7 @@ package solutions.trsoftware.commons.server.io;
 
 import solutions.trsoftware.commons.server.util.reflect.ReflectionUtils;
 
+import javax.annotation.Nullable;
 import java.io.*;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -91,7 +92,7 @@ public class ResourceLocator {
    * @see Class#getResource(String)
    * @see Class#getResourceAsStream(String)
    */
-  public ResourceLocator(String resourceName, Class refClass) {
+  public ResourceLocator(String resourceName, Class<?> refClass) {
     this.resourceName = Objects.requireNonNull(resourceName);
     this.refClass = Objects.requireNonNull(refClass);
     this.classLoader = null;
@@ -104,6 +105,7 @@ public class ResourceLocator {
    * @see #ResourceLocator(String)
    * @see #ResourceLocator(String, Class)
    */
+  @Nullable
   public URL getURL() {
     if (refClass != null)
       return refClass.getResource(resourceName);
@@ -115,6 +117,7 @@ public class ResourceLocator {
    * @return the result of {@link #getURL()} converted to a {@link URI}. Returns {@code null} if no resource
    *     with this name is found.
    */
+  @Nullable
   public URI getURI() {
     URL url = getURL();
     if (url == null)
@@ -134,6 +137,7 @@ public class ResourceLocator {
    * @see #ResourceLocator(String)
    * @see #ResourceLocator(String, Class)
    */
+  @Nullable
   public InputStream getInputStream() {
     if (refClass != null)
       return refClass.getResourceAsStream(resourceName);
@@ -161,19 +165,27 @@ public class ResourceLocator {
   }
 
   /**
-   * @return an {@link InputStreamReader} for this resource, using the default charset.
-   * @throws NullPointerException if no resource with this name is found
+   * @return an {@link InputStreamReader} for this resource, using the default charset,
+   *   or {@code null} if no resource with this name is found.
    */
+  @Nullable
   public Reader getReader() {
-    return new InputStreamReader(getInputStream());
+    InputStream in = getInputStream();
+    if (in == null)
+      return null;
+    return new InputStreamReader(in);
   }
 
   /**
-   * @return an an {@link InputStreamReader} using the UTF-8 charset for this resource
-   * @throws NullPointerException if no resource with this name is found
+   * @return an an {@link InputStreamReader} using the UTF-8 charset for this resource,
+   *   or {@code null} if no resource with this name is found.
    */
+  @Nullable
   public Reader getReaderUTF8() {
-    return readUTF8(getInputStream());
+    InputStream in = getInputStream();
+    if (in == null)
+      return null;
+    return readUTF8(in);
   }
 
   /**
@@ -274,12 +286,12 @@ public class ResourceLocator {
    *     (but not {@link Class#getResource(String)}).  Returns {@code null} if either argument is {@code null}.
    * @see <a href="https://stackoverflow.com/a/6608848">StackOverflow discussion about the difference between the getResource methods of Class vs. ClassLoader</a>
    */
-  public static String resolveResourceName(String name, Class referenceClass) {
+  public static String resolveResourceName(String name, Class<?> referenceClass) {
     if (name == null || referenceClass == null)
       return null;
     if (name.startsWith("/"))
       return name.substring(1);  // already an absolute name reference
-    Class c = referenceClass.isArray() ? ReflectionUtils.getRootComponentTypeOfArray(referenceClass) : referenceClass;
+    Class<?> c = referenceClass.isArray() ? ReflectionUtils.getRootComponentTypeOfArray(referenceClass) : referenceClass;
     String baseName = c.getName();
     int index = baseName.lastIndexOf('.');
     if (index != -1)

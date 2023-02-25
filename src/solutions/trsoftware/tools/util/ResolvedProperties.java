@@ -106,12 +106,14 @@ public class ResolvedProperties extends Properties {
    * Doing this up-front guarantees that no exceptions will be thrown by later calls to {@link #getProperty(String)}
    * (assuming that no new properties have been added).
    *
+   * @return this instance (for call chaining)
    * @throws RuntimeException any exception encountered during variable resolution
    */
-  public void resolveAll() {
+  public ResolvedProperties resolveAll() {
     for (String key : stringPropertyNames()) {
       resolve(key);
     }
+    return this;
   }
 
 }

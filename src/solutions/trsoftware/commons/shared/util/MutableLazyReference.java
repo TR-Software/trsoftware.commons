@@ -26,10 +26,11 @@ import java.util.function.Supplier;
 public abstract class MutableLazyReference<V> extends LazyReference<V> {
 
   public synchronized void set(V value) {
+    hasValue.set(true);
     this.value = value;
   }
 
-  public void refresh() {
+  public synchronized void refresh() {
     set(create());
   }
 

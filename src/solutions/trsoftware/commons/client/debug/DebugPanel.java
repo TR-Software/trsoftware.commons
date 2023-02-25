@@ -36,10 +36,10 @@ public class DebugPanel extends SmartComposite {
 
   /**
    * Creates an instance via deferred binding and, if its constructor provided a widget (via {@link #initWidget(Widget)}),
-   * adds it to the default {@link RootPanel} (i.e. {@code <body>})  
+   * adds it to the default {@link RootPanel} (i.e. {@code <body>})
    */
-  public static void create() {
-    create(null);
+  public static DebugPanel create() {
+    return create(null);
   }
 
   /**
@@ -49,7 +49,7 @@ public class DebugPanel extends SmartComposite {
    * @param hostElemId argument to {@link RootPanel#get(String)}; if {@code null}, this widget will be added
    * to the default {@link RootPanel}, which wraps the document body.
    */
-  public static void create(@Nullable String hostElemId) {
+  public static DebugPanel create(@Nullable String hostElemId) {
     DebugPanel instance = GWT.create(DebugPanel.class);
     if (instance.isInitialized()) {
       RootPanel rootPanel = RootPanel.get(hostElemId);
@@ -59,6 +59,7 @@ public class DebugPanel extends SmartComposite {
       }
       rootPanel.add(instance);
     }
+    return instance;
   }
 
 }

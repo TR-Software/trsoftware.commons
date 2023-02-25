@@ -220,7 +220,7 @@ public class RandomUtils {
     // TODO: this can be made more efficient (no need to shuffle the entire collection)
     ArrayList<T> copy = new ArrayList<T>(collection);
     Collections.shuffle(copy, rnd);
-    return ListUtils.subList(copy, 0, sampleSize);
+    return ListUtils.copyOfRange(copy, 0, sampleSize);
   }
 
   public static <T> List<T> randomSampleWithReplacement(Collection<T> collection, int sampleSize) {

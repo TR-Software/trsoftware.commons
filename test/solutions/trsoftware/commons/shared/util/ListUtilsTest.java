@@ -31,22 +31,22 @@ import static solutions.trsoftware.commons.shared.util.ListUtils.*;
 public class ListUtilsTest extends TestCase {
 
   /**
-   * Tests {@link ListUtils#subList(List, int, int)}
+   * Tests {@link ListUtils#copyOfRange(List, int, int)}
    */
-  public void testSubList() {
+  public void testCopyOfRange() {
     List<Integer> list = Arrays.asList(1, 2, 3, 4, 5, 6);
 
-    assertEquals(Arrays.asList(1, 2, 3), subList(list, 0, 3));
-    assertEquals(Arrays.asList(2, 3, 4), subList(list, 1, 4));
-    assertEquals(list, subList(list, 0, 6));
-    AssertUtils.assertThrows(IndexOutOfBoundsException.class, () -> subList(list, 0, 7));
+    assertEquals(Arrays.asList(1, 2, 3), copyOfRange(list, 0, 3));
+    assertEquals(Arrays.asList(2, 3, 4), copyOfRange(list, 1, 4));
+    assertEquals(list, copyOfRange(list, 0, 6));
+    AssertUtils.assertThrows(IndexOutOfBoundsException.class, () -> copyOfRange(list, 0, 7));
 
     // test that it returns a copy of the range rather than a view of the original list:
-    List<Integer> subList = subList(list, 0, 3);
+    List<Integer> newList = copyOfRange(list, 0, 3);
     assertEquals(1, (int)list.get(0));
-    assertEquals(1, (int)subList.get(0));
-    subList.set(0, 10);
-    assertEquals(10, (int)subList.get(0));
+    assertEquals(1, (int)newList.get(0));
+    newList.set(0, 10);
+    assertEquals(10, (int)newList.get(0));
     // the above operation shouldn't have modified the original list
     assertEquals(1, (int)list.get(0));
   }

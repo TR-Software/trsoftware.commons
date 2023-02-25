@@ -17,6 +17,7 @@
 package solutions.trsoftware.commons.client;
 
 import com.gargoylesoftware.htmlunit.BrowserVersion;
+import com.google.gwt.core.shared.GwtIncompatible;
 import com.google.gwt.junit.client.GWTTestCase;
 import solutions.trsoftware.commons.client.testutil.RunStyleValue;
 import solutions.trsoftware.commons.rebind.RunStyleInfoGenerator;
@@ -54,6 +55,7 @@ public abstract class BaseGwtTestCase extends GWTTestCase {
 
   public static boolean modifyRunStyle = false;
 
+  @GwtIncompatible
   @Override
   protected void runTest() throws Throwable {
     maybeModifyGwtArgs();
@@ -70,6 +72,7 @@ public abstract class BaseGwtTestCase extends GWTTestCase {
    * We also modify the gwt.persistentunitcachedir setting to a globally-shared dir, because different runs are able
    * to reuse most of each-other's compiler unit cache output (see doc/gwt/experiments/PersistentUnitCacheUsageExperiment.txt)
    */
+  @GwtIncompatible
   private static void maybeModifyGwtArgs() throws IOException {
     if (!gwtArgsProcessed) {
       gwtArgsProcessed = true;
@@ -168,6 +171,7 @@ public abstract class BaseGwtTestCase extends GWTTestCase {
   /**
    * Creates the WAR directory and ensures it contains the {@code jetty-env.xml} we need to work around a Jetty/GWT bug.
    */
+  @GwtIncompatible
   private static Path setUpWarDir(Path parentDir) throws IOException {
     Path warDir = FileUtils.maybeCreateDirectory(parentDir.resolve(GwtArgs.WAR));
     Path webInfDir = FileUtils.maybeCreateDirectory(warDir.resolve("WEB-INF"));
@@ -179,6 +183,7 @@ public abstract class BaseGwtTestCase extends GWTTestCase {
     return warDir;
   }
 
+  @GwtIncompatible
   private static Path getStagingDir() throws IOException {
     // check if we have a custom property that specifies where the GWT compiler output for these tests should go
     Path stagingDirPath;

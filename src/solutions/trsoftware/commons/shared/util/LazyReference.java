@@ -16,6 +16,7 @@
 
 package solutions.trsoftware.commons.shared.util;
 
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Supplier;
 
 /**
@@ -25,35 +26,31 @@ import java.util.function.Supplier;
  *
  * @author Alex
  */
-public abstract class LazyReference<V> {
+public abstract class LazyReference<V> implements Supplier<V> {
 
   /**
    * The value computed by {@link #create()}.
-   * <p style="color: #6495ed; font-weight: bold;">
-   *   TODO: perhaps init the value to some dummy object instead of {@code null}, to
-   *   disambiguate between a {@code null} value returned by {@link #create()} and the "not initialized" state?
-   *   (can also use an {@link java.util.concurrent.atomic.AtomicBoolean} for this purpose).
-   * </p>
    */
   protected volatile V value;
 
+  protected final AtomicBoolean hasValue = new AtomicBoolean();
+
   public V get(boolean create) {
-    if (value == null && create) {
-      // lazy init using the double-checked locking paradigm
-      synchronized (this) {
-        if (value == null)
-          value = create();
-      }
-    }
+    // TODO: unit test this new lock-free implementation; document these methods
+    if (create)
+      return get();
     return value;
   }
 
   public V get() {
-    return get(true);
+    // TODO: what if create() throws exception? should we set hasValue back to false in that case?
+    if (hasValue.compareAndSet(false, true))
+      value = create();
+    return value;
   }
 
   public boolean hasValue() {
-    return value != null;
+    return hasValue.get();
   }
 
   protected abstract V create();

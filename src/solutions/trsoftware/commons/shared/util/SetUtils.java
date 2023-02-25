@@ -73,12 +73,12 @@ public abstract class SetUtils {
 
   /** @return a new {@link TreeSet} initialized from the given array */
   @SafeVarargs
-  public static <T> SortedSet<T> newSortedSet(T... items) {
+  public static <E extends Comparable<E>> SortedSet<E> newSortedSet(E... items) {
     return addAll(new TreeSet<>(), items);
   }
 
   /** @return a new {@link TreeSet} initialized from the given iterator */
-  public static <T> SortedSet<T> newSortedSet(Iterator<T> it) {
+  public static <E extends Comparable<E>> SortedSet<E> newSortedSet(Iterator<E> it) {
     return addAll(new TreeSet<>(), it);
   }
 

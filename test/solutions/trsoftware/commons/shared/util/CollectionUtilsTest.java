@@ -334,7 +334,7 @@ public class CollectionUtilsTest extends TestCase {
     // test some trivial cases:
     assertTrue(reversedCopy(emptyList()).isEmpty());
     assertTrue(reversedCopy(emptySet()).isEmpty());
-    assertTrue(reversedCopy(SetUtils.newSortedSet()).isEmpty());
+    assertTrue(reversedCopy(new TreeSet<>()).isEmpty());
     assertEquals(singletonList(1), reversedCopy(singletonList(1)));
     assertEquals(singletonList(1), reversedCopy(singleton(1)));
     assertEquals(singletonList(1), reversedCopy(singletonList(1)));

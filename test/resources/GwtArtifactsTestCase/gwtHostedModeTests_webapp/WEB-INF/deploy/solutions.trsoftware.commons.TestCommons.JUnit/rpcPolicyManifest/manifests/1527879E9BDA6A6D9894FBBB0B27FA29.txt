@@ -1,0 +1,2 @@
+serviceClass: solutions.trsoftware.commons.client.server.MockRpcService
+path: A4CFBC9ADC2AD09D08DF4CCC34419B72.gwt.rpc

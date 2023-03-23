@@ -86,7 +86,7 @@ public abstract class WebUtils {
   public static String urlWithQueryString(String url, String... nameValuePairs) {
     // the given list should have an even number of args
     if (ArrayUtils.isEmpty(nameValuePairs))
-      return "";  // TODO(3/26/2020): this is wrong - should return the url without query; NOT an empty string
+      return url;
     if (nameValuePairs.length % 2 != 0)
       throw new IllegalArgumentException("Uneven number of arguments.");
     boolean key = true;

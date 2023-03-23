@@ -65,6 +65,7 @@ public abstract class ServerAssertUtils extends AssertUtils {
     assertTrue(diffs.toString(), diffs.isEmpty());
   }
 
+  @SuppressWarnings("unchecked")
   public static <T> Class<T> assertSameType(T expected, T actual) {
     assertNotNull(expected);
     assertNotNull(actual);

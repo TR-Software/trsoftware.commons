@@ -1,0 +1,4 @@
+# Module solutions.trsoftware.commons.TestCommons.JUnit
+# RPC service class, partial path of RPC policy file
+com.google.gwt.junit.client.impl.JUnitHost, C63F04478389D766205EADF6DDB3A13C.gwt.rpc
+com.google.gwt.logging.shared.RemoteLoggingService, 08FAFA5EB62F7040921DAB5F0E2BA17F.gwt.rpc

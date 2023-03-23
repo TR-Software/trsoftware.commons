@@ -64,4 +64,14 @@ public interface ThrowingFunction<T, R, E extends Exception> extends Function<T,
       super(cause);
     }
   }
+
+  /**
+   * Facilitates using a reference to a method that throws a checked exception with an API that expects a normal
+   * {@link Function}.
+   *
+   * @param function the function or method reference that throws a checked exception
+   */
+  static <T, R, E extends Exception> Function<T, R> cast(ThrowingFunction<T, R, E> function) {
+    return function;
+  }
 }

@@ -227,7 +227,7 @@ public class ListUtils {
   /**
    * @return {@code true} iff the given list is either {@code null} or empty
    */
-  public static boolean isEmpty(List list) {
+  public static boolean isEmpty(List<?> list) {
     return list == null || list.isEmpty();
   }
 

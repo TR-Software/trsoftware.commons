@@ -38,14 +38,14 @@ import static solutions.trsoftware.commons.server.io.file.FileUtils.joinPathAsFi
  * Prints a report about the sizes of the compiled GWT modules
  * (all the .cache.html files in the output war directory).
  * Also saves a copy of the report in the war file's /WEB_INF/gwtExtras dir.
- *
+ * <p>
  * NOTE: this class doesn't really need to be shipped with the WAR distribution,
  * but we're just doing that for convenience, to keep the Ant build script simple. 
  *
  * <p style="color: #6495ed; font-weight: bold;">
  *   TODO: this code needs to be updated
- *   NOTE: the newer versions of GWT also provide a file called compilation-mappings.txt in each module output directory.
- *   This file contains the (strong) filenames of each permutation along with their selection props
+ *    - newer versions of GWT also provide a file called compilation-mappings.txt in each module output directory,
+ *    which contains the (strong) filenames of each permutation along with their selection props
  * </p>
  *
  * @author Alex

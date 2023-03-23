@@ -498,21 +498,21 @@ public abstract class AssertUtils {
   }
 
   /**
-   * Asserts that the given list contains exactly 1 element and returns that element
-   * @return the only element from the list
-   * @throws AssertionFailedError if list size != 1
+   * Asserts that the given collection contains exactly 1 element and returns that element
+   * @return the only element from the collection
+   * @throws AssertionFailedError if collection size != 1
    * @see Iterables#getOnlyElement(Iterable)
    */
-  public static <T> T getOnlyElement(List<T> list) {
-    assertEquals(1, list.size());
-    return list.get(0);
+  public static <T> T getOnlyElement(Collection<T> collection) {
+    assertEquals(1, collection.size());
+    return Iterables.getOnlyElement(collection);
   }
 
   /**
    * Asserts that the given array contains exactly 1 element and returns that element
    * @return the only element from the array
    * @throws AssertionFailedError if list size != 1
-   * @see #getOnlyElement(List)
+   * @see #getOnlyElement(Collection)
    */
   public static <T> T getOnlyElement(T[] arr) {
     assertEquals(1, arr.length);

@@ -17,10 +17,7 @@
 
 package solutions.trsoftware.commons.server.testutil;
 
-import org.apache.catalina.Context;
-import org.apache.catalina.LifecycleException;
-import org.apache.catalina.Server;
-import org.apache.catalina.Wrapper;
+import org.apache.catalina.*;
 import org.apache.catalina.startup.Tomcat;
 import org.apache.tomcat.util.descriptor.web.WebXml;
 import org.apache.tomcat.util.descriptor.web.WebXmlParser;
@@ -34,8 +31,10 @@ import javax.servlet.*;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Set;
+import java.util.stream.Stream;
 
 /**
  * Skeleton implementation of an embedded Tomcat server.
@@ -160,9 +159,29 @@ public class EmbeddedTomcatServer implements AutoCloseable {
 
   /**
    * @return the {@link Context} registered at the given path, or {@code null} if no such context has been added
+   *
+   * @see Container#findChild(String)
    */
   public Context getContext(String contextPath) {
     return (Context)tomcat.getHost().findChild(contextPath);
+  }
+
+  /**
+   * @return all the deployed {@linkplain Context contexts}
+   *
+   * @see Container#findChild(String)
+   */
+  public Context[] getContexts() {
+    return getContextsAsStream().toArray(Context[]::new);
+  }
+
+  /**
+   * @return a stream of all the deployed {@linkplain Context contexts}
+   *
+   * @see Container#findChild(String)
+   */
+  public Stream<Context> getContextsAsStream() {
+    return Arrays.stream(tomcat.getHost().findChildren()).map(Context.class::cast);
   }
 
   /**

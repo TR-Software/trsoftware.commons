@@ -17,12 +17,10 @@
 package solutions.trsoftware.commons.shared.util.rpc;
 
 import com.google.gwt.i18n.client.NumberFormat;
-import com.google.gwt.user.client.rpc.CustomFieldSerializer;
-import com.google.gwt.user.client.rpc.SerializationException;
-import com.google.gwt.user.client.rpc.SerializationStreamReader;
-import com.google.gwt.user.client.rpc.SerializationStreamWriter;
+import com.google.gwt.user.client.rpc.*;
 import com.google.gwt.user.client.rpc.impl.AbstractSerializationStreamReader;
 import com.google.gwt.user.client.rpc.impl.AbstractSerializationStreamWriter;
+import com.google.gwt.user.server.rpc.SerializationPolicy;
 import solutions.trsoftware.commons.shared.util.MathUtils;
 import solutions.trsoftware.commons.shared.util.text.SharedNumberFormat;
 
@@ -183,7 +181,16 @@ public class SerializationUtils {
     return (double)scaledInt / pow10(precision);
   }
 
-  public static String serialize(Serializable obj, AbstractSerializationStreamWriter writer) throws SerializationException {
+  /**
+   * Serializes the given object by invoking the {@link AbstractSerializationStreamWriter#writeObject(Object)} method
+   * on the given writer.
+   *
+   * @param obj a serializable object: should implement either {@link Serializable} or {@link IsSerializable},
+   * and be serializable with respect to the writer's {@link SerializationPolicy}.
+   *
+   * @return the serialized string representing the given object
+   */
+  public static String serialize(Object obj, AbstractSerializationStreamWriter writer) throws SerializationException {
     writer.prepareToWrite();
     writer.writeObject(obj);
     return writer.toString();

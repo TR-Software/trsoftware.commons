@@ -1,0 +1,2 @@
+serviceClass: solutions.trsoftware.commons.client.bridge.rpc.NumberFormatTestService
+path: 93E70DB6989E525BDF54A0041209CF42.gwt.rpc

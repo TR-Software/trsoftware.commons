@@ -80,7 +80,6 @@
     </orderEntry>
     <orderEntry type="library" name="javax.websocket:javax.websocket-api:1.1" level="application" />
     <orderEntry type="library" scope="TEST" name="HtmlUnit 2.55" level="application" />
-    <orderEntry type="library" name="gwt-2.10" level="application" />
     <orderEntry type="module-library">
       <library name="Apache Tomcat 8.5.31 (minus ECJ)">
         <CLASSES>
@@ -123,6 +122,7 @@
         <jarDirectory url="file://$TOMCAT_8_HOME$" recursive="false" type="SOURCES" />
       </library>
     </orderEntry>
+    <orderEntry type="library" name="gwt-2.10" level="application" />
     <orderEntry type="library" name="com.google.guava:guava-gwt:28.2-jre" level="application" />
     <orderEntry type="module-library" scope="TEST">
       <library name="junit3.8.1">

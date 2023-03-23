@@ -425,6 +425,28 @@ public class MapUtils {
   }
 
   /**
+   * Returns the first value from the collection mapped to by the given key in the given map, or {@code null}
+   * if either the mapping is not present or the collection is empty.
+   *
+   * @see #getSingleValue(Map, Object, Object)
+   */
+  public static <K, V> V getSingleValue(Map<K, ? extends Collection<V>> map, K key) {
+    return getSingleValue(map, key, null);
+  }
+
+  /**
+   * Returns the first value from the collection mapped to by the given key in the given map, or the given
+   * default value if either the mapping is not present or the collection is empty.
+   */
+  public static <K, V> V getSingleValue(Map<K, ? extends Collection<V>> map, K key, V defaultValue) {
+    Collection<V> values = map.get(key);
+    if (!CollectionUtils.isEmpty(values)) {
+      return CollectionUtils.first(values);
+    }
+    return defaultValue;
+  }
+
+  /**
    * Inserts the given element into the map if the map doesn't already contain it.
    * NOTE: this is different from {@link Map#putIfAbsent(Object, Object)} (Java 1.8), which returns {@code null} if the
    * value wasn't already in the map.
@@ -617,6 +639,13 @@ public class MapUtils {
    */
   public static <K,V> Map.Entry<K, V> firstEntry(Map<K, V> map) {
     return map.entrySet().iterator().next();
+  }
+
+  /**
+   * @return {@code true} iff the given map is either {@code null} or empty
+   */
+  public static boolean isEmpty(Map<?, ?> map) {
+    return map == null || map.isEmpty();
   }
 
 }

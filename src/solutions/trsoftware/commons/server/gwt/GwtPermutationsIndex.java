@@ -16,53 +16,71 @@
 
 package solutions.trsoftware.commons.server.gwt;
 
+import com.google.common.collect.ImmutableSet;
+import com.google.gwt.core.client.GWT;
+import com.google.gwt.user.client.rpc.RpcRequestBuilder;
 import solutions.trsoftware.tools.gwt.artifacts.GwtCompilerArtifacts;
 
 import javax.servlet.ServletContext;
 import java.util.LinkedHashMap;
-import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import static java.lang.String.format;
+
 /**
+ * Indexes the compiled permutations for a webapp's GWT modules by scanning the module's resource path in the webapp
+ * (i.e. the files emitted into the {@code -war} directory by the GWT compiler).
+ *
  * @author Alex
  * @since 1/27/2018
  */
 public class GwtPermutationsIndex {
 
-  // lazy init
-  private Map<String, Set<String>> gwtPermutationsByModulePath = new LinkedHashMap<>();
+  /**
+   * Cache of {@link #getAvailablePermutations(String, ServletContext)} results.
+   */
+  private final Map<String, ImmutableSet<String>> gwtPermutationsByModulePath = new LinkedHashMap<>();
 
   /**
-   * Scans the {@link ServletContext#getResourcePaths(String) servletContext.getResourcePaths(moduleBasePath)} for
-   * {@code *.cache.html} files.
+   * Derives the set of all available permutations for a module based on the
+   * {@link GwtCompilerArtifacts#PERMUTATION_FILENAME_PATTERN .cache.(js|html)} files contained in the module's base
+   * path ({@link ServletContext#getResourcePaths(String) servletContext.getResourcePaths(moduleBasePath)}.
+   * <p>
+   * This assumes that each module's files are in a separate directory.
    *
    * @param moduleBasePath the URI from which the module was loaded (given by the
-   * {@value com.google.gwt.user.client.rpc.RpcRequestBuilder#MODULE_BASE_HEADER} header of a GWT-RPC request).
+   * {@value RpcRequestBuilder#MODULE_BASE_HEADER} header of a GWT-RPC request and {@link GWT#getModuleBaseURL()}).
    *
    * @return The set of all available permutation strong names present at the given resource path in the given
    * {@link ServletContext}
    */
-  public Set<String> getAvailablePermutations(String moduleBasePath, ServletContext servletContext) {
+  public ImmutableSet<String> getAvailablePermutations(String moduleBasePath, ServletContext servletContext) {
     // lazy-init the available permutation names from the set of (the *.cache.html resources present at the given context path)
-    Set<String> permutations = gwtPermutationsByModulePath.get(moduleBasePath);
+    ImmutableSet<String> permutations = gwtPermutationsByModulePath.get(moduleBasePath);
     if (permutations == null) {
       synchronized (this) {
         // double-checked locking
         permutations = gwtPermutationsByModulePath.get(moduleBasePath);
         if (permutations == null) {
-          permutations = new LinkedHashSet<>();
           // load the names of module permutations available on the server
+          Set<String> paths = servletContext.getResourcePaths(moduleBasePath);
+          if (paths == null) {
+            throw new IllegalArgumentException(
+                format("Invalid moduleBasePath ('%s' not found in '%s' webapp deployed from %s)",
+                    moduleBasePath, servletContext.getContextPath(), servletContext.getRealPath("/")));
+          }
+          ImmutableSet.Builder<String> setBuilder = ImmutableSet.builder();
           Pattern pattern = Pattern.compile(".*" + GwtCompilerArtifacts.PERMUTATION_FILENAME_PATTERN.pattern());
-          for (String resourcePath : servletContext.getResourcePaths(moduleBasePath)) {
+          for (String resourcePath : paths) {
             Matcher matcher = pattern.matcher(resourcePath);
             if (matcher.matches()) {
-              permutations.add(matcher.group(1));
+              setBuilder.add(matcher.group(1));
             }
           }
-          gwtPermutationsByModulePath.put(moduleBasePath, permutations);
+          gwtPermutationsByModulePath.put(moduleBasePath, permutations = setBuilder.build());
         }
       }
     }

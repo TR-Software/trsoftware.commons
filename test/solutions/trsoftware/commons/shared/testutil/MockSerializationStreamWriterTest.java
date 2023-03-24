@@ -22,7 +22,7 @@ import com.google.gwt.user.client.rpc.SerializationException;
 import com.google.gwt.user.client.rpc.SerializationStreamReader;
 import com.google.gwt.user.client.rpc.SerializationStreamWriter;
 import com.google.gwt.user.server.rpc.impl.ServerSerializationStreamWriter;
-import solutions.trsoftware.commons.server.testutil.rpc.SimpleSerializationPolicy;
+import solutions.trsoftware.commons.server.util.rpc.SimpleSerializationPolicy;
 import solutions.trsoftware.commons.shared.BaseTestCase;
 import solutions.trsoftware.commons.shared.testutil.rpc.ArrayCustomFieldSerializer;
 import solutions.trsoftware.commons.shared.util.function.ThrowingRunnable;

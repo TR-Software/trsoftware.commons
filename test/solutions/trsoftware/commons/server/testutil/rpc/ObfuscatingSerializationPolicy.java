@@ -22,6 +22,7 @@ import com.google.gwt.user.client.rpc.SerializationException;
 import com.google.gwt.user.client.rpc.impl.AbstractSerializationStream;
 import com.google.gwt.user.server.rpc.SerializationPolicy;
 import com.google.gwt.user.server.rpc.impl.TypeNameObfuscator;
+import solutions.trsoftware.commons.server.util.rpc.SimpleSerializationPolicy;
 import solutions.trsoftware.commons.shared.util.RandomUtils;
 import solutions.trsoftware.commons.shared.util.StringUtils;
 

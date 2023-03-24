@@ -14,20 +14,27 @@
  * the License.
  */
 
-package solutions.trsoftware.commons.server.testutil.rpc;
+package solutions.trsoftware.commons.server.util.rpc;
 
+import com.google.gwt.user.client.rpc.IsSerializable;
 import com.google.gwt.user.client.rpc.SerializationException;
 import com.google.gwt.user.server.rpc.SerializationPolicy;
 
 import java.io.Serializable;
 
 /**
- * A dummy {@link SerializationPolicy} that allows serializing any {@linkplain Serializable serializable} type.
+ * A dummy {@link SerializationPolicy} that allows serializing any {@linkplain Serializable serializable} type,
+ * without performing any validation, obfuscation, etc.
+ *
+ * @see <a href="https://www.slideshare.net/gwtcon/gwt20-websocket20and20data20serialization">
+ *   "GWT Web Socket and data serialization" (slide deck from GWTcon 2014)</a>
  */
 public class SimpleSerializationPolicy extends SerializationPolicy {
 
-  public boolean isSerializable(Class<?> cls) {
-    return cls != null && (cls.isPrimitive() || Serializable.class.isAssignableFrom(cls));
+  private static boolean isSerializable(Class<?> cls) {
+    return cls != null && (cls.isPrimitive()
+        || Serializable.class.isAssignableFrom(cls)
+        || IsSerializable.class.isAssignableFrom(cls));
   }
 
   @Override
@@ -49,4 +56,5 @@ public class SimpleSerializationPolicy extends SerializationPolicy {
   public void validateSerialize(Class<?> clazz) throws SerializationException {
     // TODO: should this method do anything?;
   }
+
 }

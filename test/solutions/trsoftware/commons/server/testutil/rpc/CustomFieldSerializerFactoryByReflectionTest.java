@@ -19,6 +19,7 @@ package solutions.trsoftware.commons.server.testutil.rpc;
 import com.google.common.base.MoreObjects;
 import com.google.gwt.user.client.rpc.CustomFieldSerializer;
 import com.google.gwt.user.server.rpc.impl.ServerSerializationStreamWriter;
+import solutions.trsoftware.commons.server.util.rpc.SimpleSerializationPolicy;
 import solutions.trsoftware.commons.shared.BaseTestCase;
 import solutions.trsoftware.commons.shared.testutil.MockSerializationStreamReader;
 import solutions.trsoftware.commons.shared.testutil.MockSerializationStreamWriter;

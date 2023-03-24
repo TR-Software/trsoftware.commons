@@ -320,4 +320,21 @@ public class MapUtilsTest extends TestCase {
     assertEquals(new AbstractMap.SimpleEntry<>("a", 1), firstEntry(map));
   }
 
+  public void testGetSingleValue() throws Exception {
+    Map<String, List<Integer>> map = hashMap(
+        "a", Arrays.asList(1, 2),
+        "b", Collections.singletonList(3),
+        "c", Collections.emptyList()
+    );
+    // 1) without default value
+    assertEquals((Integer)1, getSingleValue(map, "a"));
+    assertEquals((Integer)3, getSingleValue(map, "b"));
+    assertNull(getSingleValue(map, "c"));
+    assertNull(getSingleValue(map, "d"));
+    // 2) with default value
+    assertEquals((Integer)1, getSingleValue(map, "a", 0));
+    assertEquals((Integer)3, getSingleValue(map, "b", 0));
+    assertEquals((Integer)0, getSingleValue(map, "c", 0));
+    assertEquals((Integer)5, getSingleValue(map, "d", 5));
+  }
 }

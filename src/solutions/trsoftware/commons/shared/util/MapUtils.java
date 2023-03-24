@@ -23,6 +23,7 @@ import com.google.common.collect.Multimap;
 import solutions.trsoftware.commons.shared.util.function.ThrowingFunction;
 import solutions.trsoftware.commons.shared.util.stats.Mergeable;
 
+import javax.annotation.Nullable;
 import java.util.*;
 import java.util.function.BiFunction;
 import java.util.function.Function;
@@ -430,6 +431,7 @@ public class MapUtils {
    *
    * @see #getSingleValue(Map, Object, Object)
    */
+  @Nullable
   public static <K, V> V getSingleValue(Map<K, ? extends Collection<V>> map, K key) {
     return getSingleValue(map, key, null);
   }

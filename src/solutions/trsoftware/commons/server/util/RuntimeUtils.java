@@ -70,8 +70,7 @@ public class RuntimeUtils {
         else if (cls.getEnclosingClass() != null && targetClass.isAssignableFrom(cls.getEnclosingClass()))
           return true;
       }
-      catch (ClassNotFoundException e) {
-        continue;
+      catch (ClassNotFoundException ignored) {
       }
     }
     return false;

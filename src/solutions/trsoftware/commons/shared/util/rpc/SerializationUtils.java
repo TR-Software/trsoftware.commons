@@ -202,4 +202,26 @@ public class SerializationUtils {
     return (T)reader.readObject();
   }
 
+  /**
+   * Encapsulates the rounding policy (decimal places) for {@link #doubleToScaledInt} and {@link #doubleFromScaledInt}
+   */
+  public static class RoundedDouble {
+    private final int precision;
+
+    /**
+     * @param precision the desired number of digits to retain after the decimal point (must be >= 0)
+     */
+    public RoundedDouble(int precision) {
+      this.precision = precision;
+    }
+
+    public int toScaledInt(double value) {
+      return doubleToScaledInt(value, precision);
+    }
+
+    public double fromScaledInt(int scaledInt) {
+      return doubleFromScaledInt(scaledInt, precision);
+    }
+  }
+
 }

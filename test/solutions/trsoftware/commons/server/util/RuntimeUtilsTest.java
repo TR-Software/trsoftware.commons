@@ -19,6 +19,7 @@ package solutions.trsoftware.commons.server.util;
 
 import junit.framework.TestCase;
 import solutions.trsoftware.commons.shared.annotations.Slow;
+import solutions.trsoftware.commons.shared.testutil.AssertUtils;
 
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
@@ -29,7 +30,7 @@ import static solutions.trsoftware.commons.server.util.RuntimeUtils.*;
 
 public class RuntimeUtilsTest extends TestCase {
 
-  public void testRunningInJUnit() throws Exception {
+  public void testIsRunningInJUnit() throws Exception {
     // this thread is running in JUnit
     assertTrue(isRunningInJUnit());
 
@@ -64,5 +65,15 @@ public class RuntimeUtilsTest extends TestCase {
   public void testGetClassPath() throws Exception {
     assertEquals(System.getProperty("java.class.path"), getClassPath());
     assertEquals(ManagementFactory.getRuntimeMXBean().getClassPath(), getClassPath());
+  }
+
+  public void testPrintStackTrace() throws Exception {
+    StackTraceWrapper ex = new StackTraceWrapper("Dummy exception");
+    String fullTrace = printStackTrace(ex);
+    System.out.println("fullTrace:\n" + fullTrace);
+    AssertUtils.assertThat(fullTrace).startsWith(ex.toString());
+    String traceToMethod = printStackTrace(ex, getClass().getDeclaredMethod("testPrintStackTrace"));
+    System.out.println("traceToMethod:" + traceToMethod);
+    AssertUtils.assertThat(traceToMethod).startsWith(ex.toString());
   }
 }

@@ -104,7 +104,7 @@ public class JsConsole extends JavaScriptObject {
    * </pre>
    * @deprecated Use {@link #log(Level, JsArrayMixed)} instead.
    */
-  public final native <A extends JsArrayMixed> void log(A args) /*-{
+  public final native <A extends JavaScriptObject> void log(A args) /*-{
     this.log && this.log.apply(this, args);
   }-*/;
 
@@ -122,7 +122,7 @@ public class JsConsole extends JavaScriptObject {
    *   {@link #log(JsArrayMixed) log}(JsMixedArray.create().add("Event object: ").add(event))
    * </pre>
    */
-  public final <A extends JsArrayMixed> void log(Level level, A args) {
+  public final <A extends JavaScriptObject> void log(Level level, A args) {
     log(level.getJsMethodName(), args);
   }
 
@@ -136,11 +136,11 @@ public class JsConsole extends JavaScriptObject {
   /**
    * @return {@code true} iff this browser's console implementation supports the logging method corresponding the given verbosity level.
    */
-  private final native boolean supports(String level) /*-{
+  private native boolean supports(String level) /*-{
     return !!this[level];
   }-*/;
 
-  private final native <A extends JsArrayMixed> void log(String level, A args) /*-{
+  private native <A extends JavaScriptObject> void log(String level, A args) /*-{
     var method = this[level] ? this[level] : this.log; // fall back on the log method
     method && method.apply(this, args);  // NOTE: we use method.apply because in Chromium 35 can't invoke console methods through a variable (see https://gist.github.com/euank/7523581)
   }-*/;

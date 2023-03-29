@@ -49,7 +49,7 @@ public class JsStringArray extends JsArrayString {
   /**
    * @return a new instance containing the same elements as the given Java array
    */
-  public static JsStringArray create(String[] arr) {
+  public static JsStringArray create(String... arr) {
     return JsUtils.toJsArray(arr).cast();
   }
 

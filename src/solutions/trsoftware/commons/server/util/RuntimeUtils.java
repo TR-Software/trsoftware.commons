@@ -16,7 +16,11 @@
 
 package solutions.trsoftware.commons.server.util;
 
+import solutions.trsoftware.commons.server.io.StringPrintStream;
+
+import javax.annotation.Nonnull;
 import java.lang.management.RuntimeMXBean;
+import java.lang.reflect.Method;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.concurrent.TimeoutException;
@@ -74,6 +78,54 @@ public class RuntimeUtils {
       }
     }
     return false;
+  }
+
+  /**
+   * Returns the string that would be printed by {@link Throwable#printStackTrace()} for the given exception.
+   *
+   * @param ex the exception whose stack trace is to be printed as a string
+   * @return the stack trace string
+   * @see #printStackTrace(Throwable, Method)
+   * @see #printStackTrace(Throwable, String, String)
+   */
+  public static String printStackTrace(Throwable ex) {
+    StringPrintStream out = new StringPrintStream();
+    ex.printStackTrace(out);
+    return out.toString();
+  }
+
+  /**
+   * Returns the string representation of a partial stack trace ending with the first occurrence (i.e. most-recent invocation)
+   * of the given method.
+   *
+   * @param ex the exception whose stack trace is to be printed as a string
+   * @param method the truncation point (inclusive)
+   * @return the partial stack trace string ending with the given method
+   * @see #printStackTrace(Throwable, String, String)
+   */
+  public static String printStackTrace(Throwable ex, Method method) {
+    return printStackTrace(ex, method.getDeclaringClass().getName(), method.getName());
+  }
+
+  /**
+   * Returns the string representation of a partial stack trace ending with the first occurrence (i.e. most-recent invocation)
+   * of the given method.
+   *
+   * @param ex the exception whose stack trace is to be printed as a string
+   * @param className the class name of the last stack trace element to print
+   * @param methodName the method name of the last stack trace element to print
+   * @return the partial stack trace string ending with the given method
+   * @see #printStackTrace(Throwable, Method)
+   */
+  @Nonnull
+  private static String printStackTrace(Throwable ex, String className, String methodName) {
+    String trace = printStackTrace(ex);
+    int iMethod = trace.indexOf(className + "." + methodName);
+    if (iMethod >= 0) {
+      int iNext = trace.indexOf("\tat ", iMethod);
+      return trace.substring(0, iNext >= 0 ? iNext : trace.length()).trim();
+    }
+    return trace;
   }
 
   /**

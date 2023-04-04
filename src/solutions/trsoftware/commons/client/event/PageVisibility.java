@@ -20,8 +20,6 @@ import com.google.gwt.dom.client.Document;
 import com.google.gwt.event.shared.EventHandler;
 import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.user.client.Event;
-import solutions.trsoftware.commons.client.jso.JsDocument;
-import solutions.trsoftware.commons.client.jso.JsObject;
 
 /**
  * Entry point into the HTML5 "Page Visibility API", which can tell us whether the browser tab/window is currently visible.
@@ -30,7 +28,7 @@ import solutions.trsoftware.commons.client.jso.JsObject;
  * Use {@link #isSupported()} to check if the browser supports this API.
  *
  * @see <a href="https://docs.webplatform.org/wiki/dom/Document/visibilitychange">webplatform.org Reference</a>
- * @see <a href="https://developer.mozilla.org/en-US/docs/Web/Guide/User_experience/Using_the_Page_Visibility_API">Mozilla Reference</a>
+ * @see <a href="https://developer.mozilla.org/en-US/docs/Web/API/Page_Visibility_API">MDN reference</a>
  * @see <a href="http://caniuse.com/#feat=pagevisibility">Browser support for this feature</a>
  * @see <a href="http://ie.microsoft.com/testdrive/Performance/PageVisibility/Default.html">Test Page</a>
  *
@@ -51,18 +49,41 @@ public class PageVisibility {
   }
 
   /**
-   * @return true if the current browser supports this API
+   * @return true if the browser supports this API (specifically, iff the {@code document} object has a 
+   * {@code visibilityState} property).
+   *
+   * @see <a href="https://developer.mozilla.org/en-US/docs/Web/API/Document/visibilityState">
+   *   Document.visibilityState on MDN</a>
    */
-  public static boolean isSupported() {
-    return JsDocument.get().<JsObject>cast().hasKey("hidden");
-  }
+  public static native boolean isSupported() /*-{
+    return $doc.visibilityState !== undefined
+  }-*/;
 
   /**
-   * @return false if the page is currently hidden or if the current browser doesn't support this API
+   * Returns {@code true} iff the value of the document's {@code visibilityState} property is {@code "hidden"}.
+   * <p>
+   * NOTE: a return value of {@code false} could also mean that the browser doesn't support the Page Visibility API;
+   * use {@link #isSupported()} to disambiguate.
+   *
+   * @see <a href="https://developer.mozilla.org/en-US/docs/Web/API/Document/visibilityState">
+   *   Document.visibilityState on MDN</a>
    */
-  public static boolean isHidden() {
-    return JsDocument.get().<JsObject>cast().getBoolean("hidden");
-  }
+  public static native boolean isHidden() /*-{
+    return $doc.visibilityState === "hidden"
+  }-*/;
+
+  /**
+   * Returns {@code true} iff the value of the document's {@code visibilityState} attribute is {@code "visible"}.
+   * <p>
+   * NOTE: a return value of {@code false} could also mean that the browser doesn't support the Page Visibility API;
+   * use {@link #isSupported()} to disambiguate.
+   *
+   * @see <a href="https://developer.mozilla.org/en-US/docs/Web/API/Document/visibilityState">
+   *   Document.visibilityState on MDN</a>
+   */
+  public static native boolean isVisible() /*-{
+    return $doc.visibilityState === "visible"
+  }-*/;
 
   /**
    * Attaches the given handler to the the {@code document} element, the caller must remember to remove the handler
@@ -72,6 +93,7 @@ public class PageVisibility {
   public static <H extends ChangeHandler> HandlerRegistration addVisibilityChangeHandler(final H handler) {
     if (!isSupported())
       return null;
+    // TODO(3/31/2023): does GWT support a native way to add event listener to an arbitrary EventTarget object?  (i.e. without our NativeEvents workaround)
     return new NativeEvents.ListenerRegistration(Document.get(), ChangeEvent.NAME, false) {
       @Override
       public void onBrowserEvent(Event event) {
@@ -83,7 +105,7 @@ public class PageVisibility {
   /**
    * Handler interface for {@link ChangeEvent} events.
    */
-  public static interface ChangeHandler extends EventHandler {
+  public interface ChangeHandler extends EventHandler {
     void onVisibilityChange(ChangeEvent event);
   }
 
@@ -111,6 +133,13 @@ public class PageVisibility {
      */
     public final boolean isHidden() {
       return PageVisibility.isHidden();
+    }
+
+    /**
+     * Shortcut for {@link PageVisibility#isVisible()}
+     */
+    public final boolean isVisible() {
+      return PageVisibility.isVisible();
     }
   }
 

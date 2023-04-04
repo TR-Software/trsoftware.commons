@@ -25,6 +25,7 @@ public abstract class CloseEvent extends JavaScriptObject {
 
     /**
      * The endpoint is going away, either because of a server failure or because the browser is navigating away from the page that opened the connection.
+     * This code is also used for WS session timeouts.
      */
     GOING_AWAY(1001),
 

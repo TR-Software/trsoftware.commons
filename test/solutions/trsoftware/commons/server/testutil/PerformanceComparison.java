@@ -96,18 +96,6 @@ public abstract class PerformanceComparison {
   }
 
 
-  public static abstract class NamedRunnable implements Runnable {
-    private String name;
-
-    protected NamedRunnable(String name) {
-      this.name = name;
-    }
-
-    public final String getName() {
-      return name;
-    }
-  }
-
   private static String getTaskName(Runnable task, String defaultName) {
     return firstNotBlank(task.getClass().getSimpleName(), defaultName);
   }

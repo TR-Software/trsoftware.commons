@@ -145,7 +145,7 @@ public class ListUtilsTest extends TestCase {
 
     for (int i = list.size(); i < list.size() + 3; i++) {
       // shouldn't modify the list if maxSize >= actual size
-      trimTail(list, i);
+      assertFalse(trimTail(list, i));
       assertEquals(originalList, list);
       assertEquals(19, (int)last(list));
     }
@@ -154,15 +154,15 @@ public class ListUtilsTest extends TestCase {
     assertEquals(19, (int)last(list));
 
     // now actually trim the list
-    trimTail(list, 15);
+    assertTrue(trimTail(list, 15));
     assertEquals(15, list.size());
     assertEquals(14, (int)last(list));
 
-    trimTail(list, 1);
+    assertTrue(trimTail(list, 1));
     assertEquals(1, list.size());
     assertEquals(0, (int)last(list));
 
-    trimTail(list, 0);
+    assertTrue(trimTail(list, 0));
     assertTrue(list.isEmpty());
   }
 }

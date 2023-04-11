@@ -24,6 +24,7 @@ import junit.framework.TestCase;
 import solutions.trsoftware.commons.server.servlet.testutil.DummyHttpServletRequest;
 import solutions.trsoftware.commons.server.servlet.testutil.LiveServletTestCase;
 import solutions.trsoftware.commons.server.testutil.EmbeddedTomcatServer;
+import solutions.trsoftware.commons.server.testutil.NamedRunnable;
 import solutions.trsoftware.commons.server.testutil.PerformanceComparison;
 import solutions.trsoftware.commons.shared.annotations.Slow;
 import solutions.trsoftware.commons.shared.testutil.AssertUtils;
@@ -265,13 +266,13 @@ public class ServletUtilsTest extends TestCase {
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
       Integer nReads = getRequiredParameter(req, "nReads", Integer::parseInt);
       double multiplier = PerformanceComparison.compare(
-          new PerformanceComparison.NamedRunnable("getRequestURL(cache=true)") {
+          new NamedRunnable("getRequestURL(cache=true)") {
             @Override
             public void run() {
               ServletUtils.getRequestURL(req, true);
             }
           },
-          new PerformanceComparison.NamedRunnable("getRequestURL(cache=false)") {
+          new NamedRunnable("getRequestURL(cache=false)") {
             @Override
             public void run() {
               ServletUtils.getRequestURL(req, false);

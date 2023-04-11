@@ -18,7 +18,9 @@ package solutions.trsoftware.commons.shared.util.function;
 
 import solutions.trsoftware.commons.shared.util.callables.FunctionN;
 
+import java.util.Map;
 import java.util.function.*;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 /**
@@ -164,6 +166,23 @@ public class FunctionalUtils {
    */
   public static <T> Runnable partial(Consumer<T> fun, T t) {
     return () -> fun.accept(t);
+  }
+
+  /**
+   * Returns a merge function, suitable for use in
+   * {@link Map#merge(Object, Object, BiFunction) Map.merge()} or
+   * {@link Collectors#toMap(Function, Function, BinaryOperator) toMap()}, which always
+   * throws {@code IllegalStateException}.  This can be used to enforce the
+   * assumption that the elements being collected are distinct.
+   *
+   * @param <T> the type of input arguments to the merge function
+   * @return a merge function which always throw {@code IllegalStateException}
+   */
+  public static <T> BinaryOperator<T> throwingMerger() {
+    // NOTE: this is an exact copy of the private method java.util.stream.Collectors.throwingMerger
+    return (u,v) -> {
+      throw new IllegalStateException("Duplicate key: " + u);
+    };
   }
 
   // TODO: unit test this class

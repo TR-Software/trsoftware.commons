@@ -291,12 +291,16 @@ public class ListUtils {
    * Removes elements from the tail of the list until its size is &le; {@code maxSize}.
    *
    * @param maxSize the max number of elements to keep in the original list
+   * @return {@code true} iff the list was modified
    */
-  public static <T> void trimTail(List<T> list, int maxSize) {
+  public static boolean trimTail(List<?> list, int maxSize) {
     assert maxSize >= 0;
     if (list.size() > maxSize) {
       list.subList(maxSize, list.size()).clear();
+      assert list.size() == maxSize;
+      return true;
     }
+    return false;
   }
 
   /**

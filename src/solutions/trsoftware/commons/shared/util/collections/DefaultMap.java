@@ -16,10 +16,11 @@
 
 package solutions.trsoftware.commons.shared.util.collections;
 
-import java.util.Collection;
+import com.google.common.collect.ForwardingMap;
+
 import java.util.LinkedHashMap;
 import java.util.Map;
-import java.util.Set;
+import java.util.function.Supplier;
 
 /**
  * Decorates a {@link Map} such that {@link #get(Object)} inserts the result of {@link #computeDefault(Object)}
@@ -27,42 +28,28 @@ import java.util.Set;
  * <p>
  * NOTE: Java 8 provides a new method that serves a similar purpose: {@link Map#computeIfAbsent}
  *
+ * @see #fromSupplier(Supplier)
  * @author Alex, 2/24/2016
  */
-public abstract class DefaultMap<K, V> implements Map<K, V> {
+public abstract class DefaultMap<K, V> extends ForwardingMap<K, V> {
 
   private final Map<K,V> delegate;
 
   protected DefaultMap() {
-    this(new LinkedHashMap<K, V>());
+    this(new LinkedHashMap<>());
   }
 
   protected DefaultMap(Map<K, V> delegate) {
     this.delegate = delegate;
   }
 
+  @Override
+  protected Map<K, V> delegate() {
+    return delegate;
+  }
+
   /** Compute the default value for the given key */
   public abstract V computeDefault(K key);
-
-  @Override
-  public int size() {
-    return delegate.size();
-  }
-
-  @Override
-  public boolean isEmpty() {
-    return delegate.isEmpty();
-  }
-
-  @Override
-  public boolean containsKey(Object key) {
-    return delegate.containsKey(key);
-  }
-
-  @Override
-  public boolean containsValue(Object value) {
-    return delegate.containsValue(value);
-  }
 
   @Override
   @SuppressWarnings("unchecked")
@@ -77,51 +64,17 @@ public abstract class DefaultMap<K, V> implements Map<K, V> {
     return delegate.get(key);
   }
 
-  public V put(K key, V value) {
-    return delegate.put(key, value);
+  public static <K, V> DefaultMap<K, V> fromSupplier(Supplier<V> defaultValueSupplier) {
+    return fromSupplier(new LinkedHashMap<>(), defaultValueSupplier);
   }
 
-  @Override
-  public V remove(Object key) {
-    return delegate.remove(key);
+  public static <K, V> DefaultMap<K, V> fromSupplier(Map<K, V> delegate, Supplier<V> defaultValueSupplier) {
+    return new DefaultMap<K, V>(delegate) {
+      @Override
+      public V computeDefault(K key) {
+        return defaultValueSupplier.get();
+      }
+    };
   }
 
-  public void putAll(Map<? extends K, ? extends V> m) {
-    delegate.putAll(m);
-  }
-
-  @Override
-  public void clear() {
-    delegate.clear();
-  }
-
-  @Override
-  public Set<K> keySet() {
-    return delegate.keySet();
-  }
-
-  @Override
-  public Collection<V> values() {
-    return delegate.values();
-  }
-
-  @Override
-  public Set<Entry<K, V>> entrySet() {
-    return delegate.entrySet();
-  }
-
-  @Override
-  public boolean equals(Object o) {
-    return delegate.equals(o);
-  }
-
-  @Override
-  public int hashCode() {
-    return delegate.hashCode();
-  }
-
-  @Override
-  public String toString() {
-    return delegate.toString();
-  }
 }

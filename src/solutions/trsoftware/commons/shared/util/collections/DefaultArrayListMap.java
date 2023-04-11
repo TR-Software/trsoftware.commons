@@ -21,6 +21,7 @@ import com.google.common.collect.Multimap;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Supplier;
 
 /**
  * An implementation of {@link DefaultMap} that inserts a new instance of {@link ArrayList} when {@link #get(Object)}
@@ -29,6 +30,7 @@ import java.util.Map;
  * <p style="font-style: italic;">
  *   NOTE: this is similar to (but not quite the same as) Guava's {@link Multimap}.
  * </p>
+ * @see DefaultMap#fromSupplier(Supplier)
  */
 public class DefaultArrayListMap<K, V> extends DefaultMap<K, List<V>> {
 

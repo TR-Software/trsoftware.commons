@@ -9,6 +9,7 @@ import com.google.gwt.user.server.rpc.SerializationPolicy;
 import org.apache.catalina.Context;
 import solutions.trsoftware.commons.client.bridge.rpc.NumberFormatTestService;
 import solutions.trsoftware.commons.client.server.MockRpcService;
+import solutions.trsoftware.commons.shared.annotations.Slow;
 import solutions.trsoftware.commons.shared.util.RandomUtils;
 import solutions.trsoftware.commons.shared.util.StringUtils;
 import solutions.trsoftware.commons.shared.util.function.ThrowingFunction;
@@ -29,6 +30,7 @@ import static solutions.trsoftware.commons.shared.testutil.AssertUtils.assertThr
  * @author Alex
  * @since 3/8/2023
  */
+@Slow
 public class SerializationPolicyCacheTest extends SerializationPolicyMapTestCase {
 
   private Context combinedApp;

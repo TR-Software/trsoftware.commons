@@ -54,7 +54,11 @@ public class SimpleSerializationPolicy extends SerializationPolicy {
 
   @Override
   public void validateSerialize(Class<?> clazz) throws SerializationException {
-    // TODO: should this method do anything?;
+    // TODO: should this method do anything?
   }
 
+  @Override
+  public String toString() {
+    return getClass().getSimpleName() + "/" + hashCode();
+  }
 }

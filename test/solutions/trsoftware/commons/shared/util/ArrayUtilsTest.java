@@ -21,54 +21,12 @@ import junit.framework.TestCase;
 import java.util.Arrays;
 import java.util.function.Supplier;
 
-import static org.junit.Assert.assertArrayEquals;
 import static solutions.trsoftware.commons.shared.testutil.AssertUtils.assertArraysEqual;
 import static solutions.trsoftware.commons.shared.testutil.AssertUtils.assertThrows;
 import static solutions.trsoftware.commons.shared.util.ArrayUtils.*;
 
+@SuppressWarnings("SimplifiableJUnitAssertion")
 public class ArrayUtilsTest extends TestCase {
-
-  public void testFlexibleArrayAdd() {
-    assertArrayEquals(new String[]{"a", "b", "c", "d"},
-        flexibleArrayAdd(new String[]{"a", "b", "c"}, 3, "d"));
-    assertArrayEquals(new String[]{"a", "b", "c", null, "d"},
-        flexibleArrayAdd(new String[]{"a", "b", "c"}, 4, "d"));
-    assertArrayEquals(new String[]{null, null, null, "d"},
-        flexibleArrayAdd(null, 3, "d"));
-    assertArrayEquals(new String[]{"a", "b", "d"},
-        flexibleArrayAdd(new String[]{"a", "b", "c"}, 2, "d"));
-  }
-
-  public void testFlexibleArrayPrimitiveFloat() {
-    // start with an empty array and test a few base cases, and the rest will follow
-    // by induction
-    float[] a = new float[0];
-    int i = 0;
-    a = flexibleArrayAdd(a, i++, 1f);
-    assertEquals(2, a.length);  // should have been grown to size max(2, ceil(1.5*length)) => 2
-    assertTrue(Arrays.equals(new float[]{1f,0f}, a));
-
-    a = flexibleArrayAdd(a, i++, 2f);
-    assertEquals(2, a.length);  // should still be the same size as before
-    assertTrue(Arrays.equals(new float[]{1,2}, a));
-
-    a = flexibleArrayAdd(a, i++, 3f);
-    assertEquals(3, a.length);  // should have been grown to size max(2, ceil(1.5*length)) => 3
-    assertTrue(Arrays.equals(new float[]{1,2,3}, a));
-
-    a = flexibleArrayAdd(a, i++, 4f);
-    assertEquals(5, a.length);  // should have been grown to size max(2, ceil(1.5*length)) => 5
-    assertTrue(Arrays.equals(new float[]{1,2,3,4,0}, a));
-
-    a = flexibleArrayAdd(a, i++, 5f);
-    assertEquals(5, a.length);  // should still be the same size as before
-    assertTrue(Arrays.equals(new float[]{1,2,3,4,5}, a));
-
-    a = flexibleArrayAdd(a, i++, 6f);
-    assertEquals(8, a.length);  // should have been grown to size max(2, ceil(1.5*length)) => 8
-    assertTrue(Arrays.equals(new float[]{1,2,3,4,5,6,0,0}, a));
-    // we assume the rest is correct by induction
-  }
 
   public void testFilterIntArray() {
     assertTrue(Arrays.equals(
@@ -99,23 +57,35 @@ public class ArrayUtilsTest extends TestCase {
   }
 
   public void testConcat() throws Exception {
-    String[] result = concat(
+    assertArraysEqual(new String[]{"a", "b", "c", "d"}, concat(
         new String[]{"a"},
         new String[]{"b", "c"},
         new String[]{},
         new String[]{"d"},
         new String[]{}
-    );
-    assertTrue(Arrays.equals(new String[]{"a", "b", "c", "d"}, result));
+    ));
+    // test some edge cases
+    assertArraysEqual(new String[]{"a", "b", "c", "d"},
+        concat(new String[]{"a", "b", "c", "d"}));  // only 1 input
+    assertArraysEqual(new String[]{},
+        concat(new String[]{}));  // empty array
+    assertArraysEqual(new String[]{},
+        concat(new String[]{}, new String[]{}));  // empty arrays
+
+    //noinspection Convert2MethodRef
+    assertThrows(IllegalArgumentException.class, () -> concat());
   }
 
-  public void testInterleave() throws Exception {
-    String[] result = interleave(
-        new String[]{"a", "b"},
-        new String[]{"c", "d", "e"},
-        new String[]{"f"}
-    );
-    assertTrue(Arrays.equals(new String[]{"a", "c", "f", "b", "d", "e"}, result));
+  public void testAppend() throws Exception {
+    assertArraysEqual(new String[]{"a", "b", "c"},
+        append(new String[]{"a", "b"}, "c"));
+    assertArraysEqual(new String[]{"a", "b", "c", "d"},
+        append(new String[]{"a", "b"}, "c", "d"));
+    // test some edge cases
+    assertArraysEqual(new String[]{"a"},
+        append(new String[]{}, "a"));
+    assertArraysEqual(new String[]{},
+        append(new String[]{}));
   }
 
   public void testUnbox() throws Exception {
@@ -196,12 +166,6 @@ public class ArrayUtilsTest extends TestCase {
     assertTrue(contains(new int[]{1, 2}, 1));
     assertTrue(contains(new int[]{1, 2}, 2));
     assertTrue(contains(new int[]{1}, 1));
-  }
-
-  public void testSlice() throws Exception {
-    assertEquals(Arrays.asList("c", "d", "e"), slice(new String[]{"a", "b", "c", "d", "e", "f"}, 2, 4));
-    assertEquals(Arrays.asList("e", "f"), slice(new String[]{"a", "b", "c", "d", "e", "f"}, 4, 5));
-    assertEquals(Arrays.asList("a"), slice(new String[]{"a", "b", "c", "d", "e", "f"}, 0, 0));
   }
 
   public void testGetLast() throws Exception {

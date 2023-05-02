@@ -20,8 +20,6 @@ import com.google.gwt.core.client.JavaScriptException;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.LinkedList;
-import java.util.List;
 import java.util.function.IntFunction;
 import java.util.function.IntPredicate;
 import java.util.function.Predicate;
@@ -38,17 +36,9 @@ import java.util.stream.Stream;
 public class ArrayUtils {
 
   /**
-   * Like {@link Arrays#toString(Object[])}, but omits the enclosing brackets and allows using a custom delimiter.
-   * @return a string representation of the given array, constructed by joining the elements using the given delimiter
-   * @deprecated use {@link StringUtils#join(String, Object[])} instead.
-   */
-  public static <T> String toString(T[] array, String delimiter) {
-    return StringUtils.join(delimiter, array);
-  }
-
-  /**
    * Like {@link Arrays#toString(int[])}, but omits the enclosing brackets and allows using a custom delimiter.
    * @return a string representation of the given array, constructed by joining the elements using the given delimiter
+   *
    * @deprecated use {@link StringUtils#join(String, int...)}
    */
   public static String toString(int[] array, String delimiter) {
@@ -165,127 +155,31 @@ public class ArrayUtils {
   // TODO: consider adding symmetric lastIndexOf methods for all the indexOf methods (see com.google.common.primitives.Ints.lastIndexOf(int[], int) for example)
 
   /**
-   * Returns <tt>true</tt> if the two specified arrays of ints are
-   * <i>equal</i> to one another.  Two arrays are considered equal if both
-   * arrays contain the same number of elements, and all corresponding pairs
-   * of elements in the two arrays are equal.  In other words, two arrays
-   * are equal if they contain the same elements in the same order.  Also,
-   * two array references are considered equal if both are <tt>null</tt>.<p>
-   *
-   * @param a one array to be tested for equality.
-   * @param a2 the other array to be tested for equality.
-   * @return <tt>true</tt> if the two arrays are equal.
-   * @deprecated can now use {@link Arrays#equals(int[], int[])} in GWT
-   */
-  public static boolean equals(int[] a, int[] a2) {
-      if (a==a2)
-          return true;
-      if (a==null || a2==null)
-          return false;
-
-      int length = a.length;
-      if (a2.length != length)
-          return false;
-
-      for (int i=0; i<length; i++)
-          if (a[i] != a2[i])
-              return false;
-
-      return true;
-  }
-
-
-  /**
-   * Inserts the given entry into the given array at the given index,
-   * if necessary, losslessly resizing the array.
-   *
-   * Note: this method exists only to support hosted mode execution in java,
-   * and is not needed in javascript since JS arrays are dynamic.
-   *
-   * @return The reference to the same array if it wasn't resized or a new
-   * one if it was.
-   * @deprecated
-   */
-  public static <T> T[] flexibleArrayAdd(T[] array, int index, T value) {
-    // can't instantiate T[] directly, so going through an intermediate ArrayList
-    // TODO(12/16/2019): can use Arrays.copyOf(T[], int) and System.arraycopy() to avoid using an intermediate list
-    if (array == null || index >= array.length) {
-      ArrayList<T> newArrayList = new ArrayList<T>(index+1);
-      // must append nulls to the array list since the index is greater than its size
-      for (int i = 0; i < index; i++) {
-        newArrayList.add(array != null && i < array.length ? array[i] : null);
-      }
-      newArrayList.add(value);
-      return (T[])newArrayList.toArray();
-    }
-    else {
-      // TODO(1/3/2022): potential bug: this overwrites the existing element at array[index]
-      array[index] = value;
-      return array;
-    }
-  }
-
-  /**
-   * Adds the given element to the given primitive array at the given index.
-   * The index should represent the next available empty slot in the given array.
-   * If the array is already full, creates a new one 1.5 the size and copies all
-   * the elements into it before doing the addition.
-   *
-   * This method can be used to implement auto-resizing collections of primitives
-   * (e.g. ArrayList<Float> except using primitives).
-   *
-   * @return the new array after the insertion (may or may not be the same one
-   * as was given)
-   */
-  public static float[] flexibleArrayAdd(float[] array, int index, float value) {
-    if (index >= array.length) {
-      // must grow the array
-      float[] newArray = new float[(int)Math.max(2, Math.ceil(1.5 * array.length))];
-      // copy all the existing elements to the new array
-      System.arraycopy(array, 0, newArray, 0, array.length);
-      array = newArray;
-    }
-    // TODO(1/3/2022): potential bug: this overwrites the existing element at array[index]
-    array[index] = value;
-    return array;
-  }
-
-  /**
    * Merges the given arrays into one.
-   * @return the new array containing all the elements of the given arrays
+   *
+   * @return a new array containing all the elements of the given arrays
    */
+  @SafeVarargs
   public static <T> T[] concat(T[]... arrays) {
-    // can't instantiate T[] directly, so going through an intermediate list
-    // TODO(12/16/2019): can use Arrays.copyOf(T[], int) to avoid using an intermediate list
-    LinkedList<T> list = new LinkedList<T>();
-    for (T[] array : arrays) {
-      for (T elt : array) {
-        list.addLast(elt);
-      }
+    if (arrays.length == 0)
+      throw new IllegalArgumentException("At least 1 input array expected");
+    int newLength = Arrays.stream(arrays).mapToInt(a -> a.length).sum();
+    T[] ret = Arrays.copyOf(arrays[0], newLength);
+    int cursor = arrays[0].length;
+    for (int i = 1; i < arrays.length; i++) {
+      T[] arr = arrays[i];
+      System.arraycopy(arr, 0, ret, cursor, arr.length);
+      cursor += arr.length;
     }
-    return list.toArray(arrays[0]);  // use the first array the typecast "hint" (the no-arg version of toArray will not work to get T[] back)
+    return ret;
   }
 
   /**
-   * Interleaves the arrays: [a1, b1, c1] + [a2, b2, c2] => [a1, a2, b1, b2, c1, c2]
+   * Creates a new array representing a copy of {@code arr} with the given elements appended at the end.
    */
-  public static <T> T[] interleave(T[]... arrays) {
-    // can't instantiate T[] directly, so going through an intermediate list
-    // TODO(12/16/2019): can use Arrays.copyOf(T[], int) to avoid using an intermediate list
-    LinkedList<T> list = new LinkedList<T>();
-    boolean allTapped;
-    int i = 0;
-    do {
-      allTapped = true;
-      for (T[] array : arrays) {
-        if (array.length > i) {
-          list.add(array[i]);
-          allTapped = false;
-        }
-      }
-      i++;
-    } while (!allTapped);
-    return list.toArray(arrays[0]);  // use the first array the typecast "hint" (the no-arg version of toArray will not work to get T[] back)
+  @SafeVarargs
+  public static <T> T[] append(T[] arr, T... newElements) {
+    return concat(arr, newElements);
   }
 
   /**
@@ -412,19 +306,6 @@ public class ArrayUtils {
     for (int i = 0; i < ret.length; i++) {
       ret[i] = arr[i];
     }
-    return ret;
-  }
-
-  /**
-   * Returns a List with the selected (endIndex - startIndex + 1) elements
-   * of the given array.
-   *
-   * @deprecated
-   * @see Arrays#copyOfRange(Object[], int, int)
-   */
-  public static <T> List<T> slice(T[] arr, int startIndex, int endIndex) {
-    ArrayList<T> ret = new ArrayList<T>(endIndex - startIndex + 1);
-    ret.addAll(Arrays.asList(arr).subList(startIndex, endIndex + 1));
     return ret;
   }
 

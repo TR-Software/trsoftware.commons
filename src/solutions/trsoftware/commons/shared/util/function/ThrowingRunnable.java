@@ -17,10 +17,7 @@
 package solutions.trsoftware.commons.shared.util.function;
 
 /**
- * This interface facilitates the use of
- * {@link solutions.trsoftware.commons.shared.testutil.AssertUtils#assertThrows(Class, ThrowingRunnable)}.
- * It allows method references to void methods (that declare checked exceptions) to be passed directly into
- * {@code assertThrows} without wrapping. It is not meant to be implemented directly.
+ * This interface facilitates the use of method references for {@code void} methods that declare checked exceptions.
  *
  * @see ThrowingFunction
  */

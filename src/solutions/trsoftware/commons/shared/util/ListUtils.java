@@ -19,11 +19,14 @@ package solutions.trsoftware.commons.shared.util;
 import com.google.common.collect.Lists;
 import com.google.gwt.core.client.JavaScriptException;
 import solutions.trsoftware.commons.shared.util.collections.FluentList;
+import solutions.trsoftware.commons.shared.util.collections.SortedList;
 
 import javax.annotation.Nonnull;
 import java.util.*;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
+
+import static java.util.Objects.requireNonNull;
 
 /**
  * @author Alex
@@ -116,39 +119,103 @@ public class ListUtils {
   }
 
   /**
-   * Inserts an element into the given list, in ascending order.
-   * @param list should already be sorted
+   * Uses {@link Collections#binarySearch(List, Object)} to insert the given element into the given sorted list,
+   * at the appropriate position (as defined by the elements' {@linkplain Comparable natural ordering}).
+   *
+   * @param list a sorted list without any {@code null} elements
+   *   (failing to ensure either condition could result in non-deterministic behavior)
+   * @param newElement the element to be added to the list
    * @return A reference to the given list, to allow method chaining.
+   * @throws NullPointerException if the key is {@code null} or the list contains {@code null} elements (although
+   *    in the latter case, an exception is not guaranteed, depending on whether any {@code null} elements end up being
+   *    used as mid-points in the binary search)
+   * @see #findInsertionPoint(List, Comparable)
+   * @see SortedList
    */
   public static <T extends Comparable<T>> List<T> insertInOrder(List<T> list, T newElement) {
-    /*
-     * TODO: improve performance using Collections.binarySearch when list has non-trivial length
-     * Our current algorithm is O(n): uses a linear scan of the list
-     * We can achieve O(log n) with a binary search to find the proper insertion point in the list,
-     * using an algorithm similar to Python's bisect module (https://docs.python.org/2.7/library/bisect.html)
-     * Should be able to use Collections.binarySearch, which returns (-(insertion point) - 1) when key not found
-     * @see https://stackoverflow.com/questions/2945017/javas-equivalent-to-bisect-in-python
-     * @see https://www.geeksforgeeks.org/collections-binarysearch-java-examples/
-     *
-     * NOTE: could also roll our own "TreeSortedList" data structure using Guava's TreeMultiset for this (not random access),
-     * or "SortedArrayList" that uses the aforementioned binarySearch method (random access).
-     * @see https://stackoverflow.com/questions/8725387/why-is-there-no-sortedlist-in-java
-     */
-    ListIterator<T> listIterator = list.listIterator();
-    int index = -1;
-    while (listIterator.hasNext()) {
-      T currentElement = listIterator.next();
-      if (currentElement.compareTo(newElement) > 0) {
-        // insert before this element
-        index = listIterator.previousIndex();
-        break;
-      }
-    }
-    if (index == -1)
-      index = list.size();  // this element goes at the end of the list
-
-    list.add(index, newElement);  
+    int insertionPoint = findInsertionPoint(list, newElement);
+    list.add(insertionPoint, newElement);
     return list;
+  }
+
+  /**
+   * Uses {@link Collections#binarySearch(List, Object)} to insert the given element into a capacity-restricted
+   * sorted list at the appropriate position (as defined by the elements' {@linkplain Comparable natural ordering}).
+   * <p>
+   * If the {@linkplain #findInsertionPoint(List, Comparable) insertion point} is greater than {@code maxSize}, the list
+   * will not be modified.  If inserted, the list will be truncated to {@code maxSize}, if needed.
+   * <p>
+   * This operation is useful for maintaining data structures such as leaderboards of top N scores in a game.
+   *
+   * @param list a sorted list without any {@code null} elements
+   *   (failing to ensure either condition could result in non-deterministic behavior)
+   * @param newElement the element to be added to the list
+   * @param maxSize the maximum capacity of the list
+   * @return {@code true} if the list was modified.
+   * @throws NullPointerException if the key is {@code null} or the list contains {@code null} elements (although
+   *    in the latter case, an exception is not guaranteed, depending on whether any {@code null} elements end up being
+   *    used as mid-points in the binary search)
+   * @see #findInsertionPoint(List, Comparable)
+   * @see SortedList
+   */
+  public static <T extends Comparable<T>> boolean insertInOrder(List<T> list, T newElement, int maxSize) {
+    int insertionPoint = findInsertionPoint(list, newElement);
+    if (insertionPoint < maxSize) {
+      trimTail(list, maxSize - 1);
+      /* Note: As a perf optimization, we're truncating the list prior to the insertion; this reduces the number of
+         elements that need to be shifted to the right (e.g. if we're dealing with an ArrayList)
+       */
+      list.add(insertionPoint, newElement);
+      return true;
+    }
+    return false;
+  }
+
+  /**
+   * Uses {@link Collections#binarySearch(List, Object)} to find the insertion point of the given key into the given
+   * sorted list.
+   * <p>
+   * The <i>insertion point</i> is defined as the point at which the key would be inserted into the list:
+   * the index of the first element greater than the key, or {@code list.size()} if all elements in the list are
+   * less than the specified key.
+   * <p>
+   * If the list already contains one or more elements "equal" to the given key, the insertion point will be the next
+   * index following the last of such elements.  Such a scenario requires a sequential search over these adjacent
+   * elements, making the time complexity of this method O(n) instead of O(log n).
+   * <p>
+   * The list will not be modified by this method, and it's up to the caller to perform the actual insertion at the
+   * returned index, if desired.
+   *
+   * @param list a sorted list without any {@code null} elements
+   *   (failing to ensure either condition could result in non-deterministic behavior)
+   * @param key the key to be inserted
+   * @return the index of the first element greater than the key, or {@code list.size()}
+   *         if all elements in the list are less than the specified key.
+   * @throws NullPointerException if the key is {@code null} or the list contains {@code null} elements (although
+   *    in the latter case, an exception is not guaranteed, depending on whether any {@code null} elements end up being
+   *    used as mid-points in the binary search)
+   * @see #insertInOrder(List, Comparable)
+   * @see SortedList
+   */
+  public static <T extends Comparable<T>> int findInsertionPoint(List<T> list, T key) {
+    int index = Collections.binarySearch(list, requireNonNull(key, "key"));
+    if (index < 0) {
+      /* The list does not contain the key: a negative value returned by Collections.binarySearch
+         is defined as (-insertionPoint - 1) */
+      return -(index + 1);
+    }
+    /*
+     The list already contains one or more elements "equal" to the given key, but since Collections.binarySearch doesn't
+     guarantee which one is returned, we have to manually search through the adjacent indices to find the last one
+     */
+    ListIterator<T> it = list.listIterator(index);
+    while (it.hasNext()) {
+      T next = it.next();
+      if (next.compareTo(key) > 0)
+        return it.previousIndex();
+    }
+    // didn't find an element greater than the key; will return list.size()
+    return it.nextIndex();
   }
 
   /**
@@ -180,6 +247,45 @@ public class ListUtils {
     LinkedList<T> ret = new LinkedList<>();
     Collections.addAll(ret, elements);
     return ret;
+  }
+
+  /**
+   * Returns a new instance of {@link ArrayList} containing all the elements of the given lists, in the same order.
+   * @param inputs the lists to concatenate
+   * @return a new list representing the concatenation of the inputs
+   */
+  @SafeVarargs
+  public static <T> ArrayList<T> concat(List<T>... inputs) {
+    ArrayList<T> ret = new ArrayList<>();
+    // NOTE: ArrayList.addAll is more efficient than Collections.addAll
+    Arrays.stream(inputs).forEach(ret::addAll);
+    return ret;
+  }
+
+  /**
+   * Returns a new instance of {@link ArrayList} containing all the elements of the given lists, in the same order.
+   * @param inputs the lists to concatenate
+   * @return a new list representing the concatenation of the inputs
+   */
+  public static <T> ArrayList<T> concat(List<T> first, List<T> second) {
+    // this provides a more efficient implementation of concat(java.util.List[]) when there are only 2 inputs
+    // by ensuring that the ArrayList won't have to grow
+    ArrayList<T> ret = new ArrayList<>(first.size() + second.size());
+    ret.addAll(first);
+    ret.addAll(second);
+    return ret;
+  }
+
+  /**
+   * Adds the given element to the given list (using {@link List#add(Object)}) and returns the same list instance
+   * to facilitate call chaining.
+   *
+   * @param inputs the lists to concatenate
+   * @return a new list representing the concatenation of the inputs
+   */
+  public static <L extends List<E>, E> L append(L list, E element) {
+    list.add(element);
+    return list;
   }
 
   /**
@@ -295,8 +401,17 @@ public class ListUtils {
    */
   public static boolean trimTail(List<?> list, int maxSize) {
     assert maxSize >= 0;
-    if (list.size() > maxSize) {
-      list.subList(maxSize, list.size()).clear();
+    int size = list.size();
+    if (size > maxSize) {
+      // newSize == maxSize+1, can just call remove(maxSize)
+      if (size == maxSize + 1) {
+        // optimize the most-common use-case: last element of list being evicted; no need to create intermediate subList
+        list.remove(maxSize);
+      } else {
+        // otherwise, going through a subList could be more efficient (e.g. if list is subclass of AbstractList,
+        // this can take advantage of a fast AbstractList.removeRange implementation; see ArrayList.removeRange)
+        list.subList(maxSize, size).clear();
+      }
       assert list.size() == maxSize;
       return true;
     }

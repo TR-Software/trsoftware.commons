@@ -25,9 +25,9 @@ import com.google.gwt.user.server.rpc.impl.DequeMap;
 import com.google.gwt.user.server.rpc.impl.SerializabilityUtil;
 import com.google.gwt.user.server.rpc.impl.ServerSerializationStreamReader;
 import com.google.gwt.user.server.rpc.impl.ServerSerializationStreamWriter;
-import solutions.trsoftware.commons.shared.testutil.MockSerializationStreamReader;
-import solutions.trsoftware.commons.shared.testutil.MockSerializationStreamWriter;
 import solutions.trsoftware.commons.shared.testutil.rpc.CustomFieldSerializerFactory;
+import solutions.trsoftware.commons.shared.testutil.rpc.MockSerializationStreamReader;
+import solutions.trsoftware.commons.shared.testutil.rpc.MockSerializationStreamWriter;
 import solutions.trsoftware.commons.shared.testutil.rpc.VectorWriter;
 import solutions.trsoftware.commons.shared.util.MapUtils;
 
@@ -83,7 +83,7 @@ public class CustomFieldSerializerFactoryByReflection extends CustomFieldSeriali
     Class<?> customSerializerClass = SerializabilityUtil.hasCustomFieldSerializer(instanceClass);
     CustomFieldSerializer<?> customFieldSerializer = null;
     if (customSerializerClass != null) {
-      // Use custom field serializer
+      // Use custom field serializer if available
       customFieldSerializer = loadCustomFieldSerializer(customSerializerClass);
       if (customFieldSerializer == null) {
         customFieldSerializer = new LegacySerializerWrapper(customSerializerClass, instanceClass);

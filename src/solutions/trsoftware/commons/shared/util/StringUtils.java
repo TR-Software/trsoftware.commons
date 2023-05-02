@@ -47,8 +47,10 @@ public class StringUtils {
   public static final char MAX_PRINTABLE_ASCII_CHAR = '~';
   /** The alphabet {@code [A-Za-z]} */
   public static final String ASCII_LETTERS = new CharRange('A', 'Z').toString() + new CharRange('a', 'z').toString();
+  /** The alphabet {@code [0-9]} */
+  public static final String ASCII_NUMBERS = new CharRange('0', '9').toString();
   /** The alphabet {@code [A-Za-z0-9]} */
-  public static final String ASCII_LETTERS_AND_NUMBERS = ASCII_LETTERS + new CharRange('0', '9').toString();
+  public static final String ASCII_LETTERS_AND_NUMBERS = ASCII_LETTERS + ASCII_NUMBERS;
   /** The alphabet of all printable {@code ASCII} chars */
   public static final String ASCII_PRINTABLE_CHARS = new CharRange(MIN_PRINTABLE_ASCII_CHAR, MAX_PRINTABLE_ASCII_CHAR).toString();
 
@@ -705,6 +707,14 @@ public class StringUtils {
    */
   public static String methodCallToString(String methodName, Object... args) {
     return methodName + tupleToString(args);
+  }
+
+  /**
+   * Useful for printing debug info.
+   * @return a string that looks like {@code "ClassName.methodName(arg1, arg2, ...)"}
+   */
+  public static String methodCallToString(Class<?> cls, String methodName, Object... args) {
+    return methodCallToString(cls.getSimpleName() + "." + methodName, args);
   }
 
   /**

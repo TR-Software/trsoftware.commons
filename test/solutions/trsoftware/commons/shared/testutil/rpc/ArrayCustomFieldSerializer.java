@@ -4,8 +4,6 @@ import com.google.gwt.user.client.rpc.CustomFieldSerializer;
 import com.google.gwt.user.client.rpc.SerializationException;
 import com.google.gwt.user.client.rpc.SerializationStreamReader;
 import com.google.gwt.user.client.rpc.SerializationStreamWriter;
-import solutions.trsoftware.commons.shared.testutil.MockSerializationStreamReader;
-import solutions.trsoftware.commons.shared.testutil.MockSerializationStreamWriter;
 
 import java.util.function.IntFunction;
 

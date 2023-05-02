@@ -28,6 +28,7 @@ import solutions.trsoftware.commons.shared.util.reflect.ClassNameParser;
 
 import java.io.File;
 import java.io.Serializable;
+import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Type;
 import java.nio.file.FileSystemNotFoundException;
@@ -379,6 +380,49 @@ public class ReflectionUtilsTest extends TestCase {
   public void testIsJunitTestCase() throws Exception {
     assertTrue(isJunit3TestCase(getClass()));  // this class is a unit test
     assertFalse(isJunit3TestCase(ReflectionUtils.class));  // but ReflectionUtils is not
+  }
+
+  public void testGetAllDeclaredFields() throws Exception {
+    // 1) test some edge cases
+    assertEquals(Collections.emptySet(), getAllDeclaredFields(int.class));  // primitive
+    assertEquals(Collections.emptySet(), getAllDeclaredFields(Object.class));  // Object has no fields
+    assertEquals(Collections.emptySet(), getAllDeclaredFields(Sub[].class));  // array
+
+    // 2) test with the classes in our dummy hierarchy
+    LinkedHashSet<Field> baseFields = SetUtils.newSet(
+        Base.class.getDeclaredField("a"),
+        Base.class.getDeclaredField("b")
+    );
+    LinkedHashSet<Field> subFields = SetUtils.newSet(
+        Sub.class.getDeclaredField("c"),
+        Sub.class.getDeclaredField("d")
+    );
+    Set<Field> allFields = SetUtils.union(baseFields, subFields);
+    assertEquals(baseFields, getAllDeclaredFields(Base.class));
+    assertEquals(allFields, getAllDeclaredFields(Sub.class));
+
+    // Note: inner classes have an additional synthetic field "this$0"
+    class InnerSub extends Sub {
+      private Object e;
+    }
+    LinkedHashSet<Field> innerSubFields = SetUtils.newSet(
+        InnerSub.class.getDeclaredField("e"),
+        InnerSub.class.getDeclaredField("this$0"));
+    assertEquals(SetUtils.union(allFields, innerSubFields),
+        getAllDeclaredFields(InnerSub.class));
+  }
+
+  private static class Base {
+    public int a;
+    private int b;
+
+    public int sum() {
+      return a + b;
+    }
+  }
+
+  private static class Sub extends Base {
+    private int c, d;
   }
 
   private static class NestedClass {}

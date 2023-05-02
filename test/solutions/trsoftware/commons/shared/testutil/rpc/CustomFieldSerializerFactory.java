@@ -19,7 +19,6 @@ package solutions.trsoftware.commons.shared.testutil.rpc;
 import com.google.common.collect.ImmutableMap;
 import com.google.gwt.user.client.rpc.CustomFieldSerializer;
 import com.google.gwt.user.client.rpc.SerializationException;
-import solutions.trsoftware.commons.shared.testutil.MockSerializationStreamWriter;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;

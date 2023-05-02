@@ -40,12 +40,7 @@ public class StreamingSelectionEvaluator extends
   public StreamingRelation call(Relation input) {
     return new StreamingRelation(op.getOutputSchema(),
         new TransformingIterator<Row, Row>(
-            new PredicatedIterator<Row>(input.iterator(), new Predicate<Row>() {
-              @Override
-              public boolean apply(Row item) {
-                return op.getParams().apply(item);
-              }}) {
-            }) {
+            new PredicatedIterator<>(input.iterator(), (Predicate<Row>)item -> op.getParams().apply(item))) {
           @Override
           protected Row transform(Row inputRow) {
             return op.call(inputRow);

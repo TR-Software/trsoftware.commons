@@ -129,7 +129,7 @@ public abstract class ReflectionUtils {
    *     with the given args
    * @throws IllegalArgumentException if any exception was thrown by {@link Class#getConstructor(Class[])}
    */
-  public static <T> FunctionN<T> newInstanceFactory(Class<T> cls, Class... constructorParamTypes) {
+  public static <T> FunctionN<T> newInstanceFactory(Class<T> cls, Class<?>... constructorParamTypes) {
     final Constructor<T> constructor = getConstructorUnchecked(cls, constructorParamTypes);
     return args -> {
       try {
@@ -151,7 +151,7 @@ public abstract class ReflectionUtils {
    * @throws IllegalArgumentException if any exception was thrown by {@link Class#getConstructor(Class[])}
    */
   @Nonnull
-  public static <T> Constructor<T> getConstructorUnchecked(Class<T> cls, Class... constructorParamTypes) {
+  public static <T> Constructor<T> getConstructorUnchecked(Class<T> cls, Class<?>... constructorParamTypes) {
     final Constructor<T> constructor;
     try {
       constructor = cls.getConstructor(constructorParamTypes);
@@ -685,7 +685,7 @@ public abstract class ReflectionUtils {
 
   /**
    * Calls {@link AccessibleObject#setAccessible(boolean) setAccessible(true)} on the given member if it's not
-   * already accessible.
+   * {@code public}.
    * @return the given argument (for call chaining)
    */
   public static <T extends AccessibleObject & Member> T ensureAccessible(T member) {
@@ -697,5 +697,25 @@ public abstract class ReflectionUtils {
       member.setAccessible(true);
     }
     return member;
+  }
+
+  /**
+   * Returns a new {@link LinkedHashSet} containing all {@linkplain Class#getDeclaredFields() declared fields} of the
+   * given class and all of its {@linkplain Class#getSuperclass() superclasses}.
+   * <p>
+   * If the given class is {@linkplain Class#isPrimitive() primitive} or an {@linkplain Class#isArray() array}, returns
+   * an empty set.
+   * <p>
+   * <em>Note:</em> since the result of {@link Class#getDeclaredFields()} includes {@linkplain Field#isSynthetic() synthetic}
+   * fields (like "this$0"), they will be retained here as well.
+   */
+  @Nonnull
+  public static LinkedHashSet<Field> getAllDeclaredFields(@Nonnull Class<?> cls) {
+    LinkedHashSet<Field> allFields = new LinkedHashSet<>();
+    while (cls != null && cls != Object.class) {
+      Collections.addAll(allFields, cls.getDeclaredFields());
+      cls = cls.getSuperclass();
+    }
+    return allFields;
   }
 }

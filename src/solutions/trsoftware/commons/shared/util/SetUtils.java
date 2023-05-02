@@ -29,7 +29,7 @@ public abstract class SetUtils {
    * @return A new set that represents the {@link Set#removeAll(Collection) <i>asymmetric set difference</i>}
    * of the two sets.  Neither arg is modified.
    */
-  public static <T> Set<T> difference(Set<T> s1, Set<T> s2) {
+  public static <T> Set<T> difference(Set<T> s1, Set<? extends T> s2) {
     s1 = newSet(s1);
     s1.removeAll(s2);
     return s1;
@@ -39,7 +39,7 @@ public abstract class SetUtils {
    * @return A new set that represents the {@link Set#retainAll(Collection) <i>intersection</i>} of the two sets.
    * Neither arg is modified.
    */
-  public static <T> Set<T> intersection(Set<T> s1, Set<T> s2) {
+  public static <T> Set<T> intersection(Set<T> s1, Set<? extends T> s2) {
     s1 = newSet(s1);
     s1.retainAll(s2);
     return s1;
@@ -49,7 +49,7 @@ public abstract class SetUtils {
    * @return A new set that represents the {@link Set#addAll(Collection) <i>union</i>} of the two sets.
    * Neither arg is modified.
    */
-  public static <T> Set<T> union(Set<T> s1, Set<T> s2) {
+  public static <T> Set<T> union(Set<T> s1, Set<? extends T> s2) {
     s1 = newSet(s1);
     s1.addAll(s2);
     return s1;
@@ -68,6 +68,11 @@ public abstract class SetUtils {
 
   /** @return a new set initialized from the given iterator */
   public static <T> LinkedHashSet<T> newSet(Iterator<T> it) {
+    return addAll(new LinkedHashSet<>(), it);
+  }
+
+  /** @return a new set initialized from the given iterable */
+  public static <T> LinkedHashSet<T> newSet(Iterable<T> it) {
     return addAll(new LinkedHashSet<>(), it);
   }
 

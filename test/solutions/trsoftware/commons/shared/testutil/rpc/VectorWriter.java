@@ -20,7 +20,6 @@ import com.google.gwt.user.client.rpc.SerializationException;
 import com.google.gwt.user.client.rpc.SerializationStreamWriter;
 import com.google.gwt.user.server.rpc.impl.ServerSerializationStreamWriter;
 import solutions.trsoftware.commons.server.testutil.rpc.CustomFieldSerializerFactoryByReflection;
-import solutions.trsoftware.commons.shared.testutil.MockSerializationStreamWriter;
 
 import javax.annotation.Nonnull;
 import java.util.IdentityHashMap;

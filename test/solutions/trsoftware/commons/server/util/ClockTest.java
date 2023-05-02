@@ -53,7 +53,6 @@ public class ClockTest extends TestCaseCanStopClock {
       // the clock shouldn't change after we start it ticking in fake mode
       time = Clock.currentTimeMillis();
       Clock.startTicking();
-      assertEquals(time, Clock.currentTimeMillis());
       assertApproximatelyEquals(time, Clock.currentTimeMillis(), 5);  // allow some leeway due to potential delay caused by system load
       // the difference between the clock and real time should be preserved
       Thread.sleep(1000);

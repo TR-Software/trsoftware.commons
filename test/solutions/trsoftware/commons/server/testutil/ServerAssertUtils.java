@@ -17,44 +17,71 @@
 
 package solutions.trsoftware.commons.server.testutil;
 
+import com.google.gwt.core.shared.GwtIncompatible;
 import solutions.trsoftware.commons.server.util.reflect.MemberSet;
 import solutions.trsoftware.commons.server.util.reflect.ObjectDiffs;
+import solutions.trsoftware.commons.server.util.reflect.ReflectionUtils;
 import solutions.trsoftware.commons.shared.testutil.AssertUtils;
 import solutions.trsoftware.commons.shared.util.StringUtils;
 
+import javax.annotation.Nonnull;
 import java.lang.reflect.Field;
 import java.lang.reflect.Member;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.Map;
+import java.util.Set;
 import java.util.function.Function;
 import java.util.regex.Pattern;
 
 import static junit.framework.Assert.*;
 
 /**
- * Date: Nov 28, 2008 Time: 6:25:03 PM
+ * Extends {@link AssertUtils} with additional methods that are GWT-incompatible.
  *
  * @author Alex
  */
+@GwtIncompatible
 public abstract class ServerAssertUtils extends AssertUtils {
 
   /**
    * Asserts that the given instances have equal values for all public members of their class.
+   * @deprecated use {@link #assertEqualsByReflection2(Object, Object)}
    */
   public static <T> void assertEqualsByReflection(T expected, T actual) throws Exception {
     assertEqualsByReflection(expected, actual, new MemberSet<>(assertSameType(expected, actual)).excludeMethodsInheritedFromObject());
   }
 
   /**
-   * Asserts that the given instances have equal values for all public instance fields members matching the given spec.
+   * Assert that all fields (both public and private) of the given objects are equal, including the fields inherited
+   * from any superclass.
+   * @see ReflectionUtils#getAllDeclaredFields(Class)
+   */
+  public static <T> void assertEqualsByReflection2(T expected, T actual) throws Exception {
+    // TODO: replace the original assertEqualsByReflection implementation with this method (can rename original); add unit test
+    assertSameType(expected, actual);
+    Class<?> cls = expected.getClass();
+    Set<Field> allFields = ReflectionUtils.getAllDeclaredFields(cls);
+    for (Field field : allFields) {
+      if (field.isSynthetic())
+        continue;  // ignore synthetic fields (like "this$0")
+      if (!field.isAccessible()) {
+        field.setAccessible(true);
+        // Note: this override is temporary: future invocations of getDeclaredField will have the original value for isAccessible
+      }
+      assertDeepEquals(field.toString(), field.get(expected), field.get(actual));
+    }
+  }
+
+  /**
+   * Asserts that the given instances have equal values for all public members matching the given spec.
    */
   public static <T> void assertEqualsByReflection(T expected, T actual, MemberSet<T> memberSpec) throws Exception {
     assertEqualsByReflection(expected, actual, new ObjectDiffs().addReflectionSpec(memberSpec));
   }
 
   /**
-   * Asserts that the given instances have equal values for all public instance fields members matching the given spec.
+   * Asserts that the given instances are equal according to the given {@linkplain ObjectDiffs differ}.
    */
   public static <T> void assertEqualsByReflection(T expected, T actual, ObjectDiffs differ) throws Exception {
     Class<T> type = assertSameType(expected, actual);
@@ -159,6 +186,39 @@ public abstract class ServerAssertUtils extends AssertUtils {
       assertEquals("Unexpected result from function call " + StringUtils.methodCallToString(fcnName, arg),
           expectedResult, result);
     }
+  }
+
+  /**
+   * Equivalent to
+   * <pre>
+   * if (o instance of T)
+   *   return (T)o;
+   * else
+   *   throw new AssertionFailedError();
+   * </pre>
+   *
+   * @return the given object cast to the expected type
+   */
+  public static <T> T assertInstanceOf(@Nonnull Class<T> expectedType, @Nonnull Object o) {
+    return assertInstanceOf(null, expectedType, o);
+  }
+
+  /**
+   * Equivalent to
+   * <pre>
+   * if (o instance of T)
+   *   return (T)o;
+   * else
+   *   throw new AssertionFailedError(message);
+   * </pre>
+   *
+   * @return the given object cast to the expected type
+   */
+  public static <T> T assertInstanceOf(String message, @Nonnull Class<T> expectedType, @Nonnull Object o) {
+    assertTrue(formatComparisonFailedMessage(message, expectedType, o.getClass()),
+        expectedType.isAssignableFrom(o.getClass()));
+    return expectedType.cast(o);
+
   }
 
 }

@@ -16,6 +16,9 @@
 
 package solutions.trsoftware.commons.shared.util.rpc;
 
+import com.google.common.base.MoreObjects;
+import com.google.common.collect.BiMap;
+import com.google.common.collect.HashBiMap;
 import com.google.gwt.i18n.client.NumberFormat;
 import com.google.gwt.user.client.rpc.*;
 import com.google.gwt.user.client.rpc.impl.AbstractSerializationStreamReader;
@@ -25,6 +28,7 @@ import solutions.trsoftware.commons.shared.util.MathUtils;
 import solutions.trsoftware.commons.shared.util.text.SharedNumberFormat;
 
 import java.io.Serializable;
+import java.math.RoundingMode;
 
 /**
  * Utilities for implementing
@@ -138,6 +142,14 @@ public class SerializationUtils {
    * The rounding of the scaled decimal is done with {@link Math#round(double)}, which results in "half-down"
    * rounding for negative values.  For example: {@code Math.round(1.5) == 2},
    * but {@code Math.round(-1.5) == -1}.
+   * <p>
+   * Traditional {@link RoundingMode#HALF_UP "half-up"} rounding can be achieved by
+   * negating the input and output values of this method.  For example:
+   * <pre>
+   *   double value = -1.345;
+   *   assertEquals(-134, doubleToScaledInt(value, 2));  // Math.round is "half-down" for negative values
+   *   assertEquals(-135, -doubleToScaledInt(-value, 2));  // can force "half-up" by negating the input and output
+   * </pre>
    *
    *
    * @param value the original {@code double}; must be finite, not {@code NaN}, and
@@ -207,20 +219,82 @@ public class SerializationUtils {
    */
   public static class RoundedDouble {
     private final int precision;
+    private final BiMap<Double, Integer> replacements = HashBiMap.create(3);
+    /**
+     * Will emulate "half-up" rounding for negative doubles if true.
+     */
+    private final boolean roundHalfUp;
 
     /**
      * @param precision the desired number of digits to retain after the decimal point (must be >= 0)
+     *
      */
     public RoundedDouble(int precision) {
+      this(precision, false);
+    }
+
+    /**
+     * @param precision the desired number of digits to retain after the decimal point (must be >= 0)
+     * @param roundHalfUp if {@code true}, negative double values will be rounded to "nearest neighbor" (as if using
+     *     {@link RoundingMode#HALF_UP}); otherwise, negative values will be rounded toward positive infinity (same as
+     *     {@link Math#round(double)}).
+     */
+    public RoundedDouble(int precision, boolean roundHalfUp) {
       this.precision = precision;
+      this.roundHalfUp = roundHalfUp;
+    }
+
+    /**
+     * @param precision the desired number of digits to retain after the decimal point (must be >= 0)
+     * @param roundHalfUp if {@code true}, negative double values will be rounded to "nearest neighbor" (as if using
+     *     {@link RoundingMode#HALF_UP}); otherwise, negative values will be rounded toward positive infinity (same as
+     *     {@link Math#round(double)}).
+     * @param NaN replacement for {@link Double#NaN} (should be unique to the domain)
+     * @param POSITIVE_INFINITY replacement for {@link Double#POSITIVE_INFINITY} (should be unique to the domain)
+     * @param NEGATIVE_INFINITY replacement for {@link Double#NEGATIVE_INFINITY} (should be unique to the domain)
+     */
+    public RoundedDouble(int precision, boolean roundHalfUp, Integer NaN, Integer POSITIVE_INFINITY, Integer NEGATIVE_INFINITY) {
+      this(precision, roundHalfUp);
+      maybeAddReplacement(Double.NaN, NaN);
+      maybeAddReplacement(Double.POSITIVE_INFINITY, POSITIVE_INFINITY);
+      maybeAddReplacement(Double.NEGATIVE_INFINITY, NEGATIVE_INFINITY);
+    }
+
+    private void maybeAddReplacement(double illegalValue, Integer replacement) {
+      if (replacement != null) {
+        if (replacements.containsValue(replacement))
+          throw new IllegalArgumentException("Replacement value " + replacement + " already assigned to "
+              + replacements.inverse().get(replacement));
+        replacements.put(illegalValue, replacement);
+      }
     }
 
     public int toScaledInt(double value) {
+      if (Double.isNaN(value) || Double.isInfinite(value)) {
+        Integer replacement = replacements.get(value);
+        if (replacement != null)
+          return replacement;
+        throw new IllegalArgumentException("No replacement available for illegal double value " + value);
+      }
+      if (value < 0 && roundHalfUp)
+        return -doubleToScaledInt(-value, precision);
       return doubleToScaledInt(value, precision);
     }
 
     public double fromScaledInt(int scaledInt) {
+      Double replacedValue = replacements.inverse().get(scaledInt);
+      if (replacedValue != null)
+        return replacedValue;
       return doubleFromScaledInt(scaledInt, precision);
+    }
+
+    @Override
+    public String toString() {
+      return MoreObjects.toStringHelper(this)
+          .add("precision", precision)
+          .add("replacements", replacements)
+          .add("roundHalfUp", roundHalfUp)
+          .toString();
     }
   }
 

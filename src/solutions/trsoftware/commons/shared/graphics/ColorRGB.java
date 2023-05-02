@@ -19,6 +19,8 @@ package solutions.trsoftware.commons.shared.graphics;
 import solutions.trsoftware.commons.shared.util.MathUtils;
 import solutions.trsoftware.commons.shared.util.stats.MinAndMaxDouble;
 
+import java.io.Serializable;
+
 /**
  * Represents a color specified as RGB, and provides methods for getting its components and
  * constructing an HTML color (hex) literal.  This class is immutable.
@@ -26,7 +28,7 @@ import solutions.trsoftware.commons.shared.util.stats.MinAndMaxDouble;
  * @author Alex
  * @see ColorHSL
  */
-public final class ColorRGB {
+public final class ColorRGB implements Serializable {
 
   public final static ColorRGB WHITE = new ColorRGB(255, 255, 255);
   public final static ColorRGB LIGHT_GRAY = new ColorRGB(192, 192, 192);
@@ -52,7 +54,10 @@ public final class ColorRGB {
    *
    * @see #getRGB()
    */
-  private final int value;
+  private int value;  // Note: not declared final to support GWT serialization
+
+  private ColorRGB() {  // default constructor for serialization
+  }
 
   /**
    * Constructs a new instance from the given RGB components.

@@ -14,7 +14,7 @@
  * the License.
  */
 
-package solutions.trsoftware.commons.shared.testutil;
+package solutions.trsoftware.commons.shared.testutil.rpc;
 
 import com.google.common.base.Strings;
 import com.google.common.collect.Iterables;

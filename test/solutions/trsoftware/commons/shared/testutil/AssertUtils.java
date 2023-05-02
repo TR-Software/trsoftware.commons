@@ -31,19 +31,17 @@ import solutions.trsoftware.commons.shared.util.function.ThrowingRunnable;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.*;
-import java.util.function.BiPredicate;
-import java.util.function.IntPredicate;
-import java.util.function.Predicate;
-import java.util.function.Supplier;
+import java.util.function.*;
 
 import static junit.framework.Assert.*;
 import static solutions.trsoftware.commons.shared.util.CollectionUtils.asList;
 import static solutions.trsoftware.commons.shared.util.CollectionUtils.first;
 
 /**
- * Date: Nov 28, 2008 Time: 6:25:03 PM
+ * Provides additional assertion methods that are missing from {@link junit.framework.Assert}
  *
  * @author Alex
+ * @since Nov 28, 2008
  */
 public abstract class AssertUtils {
 
@@ -103,9 +101,9 @@ public abstract class AssertUtils {
    * @param expectedThrowableClass must be a class (not an interface)
    * @param code will be executed to trigger the expected exception
    * @return The caught exception so that it may be examined by the caller.
-   * @throws IllegalArgumentException if the first arg is an interface (it should be an actual class because
-   * this method uses {@link GwtUtils#isAssignableFrom(Class, Class)} to check whether the thrown exception is of the
-   * expected type)
+   * @throws IllegalArgumentException if the first arg is an interface (it should be a concrete class because
+   *                                  this method uses {@link GwtUtils#isAssignableFrom(Class, Class)} to check whether
+   *                                  the thrown exception is of the expected type)
    */
   public static <T extends Throwable> T assertThrows(Class<T> expectedThrowableClass, final Runnable code) {
     return assertThrows(expectedThrowableClass, (ThrowingRunnable)code::run);
@@ -117,9 +115,9 @@ public abstract class AssertUtils {
    * @param expectedThrowableClass must be a class (not an interface)
    * @param code will be executed to trigger the expected exception
    * @return The caught exception so that it may be examined by the caller.
-   * @throws IllegalArgumentException if the first arg is an interface (it should be an actual class because
-   * this method uses {@link GwtUtils#isAssignableFrom(Class, Class)} to check whether the thrown exception is of the
-   * expected type)
+   * @throws IllegalArgumentException if the first arg is an interface (it should be a concrete class because
+   *                                  this method uses {@link GwtUtils#isAssignableFrom(Class, Class)} to check whether
+   *                                  the thrown exception is of the expected type)
    */
   public static <T extends Throwable> T assertThrows(Class<T> expectedThrowableClass, final Supplier<?> code) {
     return assertThrows(expectedThrowableClass, (ThrowingRunnable)code::get);
@@ -131,9 +129,9 @@ public abstract class AssertUtils {
    * @param expectedThrowableClass must be a class (not an interface)
    * @param code will be executed to trigger the expected exception
    * @return The caught exception so that it may be examined by the caller.
-   * @throws IllegalArgumentException if the first arg is an interface (it should be an actual class because
-   * this method uses {@link GwtUtils#isAssignableFrom(Class, Class)} to check whether the thrown exception is of the
-   * expected type)
+   * @throws IllegalArgumentException if the first arg is an interface (it should be a concrete class because
+   *                                  this method uses {@link GwtUtils#isAssignableFrom(Class, Class)} to check whether
+   *                                  the thrown exception is of the expected type)
    */
   @SuppressWarnings("unchecked")
   public static <T extends Throwable> T assertThrows(Class<T> expectedThrowableClass, ThrowingRunnable code) {
@@ -150,7 +148,7 @@ public abstract class AssertUtils {
       if (!GwtUtils.isAssignableFrom(AssertionFailedError.class, expectedThrowableClass) && ex instanceof AssertionFailedError)
         throw (AssertionFailedError)ex;
       else if (!GwtUtils.isAssignableFrom(expectedThrowableClass, ex.getClass()))
-        throw new AssertionError("We were expecting an instance of " + expectedThrowableClass.getName() + " but instead got this exception you see in the cause", ex);
+        throw new AssertionError("Expecting an instance of " + expectedThrowableClass.getName() + " but instead got this exception you see in the cause", ex);
     }
     assertNotNull(expectedThrowableClass.getName() + " expected but wasn't thrown.", caught);
     assertTrue(GwtUtils.isAssignableFrom(expectedThrowableClass, caught.getClass()));
@@ -224,7 +222,7 @@ public abstract class AssertUtils {
   /**
    * Same as the private JUnit method {@link Assert#failNotEquals(String, Object, Object)}
    */
-  private static void failNotEquals(String message, Object expected, Object actual) {
+  public static void failNotEquals(String message, Object expected, Object actual) {
     fail(formatComparisonFailedMessage(message, expected, actual));
   }
 
@@ -233,10 +231,10 @@ public abstract class AssertUtils {
     assertEquals(expected, actual);
   }
 
-  public static void assertSameSequence(Enumeration expected, Enumeration actual) {
+  public static void assertSameSequence(Enumeration<?> expected, Enumeration<?> actual) {
     while (true) {
       if (!expected.hasMoreElements()) {
-        assertTrue(!actual.hasMoreElements());
+        assertFalse(actual.hasMoreElements());
         break;  // both enums are finished
       }
       assertTrue(actual.hasMoreElements());
@@ -266,9 +264,12 @@ public abstract class AssertUtils {
    * @return <tt>true</tt> if the two arrays are equal
    */
   public static void assertArraysEqual(long[] a, long[] a2) {
-    boolean pass = Arrays.equals(a, a2);
-    if (!pass)
-      fail(formatComparisonFailedMessage("Arrays not equal.", Arrays.toString(a), Arrays.toString(a2)));
+    assertArraysEqual("Arrays not equal.", a, a2);
+  }
+
+  public static void assertArraysEqual(String message, long[] a, long[] a2) {
+    if (!Arrays.equals(a, a2))
+      failNotEquals(message, Arrays.toString(a), Arrays.toString(a2));
   }
 
   /**
@@ -283,9 +284,12 @@ public abstract class AssertUtils {
    * @param a2 the other array to be tested for equality
    */
   public static void assertArraysEqual(int[] a, int[] a2) {
-    boolean pass = Arrays.equals(a, a2);
-    if (!pass)
-      fail(formatComparisonFailedMessage("Arrays not equal.", Arrays.toString(a), Arrays.toString(a2)));
+    assertArraysEqual("Arrays not equal.", a, a2);
+  }
+
+  public static void assertArraysEqual(String message, int[] a, int[] a2) {
+    if (!Arrays.equals(a, a2))
+      failNotEquals(message, Arrays.toString(a), Arrays.toString(a2));
   }
 
   /**
@@ -300,9 +304,12 @@ public abstract class AssertUtils {
    * @param a2 the other array to be tested for equality
    */
   public static void assertArraysEqual(short[] a, short[] a2) {
-    boolean pass = Arrays.equals(a, a2);
-    if (!pass)
-      fail(formatComparisonFailedMessage("Arrays not equal.", Arrays.toString(a), Arrays.toString(a2)));
+    assertArraysEqual("Arrays not equal.", a, a2);
+  }
+
+  public static void assertArraysEqual(String message, short[] a, short[] a2) {
+    if (!Arrays.equals(a, a2))
+      failNotEquals(message, Arrays.toString(a), Arrays.toString(a2));
   }
 
   /**
@@ -317,9 +324,12 @@ public abstract class AssertUtils {
    * @param a2 the other array to be tested for equality
    */
   public static void assertArraysEqual(char[] a, char[] a2) {
-    boolean pass = Arrays.equals(a, a2);
-    if (!pass)
-      fail(formatComparisonFailedMessage("Arrays not equal.", Arrays.toString(a), Arrays.toString(a2)));
+    assertArraysEqual("Arrays not equal.", a, a2);
+  }
+
+  public static void assertArraysEqual(String message, char[] a, char[] a2) {
+    if (!Arrays.equals(a, a2))
+      failNotEquals(message, Arrays.toString(a), Arrays.toString(a2));
   }
 
   /**
@@ -334,9 +344,12 @@ public abstract class AssertUtils {
    * @param a2 the other array to be tested for equality
    */
   public static void assertArraysEqual(byte[] a, byte[] a2) {
-    boolean pass = Arrays.equals(a, a2);
-    if (!pass)
-      fail(formatComparisonFailedMessage("Arrays not equal.", Arrays.toString(a), Arrays.toString(a2)));
+    assertArraysEqual("Arrays not equal.", a, a2);
+  }
+
+  public static void assertArraysEqual(String message, byte[] a, byte[] a2) {
+    if (!Arrays.equals(a, a2))
+      failNotEquals(message, Arrays.toString(a), Arrays.toString(a2));
   }
 
   /**
@@ -351,9 +364,12 @@ public abstract class AssertUtils {
    * @param a2 the other array to be tested for equality
    */
   public static void assertArraysEqual(boolean[] a, boolean[] a2) {
-    boolean pass = Arrays.equals(a, a2);
-    if (!pass)
-      fail(formatComparisonFailedMessage("Arrays not equal.", Arrays.toString(a), Arrays.toString(a2)));
+    assertArraysEqual("Arrays not equal.", a, a2);
+  }
+
+  public static void assertArraysEqual(String message, boolean[] a, boolean[] a2) {
+    if (!Arrays.equals(a, a2))
+      failNotEquals(message, Arrays.toString(a), Arrays.toString(a2));
   }
 
   /**
@@ -363,7 +379,7 @@ public abstract class AssertUtils {
    * arrays are equal.  In other words, two arrays are equal if they contain the
    * same elements in the same order.  Also, two array references are considered
    * equal if both are <tt>null</tt>.<p>
-   *
+   * <p>
    * Two doubles <tt>d1</tt> and <tt>d2</tt> are considered equal if:
    * <pre>    <tt>new Double(d1).equals(new Double(d2))</tt></pre>
    * (Unlike the <tt>==</tt> operator, this method considers <tt>NaN</tt> equals
@@ -374,9 +390,12 @@ public abstract class AssertUtils {
    * @see Double#equals(Object)
    */
   public static void assertArraysEqual(double[] a, double[] a2) {
-    boolean pass = Arrays.equals(a, a2);
-    if (!pass)
-      fail(formatComparisonFailedMessage("Arrays not equal.", Arrays.toString(a), Arrays.toString(a2)));
+    assertArraysEqual("Arrays not equal.", a, a2);
+  }
+
+  public static void assertArraysEqual(String message, double[] a, double[] a2) {
+    if (!Arrays.equals(a, a2))
+      failNotEquals(message, Arrays.toString(a), Arrays.toString(a2));
   }
 
   /**
@@ -386,7 +405,7 @@ public abstract class AssertUtils {
    * arrays are equal.  In other words, two arrays are equal if they contain the
    * same elements in the same order.  Also, two array references are considered
    * equal if both are <tt>null</tt>.<p>
-   *
+   * <p>
    * Two floats <tt>f1</tt> and <tt>f2</tt> are considered equal if:
    * <pre>    <tt>new Float(f1).equals(new Float(f2))</tt></pre>
    * (Unlike the <tt>==</tt> operator, this method considers <tt>NaN</tt> equals
@@ -397,9 +416,12 @@ public abstract class AssertUtils {
    * @see Float#equals(Object)
    */
   public static void assertArraysEqual(float[] a, float[] a2) {
-    boolean pass = Arrays.equals(a, a2);
-    if (!pass)
-      fail(formatComparisonFailedMessage("Arrays not equal.", Arrays.toString(a), Arrays.toString(a2)));
+    assertArraysEqual("Arrays not equal.", a, a2);
+  }
+
+  public static void assertArraysEqual(String message, float[] a, float[] a2) {
+    if (!Arrays.equals(a, a2))
+      failNotEquals(message, Arrays.toString(a), Arrays.toString(a2));
   }
 
 
@@ -417,9 +439,57 @@ public abstract class AssertUtils {
    * @param a2 the other array to be tested for equality
    */
   public static void assertArraysEqual(Object[] a, Object[] a2) {
-    boolean pass = Arrays.deepEquals(a, a2);
-    if (!pass)
-      fail(formatComparisonFailedMessage("Arrays not equal.", Arrays.deepToString(a), Arrays.deepToString(a2)));
+    assertArraysEqual("Arrays not equal.", a, a2);
+  }
+
+  public static void assertArraysEqual(String message, Object[] a, Object[] a2) {
+    if (!Arrays.deepEquals(a, a2))
+      failNotEquals(message, Arrays.deepToString(a), Arrays.deepToString(a2));
+  }
+
+  /**
+   * If the given objects are arrays, they will be compared using the appropriate
+   * {@link Arrays#equals} or {@link Arrays#deepEquals} method.
+   * Otherwise, same as {@link Assert#assertEquals(Object, Object)}.
+   */
+  public static void assertDeepEquals(Object expected, Object actual) {
+    assertDeepEquals(null, expected, actual);
+  }
+
+  /**
+   * If the given objects are arrays, they will be compared using the appropriate
+   * {@link Arrays#equals} or {@link Arrays#deepEquals} method.
+   * Otherwise, same as {@link Assert#assertEquals(String, Object, Object)}.
+   */
+  public static void assertDeepEquals(String message, Object expected, Object actual) {
+    if (expected == null && actual == null)
+      return;
+    if (expected != null) {
+      if (expected.equals(actual))
+        return;
+      // the objects might be arrays
+      if (expected instanceof Object[] && actual instanceof Object[])
+        assertArraysEqual(message, (Object[])expected, (Object[])actual);
+      else if (expected instanceof byte[] && actual instanceof byte[])
+        assertArraysEqual(message, (byte[])expected, (byte[])actual);
+      else if (expected instanceof short[] && actual instanceof short[])
+        assertArraysEqual(message, (short[])expected, (short[])actual);
+      else if (expected instanceof int[] && actual instanceof int[])
+        assertArraysEqual(message, (int[])expected, (int[])actual);
+      else if (expected instanceof long[] && actual instanceof long[])
+        assertArraysEqual(message, (long[])expected, (long[])actual);
+      else if (expected instanceof char[] && actual instanceof char[])
+        assertArraysEqual(message, (char[])expected, (char[])actual);
+      else if (expected instanceof float[] && actual instanceof float[])
+        assertArraysEqual(message, (float[])expected, (float[])actual);
+      else if (expected instanceof double[] && actual instanceof double[])
+        assertArraysEqual(message, (double[])expected, (double[])actual);
+      else if (expected instanceof boolean[] && actual instanceof boolean[])
+        assertArraysEqual(message, (boolean[])expected, (boolean[])actual);
+      else
+        failNotEquals(message, expected, actual);
+    }
+    // TODO: unit test this
   }
 
   /**
@@ -437,7 +507,7 @@ public abstract class AssertUtils {
   /**
    * Asserts that the given {@link Comparable} objects are equal according to both {@link Object#equals}
    * and {@link Comparable#compareTo}, and that they have the same hash code.
-   *
+   * <p>
    * In other words, this method combines {@link #assertEqualsAndHashCode(Object, Object)} and
    * {@link #assertComparablesEqual(Comparable, Comparable)}.
    *
@@ -458,9 +528,9 @@ public abstract class AssertUtils {
    * returns {@code false}), despite the fact this behavior is not required by the contract of {@link Object#equals}.
    *
    * @deprecated this assertion is too restrictive, because, as described above, objects are
-   * allowed to have the same hash code despite {@link Object#equals} returning {@code false}.
-   * In other words, there is no prescribed relationship between {@link Object#equals} and {@link Object#hashCode}
-   * Use {@link #assertNotEqual(Object, Object)} instead of this method.
+   *     allowed to have the same hash code despite {@link Object#equals} returning {@code false}.
+   *     In other words, there is no prescribed relationship between {@link Object#equals} and {@link Object#hashCode}
+   *     Use {@link #assertNotEqual(Object, Object)} instead of this method.
    */
   public static void assertNotEqualsAndHashCode(Object a, Object b) {
     assertNotEqual(a, b);
@@ -494,28 +564,30 @@ public abstract class AssertUtils {
   }
 
   public static <T> void assertContains(T[] array, @Nullable T element) {
-    assertTrue(ArrayUtils.contains(array, element));
+    assertTrue(Arrays.deepToString(array), ArrayUtils.contains(array, element));
   }
 
   /**
    * Asserts that the given collection contains exactly 1 element and returns that element
+   *
    * @return the only element from the collection
    * @throws AssertionFailedError if collection size != 1
    * @see Iterables#getOnlyElement(Iterable)
    */
   public static <T> T getOnlyElement(Collection<T> collection) {
-    assertEquals(1, collection.size());
+    assertEquals(collection.toString(), 1, collection.size());
     return Iterables.getOnlyElement(collection);
   }
 
   /**
    * Asserts that the given array contains exactly 1 element and returns that element
+   *
    * @return the only element from the array
    * @throws AssertionFailedError if list size != 1
    * @see #getOnlyElement(Collection)
    */
   public static <T> T getOnlyElement(T[] arr) {
-    assertEquals(1, arr.length);
+    assertEquals(Arrays.deepToString(arr), 1, arr.length);
     return arr[0];
   }
 
@@ -524,8 +596,8 @@ public abstract class AssertUtils {
    * according to their {@link Comparable#compareTo(Object)} methods, without checking {@link Object#equals(Object)}.
    */
   public static <T extends Comparable<T>> void assertComparablesEqual(@Nonnull T a, @Nonnull T b) {
-    assertTrue(a.compareTo(b) == 0);
-    assertTrue(b.compareTo(a) == 0);
+    assertEquals(0, a.compareTo(b));
+    assertEquals(0, b.compareTo(a));
   }
 
   /**
@@ -539,6 +611,7 @@ public abstract class AssertUtils {
   /**
    * Asserts that each element in the given sequence is "less than" the next element
    * according to the "natural ordering" defined by {@link Comparable#compareTo(Object)}
+   *
    * @see Comparable
    */
   @SafeVarargs
@@ -643,7 +716,7 @@ public abstract class AssertUtils {
    *
    * @throws AssertionFailedError if the lists differ in size or any pair of elements are not equal
    */
-  public static <E extends Object> void assertListsEqual(List<E> expected, List<E> actual) {
+  public static <E> void assertListsEqual(List<E> expected, List<E> actual) {
     assertListsEqual(expected, actual, (BiPredicate<E, E>)Objects::equals);
   }
 
@@ -669,6 +742,43 @@ public abstract class AssertUtils {
         failNotEquals("Lists differ on element " + i, expected, actual);
       }
     }
+  }
+
+  /**
+   * Tests two maps for equality using a custom comparison function to compare the values.
+   * <p>
+   * This is similar to {@link junit.framework.Assert#assertEquals(Object, Object) assertEquals(Map, Map)}, but
+   * allows the values to be tested for equality using something other than {@link Object#equals(Object)}
+   *
+   * @param equalityPredicate a predicate that takes a pair of values and returns {@code true} if it considers
+   *     them equal
+   * @throws AssertionFailedError if the maps differ in size or
+   *                              if the given predicate returns {@code false} for any pair of values for a key
+   */
+  public static <K, V> void assertMapsEqual(Map<K, V> expected, Map<K, V> actual, BiPredicate<V, V> equalityPredicate) {
+    assertEquals("Maps differ in size", expected.size(), actual.size());
+    for (K key : expected.keySet()) {
+      V a = expected.get(key);
+      V b = actual.get(key);
+      // TODO: should this first perform the same null checks as Assert.assertEquals(String, Object, Object)?
+      if (!equalityPredicate.test(a, b)) {
+        failNotEquals("Maps differ on key " + key, expected, actual);
+      }
+    }
+  }
+
+  /**
+   * Tests two maps for equality using a custom assertion function to compare the corresponding values for each key.
+   *
+   * @param valueAssertion a custom assertion function (like {@link Assert#assertEquals}) that takes a pair of values
+   *   and throws an exception (e.g. {@link AssertionFailedError}) if they don't pass the test
+   * @throws AssertionFailedError if the maps differ in size, sets of keys, or
+   *                              if the given function throws an exception for any pair of values corresponding to a key
+   */
+  public static <K, V> void assertMapsEqual(Map<K, ? extends V> expected, Map<K, ? extends V> actual, BiConsumer<V, V> valueAssertion) {
+    assertEquals("Maps differ in size", expected.size(), actual.size());
+    assertEquals("Maps contain different keys", expected.keySet(), actual.keySet());
+    expected.keySet().forEach(k -> valueAssertion.accept(expected.get(k), actual.get(k)));
   }
 
   /**
@@ -735,7 +845,7 @@ public abstract class AssertUtils {
 
   /**
    * Allows chaining additional assertions for comparable types.
-   *
+   * <p>
    * The simplest way to use this class is by calling {@link #assertThat(Comparable)} and chaining the assertions
    * to the result.
    */
@@ -785,7 +895,7 @@ public abstract class AssertUtils {
 
   /**
    * Allows chaining additional assertions for string types.
-   *
+   * <p>
    * The simplest way to use this class is by calling {@link #assertThat(String)} and chaining the assertions
    * to the result.
    */
@@ -800,7 +910,7 @@ public abstract class AssertUtils {
           value.matches(regex));
       return this;
     }
-    
+
     public StringAssertionBuilder isNotEmpty() {
       assertFalse(value.isEmpty());
       return this;
@@ -816,7 +926,7 @@ public abstract class AssertUtils {
           value.startsWith(prefix));
       return this;
     }
-    
+
     public StringAssertionBuilder endsWith(String suffix) {
       assertTrue(StringUtils.template("The string \"$1\" doesn't end with \"$2\"", value, suffix),
           value.endsWith(suffix));

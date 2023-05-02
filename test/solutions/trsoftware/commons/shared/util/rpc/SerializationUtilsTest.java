@@ -19,8 +19,8 @@ package solutions.trsoftware.commons.shared.util.rpc;
 import com.google.gwt.core.shared.GwtIncompatible;
 import com.google.gwt.user.client.rpc.SerializationException;
 import junit.framework.TestCase;
-import solutions.trsoftware.commons.shared.testutil.MockSerializationStreamReader;
-import solutions.trsoftware.commons.shared.testutil.MockSerializationStreamWriter;
+import solutions.trsoftware.commons.shared.testutil.rpc.MockSerializationStreamReader;
+import solutions.trsoftware.commons.shared.testutil.rpc.MockSerializationStreamWriter;
 import solutions.trsoftware.commons.shared.util.MathUtils;
 import solutions.trsoftware.commons.shared.util.RandomUtils;
 import solutions.trsoftware.commons.shared.util.StringUtils;
@@ -28,6 +28,8 @@ import solutions.trsoftware.commons.shared.util.StringUtils;
 import java.util.Arrays;
 import java.util.Random;
 
+import static java.lang.Double.*;
+import static solutions.trsoftware.commons.shared.testutil.AssertUtils.assertThrows;
 import static solutions.trsoftware.commons.shared.util.rpc.SerializationUtils.*;
 
 /**
@@ -71,8 +73,9 @@ public class SerializationUtilsTest extends TestCase {
     // review some basic examples manually
     {
       assertEquals(135, doubleToScaledInt(1.345, 2));
-      assertEquals(-134, doubleToScaledInt(-1.345, 2));  // Math.round is "half-down" for negative values
-      assertEquals(-135, -doubleToScaledInt(-(-1.345), 2));  // can force "half-up" by negating the input and output
+      double value = -1.345;
+      assertEquals(-134, doubleToScaledInt(value, 2));  // Math.round is "half-down" for negative values
+      assertEquals(-135, -doubleToScaledInt(-value, 2));  // can force "half-up" by negating the input and output
     }
     // now test with some random doubles
     Random rnd = new Random(1);
@@ -109,5 +112,48 @@ public class SerializationUtilsTest extends TestCase {
       }
     }
     System.out.println("writer.toString() = " + writer.toString());
+  }
+
+  /**
+   * Test {@link RoundedDouble}
+   */
+  public void testRoundedDouble() throws Exception {
+    RoundedDouble rounder = new RoundedDouble(2, true);
+    testRoundedDouble(rounder, 1.345, 135, 1.35);
+    // uses "half-up" rounding for negative values
+    testRoundedDouble(rounder, -1.345, -135, -1.35);
+    // any illegal values (NaN, +/- Inf) should throw
+    assertRoundedDoubleThrows(rounder, NaN, POSITIVE_INFINITY, NEGATIVE_INFINITY);
+
+    // test using "half-down" rounding for negative values
+    testRoundedDouble(new RoundedDouble(2, false), -1.345, -134, -1.34);
+
+    // test replacing illegal values with special ints
+    RoundedDouble nanRounder = new RoundedDouble(2, true, -1, null, null);
+    testRoundedDouble(nanRounder, 1.345, 135, 1.35);
+    testRoundedDouble(nanRounder, NaN, -1, NaN);
+    // should still throw for the other illegal values
+    assertRoundedDoubleThrows(rounder, POSITIVE_INFINITY, NEGATIVE_INFINITY);
+    
+    RoundedDouble safeRounder = new RoundedDouble(2, true, -1, -2, -3);
+    testRoundedDouble(safeRounder, 1.345, 135, 1.35);
+    testRoundedDouble(safeRounder, NaN, -1, NaN);
+    testRoundedDouble(safeRounder, POSITIVE_INFINITY, -2, POSITIVE_INFINITY);
+    testRoundedDouble(safeRounder, NEGATIVE_INFINITY, -3, NEGATIVE_INFINITY);
+
+    // constructor should throw if given a duplicate replacement value
+    assertThrows(IllegalArgumentException.class, () -> new RoundedDouble(2, true, -1, -2, -1));
+  }
+
+  private static void testRoundedDouble(RoundedDouble rounder, double inputValue, int expectedToScaledInt, double expectedFromScaledInt) {
+    int scaledInt = rounder.toScaledInt(inputValue);
+    assertEquals(expectedToScaledInt, scaledInt);
+    assertEquals(expectedFromScaledInt, rounder.fromScaledInt(scaledInt));
+  }
+
+  private static void assertRoundedDoubleThrows(RoundedDouble rounder, double... illegalValues) {
+    for (double illegalValue : illegalValues) {
+      assertThrows(IllegalArgumentException.class, () -> rounder.toScaledInt(illegalValue));
+    }
   }
 }

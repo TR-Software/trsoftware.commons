@@ -14,7 +14,7 @@
  * the License.
  */
 
-package solutions.trsoftware.commons.shared.testutil;
+package solutions.trsoftware.commons.shared.testutil.rpc;
 
 import com.google.common.base.MoreObjects;
 import com.google.common.base.Strings;
@@ -27,8 +27,6 @@ import com.google.gwt.user.client.rpc.SerializationStreamWriter;
 import com.google.gwt.user.client.rpc.impl.AbstractSerializationStreamWriter;
 import com.google.gwt.user.client.rpc.impl.ClientSerializationStreamWriter;
 import com.google.gwt.user.server.rpc.impl.ServerSerializationStreamWriter;
-import solutions.trsoftware.commons.shared.testutil.rpc.CustomFieldSerializerFactory;
-import solutions.trsoftware.commons.shared.testutil.rpc.VectorWriter;
 import solutions.trsoftware.commons.shared.util.ListUtils;
 import solutions.trsoftware.commons.shared.util.StringUtils;
 

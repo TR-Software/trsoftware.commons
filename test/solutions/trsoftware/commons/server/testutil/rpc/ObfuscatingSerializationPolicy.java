@@ -16,6 +16,7 @@
 
 package solutions.trsoftware.commons.server.testutil.rpc;
 
+import com.google.common.base.MoreObjects;
 import com.google.common.collect.BiMap;
 import com.google.common.collect.HashBiMap;
 import com.google.gwt.user.client.rpc.SerializationException;
@@ -23,9 +24,8 @@ import com.google.gwt.user.client.rpc.impl.AbstractSerializationStream;
 import com.google.gwt.user.server.rpc.SerializationPolicy;
 import com.google.gwt.user.server.rpc.impl.TypeNameObfuscator;
 import solutions.trsoftware.commons.server.util.rpc.SimpleSerializationPolicy;
-import solutions.trsoftware.commons.shared.util.RandomUtils;
-import solutions.trsoftware.commons.shared.util.StringUtils;
 
+import javax.annotation.Nonnull;
 import java.util.Objects;
 
 /**
@@ -35,13 +35,15 @@ import java.util.Objects;
  * @since 4/23/2022
  */
 public class ObfuscatingSerializationPolicy extends SimpleSerializationPolicy implements TypeNameObfuscator {
+  @Nonnull
   private final BiMap<Class<?>, String> classToTypeId;
+  private int nextId = 1;
 
   public ObfuscatingSerializationPolicy() {
     classToTypeId = HashBiMap.create();
   }
 
-  public ObfuscatingSerializationPolicy(BiMap<Class<?>, String> obfuscatedTypeName) {
+  public ObfuscatingSerializationPolicy(@Nonnull BiMap<Class<?>, String> obfuscatedTypeName) {
     classToTypeId = Objects.requireNonNull(obfuscatedTypeName);
   }
 
@@ -53,32 +55,67 @@ public class ObfuscatingSerializationPolicy extends SimpleSerializationPolicy im
      */
     BiMap<String, Class<?>> typeIdToClass = classToTypeId.inverse();
     if (!typeIdToClass.containsKey(id))
-      throw new IllegalStateException(String.format("No typeId to class mapping for '%s'", id));
+      throw new SerializationException(String.format("No typeId to class mapping for '%s'", id));
     return typeIdToClass.get(id).getName();
   }
 
   @Override
-  public String getTypeIdForClass(Class<?> clazz) throws SerializationException {
-    ensureTypeId(clazz);
-    return classToTypeId.get(clazz);
+  public String getTypeIdForClass(Class<?> cls) throws SerializationException {
+    ensureTypeId(cls);
+    return classToTypeId.get(cls);
   }
 
   /**
    * Creates a new typeId mapping for the given class if needed
    */
-  private void ensureTypeId(Class<?> clazz) {
+  private void ensureTypeId(Class<?> cls) {
     // create a new mapping if needed
-    if (!classToTypeId.containsKey(clazz)) {
+    if (!classToTypeId.containsKey(cls)) {
       synchronized (this) {
-        if (!classToTypeId.containsKey(clazz)) {
-          String randId;
-          do {
-            randId = RandomUtils.randString(2, StringUtils.ASCII_LETTERS_AND_NUMBERS);
-          }
-          while (classToTypeId.containsValue(randId));
-          classToTypeId.put(clazz, randId);
+        if (!classToTypeId.containsKey(cls)) {
+          String id = generateTypeId(cls);
+          classToTypeId.put(cls, id);
         }
       }
     }
+  }
+
+  @Nonnull
+  protected String generateTypeId(Class<?> cls) {  // subclasses can override if desired
+    String id;
+    do {
+      id = Integer.toString(nextId++, 36);  // same number encoding as GWT uses to generate .gwt.rpc policy files
+    }
+    while (classToTypeId.containsValue(id));
+    return id;
+  }
+
+
+  @Override
+  public String toString() {
+    return MoreObjects.toStringHelper(this)
+        .add("classToTypeId", classToTypeId)
+        .toString();
+  }
+
+  @Override
+  public boolean equals(Object o) {
+    if (this == o)
+      return true;
+    if (o == null || getClass() != o.getClass())
+      return false;
+
+    ObfuscatingSerializationPolicy that = (ObfuscatingSerializationPolicy)o;
+
+    if (nextId != that.nextId)
+      return false;
+    return classToTypeId.equals(that.classToTypeId);
+  }
+
+  @Override
+  public int hashCode() {
+    int result = classToTypeId.hashCode();
+    result = 31 * result + nextId;
+    return result;
   }
 }

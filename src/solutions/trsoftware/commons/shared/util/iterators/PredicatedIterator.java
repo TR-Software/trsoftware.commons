@@ -16,9 +16,9 @@
 
 package solutions.trsoftware.commons.shared.util.iterators;
 
-import com.google.common.base.Predicate;
 
 import java.util.Iterator;
+import java.util.function.Predicate;
 
 /**
  * Implements {@link FilteringIterator#filter(Object)} by invoking the given predicate.
@@ -42,7 +42,7 @@ public class PredicatedIterator<T> extends FilteringIterator<T> {
 
   @Override
   protected boolean filter(T elt) {
-    return predicate.apply(elt);
+    return predicate.test(elt);
   }
 
 }

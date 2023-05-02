@@ -20,12 +20,16 @@ package solutions.trsoftware.commons.shared.util;
 import com.google.common.collect.ImmutableList;
 import junit.framework.TestCase;
 import solutions.trsoftware.commons.shared.testutil.AssertUtils;
+import solutions.trsoftware.commons.shared.testutil.ComparableInt;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.stream.Collectors;
 
+import static com.google.common.base.Strings.lenientFormat;
+import static java.util.Arrays.asList;
 import static solutions.trsoftware.commons.shared.util.ListUtils.*;
 
 public class ListUtilsTest extends TestCase {
@@ -34,10 +38,10 @@ public class ListUtilsTest extends TestCase {
    * Tests {@link ListUtils#copyOfRange(List, int, int)}
    */
   public void testCopyOfRange() {
-    List<Integer> list = Arrays.asList(1, 2, 3, 4, 5, 6);
+    List<Integer> list = asList(1, 2, 3, 4, 5, 6);
 
-    assertEquals(Arrays.asList(1, 2, 3), copyOfRange(list, 0, 3));
-    assertEquals(Arrays.asList(2, 3, 4), copyOfRange(list, 1, 4));
+    assertEquals(asList(1, 2, 3), copyOfRange(list, 0, 3));
+    assertEquals(asList(2, 3, 4), copyOfRange(list, 1, 4));
     assertEquals(list, copyOfRange(list, 0, 6));
     AssertUtils.assertThrows(IndexOutOfBoundsException.class, () -> copyOfRange(list, 0, 7));
 
@@ -52,7 +56,7 @@ public class ListUtilsTest extends TestCase {
   }
 
   public void testSafeSubList() throws Exception {
-    List<Integer> list = Arrays.asList(1,2,3,4,5);
+    List<Integer> list = asList(1,2,3,4,5);
     // test some sub-lists that are equivalent to the original:
     assertEquals(list, safeSubList(list, 0, 5));
     assertEquals(list, safeSubList(list, 0, 50));
@@ -67,7 +71,7 @@ public class ListUtilsTest extends TestCase {
     assertEquals(Collections.emptyList(), safeSubList(list, 5, 4));
     assertEquals(Collections.emptyList(), safeSubList(list, 3, 3));
     // test some typical usages:
-    assertEquals(Arrays.asList(3,4,5), safeSubList(list, 2, 50));
+    assertEquals(asList(3,4,5), safeSubList(list, 2, 50));
     // now test all the valid sub-lists
     for (int i = 0; i <= list.size(); i++) {
       for (int n = i; n <=  list.size(); n++) {
@@ -77,9 +81,10 @@ public class ListUtilsTest extends TestCase {
   }
 
   public void testInsertInOrder() throws Exception {
+    // 1) insertInOrder(java.util.List<T>, T)
     assertEquals(
         arrayList("a"),
-        insertInOrder(new ArrayList<String>(), "a"));
+        insertInOrder(arrayList(), "a"));
     assertEquals(
         arrayList("a", "b"),
         insertInOrder(arrayList("a"), "b"));
@@ -89,6 +94,91 @@ public class ListUtilsTest extends TestCase {
     assertEquals(
         arrayList("a", "b", "c", "d"),
         insertInOrder(arrayList("a", "b", "d"), "c"));
+
+    // 2) insertInOrder(java.util.List<T>, T, int): with maxSize arg
+    ComparableInt[][] i = ComparableInt.createTestData(5, 3);
+    ArrayList<ComparableInt> list = arrayList(i[1][1], i[2][1], i[2][0]);
+
+    assertTrue(insertInOrder(list, i[0][1], 5));
+    assertEquals(asList(i[0][1], i[1][1], i[2][1], i[2][0]), list);
+
+    assertTrue(insertInOrder(list, i[3][0], 5));
+    assertEquals(asList(i[0][1], i[1][1], i[2][1], i[2][0], i[3][0]), list);
+
+    // list should not be modified if it's full and new element is greater than its last element
+    assertFalse(insertInOrder(list, i[3][0], 5));
+    assertEquals(asList(i[0][1], i[1][1], i[2][1], i[2][0], i[3][0]), list);  // not modified
+    // last element should be evicted if new elem inserted and list overflows maxSize as a result
+    assertTrue(insertInOrder(list, i[1][0], 5));
+    assertEquals(asList(i[0][1], i[1][1], i[1][0], i[2][1], i[2][0]), list);  // former last element evicted
+
+    // given list size > maxSize + 1: should be trimmed to maxSize regardless, but only if new element was inserted
+    assertFalse(insertInOrder(list, i[2][2], 3));  // should neither insert elem nor trim the list down to 3
+    assertEquals(asList(i[0][1], i[1][1], i[1][0], i[2][1], i[2][0]), list);  // not modified
+
+    assertTrue(insertInOrder(list, i[0][0], 3));  // should insert elem and trim size from 5 to 3
+    assertEquals(asList(i[0][1], i[0][0], i[1][1]), list);
+  }
+
+  public void testFindInsertionPoint() throws Exception {
+    int nValues = 5;
+    int nDuplicates = 3;  // the number of different ComparableInt to create for each unique int value
+    ComparableInt[][] ints = ComparableInt.createTestData(nValues, nDuplicates);
+
+    {
+      List<ComparableInt> list = new ArrayList<>();
+      List<ComparableInt> expectedList = new ArrayList<>();
+      int expectedInsPoint = 0;
+      int valueToSkip = 2;
+      for (int n = 0; n < ints.length; n++) {
+        if (n == valueToSkip) continue;
+        ComparableInt[] instances = ints[n];  // different instances of ComparableInt(n)
+        for (ComparableInt value : instances) {
+          // the next instance of of ComparableInt(n) should be inserted at the end of all such instances already inserted
+          expectedList.add(value);
+          verifyInsertionPoint(list, value, expectedInsPoint++, expectedList);
+        }
+      }
+      // at this point we've inserted all instances of 0,1,3, and 4; now try inserting all the inst
+      // now test some insertion points in the middle of the list
+      expectedInsPoint = valueToSkip * nDuplicates;
+      for (ComparableInt skippedValue : ints[valueToSkip]) {
+        expectedList.add(expectedInsPoint, skippedValue);
+        verifyInsertionPoint(list, skippedValue, expectedInsPoint++, expectedList);
+      }
+      // sanity check: at this point, the list should contain all of our data in its natural order
+      assertEquals(
+          Arrays.stream(ints).flatMap(Arrays::stream).collect(Collectors.toList()),
+          list);
+
+      // now try inserting a duplicate value somewhere in the middle
+      ComparableInt toInsert = ints[0][0];  // 0a
+      expectedInsPoint = ints[0].length;  // should go after 0a,0b,0c
+      expectedList.add(expectedInsPoint, toInsert);
+      verifyInsertionPoint(list, toInsert, expectedInsPoint, expectedList);
+      // sanity check: the list should now start with 0a, 0b, 0c, 0a, 1a
+      assertEquals(asList(ArrayUtils.append(ints[0], toInsert, ints[1][0])), list.subList(0, expectedInsPoint+2));
+
+      // should throw NPE if the key is null
+      AssertUtils.assertThrows(NullPointerException.class, () -> findInsertionPoint(list, null));
+    }
+  }
+
+  /**
+   * Helper for {@link #testFindInsertionPoint()}.  Invokes {@link ListUtils#findInsertionPoint(List, Comparable)}
+   * on the given list and key and adds the key to the list at the returned insertion point.
+   *
+   * @param expectedInsertionPoint the expected return value of {@link ListUtils#findInsertionPoint(List, Comparable)}
+   * @param expectedElements the expected state of the list after inserting the key
+   * @return the result of {@code findInsertionPoint(list, key)}
+   */
+  private int verifyInsertionPoint(List<ComparableInt> list, ComparableInt key, int expectedInsertionPoint, List<ComparableInt> expectedElements) {
+    int i = findInsertionPoint(list, key);
+    list.add(i, key);
+    System.out.println(lenientFormat("%s inserted at index %s: %s", key, i, list));
+    assertEquals(expectedInsertionPoint, i);
+    assertEquals(expectedElements, list);
+    return i;
   }
 
   public void testIsSorted() throws Exception {
@@ -110,16 +200,16 @@ public class ListUtilsTest extends TestCase {
 
   public void testArrayList() throws Exception {
     // the casts are redundant but necessary for testing purposes
-    assertEquals(Arrays.asList(), (ArrayList)arrayList());
-    assertEquals(Arrays.asList("a"), (ArrayList<String>)arrayList("a"));
-    assertEquals(Arrays.asList("a", "b"), (ArrayList<String>)arrayList("a", "b"));
-    assertEquals(Arrays.asList("a", "b", "c"), (ArrayList<String>)arrayList("a", "b", "c"));
+    assertEquals(asList(), (ArrayList)arrayList());
+    assertEquals(asList("a"), (ArrayList<String>)arrayList("a"));
+    assertEquals(asList("a", "b"), (ArrayList<String>)arrayList("a", "b"));
+    assertEquals(asList("a", "b", "c"), (ArrayList<String>)arrayList("a", "b", "c"));
   }
 
   public void testGetLast() throws Exception {
-    assertEquals("a", last(Arrays.asList("a")));
-    assertEquals("b", last(Arrays.asList("a", "b")));
-    assertEquals("c", last(Arrays.asList("a", "b", "c")));
+    assertEquals("a", last(asList("a")));
+    assertEquals("b", last(asList("a", "b")));
+    assertEquals("c", last(asList("a", "b", "c")));
     AssertUtils.assertThrows(IndexOutOfBoundsException.class, new Runnable() {
       public void run() {
         last(new ArrayList<Object>());  // an empty list has no last element
@@ -128,11 +218,11 @@ public class ListUtilsTest extends TestCase {
   }
 
   public void testReversedCopy() throws Exception {
-    assertEquals(Arrays.asList(), reversedCopy(Arrays.asList()));
-    assertEquals(Arrays.asList("a"), reversedCopy(Arrays.asList("a")));
-    assertEquals(Arrays.asList("b", "a"), reversedCopy(Arrays.asList("a", "b")));
-    assertEquals(Arrays.asList("c", "b", "a"), reversedCopy(Arrays.asList("a", "b", "c")));
-    List<String> lst = Arrays.asList("a", "b", "c");
+    assertEquals(asList(), reversedCopy(asList()));
+    assertEquals(asList("a"), reversedCopy(asList("a")));
+    assertEquals(asList("b", "a"), reversedCopy(asList("a", "b")));
+    assertEquals(asList("c", "b", "a"), reversedCopy(asList("a", "b", "c")));
+    List<String> lst = asList("a", "b", "c");
     assertNotSame(lst, reversedCopy(lst));  // make sure that a copy of the list was made
   }
 

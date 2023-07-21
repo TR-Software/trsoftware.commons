@@ -26,11 +26,12 @@ import solutions.trsoftware.commons.shared.util.function.FunctionalUtils;
 import solutions.trsoftware.commons.shared.util.reflect.ClassNameParser;
 
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import javax.lang.model.SourceVersion;
 import javax.lang.model.element.Modifier;
-import java.io.File;
 import java.io.PrintStream;
 import java.lang.reflect.*;
+import java.net.URI;
 import java.nio.file.*;
 import java.util.*;
 import java.util.function.Supplier;
@@ -369,12 +370,20 @@ public abstract class ReflectionUtils {
   /**
    * Infers the compiler output path for the project by using the given class as a reference point.
    * @param refClass A reference class to use in performing the classpath lookup.
-   * @return the root directory of the subtree from where the given class was loaded.  In most cases this would be
-   * the compiler output path for the project (containing the compiled {@code .class} files)
+   * @return The root of the directory tree from where the given class was loaded (in most cases this would be
+   * the compiler output path for the project containing the compiled {@code .class} files).
+   * <p>
+   * Returns {@code null} if unable to derive such path (e.g. if the class is primitive, {@code void},
+   * or its {@code .class} file is not a resource accessible via {@link Class#getResource(String)}.
    */
-  public static Path getCompilerOutputPath(Class refClass) {
+  @Nullable
+  public static Path getCompilerOutputPath(Class<?> refClass) {
     // get the directory containing this .class file
-    final Path refClassFile = Paths.get(getClassFile(refClass).getURI());
+    ResourceLocator classFile = getClassFile(refClass);
+    URI classFileURI;
+    if (classFile == null || (classFileURI = classFile.getURI()) == null)
+      return null;
+    final Path refClassFile = Paths.get(classFileURI);
     final Path refClassDir = refClassFile.getParent();
     // go up to the root dir of the compiler output
     // (by going up the directory tree the same number of steps as the number of packages above this class)
@@ -389,16 +398,6 @@ public abstract class ReflectionUtils {
   }
 
   // TODO: extract the methods that attempt discover locations of .class/.java files to a separate util class
-
-  /**
-   * Infers the compiler output path for the project by using the given class as a reference point.
-   * @param refClass A reference class to use in performing the classpath lookup.
-   * @return the root directory of the subtree from where the given class was loaded.  In most cases this would be
-   * the compiler output path for the project (containing the compiled {@code .class} files)
-   */
-  public static File getCompilerOutputDir(Class refClass) {
-    return getCompilerOutputPath(refClass).toFile();
-  }
 
   /**
    * Delegates to {@link SourceVersion#isKeyword}, which decides whether the arg is a reserved Java keyword or literal
@@ -441,16 +440,18 @@ public abstract class ReflectionUtils {
   }
 
   /**
-   * Attempts to find the location of the compiled {@code .class} file for a given class.
+   * Attempts to find the location of the compiled {@code .class} file for the given class object.
+   * <p>
+   * <em>Caution:</em> the resource referenced by the returned {@link ResourceLocator} might not actually exist or might
+   * not be compatible with file-system operations (e.g. if it's contained within a JAR).
    *
    * @param cls the class to look up (should be a reference type, otherwise will return {@code null})
-   * @return a reference to the location of the compiled {@code .class} file for the given class.
-   * <b>CAUTION:</b> the resource referenced by the returned {@link ResourceLocator} might not actually exist or might
-   * not be compatible with file-system operations (e.g. if it's contained within a JAR).
-   * Will return {@code null} if the class is primitive, {@code void}, or its {@code .class} file is not a resource
+   * @return a reference to the location of the compiled {@code .class} file for the given class,
+   * or {@code null} if the class is primitive, {@code void}, or its {@code .class} file is not a resource
    * accessible via {@link Class#getResource(String)}
    */
-  public static ResourceLocator getClassFile(Class cls) {
+  @Nullable
+  public static ResourceLocator getClassFile(Class<?> cls) {
     // There are five kinds of classes (or interfaces):
     // a) Top level classes
     // b) Nested classes (static member classes)

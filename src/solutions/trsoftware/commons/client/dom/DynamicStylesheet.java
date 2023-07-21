@@ -21,9 +21,10 @@ import com.google.gwt.core.client.JavaScriptObject;
 /**
  * Allows dynamically adding a stylesheet to the DOM.
  * 
- * Jan 9, 2013
- * 
+ * @see com.google.gwt.dom.client.StyleInjector
+ *
  * @author Alex
+ * @since Jan 9, 2013
  */
 public class DynamicStylesheet {
   private JavaScriptObject stylesheet = createDynamicStylesheet();

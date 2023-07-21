@@ -23,6 +23,7 @@ import com.google.gwt.junit.tools.GWTTestSuite;
 import junit.framework.Test;
 import junit.framework.TestCase;
 import junit.framework.TestSuite;
+import solutions.trsoftware.commons.server.io.ResourceLocator;
 import solutions.trsoftware.commons.server.io.file.FileUtils;
 import solutions.trsoftware.commons.server.util.reflect.ReflectionPredicates;
 import solutions.trsoftware.commons.server.util.reflect.ReflectionUtils;
@@ -30,6 +31,7 @@ import solutions.trsoftware.commons.shared.util.StringUtils;
 import solutions.trsoftware.commons.shared.util.collections.DefaultHashSetMap;
 import solutions.trsoftware.tools.util.BytecodeParser;
 
+import javax.annotation.Nonnull;
 import java.io.IOException;
 import java.io.PrintStream;
 import java.lang.annotation.Annotation;
@@ -42,6 +44,7 @@ import java.nio.file.Path;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.util.*;
 import java.util.function.Predicate;
+import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -58,6 +61,8 @@ import static solutions.trsoftware.junit.TestSuiteBuilder.FilterMode.INCLUDE;
  */
 public class TestSuiteBuilder {
 
+  private static final Logger LOGGER = Logger.getLogger(TestSuiteBuilder.class.getName());
+
   /**
    * Matches filenames ending with {@code "Test.class"}}
    */
@@ -72,7 +77,7 @@ public class TestSuiteBuilder {
   private String filenameRegex = DEFAULT_FILENAME_REGEX;;
 
   /** Paths to be searched for test classes */
-  private LinkedHashSet<Path> contentRoots = new LinkedHashSet<>();
+  private final LinkedHashSet<Path> contentRoots = new LinkedHashSet<>();
 
   /**
    * Whether the result should be a tree of suites, grouped by package. Otherwise it will be a single suite containing
@@ -98,7 +103,7 @@ public class TestSuiteBuilder {
    * Test classes inheriting from these will be either included in or excluded from the suite,
    * depending on the {@link FilterMode} key.
    */
-  private FilterMap<Class<?>> superclassFilters = new FilterMap<>();
+  private final FilterMap<Class<?>> superclassFilters = new FilterMap<>();
   /**
    * Test methods (or classes) marked with these annotations ({@code @interface}s) will be either included in or
    * excluded from the suite, depending on the {@link FilterMode} key.
@@ -163,6 +168,14 @@ public class TestSuiteBuilder {
    */
   private TestTimeBoxDecorator.TimeBoxSettings timeBoxSettings;
 
+  public TestSuiteBuilder() {
+    // TODO: don't do this by default: caller should specify if they want this feature (extract method)
+    String packages = System.getProperty("TestSuiteBuilder.packages");
+    if (packages != null) {
+      Arrays.stream(packages.split(",")).map(String::trim).filter(StringUtils::notBlank)
+          .forEach(this::addPackage);
+    }
+  }
 
   /**
    * @param filenameRegex see {@link #filenameRegex}
@@ -201,20 +214,58 @@ public class TestSuiteBuilder {
    * @param path a path containing test classes
    * @return self, for chaining
    */
-  public TestSuiteBuilder addContentRoot(Path path) {
-    contentRoots.add(path);
+  public TestSuiteBuilder addContentRoot(@Nonnull Path path) {
+    if (contentRoots.add(Objects.requireNonNull(path, "path"))) {
+      LOGGER.info("Adding tests from " + path);
+    }
     return this;
   }
 
   /**
    * Adds the path of the given reference class to the set of content roots to be scanned for classes.
    *
-   * @param refClass the location of this class on disk will be used to look for tests to add to the suite
+   * @param refClass the location of the corrseponding {@code .class} file on will be used to look for tests to add to the suite
    * @return self, for chaining
    * @see ReflectionUtils#getCompilerOutputPath(Class)
    */
-  public TestSuiteBuilder addContentRoot(Class refClass) {
-    return addContentRoot(ReflectionUtils.getCompilerOutputPath(refClass));
+  public TestSuiteBuilder addContentRoot(Class<?> refClass) {
+    Path path = ReflectionUtils.getCompilerOutputPath(refClass);
+    if (path == null) {
+      LOGGER.severe("Unable to find compiler output path for " + refClass);
+      return this;
+    }
+    return addContentRoot(path);
+  }
+
+  /**
+   * Adds the compiler output path containing the given package to the set of content roots to be scanned for classes.
+   *
+   * @return self, for chaining
+   * @see ReflectionUtils#getCompilerOutputPath(Class)
+   */
+  public TestSuiteBuilder addPackage(String packageName) {
+    // get the .class file path (compiler output dir) for the given package
+    String resourceName = packageName.replace('.', '/');
+    ResourceLocator res = new ResourceLocator(resourceName);
+    if (res.exists()) {
+      Path path = res.toPath();
+      if (Files.exists(path)) {
+        return addContentRoot(path);
+      }
+    }
+    LOGGER.severe("Unable to find compiler output path for package " + packageName);
+    return this;
+  }
+
+  /**
+   * Adds the compiler output path containing the package of the given class
+   * to the set of content roots to be scanned for classes.
+   *
+   * @return self, for chaining
+   * @see ReflectionUtils#getCompilerOutputPath(Class)
+   */
+  public TestSuiteBuilder addPackageOf(Class<?> classInPackage) {
+    return addPackage(classInPackage.getPackage().getName());
   }
 
   /**
@@ -257,6 +308,9 @@ public class TestSuiteBuilder {
     validateSettings();
     TestSuite testSuite = useGwtTestSuite ? new GWTTestSuite(name) : new TestSuite(name);
     Pattern filenamePattern = Pattern.compile(filenameRegex);
+    /* TODO(5/29/2023): filter the contentRoots to make sure that nothing is included more than once,
+         e.g.  if contentRoots = ["/a/b/c", "/a/b/"], the "/a/b/c" entry is superfluous since already included in "/a/b/"
+      */
     for (Path root : contentRoots) {
       if (groupByPackage)
         addGroupedByPackage(testSuite, root, filenamePattern);
@@ -344,7 +398,7 @@ public class TestSuiteBuilder {
           TestSuite dirTestSuite = suiteStack.peek();
           addIfNotEmpty(dirTestSuite, createTestSuiteForClass(cls));
           Package pkg = cls.getPackage();
-          if (pkg != null)
+          if (dirTestSuite != null && pkg != null)
             dirTestSuite.setName(pkg.getName());  // update the name of the suite to be the proper name of the package
         }
         return FileVisitResult.CONTINUE;
@@ -406,10 +460,19 @@ public class TestSuiteBuilder {
    * @return {@code true} iff the given {@link TestSuite} contains no tests
    */
   public static boolean isEmpty(TestSuite suite) {
-    return suite.testCount() == 0;
+    return suite == null || suite.testCount() == 0;
   }
 
+  /**
+   * Caches tests to ensure there are no duplicates
+   */
+  private LinkedHashMap<Class<?>, TestSuite> testSuitesByClass = new LinkedHashMap<>();
+
   private TestSuite createTestSuiteForClass(Class<?> testClass) {
+    if (testSuitesByClass.containsKey(testClass)) {
+      // already have a suite for this class; probably a duplicate contentRoots entry
+      return null;
+    }
     // leverage the functionality already provided by TestSuite to convert a TestCase into a suite containing its test methods
     TestSuite testSuiteForClass = new TestSuite(testClass);
     // now modify that TestSuite as needed
@@ -452,6 +515,7 @@ public class TestSuiteBuilder {
     for (Test test : testsByName.values()) {
       testSuiteForClass.addTest(test);
     }
+    testSuitesByClass.put(testClass, testSuiteForClass);
     return testSuiteForClass;
   }
 

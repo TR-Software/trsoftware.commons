@@ -185,6 +185,14 @@ public class FunctionalUtils {
     };
   }
 
+  public static <T> Predicate<T> alwaysTrue() {
+    return any -> true;
+  }
+
+  public static <T> Predicate<T> alwaysFalse() {
+    return any -> false;
+  }
+
   // TODO: unit test this class
 
 }

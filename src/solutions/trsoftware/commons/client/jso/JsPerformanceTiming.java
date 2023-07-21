@@ -18,6 +18,8 @@ package solutions.trsoftware.commons.client.jso;
 
 import com.google.gwt.core.client.JavaScriptObject;
 
+import javax.annotation.Nullable;
+
 /**
  * A JSNI overlay type for the window.performance.timing object. Supports a subset of the methods provided by that API.
  *
@@ -31,6 +33,8 @@ import com.google.gwt.core.client.JavaScriptObject;
  * @see <a href="http://msdn.microsoft.com/en-us/ff975075(v=vs.85)">MSDN Reference</a>
  * @see <a href="http://caniuse.com/#search=performance">List of browser versions that support this API</a>
  * @since 11/5/2014
+ *
+ * @deprecated The PerformanceTiming API is no longer recommended (see MDN page)
  */
 public class JsPerformanceTiming extends JavaScriptObject {
 
@@ -38,6 +42,7 @@ public class JsPerformanceTiming extends JavaScriptObject {
   protected JsPerformanceTiming() {
   }
 
+  @Nullable
   public static native JsPerformanceTiming get() /*-{
     var performance = $wnd.performance;
     return performance ? performance.timing : null;

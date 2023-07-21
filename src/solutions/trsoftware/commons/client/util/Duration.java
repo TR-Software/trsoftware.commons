@@ -19,8 +19,6 @@ package solutions.trsoftware.commons.client.util;
 import solutions.trsoftware.commons.shared.util.AbstractDuration;
 import solutions.trsoftware.commons.shared.util.text.DurationFormat;
 
-import static com.google.gwt.core.client.Duration.currentTimeMillis;
-
 /**
  * Client-side implementation of {@link solutions.trsoftware.commons.shared.util.Duration}
  * (a utility class for measuring elapsed time).
@@ -72,6 +70,15 @@ public class Duration extends AbstractDuration {
    */
   public double elapsedMillis() {
     return currentTimeMillis() - start;
+  }
+
+  @Override
+  public double getStartTimeMillis() {
+    return start;
+  }
+
+  public double currentTimeMillis() {
+    return com.google.gwt.core.client.Duration.currentTimeMillis();
   }
 
 

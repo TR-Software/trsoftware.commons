@@ -19,6 +19,7 @@ package solutions.trsoftware.commons.client.images;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.resources.client.ClientBundle;
 import com.google.gwt.resources.client.ImageResource;
+import solutions.trsoftware.commons.client.bundle.SvgImageResource;
 
 /**
  * Provides icons used by this module.
@@ -46,4 +47,6 @@ public interface CommonsImages extends ClientBundle {
   ImageResource loading_circle();
   ImageResource mail24();
 
+  @Source("reloadIconSingleArrow.svg")  // https://commons.wikimedia.org/wiki/File:OOjs_UI_icon_reload-progressive.svg
+  SvgImageResource reloadIconSingleArrow();
 }

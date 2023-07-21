@@ -19,7 +19,7 @@ package solutions.trsoftware.commons.client.event;
 import com.google.gwt.event.dom.client.KeyCodes;
 import com.google.gwt.event.dom.client.KeyDownEvent;
 import com.google.gwt.event.dom.client.KeyDownHandler;
-import com.google.gwt.user.client.ui.TextBox;
+import com.google.gwt.user.client.ui.TextBoxBase;
 
 import java.util.ArrayList;
 import java.util.ListIterator;
@@ -32,15 +32,25 @@ import java.util.ListIterator;
  */
 public class CommandBuffer implements KeyDownHandler {
 
-  private final TextBox textBox;
+  private final TextBoxBase textBox;
 
   private final ArrayList<String> commandHistory = new ArrayList<>();
   private ListIterator<String> commandIterator;
 
   /**
+   * Factory method.  Attaches a new instance of {@link CommandBuffer} to the given input field.
+   * Use this instead of the {@linkplain #CommandBuffer(TextBoxBase) constructor} for better readability.
+   * 
+   * @return the new instance
+   */
+  public static CommandBuffer wrap(TextBoxBase textBox) {
+    return new CommandBuffer(textBox);
+  }
+
+  /**
    * Binds a new instance to the given textbox, attaching key-down handlers to it for the command history cycling behavior.
    */
-  public CommandBuffer(TextBox textBox) {
+  public CommandBuffer(TextBoxBase textBox) {
     this.textBox = textBox;
     textBox.addKeyDownHandler(this);
   }
@@ -82,7 +92,7 @@ public class CommandBuffer implements KeyDownHandler {
     textBox.setCursorPos(command.length());  // place the cursor at the end of the command
   }
 
-  public TextBox getTextBox() {
+  public TextBoxBase getTextBox() {
     return textBox;
   }
 

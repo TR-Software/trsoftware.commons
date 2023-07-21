@@ -11,7 +11,14 @@ import java.util.Objects;
 
 /**
  * A decorator that wraps a {@link List} to allow using negative indices, which are interpreted as
- * offsets from the end of the list, with all {@link List} operations taking an index.
+ * offsets from the end of the list, for all {@link List} operations involving element indices.
+ * <p>
+ * Additionally, provides the following convenience methods that are missing from the {@link List} interface:
+ * <ul>
+ *   <li>{@link #subList(int)}: returns a sublist starting at the given index
+ *   (as a shortcut for {@link #subList(int, int)} where the 2nd arg defaults to the list size)
+ *   </li>
+ * </ul>
  * <p>
  * Examples:
  * <pre>{@code
@@ -26,15 +33,11 @@ import java.util.Objects;
  *   subList.add(-1, 333);
  *     assertEquals(Arrays.asList(0, 1, 2, 33, 333, 4), original);
  * }</pre>
- * <p>
- * Additionally provides the following convenience methods:
- * <ul>
- *   <li>{@link #subList(int)}: shortcut for {@link #subList(int, int)} where the 2nd arg defaults to the list size</li>
- * </ul>
  *
  * @author Alex
  * @since 12/27/2022
  */
+@SuppressWarnings("NullableProblems")
 public class FluentList<E> extends ForwardingList<E> {
 
   @Nonnull

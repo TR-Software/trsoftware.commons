@@ -131,6 +131,7 @@ public class WidgetDecorator {
    * @return the widget itself to allow method chaining.
    */
   public static <T extends Widget> T setVisibilityHidden(T widget, boolean hidden) {
+    // TODO(5/11/2023): com.google.gwt.dom.client.Style now has dedicated setVisibility/clearVisibility methods
     setStyleProperty(widget, "visibility", hidden ? "hidden" : "");
     return widget;
   }

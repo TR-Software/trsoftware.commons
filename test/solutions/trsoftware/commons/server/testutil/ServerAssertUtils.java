@@ -25,6 +25,7 @@ import solutions.trsoftware.commons.shared.testutil.AssertUtils;
 import solutions.trsoftware.commons.shared.util.StringUtils;
 
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import java.lang.reflect.Field;
 import java.lang.reflect.Member;
 import java.lang.reflect.Method;
@@ -32,6 +33,7 @@ import java.lang.reflect.Modifier;
 import java.util.Map;
 import java.util.Set;
 import java.util.function.Function;
+import java.util.function.Predicate;
 import java.util.regex.Pattern;
 
 import static junit.framework.Assert.*;
@@ -59,11 +61,25 @@ public abstract class ServerAssertUtils extends AssertUtils {
    */
   public static <T> void assertEqualsByReflection2(T expected, T actual) throws Exception {
     // TODO: replace the original assertEqualsByReflection implementation with this method (can rename original); add unit test
+    assertEqualsByReflection2(expected, actual, null);
+  }
+
+  /**
+   * Assert that the fields (both public and private) of the given objects are equal, including the fields inherited
+   * from any superclass.
+   * <p>
+   * The given predicate can be used to exclude certain fields from the comparison.
+   *
+   * @param filter a field will be compared only if it matches this predicate
+   * @see ReflectionUtils#getAllDeclaredFields(Class)
+   */
+  public static <T> void assertEqualsByReflection2(T expected, T actual, @Nullable Predicate<Field> filter) throws Exception {
+    // TODO: replace the original assertEqualsByReflection implementation with this method (can rename original); add unit test
     assertSameType(expected, actual);
     Class<?> cls = expected.getClass();
     Set<Field> allFields = ReflectionUtils.getAllDeclaredFields(cls);
     for (Field field : allFields) {
-      if (field.isSynthetic())
+      if (field.isSynthetic() || (filter != null && !filter.test(field)))
         continue;  // ignore synthetic fields (like "this$0")
       if (!field.isAccessible()) {
         field.setAccessible(true);

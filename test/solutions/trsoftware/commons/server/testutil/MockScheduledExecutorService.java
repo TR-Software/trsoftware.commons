@@ -478,7 +478,7 @@ public class MockScheduledExecutorService implements ScheduledExecutorService {
     }
     out.printf("%d Completed tasks", history.size());
     if (!selectedRange.isEmpty()) {
-      out.printf(" (displaying time range %,d - %,d):%n", selectedRange.get(0).time, now());
+      out.printf(" (displaying time range [%,d, %,d]):%n", selectedRange.get(0).time, now());
       out.printf("%5s, %30s, %8s, %12s, %s%n", "id", "time / offset", "runCount", "outcome", "name");
       for (TaskRunRecord task : selectedRange) {
         out.printf("%5s, %30s, %,8d, %12s, %s%n",

@@ -20,7 +20,6 @@ package solutions.trsoftware.commons.server.util.reflect;
 import junit.framework.TestCase;
 import solutions.trsoftware.commons.server.io.ResourceLocator;
 import solutions.trsoftware.commons.server.io.StringPrintStream;
-import solutions.trsoftware.commons.server.io.file.FileSet;
 import solutions.trsoftware.commons.shared.util.SetUtils;
 import solutions.trsoftware.commons.shared.util.StringUtils;
 import solutions.trsoftware.commons.shared.util.VersionNumber;
@@ -157,17 +156,6 @@ public class ReflectionUtilsTest extends TestCase {
     assertEquals(Arrays.asList(DEFAULT, STRICTFP), parseModifiers("default strictfp void"));  // void is not a modifier
   }
 
-  public void testGetCompilerOutputDir() throws Exception {
-    Class<? extends ReflectionUtilsTest> thisClass = getClass();
-    File result = getCompilerOutputDir(thisClass);
-    System.out.println("result = " + result);
-    assertTrue(result.exists());
-    assertTrue(result.isDirectory());
-    // confirm that the result indeed contains this class
-    FileSet allClassFiles = new FileSet(result);
-    assertTrue(allClassFiles.contains(ReflectionUtils.getClassFile(thisClass).toFile()));
-  }
-
   private static void assertAllAssignableFrom(Class<?> arg, Set<Class<?>> expected) {
     Set<Class<?>> actual = getAllTypesAssignableFrom(arg);
     System.out.println(StringUtils.methodCallToStringWithResult("getAllTypesAssignableFrom", actual, arg));
@@ -177,6 +165,7 @@ public class ReflectionUtilsTest extends TestCase {
     }
   }
 
+  @SuppressWarnings("ConfusingArgumentToVarargsMethod")
   private static void assertAllAssignableFromAll(Class<?>[] args, Set<Class<?>> expected) {
     Set<Class<?>> actual = getAllTypesAssignableFromAll(args);
     System.out.println(StringUtils.methodCallToStringWithResult("getAllTypesAssignableFromAll", actual, args));

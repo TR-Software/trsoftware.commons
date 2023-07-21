@@ -24,24 +24,23 @@ import java.util.stream.Stream;
 /**
  * An online version of {@link NumberSample} for {@link Comparable} values that uses O(1) space.
  * Computes mean and variance of the sample without storing all the individual data points using
- * the algorithm described in http://en.wikipedia.org/wiki/Algorithms_for_calculating_variance#Online_algorithm.
+ * <a href="https://en.wikipedia.org/wiki/Algorithms_for_calculating_variance#Welford's_online_algorithm">
+ *   Welford's algorithm</a>.
  * <p>
  * Since the individual numbers are not stored, it's impossible to compute an exact median nor select a percentile,
  * therefore those operations are not supported.
  * <p>
- * In the future, it's possible to modify this class to use an approximate online median selection algorithm like the
- * one described in Cantone and Hofri, "Analysis of An Approximate Median Selection Algorithm,"
- * ftp.cs.wpi.edu/pub/techreports/pdf/06-17.pdf
- *
- * <p style="color: #6495ed; font-weight: bold;">
- *   TODO: implement {@link java.util.stream.Collector} to allow using this class with a stream.
- * </p>
+ * <i>Note: </i>in the future, it might be possible to modify this class to use an approximate online median selection
+ * algorithm like the one described in <a href="https://ftp.cs.wpi.edu/pub/techreports/pdf/06-17.pdf">
+ *   Cantone and Hofri, "Analysis of An Approximate Median Selection Algorithm"</a>
  *
  * @author Alex
  * @see NumberSampleOnlineDouble
  * @see NumberSample
  */
 public class NumberSampleOnline<N extends Number & Comparable<N>> implements SampleStatistics<N>, CollectableStats<N, NumberSampleOnline<N>>, Serializable {
+
+  // TODO: implement java.util.stream.Collector to allow using this class with a stream
 
   private final MeanAndVariance meanAndVariance = new MeanAndVariance();
   private final MinAndMaxComparable<N> minAndMax = new MinAndMaxComparable<N>();

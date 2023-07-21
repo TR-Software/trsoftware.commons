@@ -285,7 +285,7 @@ public final class ColorRGB implements Serializable {
    * {@link java.awt.image.ColorModel}:
    * <table border=1>
    * <tr>
-   * <th colspan=4>Bits</th>
+   * <th colspan=4 align=center>Bits</th>
    * </tr>
    * <tr>
    * <th>31 - 24</th>
@@ -309,7 +309,6 @@ public final class ColorRGB implements Serializable {
    * @see #getRed
    * @see #getGreen
    * @see #getBlue
-   * @since JDK1.0
    */
   public int getRGB() {
     return value;

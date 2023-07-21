@@ -88,6 +88,11 @@ public class Duration extends AbstractDuration implements AutoCloseable {
     return timeUnit.from(TimeUnit.NANOSECONDS, nanos);
   }
 
+  @Override
+  public double getStartTimeMillis() {
+    return start;
+  }
+
   /**
    * If the duration is less than an hour, it will be printed as "MM:SS" or "MM:SS.millis" if printMillis is true,
    * and if greater than an hour, it will be printed as "HH:MM:SS" or "HH:MM:SS.millis" if printMillis is true.

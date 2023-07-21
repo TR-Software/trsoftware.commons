@@ -22,6 +22,10 @@ import com.google.gwt.user.client.DOM;
 import com.google.gwt.user.client.ui.ComplexPanel;
 import com.google.gwt.user.client.ui.Widget;
 
+import javax.annotation.Nonnull;
+
+import static java.util.Objects.requireNonNull;
+
 /**
  * Panel that displays its children within {@code <li>} elements nested in a parent {@code <ol>} or {@code <ul>}
  * (determined by the {@link Type} arg passed to the constructor).
@@ -49,8 +53,8 @@ public class ListPanel extends ComplexPanel {
   /**
    * @param listType determines whether to use {@code <ul>} or {@code <ol>} as the main element
    */
-  public ListPanel(Type listType) {
-    this.listType = listType;
+  public ListPanel(@Nonnull Type listType) {
+    this.listType = requireNonNull(listType, "listType");
     switch (listType) {
       case UL:
         setElement(Document.get().createULElement());
@@ -87,7 +91,7 @@ public class ListPanel extends ComplexPanel {
      * super.remove() will detach the child widget's element from its parent.
      */
     com.google.gwt.dom.client.Element li = w.getElement().getParentElement();
-    boolean removed = super.remove(w);
+    boolean removed = super.remove(w);  // physically detaches w from li and logically detaches it from the panel
     if (removed) {
       getElement().removeChild(li);
     }

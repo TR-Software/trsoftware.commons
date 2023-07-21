@@ -21,6 +21,7 @@ import solutions.trsoftware.commons.client.exceptions.StackTraceDeobfuscatorServ
 import solutions.trsoftware.commons.server.servlet.ServletUtils;
 import solutions.trsoftware.commons.server.servlet.config.WebConfigParser;
 
+import javax.annotation.Nonnull;
 import javax.servlet.ServletContext;
 import java.io.File;
 import java.util.HashMap;
@@ -96,7 +97,7 @@ public class StackTraceDeobfuscatorServlet extends RemoteServiceServlet implemen
       str.append(ste).append("\n");
     }
     String result = str.toString();
-    logStackTrace(exceptionMessage, result);
+    logStackTrace(exceptionMessage, stackTrace);
     return result;
   }
 
@@ -108,12 +109,33 @@ public class StackTraceDeobfuscatorServlet extends RemoteServiceServlet implemen
    *
    * @see ServletContext#log(String)
    */
-  protected void logStackTrace(String exceptionMessage, String deobfuscatedStackTrace) {
+  protected void logStackTrace(String exceptionMessage, StackTraceElement[] deobfuscatedStackTrace) {
+    // TODO: experiment: maybe use this to replace the original logStackTrace(String, String) method
     // record the stack trace before returning it
     StringBuilder logMsgBuilder = ServletUtils.appendGwtRequestInfo(new StringBuilder("Client-side stack trace for "),
         getThreadLocalRequest(), getPermutationStrongName());
-    logMsgBuilder.append('\n').append(exceptionMessage).append(":\n").append(deobfuscatedStackTrace);
-    getServletContext().log(logMsgBuilder.toString());
+//    logMsgBuilder.append('\n').append(exceptionMessage).append(":\n").append(deobfuscatedStackTrace);
+    getServletContext().log(logMsgBuilder.toString(),
+        new StackTraceHolder(exceptionMessage, deobfuscatedStackTrace));
+  }
+
+  public static class StackTraceHolder extends Throwable {
+    // TODO: maybe extract class as a general util in TR Commons (similar to solutions.trsoftware.commons.server.util.StackTraceWrapper)
+
+    public StackTraceHolder(@Nonnull String message, @Nonnull StackTraceElement[] stackTrace) {
+      super(message);
+      setStackTrace(stackTrace);
+    }
+
+    @Override
+    public String toString() {
+      return getMessage();
+    }
+
+    @Override
+    public synchronized Throwable fillInStackTrace() {
+      return this;  // no-op, since custom stack trace is provided
+    }
   }
 
   /**

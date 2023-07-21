@@ -47,6 +47,11 @@ public class MockDuration extends AbstractDuration {
     return elapsedMillis;
   }
 
+  @Override
+  public double getStartTimeMillis() {
+    throw new UnsupportedOperationException();
+  }
+
   /**
    * Sets {@link #elapsedMillis} to the given value.
    *

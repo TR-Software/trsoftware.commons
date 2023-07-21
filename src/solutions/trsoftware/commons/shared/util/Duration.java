@@ -56,4 +56,5 @@ public interface Duration {
    */
   double computeSpeed(int nOperations, TimeUnit timeUnit);  // TODO(11/1/2016): use this new method everywhere Duration is used to compute processing speed
 
+  double getStartTimeMillis();
 }

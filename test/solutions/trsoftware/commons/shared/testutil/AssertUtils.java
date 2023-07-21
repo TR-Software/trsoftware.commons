@@ -246,6 +246,15 @@ public abstract class AssertUtils {
     assertEquals(asList(expected), asList(actual));
   }
 
+  public static void assertSameSize(Map<?, ?> expected, Map<?, ?> actual) {
+    assertEquals(expected.size(), actual.size());
+  }
+
+
+  public static void assertSameSize(Collection<?> expected, Collection<?> actual) {
+    assertEquals(expected.size(), actual.size());
+  }
+
   /*
    TODO: can get rid of all the assertArraysEqual methods, because they duplicate those already provided by JUnit
     (see org.junit.Assert.assertArrayEquals(int[], int[]))
@@ -583,7 +592,7 @@ public abstract class AssertUtils {
    * Asserts that the given array contains exactly 1 element and returns that element
    *
    * @return the only element from the array
-   * @throws AssertionFailedError if list size != 1
+   * @throws AssertionFailedError if array length != 1
    * @see #getOnlyElement(Collection)
    */
   public static <T> T getOnlyElement(T[] arr) {

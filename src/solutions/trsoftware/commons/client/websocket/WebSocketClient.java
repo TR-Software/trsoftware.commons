@@ -22,6 +22,10 @@ public abstract class WebSocketClient {
     webSocket.close();
   }
 
+  public boolean isOpen() {
+    return webSocket.getReadyState() == WebSocket.ReadyState.OPEN;
+  }
+
   public abstract void onOpen();
   public abstract void onClose(CloseEvent closeEvent);
   public abstract void onMessage(String message);

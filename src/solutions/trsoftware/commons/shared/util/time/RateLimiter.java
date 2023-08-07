@@ -81,7 +81,7 @@ public class RateLimiter {
    *
    * @throws RateLimitException if the latest window already contains at least {@link #max} event times.
    */
-  public synchronized void checkRateLimit() {
+  public synchronized void checkRateLimit() throws RateLimitException {
     // 1) clear all the events past the horizon
     while (!eventTimes.isEmpty() && clock.getMillisSince(eventTimes.peek()) >= timeWindowMillis)
       eventTimes.poll();
@@ -106,7 +106,7 @@ public class RateLimiter {
   /**
    * Thrown when the rate limit has been exceeded.
    */
-  public class RateLimitException extends RuntimeException {
+  public class RateLimitException extends Exception {
     public RateLimitException() {
       super(new StringBuilder("Exceeded the maximum rate of ")
           .append(max).append(" ").append(StringUtils.pluralize(eventName, max))

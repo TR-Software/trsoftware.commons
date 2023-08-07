@@ -147,14 +147,14 @@ public class Clock {
   }
 
   /**
-   * Calls {@link Stopwatch#createUnstarted(Ticker)} or {@link Stopwatch#createUnstarted()}
+   * Calls {@link Stopwatch#createStarted(Ticker)} or {@link Stopwatch#createUnstarted()}
    * using this clock's {@link #ticker()}.
    *
    * @param started whether to call {@link Stopwatch#createStarted(Ticker)} or {@link Stopwatch#createUnstarted(Ticker)}
    * @return the result of {@link Stopwatch#createStarted(Ticker)} if the argument is {@code true}, otherwise
    * {@link Stopwatch#createUnstarted(Ticker)}
    */
-  public static Stopwatch createStopwatch(boolean started) {
+  public static Stopwatch newStopwatch(boolean started) {
     return started ? Stopwatch.createStarted(ticker()) : Stopwatch.createUnstarted(ticker());
   }
 

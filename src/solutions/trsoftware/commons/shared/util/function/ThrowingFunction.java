@@ -70,8 +70,10 @@ public interface ThrowingFunction<T, R, E extends Exception> extends Function<T,
    * {@link Function}.
    *
    * @param function the function or method reference that throws a checked exception
+   * @return the throwing function cast to a normal function, such that any checked exceptions thrown by the given function
+   *   will be rethrown as unchecked {@link WrappedException} exceptions
    */
-  static <T, R, E extends Exception> Function<T, R> cast(ThrowingFunction<T, R, E> function) {
+  static <T, R, E extends Exception> Function<T, R> unchecked(ThrowingFunction<T, R, E> function) {
     return function;
   }
 }

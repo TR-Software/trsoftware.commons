@@ -397,10 +397,10 @@ public class ClockTest extends TestCase {
     assertTickerRunning(ticker, printTicks);
   }
 
-  public void testCreateStopwatch() throws Exception {
+  public void testNewStopwatch() throws Exception {
     Clock.stop();
-    Stopwatch started = Clock.createStopwatch(true);
-    Stopwatch unstarted = Clock.createStopwatch(false);
+    Stopwatch started = Clock.newStopwatch(true);
+    Stopwatch unstarted = Clock.newStopwatch(false);
     assertTrue(started.isRunning());
     assertFalse(unstarted.isRunning());
     assertEquals(0, started.elapsed(NANOSECONDS));

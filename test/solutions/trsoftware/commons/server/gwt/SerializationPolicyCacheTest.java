@@ -58,7 +58,7 @@ public class SerializationPolicyCacheTest extends SerializationPolicyMapTestCase
     Set<String> expectedModules = expectedServicesByModule.keySet();
     assertEquals(expectedModules, cache.getModuleNames());
     Map<String, SerializationPolicyMap> expectedPolicyMaps = expectedModules.stream()
-        .collect(Collectors.toMap(Function.identity(), ThrowingFunction.cast(this::getExpectedPolicyMap)));
+        .collect(Collectors.toMap(Function.identity(), ThrowingFunction.unchecked(this::getExpectedPolicyMap)));
     assertEquals(expectedPolicyMaps, cache.getPoliciesByModuleName());
     for (Map.Entry<String, Set<Class<? extends RemoteService>>> servicesForModule : expectedServicesByModule.entrySet()) {
       verifyPoliciesForModule(cache, servicesForModule.getKey(), servicesForModule.getValue());

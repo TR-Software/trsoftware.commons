@@ -1,20 +1,27 @@
 package solutions.trsoftware.commons.server.management.monitoring;
 
+import com.google.common.base.MoreObjects;
 import com.google.common.primitives.Longs;
 import solutions.trsoftware.commons.server.io.ServerIOUtils;
+import solutions.trsoftware.commons.server.management.monitoring.DeadlockDetector.DeadlockEvent;
+import solutions.trsoftware.commons.server.util.Duration;
 import solutions.trsoftware.commons.server.util.RuntimeUtils;
 import solutions.trsoftware.commons.shared.BaseTestCase;
 import solutions.trsoftware.commons.shared.annotations.Slow;
 import solutions.trsoftware.commons.shared.util.stats.HashCounter;
 
+import java.lang.management.ManagementFactory;
+import java.lang.management.ThreadMXBean;
 import java.util.ArrayList;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
-import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
+import static java.lang.String.format;
 import static solutions.trsoftware.commons.shared.util.SetUtils.newSet;
+import static solutions.trsoftware.commons.shared.util.StringUtils.idToString;
 
 /**
  * @author Alex
@@ -22,44 +29,74 @@ import static solutions.trsoftware.commons.shared.util.SetUtils.newSet;
  */
 public class DeadlockDetectorTest extends BaseTestCase {
 
-
-  /*@Slow
-  public void testWithMonitorLocks() throws Exception {
-    DeadlockDetector detector = new DeadlockDetector();
-    int nThreads = 2;
+  /**
+   * Creates 2 new threads which should become deadlocked after running the given code, and verifies
+   * that the deadlock is detected by {@link DeadlockDetector} as well as the fired {@link DeadlockEvent}
+   *
+   * @return the threads created by this method
+   */
+  static ArrayList<Thread> testDeadlockDetection(DeadlockSimulator code) {
+    DeadlockDetector detector = new DeadlockDetector(DeadlockDetector.class.getSimpleName());
     ArrayList<Thread> threads = new ArrayList<>();
     AtomicBoolean foundDeadlock = new AtomicBoolean();
-    DeadlockingMonitorCode code = new DeadlockingMonitorCode();
+    Duration testDuration = new Duration();
 
+    int nThreads = 2;
     for (int i = 0; i < nThreads; i++) {
-      Thread thread = new Thread(new DeadlockingRunnable(code));
+      Thread thread = new Thread(code);
       threads.add(thread);
       thread.start();
     }
-    detector.addHandler(new DeadlockDetector.DefaultDeadlockHandler() {
+    System.err.printf("testDeadlockDetection(%s(%s))%n", idToString(code), idToString(code.counter));
+
+    DeadlockDetector.DefaultDeadlockHandler handler = new DeadlockDetector.DefaultDeadlockHandler() {
       @Override
-      public void deadlockDetected(DeadlockDetector.DeadlockEvent event) {
-        super.deadlockDetected(event);
-        assertEquals(newSet(threads), newSet(event.getThreads()));
+      public void deadlockDetected(DeadlockEvent deadlockEvent) {
+        super.deadlockDetected(deadlockEvent);
+        assertEquals(newSet(threads), newSet(deadlockEvent.getThreads()));
         Set<Long> expectedThreadIds = threads.stream().map(Thread::getId).collect(Collectors.toSet());
-        assertEquals(expectedThreadIds, newSet(Longs.asList(event.getThreadIds())));
-        System.err.println("code.counter = " + code.counter);
+        assertEquals(expectedThreadIds, newSet(Longs.asList(deadlockEvent.getThreadIds())));
+        System.err.printf("deadlockDetected for code=%s, code.%s=%s%n", idToString(code), idToString(code.counter), code.counter);
+        System.err.printf("code.%s = %s%n", idToString(code.counter), code.counter);
         synchronized (foundDeadlock) {
           foundDeadlock.set(true);
           foundDeadlock.notify();
         }
       }
-    });
+    };
+    detector.addHandler(handler);
 
+    assertFalse(detector.isRunning());
+    assertFalse(detector.isShutdown());
     detector.start(1, 10);
-//
-//    thread1.join();
-//    thread2.join();
-    synchronized (foundDeadlock) {
-      foundDeadlock.wait(10_000);
-      assertTrue(foundDeadlock.get());
+    assertTrue(detector.isRunning());
+
+    try {
+      if (!foundDeadlock.get()) {
+        // if not found right away, wait long enough for the deadlock to occur and be detected
+        synchronized (foundDeadlock) {
+          int timeout = 10_000;
+          System.out.printf("Waiting %,d ms for deadlock to be detected%n", timeout);
+          try {
+            foundDeadlock.wait(timeout);
+          }
+          catch (InterruptedException e) {
+            throw new RuntimeException("Unexpectedly interrupted while waiting for a deadlock", e);
+          }
+          boolean found = foundDeadlock.get();
+          System.out.printf("Deadlock %sdetected after %,f ms.%n", found ? "" : "not ", testDuration.elapsedMillis());
+          assertTrue("Should have detected a deadlock", found);
+        }
+      }
     }
-  }*/
+    finally {
+      assertFalse(detector.isShutdown());
+      detector.shutdown();
+      assertFalse(detector.isRunning());
+      assertTrue(detector.isShutdown());
+    }
+    return threads;
+  }
 
   /**
    * Tests detection of a monitor (i.e. {@code synchronized} block) deadlock.
@@ -80,14 +117,15 @@ public class DeadlockDetectorTest extends BaseTestCase {
   }
 
   /**
-   * Helper for {@link #testWithMonitorLocks()}, intended to be run in a separate JVM process.
+   * Helper for {@link #testWithMonitorLocks()}, intended to be run in a separate JVM process, so that the
+   * permanently-deadlocked threads don't affect any other tests running in the suite
    */
   private static class MonitorDeadlockTester {
-    private static final Logger LOGGER = Logger.getLogger(MonitorDeadlockTester.class.getName());
 
     public static void main(String[] args) {
       try {
         doTest();
+        System.exit(0);  // must explicitly call exit because; otherwise will never finish with the deadlocked threads still running
       }
       catch (Throwable e) {
         e.printStackTrace();
@@ -96,156 +134,183 @@ public class DeadlockDetectorTest extends BaseTestCase {
     }
 
     private static void doTest() throws InterruptedException {
-      DeadlockDetector detector = new DeadlockDetector(DeadlockDetector.class.getSimpleName());
-      int nThreads = 2;
-      ArrayList<Thread> threads = new ArrayList<>();
-      AtomicBoolean foundDeadlock = new AtomicBoolean();
-      DeadlockingMonitorCode code = new DeadlockingMonitorCode();
-
-      for (int i = 0; i < nThreads; i++) {
-        Thread thread = new Thread(new DeadlockingRunnable(code));
-        threads.add(thread);
-        thread.start();
-      }
-      detector.addHandler(new DeadlockDetector.DefaultDeadlockHandler() {
-        @Override
-        public void deadlockDetected(DeadlockDetector.DeadlockEvent event) {
-          super.deadlockDetected(event);
-          assertEquals(newSet(threads), newSet(event.getThreads()));
-          Set<Long> expectedThreadIds = threads.stream().map(Thread::getId).collect(Collectors.toSet());
-          assertEquals(expectedThreadIds, newSet(Longs.asList(event.getThreadIds())));
-          System.err.println("code.counter = " + code.counter);
-          synchronized (foundDeadlock) {
-            foundDeadlock.set(true);
-            foundDeadlock.notify();
-          }
-        }
-      });
-
-      detector.start(1, 10);
-      synchronized (foundDeadlock) {
-        System.out.println("Waiting for foundDeadlock");
-        foundDeadlock.wait(1_000);
-        System.out.println("Notified for foundDeadlock");
-        assertTrue("Should have detected a deadlock", foundDeadlock.get());
-        detector.terminate();
-        System.exit(foundDeadlock.get() ? 0 : 1);
-      }
+      testDeadlockDetection(new MonitorDeadlockSimulator());
     }
+
   }
 
   @Slow
-  public void testWithReentrantLocks() throws Exception {
-    DeadlockDetector detector = new DeadlockDetector(DeadlockDetector.class.getSimpleName());
-    int nThreads = 2;
-    ArrayList<Thread> threads = new ArrayList<>();
-    AtomicBoolean foundDeadlock = new AtomicBoolean();
-    InterruptibleReentrantLockCode code = new InterruptibleReentrantLockCode();
+  public void testWithInterruptibleLocks() throws Exception {
+    // 1) make sure there are no pre-existing deadlocks in the system (which could throw off this test)
+    assertNoDeadlock();
 
-    for (int i = 0; i < nThreads; i++) {
-      Thread thread = new Thread(new DeadlockingRunnable(code));
-      threads.add(thread);
-      thread.start();
-    }
-    detector.addHandler(new DeadlockDetector.DefaultDeadlockHandler() {
-      @Override
-      public void deadlockDetected(DeadlockDetector.DeadlockEvent event) {
-        super.deadlockDetected(event);
-        assertEquals(newSet(threads), newSet(event.getThreads()));
-        Set<Long> expectedThreadIds = threads.stream().map(Thread::getId).collect(Collectors.toSet());
-        assertEquals(expectedThreadIds, newSet(Longs.asList(event.getThreadIds())));
-        System.err.println("code.counter = " + code.counter);
-        synchronized (foundDeadlock) {
-          foundDeadlock.set(true);
-          foundDeadlock.notify();
-        }
-      }
-    });
-    detector.start(1, 10);
+    // 2) perform the test by creating deadlocked threads and ensuring that they are detected
+    ArrayList<Thread> threads = testDeadlockDetection(new InterruptibleDeadlockSimulator(true));
+
+    // 3) make sure the deadlock was resolved by interrupting the threads
+    assertNoDeadlock();
+
     // should be able to join the threads because the deadlock should've been resolved via interruption
     for (Thread thread : threads) {
       thread.join();
     }
-    synchronized (foundDeadlock) {
-      foundDeadlock.wait(10_000);
-      assertTrue(foundDeadlock.get());
-    }
+  }
+
+  /**
+   * Asserts that no deadlock is currently present in the JVM, using {@link ThreadMXBean#findDeadlockedThreads()}
+   */
+  public static void assertNoDeadlock() {
+    assertNull(ManagementFactory.getThreadMXBean().findDeadlockedThreads());
   }
 
 
-  public interface DeadlockingCode {
-    void f();
+  /**
+   * Declares 2 abstract methods ({@link #f()} and {@link #g()}) that should cause a deadlock when invoked concurrently.
+   * This abstraction allows simulating different types of deadlocks, e.g. with {@code synchronized} blocks or
+   * {@link java.util.concurrent.locks}.
+   * <p>
+   * Provides a {@link #run()} method that infinitely calls {@link #f()} and {@link #g()} until the thread
+   * is interrupted.  Subclasses just have to implement the 2 abstract methods in a way that causes a race condition
+   * that leads to a deadlock of the desired type, and run the same instance of this {@link Runnable} in 2 or more threads.
+   *
+   * @see MonitorDeadlockSimulator
+   * @see InterruptibleDeadlockSimulator
+   */
+  public abstract static class DeadlockSimulator implements Runnable {
+    /**
+     * Counts the number of times the critical section is reached by each thread
+     */
+    protected final HashCounter<String> counter = new HashCounter<>();
 
-    void g();
-  }
+    public abstract void f();
 
-  static class DeadlockingMonitorCode implements DeadlockingCode {
-    private final Object lock = new Object();
-    private HashCounter<Thread> counter = new HashCounter<>();
-
-    public synchronized void f() {
-      synchronized (lock) {
-        // do something
-        counter.increment(Thread.currentThread());
-      }
-    }
-
-    public void g() {
-      synchronized (lock) {
-        f();
-      }
-    }
-  }
-
-  static class InterruptibleReentrantLockCode implements DeadlockingCode {
-    private final ReentrantLock lock1 = new ReentrantLock();
-    private final ReentrantLock lock2 = new ReentrantLock();
-    private final HashCounter<Thread> counter = new HashCounter<>();
-
-    public void f() {
-      try {
-        lock1.lockInterruptibly();
-        lock2.lockInterruptibly();
-        // do something
-        counter.increment(Thread.currentThread());
-      }
-      catch (InterruptedException e) {
-        throw new RuntimeException(e);
-      }
-      finally {
-        lock2.unlock();
-        lock1.unlock();
-      }
-    }
-
-    public void g() {
-      try {
-        lock2.lockInterruptibly();
-        f();
-      }
-      catch (InterruptedException e) {
-        throw new RuntimeException(e);
-      }
-      finally {
-        lock2.unlock();
-      }
-    }
-  }
-
-  static class DeadlockingRunnable implements Runnable {
-    private final DeadlockingCode code;
-
-    public DeadlockingRunnable(DeadlockingCode code) {
-      this.code = code;
-    }
+    public abstract void g();
 
     @Override
     public void run() {
       while (!Thread.interrupted()) {
-        code.g();
-        code.f();
+        f();
+        g();
       }
+    }
+  }
 
+  /**
+   * Simulates a deadlock with {@code synchronized} blocks.
+   * <p>
+   * <strong>Warning:</strong>
+   * <p>
+   * There is no way to programmatically resolve this kind of deadlock without restarting the JVM process
+   * (because threads waiting to enter such a block cannot respond to {@linkplain Thread#interrupt() interrupts}
+   * and cannot be killed via {@link Thread#stop()}).
+   * <p>
+   * Any unit tests employing this code should probably <em>run in a separate JVM process</em>,
+   * to avoid leaking system resources while running a large JUnit test suite.
+   */
+  public static class MonitorDeadlockSimulator extends DeadlockSimulator {
+    private final Object lock = new Object();
+
+    public void f() {
+      synchronized (lock) {
+        g();
+      }
+    }
+
+    public synchronized void g() {
+      synchronized (lock) {
+        // do something
+        counter.increment(Thread.currentThread().getName());
+      }
+    }
+  }
+
+  /**
+   * Simulates a deadlock using {@link ReentrantLock#lockInterruptibly()}.  This type of deadlock can be resolved
+   * by {@linkplain Thread#interrupt() interrupting} the affected threads.
+   */
+  public static class InterruptibleDeadlockSimulator extends DeadlockSimulator {
+    private final ReentrantLock lock1 = new NamedReentrantLock("lock1");
+    private final ReentrantLock lock2 = new NamedReentrantLock("lock2");
+    private boolean verbose;
+
+    public InterruptibleDeadlockSimulator() {
+    }
+
+    public InterruptibleDeadlockSimulator(boolean verbose) {
+      this.verbose = verbose;
+    }
+
+    public void f() {
+      try {
+        lock2.lockInterruptibly();
+        g();
+      }
+      catch (InterruptedException e) {
+        throw new RuntimeException(formatInterruptedMsg(lock2, "f"), e);
+      }
+      finally {
+        if (lock2.isHeldByCurrentThread())
+          lock2.unlock();
+      }
+    }
+
+    public void g() {
+      ArrayList<Lock> heldLocks = new ArrayList<>();
+      try {
+        try {
+          lock1.lockInterruptibly();
+          heldLocks.add(lock1);
+        }
+        catch (InterruptedException e) {
+          throw new RuntimeException(
+              formatInterruptedMsg(lock1, "g"), e);
+        }
+        try {
+          lock2.lockInterruptibly();
+          heldLocks.add(lock2);
+          // do the following if both locks acquired successfully:
+          String currentThreadName = Thread.currentThread().getName();
+          counter.increment(currentThreadName);
+          if (verbose) {
+            System.err.printf("%s.%s[%s]++ = %s%n", idToString(this), idToString(counter), currentThreadName, counter);
+          }
+        }
+        catch (InterruptedException e) {
+          throw new RuntimeException(formatInterruptedMsg(lock2, "g"), e);
+        }
+      }
+      finally {
+        heldLocks.forEach(Lock::unlock);
+      }
+    }
+
+    private static String formatInterruptedMsg(ReentrantLock lock, String methodName) {
+      return format("%s interrupted while trying to acquire %s in %s()",
+          Thread.currentThread(), lock, methodName);
+    }
+  }
+
+  /**
+   * Extends {@link ReentrantLock} to provide a more-useful {@link #toString()} representation.
+   */
+  static class NamedReentrantLock extends ReentrantLock {
+    private String name;
+
+    public NamedReentrantLock(String name) {
+      this.name = name;
+    }
+
+    public NamedReentrantLock(String name, boolean fair) {
+      super(fair);
+      this.name = name;
+    }
+
+    @Override
+    public String toString() {
+      return MoreObjects.toStringHelper(this)
+          .add("name", name)
+          .add("owner", getOwner())
+          .toString();
     }
   }
 

@@ -22,6 +22,7 @@ import solutions.trsoftware.commons.client.CommonsGwtTestCase;
 import solutions.trsoftware.commons.shared.testutil.AssertUtils;
 import solutions.trsoftware.commons.shared.util.TimeUnit;
 import solutions.trsoftware.commons.shared.util.TimeUtils;
+import solutions.trsoftware.commons.shared.util.function.ThrowingRunnable;
 
 /**
  * Nov 13, 2010
@@ -63,20 +64,12 @@ public class RateLimiterTest extends CommonsGwtTestCase {
       assertEquals(0d, r.millisUntilCanProceed());
       r.checkRateLimit();
       assertEquals(100d, r.millisUntilCanProceed());
-      AssertUtils.assertThrows(RateLimiter.RateLimitException.class, new Runnable() {
-        public void run() {
-          r.checkRateLimit();
-        }
-      });
+      AssertUtils.assertThrows(RateLimiter.RateLimitException.class, (ThrowingRunnable)r::checkRateLimit);
       mockTime.advance(55);
       assertEquals(45d, r.millisUntilCanProceed());
       mockTime.advance(45);
       r.checkRateLimit();
-      AssertUtils.assertThrows(RateLimiter.RateLimitException.class, new Runnable() {
-        public void run() {
-          r.checkRateLimit();
-        }
-      });
+      AssertUtils.assertThrows(RateLimiter.RateLimitException.class, (ThrowingRunnable)r::checkRateLimit);
     }
 
     // check a window of size 2
@@ -85,21 +78,13 @@ public class RateLimiterTest extends CommonsGwtTestCase {
       r.checkRateLimit();
       mockTime.advance(5);
       r.checkRateLimit();
-      AssertUtils.assertThrows(RateLimiter.RateLimitException.class, new Runnable() {
-        public void run() {
-          r.checkRateLimit();
-        }
-      });
+      AssertUtils.assertThrows(RateLimiter.RateLimitException.class, (ThrowingRunnable)r::checkRateLimit);
       assertEquals(95d, r.millisUntilCanProceed());
       mockTime.advance(95);
       r.checkRateLimit();
       mockTime.advance(5);
       r.checkRateLimit();
-      AssertUtils.assertThrows(RateLimiter.RateLimitException.class, new Runnable() {
-        public void run() {
-          r.checkRateLimit();
-        }
-      });
+      AssertUtils.assertThrows(RateLimiter.RateLimitException.class, (ThrowingRunnable)r::checkRateLimit);
     }
     
     // check a window of size 3
@@ -111,21 +96,13 @@ public class RateLimiterTest extends CommonsGwtTestCase {
       assertEquals(0d, r.millisUntilCanProceed());
       r.checkRateLimit();
       assertEquals(150d, r.millisUntilCanProceed());
-      AssertUtils.assertThrows(RateLimiter.RateLimitException.class, new Runnable() {
-        public void run() {
-          r.checkRateLimit();
-        }
-      });
+      AssertUtils.assertThrows(RateLimiter.RateLimitException.class, (ThrowingRunnable)r::checkRateLimit);
       mockTime.advance(150);
       // window should now contain just the 1 event that happened after 50ms
       r.checkRateLimit();
       r.checkRateLimit();
       assertEquals(50d, r.millisUntilCanProceed());
-      AssertUtils.assertThrows(RateLimiter.RateLimitException.class, new Runnable() {
-        public void run() {
-          r.checkRateLimit();
-        }
-      });
+      AssertUtils.assertThrows(RateLimiter.RateLimitException.class, (ThrowingRunnable)r::checkRateLimit);
     }
   }
 

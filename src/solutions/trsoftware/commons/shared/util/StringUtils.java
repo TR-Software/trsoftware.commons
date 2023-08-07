@@ -1345,7 +1345,7 @@ public class StringUtils {
    * Generates the same default string representation of the given object as the one that would been produced by
    * {@link Object#toString()} if the object's class didn't override either {@link Object#toString()} or {@link Object#hashCode()}).
    * <p>
-   * In other words, this method returns a string equal to the value of:
+   * More precisely, this method returns a string equal to the value of:
    * <pre>
    *   o.getClass().getName() + '@' + Integer.toHexString(System.identityHashCode(o))
    * </pre>
@@ -1371,8 +1371,8 @@ public class StringUtils {
   }
 
   /**
-   * Similar to {@link #identityToString(Object)}, but produces shorter strings (using {@link Class#getSimpleName()}
-   * and only the first 4 hex chars of {@link System#identityHashCode(Object)}.
+   * Similar to {@link #identityToString(Object)}, but produces shorter strings by using {@link Class#getSimpleName()}
+   * (instead of {@link Class#getName()}) and including only the first 4 hex chars of {@link System#identityHashCode(Object)}.
    * <p>
    * In other words, this method returns a string equal to the value of:
    * <pre>

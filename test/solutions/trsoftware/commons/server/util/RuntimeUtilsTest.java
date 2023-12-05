@@ -20,6 +20,7 @@ package solutions.trsoftware.commons.server.util;
 import junit.framework.TestCase;
 import solutions.trsoftware.commons.shared.annotations.Slow;
 import solutions.trsoftware.commons.shared.testutil.AssertUtils;
+import solutions.trsoftware.commons.shared.util.StackTraceWrapper;
 
 import java.io.BufferedReader;
 import java.io.InputStreamReader;

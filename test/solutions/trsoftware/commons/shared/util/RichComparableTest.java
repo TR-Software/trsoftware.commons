@@ -1,9 +1,9 @@
 package solutions.trsoftware.commons.shared.util;
 
 import junit.framework.TestCase;
-import org.jetbrains.annotations.NotNull;
 import solutions.trsoftware.commons.shared.util.compare.RichComparable;
 
+import javax.annotation.Nonnull;
 import java.util.function.Function;
 
 /**
@@ -25,7 +25,7 @@ public class RichComparableTest extends TestCase {
     }
 
     @Override
-    public int compareTo(@NotNull RichString o) {
+    public int compareTo(@Nonnull RichString o) {
       return value.compareTo(o.value);
     }
 

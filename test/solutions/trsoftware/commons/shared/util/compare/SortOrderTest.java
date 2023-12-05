@@ -15,8 +15,8 @@ public class SortOrderTest extends TestCase {
 
   public void testCompare() throws Exception {
     for (int i = 0; i < 100; i++) {
-      Integer a = rnd.nextInt();
-      Integer b = rnd.nextInt();
+      Integer a = rnd().nextInt();
+      Integer b = rnd().nextInt();
       int cmp = a.compareTo(b);
       assertEquals(cmp, ASC.compare(a, b));  // should be the same as the natural ordering
       assertEquals(-cmp, DESC.compare(a, b)); // should be the opposite of the natural ordering

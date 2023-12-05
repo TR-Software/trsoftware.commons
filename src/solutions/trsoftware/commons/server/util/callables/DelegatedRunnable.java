@@ -26,6 +26,7 @@ package solutions.trsoftware.commons.server.util.callables;
  *
  *
  * @see #doRun()
+ * @see SafeRunnable
  * @author Alex
  * @since 11/29/2017
  */
@@ -50,7 +51,8 @@ public class DelegatedRunnable implements Runnable {
    * Subclasses can override if they wish to do something after {@link #doRun()}.
    * This method is guaranteed to execute even if {@link #doRun()} threw an exception.
    *
-   * @param ex any exception that was thrown by {@link #doRun()}, or {@code null} if no exception was thrown.
+   * @param ex an unchecked exception that was thrown by {@link #doRun()} (if any),
+   *   or {@code null} if no exception was thrown
    */
   protected void doAfter(Throwable ex) {
     if (ex != null)

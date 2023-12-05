@@ -1,13 +1,15 @@
 package solutions.trsoftware.commons.shared.util.collections;
 
+import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ForwardingList;
-import com.google.gwt.thirdparty.guava.common.annotations.VisibleForTesting;
 
 import javax.annotation.Nonnull;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.ListIterator;
-import java.util.Objects;
+
+import static java.util.Objects.requireNonNull;
 
 /**
  * A decorator that wraps a {@link List} to allow using negative indices, which are interpreted as
@@ -44,17 +46,25 @@ public class FluentList<E> extends ForwardingList<E> {
   private final List<E> delegate;
 
   /**
+   * Creates an empty {@link FluentList} backed by an {@link ArrayList}
+   */
+  public FluentList() {
+    this(new ArrayList<>());
+  }
+
+  /**
    * Protected constructor for subclassing.
    * Use the {@code public} factory method {@link #from(List)} instead of this constructor.
    */
-  protected FluentList(List<E> delegate) {
-    this.delegate = Objects.requireNonNull(delegate, "delegate");
+  protected FluentList(@Nonnull List<E> delegate) {
+    this.delegate = requireNonNull(delegate, "delegate");
   }
 
   /**
    * @return a {@link FluentList} that wraps the given list or itself if it's already a {@link FluentList}
    */
-  public static <E> FluentList<E> from(List<E> list) {
+  public static <E> FluentList<E> from(@Nonnull List<E> list) {
+    requireNonNull(list, "list");
     return (list instanceof FluentList)
         ? (FluentList<E>) list
         : new FluentList<>(list);

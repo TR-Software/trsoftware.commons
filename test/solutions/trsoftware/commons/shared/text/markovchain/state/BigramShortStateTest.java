@@ -24,7 +24,7 @@ import solutions.trsoftware.commons.shared.testutil.AssertUtils;
  *
  * @author Alex
  */
-public class BigramShortStateTest extends ShortStateTest {
+public class BigramShortStateTest extends ShortStateTestCase {
 
   public void testBigramShortState() throws Exception {
     final BigramShortState state = new BigramShortState("foo", "bar", dict);

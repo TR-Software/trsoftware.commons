@@ -16,9 +16,9 @@
 
 package solutions.trsoftware.commons.shared.util;
 
+import com.google.common.annotations.VisibleForTesting;
 import com.google.common.cache.LoadingCache;
 import com.google.common.util.concurrent.Futures;
-import com.google.gwt.thirdparty.guava.common.annotations.VisibleForTesting;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;

@@ -16,9 +16,6 @@
 
 package solutions.trsoftware.commons.shared.util.random;
 
-import java.util.HashSet;
-import java.util.Set;
-
 import static solutions.trsoftware.commons.shared.util.RandomUtils.rnd;
 
 /**
@@ -28,14 +25,14 @@ import static solutions.trsoftware.commons.shared.util.RandomUtils.rnd;
  */
 public class RandomCharGenerator {
 
-  private String alphabet;
+  private final String alphabet;
 
   public RandomCharGenerator(String alphabet) {
     this.alphabet = alphabet;
   }
 
   public char next() {
-    return alphabet.charAt(rnd.nextInt(alphabet.length()));
+    return alphabet.charAt(rnd().nextInt(alphabet.length()));
   }
 
 }

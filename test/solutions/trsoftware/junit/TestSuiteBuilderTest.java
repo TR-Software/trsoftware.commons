@@ -17,7 +17,10 @@
 
 package solutions.trsoftware.junit;
 
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Lists;
+import com.google.common.reflect.ClassPath;
 import com.google.gwt.junit.client.GWTTestCase;
 import junit.framework.Test;
 import junit.framework.TestCase;
@@ -25,6 +28,8 @@ import junit.framework.TestSuite;
 import solutions.trsoftware.commons.client.CommonsGwtTestCase;
 import solutions.trsoftware.commons.client.util.WebUtilsGwtTest;
 import solutions.trsoftware.commons.server.util.reflect.ReflectionUtils;
+import solutions.trsoftware.commons.shared.annotations.ExcludeFromSuite;
+import solutions.trsoftware.commons.shared.annotations.Slow;
 import solutions.trsoftware.commons.shared.util.MapDecorator;
 import solutions.trsoftware.commons.shared.util.MapUtils;
 import solutions.trsoftware.commons.shared.util.template.SimpleTemplateParserGwtTest;
@@ -41,22 +46,22 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 import java.lang.reflect.AnnotatedElement;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
+import java.lang.reflect.Modifier;
+import java.util.*;
+import java.util.function.BiConsumer;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
-import static solutions.trsoftware.commons.server.testutil.ServerAssertUtils.assertFunctionResults;
-import static solutions.trsoftware.commons.shared.testutil.AssertUtils.assertThrows;
-import static solutions.trsoftware.junit.TestSuiteBuilder.FilterMode;
-import static solutions.trsoftware.junit.TestSuiteBuilder.iterTests;
+import static solutions.trsoftware.commons.shared.testutil.AssertUtils.*;
+import static solutions.trsoftware.commons.shared.util.MapUtils.throwingMerger;
+import static solutions.trsoftware.junit.TestSuiteBuilder.*;
 
 /**
  * @author Alex
  * @since 4/30/2018
  */
+@ExcludeFromSuite
 public class TestSuiteBuilderTest extends TestCase {
-
 
   public void testIterTests() throws Exception {
     ArrayList<Test> tests = Lists.newArrayList(iterTests(
@@ -186,7 +191,7 @@ public class TestSuiteBuilderTest extends TestCase {
   private TestSuite buildSuite(TestSuiteBuilder builder) throws IOException {
     System.out.println("builder = " + builder);
     TestSuite suite = builder.buildSuite();
-    TestSuiteBuilder.printTestSuite(suite);
+    printTestSuite(suite);
     assertEquals(getClass().getName(), suite.getName());
     return suite;
   }
@@ -275,6 +280,180 @@ public class TestSuiteBuilderTest extends TestCase {
         (Runnable)() -> builder.excludeTestsAnnotatedWith(Ann1.class));
   }
 
+  public void testApplyPackageFilters() throws Exception {
+    TestSuiteBuilder builder = new TestSuiteBuilder()
+        .includeOnlySubpackagesOf("solutions.trsoftware.commons");
+    MapDecorator<Class<?>, Boolean> expected = MapUtils.<Class<?>, Boolean>linkedHashMapBuilder()
+        .put(solutions.trsoftware.commons.shared.util.ListUtilsTest.class, true)
+        .put(solutions.trsoftware.commons.shared.util.template.SimpleTemplateParserGwtTest.class, true)
+        .put(solutions.trsoftware.commons.shared.util.template.SimpleTemplateParserJavaTest.class, true)
+        .put(solutions.trsoftware.commons.shared.util.stats.MeanAndVarianceTest.class, true)
+        .put(solutions.trsoftware.commons.shared.testutil.AssertUtilsTest.class, true)
+        .put(solutions.trsoftware.commons.shared.validation.ValidationRuleGwtTestCase.class, true)
+        .put(solutions.trsoftware.commons.client.util.WebUtilsGwtTest.class, true)
+        .put(solutions.trsoftware.commons.server.servlet.ServletUtilsTest.class, true)
+        .put(solutions.trsoftware.commons.server.testutil.FakeMailServerTest.class, true)
+        .put(solutions.trsoftware.junit.TestSuiteBuilderTest.class, false)  // outside the scope (not in commons)
+        ;
+    assertFunctionResults("builder.applyPackageFilters", builder::applyPackageFilters, expected.getMap());
+    // now add some exclusions
+    builder.excludeSubpackagesOf(
+        "solutions.trsoftware.commons.shared.util.template",
+        "solutions.trsoftware.commons.shared.testutil");
+    assertFunctionResults("builder.applyPackageFilters", builder::applyPackageFilters,
+        expected
+            // the following are now excluded:
+            .put(solutions.trsoftware.commons.shared.util.template.SimpleTemplateParserGwtTest.class, false)
+            .put(solutions.trsoftware.commons.shared.util.template.SimpleTemplateParserJavaTest.class, false)
+            .put(solutions.trsoftware.commons.shared.testutil.AssertUtilsTest.class, false)
+            .getMap()
+    );
+    builder.excludeSubpackagesOf("solutions.trsoftware.commons.server");
+    assertFunctionResults("builder.applyPackageFilters", builder::applyPackageFilters,
+        expected
+            // the following are now excluded:
+            .put(solutions.trsoftware.commons.server.servlet.ServletUtilsTest.class, false)
+            .put(solutions.trsoftware.commons.server.testutil.FakeMailServerTest.class, false)
+            .getMap()
+    );
+
+    // now try adding another inclusion for a package that was already excluded
+    assertThrows(IllegalStateException.class,
+            (Runnable)() -> builder.includeOnlySubpackagesOf("solutions.trsoftware.commons.server"));
+    // now do the same for the opposite case
+    assertThrows(IllegalStateException.class,
+            (Runnable)() -> builder.excludeSubpackagesOf("solutions.trsoftware.commons"));
+    /* TODO: should we enforce more strict validation of contradicting rules?
+     *  e.g. includeOnlySubpackagesOf("solutions.trsoftware.commons.server.servlet") should fail b/c its parent package
+     *  has been excluded?  Or maybe should be allowed and could mean include server.servlet while excluding
+     *  everything else in server.*
+     */
+  }
+
+  @Slow
+  public void testBuildSuiteWithPackageFilters() throws Exception {
+    // Will be using Guava's ClassPath to verify that generated suite finds all the test classes
+    ClassPath classPath = ClassPath.from(ClassLoader.getSystemClassLoader());
+    ImmutableSet<ClassPath.ClassInfo> topLevelClasses = classPath.getTopLevelClasses();
+    String basePackage = "solutions.trsoftware.commons";
+    List<String> excludedSubpackages = Arrays.asList(
+        "solutions.trsoftware.commons.shared.util.template",
+        "solutions.trsoftware.commons.shared.testutil"
+    );
+    Set<Class<?>> testClassesInBasePackage = classPath.getTopLevelClassesRecursive(basePackage).stream()
+        .filter(classInfo -> classInfo.getName().endsWith("Test"))
+        .map(ClassPath.ClassInfo::load)
+        .filter(TestSuiteBuilderTest::isTestCase)
+        .collect(Collectors.toSet());
+    TestSuiteBuilder builder = new TestSuiteBuilder()
+        .addContentRoot(getClass())
+        .includeOnlySubpackagesOf(basePackage);
+    {
+      // 1) test package inclusion filter
+      TestSuite suite = buildSuite(builder);
+      TreeMap<String, TestSuite> expectedTestSuitesByName = testClassesInBasePackage.stream()
+          .map(TestSuite::new)
+          .collect(Collectors.toMap(TestSuite::getName, Function.identity(), throwingMerger(), TreeMap::new));
+      Map<String, TestSuite> actualTestSuitesByName = extractNestedSuites(suite).stream()
+          .collect(Collectors.toMap(TestSuite::getName, Function.identity(), throwingMerger(), TreeMap::new));
+      assertMapsEqual(expectedTestSuitesByName, actualTestSuitesByName, (BiConsumer<TestSuite, TestSuite>)TestSuiteBuilderTest::assertEquals);
+    }
+    {
+      // 2) test package exclusion filters
+      excludedSubpackages.forEach(builder::excludeSubpackagesOf);
+      TestSuite suite = buildSuite(builder);
+      TreeMap<String, TestSuite> expectedTestSuitesByName = testClassesInBasePackage.stream()
+          .filter(cls -> excludedSubpackages.stream().noneMatch(pak -> isInSubpackageOf(pak, cls)))
+          .map(TestSuite::new)
+          .collect(Collectors.toMap(TestSuite::getName, Function.identity(), throwingMerger(), TreeMap::new));
+      Map<String, TestSuite> actualTestSuitesByName = extractNestedSuites(suite).stream()
+          .collect(Collectors.toMap(TestSuite::getName, Function.identity(), throwingMerger(), TreeMap::new));
+      assertMapsEqual(expectedTestSuitesByName, actualTestSuitesByName, (BiConsumer<TestSuite, TestSuite>)TestSuiteBuilderTest::assertEquals);
+    }
+    {
+      // 3) with an additional superclass filter
+      builder.excludeSubclassesOf(GWTTestCase.class);
+      TestSuite suite = buildSuite(builder);
+      TreeMap<String, TestSuite> expectedTestSuitesByName = testClassesInBasePackage.stream()
+          .filter(cls -> excludedSubpackages.stream().noneMatch(pak -> isInSubpackageOf(pak, cls)))
+          .filter(cls -> !GWTTestCase.class.isAssignableFrom(cls))
+          .map(TestSuite::new)
+          .collect(Collectors.toMap(TestSuite::getName, Function.identity(), throwingMerger(), TreeMap::new));
+      Map<String, TestSuite> actualTestSuitesByName = extractNestedSuites(suite).stream()
+          .collect(Collectors.toMap(TestSuite::getName, Function.identity(), throwingMerger(), TreeMap::new));
+      assertMapsEqual(expectedTestSuitesByName, actualTestSuitesByName, (BiConsumer<TestSuite, TestSuite>)TestSuiteBuilderTest::assertEquals);
+    }
+  }
+
+  public static boolean isTestCase(Class<?> cls) {
+    return !Modifier.isAbstract(cls.getModifiers()) && !Modifier.isInterface(cls.getModifiers())
+        && (TestCase.class.isAssignableFrom(cls));
+  }
+
+  public static void assertEquals(TestSuite expected, TestSuite actual) {
+    assertEquals(expected.getName(), actual.getName());
+    assertEquals(expected.countTestCases(), actual.countTestCases());
+    List<TestCase> expectedTestCases = extractTestCases(expected);
+
+    List<TestCase> actualTestCases = extractTestCases(actual);
+
+    assertEquals(expectedTestCases.size(), actualTestCases.size());
+    for (int i = 0; i < expectedTestCases.size(); i++) {
+      assertEquals(expectedTestCases.get(i), actualTestCases.get(i));;
+    }
+  }
+
+  public static void assertEquals(TestCase expected, TestCase actual) {
+    assertSameType(expected, actual);
+    assertEquals(expected.getName(), actual.getName());
+  }
+
+  /**
+   * @return a list of the {@link Test} elements in the given suite that are instances of {@link TestCase},
+   * sorted by {@linkplain TestCase#getName() name}
+   */
+  private static List<TestCase> extractTestCases(TestSuite expected) {
+    return listTests(expected).stream()
+        .filter(TestCase.class::isInstance)
+        .map(TestCase.class::cast)
+        .sorted(Comparator.comparing(TestCase::getName))
+        .collect(Collectors.toList());
+  }
+
+  private static List<TestSuite> extractNestedSuites(TestSuite suite) {
+    ImmutableList.Builder<TestSuite> ret = ImmutableList.builder();
+    walkTestSuiteTree(suite, new TestSuiteVisitor() {
+      @Override
+      public void preVisitSuite(TestSuite suite) {
+        ret.add(suite);
+      }
+    });
+    return ret.build();
+  }
+
+  public void testIsDescendentPackage() throws Exception {
+    assertTrue(isDescendentPackage("", ""));
+    assertTrue(isDescendentPackage("a", "a"));
+    assertTrue(isDescendentPackage("a", "a.b"));
+    assertTrue(isDescendentPackage("a", "a.b.c"));
+    assertTrue(isDescendentPackage("a.b", "a.b"));
+    assertTrue(isDescendentPackage("a.b", "a.b.c"));
+    assertTrue(isDescendentPackage("a.b.c", "a.b.c"));
+    assertTrue(isDescendentPackage("a.b.c", "a.b.c.d.e"));
+
+    // default package is not a subpackage of any other
+    assertFalse(isDescendentPackage("a", ""));
+    // nothing is a subpackage of the default package
+    assertFalse(isDescendentPackage("", "a"));
+
+    assertFalse(isDescendentPackage("a", "b"));
+    assertFalse(isDescendentPackage("a.b", "a"));
+    assertFalse(isDescendentPackage("a.b", "a.c"));
+    assertFalse(isDescendentPackage("a.b.c", "a"));
+    assertFalse(isDescendentPackage("a.b.c", "a.b"));
+    assertFalse(isDescendentPackage("a.b.c", "a.b.x"));
+  }
+
   /**
    * Spec for a suite that would be created via {@link TestSuite#TestSuite(Class)}
    */
@@ -335,7 +514,7 @@ public class TestSuiteBuilderTest extends TestCase {
     return new TestSuiteBuilder()
         // pattern matching the filenames of the nested class files
         .setFilenameRegex(".*TestSuiteBuilderTest\\$Test\\d\\.class")
-        .addContentRoot(ReflectionUtils.getClassFile(TestSuiteBuilderTest.class).toFile().toPath().getParent());
+        .addContentRoot(ReflectionUtils.getClassFile(TestSuiteBuilderTest.class).toPath().getParent());
   }
 
   /*

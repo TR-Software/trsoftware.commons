@@ -23,7 +23,7 @@ import solutions.trsoftware.commons.server.memquery.Row;
 import java.io.PrintStream;
 import java.util.Iterator;
 
-import static solutions.trsoftware.commons.shared.util.StringUtils.repeat;
+import static solutions.trsoftware.commons.shared.util.StringUtils.*;
 
 /** Uses printf to print the data as fixed-width columns of text */
 public class FixedWidthPrinter extends ResultSetPrinter<FixedWidthPrinter> {
@@ -67,22 +67,6 @@ public class FixedWidthPrinter extends ResultSetPrinter<FixedWidthPrinter> {
     this.verticalBorderSeparator = verticalBorderSeparator;
     return this;
   }
-
-  /**
-   * <ul>
-   * <li><b>row indices</b>: 0 for top row, 1 for middle, and 2 for last</li>
-   * <li><b>col indices</b>: 0 for first col, 1 for middle, and 2 for last</li>
-   * </ul>
-   * @see <a href="https://en.wikipedia.org/wiki/Box-drawing_character#Block_Elements">Box-drawing characters</a>
-   */
-  public static final char[][] CORNER_CHARS = {
-      new char[]{'\u2554', '\u2566', '\u2557'},
-      new char[]{'\u2560', '\u256C', '\u2563'},
-      new char[]{'\u255A', '\u2569', '\u255D'}
-  };
-
-  public static final char H_BORDER_CHAR = '\u2550';
-  public static final char V_BORDER_CHAR = '\u2551';
 
 
   protected class Impl extends PrinterImpl {

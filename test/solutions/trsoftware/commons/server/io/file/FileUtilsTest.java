@@ -75,7 +75,7 @@ public class FileUtilsTest extends TestCase {
   }
 
   public void testFileTreePrintVisitor() throws Exception {
-    Path dir = ReflectionUtils.getClassFile(getClass()).toFile().toPath().getParent();
+    Path dir = ReflectionUtils.getClassFile(getClass()).toPath().getParent();
     Files.walkFileTree(dir, new FileTreePrintVisitor(System.out));
   }
 

@@ -22,7 +22,6 @@ import solutions.trsoftware.commons.server.util.reflect.MemberSet;
 import solutions.trsoftware.commons.server.util.reflect.ObjectDiffs;
 import solutions.trsoftware.commons.server.util.reflect.ReflectionUtils;
 import solutions.trsoftware.commons.shared.testutil.AssertUtils;
-import solutions.trsoftware.commons.shared.util.StringUtils;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -30,9 +29,7 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Member;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
-import java.util.Map;
 import java.util.Set;
-import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.regex.Pattern;
 
@@ -108,15 +105,6 @@ public abstract class ServerAssertUtils extends AssertUtils {
     assertTrue(diffs.toString(), diffs.isEmpty());
   }
 
-  @SuppressWarnings("unchecked")
-  public static <T> Class<T> assertSameType(T expected, T actual) {
-    assertNotNull(expected);
-    assertNotNull(actual);
-    final Class<T> expectedClass = (Class<T>)expected.getClass();
-    assertEquals(expectedClass, actual.getClass());
-    return expectedClass;
-  }
-
   /**
    * Specifies how two instances of a class should be compared by reflection.
    *
@@ -178,29 +166,6 @@ public abstract class ServerAssertUtils extends AssertUtils {
 
     public EqualsByReflectionSpec excludeAllFields() {
       return includeFieldsMatching(NOTHING);
-    }
-  }
-
-  /**
-   * Tests the given function against the expected results.
-   * <p>
-   * In other words, asserts that
-   * <pre>
-   *   r.equals(fcn(a)) // &forall;(a, r) &isin; expectedResults
-   * </pre>
-   * @param fcnName used for printing error messages
-   * @param fcn the function being tested
-   * @param expectedResults a mapping of function args to their expected results
-   * @param <A> the type of the input to the function
-   * @param <R> the type of the result of the function
-   */
-  public static <A, R> void assertFunctionResults(String fcnName, Function<A, R> fcn, Map<A, R> expectedResults) {
-    for (Map.Entry<A, R> entry : expectedResults.entrySet()) {
-      A arg = entry.getKey();
-      R result = fcn.apply(arg);
-      R expectedResult = entry.getValue();
-      assertEquals("Unexpected result from function call " + StringUtils.methodCallToString(fcnName, arg),
-          expectedResult, result);
     }
   }
 

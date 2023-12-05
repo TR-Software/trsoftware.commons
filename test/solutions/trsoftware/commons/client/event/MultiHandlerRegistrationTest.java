@@ -16,10 +16,11 @@
 
 package solutions.trsoftware.commons.client.event;
 
-import com.google.gwt.thirdparty.guava.common.collect.Sets;
+import com.google.common.collect.Sets;
 import com.google.web.bindery.event.shared.HandlerRegistration;
 import com.google.web.bindery.event.shared.UmbrellaException;
 import junit.framework.TestCase;
+import solutions.trsoftware.commons.client.testutil.SimulatedException;
 import solutions.trsoftware.commons.shared.testutil.AssertUtils;
 
 import java.util.Arrays;
@@ -102,38 +103,4 @@ public class MultiHandlerRegistrationTest extends TestCase {
     }
   }
 
-  private static class SimulatedException extends RuntimeException {
-    private int id;
-
-    private SimulatedException(int id) {
-      super("Simulated exception #" + id);
-      this.id = id;
-    }
-
-
-    private SimulatedException() {
-      // empty constructor to suppress warnings about Serializable
-    }
-
-    public int getId() {
-      return id;
-    }
-
-    @Override
-    public boolean equals(Object o) {
-      if (this == o)
-        return true;
-      if (o == null || getClass() != o.getClass())
-        return false;
-
-      SimulatedException that = (SimulatedException)o;
-
-      return id == that.id;
-    }
-
-    @Override
-    public int hashCode() {
-      return id;
-    }
-  }
 }

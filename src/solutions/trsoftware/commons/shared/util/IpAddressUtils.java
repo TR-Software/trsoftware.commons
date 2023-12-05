@@ -106,6 +106,6 @@ public class IpAddressUtils {
   }
 
   public static IpAddress randomIpAddress() {
-    return new IpAddress(RandomUtils.rnd.nextInt());
+    return new IpAddress(RandomUtils.rnd().nextInt());
   }
 }

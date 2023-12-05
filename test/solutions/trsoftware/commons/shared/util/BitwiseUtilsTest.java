@@ -193,7 +193,7 @@ public class BitwiseUtilsTest extends TestCase {
         assertEquals(-1, setBit(-1, i)); // -1 has all 1-bits (in 2's complement binary)
         // test some random numbers
         for (int j = 0; j < 10; j++) {
-          int x = RandomUtils.rnd.nextInt();
+          int x = RandomUtils.rnd().nextInt();
           int xSi = setBit(x, i);
           assertTrue(testBit(xSi, i));
           assertTrue(testBit(setBit(clearBit(x, i), i), i));
@@ -218,7 +218,7 @@ public class BitwiseUtilsTest extends TestCase {
         assertEquals(-1L, setBit(-1L, i)); // -1 has all 1-bits (in 2's complement binary)
         // test some random numbers
         for (int j = 0; j < 10; j++) {
-          long x = RandomUtils.rnd.nextLong();
+          long x = RandomUtils.rnd().nextLong();
           long xSi = setBit(x, i);
           assertTrue(testBit(xSi, i));
           assertTrue(testBit(setBit(clearBit(x, i), i), i));
@@ -243,7 +243,7 @@ public class BitwiseUtilsTest extends TestCase {
         assertEquals((short)-1, setBit((short)-1, i)); // -1 has all 1-bits (in 2's complement binary)
         // test some random numbers
         for (int j = 0; j < 10; j++) {
-          short x = (short)RandomUtils.rnd.nextInt();
+          short x = (short)RandomUtils.rnd().nextInt();
           short xSi = setBit(x, i);
           assertTrue(testBit(xSi, i));
           assertTrue(testBit(setBit(clearBit(x, i), i), i));
@@ -268,7 +268,7 @@ public class BitwiseUtilsTest extends TestCase {
         assertEquals((byte)-1, setBit((byte)-1, i)); // -1 has all 1-bits (in 2's complement binary)
         // test some random numbers
         for (int j = 0; j < 10; j++) {
-          byte x = (byte)RandomUtils.rnd.nextInt();
+          byte x = (byte)RandomUtils.rnd().nextInt();
           byte xSi = setBit(x, i);
           assertTrue(testBit(xSi, i));
           assertTrue(testBit(setBit(clearBit(x, i), i), i));

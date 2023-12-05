@@ -260,6 +260,7 @@ public class TimeUtils {
    * @return the corresponding {@link Instant}
    */
   @GwtIncompatible
+  @SuppressWarnings("NonJREEmulationClassesInClientCode")
   public static Instant secondsToInstant(double seconds) {
     long whole = (long)seconds;
     long nanos = (long)TimeUnit.SECONDS.to(TimeUnit.NANOSECONDS, seconds - whole);

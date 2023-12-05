@@ -29,7 +29,7 @@ import java.util.NoSuchElementException;
  */
 public class SingletonIterator<T> extends UnmodifiableIterator<T> {
 
-  private T elt;
+  private final T elt;
   private boolean hasNext = true;
 
   public SingletonIterator(T elt) {

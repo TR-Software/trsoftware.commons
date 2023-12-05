@@ -1,6 +1,5 @@
 package solutions.trsoftware.commons.shared.testutil;
 
-import org.jetbrains.annotations.NotNull;
 import solutions.trsoftware.commons.shared.util.ArrayUtils;
 import solutions.trsoftware.commons.shared.util.StringUtils;
 import solutions.trsoftware.commons.shared.util.compare.RichComparable;
@@ -41,7 +40,7 @@ public class ComparableInt implements RichComparable<ComparableInt> {
   }
 
   @Override
-  public int compareTo(@NotNull ComparableInt o) {
+  public int compareTo(@Nonnull ComparableInt o) {
     return Integer.compare(value, o.value);
   }
 

@@ -16,9 +16,9 @@
 
 package solutions.trsoftware.commons.shared.data;
 
+import com.google.common.collect.ImmutableList;
 import solutions.trsoftware.commons.shared.util.MapUtils;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -300,7 +300,7 @@ public abstract class CountryCodes {
   }
 
   public static List<String> listAllCodes() {
-    return new ArrayList<String>(countryCodeToNameMap.keySet());
+    return ImmutableList.copyOf(countryCodeToNameMap.keySet());
   }
 
 }

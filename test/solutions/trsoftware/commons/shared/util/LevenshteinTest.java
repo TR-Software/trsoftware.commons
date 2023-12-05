@@ -551,9 +551,9 @@ public class LevenshteinTest extends TestCase {
    */
   private static EditOperation randomEditOp() {
     String chars = StringUtils.ASCII_LETTERS_AND_NUMBERS;
-    char c = chars.charAt(rnd.nextInt(chars.length()));
-    int pos = rnd.nextInt(10);
-    switch (rnd.nextInt(3)) {
+    char c = chars.charAt(rnd().nextInt(chars.length()));
+    int pos = rnd().nextInt(10);
+    switch (rnd().nextInt(3)) {
       case 0:
         return new Insertion(pos, c);
       case 1:

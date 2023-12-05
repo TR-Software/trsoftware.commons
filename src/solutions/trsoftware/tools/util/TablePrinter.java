@@ -23,7 +23,6 @@ import solutions.trsoftware.commons.shared.util.StringUtils;
 import java.io.PrintStream;
 import java.util.List;
 
-import static solutions.trsoftware.commons.server.memquery.output.FixedWidthPrinter.*;
 import static solutions.trsoftware.commons.shared.util.StringUtils.*;
 
 /**

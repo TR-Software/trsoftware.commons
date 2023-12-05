@@ -21,7 +21,7 @@ import solutions.trsoftware.commons.shared.util.HasValue;
 import java.io.Serializable;
 
 /**
- * A superclass for the {@link MaxComparable} and {@link MinComparable} classes.
+ * Base class for the {@link MaxComparable} and {@link MinComparable} classes.
  *
  * @param <T> type of input elements (for {@link Updatable#update(Object)})
  * @param <R> the concrete subclass of this class (for {@link Mergeable#merge(Object)})

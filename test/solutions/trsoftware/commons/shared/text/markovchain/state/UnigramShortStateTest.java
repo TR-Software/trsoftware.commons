@@ -24,7 +24,7 @@ import solutions.trsoftware.commons.shared.testutil.AssertUtils;
  *
  * @author Alex
  */
-public class UnigramShortStateTest extends ShortStateTest {
+public class UnigramShortStateTest extends ShortStateTestCase {
 
   public void testUnigramShortState() throws Exception {
     final UnigramShortState state = new UnigramShortState("foo", dict);

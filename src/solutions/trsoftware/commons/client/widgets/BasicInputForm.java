@@ -94,12 +94,9 @@ public abstract class BasicInputForm extends FlowPanel {
 
   public BasicInputForm(Layout layout) {
     this.layout = layout;
-    submitCommand = new Command() {
-      @Override
-      public void execute() {
-        if (validate())
-          doValidatedSubmit();
-      }
+    submitCommand = () -> {
+      if (validate())
+        doValidatedSubmit();
     };
     enterKeyHandler = new SpecificKeyDownHandler(KeyCodes.KEY_ENTER, submitCommand);
     add(tblForm);

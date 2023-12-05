@@ -140,7 +140,7 @@ public abstract class IncrementalLoop implements Scheduler.RepeatingCommand {
   }
 
   /**
-   * The loop expression: will keep executing while this evaluates to {@code true}
+   * The loop condition: will keep executing while this evaluates to {@code true}
    *
    * @return {@code true} if the loop finished processing all iterations
    */

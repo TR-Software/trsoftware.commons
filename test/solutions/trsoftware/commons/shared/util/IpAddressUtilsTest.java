@@ -87,7 +87,7 @@ public class IpAddressUtilsTest extends TestCase {
 
     // now test a 100K random values (it takes too int to test the whole range of ints)
     for (int i = 0; i < 100000; i++) {
-      int value = RandomUtils.rnd.nextInt();
+      int value = RandomUtils.rnd().nextInt();
       assertEquals(value, ip4StringToInt(ip4IntToString(value)));
     }
   }
@@ -107,6 +107,6 @@ public class IpAddressUtilsTest extends TestCase {
   }
 
   public static long randomIpLong() {
-    return RandomUtils.rnd.nextLong() & 0xffffffffL;
+    return RandomUtils.rnd().nextLong() & 0xffffffffL;
   }
 }

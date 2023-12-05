@@ -21,8 +21,8 @@ import com.google.common.annotations.VisibleForTesting;
 import com.google.web.bindery.event.shared.HandlerRegistration;
 import solutions.trsoftware.commons.shared.util.CollectionUtils;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.LinkedHashSet;
+import java.util.Set;
 
 /**
  * Combines several handler registrations into one.
@@ -31,7 +31,10 @@ import java.util.List;
  */
 public class MultiHandlerRegistration implements HandlerRegistration {
 
-  private final List<HandlerRegistration> handlerRegistrations = new ArrayList<>();
+  private final Set<HandlerRegistration> handlerRegistrations = new LinkedHashSet<>();
+
+  public MultiHandlerRegistration() {
+  }
 
   public MultiHandlerRegistration(HandlerRegistration... registrations) {
     for (HandlerRegistration reg : registrations) {
@@ -52,7 +55,7 @@ public class MultiHandlerRegistration implements HandlerRegistration {
   }
 
   @VisibleForTesting
-  public List<HandlerRegistration> getHandlerRegistrations() {
+  public Set<HandlerRegistration> getHandlerRegistrations() {
     return handlerRegistrations;
   }
 

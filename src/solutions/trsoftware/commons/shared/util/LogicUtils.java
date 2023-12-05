@@ -67,6 +67,7 @@ public class LogicUtils {
    *
    * @return {@code o1} if it's not {@code null}, otherwise {@code o2} (which could be {@code null})
    * @see #firstNonNull(Object[])
+   * @see #nonNullOrElse(Object, Supplier)
    * @see MoreObjects#firstNonNull(Object, Object)
    */
   @Nullable
@@ -82,6 +83,7 @@ public class LogicUtils {
    * @return the first of the given args which is not {@code null},
    *     or {@code null} if there isn't a non-{@code null} input element.
    * @see #firstNonNull(Object, Object)
+   * @see #nonNullOrElse(Object, Supplier)
    */
   @Nullable
   @SafeVarargs
@@ -95,15 +97,19 @@ public class LogicUtils {
 
   /**
    * Returns the given object if it's not {@code null}, otherwise returns the value produced by the given supplier.
+   * <p>
+   * Equivalent to <pre>
+   *   Optional.of(value).orElseGet(other)
+   * </pre>
    *
    * @return {@code obj} if it's not {@code null}, otherwise {@code supplier.get()}
    * @see #firstNonNull(Object, Object)
    * @see Optional#orElseGet(Supplier)
    */
   @Nullable
-  public static <T> T nonNullOrElse(T obj, Supplier<T> supplier) {
-    if (obj != null)
-      return obj;
-    return supplier.get();
+  public static <T> T nonNullOrElse(T value, Supplier<T> other) {
+    if (value != null)
+      return value;
+    return other.get();
   }
 }

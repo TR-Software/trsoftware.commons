@@ -30,6 +30,7 @@ import javax.annotation.Nullable;
 import javax.lang.model.SourceVersion;
 import javax.lang.model.element.Modifier;
 import java.io.PrintStream;
+import java.lang.annotation.Annotation;
 import java.lang.reflect.*;
 import java.net.URI;
 import java.nio.file.*;
@@ -718,5 +719,24 @@ public abstract class ReflectionUtils {
       cls = cls.getSuperclass();
     }
     return allFields;
+  }
+
+  /**
+   * Returns {@code true} if an annotation for the specified type is <em>directly present</em> on the specified element,
+   * else {@code false}.  This method ignores inherited annotations.
+   * <p>
+   * The truth value returned by this method is equivalent to:
+   * <pre>
+   *   annotatedElement.{@link AnnotatedElement#getDeclaredAnnotation(Class) getDeclaredAnnotation}(annotationClass) != null
+   * </pre>
+   *
+   * @param annotationClass the annotation type
+   * @return {@code true} iff an annotation for the specified type is <em>directly</em> on the specified element
+   * @throws NullPointerException if either arg is null
+   * @see AnnotatedElement#isAnnotationPresent(Class)
+   */
+  public static boolean hasDeclaredAnnotation(Class<? extends Annotation> annotationClass, AnnotatedElement annotatedElement) {
+    // NOTE: don't change the order of parameters; this method is designed to be used as a method reference similar to Class::isAssignableFrom
+    return annotatedElement.getDeclaredAnnotation(annotationClass) != null;
   }
 }

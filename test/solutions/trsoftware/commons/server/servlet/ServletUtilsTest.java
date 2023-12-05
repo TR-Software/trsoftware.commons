@@ -166,7 +166,7 @@ public class ServletUtilsTest extends TestCase {
   public void testGetRequestURL() throws Exception {
     for (int i = 0; i < 100; i++) {
       for (String protocol : new String[]{"http", "https"}) {
-        String url = TestData.randomURL(protocol, nextIntInRange(2, 4), rnd.nextBoolean(),
+        String url = TestData.randomURL(protocol, nextIntInRange(2, 4), rnd().nextBoolean(),
             nextIntInRange(1, 5), nextIntInRange(3, 6));
         // 1) try without caching
         {

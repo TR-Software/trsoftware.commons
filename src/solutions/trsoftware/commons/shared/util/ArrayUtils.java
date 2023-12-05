@@ -20,6 +20,7 @@ import com.google.gwt.core.client.JavaScriptException;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Objects;
 import java.util.function.IntFunction;
 import java.util.function.IntPredicate;
 import java.util.function.Predicate;
@@ -76,17 +77,17 @@ public class ArrayUtils {
   }
 
   /**
-   * Linearly scans a range of the given array for the first occurrence of the value {@code target}.
+   * Linearly scans a range of the given array for the first occurrence of the {@code target} element.
    *
    * @param array the array to be searched
    * @param target the value to find
-   * @param fromIndex the index of the first element (inclusive) to be searched
-   * @param toIndex the index of the last element (exclusive) to be searched
+   * @param fromIndex (inclusive) the index of the first element to be searched
+   * @param toIndex (exclusive) the index after the last element to be searched
    * @return the index of the first matching element in the array, or -1 if not found
    */
   public static <T> int indexOf(T[] array, T target, int fromIndex, int toIndex) {
     for (int i = fromIndex; i < toIndex; i++) {
-      if ((target == null && array[i] == null) || (target != null && target.equals(array[i])))
+      if (Objects.equals(array[i], target))
         return i;
     }
     return -1;
@@ -140,8 +141,8 @@ public class ArrayUtils {
    *
    * @param array the array to be searched
    * @param target the value to find
-   * @param fromIndex the index of the first element (inclusive) to be searched
-   * @param toIndex the index of the last element (exclusive) to be searched
+   * @param fromIndex the index of the first element to be searched (inclusive)
+   * @param toIndex the index after the last element to be searched (exclusive)
    * @return the index of the first matching element in the array, or -1 if not found
    */
   public static int indexOf(char[] array, char target, int fromIndex, int toIndex) {
@@ -396,7 +397,7 @@ public class ArrayUtils {
    * @throws ArrayIndexOutOfBoundsException if the given index is not in the range {@code [0, arrayLength[}
    */
   public static void checkBounds(int arrayLength, int idx) {
-    if (idx < 0 || idx > arrayLength-1)
+    if (idx < 0 || idx >= arrayLength)
       throw new ArrayIndexOutOfBoundsException(idx);
   }
 

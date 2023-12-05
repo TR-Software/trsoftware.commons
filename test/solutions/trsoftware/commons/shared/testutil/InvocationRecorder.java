@@ -20,7 +20,6 @@ import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Iterators;
 import com.google.common.collect.LinkedListMultimap;
-import org.jetbrains.annotations.NotNull;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -116,7 +115,7 @@ public class InvocationRecorder implements Iterable<InvocationRecord> {
     invocationRecords.clear();
   }
 
-  @NotNull
+  @Nonnull
   @Override
   public Iterator<InvocationRecord> iterator() {
     return Iterators.unmodifiableIterator(invocationRecords.values().iterator());

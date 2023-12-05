@@ -75,7 +75,7 @@ public class MemoryUnitTest extends TestCase {
 
   public void testToBytes() throws Exception {
     for (int i = 0; i < 1000; i++) {
-      double value = rnd.nextDouble() * rnd.nextInt(20);
+      double value = rnd().nextDouble() * rnd().nextInt(20);
       for (MemoryUnit unit : values()) {
         assertEquals(unit.toBytes(value), unit.to(BYTES, value));
       }
@@ -84,7 +84,7 @@ public class MemoryUnitTest extends TestCase {
 
   public void testFromBytes() throws Exception {
     for (int i = 0; i < 1000; i++) {
-      double value = rnd.nextDouble() * rnd.nextInt(20);
+      double value = rnd().nextDouble() * rnd().nextInt(20);
       for (MemoryUnit unit : values()) {
         assertEquals(unit.fromBytes(value), unit.from(BYTES, value));
       }

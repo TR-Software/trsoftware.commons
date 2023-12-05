@@ -64,7 +64,7 @@ public class NumberSample<N extends Number & Comparable<N>> implements SampleSta
    * True if one or more new samples have been added since the last time the
    * list was sorted (to avoid potentially costly re-sorting).
    */
-  private boolean dirty;
+  private boolean modified;
 
   /**
    * Creates a new instance representing the data in the given list.
@@ -100,7 +100,7 @@ public class NumberSample<N extends Number & Comparable<N>> implements SampleSta
 
   public synchronized void update(N sample) {
     samples.add(sample);
-    dirty = true;
+    modified = true;
   }
 
 
@@ -126,7 +126,7 @@ public class NumberSample<N extends Number & Comparable<N>> implements SampleSta
   }
 
   public synchronized void addAll(Collection<N> samplesToBeAdded) {
-    dirty |= samples.addAll(samplesToBeAdded);
+    modified |= samples.addAll(samplesToBeAdded);
   }
 
   /**
@@ -240,9 +240,9 @@ public class NumberSample<N extends Number & Comparable<N>> implements SampleSta
   @SuppressWarnings("unchecked")
   private synchronized List<N> sort() {
     // optimization: sort only if the list has been modified since the last time it was sorted
-    if (dirty) {
+    if (modified) {
       Collections.sort(samples);
-      dirty = false;
+      modified = false;
     }
     return samples;
   }

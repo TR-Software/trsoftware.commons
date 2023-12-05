@@ -17,6 +17,7 @@
 package solutions.trsoftware.commons.shared.util.stats;
 
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import java.util.function.Supplier;
 
 import static java.util.Objects.requireNonNull;
@@ -36,7 +37,7 @@ public abstract class AbstractArgMinMax<A, V extends Comparable<V>> implements S
   /** The current argument associated with the best value */
   private A bestArg;
 
-  /** Updates the mean with a new sample, returning the new argmax */
+  /** Updates the current argmax (or argmin) from the given sample, returning the current best arg */
   public V update(@Nonnull A arg, @Nonnull V value) {
     requireNonNull(arg, "arg");
     requireNonNull(value, "value");
@@ -56,6 +57,7 @@ public abstract class AbstractArgMinMax<A, V extends Comparable<V>> implements S
   /**
    * @return the arg associated with the best value, or {@code null} if the {@link #update} method was never invoked.
    */
+  @Nullable
   public A get() {
     return bestArg;
   }

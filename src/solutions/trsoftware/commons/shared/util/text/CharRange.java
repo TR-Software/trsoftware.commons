@@ -59,6 +59,25 @@ public class CharRange implements CharSequence, Iterable<Character> {
     return (char)(min + index);
   }
 
+  /**
+   * @return the index of the given char within the CharSequence represented by this range, such that
+   * {@code charAt(indexOf(c)) == c}, or {@code -1} if the given char is not included in this range
+   */
+  public int indexOf(char c) {
+    int i = c - min;
+    if (c < min || c > max)
+      return -1;
+    return c - min;
+  }
+
+  /**
+   * @return the index of the given char within the CharSequence represented by this range, such that
+   * {@code charAt(indexOf(c)) == c}, or {@code -1} if the given char is not included in this range
+   */
+  public boolean contains(char c) {
+    return c >= min && c <= max;
+  }
+
   @Override
   public String toString() {
     if (str == null)

@@ -76,8 +76,8 @@ public class PrimitiveFloatArrayListTest extends TestCase {
     }
     // 2) test insertion: add(int, Float) and the add(int, float) primitive specialization
     for (int i = 0; i < 1000; i++) {
-      float value = rnd.nextFloat();
-      int index = rnd.nextInt(arrayList.size());
+      float value = rnd().nextFloat();
+      int index = rnd().nextInt(arrayList.size());
       arrayList.add(index, value);
       // test both add(int, Float) and the add(int, float) primitive specialization
       if (value % 2 == 0)

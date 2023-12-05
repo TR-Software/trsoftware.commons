@@ -24,7 +24,7 @@ import solutions.trsoftware.commons.shared.testutil.AssertUtils;
  *
  * @author Alex
  */
-public class NgramShortStateTest extends ShortStateTest {
+public class NgramShortStateTest extends ShortStateTestCase {
 
   public void testNgramShortState() throws Exception {
     final NgramShortState state = new NgramShortState(dict, "foo", "bar", "baz");

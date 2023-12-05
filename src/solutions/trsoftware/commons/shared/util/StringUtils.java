@@ -29,6 +29,7 @@ import solutions.trsoftware.commons.shared.util.text.CharRange;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.*;
+import java.util.function.UnaryOperator;
 import java.util.stream.IntStream;
 
 import static com.google.common.base.Preconditions.checkArgument;
@@ -61,6 +62,22 @@ public class StringUtils {
    * @see <a href="https://docs.oracle.com/javase/8/docs/technotes/guides/intl/encoding.doc.html">Supported Encodings</a>
    */
   public static final String UTF8_CHARSET_NAME = "UTF-8";
+
+  // box drawing characters
+  /**
+   * <ul>
+   * <li><b>row indices</b>: 0 for top row, 1 for middle, and 2 for last</li>
+   * <li><b>col indices</b>: 0 for first col, 1 for middle, and 2 for last</li>
+   * </ul>
+   * @see <a href="https://en.wikipedia.org/wiki/Box-drawing_character#Block_Elements">Box-drawing characters</a>
+   */
+  public static final char[][] CORNER_CHARS = {
+      new char[]{'\u2554', '\u2566', '\u2557'},
+      new char[]{'\u2560', '\u256C', '\u2563'},
+      new char[]{'\u255A', '\u2569', '\u255D'}
+  };
+  public static final char H_BORDER_CHAR = '\u2550';
+  public static final char V_BORDER_CHAR = '\u2551';
 
   public static String capitalize(String str) {
     if (isBlank(str) || isCapitalized(str) || !Character.isLetter(str.charAt(0)))
@@ -427,6 +444,25 @@ public class StringUtils {
    */
   public static String indent(int nSpaces, String toIndent) {
     return nSpaces > 0 ? indent(nSpaces) + toIndent : toIndent;
+  }
+
+  /**
+   * Returns a function that prepends the given number of space chars to a string.
+   * <pre>
+   *   s -> {@link #indent(int, String) indent(nSpaces, s)}
+   * </pre>
+   * Code example that prints a string array with each line indented by 2 spaces:
+   * <pre>
+   *   Arrays.stream(stringArray).map({@link #indenting}(2)).forEach(System.out::println);
+   * </pre>
+   *
+   * @param width the desired length of the result string
+   * @return a function that applies {@link #justifyRight(String, int) justifyRight(s, width)} to a string {@code s}.
+   * @see #justifyRight(String, int)
+   */
+
+  public static UnaryOperator<String> indenting(int nSpaces) {
+    return s -> indent(nSpaces, s);
   }
 
   /** @return a string of the given length using randomly-selected chars from the alphabet {@code [A-Za-z]} */
@@ -1044,12 +1080,27 @@ public class StringUtils {
    * @return the given string padded on the left to the desired width.  The result is guaranteed to have
    * the desired width unless the input string is longer than that, in which case it will not be truncated.
    * @see Strings#padStart(String, int, char)
+   * @see #justifyRight(int)
    */
   public static String justifyRight(String str, int width) {
     if (str == null || width <= str.length())
       return str;
     return padLeft(str, width - str.length(), ' ');
   }
+
+  /**
+   * Returns a function that can be used to apply a fixed <i>right-justify</i> transformation to a stream of strings:
+   * <pre>
+   *   s -> {@link #justifyRight(String, int) justifyRight(s, width)}
+   * </pre>
+   *
+   * @param width the desired length of the result string
+   * @return a function that applies {@link #justifyRight(String, int) justifyRight(s, width)} to a string {@code s}.
+   * @see #justifyRight(String, int)
+   */
+  public static UnaryOperator<String> justifyRight(int width) {
+    return s -> justifyRight(s, width);
+  }  // TODO: maybe provide matching higher-order functions for the other methods in this class (e.g. justifyLeft, etc.)
 
   /**
    * @return a string which represents a mirror image of the given string
@@ -1218,16 +1269,9 @@ public class StringUtils {
    * @return the characters in the given {@link String} sorted in alphabetical order.
    */
   public static String sorted(String str) {
-    Character[] chars = new Character[str.length()];
-    for (int i = 0; i < str.length(); i++) {
-      chars[i] = str.charAt(i);
-    }
+    char[] chars = str.toCharArray();
     Arrays.sort(chars);
-    StringBuilder ret = new StringBuilder(chars.length);
-    for (Character c : chars) {
-      ret.append(c);
-    }
-    return ret.toString();
+    return new String(chars);
   }
 
   /**

@@ -323,7 +323,10 @@ public abstract class ServletUtils {
     return getRequestURL(threadLocalRequest);
   }
 
-  /** @return the requested URL minus the path (e.g. http://example.com/foo -> http://example.com) */
+  /**
+   * @return the requested URL minus the path (e.g. http://example.com/foo -> http://example.com)
+   * @see #getRequestURL(HttpServletRequest)
+   */
   public static StringBuffer getBaseURL(HttpServletRequest request) {
     /* TODO(11/2/2021): instead of string parsing, might be safer to use the URL object returned by
          ServletUtils.getRequestURL(HttpServletRequest); the performance cost should be negligible
@@ -334,6 +337,19 @@ public abstract class ServletUtils {
     // instead, we just strip off everything after the 3rd slash in the URL (which seems to work for all imaginable types of http urls)
     int indexOfSlashBeforePath = url.indexOf("/", url.indexOf("//") + 2);
     url.delete(indexOfSlashBeforePath, url.length());
+    return url;
+  }
+
+  /**
+   * Same as {@link HttpServletRequest#getRequestURL()} but also includes the
+   * {@linkplain HttpServletRequest#getQueryString() query string}, if any.
+   */
+  public static StringBuffer getFullRequestURL(HttpServletRequest request) {
+    StringBuffer url = request.getRequestURL();
+    String queryString = request.getQueryString();
+    if (queryString != null) {
+      url.append('?').append(queryString);
+    }
     return url;
   }
 

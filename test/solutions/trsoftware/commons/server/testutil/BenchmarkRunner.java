@@ -19,7 +19,6 @@ package solutions.trsoftware.commons.server.testutil;
 import com.google.common.base.MoreObjects;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
-import org.jetbrains.annotations.NotNull;
 import solutions.trsoftware.commons.shared.util.CollectionUtils;
 import solutions.trsoftware.commons.shared.util.MapUtils;
 import solutions.trsoftware.commons.shared.util.MemoryUnit;
@@ -46,11 +45,11 @@ import java.util.function.Supplier;
  * TODO: remove code duplicated with {@link BenchmarkingTestCase}
  *
  * TODO: this duplicates {@link PerformanceComparison}
- *
- * TODO: consider using <a href="http://openjdk.java.net/projects/code-tools/jmh/">JMH</a> for accurate CPU benchmarks
  * </p>
+ *
  * @author Alex
  * @since 1/2/14
+ * @deprecated Use <a href="http://openjdk.java.net/projects/code-tools/jmh/">JMH</a> more-accurate CPU benchmarks
  */
 public class BenchmarkRunner {
 
@@ -709,7 +708,7 @@ public class BenchmarkRunner {
       }
 
       @Override
-      public int compareTo(@NotNull PQEntry other) {
+      public int compareTo(@Nonnull PQEntry other) {
         return Long.compare(this.measurement, other.measurement);
       }
 

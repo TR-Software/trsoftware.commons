@@ -120,7 +120,7 @@ public class StackTraceDeobfuscatorServlet extends RemoteServiceServlet implemen
   }
 
   public static class StackTraceHolder extends Throwable {
-    // TODO: maybe extract class as a general util in TR Commons (similar to solutions.trsoftware.commons.server.util.StackTraceWrapper)
+    // TODO: maybe extract class as a general util in TR Commons (similar to solutions.trsoftware.commons.shared.util.StackTraceWrapper)
 
     public StackTraceHolder(@Nonnull String message, @Nonnull StackTraceElement[] stackTrace) {
       super(message);

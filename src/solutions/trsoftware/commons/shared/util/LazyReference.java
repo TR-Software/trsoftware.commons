@@ -45,7 +45,7 @@ public abstract class LazyReference<V> implements Supplier<V> {
   public V get() {
     // TODO: what if create() throws exception? should we set hasValue back to false in that case?
     if (hasValue.compareAndSet(false, true))
-      value = create();
+      return value = create();
     return value;
   }
 

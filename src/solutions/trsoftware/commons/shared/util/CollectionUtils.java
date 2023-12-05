@@ -26,10 +26,13 @@ import solutions.trsoftware.commons.shared.util.iterators.ArrayIterator;
 import solutions.trsoftware.commons.shared.util.iterators.ChainedIterator;
 
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
+
+import static java.util.Objects.requireNonNull;
 
 /**
  * Date: Sep 16, 2008 Time: 5:36:41 PM
@@ -238,14 +241,52 @@ public class CollectionUtils {
   }
 
   /**
-   * @return true iff collection contains any items in the query.
+   * @return true iff the first collection contains any elements from the second collection
    */
   public static <T> boolean containsAny(Collection<T> collection, Collection<T> query) {
     for (T q : query) {
-      if (collection.contains(q))
+      if (contains(collection, q))
         return true;
     }
     return false;
+  }
+
+  /**
+   * Null-safe implementation of {@link Collection#contains(Object)}: trapping any {@link NullPointerException}
+   * or {@link ClassCastException} that might result from the argument being {@code null}
+   * (e.g. {@link ConcurrentHashMap#keySet()}) or of the wrong type (e.g. {@link TreeSet}).
+   * Returns {@code false} if either exception is thrown.
+   *
+   * @return true iff collection contains the specified object
+   * @throws NullPointerException if the collection itself is null
+   * @see #containsNull(Collection)
+   * @see Iterables#contains(Iterable, Object)
+   */
+  public static boolean contains(Collection<?> collection, Object o) {
+    /* Note: this method is identical to Guava's package-private method Collections2.safeContains
+     * which is used by Iterables.contains */
+    requireNonNull(collection, "collection");
+    try {
+      return collection.contains(o);
+    }
+    catch (ClassCastException | NullPointerException e) {
+      // collection probably doesn't permit nulls (e.g. ConcurrentHashMap.keySet) so contains(null) threw NPE
+      // or requires elements of a particular type (e.g. TreeSet requires comparables)
+      return false;
+    }
+  }
+
+  /**
+   * Null-safe implementation of {@link Collection#contains(Object)} being used to check for the presence of a null element,
+   * trapping any {@link NullPointerException} that might result from {@code contains(null)} being invoked
+   * on a collection that doesn't allow {@code null} elements (e.g. {@link ConcurrentHashMap#keySet()})
+   *
+   * @return true iff collection contains a {@code null} element
+   * @throws NullPointerException if the collection itself is null
+   * @see #contains(Collection, Object)
+   */
+  public static boolean containsNull(Collection<?> collection) {
+    return contains(collection, null);
   }
 
   /**
@@ -446,4 +487,42 @@ public class CollectionUtils {
     if (caught != null)
       throw new UmbrellaException(caught);
   }
+
+  /**
+   * Returns a comparator that compares two collections according to the lexicographic order of their elements
+   * (as defined by the given element comparator).
+   * <p>
+   * The semantics are similar to {@link String#compareTo(String)}, where the elements of a collection are
+   * treated similar to characters in a string when strings are being sorted lexicographically.
+   *
+   * @param elemComparator pairwise comparator for the collection elements
+   * @param <E> the type of elements in the collections to be compared
+   * @param <C> the collection type
+   * @return a comparator that compares 2 collections using the given element comparator
+   */
+  public static <E, C extends Collection<E>> Comparator<C> lexicographicOrder(Comparator<E> elemComparator) {
+    // TODO: maybe extract inner class (to facilitate debugging with prettier class name)
+    return new Comparator<C>() {
+      @Override
+      public int compare(C c1, C c2) {
+        int cmp = Integer.compare(c1.size(), c2.size());
+        if (cmp != 0)
+          return cmp;  // unequal sizes; the smaller collection comes first
+        else {
+          // inputs have the same size; apply the given comparator to each pair of elements until the first unequal pair
+          Iterator<E> it1 = c1.iterator();
+          Iterator<E> it2 = c2.iterator();
+          while (it1.hasNext()) {
+            E e1 = it1.next();
+            E e2 = it2.next();
+            cmp = elemComparator.compare(e1, e2);
+            if (cmp != 0)
+              return cmp;
+          }
+        }
+        return 0;  // all elements equal
+      }
+    };
+  }
+
 }

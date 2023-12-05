@@ -16,19 +16,23 @@
 
 package solutions.trsoftware.commons.shared.util.iterators;
 
+import solutions.trsoftware.commons.shared.util.collections.ListAdapter;
+
 import java.util.Iterator;
 import java.util.ListIterator;
 import java.util.NoSuchElementException;
 
 /**
- * Base class to help implement iterators over indexed sequences.
+ * Base class to help implement iterators over indexed sequences, such as arrays.
  * Essentially an Iterator version of an indexed for-loop.
+ * Does not support {@linkplain #remove() removal}.
  *
  * @author Alex, 4/27/2016
+ * @see ListAdapter
  */
 public abstract class IndexedIterator<T> implements Iterator<T> {
 
-  /** The starting index value (iteration will start with {@link #i} equal to this value) */
+  /** The starting index value (iteration will start with <code>{@link #i} = {@link #start}</code>) */
   protected final int start;
   /** Upper limit for the index value (iteration will stop when {@link #i} is greater than or equal to this value) */
   protected final int limit;
@@ -37,7 +41,7 @@ public abstract class IndexedIterator<T> implements Iterator<T> {
 
   /**
    * Creates a new instance to iterate indices in the range {@code [0, limit[}.
-   * @param limit the value for {@link #limit}
+   * @param limit upper bound for the index value (exclusive)
    */
   public IndexedIterator(int limit) {
    this(0, limit);
@@ -47,7 +51,7 @@ public abstract class IndexedIterator<T> implements Iterator<T> {
    * Creates a new instance to iterate indices in the range {@code [start, limit[}
    *
    * @param start initial index value (inclusive)
-   * @param limit upper limit for the index value (exclusive)
+   * @param limit upper bound for the index value (exclusive)
    */
   public IndexedIterator(int start, int limit) {
     this.start = start;
@@ -69,7 +73,7 @@ public abstract class IndexedIterator<T> implements Iterator<T> {
   }
 
   /**
-   * @throws NoSuchElementException iff {@link #hasNext()} returns {@code false}, to comply with the Iterator interface
+   * @throws NoSuchElementException if {@link #hasNext()} returns {@code false}, to comply with the Iterator interface
    */
   protected void maybeThrowNoSuchElement() {
     if (!hasNext())
@@ -83,11 +87,4 @@ public abstract class IndexedIterator<T> implements Iterator<T> {
     return i;
   }
 
-  /**
-   * Not supported.
-   */
-  @Override
-  public void remove() {
-    throw new UnsupportedOperationException();
-  }
 }

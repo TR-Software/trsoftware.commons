@@ -73,7 +73,7 @@ public class ColorSequence {
     double hue = nextHue;
     nextHue = (hue + addend) % 1;
     // sat between 0.1 and 0.3
-    double saturation = (RandomUtils.rnd.nextInt(2000) + 1000) / 10000d;
+    double saturation = (RandomUtils.rnd().nextInt(2000) + 1000) / 10000d;
     double brightness = 0.9d;
     // TODO: try using HSL instead of HSB?
     int sRGB = ColorUtils.HSBtoRGB((float)hue, (float)saturation, (float)brightness);

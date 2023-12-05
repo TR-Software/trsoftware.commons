@@ -26,7 +26,7 @@ import solutions.trsoftware.commons.shared.text.markovchain.dict.ShortHashArrayC
  *
  * @author Alex
  */
-public abstract class ShortStateTest extends TestCase {
+public abstract class ShortStateTestCase extends TestCase {
   protected CodingDictionary<Short> dict;
 
   @Override

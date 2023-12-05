@@ -2,6 +2,7 @@ package solutions.trsoftware.commons.shared.util.collections;
 
 import javax.annotation.Nonnull;
 import java.util.AbstractList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.function.IntFunction;
 import java.util.function.IntSupplier;
@@ -9,7 +10,11 @@ import java.util.function.IntSupplier;
 import static java.util.Objects.requireNonNull;
 
 /**
- * Provides a {@link List java.util.List} view of any data structure that has a size allows access to elements by index.
+ * Provides an unmodifiable {@link List java.util.List} view of any data structure that has a size
+ * and allows access to elements by index.
+ * <p>
+ * <em>Note:</em> Since this list is unmodifiable, any operations relying on mutability
+ * (such as {@link #sort(Comparator)}) will throw an {@link UnsupportedOperationException}.
  *
  * @param <E> the element type
  */

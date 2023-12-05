@@ -17,6 +17,7 @@
 package solutions.trsoftware.commons.shared.util;
 
 import solutions.trsoftware.commons.shared.util.compare.RichComparable;
+import solutions.trsoftware.commons.shared.util.text.SharedNumberFormat;
 
 /**
  * A GWT-friendly, simplified, version of {@link java.util.concurrent.TimeUnit}.
@@ -103,7 +104,7 @@ public enum TimeUnit implements RichComparable<TimeUnit> {
    * The estimated duration of a month is one twelfth of {@code 365.2425 Days}.
    * @see java.time.temporal.ChronoUnit#MONTHS
    */
-  MONTHS(SECONDS.toMillis(31556952 / 12), "M"),
+  MONTHS(SECONDS.toMillis(2629746 /* 31556952 / 12 */), "M"),
   /**
    * Unit that represents the concept of a year.
    * For the ISO calendar system, it is equal to 12 months.
@@ -136,6 +137,21 @@ public enum TimeUnit implements RichComparable<TimeUnit> {
    * @return the converted duration in this unit, which could be a fraction.
    */
   public double from(TimeUnit sourceUnit, double sourceDuration) {
+    return convert(sourceDuration, sourceUnit);
+  }
+
+  /**
+   * Convert the given time duration in the given unit to this unit.
+   * <p>
+   * <em>Note:</em> this method is exactly the same as {@link #from(TimeUnit, double)} with the parameters reversed,
+   * to match the API of
+   * {@link java.util.concurrent.TimeUnit#convert(long, java.util.concurrent.TimeUnit) java.util.concurrent.TimeUnit}
+   *
+   * @param sourceUnit the unit of the <tt>sourceDuration</tt> argument
+   * @param sourceDuration the time duration in the given <tt>sourceUnit</tt>
+   * @return the converted duration in this unit, which could be a fraction.
+   */
+  public double convert(double sourceDuration, TimeUnit sourceUnit) {
     if (sourceUnit == this)
       return sourceDuration;  // if it's the same unit, return the same value without doing any lossy arithmetic
     return (sourceUnit.millis * sourceDuration) / millis;
@@ -160,6 +176,14 @@ public enum TimeUnit implements RichComparable<TimeUnit> {
     return from(MILLISECONDS, duration);
   }
 
+  public double toNanos(double duration) {
+    return to(NANOSECONDS, duration);
+  }
+
+  public double fromNanos(double duration) {
+    return from(NANOSECONDS, duration);
+  }
+
   /**
    * @return The name of this unit in lowercase, in its singular or plural form, depending on whether the given
    * duration is equal to 1.
@@ -169,6 +193,38 @@ public enum TimeUnit implements RichComparable<TimeUnit> {
     if (duration == 1)
       ret = ret.substring(0, ret.length()-1);  // we want the singular form of the name, so strip the trailing "s"
     return ret;
+  }
+
+  // TODO: maybe move the following Stopwatch.toString copycat methods to DurationFormat, and provide juc.TimeUnit-compatible versions
+  public static String format(double nanos, int maxFractionDigits) {
+    // TODO: experimental impl of Guava's Stopwatch.toString, to facilitate printing human-readable time values, with unit chosen automatically
+    TimeUnit unit = chooseUnit(nanos);
+    double value = nanos / NANOSECONDS.convert(1, unit);
+    SharedNumberFormat numberFormat = new SharedNumberFormat(maxFractionDigits);  // corresponds to Guava's Platform.formatCompact4Digits(value)
+    return numberFormat.format(value) + " " + unit.abbreviation;
+  }
+
+  static TimeUnit chooseUnit(double nanos) {
+    // TODO: experimental impl of Guava's Stopwatch.chooseUnit, to facilitate printing human-readable time values, with unit chosen automatically
+    if (DAYS.convert(nanos, NANOSECONDS) >= 1) {
+      return DAYS;
+    }
+    if (HOURS.convert(nanos, NANOSECONDS) >= 1) {
+      return HOURS;
+    }
+    if (MINUTES.convert(nanos, NANOSECONDS) >= 1) {
+      return MINUTES;
+    }
+    if (SECONDS.convert(nanos, NANOSECONDS) >= 1) {
+      return SECONDS;
+    }
+    if (MILLISECONDS.convert(nanos, NANOSECONDS) >= 1) {
+      return MILLISECONDS;
+    }
+    if (MICROSECONDS.convert(nanos, NANOSECONDS) >= 1) {
+      return MICROSECONDS;
+    }
+    return NANOSECONDS;
   }
 
 }

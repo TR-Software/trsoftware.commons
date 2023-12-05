@@ -405,7 +405,7 @@ public class MathUtilsJavaTest extends TestCase {
     assertFalse(isPowerOf2(Integer.MIN_VALUE));
     // 3) now test some random values (too slow to iterate over possible ints)
     for (int i = 0; i < 100_000; i++) {
-      int x = RandomUtils.rnd.nextInt();
+      int x = RandomUtils.rnd().nextInt();
       assertEquals(powersOf2.contains(x), isPowerOf2(x));
     }
   }

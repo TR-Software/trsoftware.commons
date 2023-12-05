@@ -17,7 +17,7 @@ public class WebsocketSessionStub implements Session {
 
   private static final AtomicInteger nextId = new AtomicInteger();
 
-  private final LinkedHashMap<String, List<String>> requestParameterMap = new LinkedHashMap<>();
+  private Map<String, List<String>> requestParameterMap = new LinkedHashMap<>();
   private CloseReason closeReason;
   
   private RemoteEndpoint.Async asyncRemote;
@@ -173,6 +173,11 @@ public class WebsocketSessionStub implements Session {
   @Override
   public Map<String, List<String>> getRequestParameterMap() {
     return requestParameterMap;
+  }
+
+  public WebsocketSessionStub setRequestParameterMap(Map<String, List<String>> requestParameterMap) {
+    this.requestParameterMap = requestParameterMap;
+    return this;
   }
 
   @Override

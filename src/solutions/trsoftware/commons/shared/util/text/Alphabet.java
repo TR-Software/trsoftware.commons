@@ -26,11 +26,14 @@ import static solutions.trsoftware.commons.shared.util.StringUtils.*;
  * @author Alex, 9/20/2017
  */
 public enum Alphabet {
+  /*
+  NOTE: see https://symbl.cc/en/alphabets/ for lists of code points comprising the alphabets of non-English languages
+   */
 
   CUSTOM(""),
   NUMBERS("0123456789"),
   /** The chars on the QWERTY home row that fall under the standard finger positions */
-  HOME_ROW_BASIC("asdfjkl;'") {
+  HOME_ROW_BASIC("asdfjkl;") {
     @Override
     public String getPrettyName() {
       return "Home row (Qwerty, just the 8 fingers)";

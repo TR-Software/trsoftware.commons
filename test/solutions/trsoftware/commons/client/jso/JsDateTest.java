@@ -125,7 +125,7 @@ public class JsDateTest extends CommonsGwtTestCase {
       }
     }
     for (int i = 1; i < 100; i++) {
-      int rndTime = RandomUtils.rnd.nextInt();
+      int rndTime = RandomUtils.rnd().nextInt();
       JsDate dRand = JsDate.create(rndTime);
       assertEqualsAndHashCode(dRand);
       hasher.addHash(dRand);

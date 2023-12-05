@@ -18,7 +18,6 @@
 package solutions.trsoftware.commons.shared.util.text;
 
 import junit.framework.TestCase;
-import solutions.trsoftware.commons.shared.testutil.AssertUtils;
 
 import java.util.Arrays;
 import java.util.Collections;
@@ -53,7 +52,10 @@ public class CharRangeTest extends TestCase {
     assertEquals(expected, charRange.toString());
     assertEquals(expected.length(), charRange.length());
     for (int i = 0; i < expected.length(); i++) {
-      assertEquals(expected.charAt(i), charRange.charAt(i));
+      char c = expected.charAt(i);
+      assertEquals(c, charRange.charAt(i));
+      assertEquals(i, charRange.indexOf(c));
+      assertTrue(charRange.contains(c));
     }
   }
 
@@ -94,5 +96,25 @@ public class CharRangeTest extends TestCase {
     assertEqualsAndHashCode(new CharRange('A', 'B'), new CharRange('A', 'B'));
     assertEqualsAndHashCode(new CharRange('0', '9'), new CharRange('0', '9'));
     assertNotEqual(new CharRange('A', 'B'), new CharRange('A', 'C'));
+  }
+
+  public void testIndexOf() throws Exception {
+    CharRange ad = new CharRange('a', 'd');
+    assertEquals(-1, ad.indexOf('A'));
+    assertEquals(0, ad.indexOf('a'));
+    assertEquals(1, ad.indexOf('b'));
+    assertEquals(2, ad.indexOf('c'));
+    assertEquals(3, ad.indexOf('d'));
+    assertEquals(-1, ad.indexOf('e'));
+  }
+
+  public void testContains() throws Exception {
+    CharRange ad = new CharRange('a', 'd');
+    assertFalse(ad.contains('A'));
+    assertTrue(ad.contains('a'));
+    assertTrue(ad.contains('b'));
+    assertTrue(ad.contains('c'));
+    assertTrue(ad.contains('d'));
+    assertFalse(ad.contains('e'));
   }
 }

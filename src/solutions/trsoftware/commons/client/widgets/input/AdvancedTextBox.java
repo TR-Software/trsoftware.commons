@@ -42,7 +42,7 @@ import solutions.trsoftware.commons.shared.util.StringUtils;
  * @see <a href="https://caniuse.com/?search=placeholder">
  *   Can I use "placeholder"?</a>
  *
- * @deprecated
+ * @deprecated Made obsolete by the {@code placeholder} attribute for {@code <input>} / {@code <textarea>} elements
  * @author Alex
  */
 public class AdvancedTextBox extends TextBox implements FocusHandler, BlurHandler {

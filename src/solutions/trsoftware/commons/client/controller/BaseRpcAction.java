@@ -16,6 +16,7 @@
 
 package solutions.trsoftware.commons.client.controller;
 
+import com.google.common.base.MoreObjects;
 import com.google.gwt.core.client.Duration;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.core.client.Scheduler;
@@ -50,6 +51,11 @@ public abstract class BaseRpcAction<T> implements Command, AsyncCallback<T> {
    * @see #suspendRPCsAndPromptToReloadPage()
    */
   private static boolean reloadPromptShowing;
+
+  private static int nextId;
+
+  /** Sequence number of this RPC call */
+  protected final int id = ++nextId;
   /** allows timing RPC calls */
   protected double startTime;
   /** allows timing RPC calls */
@@ -104,8 +110,8 @@ public abstract class BaseRpcAction<T> implements Command, AsyncCallback<T> {
   public final void onFailure(Throwable caught) {
     endTime = Duration.currentTimeMillis();
     if (Log.ENABLED) {
-      GWT.log("BaseRpcAction.onFailure", caught);
-      Log.write("Call to " + name + " failed ( " + getRoundTripTime() + " ms): " + caught.getClass().getName() + ": " + caught.getMessage());
+      GWT.log(getRpcFailedMessage(), caught);
+      Log.write(getRpcFailedMessage() + ": " + caught.getClass().getName() + ": " + caught.getMessage());
     }
     if (caught instanceof IncompatibleRemoteServiceException) {
       /* When GameServiceServlet determines that the client code version doesn't match what's currently deployed on the server,
@@ -126,9 +132,13 @@ public abstract class BaseRpcAction<T> implements Command, AsyncCallback<T> {
     getEventBus().fireEventFromSource(new FailureEvent(caught), this);
   }
 
+  protected String getRpcFailedMessage() {
+    return "Call to " + name + " failed (" + getRoundTripTime() + " ms)";
+  }
+
   /** Subclasses should override to provide handling for exceptions that might be thrown by their particular RPCs */
   protected void handleFailure(Throwable caught) {
-    throw new RuntimeException(caught); // this is a last resort; let the UncaughtExceptionHandler deal with it
+    throw new RpcActionFailedException(this, caught); // this is a last resort; let the UncaughtExceptionHandler deal with it
   }
 
   protected abstract void handleSuccess(T result);
@@ -139,7 +149,7 @@ public abstract class BaseRpcAction<T> implements Command, AsyncCallback<T> {
 
   public final void onSuccess(T result) {
     endTime = Duration.currentTimeMillis();
-    Log.write("Call to " + name + " succeeded (" + getRoundTripTime() + " ms roundtrip).");
+    Log.write("Call to " + name + " succeeded (" + getRoundTripTime() + " ms)");
     handleSuccess(result);
     getEventBus().fireEventFromSource(new SuccessEvent<T>(result), this);
     onFinished();
@@ -232,4 +242,27 @@ public abstract class BaseRpcAction<T> implements Command, AsyncCallback<T> {
     return getEventBus().addHandlerToSource(FailureEvent.TYPE, this, handler);
   }
 
+  @Override
+  public String toString() {
+    return MoreObjects.toStringHelper(this)
+        .add("id", id)
+        .add("name", name)
+        .add("startTime", startTime)
+        .add("endTime", endTime)
+        .toString();
+  }
+
+  public static class RpcActionFailedException extends RuntimeException {
+
+    public RpcActionFailedException(BaseRpcAction<?> rpcAction, Throwable cause) {
+      super(rpcAction.getRpcFailedMessage(), cause);
+    }
+
+    public RpcActionFailedException(String message, Throwable cause) {
+      super(message, cause);
+    }
+
+    private RpcActionFailedException() {
+    }
+  }
 }

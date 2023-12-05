@@ -25,10 +25,8 @@ import solutions.trsoftware.commons.shared.util.stats.Mergeable;
 
 import javax.annotation.Nullable;
 import java.util.*;
-import java.util.function.BiFunction;
-import java.util.function.Function;
-import java.util.function.Predicate;
-import java.util.function.Supplier;
+import java.util.function.*;
+import java.util.stream.Collectors;
 
 /**
  * Date: Jun 6, 2008 Time: 2:15:43 PM
@@ -222,7 +220,7 @@ public class MapUtils {
    * @deprecated use {@link MapDecorator} for type-safety
    */
   @SuppressWarnings("unchecked")
-  public static <M extends Map<K,V>,K,V> M putAll(M map, Object... keyValuePairs) {
+  public static <K, V, M extends Map<K, V>> M putAll(M map, Object... keyValuePairs) {
     int n = keyValuePairs.length;
     if (n % 2 == 1)
       throw new IllegalArgumentException("Even number of args required.");
@@ -648,6 +646,23 @@ public class MapUtils {
    */
   public static boolean isEmpty(Map<?, ?> map) {
     return map == null || map.isEmpty();
+  }
+
+  /**
+   * Returns a merge function, suitable for use in
+   * {@link Map#merge(Object, Object, BiFunction) Map.merge()} or
+   * {@link Collectors#toMap(Function, Function, BinaryOperator) toMap()}, which always
+   * throws {@code IllegalStateException}.  This can be used to enforce the
+   * assumption that the elements being collected are distinct.
+   *
+   * @param <T> the type of input arguments to the merge function
+   * @return a merge function which always throw {@code IllegalStateException}
+   */
+  public static <T> BinaryOperator<T> throwingMerger() {
+    // NOTE: this is an exact copy of the private method java.util.stream.Collectors.throwingMerger
+    return (u,v) -> {
+      throw new IllegalStateException("Duplicate key: " + u);
+    };
   }
 
 }

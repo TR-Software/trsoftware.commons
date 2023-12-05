@@ -37,7 +37,7 @@ public class TimeUnitTest extends TestCase {
   public void setUp() throws Exception {
     super.setUp();
     randomDoubles = new double[1000];
-    Random rnd = RandomUtils.rnd;
+    Random rnd = RandomUtils.rnd();
     for (int i = 0; i < randomDoubles.length; i++) {
       randomDoubles[i] = rnd.nextDouble() * rnd.nextInt();
     }
@@ -127,4 +127,26 @@ public class TimeUnitTest extends TestCase {
     assertEquals("hours", HOURS.getPrettyName(1.1));
     assertEquals("hours", HOURS.getPrettyName(2));
   }
+
+  public void testChooseUnit() throws Exception {
+    TimeUnit[] units = values();
+    for (int i = units.length - 1; i >= 0; i--) {
+      TimeUnit unit = units[i];
+      // any nanos value >= 1 should map to the same unit (at most DAYS)
+      assertEquals(units[MathUtils.restrict(i, 0, DAYS.ordinal())], chooseUnit(unit, 1));
+      assertEquals(units[MathUtils.restrict(i, 0, DAYS.ordinal())], chooseUnit(unit, 1.1));
+      // any nanos value < 1 should map to the next lower unit (at least NANOSECONDS)
+      assertEquals(units[MathUtils.restrict(i-1, 0, DAYS.ordinal())], chooseUnit(unit, 0.9));
+    }
+  }
+
+  private TimeUnit chooseUnit(TimeUnit sourceUnit, double duration) {
+    double nanos = sourceUnit.toNanos(duration);
+    TimeUnit result = TimeUnit.chooseUnit(nanos);
+    // also print the result of format
+    System.out.println(new TimeValue(duration, sourceUnit) + " -> " + format(nanos, 4));
+    return result;
+  }
+
+
 }

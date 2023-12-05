@@ -47,6 +47,7 @@ import static solutions.trsoftware.commons.server.io.file.FileUtils.urlToFilepat
  * @author Alex
  * @see <a href="https://stackoverflow.com/a/6608848">StackOverflow discussion about the difference between the
  *     getResource methods of Class vs. ClassLoader</a>
+ * @see com.google.common.reflect.ClassPath.ResourceInfo
  * @since 3/19/2018
  */
 public class ResourceLocator {

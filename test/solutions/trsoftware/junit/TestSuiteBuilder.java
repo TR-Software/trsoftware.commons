@@ -17,7 +17,13 @@
 
 package solutions.trsoftware.junit;
 
+import com.google.common.annotations.VisibleForTesting;
+import com.google.common.base.MoreObjects;
+import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Iterators;
+import com.google.common.collect.MultimapBuilder;
+import com.google.common.collect.SetMultimap;
+import com.google.common.reflect.ClassPath;
 import com.google.gwt.junit.client.GWTTestCase;
 import com.google.gwt.junit.tools.GWTTestSuite;
 import junit.framework.Test;
@@ -25,13 +31,14 @@ import junit.framework.TestCase;
 import junit.framework.TestSuite;
 import solutions.trsoftware.commons.server.io.ResourceLocator;
 import solutions.trsoftware.commons.server.io.file.FileUtils;
-import solutions.trsoftware.commons.server.util.reflect.ReflectionPredicates;
 import solutions.trsoftware.commons.server.util.reflect.ReflectionUtils;
 import solutions.trsoftware.commons.shared.util.StringUtils;
-import solutions.trsoftware.commons.shared.util.collections.DefaultHashSetMap;
+import solutions.trsoftware.commons.shared.util.collections.ListAdapter;
+import solutions.trsoftware.commons.shared.util.iterators.IndexedIterator;
 import solutions.trsoftware.tools.util.BytecodeParser;
 
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import java.io.IOException;
 import java.io.PrintStream;
 import java.lang.annotation.Annotation;
@@ -43,12 +50,14 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.util.*;
+import java.util.function.BiPredicate;
 import java.util.function.Predicate;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import java.util.stream.Collectors;
 
+import static java.lang.String.format;
 import static solutions.trsoftware.commons.shared.util.StringUtils.indent;
 import static solutions.trsoftware.junit.TestSuiteBuilder.FilterMode.EXCLUDE;
 import static solutions.trsoftware.junit.TestSuiteBuilder.FilterMode.INCLUDE;
@@ -67,6 +76,7 @@ public class TestSuiteBuilder {
    * Matches filenames ending with {@code "Test.class"}}
    */
   public static final String DEFAULT_FILENAME_REGEX = ".*Test\\.class";
+  public static final String PACKAGES_CONFIG_PROPERTY = "TestSuiteBuilder.packages";
 
 //  /**
 //   * Matches filenames ending with {@code "Test.class"} or {@code "TestCase.class"}
@@ -100,15 +110,26 @@ public class TestSuiteBuilder {
   private boolean useGwtTestSuite;
 
   /**
+   * Used by {@link #isValidPackage(String)}
+   * <p>
+   * TODO(9/18/2023): could refactor our whole whole from contentRoots file-tree walking mechanism
+   *       using with Guava's ClassPath, and apply package filtering that way
+   */
+  private ClassPath classPath;  // TODO(9/20/2023): not used for now b/c adds a significant startup perf penalty
+
+  /**
    * Test classes inheriting from these will be either included in or excluded from the suite,
    * depending on the {@link FilterMode} key.
    */
-  private final FilterMap<Class<?>> superclassFilters = new FilterMap<>();
+  private final FilterSet<Class<?>, Class<?>> superclassFilters = new FilterSet<>(Class::isAssignableFrom);
   /**
-   * Test methods (or classes) marked with these annotations ({@code @interface}s) will be either included in or
+   * Test methods (or classes) marked with these annotations will be either included in or
    * excluded from the suite, depending on the {@link FilterMode} key.
    */
-  private FilterMap<Class<? extends Annotation>> annotationFilters = new FilterMap<>();
+  private final FilterSet<Class<? extends Annotation>, AnnotatedElement> annotationFilters
+      = new FilterSet<>(ReflectionUtils::hasDeclaredAnnotation);
+
+  private final FilterSet<String, Class<?>> packageFilters = new FilterSet<>(TestSuiteBuilder::isInSubpackageOf);
 
   /**
    * Determines how {@link #superclassFilters} or {@link #annotationFilters} will be used.
@@ -145,9 +166,18 @@ public class TestSuiteBuilder {
     }
   }
 
-  private static class FilterMap<T> extends DefaultHashSetMap<FilterMode, T> {
-    FilterMap() {
-      super(new EnumMap<>(FilterMode.class));
+
+  private static class FilterSet<T, U> implements Predicate<U> {
+
+    private final BiPredicate<T, U> matcher;
+    private final SetMultimap<FilterMode, T> map = MultimapBuilder.enumKeys(FilterMode.class).linkedHashSetValues().build();
+
+    /**
+     * @param matcher a predicate that determines whether the filter condition object, {@link T},
+     * matches the second argument, {@link U}
+     */
+    FilterSet(BiPredicate<T, U> matcher) {
+      this.matcher = matcher;
     }
 
     @SafeVarargs
@@ -155,11 +185,46 @@ public class TestSuiteBuilder {
       FilterMode oppositeMode = mode.opposite();
       for (T filter : filters) {
         // make sure this map doesn't already contain the opposite of this filter
-        if (get(oppositeMode).contains(filter))
-          throw new IllegalStateException(String.format("Cannot %s <%s> because it is already being explicitly %sd",
+        if (map.get(oppositeMode).contains(filter))
+          throw new IllegalStateException(format("Cannot %s <%s> because it is already being explicitly %sd",
               mode.prettyName(), filter, oppositeMode.prettyName()));
-        get(mode).add(filter);
+        map.put(mode, filter);
       }
+    }
+
+    /**
+     * @return {@code true} iff either
+     *   (1) given class or method is explicitly included, OR
+     *   (2) there aren't any explicit inclusions
+     */
+    boolean includes(U classOrMethod) {
+      return !map.containsKey(INCLUDE) || matches(INCLUDE, classOrMethod);
+    }
+
+    /**
+     * @return {@code true} iff the given class or method is explicitly excluded
+     */
+    boolean excludes(U classOrMethod) {
+//      return !get(EXCLUDE).isEmpty() && isExcluded(classOrMethod);
+      return matches(EXCLUDE, classOrMethod);
+    }
+
+    private boolean matches(FilterMode mode, U classOrMethod) {
+      return map.get(mode).stream().anyMatch(t -> matcher.test(t, classOrMethod));
+    }
+
+    @Override
+    public boolean test(U classOrMethod) {
+      return includes(classOrMethod) && !excludes(classOrMethod);
+    }
+
+    public void clear() {
+      map.clear();
+    }
+
+    @Override
+    public String toString() {
+      return map.toString();
     }
   }
 
@@ -169,12 +234,27 @@ public class TestSuiteBuilder {
   private TestTimeBoxDecorator.TimeBoxSettings timeBoxSettings;
 
   public TestSuiteBuilder() {
+//    classPath = parseClassPath();
     // TODO: don't do this by default: caller should specify if they want this feature (extract method)
-    String packages = System.getProperty("TestSuiteBuilder.packages");
-    if (packages != null) {
-      Arrays.stream(packages.split(",")).map(String::trim).filter(StringUtils::notBlank)
-          .forEach(this::addPackage);
+    // TODO(9/13/2023): document the usage of this property
+    String packages = System.getProperty(PACKAGES_CONFIG_PROPERTY);
+    if (StringUtils.notEmpty(packages)) {
+      String[] pkgNames = Pattern.compile(",").splitAsStream(packages).map(String::trim).toArray(String[]::new);
+      LOGGER.config(() -> format("Building suite of tests contained in packages %s (as specified by the %s property)",
+          Arrays.toString(pkgNames), PACKAGES_CONFIG_PROPERTY));
+      includeOnlySubpackagesOf(pkgNames);
     }
+  }
+
+  static ClassPath parseClassPath() {  // TODO: experimental
+    try {
+      return ClassPath.from(ClassLoader.getSystemClassLoader());
+    }
+    catch (IOException e) {
+      LOGGER.log(Level.WARNING, e, () -> format("Unable to parse classpath with %s", ClassPath.class));
+      // suppress exception; classPath will simply not be available as a validation method for isValidPackage
+    }
+    return null;
   }
 
   /**
@@ -216,7 +296,7 @@ public class TestSuiteBuilder {
    */
   public TestSuiteBuilder addContentRoot(@Nonnull Path path) {
     if (contentRoots.add(Objects.requireNonNull(path, "path"))) {
-      LOGGER.info("Adding tests from " + path);
+      LOGGER.config("Adding tests from " + path);
     }
     return this;
   }
@@ -224,7 +304,7 @@ public class TestSuiteBuilder {
   /**
    * Adds the path of the given reference class to the set of content roots to be scanned for classes.
    *
-   * @param refClass the location of the corrseponding {@code .class} file on will be used to look for tests to add to the suite
+   * @param refClass the location of the corresponding {@code .class} file on will be used to look for tests to add to the suite
    * @return self, for chaining
    * @see ReflectionUtils#getCompilerOutputPath(Class)
    */
@@ -244,7 +324,16 @@ public class TestSuiteBuilder {
    * @see ReflectionUtils#getCompilerOutputPath(Class)
    */
   public TestSuiteBuilder addPackage(String packageName) {
-    // get the .class file path (compiler output dir) for the given package
+    /*
+     TODO(9/13/2023): this doesn't work if project contains multipe source roots with the same package
+       Example: given source roots "src" and "tools", IntelliJ might put the "tools" root ahead of "src" on classpath,
+       which would make ClassLoader.getResource return the URL for the "tools" directory instead of "src".
+       Therefore:
+         - either deprecate or remove this method
+         - instead, use addContentRoot(Class<?> refClass) in conjunction w/"TestSuiteBuilder.packages" sys prop to filter
+           based on package
+    */
+
     String resourceName = packageName.replace('.', '/');
     ResourceLocator res = new ResourceLocator(resourceName);
     if (res.exists()) {
@@ -265,16 +354,28 @@ public class TestSuiteBuilder {
    * @see ReflectionUtils#getCompilerOutputPath(Class)
    */
   public TestSuiteBuilder addPackageOf(Class<?> classInPackage) {
+    /*
+     TODO(9/13/2023): this doesn't work if project contains multipe source roots with the same package
+       Example: given source roots "src" and "tools", IntelliJ might put the "tools" root ahead of "src" on classpath,
+       which would make ClassLoader.getResource return the URL for the "tools" directory instead of "src".
+       Therefore:
+         - either deprecate or remove this method
+         - instead, use addContentRoot(Class<?> refClass) in conjunction w/"TestSuiteBuilder.packages" sys prop to filter
+           based on package
+    */
     return addPackage(classInPackage.getPackage().getName());
   }
 
   /**
-   * Asserts that none of the settings clash with each other.
+   * Asserts that none of the settings clash with each other and clears the transient state of this builder in preparation
+   * to build a new suite.
+   *
    * @throws IllegalStateException if the current configuration of this builder violates any constraints
    */
-  private void validateSettings() throws IllegalStateException {
+  private void prepareToBuild() throws IllegalStateException {
     if (useGwtTestSuite && groupByPackage)
       throw new IllegalStateException("useGwtTestSuite and groupByPackage are mutually exclusive");
+    classToTestSuiteMap.clear();  // reset the state
   }
 
   /**
@@ -285,7 +386,7 @@ public class TestSuiteBuilder {
    * @return the generated test suite (which might be an instance of {@link GWTTestSuite} if the {@link #useGwtTestSuite}
    * setting was specified).
    *
-   * @throws IllegalStateException if the current configuration of this builder violates any constraints (see {@link #validateSettings()})
+   * @throws IllegalStateException if the current configuration of this builder violates any constraints (see {@link #prepareToBuild()})
    * @throws IOException any exception thrown while searching for and parsing the test class files.
    */
   public TestSuite buildSuite() throws IllegalStateException, IOException {
@@ -301,15 +402,16 @@ public class TestSuiteBuilder {
    * @return the generated test suite (which might be an instance of {@link GWTTestSuite} if the {@link #useGwtTestSuite}
    * setting was specified).
    *
-   * @throws IllegalStateException if the current configuration of this builder violates any constraints (see {@link #validateSettings()})
+   * @throws IllegalStateException if the current configuration of this builder violates any constraints (see {@link #prepareToBuild()})
    * @throws IOException any exception thrown while searching for and parsing the test class files.
    */
   public TestSuite buildSuite(String name) throws IllegalStateException, IOException {
-    validateSettings();
+    prepareToBuild();
     TestSuite testSuite = useGwtTestSuite ? new GWTTestSuite(name) : new TestSuite(name);
     Pattern filenamePattern = Pattern.compile(filenameRegex);
     /* TODO(5/29/2023): filter the contentRoots to make sure that nothing is included more than once,
          e.g.  if contentRoots = ["/a/b/c", "/a/b/"], the "/a/b/c" entry is superfluous since already included in "/a/b/"
+        Update(9/13/2023): this is low priority since we're now using a hash map (testSuitesByClass) to prevent duplicates
       */
     for (Path root : contentRoots) {
       if (groupByPackage)
@@ -385,15 +487,7 @@ public class TestSuiteBuilder {
 
       @Override
       protected FileVisitResult visitMatchedFile(Path file, BasicFileAttributes attrs, Matcher match) {
-        Class<?> cls = null;
-        try {
-          String className = BytecodeParser.extractClassName(file.toFile());
-          cls = Class.forName(className);
-        }
-        catch (Exception e) {
-          // the file is probably not a valid class; print stack trace and ignore this exception
-          e.printStackTrace();
-        }
+        Class<?> cls = getClassFromFile(file);
         if (cls != null && includeClass(cls)) {
           TestSuite dirTestSuite = suiteStack.peek();
           addIfNotEmpty(dirTestSuite, createTestSuiteForClass(cls));
@@ -427,21 +521,39 @@ public class TestSuiteBuilder {
     Files.walkFileTree(root, new FileUtils.FilenamePatternVisitor(filenamePattern) {
       @Override
       protected FileVisitResult visitMatchedFile(Path file, BasicFileAttributes attrs, Matcher match) {
-        Class<?> cls = null;
-        try {
-          String className = BytecodeParser.extractClassName(file.toFile());
-          cls = Class.forName(className);
-        }
-        catch (Exception e) {
-          // the file is probably not a valid class; print stack trace and ignore this exception
-          e.printStackTrace();
-        }
+        Class<?> cls = getClassFromFile(file);
         if (cls != null && includeClass(cls)) {
           addIfNotEmpty(rootTestSuite, createTestSuiteForClass(cls));
         }
         return FileVisitResult.CONTINUE;
       }
     });
+  }
+
+  /**
+   * Uses {@link Class#forName(String)} to get the {@link Class} object associated with the given
+   * compiled {@code .class} file.
+   *
+   * @param file location of a compiled {@code .class} file
+   * @return the class object or {@code null} if an exception occurred during the lookup
+   */
+  @Nullable
+  private static Class<?> getClassFromFile(Path file) {
+    /* TODO: consider moving method to ReflectionUtils (as the inverse of ReflectionUtils.getClassFile)
+     *   - the extracted method should rethrow exceptions rather than return null
+     *   Note: this would require moving BytecodeParser from tools to src, thereby adding a BCEL dependency in prod
+     */
+    Class<?> cls = null;
+    try {
+      String className = BytecodeParser.extractClassName(file.toFile());
+      cls = Class.forName(className);
+    }
+    catch (Throwable e) {
+      // the file is probably not a valid class; print stack trace and ignore this exception
+      LOGGER.log(Level.WARNING, "Unable to find Class for " + file, e);
+      e.printStackTrace();
+    }
+    return cls;
   }
 
   /**
@@ -466,37 +578,36 @@ public class TestSuiteBuilder {
   /**
    * Caches tests to ensure there are no duplicates
    */
-  private LinkedHashMap<Class<?>, TestSuite> testSuitesByClass = new LinkedHashMap<>();
+  private LinkedHashMap<Class<?>, TestSuite> classToTestSuiteMap = new LinkedHashMap<>();
 
   private TestSuite createTestSuiteForClass(Class<?> testClass) {
-    if (testSuitesByClass.containsKey(testClass)) {
-      // already have a suite for this class; probably a duplicate contentRoots entry
+    if (classToTestSuiteMap.containsKey(testClass)) {
+      // already added a suite for this class; probably a duplicate contentRoots entry
       return null;
     }
     // leverage the functionality already provided by TestSuite to convert a TestCase into a suite containing its test methods
     TestSuite testSuiteForClass = new TestSuite(testClass);
     // now modify that TestSuite as needed
     SortedMap<String, Test> testsByName = new TreeMap<>();  // alphabetically sort the tests by name
-    Enumeration methodTests = testSuiteForClass.tests();
-    while (methodTests.hasMoreElements()) {
+    for (Test test : listTests(testSuiteForClass)) {
       /*
       the default test suite generated for a class will contain an entry for each test method, each being an instance
       of that same class (which is almost certainly an instance of TestCase), so the following cast should succeed
       */
-      TestCase test = (TestCase)methodTests.nextElement();
-      String testName = test.getName();
+      TestCase testCase = (TestCase)test;
+      String testName = testCase.getName();
       Method testMethod;
       try {
         testMethod = testClass.getMethod(testName);
       }
       catch (NoSuchMethodException e) {
-        if (test.toString().equals("warning(junit.framework.TestSuite$1)")) {
+        if (testCase.toString().equals("warning(junit.framework.TestSuite$1)")) {
           /*
           this is a special-case marker inserted by the TestSuite(Class) constructor to warn about
           a problem with the test class (e.g. "No tests found in ..."),
           in which case we should simply add it to our result as-is
           */
-          testsByName.put(testName, test);
+          testsByName.put(testName, testCase);
           continue;
         }
         else {
@@ -507,21 +618,20 @@ public class TestSuiteBuilder {
       if (applyAnnotationFilters(testMethod)) {
         testsByName.put(testName,
             timeBoxSettings != null ?
-                new TestTimeBoxDecorator(test, testMethod, timeBoxSettings)
-                : test);
+                new TestTimeBoxDecorator(testCase, testMethod, timeBoxSettings)
+                : testCase);
       }
     }
     testSuiteForClass = new TestSuite(testSuiteForClass.getName());
     for (Test test : testsByName.values()) {
       testSuiteForClass.addTest(test);
     }
-    testSuitesByClass.put(testClass, testSuiteForClass);
+    classToTestSuiteMap.put(testClass, testSuiteForClass);
     return testSuiteForClass;
   }
 
   /**
-   * Subclasses of the given superclasses will be excluded from the suite.
-   * @return self, for method chaining
+   * Subclasses of the given superclasses or interfaces will be excluded from the suite.
    */
   public TestSuiteBuilder excludeSubclassesOf(Class<?>... superClasses) {
     superclassFilters.add(EXCLUDE, superClasses);
@@ -529,8 +639,7 @@ public class TestSuiteBuilder {
   }
 
   /**
-   * Only subclasses of the given superclasses will be included in the suite.
-   * @return self, for method chaining
+   * Only subclasses of the given superclasses or interfaces will be included in the suite.
    */
   public TestSuiteBuilder includeOnlySubclassesOf(Class<?>... superClasses) {
     superclassFilters.add(INCLUDE, superClasses);
@@ -538,9 +647,8 @@ public class TestSuiteBuilder {
   }
 
   /**
-   * Clears any superclass filters that might have been previously set
-   * (via {@link #includeOnlyTestsAnnotatedWith(Class[])} or {@link #excludeTestsAnnotatedWith(Class[])}.
-   * @return self, for method chaining
+   * Clears any {@linkplain #superclassFilters superclass filters} that might have been previously set
+   * via {@link #includeOnlyTestsAnnotatedWith} or {@link #excludeTestsAnnotatedWith}.
    */
   public TestSuiteBuilder clearSuperclassFilters() {
     superclassFilters.clear();
@@ -550,7 +658,6 @@ public class TestSuiteBuilder {
   /**
    * Test methods (or classes) marked with the given annotations will be excluded from the suite.
    * @param annotationClasses an {@code @interface}
-   * @return self, for method chaining
    */
   @SafeVarargs
   public final synchronized TestSuiteBuilder excludeTestsAnnotatedWith(Class<? extends Annotation>... annotationClasses) {
@@ -561,7 +668,6 @@ public class TestSuiteBuilder {
   /**
    * Test methods (or classes) will be included in the suite <b>only if</b> marked with any of the given annotations.
    * @param annotationClasses an {@code @interface}
-   * @return self, for method chaining
    */
   @SafeVarargs
   public final synchronized TestSuiteBuilder includeOnlyTestsAnnotatedWith(Class<? extends Annotation>... annotationClasses) {
@@ -570,13 +676,70 @@ public class TestSuiteBuilder {
   }
 
   /**
-   * Clears any annotation filters that might have been previously set
-   * (via {@link #includeOnlyTestsAnnotatedWith(Class[])} or {@link #excludeTestsAnnotatedWith(Class[])}.
-   * @return self, for method chaining
+   * Clears any {@linkplain #annotationFilters annotation filters} that might have been previously set
+   * via {@link #includeOnlyTestsAnnotatedWith} or {@link #excludeTestsAnnotatedWith}.
    */
   public TestSuiteBuilder clearAnnotationFilters() {
     annotationFilters.clear();
     return this;
+  }
+
+  /**
+   * Include only tests from the given packages (and their descendents)
+   * @param parentPackages the names of packages whose tests are to be included
+   */
+  public TestSuiteBuilder includeOnlySubpackagesOf(String... parentPackages) {
+    packageFilters.add(INCLUDE, validatePackageNames(parentPackages));
+    return this;
+  }
+
+  /**
+   * Exclude any tests from the given packages (and their descendents)
+   * @param parentPackages the names of packages whose tests are to be excluded
+   */
+  public TestSuiteBuilder excludeSubpackagesOf(String... parentPackages) {
+    packageFilters.add(EXCLUDE, validatePackageNames(parentPackages));
+    return this;
+  }
+
+  /**
+   * Clears any {@linkplain #packageFilters package filters} that might have been previously set
+   * via {@link #includeOnlySubpackagesOf} or {@link #excludeSubpackagesOf}.
+   */
+  public TestSuiteBuilder clearPackageFilters() {
+    packageFilters.clear();
+    return this;
+  }
+
+  private String[] validatePackageNames(String... pkgNames) {
+    return Arrays.stream(pkgNames).filter(name -> {
+      /*
+      NOTE: would be nice if we could just use Package.getPackage(name) to validate a package name,
+      but unfortunately, that returns null until an actual class from that package has been loaded by the ClassLoader,
+      even if the package name is valid
+       */
+      if (!isValidPackage(name)) {
+        // TODO: maybe throw exception instead?
+        LOGGER.warning(() -> format("Unable to find package <%s>", name));
+        return false;
+      }
+      return true;
+    }).toArray(String[]::new);
+  }
+
+  private boolean isValidPackage(String pkgName) {
+    /*
+    NOTE: would be nice if we could just use Package.getPackage(name) to validate a package name,
+    but unfort., that returns null until an actual class from that package has been loaded by the ClassLoader,
+    even if the package name is valid
+     */
+//    return Package.getPackage(pkgName) != null;
+    if (classPath != null) {
+      // TODO: temporarily disabled (classPath always null) due to startup perf overhead of using ClassPath
+      ImmutableSet<ClassPath.ClassInfo> classesInPkg = classPath.getTopLevelClassesRecursive(pkgName);
+      return !classesInPkg.isEmpty();
+    }
+    return true;  // don't have a way to validate the package
   }
 
   /**
@@ -586,50 +749,49 @@ public class TestSuiteBuilder {
    * @see #annotationFilters
    * @see FilterMode
    */
+  @VisibleForTesting
   boolean applyAnnotationFilters(AnnotatedElement annotatedElement) {  // exposed with package-private visibility for unit testing
-    Predicate<AnnotatedElement> excludePredicate = annotationFilters.get(EXCLUDE).stream()
-        .map(ReflectionPredicates::mustHaveDeclaredAnnotation)
-        .reduce(Predicate::or)
-        .orElse(x -> false);
-
+    FilterSet<Class<? extends Annotation>, AnnotatedElement> filters = this.annotationFilters;
     if (annotatedElement instanceof Class) {
       /*
       for classes, test only the exclusion rules
-      (because some of its methods might have a required annotation even if the class itself does not)
+      because some of its methods might have a required ("include") annotation even if the class itself does not
       */
-      return !excludePredicate.test(annotatedElement);
+      return !filters.excludes(annotatedElement);
+      // TODO(9/15/2023): should we also check annotations on the package of the class?
     }
     else {
-      // for methods, we test both inclusion and exclusion rules,
+      // for methods, we test both inclusion and exclusion rules
       assert annotatedElement instanceof Method;
       Method method = (Method)annotatedElement;
-      Predicate<AnnotatedElement> includePredicate = annotationFilters.get(INCLUDE).stream()
-          .map(ReflectionPredicates::mustHaveDeclaredAnnotation)
-          .reduce(Predicate::or)
-          .orElse(x -> true);
-      // for methods we also want to consider the annotations present on the method's declaring class
-      Class<?> declaringClass = method.getDeclaringClass();
-      return (includePredicate.test(method) || includePredicate.test(declaringClass)) &&
-          !(excludePredicate.test(method) || excludePredicate.test(declaringClass));
 
+      // we also want to consider the annotations present on the method's declaring class
+      Class<?> declaringClass = method.getDeclaringClass();
+
+      // a method is included if either it or its class has an included ann, and neither it nor its class has an excluded ann
+      return (filters.includes(method) || filters.includes(declaringClass))
+          && !(filters.excludes(method) || filters.excludes(declaringClass));
     }
   }
 
   /**
-   * Decides whether to include the given test class in the suite based on the {@link #superclassFilters}
+   * Decides whether to include the given test class into the suite based on the {@link #superclassFilters}
    * @param cls a test class ({@link TestCase})
    * @return {@code true} iff the given class should be included in the suite
    */
+  @VisibleForTesting
   boolean applySuperclassFilters(Class<?> cls) {  // exposed with package-private visibility for unit testing
-    Predicate<Class<?>> includePredicate = superclassFilters.get(INCLUDE).stream()
-              .map(ReflectionPredicates::mustBeSubclassOf)
-              .reduce(Predicate::or)
-              .orElse(x -> true);
-    Predicate<Class<?>> excludePredicate = superclassFilters.get(EXCLUDE).stream()
-              .map(ReflectionPredicates::mustBeSubclassOf)
-              .reduce(Predicate::or)
-              .orElse(x -> false);
-    return includePredicate.test(cls) && !excludePredicate.test(cls);
+      return superclassFilters.test(cls);
+  }
+
+  /**
+   * Decides whether to include the given test class into the suite based on the {@link #packageFilters}
+   * @param cls a test class ({@link TestCase})
+   * @return {@code true} iff the given class should be included in the suite
+   */
+  @VisibleForTesting
+  boolean applyPackageFilters(Class<?> cls) {  // exposed with package-private visibility for unit testing
+    return packageFilters.test(cls);
   }
 
   /**
@@ -654,22 +816,52 @@ public class TestSuiteBuilder {
         // make sure this is a concrete class (otherwise it can't be instantiated by the test runner)
         !Modifier.isAbstract(modifiers) && !Modifier.isInterface(modifiers)
             // make sure this is a subclass of TestCase that's not excluded by any filters
-            && TestCase.class.isAssignableFrom(cls) && applySuperclassFilters(cls) && applyAnnotationFilters(cls);
-    // may override to provide additional filters
+            && TestCase.class.isAssignableFrom(cls)
+            && applyPackageFilters(cls)
+            && applySuperclassFilters(cls)
+            && applyAnnotationFilters(cls);
+    // can override to provide additional filters
   }
 
   @Override
   public String toString() {
-    final StringBuilder sb = new StringBuilder("TestSuiteBuilder{");
-    sb.append("superclassFilters=").append(superclassFilters);
-    sb.append(", annotationFilters=").append(annotationFilters);
-    sb.append(", filenameRegex='").append(filenameRegex).append('\'');
-    sb.append(", contentRoots=").append(contentRoots);
-    sb.append(", groupByPackage=").append(groupByPackage);
-    sb.append(", useGwtTestSuite=").append(useGwtTestSuite);
-    sb.append(", timeBoxSettings=").append(timeBoxSettings);
-    sb.append('}');
-    return sb.toString();
+    return MoreObjects.toStringHelper(this)
+        .add("filenameRegex", StringUtils.quote(filenameRegex))
+        .add("contentRoots", contentRoots.stream().map(Path::toString).map(StringUtils::quote).toArray())
+        .add("packageFilters", packageFilters)
+        .add("superclassFilters", superclassFilters)
+        .add("annotationFilters", annotationFilters)
+        .add("groupByPackage", groupByPackage)
+        .add("useGwtTestSuite", useGwtTestSuite)
+        .add("timeBoxSettings", timeBoxSettings)
+        .toString();
+  }
+
+  // Static utility methods:
+
+  /**
+   * Returns true if the given class is in the given package or in a subpackage (direct or indirect descendent)
+   * of the given package.
+   * @param parentPackage name of parent package
+   * @param cls a class that may (or may not) be a member of the given package or of a subpackage of that package
+   */
+  static boolean isInSubpackageOf(String parentPackage, Class<?> cls) {
+    // TODO: move method (& test) to ReflectionUtils?
+    return isDescendentPackage(parentPackage, cls.getPackage().getName());
+  }
+
+  /**
+   * Tests whether {@code childPackage} is a direct or indirect descendent of {@code parentPackage}.
+   * @param parentPackage name of parent package
+   * @param childPackage name of potential subpackage
+   * @return {@code true} iff {@code childPackage} is the same as or is a descendent of {@code parentPackage}
+   */
+  static boolean isDescendentPackage(@Nonnull String parentPackage, @Nonnull String childPackage) {
+    // TODO: move method (& test) to ReflectionUtils?
+    if (childPackage.length() < parentPackage.length())
+      return false;  // fail early
+    // could be the same package or a subpackage
+    return (childPackage + ".").startsWith(parentPackage + ".");  // Note: append dot on both sides b/c could be the same package
   }
 
   /**
@@ -678,7 +870,7 @@ public class TestSuiteBuilder {
    * @param suite the suite whose tests are to be printed
    */
   public static void printTestSuite(TestSuite suite) {
-    String heading = String.format("------------ TestSuite(\"%s\"): ------------", suite.getName());
+    String heading = format("------------ TestSuite(name=\"%s\", %d tests): ------------", suite.getName(), suite.countTestCases());
     System.out.println(heading);
     printTestSuiteRecursive(suite, System.out, 0);
     System.out.println(StringUtils.repeat('-', heading.length()));
@@ -765,19 +957,50 @@ public class TestSuiteBuilder {
   }
 
   /**
-   * Constructs a typed {@link Iterator} over all {@link Test} elements in the given suites.
+   * Returns a typed {@link Iterator} over all the top-level {@link Test} elements in the given suites.
    * @param testSuites the input suites
    * @return an {@link Iterator} that sequentially iterates the individual {@link Test} elements in the given suites.
+   * @see #listTests(TestSuite)
+   * @see #walkTestSuiteTree(TestSuite, TestSuiteVisitor)
    */
   public static Iterator<Test> iterTests(TestSuite... testSuites) {
-    @SuppressWarnings("unchecked")
-    List<Iterator<Test>> iterators = (List<Iterator<Test>>)Arrays.stream(testSuites)
-        .map(TestSuite::tests)
-        .map(Iterators::forEnumeration)
-        .collect(Collectors.toList());
-    return Iterators.concat(iterators.iterator());
+    return Iterators.concat(Arrays.stream(testSuites)
+            .map(TestSuiteBuilder::iterTests)
+            .iterator());
   }
 
+  /**
+   * Returns a typed {@link Iterator} over all the top-level {@link Test} elements in the given suite.
+   * @return an {@link Iterator} that sequentially iterates the individual {@link Test} elements in the given suite.
+   * @see #listTests(TestSuite)
+   * @see #walkTestSuiteTree(TestSuite, TestSuiteVisitor)
+   */
+  public static Iterator<Test> iterTests(TestSuite suite) {
+    return new IndexedIterator<Test>(suite.testCount()) {
+      @Override
+      protected Test get(int idx) {
+        return suite.testAt(idx);
+      }
+    };
+  }
+
+  /**
+   * Returns a typed {@link List} view of the {@link Test} elements contained in the given suite.
+   * @return an unmodifiable list
+   * @see #iterTests(TestSuite)
+   * @see #walkTestSuiteTree(TestSuite, TestSuiteVisitor)
+   */
+  public static List<Test> listTests(TestSuite suite) {
+    return new ListAdapter<>(suite::testAt, suite::testCount);
+  }
+
+
+  /**
+   * Combines all the tests in the given suites into a single {@link GWTTestSuite}
+   * @param name the name of the resulting suite
+   * @param testSuites the tests to add to the {@link GWTTestSuite}
+   * @return a new {@link GWTTestSuite} containing all the tests in the given suites
+   */
   public static GWTTestSuite toGWTTestSuite(String name, TestSuite... testSuites) {
     GWTTestSuite gwtTestSuite = new GWTTestSuite(name);
     for (Iterator<Test> it = iterTests(testSuites); it.hasNext(); ) {
@@ -788,7 +1011,7 @@ public class TestSuiteBuilder {
   }
 
   /**
-   * The suites for each module in a {@link GWTTestSuite} have an ugly {@code ".JUnit.gwt.xml"} suffix in their
+   * The default suites for each module in a {@link GWTTestSuite} have an ugly {@code ".JUnit.gwt.xml"} suffix in their
    * names. This method replaces those suffixes with {@code " GWT Module"}
    * <p>Example:
    * {@code "solutions.trsoftware.commons.Commons.JUnit.gwt.xml"} &rarr; {@code "solutions.trsoftware.commons.Commons GWT Module"}
@@ -806,6 +1029,37 @@ public class TestSuiteBuilder {
         testSuite.setName(testSuiteName.substring(0, suffixPos) + " GWT Module");
     }
     return gwtTestSuite;
+  }
+
+  /**
+   * Recursively visits all the tests contained in given suite.
+   *
+   * @param suite root of the test suite tree
+   * @param visitor will be invoked for every {@link Test} and {@link TestSuite} contained within the given suite
+   * @see #iterTests(TestSuite)
+   */
+  public static void walkTestSuiteTree(TestSuite suite, TestSuiteVisitor visitor) {
+    // pre-order traversal (visit self before children)
+    for (Test test : listTests(suite)) {
+      if (test instanceof TestSuite) {
+        TestSuite nextSuite = (TestSuite)test;
+        visitor.preVisitSuite(nextSuite);
+        walkTestSuiteTree(nextSuite, visitor);
+        visitor.postVisitSuite(nextSuite);
+      }
+      else  {
+        visitor.visitTest(test);
+      }
+    }
+  }
+
+  /**
+   * Visitor interface for {@link #walkTestSuiteTree}
+   */
+  public interface TestSuiteVisitor {
+    default void preVisitSuite(TestSuite suite) {}
+    default void visitTest(Test test) {}
+    default void postVisitSuite(TestSuite suite) {}
   }
 
 }

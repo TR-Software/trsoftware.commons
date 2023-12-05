@@ -30,6 +30,13 @@ import com.google.gwt.user.client.ui.SimplePanel;
  */
 public class SimpleFormPanel extends SimplePanel {
 
+  /* TODO(8/12/2023): fix doc comment for this class:
+      - FormPanel doesn't appear to use an AJAX request, just a plain JS call to form.submit()
+        however, that does have some downsides, like not triggering the native constraint validation
+        (see https://developer.mozilla.org/en-US/docs/Web/API/HTMLFormElement/submit)
+        - but this can be mitigated in Java code via FormPanel.addSubmitHandler
+   */
+
   /** Creates an empty panel that uses a FORM for its contents. */
   public SimpleFormPanel() {
     super(Document.get().createFormElement());

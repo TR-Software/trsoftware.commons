@@ -36,7 +36,32 @@ public class RandomUtils {
      (extending java.util.Random and delegating all methods to the wrapped instance, in addition to adding our enhanced methods)
   */
 
-  public static final Random rnd = new Random();
+  /**
+   * The default random number generator instance used by the static methods that don't take a custom
+   * {@link Random} instance as a parameter.  Can be replaced by unit tests via {@link #setRnd(Random)}
+   * to produce repeatable test runs with a {@linkplain Random#Random(long) seeded} instance.
+   * @see #setRnd(Random)
+   */
+  private static Random rnd = new Random();
+
+  /**
+   * @return The default random number generator instance used by the static methods that don't take a custom
+   * {@link Random} instance as a parameter.
+   *
+   * @see #setRnd(Random)
+   */
+  public static Random rnd() {
+    return rnd;
+  }
+
+  /**
+   * Replaces the default random number generator.
+   * This allows unit tests to produce repeatable test runs by using a {@linkplain Random#Random(long) seeded} instance.
+   */
+  public static void setRnd(Random rnd) {
+    RandomUtils.rnd = rnd;
+  }
+
 
   private RandomUtils() {  // uninstantiable class
   }
@@ -107,10 +132,10 @@ public class RandomUtils {
   }
 
   /**
-   * Generates a random integer between 2 endpoints.
+   * Generates a random integer in the range {@code [lowerBound, upperBound)}.
    *
-   * @param lowerBound inclusive
-   * @param upperBound exclusive
+   * @param lowerBound lower bound (inclusive)
+   * @param upperBound upper bound (exclusive)
    * @return a random {@code int} between {@code lowerBound} (inclusive) and {@code upperBound} (exclusive),
    * with roughly equal probability of any particular {@code int} in this range
    */
@@ -121,8 +146,8 @@ public class RandomUtils {
   /**
    * Generates a random {@code int} in the range {@code [lowerBound, upperBound)} from the given RNG.
    *
-   * @param lowerBound inclusive
-   * @param upperBound exclusive
+   * @param lowerBound lower bound (inclusive)
+   * @param upperBound upper bound (exclusive)
    * @return a random {@code int} between {@code lowerBound} (inclusive) and {@code upperBound} (exclusive),
    * with roughly equal probability of any particular {@code int} in this range
    */
@@ -243,6 +268,7 @@ public class RandomUtils {
 
   @SafeVarargs
   public static <T> T randomElement(Random rnd, T... arr) {
+    // TODO(10/12/2023): this could throw IndexOutOfBounds if arr is empty; same thing with the other randomElement methods here
     return arr[rnd.nextInt(arr.length)];
   }
 
@@ -251,8 +277,6 @@ public class RandomUtils {
   }
 
   public static <T> T randomElement(List<T> list, Random rnd) {
-    if (!(list instanceof RandomAccess))
-      System.err.println("WARNING: RandomUtils.randomElement received a non-random-access list (" + list.getClass().getName() + ")");
     return list.get(rnd.nextInt(list.size()));
   }
 
@@ -263,6 +287,8 @@ public class RandomUtils {
 
   /** @return a random element from the collection, using the given RNG */
   public static <T> T randomElement(Collection<T> collection, Random rnd) {
+    if (collection instanceof List)
+      return randomElement((List<T>)collection, rnd);
     int index = rnd.nextInt(collection.size());
     return Iterables.get(collection, index);
   }

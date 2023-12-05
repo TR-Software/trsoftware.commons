@@ -16,6 +16,8 @@
 
 package solutions.trsoftware.commons.shared.util;
 
+import com.google.common.collect.Sets;
+
 import java.util.*;
 
 import static solutions.trsoftware.commons.shared.util.CollectionUtils.addAll;
@@ -28,6 +30,7 @@ public abstract class SetUtils {
   /**
    * @return A new set that represents the {@link Set#removeAll(Collection) <i>asymmetric set difference</i>}
    * of the two sets.  Neither arg is modified.
+   * @see Sets#difference(Set, Set)
    */
   public static <T> Set<T> difference(Set<T> s1, Set<? extends T> s2) {
     s1 = newSet(s1);
@@ -38,6 +41,7 @@ public abstract class SetUtils {
   /**
    * @return A new set that represents the {@link Set#retainAll(Collection) <i>intersection</i>} of the two sets.
    * Neither arg is modified.
+   * @see Sets#intersection(Set, Set)
    */
   public static <T> Set<T> intersection(Set<T> s1, Set<? extends T> s2) {
     s1 = newSet(s1);
@@ -48,6 +52,7 @@ public abstract class SetUtils {
   /**
    * @return A new set that represents the {@link Set#addAll(Collection) <i>union</i>} of the two sets.
    * Neither arg is modified.
+   * @see Sets#union(Set, Set)
    */
   public static <T> Set<T> union(Set<T> s1, Set<? extends T> s2) {
     s1 = newSet(s1);

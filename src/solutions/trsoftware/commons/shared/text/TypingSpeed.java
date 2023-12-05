@@ -21,7 +21,6 @@ import solutions.trsoftware.commons.shared.util.compare.RichComparable;
 import solutions.trsoftware.commons.shared.util.text.SharedNumberFormat;
 
 import javax.annotation.Nonnull;
-import javax.validation.constraints.NotNull;
 import java.util.Objects;
 
 /**
@@ -111,7 +110,7 @@ public class TypingSpeed extends Number implements RichComparable<TypingSpeed> {
   private double cpm;
 
   /** This field is needed to convert between the {@linkplain Unit units} */
-  @NotNull
+  @Nonnull
   private Language language;
 
   /** Default constructor to support serialization */

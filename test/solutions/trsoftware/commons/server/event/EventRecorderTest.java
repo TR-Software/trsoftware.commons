@@ -4,8 +4,8 @@ import com.google.common.eventbus.EventBus;
 import com.google.common.eventbus.Subscribe;
 import com.google.gwt.dev.util.collect.IdentityHashSet;
 import junit.framework.TestCase;
-import solutions.trsoftware.commons.server.util.StackTraceWrapper;
 import solutions.trsoftware.commons.shared.annotations.Slow;
+import solutions.trsoftware.commons.shared.util.StackTraceWrapper;
 
 import java.util.IdentityHashMap;
 import java.util.List;

@@ -139,6 +139,7 @@ public class Area2d implements Serializable, Comparable<Area2d> {
     @Override
     public Area2d parse(CharSequence text) throws ParseException {
       try {
+        // TODO(11/6/2023): maybe rewrite with custom parser that accepts spaces around the 'x'
         return Area2d.parse(text.toString());
       }
       catch (Exception e) {

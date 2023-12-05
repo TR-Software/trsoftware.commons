@@ -56,7 +56,7 @@ public class FixedSizeLruCacheJavaTest extends TestCase {
     assertTrue(
         new MultithreadedTestHarness(new Runnable() {
           public void run() {
-            int idx = RandomUtils.rnd.nextInt(nKeys);
+            int idx = RandomUtils.rnd().nextInt(nKeys);
             synchronized (cache) {
               cache.put(idx, lastValueForEachKey[idx].incrementAndGet());
             }

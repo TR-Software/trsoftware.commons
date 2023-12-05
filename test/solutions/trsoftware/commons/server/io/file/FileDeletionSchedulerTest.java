@@ -57,8 +57,8 @@ public class FileDeletionSchedulerTest extends TestCase {
       tempFiles.add(tempFile);
     }
     // add some files that are not under the temp dir (these should not be scheduled for deletion)
-    TreeSet<Path> notToBeDeleted = new TreeSet<>(Arrays.asList(
-        ReflectionUtils.getClassFile(getClass()).toFile().toPath()
+    TreeSet<Path> notToBeDeleted = new TreeSet<>(Collections.singletonList(
+        ReflectionUtils.getClassFile(getClass()).toPath()
     ));
     TreeSet<Path> allFiles = new TreeSet<>(tempFiles);
     allFiles.addAll(notToBeDeleted);

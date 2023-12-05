@@ -24,7 +24,7 @@ import java.util.PrimitiveIterator;
 import java.util.function.Consumer;
 
 /**
- * An Iterator specialized for {@code float} values.
+ * An Iterator specialized for primitive {@code float} values.
  *
  * @see PrimitiveIterator.OfDouble
  *

@@ -29,6 +29,12 @@ import java.util.Map;
  */
 public class MapDecorator<K, V> {
 
+  /* TODO(9/15/2023):
+       - rename this class as MapBuilder for clarity (not sure why that name was changed in the first place)
+       - maybe also do the same for MultimapDecorator
+         (that name was probably chosen to avoid clashing with Guava's MultimapBuilder class)
+   */
+
   private Map<K, V> map;
 
   public MapDecorator(Map<K, V> delegate) {

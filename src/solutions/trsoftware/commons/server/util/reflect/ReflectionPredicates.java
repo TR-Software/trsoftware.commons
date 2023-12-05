@@ -30,15 +30,21 @@ import java.util.function.Predicate;
 public class ReflectionPredicates {
 
   /**
-   * @return a predicate that evaluates to {@code true} iff its argument declares an annotation of the given type.
+   * @return a predicate that evaluates to {@code true} iff its argument has a
+   * {@linkplain AnnotatedElement#getDeclaredAnnotation(Class) declared} annotation of the given type.
+   *
+   * @see ReflectionUtils#hasDeclaredAnnotation(Class, AnnotatedElement)
    */
   public static Predicate<AnnotatedElement> mustHaveDeclaredAnnotation(Class<? extends Annotation> ann) {
     return annotatedElement -> annotatedElement.getDeclaredAnnotation(ann) != null;
   }
 
   /**
+   * @param superClass a class or interface that the object being evaluated should extend to satisfy the returned
+   * predicate
    * @return a predicate that evaluates to {@code true} iff its argument is or extends {@code superClass}
    * (this is similar to the generic type expression {@code <T extends superClass>})
+   * @see Class#isAssignableFrom(Class)
    */
   public static Predicate<Class<?>> mustBeSubclassOf(Class<?> superClass) {
     return superClass::isAssignableFrom;

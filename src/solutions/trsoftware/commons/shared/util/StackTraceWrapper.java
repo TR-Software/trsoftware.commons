@@ -14,7 +14,7 @@
  * the License.
  */
 
-package solutions.trsoftware.commons.server.util;
+package solutions.trsoftware.commons.shared.util;
 
 /**
  * A marker class that can be used for obtaining or printing a stack trace without

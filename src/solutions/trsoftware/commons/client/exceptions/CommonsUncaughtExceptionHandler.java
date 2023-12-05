@@ -37,6 +37,8 @@ import solutions.trsoftware.commons.shared.util.StringUtils;
  */
 public class CommonsUncaughtExceptionHandler implements GWT.UncaughtExceptionHandler {
 
+  // TODO(8/30/2023): make this a singleton? would allow using the reporting functionality without intermediate call to GWT.getUncaughtExceptionHandler()
+
   private PopupDialog exceptionNoticePopup;
   private LazyReference<StackTraceDeobfuscatorClient> deobfuscatorClient = new LazyReference<StackTraceDeobfuscatorClient>() {
     @Override
@@ -53,28 +55,46 @@ public class CommonsUncaughtExceptionHandler implements GWT.UncaughtExceptionHan
   };
 
   /**
-   * This method, onUncaughtException, should only be called behind-the-scenes
-   * by GWT (when an exception is really uncaught).
-   * When we wish to manually just log and ignore an exception, we should call
-   * handleException(e, false).
+   * This method is invoked behind-the-scenes by GWT for any uncaught exceptions and calls
+   * {@link #handleException(Throwable, boolean) handleException(e, true)}
+   * <p>
+   * In order to manually just log and ignore a caught exception, can invoke
+   * {@code handleException(e, false)} directly.
    */
   public final void onUncaughtException(final Throwable e) {
     handleException(e, true);
   }
 
-  public void handleException(final Throwable e, boolean uncaught) {
+  /**
+   * {@linkplain #reportException(Throwable, int) Reports} the given exception and
+   * optionally displays a popup message to notify the user about a problem.
+   * <p>
+   * This method is normally invoked from {@link #onUncaughtException(Throwable)} and displays the error popup,
+   * but it can also be used for a caught exception in order to just log the exception on server without notifying
+   * the user.
+   *
+   * @param e the exception to report
+   * @param showPopup if {@code true} (e.g. when invoked from {@link #onUncaughtException(Throwable)}),
+   *   will display an error message popup after reporting the exception; otherwise will report the exception silently
+   * @see #showPopupNotice()
+   */
+  public void handleException(final Throwable e, boolean showPopup) {
     Log.error("Uncaught Exception", e); // for of all, print the exception in the GWT dev mode shell, or browser console
 
     // 1) Invoke the new exception reporting mechanism
     reportException(e, 0);
 
-    // 2) Let the user know that a problem has occurred; this is done after the reporting step, just in case it causes
-    // an exception (which would cause the reporting code not to run otherwise)
-    // NOTE: prior to R46 this code ran in a deferred command, but that sometimes caused weird UI-related exceptions
-    // in prod (see: https://www.google.com/analytics/web/?hl=en#report/content-event-events/a1569770w2756850p2811177/%3F_u.date00%3D20140421%26_u.date01%3D20140821%26explorer-table.plotKeys%3D%5B%5D%26explorer-table.rowStart%3D0%26explorer-table.rowCount%3D100%26_r.drilldown%3Danalytics.eventCategory%3AExceptionStackTrace%26explorer-segmentExplorer.segmentId%3Danalytics.eventLabel/ )
-    // the hypothesis was that the deferred command ran after the browser window was destroyed, so we decided not to do it in a deferred command,
-    // to reduce the number of false exceptions reported to GA )
-    showPopupNotice();
+    if (showPopup) {
+      /*
+       2) Let the user know that a problem has occurred; this is done after the reporting step, just in case it causes
+       an exception (which would cause the reporting code not to run otherwise).
+
+       Note: in the past, this code ran in a deferred command, but that sometimes caused weird UI-related exceptions
+       (the hypothesis at the time was that the deferred command ran after the browser window was destroyed),
+        so we decided not to use a deferred command here.
+      */
+      showPopupNotice();
+    }
   }
 
   /**

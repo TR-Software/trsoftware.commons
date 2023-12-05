@@ -16,10 +16,14 @@
 
 package solutions.trsoftware.commons.shared.util.iterators;
 
+import com.google.common.base.Preconditions;
+
 /**
-* @author Alex, 4/27/2016
-*/
-public class CharSequenceIterator extends IndexedIterator<Character> {
+ * A primitive {@code char} iterator for a {@link CharSequence}
+ *
+ * @author Alex, 4/27/2016
+ */
+public class CharSequenceIterator extends IndexedCharIterator {
 
   private final CharSequence charSequence;
 
@@ -28,14 +32,26 @@ public class CharSequenceIterator extends IndexedIterator<Character> {
     this.charSequence = charSequence;
   }
 
+  /**
+   * Creates an iterator over the chars in the given sequence starting at the given index
+   * @param start index of the first char to be returned
+   */
   public CharSequenceIterator(CharSequence charSequence, int start) {
-    super(start, charSequence.length());
+    this(charSequence, start, charSequence.length());
+  }
+
+  /**
+   * Creates an iterator over the chars in the given sequence  between indices {@code start} (inclusive) and
+   * {@code end} (exclusive).
+   */
+  public CharSequenceIterator(CharSequence charSequence, int start, int end) {
+    super(start, end);
+    Preconditions.checkPositionIndexes(start, end, charSequence.length());
     this.charSequence = charSequence;
-    get(start); // trigger IndexOutOfBoundsException if the starting index isn't valid
   }
 
   @Override
-  protected Character get(int idx) {
+  protected char get(int idx) {
     return charSequence.charAt(idx);
   }
 

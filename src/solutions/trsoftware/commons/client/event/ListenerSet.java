@@ -22,6 +22,11 @@ import solutions.trsoftware.commons.client.exceptions.CommonsUncaughtExceptionHa
 import java.util.ArrayList;
 import java.util.LinkedHashSet;
 
+/*
+ TODO(8/30/2023): it might be time to delete all these deprecated ListenerSet-related classes
+  (the only remaining usage is in TypeRacer's jsessionid change listener)
+*/
+
 /**
  * @author Alex
  * @since Nov 21, 2007
@@ -41,8 +46,8 @@ public class ListenerSet<T> extends LinkedHashSet<DataChangeListener<T>> {
       }
       catch (Throwable e) {
         // we don't let an exception interrupt this loop, but since this would
-        // prevent it from percolating up to the TyperacerUncaughtExceptionHandler,
-        // we invoke the TyperacerUncaughtExceptionHandler here manually
+        // prevent it from percolating up to the CommonsUncaughtExceptionHandler,
+        // we invoke the CommonsUncaughtExceptionHandler here manually
         ((CommonsUncaughtExceptionHandler)GWT.getUncaughtExceptionHandler()).handleException(e, false);
       }
     }

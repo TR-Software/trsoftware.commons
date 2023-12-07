@@ -9,7 +9,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.stream.Stream;
 
-import static solutions.trsoftware.commons.shared.util.MathUtils.floorMod;
+import static java.lang.Math.floorMod;
 import static solutions.trsoftware.commons.shared.util.RandomUtils.rnd;
 
 /**

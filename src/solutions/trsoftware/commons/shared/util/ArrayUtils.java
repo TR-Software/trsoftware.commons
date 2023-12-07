@@ -17,9 +17,11 @@
 package solutions.trsoftware.commons.shared.util;
 
 import com.google.gwt.core.client.JavaScriptException;
+import solutions.trsoftware.commons.shared.util.function.IntBiFunction;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Map;
 import java.util.Objects;
 import java.util.function.IntFunction;
 import java.util.function.IntPredicate;
@@ -399,6 +401,45 @@ public class ArrayUtils {
   public static void checkBounds(int arrayLength, int idx) {
     if (idx < 0 || idx >= arrayLength)
       throw new ArrayIndexOutOfBoundsException(idx);
+  }
+
+  /**
+   * Returns {@code arr[i]} if present, otherwise returns the value computed by the given function
+   * after entering it into the array.
+   * <p>
+   * Same idea as {@link Map#computeIfAbsent}, but intended for using an array instead of Map as a cache.
+   *
+   * @param i array index (and arg for producer)
+   * @param y row index
+   * @param producer a function that computes the value for {@code arr[i]} if it's absent
+   * @return the current (existing or computed) value associated with the specified array indices,
+   *     or null if the computed value is null
+   */
+  public static <T> T computeIfAbsent(T[] arr, int i, IntFunction<T> producer) {
+    T cached = arr[i];
+    if (cached == null)
+      return arr[i] = producer.apply(i);
+    return cached;
+  }
+
+  /**
+   * Returns {@code arr[y][x]} if present, otherwise returns the value computed by the given function
+   * after entering it into the array.
+   * <p>
+   * Same idea as {@link Map#computeIfAbsent}, but intended for using an array instead of Map as a cache.
+   *
+   * @param y row index (for outer array)
+   * @param x column index (for nested array)
+   * @param producer a function, <code>(y, x) &rarr; T</code>, that
+   *     computes the value for {@code arr[y][x]} if it's absent
+   * @return the current (existing or computed) value associated with the specified array indices,
+   *     or null if the computed value is null
+   */
+  public static <T> T computeIfAbsent(T[][] arr, int y, int x, IntBiFunction<T> producer) {
+    T cached = arr[y][x];
+    if (cached == null)
+      return arr[y][x] = producer.apply(y, x);
+    return cached;
   }
 
 }

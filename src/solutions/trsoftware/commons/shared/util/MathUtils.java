@@ -277,11 +277,13 @@ public class MathUtils {
   /**
    * The equivalent of Python's {@code %} operator, which always returns a number with the same sign as the divisor {@code b}.
    * This is useful for things like wrapping array indices.
+   * <p>
+   * Note: this method is equivalent to {@link Math#floorMod(int, int)} (introduced in Java 1.8), so the only reason
+   * to use it instead of the one in {@link Math} is compatibility with older GWT versions.
    *
-   * NOTE: Java 8 actually introduced the {@link Math#floorMod(int, int)} method, but we can't use that from older GWT versions.
-   *
-   * @return The mathematical {@code a mod b}. Unlike Java's native {@code %} operator, our result
-   * is guaranteed to have the same sign as the divisor {@code b} (same as Python's {@code %} operator).
+   * @return The mathematical {@code a mod b}, which unlike the native {@code %} operator,
+   * is guaranteed to have the same sign as the divisor {@code b}
+   * @see Math#floorMod(int, int)
    */
   public static int floorMod(int a, int b) {
     return (a % b + b) % b;

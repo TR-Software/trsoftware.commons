@@ -17,10 +17,14 @@
 package solutions.trsoftware.commons.shared.util;
 
 import junit.framework.TestCase;
+import solutions.trsoftware.commons.shared.util.function.IntBiFunction;
 
 import java.util.Arrays;
+import java.util.List;
+import java.util.function.IntFunction;
 import java.util.function.Supplier;
 
+import static java.util.Collections.singletonList;
 import static solutions.trsoftware.commons.shared.testutil.AssertUtils.assertArraysEqual;
 import static solutions.trsoftware.commons.shared.testutil.AssertUtils.assertThrows;
 import static solutions.trsoftware.commons.shared.util.ArrayUtils.*;
@@ -232,4 +236,80 @@ public class ArrayUtilsTest extends TestCase {
     assertArraysEqual(new String[]{"a", "b", "c", "d"}, merge(new String[]{}, new String[]{"a", "b", "c", "d"}));
     assertArraysEqual(new String[]{}, merge(new String[]{}, new String[]{}));
   }
+
+  @SuppressWarnings("unchecked")
+  public void testComputeIfAbsent() throws Exception {
+    class Producer {
+      int count;  // used to ensure that function invoked only once
+    }
+
+    // 1) test computeIfAbsent(T[], int, IntFunction<T>)
+    {
+      class ListProducer extends Producer implements IntFunction<List<Integer>> {
+        @Override
+        public List<Integer> apply(int value) {
+          count++;
+          return ListUtils.arrayList(value);
+        }
+      }
+      ListProducer producer = new ListProducer();
+      List<Integer>[] arr = new List[4];
+      int i = 1;
+      List<Integer> computedValue1 = computeIfAbsent(arr, i, producer);
+      assertEquals(singletonList(i), computedValue1);
+      // computed value should be inserted into arr[i]
+      assertArraysEqual(new List[]{null, computedValue1, null, null}, arr);
+      assertEquals(1, producer.count);
+      // subsequent invocations should return the same instance without invoking the producer function again
+      assertSame(computedValue1, computeIfAbsent(arr, i, producer));
+      assertEquals(1, producer.count);
+      assertArraysEqual(new List[]{null, computedValue1, null, null}, arr);
+      // invoke again with a different index
+      i = 2;
+      List<Integer> computedValue2 = computeIfAbsent(arr, i, producer);
+      assertEquals(singletonList(i), computedValue2);
+      assertArraysEqual(new List[]{null, computedValue1, computedValue2, null}, arr);
+      assertEquals(2, producer.count);
+    }
+
+    // 1) test computeIfAbsent(T[][], int, int, IntBiFunction<T>): the 2D array version
+    {
+      class Area2dProducer extends Producer implements IntBiFunction<Area2d> {
+        @Override
+        public Area2d apply(int w, int h) {
+          count++;
+          return new Area2d(w, h);
+        }
+      }
+      Area2dProducer producer = new Area2dProducer();
+      Area2d[][] arr = new Area2d[2][2];
+      Area2d computedValue1 = computeIfAbsent(arr, 1, 1, producer);
+      assertEquals(new Area2d(1, 1), computedValue1);
+      // computed value should be inserted into arr[1][1]
+      Area2d[][] expectedArr = new Area2d[][]{
+          new Area2d[]{null, null},
+          new Area2d[]{null, computedValue1},
+      };
+      assertArraysEqual(expectedArr, arr);
+      assertEquals(1, producer.count);
+      // subsequent invocations should return the same instance without invoking the producer function again
+      assertSame(computedValue1, computeIfAbsent(arr, 1, 1, producer));
+      assertEquals(1, producer.count);
+      assertArraysEqual(expectedArr, arr);
+      // invoke again with different indices
+      Area2d computedValue2 = computeIfAbsent(arr, 1, 0, producer);
+      assertEquals(new Area2d(1, 0), computedValue2);
+      // computed value should be inserted into arr[1][0]
+      expectedArr = new Area2d[][]{
+          new Area2d[]{null, null},
+          new Area2d[]{computedValue2, computedValue1},
+      };
+      assertArraysEqual(expectedArr, arr);
+      assertEquals(2, producer.count);
+    }
+
+
+  }
+
+
 }

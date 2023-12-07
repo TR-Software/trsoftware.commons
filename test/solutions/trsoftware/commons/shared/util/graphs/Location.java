@@ -2,7 +2,7 @@ package solutions.trsoftware.commons.shared.util.graphs;
 
 import javax.annotation.Nonnull;
 
-import static solutions.trsoftware.commons.shared.util.MathUtils.floorMod;
+import static java.lang.Math.floorMod;
 
 /**
  * Represents a location in 2-dimensional space with integer {@code x} and {@code y} coordinates.

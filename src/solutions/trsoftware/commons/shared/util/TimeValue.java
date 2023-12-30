@@ -18,6 +18,8 @@ package solutions.trsoftware.commons.shared.util;
 
 import solutions.trsoftware.commons.shared.util.text.SharedNumberFormat;
 
+import static java.util.Objects.requireNonNull;
+
 /**
  * Represents a duration of time expressed in a particular {@link TimeUnit}. Instances are immutable and thread-safe.
  *
@@ -40,7 +42,7 @@ public class TimeValue extends Number implements Comparable<TimeValue> {
   );
 
   public TimeValue(double value, TimeUnit unit) {
-    Assert.assertNotNull(unit);
+    requireNonNull(unit, "unit");
     this.value = value;
     this.unit = unit;
   }

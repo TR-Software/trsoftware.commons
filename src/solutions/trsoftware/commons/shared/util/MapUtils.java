@@ -522,11 +522,24 @@ public class MapUtils {
   }
 
   /**
-   * Removes all the entries matching predicate from the given map.
-   * Returns the same map to allow method chaining.
+   * Removes all the entries matching the given filter from the given map.
+   *
+   * @return the same map after applying the transformation
+   * @see #removeIf(Map, BiPredicate)
    */
-  public static <K,V> Map<K, V> removeMatchingEntries(Map<K,V> map, Predicate<Map.Entry<K,V>> predicate) {
-    map.entrySet().removeIf(predicate);
+  public static <K,V> Map<K, V> removeMatchingEntries(Map<K,V> map, Predicate<Map.Entry<K,V>> entryFilter) {
+    map.entrySet().removeIf(entryFilter);
+    return map;
+  }
+
+  /**
+   * Removes all the entries matching the given filter from the given map.
+   *
+   * @param keyValueFilter A {@code (key, value)} &rarr; {@code boolean} function
+   * @return the same map after applying the transformation
+   */
+  public static <K,V> Map<K, V> removeIf(Map<K,V> map, BiPredicate<K, V> keyValueFilter) {
+    map.entrySet().removeIf(entry -> keyValueFilter.test(entry.getKey(), entry.getValue()));
     return map;
   }
 

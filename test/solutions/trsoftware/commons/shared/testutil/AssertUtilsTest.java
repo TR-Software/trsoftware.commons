@@ -30,14 +30,12 @@ import static solutions.trsoftware.commons.shared.testutil.AssertUtils.*;
 public class AssertUtilsTest extends TestCase {
 
   public void testAssertAllEqual() throws Exception {
-    assertAllEqual(1);
     assertAllEqual(1, 1);
     assertAllEqual(1, 1, 1);
 
     assertThrows(AssertionFailedError.class, (Runnable)() -> assertAllEqual(1, 2));
     assertThrows(AssertionFailedError.class, (Runnable)() -> assertAllEqual(1, 1, 2));
 
-    assertAllEqual("a");
     assertAllEqual("a", "a");
     assertAllEqual("a", "a", "a");
 
@@ -47,7 +45,6 @@ public class AssertUtilsTest extends TestCase {
   }
 
   public void testAssertAllEqualAndNotNull() throws Exception {
-    assertAllEqualAndNotNull(1);
     assertAllEqualAndNotNull(1, 1);
     assertAllEqualAndNotNull(1, 1, 1);
 
@@ -55,7 +52,6 @@ public class AssertUtilsTest extends TestCase {
     assertThrows(AssertionFailedError.class, (Runnable)() -> assertAllEqualAndNotNull(1, 1, 2));
     assertThrows(AssertionFailedError.class, (Runnable)() -> assertAllEqualAndNotNull(null, 1, 2));
 
-    assertAllEqualAndNotNull("a");
     assertAllEqualAndNotNull("a", "a");
     assertAllEqualAndNotNull("a", "a", "a");
 

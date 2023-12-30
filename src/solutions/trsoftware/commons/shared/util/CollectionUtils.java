@@ -342,6 +342,7 @@ public class CollectionUtils {
   /**
    * @return the first element returned by the given collection's iterator
    * @throws NoSuchElementException if the collection is empty
+   * @see Iterables#getFirst(Iterable, Object)
    */
   public static <T> T first(Iterable<T> iterable) {
     return iterable.iterator().next();

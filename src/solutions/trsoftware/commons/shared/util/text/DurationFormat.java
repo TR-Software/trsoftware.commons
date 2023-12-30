@@ -40,6 +40,8 @@ import java.util.Map;
  * considerations apply: it is recommended to create separate format instances for each thread.
  * If multiple threads access a format concurrently, it must be synchronized externally.
  *
+ * @see TimeUnit#format(double, int)
+ * @see TimeUnit#toString(double, int)
  * @see java.time.Duration#toString()
  * @see <a href="https://stackoverflow.com/q/266825/1965404">Other ways to format a duration in Java</a>
  * @author Alex, 8/3/2017

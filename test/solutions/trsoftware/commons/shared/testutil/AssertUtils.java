@@ -49,26 +49,36 @@ public abstract class AssertUtils {
 
   }
 
-  /** Makes sure all the arguments are equal to each other */
+  /** Asserts that all the arguments are equal to each other */
   public static void assertAllEqual(Object... args) {
+    assertTrue("Too few arguments", args.length > 1);
     for (int i = 1; i < args.length; i++) {
       assertEquals(args[i - 1], args[i]);
     }
   }
 
-  /** Makes sure all the arguments are equal to each other */
+  /** Asserts that all the arguments are equal to each other and none are null */
   public static void assertAllEqualAndNotNull(Object... args) {
+    assertTrue("Too few arguments", args.length > 1);
     for (int i = 1; i < args.length; i++) {
       assertNotNull(args[i - 1]);
       assertEquals(args[i - 1], args[i]);
     }
   }
 
-  /** Makes sure all the arguments are equal to the first argument */
-  @SafeVarargs
-  public static <T> void assertAllEqualTo(T expected, T... args) {
-    for (int i = 1; i < args.length; i++) {
-      assertEquals(expected, args[i]);
+  /** Asserts that all the arguments are equal to the first argument */
+  public static void assertAllEqualTo(Object expected, Object... args) {
+    assertTrue("Too few arguments", args.length > 0);
+    for (Object arg : args) {
+      assertEquals(expected, arg);
+    }
+  }
+
+  /** Asserts that all the arguments are the same object */
+  public static void assertAllSame(Object expected, Object... args) {
+    assertTrue("Too few arguments", args.length > 0);
+    for (Object arg : args) {
+      assertSame(expected, arg);
     }
   }
 

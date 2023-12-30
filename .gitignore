@@ -2,3 +2,4 @@ out
 build
 **/Thumbs.db
 gwtTestsStaging/
+**/jmh_generated/**

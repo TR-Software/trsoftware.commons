@@ -8,8 +8,12 @@ public class SimulatedException extends RuntimeException {
   private int id;
 
   public SimulatedException(int id) {
-    super("Simulated exception #" + id);
+    this("Simulated exception #" + id);
     this.id = id;
+  }
+
+  public SimulatedException(String message) {
+    super(message);
   }
 
   private SimulatedException() {

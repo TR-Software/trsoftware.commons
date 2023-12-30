@@ -1435,4 +1435,12 @@ public class StringUtils {
       return "null";
     return o.getClass().getSimpleName() + "@" + Integer.toHexString(System.identityHashCode(o)).substring(0, 4);
   }
+
+  /**
+   * Same as {@link Character#isSurrogate(char)}, provided for GWT compatibility.
+   */
+  public static boolean isSurrogate(char ch) {
+    // copied verbatim from the source code in Character.java
+    return ch >= Character.MIN_SURROGATE && ch < (Character.MAX_SURROGATE + 1);
+  }
 }

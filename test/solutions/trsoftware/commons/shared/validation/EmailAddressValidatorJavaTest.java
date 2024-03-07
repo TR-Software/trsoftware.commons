@@ -30,4 +30,8 @@ public class EmailAddressValidatorJavaTest extends TestCase {
   public void testEmailValidation() throws Exception {
     delegate.testEmailValidation();
   }
+
+  public void testExamplesFromWikipedia() throws Exception {
+    delegate.testExamplesFromWikipedia();
+  }
 }

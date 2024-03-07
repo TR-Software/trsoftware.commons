@@ -105,7 +105,7 @@ public abstract class ReflectionUtils {
 
   /**
    * @return a list of modifier constants parsed from the given string
-   * @see Modifier
+   * @see java.lang.reflect.Modifier#toString(int)
    */
   public static List<Modifier> parseModifiers(String str) {
     ArrayList<Modifier> modifiers = new ArrayList<>();
@@ -228,7 +228,7 @@ public abstract class ReflectionUtils {
    * </p>
    *
    */
-  public static Type[] getGenericTypeArgumentsForInterface(Class cls, Class parametrizedInterface) {
+  public static Type[] getGenericTypeArgumentsForInterface(Class<?> cls, Class<?> parametrizedInterface) {
     Type[] genericInterfaces = cls.getGenericInterfaces();
     for (Type genericInterface : genericInterfaces) {
       if (genericInterface instanceof ParameterizedType) {
@@ -243,9 +243,9 @@ public abstract class ReflectionUtils {
   /**
    * @return the names of all fields declared by the given class (excluding any synthetic fields like "this$0").
    */
-  public static List<String> getFieldNames(Class cls) {
+  public static List<String> getFieldNames(Class<?> cls) {
     Field[] fields = cls.getDeclaredFields();
-    ArrayList<String> names = new ArrayList<String>();
+    ArrayList<String> names = new ArrayList<>();
     for (Field field : fields) {
       if (!field.isSynthetic())
         names.add(field.getName());
@@ -359,7 +359,7 @@ public abstract class ReflectionUtils {
     return ret;
   }
 
-  /** @return all members declared in the given class */
+  /** @return all members declared in the given class, including both fields and methods */
   public static List<Member> listMembersDeclaredIn(Class<?> targetClass) {
     // TODO: unit test this method
     List<Member> ret = new ArrayList<Member>();

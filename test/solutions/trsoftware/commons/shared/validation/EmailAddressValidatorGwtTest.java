@@ -31,12 +31,12 @@ public class EmailAddressValidatorGwtTest extends RegexValidationRuleGwtTestCase
 
   public void testEmailValidation() throws Exception {
     validator = new EmailAddressValidator("email", false);
-    assertValidity("a", false);
-    assertValidity("asdf", false);
-    assertValidity("as@df", false);
-    assertValidity("a@s", false);
-    assertValidity("a@s.df", true);  // this is the shortest email address that should pass validation
-    // test the diffiernt TLD variations
+    assertNotValid("a");
+    assertNotValid("asdf");
+    assertValid("as@df");
+    assertValid("a@s");
+    assertValid("a@s.df");
+    // test the different TLD variations
     Map<String, Boolean> tlds = MapUtils.linkedHashMap(
         "s.d-f", true,
         "s.df-", false,
@@ -46,89 +46,133 @@ public class EmailAddressValidatorGwtTest extends RegexValidationRuleGwtTestCase
         "s.df-79--8*3--q", false);
     // test multiple TLDs
     for (String tld1 : tlds.keySet()) {
-      assertValidity("a@s." + tld1, tlds.get(tld1));
+      assertValidity(validator, "a@s." + tld1, tlds.get(tld1));
       for (String tld2 : tlds.keySet()) {
-        assertValidity("a@s." + (tld1 + "." + tld2), tlds.get(tld1) && tlds.get(tld2));
+        assertValidity(validator, "a@s." + (tld1 + "." + tld2), tlds.get(tld1) && tlds.get(tld2));
       }
     }
 
-    assertValidity("asdf@asdf.com", true);
-    assertValidity("asdf@asdf.com", true);
-    assertValidity("  alexander.epshteyn@gmail.com ", false);  // spaces around input not allowed
+    assertValid("asdf@asdf.com");
+    assertValid("asdf@asdf.com");
+    assertNotValid("  alexander.epshteyn@gmail.com ");
     // dots in username are ok
-    assertValidity("alexander.epshteyn@gmail.com", true);
-    assertValidity("a.lexanderepshteyn@gmail.com", true);
-    assertValidity("al.exanderepshteyn@gmail.com", true);
-    assertValidity("ale.xanderepshteyn@gmail.com", true);
-    assertValidity("alex.anderepshteyn@gmail.com", true);
-    assertValidity("alexanderepshtey.n@gmail.com", true);
-    assertValidity("alexanderepshte.yn@gmail.com", true);
-    assertValidity("alexanderepsht.eyn@gmail.com", true);
-    assertValidity("alexander.epsh.teyn@gmail.foo.bar.us", true);
-    assertValidity("alexander.epsh..teyn@gmail.foo.bar.us", false);  // two dots back to back aren't allowed
-    assertValidity(".alexander.epshteyn@gmail.foo.bar.us", false);  // local part can't start with dot
-    assertValidity("alexander.epshteyn.@gmail.foo.bar.us", false);  // local part can't end with dot
-    assertValidity("alexander.epsh.@gmail.foo.bar.us", false);
-    assertValidity("alexander.epsh.as@gmail.foo.bar.us", true);
-    assertValidity("alexander.ep.s.h.as@gmail.foo.bar.us", true);
-    assertValidity("alexander.epsh.a@gmail.foo.bar.us", true);
-    assertValidity("alexander.e@gmail.foo.bar.us", true);
-    assertValidity("a.l.e.xander.e@gmail.foo.bar.us", true);
-    assertValidity("a@pidar.ru", true);
-    assertValidity("ab@pidar.ru", true);
-    assertValidity("a123a@pi--dar.ru", true);
-    assertValidity("a123a@pi-dar.ru", true);
-    assertValidity("a123a@pidar.ru", true);
-    assertValidity("a123a@pid190013ar.net", true);
-    assertValidity("a123@pid190013ar.net", true);
-    assertValidity("a_123@pid190013ar.net", true);
-    assertValidity("a_123_@pid190013ar.net", true);
-    assertValidity("123@pid190013ar.net", true); // email addresses that start with numbers should pass validation
-    assertValidity("123asdf@pid190013ar.net", true); // email addresses that start with numbers should pass validation
-    assertValidity("123.asdf@pid190013ar.net", true); // email addresses that start with numbers should pass validation
-    assertValidity("123_asdf@pid190013ar.net", true); // email addresses that start with numbers should pass validation
-    assertValidity("asdf@asdf.com", true);
-    assertValidity("@asdf.com", false);
-    assertValidity("asdf@asdf", false);
-    assertValidity("asd@@sf.foo", false);
-    assertValidity("as_d@sfnet.foo", true);
-    assertValidity("as_d@sf-net.foo", true);
-    assertValidity("as_d@sf_net.foo", false);
-    assertValidity("as_dtest@sf_net..foo", false);
-    assertValidity("as..d@sf_net.foo", false);
-    assertValidity("as.d@ sf_net.foo", false);
-    assertValidity("joe@q.com", true);
-    assertValidity("the-stone@gmx.at", true);
-    assertValidity("-the-stone@gmx.at", true);
-    assertValidity("-the-st*(&$one@gmx.at", true);
-    assertValidity("-the-st*(@&$one@gmx.at", false);  // can't have 2 @ symbols
-    assertValidity("the-stone-@gmx.at", true);
-    assertValidity("the--stone@gmx.at", true);
-    assertValidity("the-st-one@gmx.at", true);
-    assertValidity("the-st-o-ne@gmx.at", true);
-    assertValidity("typeracer@matthewmoore.org.uk", true);
-    assertValidity("ljosa-typeracer@ljosa.com", true);
+    assertValid("alexander.epshteyn@gmail.com");
+    assertValid("a.lexanderepshteyn@gmail.com");
+    assertValid("al.exanderepshteyn@gmail.com");
+    assertValid("ale.xanderepshteyn@gmail.com");
+    assertValid("alex.anderepshteyn@gmail.com");
+    assertValid("alexanderepshtey.n@gmail.com");
+    assertValid("alexanderepshte.yn@gmail.com");
+    assertValid("alexanderepsht.eyn@gmail.com");
+    assertValid("alexander.epsh.teyn@gmail.foo.bar.us");
+    assertNotValid("alexander.epsh..teyn@gmail.foo.bar.us");
+    assertNotValid(".alexander.epshteyn@gmail.foo.bar.us");
+    assertNotValid("alexander.epshteyn.@gmail.foo.bar.us");
+    assertNotValid("alexander.epsh.@gmail.foo.bar.us");
+    assertValid("alexander.epsh.as@gmail.foo.bar.us");
+    assertValid("alexander.ep.s.h.as@gmail.foo.bar.us");
+    assertValid("alexander.epsh.a@gmail.foo.bar.us");
+    assertValid("alexander.e@gmail.foo.bar.us");
+    assertValid("a.l.e.xander.e@gmail.foo.bar.us");
+    assertValid("a@pidar.ru");
+    assertValid("ab@pidar.ru");
+    assertValid("a123a@pi--dar.ru");
+    assertValid("a123a@pi-dar.ru");
+    assertValid("a123a@pidar.ru");
+    assertValid("a123a@pid190013ar.net");
+    assertValid("a123@pid190013ar.net");
+    assertValid("a_123@pid190013ar.net");
+    assertValid("a_123_@pid190013ar.net");
+    assertValid("123@pid190013ar.net");
+    assertValid("123asdf@pid190013ar.net");
+    assertValid("123.asdf@pid190013ar.net");
+    assertValid("123_asdf@pid190013ar.net");
+    assertValid("asdf@asdf.com");
+    assertNotValid("@asdf.com");
+    assertValid("asdf@asdf");
+    assertNotValid("asd@@sf.foo");
+    assertValid("as_d@sfnet.foo");
+    assertValid("as_d@sf-net.foo");
+    assertNotValid("as_d@sf_net.foo");
+    assertNotValid("as_dtest@sf_net..foo");
+    assertNotValid("as..d@sf_net.foo");
+    assertNotValid("as.d@ sf_net.foo");
+    assertValid("joe@q.com");
+    assertValid("the-stone@gmx.at");
+    assertValid("-the-stone@gmx.at");
+    assertNotValid("-the-st*(&$one@gmx.at");  // '(' not allowed in unquoted local part
+    assertNotValid("-the-st*@&$one@gmx.at");  // '@' not allowed in unquoted local part
+    assertValid("the-stone-@gmx.at");
+    assertValid("the--stone@gmx.at");
+    assertValid("the-st-one@gmx.at");
+    assertValid("the-st-o-ne@gmx.at");
+    assertValid("typeracer@matthewmoore.org.uk");
+    assertValid("ljosa-typeracer@ljosa.com");
 
     // pretty much anything goes when the local part is quoted
-    assertValidity("\"asdf\"@example.com", true);
-    assertValidity("\"as df\"@example.com", true);
-    assertValidity("\"as @@(*!&@# df\"@example.com", true);
+    assertValid("\"asdf\"@example.com");
+    assertValid("\"as df\"@example.com");
+    assertValid("\"as @@(*!&@# df\"@example.com");
 
     // try some examples from the RFC (http://tools.ietf.org/html/rfc3696#page-5)
 
-    assertValidity("\"Abc@def\"@example.com", true);
-    assertValidity("\"Fred Bloggs\"@example.com", true);
-    assertValidity("user+mailbox@example.com", true);
-    assertValidity("customer/department=shipping@example.com", true);
-    assertValidity("$A12345@example.com", true);
-    assertValidity("!def!xyz%abc@example.com", true);
-    assertValidity("_somename@example.com", true);
+    assertValid("\"Abc@def\"@example.com");
+    assertValid("\"Fred Bloggs\"@example.com");
+    assertValid("user+mailbox@example.com");
+    assertValid("customer/department=shipping@example.com");
+    assertValid("$A12345@example.com");
+    assertValid("!def!xyz%abc@example.com");
+    assertValid("_somename@example.com");
   }
 
-  private void assertValidity(String testString, boolean valid) throws Exception {
-    super.assertValidity(validator, testString, valid);
+  public void testExamplesFromWikipedia() throws Exception {
+    validator = new EmailAddressValidator("email", false);
+
+    // examples from Wikipedia (https://en.wikipedia.org/wiki/Email_address#Examples on 1/19/2024)
+
+    // Valid email addresses:
+    assertValid("simple@example.com");
+    assertValid("very.common@example.com");
+    assertValid("x@example.com");  // one-letter local-part
+    assertValid("long.email-address-with-hyphens@and.subdomains.example.com");
+    assertValid("user.name+tag+sorting@example.com");  // may be routed to user.name@example.com inbox depending on mail server
+    assertValid("name/surname@example.com");  // slashes are a printable character, and allowed
+    assertValid("admin@example");  // local domain name with no TLD, although ICANN highly discourages dotless email addresses
+    assertValid("example@s.example");  // see https://en.wikipedia.org/wiki/List_of_Internet_top-level_domains
+    assertValid("\" \"@example.org");  // space between the quotes
+    assertValid("\"john..doe\"@example.org");  // quoted double dot
+    assertValid("mailhost!username@example.org");  // bangified host route used for uucp mailers
+    assertValid("user%example.com@example.org");  // % escaped mail route to user@example.com via example.org
+    assertValid("user-@example.org");  // local-part ending with non-alphanumeric character from the list of allowed printable characters
+    assertValid("postmaster@[123.123.123.123]");  // IP addresses are allowed instead of domains when in square brackets, but strongly discouraged
+    assertValid("postmaster@[IPv6:2001:0db8:85a3:0000:0000:8a2e:0370:7334]");  // IPv6 uses a different syntax
+    assertValid("_test@[IPv6:2001:0db8:85a3:0000:0000:8a2e:0370:7334]");  // begin with underscore different syntax
+    assertValid("\"very.(),:;<>[]\\\".VERY.\\\"very@\\\\ \\\"very\\\".unusual\"@strange.example.com");  // include non-letters character AND multiple at sign, the first one being double quoted
+
+    /* TODO(1/19/2024): this test fails; do we want to update the regexes in EmailAddressValidator to be more lenient?
+     * Note: using regexes might not be the best way of validating email addresses; see:
+     *   - https://stackoverflow.com/questions/2049502/what-characters-are-allowed-in-an-email-address
+     *   - https://www.regular-expressions.info/email.html
+     */
+
+    // TODO: test the invalid address examples given in the Wikipedia article too
+    assertNotValid("abc.example.com");  // no @ character
+    assertNotValid("a@b@c@example.com");  // only one @ is allowed outside quotation marks
+    assertNotValid("a\"b(c)d,e:f;g<h>i[j\\k]l@example.com");  // none of the special characters in this local-part are allowed outside quotation marks
+    assertNotValid("just\"not\"right@example.com");  // quoted strings must be dot separated or be the only element making up the local-part
+    assertNotValid("this is\"not\\allowed@example.com");  // spaces, quotes, and backslashes may only exist when within quoted strings and preceded by a backslash
+    assertNotValid("this\\ still\\\"not\\\\allowed@example.com");  // even if escaped (preceded by a backslash), spaces, quotes, and backslashes must still be contained by quotes
+    assertNotValid("1234567890123456789012345678901234567890123456789012345678901234+x@example.com");  // local-part is longer than 64 characters
+    assertNotValid("i.like.underscores@but_they_are_not_allowed_in_this_part");  // underscore is not allowed in domain part
   }
 
-  
+  protected void assertValid(String testString) throws Exception {
+    super.assertValidity(validator, testString, true);
+  }
+
+  protected void assertNotValid(String testString) throws Exception {
+    super.assertValidity(validator, testString, false);
+  }
+
 
 }

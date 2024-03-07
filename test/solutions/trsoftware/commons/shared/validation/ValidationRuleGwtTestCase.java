@@ -17,6 +17,7 @@
 
 package solutions.trsoftware.commons.shared.validation;
 
+import com.google.common.base.Strings;
 import solutions.trsoftware.commons.client.CommonsGwtTestCase;
 
 /**
@@ -26,8 +27,9 @@ import solutions.trsoftware.commons.client.CommonsGwtTestCase;
  */
 public abstract class ValidationRuleGwtTestCase extends CommonsGwtTestCase {
 
-  protected void assertValidity(BaseValidationRule validator, String testString, boolean valid) throws Exception {
-    String msg = "Asserting that " + validator.getFieldName() + " = " + testString + " is " + (valid ? "accepted" : "rejected");
+  protected void assertValidity(BaseValidationRule<String> validator, String testString, boolean valid) throws Exception {
+    String msg = Strings.lenientFormat("Asserting that %s = <%s> is %s",
+        validator.getFieldName(), testString, valid ? "accepted" : "rejected");
     System.out.println(msg);
 
     // 1). check the validator

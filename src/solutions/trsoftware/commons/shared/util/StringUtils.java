@@ -49,9 +49,9 @@ public class StringUtils {
   /** The alphabet {@code [A-Za-z]} */
   public static final String ASCII_LETTERS = new CharRange('A', 'Z').toString() + new CharRange('a', 'z').toString();
   /** The alphabet {@code [0-9]} */
-  public static final String ASCII_NUMBERS = new CharRange('0', '9').toString();
+  public static final String ASCII_DIGITS = new CharRange('0', '9').toString();
   /** The alphabet {@code [A-Za-z0-9]} */
-  public static final String ASCII_LETTERS_AND_NUMBERS = ASCII_LETTERS + ASCII_NUMBERS;
+  public static final String ASCII_LETTERS_AND_NUMBERS = ASCII_LETTERS + ASCII_DIGITS;
   /** The alphabet of all printable {@code ASCII} chars */
   public static final String ASCII_PRINTABLE_CHARS = new CharRange(MIN_PRINTABLE_ASCII_CHAR, MAX_PRINTABLE_ASCII_CHAR).toString();
 
@@ -256,7 +256,7 @@ public class StringUtils {
   }
 
   /**
-   * Truncates the given string to the desired length.
+   * Truncates the given string to the desired maximum length.
    * @param str The input string, can be null
    * @param length the maximum length of the string to be returned
    * @return a string containing up to length chars from the input string
@@ -1374,6 +1374,10 @@ public class StringUtils {
       ret[i] = codePointIterator.nextInt();
     }
     return ret;
+  }
+
+  public static String codePointsToString(int[] codePoints) {
+    return new String(codePoints, 0, codePoints.length);
   }
 
   /**

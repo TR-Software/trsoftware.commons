@@ -42,7 +42,9 @@ public abstract class SecureRandomUtils {
   }
 
   /**
-   * @param n the number of bytes to generate
+   * Returns a url-safe base64-encoded string generated from {@code n} {@linkplain SecureRandom#nextBytes random bytes}.
+   *
+   * @param n the number of random bytes to use for generating the string
    * @return A url-safe base64-encoded string generated from {@code n} random bytes.
    */
   public static String randBytes(int n) {
@@ -54,16 +56,18 @@ public abstract class SecureRandomUtils {
   }
 
   /**
-   * Generates a code that can be used for things like email verification tokens, etc.  We use 12 random bytes because:
+   * Generates a random string that can be used for things like email verification tokens, etc.
+   * For this purpose we use 12 random bytes because:
    * <ol>
    *   <li>it's long-enough to make collisions extremely rare</li>
    *   <li>it's short-enough to be used in a URL</li>
    *   <li>its base64 encoding doesn't contain any padding chars</li>
    * </ol>
-   * @return 12 random bytes encoded with url-safe base64.
+   * @return a 16-char string generated from 12 random bytes encoded with url-safe base64
+   * @see #randBytes(int)
    */
   public static String randomCode() {
-    // we use 12 bytes, because its base64 encoding is 16 chars long without any padding chars
+    // we use 12 bytes because its base64 encoding is 16 chars long (and doesn't need any padding chars)
     return randBytes(12);
   }
 

@@ -409,8 +409,8 @@ public class TypingLogReplayPlayer extends Composite {
       JsSelection s = JsDocument.get().getSelection();
       if (s != null) {
         int focusOffset = s.getFocusOffset();
-        JsObject focusNode = (JsObject)s.getObject("focusNode");
-        Element parentElement = (Element)focusNode.getObject("parentElement");
+        JsObject focusNode = s.getObject("focusNode");
+        Element parentElement = focusNode.getObject("parentElement");
         int charPosWithinText;
         if (parentElement == acceptedCharsSpan.getElement())
           charPosWithinText = focusOffset;

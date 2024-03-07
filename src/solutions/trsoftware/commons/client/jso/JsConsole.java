@@ -100,9 +100,9 @@ public class JsConsole extends JavaScriptObject {
    * For general output of logging information. We assume that all implementations of {@code window.console} provide at least a {@code log} method.
    * @param args can pass a {@link JsArrayMixed} to take advantage of {@code console.log}'s vararg capability. Example:
    * <pre>
-   *   {@link #log(JsArrayMixed) log}(JsMixedArray.create().add("Event object: ").add(event))
+   *   {@link #log(JavaScriptObject) log}(JsMixedArray.create().add("Event object: ").add(event))
    * </pre>
-   * @deprecated Use {@link #log(Level, JsArrayMixed)} instead.
+   * @deprecated Use {@link #log(Level, JavaScriptObject)} instead.
    */
   public final native <A extends JavaScriptObject> void log(A args) /*-{
     this.log && this.log.apply(this, args);
@@ -114,13 +114,14 @@ public class JsConsole extends JavaScriptObject {
 
   /**
    * Selects the output method to call based on the given {@link Level}, and calls it with the given args.
-   * This method takes advantage of the console's vararg capability, unlike {@link #log(Level, String)}
-   * @param level the verbosity level
-   * @param args can pass a {@link JsMixedArray} to construct the args array using method chaining.
+   * This method takes advantage of the console's vararg capability, unlike {@link #log(Level, String)}.
+   * <p>
    * Example:
    * <pre>
-   *   {@link #log(JsArrayMixed) log}(JsMixedArray.create().add("Event object: ").add(event))
+   *   {@link #log(Level, JavaScriptObject) log}(JsMixedArray.create().add("Event object: ").add(event))
    * </pre>
+   * @param level the verbosity level
+   * @param args can pass a {@link JsMixedArray} to construct the args array using method chaining.
    */
   public final <A extends JavaScriptObject> void log(Level level, A args) {
     log(level.getJsMethodName(), args);

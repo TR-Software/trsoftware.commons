@@ -17,11 +17,14 @@
 package solutions.trsoftware.commons.client.jso;
 
 import com.google.gwt.core.client.JavaScriptObject;
+import com.google.gwt.core.client.JsonUtils;
 
 import javax.annotation.Nullable;
+import java.util.Arrays;
+import java.util.stream.Stream;
 
 /**
- * An overlay type providing access to properties of a {@link JavaScriptObject}.
+ * An overlay type providing easy read/write access for properties of a {@link JavaScriptObject}.
  *
  * @author Alex
  */
@@ -234,6 +237,7 @@ public class JsObject extends JavaScriptObject {
    * @return an array of a this object's own enumerable property names, iterated in the same order that a normal loop would.
    * @see <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object/keys">Object.keys</a>
    * @see JsStringArray#toJavaArray()
+   * @see #streamKeys()
    */
   public final native JsStringArray keys() /*-{
     var ret = [];
@@ -244,6 +248,14 @@ public class JsObject extends JavaScriptObject {
     }
     return ret;
   }-*/;
+
+  /**
+   * @return a stream of this object's own enumerable property names
+   * @see #keys()
+   */
+  public final Stream<String> streamKeys() {
+    return Arrays.stream(keys().toJavaArray());
+  }
 
   /**
    * Copies all enumerable own properties from the given object into {@code this} object. The properties in this
@@ -261,5 +273,38 @@ public class JsObject extends JavaScriptObject {
     }
     return this;
   }-*/;
+
+  /**
+   * @return {@code this[key] === other[key]}
+   */
+  // TODO: maybe refactor code dup with JsUtils.equals
+  public final native boolean propertyEquals(JavaScriptObject other, String key) /*-{
+    return this[key] === other[key];
+  }-*/;
+
+  /**
+   * Converts this object to JSON.
+   *
+   * @see JsonUtils#stringify(JavaScriptObject)
+   * @see <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/JSON/stringify">
+   *   <code>JSON.stringify()</code></a>
+   */
+  public final String toJSON() {
+    return JsonUtils.stringify(this);
+  }
+
+  /**
+   * Converts this object to JSON.
+   *
+   * @param space controls the spacing in the final string. Successive levels in the stringification
+   *        will each be indented by this string (or the first ten characters of it).
+   *
+   * @see JsonUtils#stringify(JavaScriptObject, String)
+   * @see <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/JSON/stringify">
+   *   <code>JSON.stringify()</code></a>
+   */
+  public final String toJSON(String space) {
+    return JsonUtils.stringify(this, space);
+  }
 
 }

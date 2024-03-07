@@ -17,14 +17,17 @@
 package solutions.trsoftware.commons.server.util.reflect;
 
 import javax.annotation.Nullable;
+import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 
 /**
  * Utils for working with JavaBeans.
  *
  * <p style="font-style: italic;">
- *   NOTE: some of this code borrowed from {@code org.hibernate.cache.ehcache.management.impl.BeanUtils}
+ * NOTE: some of this code borrowed from {@code org.hibernate.cache.ehcache.management.impl.BeanUtils}
  * </p>
+ *
+ * @see java.beans.Introspector
  */
 public class BeanUtils {
 
@@ -38,9 +41,9 @@ public class BeanUtils {
    * @return the named getter method or null if not found
    */
   @Nullable
-   public static Method getterMethod(Object bean, String propertyName) {
+  public static Method getterMethod(Object bean, String propertyName) {
     return accessorMethod("get", bean, propertyName);
-   }
+  }
 
   /**
    * Return the named setter method on the bean or null if not found.
@@ -50,18 +53,18 @@ public class BeanUtils {
    * @return the named setter method or null if not found
    */
   @Nullable
-   public static Method setterMethod(Object bean, String propertyName) {
+  public static Method setterMethod(Object bean, String propertyName) {
     return accessorMethod("set", bean, propertyName);
-   }
+  }
 
   @Nullable
-  public static Method accessorMethod(String methodNamePrefix, Object bean, String propertyName) {
+  private static Method accessorMethod(String methodNamePrefix, Object bean, String propertyName) {
     return accessorMethod(methodNamePrefix, bean.getClass(), propertyName);
   }
 
   @Nullable
-  public static Method accessorMethod(String methodNamePrefix, Class<?> beanClass, String propertyName) {
-    final String methodName = beanMethodName(methodNamePrefix, propertyName);
+  private static Method accessorMethod(String methodNamePrefix, Class<?> beanClass, String propertyName) {
+    final String methodName = accessorMethodName(methodNamePrefix, propertyName);
     for (Method m : beanClass.getMethods()) {
       if (methodName.equals(m.getName())) {
         switch (methodNamePrefix) {
@@ -84,12 +87,24 @@ public class BeanUtils {
     return null;
   }
 
-  public static String beanMethodName(String methodNamePrefix, String propertyName) {
+  private static String accessorMethodName(String methodNamePrefix, String propertyName) {
     final StringBuilder sb = new StringBuilder(methodNamePrefix).append(Character.toUpperCase(propertyName.charAt(0)));
     if (propertyName.length() > 1) {
       sb.append(propertyName.substring(1));
     }
     return sb.toString();
+  }
+
+  /**
+   * Derives the expected name of a getter method corresponding to the given field, based on its name and type,
+   * but does not check whether such a method is actually defined.
+   */
+  public static String getterMethodName(Field field) {
+    String name = field.getName();
+    Class<?> type = field.getType();
+    String prefix = (type == boolean.class || type == Boolean.class) ? "is" : "get";
+
+    return accessorMethodName(prefix, name);
   }
 
 }

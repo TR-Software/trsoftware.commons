@@ -222,7 +222,7 @@ public abstract class AssertUtils {
    *
    * @return a message that can be passed to the {@link AssertionFailedError} constructor
    */
-  public static String formatComparisonFailedMessage(String message, Object expected, Object actual) {
+  public static String formatComparisonFailedMessage(@Nullable String message, Object expected, Object actual) {
     String formatted = "";
     if (message != null)
       formatted = message + " ";

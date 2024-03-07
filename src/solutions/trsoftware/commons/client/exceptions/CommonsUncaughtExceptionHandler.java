@@ -55,11 +55,12 @@ public class CommonsUncaughtExceptionHandler implements GWT.UncaughtExceptionHan
   };
 
   /**
-   * This method is invoked behind-the-scenes by GWT for any uncaught exceptions and calls
+   * This method is invoked by GWT for any uncaught exceptions and calls
    * {@link #handleException(Throwable, boolean) handleException(e, true)}
    * <p>
    * In order to manually just log and ignore a caught exception, can invoke
-   * {@code handleException(e, false)} directly.
+   * {@code handleException(e, false)} directly, or override {@link #showPopupNotice()} to disable
+   * showing an error popup for every exception.
    */
   public final void onUncaughtException(final Throwable e) {
     handleException(e, true);
@@ -184,6 +185,7 @@ public class CommonsUncaughtExceptionHandler implements GWT.UncaughtExceptionHan
    * @param exceptionWithStackTrace a string containing the exception message and the de-obfuscated stack trace
    */
   protected void logException(String exceptionWithStackTrace) {
+    // TODO(3/2/2024): might not want user to see the full stack trace (with actual class names); maybe predicate on Debug.ENABLED?
     JsConsole.get().log(JsConsole.Level.ERROR, exceptionWithStackTrace);
   }
 }

@@ -22,6 +22,9 @@ import com.google.gwt.user.client.ui.PopupPanel;
 import com.google.gwt.user.client.ui.Widget;
 import solutions.trsoftware.commons.client.util.GwtUtils;
 
+import javax.annotation.Nullable;
+import java.util.function.Predicate;
+
 /**
  * Performs lookups on the widget hierarchy (i.e. DOM).
  * 
@@ -30,17 +33,37 @@ import solutions.trsoftware.commons.client.util.GwtUtils;
  * @author Alex
  */
 public class WidgetQuery {
+
   /**
    * Finds the first ancestor of the given widget which is an instance of the
    * given concrete class (or a subclass of it).
-   * @return an instance of the given class which is an ancestor of w or null
-   * if not found.
+   *
+   * @return an instance of the given class which is an ancestor of {@code widget}, or {@code null} if not found.
+   * @see #ancestorOf(Widget, Predicate)
    */
-  public static <T extends Widget> T ancestorOf(Widget w, Class<T> parentClass) {
-    Widget next = w;
+  public static <T extends Widget> T ancestorOf(Widget widget, Class<T> parentClass) {
+    // TODO(2/21/2024): can simplify by delegating to ancestorOf(Widget, Predicate)
+    Widget next = widget;
     while ((next = next.getParent()) != null) {
       if (GwtUtils.isAssignableFrom(parentClass, next.getClass()))
+        //noinspection unchecked
         return (T)next;
+    }
+    return null;
+  }
+
+  /**
+   * Finds the first ancestor (panel) of the given widget that matches the given predicate.
+   *
+   * @param predicate matches the desired parent widget
+   * @return the nearest ancestor panel matching the given predicate, or {@code null} if none match
+   */
+  @Nullable
+  public static Widget ancestorOf(Widget widget, Predicate<Widget> predicate) {
+    Widget next = widget;
+    while ((next = next.getParent()) != null) {
+      if (predicate.test(next))
+        return next;
     }
     return null;
   }

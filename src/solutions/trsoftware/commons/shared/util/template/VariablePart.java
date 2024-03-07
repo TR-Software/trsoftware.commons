@@ -31,7 +31,7 @@ public class VariablePart implements TemplatePart {
 
   public StringBuilder write(StringBuilder buffer, Map<String, ?> substitutions) {
     if (substitutions.containsKey(varName))
-      return buffer.append(String.valueOf(substitutions.get(varName)));
+      return buffer.append(substitutions.get(varName));
     return buffer;
   }
 

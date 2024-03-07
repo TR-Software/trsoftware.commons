@@ -86,12 +86,26 @@ public abstract class BasicInputForm extends FlowPanel {
   private SpecificKeyDownHandler enterKeyHandler;
   private List<TextInput> textInputs = new ArrayList<TextInput>();
 
-  public enum Layout { HORIZONTAL, VERTICAL;}
+  public enum Layout {
+    /**
+     * Input field will be displayed next to the label in the same row
+     */
+    HORIZONTAL,
+    /**
+     * Input field will be displayed below the label in a separate row
+     */
+    VERTICAL
+  }
 
   public BasicInputForm() {
     this(Layout.HORIZONTAL);
   }
 
+  /**
+   * @param layout orientation of the input fields against their labels
+   * @see Layout#HORIZONTAL
+   * @see Layout#VERTICAL
+   */
   public BasicInputForm(Layout layout) {
     this.layout = layout;
     submitCommand = () -> {
@@ -155,11 +169,11 @@ public abstract class BasicInputForm extends FlowPanel {
     return addTextField(label, textBox, null);
   }
 
-  public BasicInputForm addTextField(Label label, TextBox textBox, ValidationRule validator) {
+  public BasicInputForm addTextField(Label label, TextBox textBox, ValidationRule<String> validator) {
     return addTextInput(label, new TextInput(textBox, validator));
   }
 
-  public BasicInputForm addTextField(String label, TextBox textBox, ValidationRule validator) {
+  public BasicInputForm addTextField(String label, TextBox textBox, ValidationRule<String> validator) {
     return addTextInput(label, new TextInput(textBox, validator));
   }
 

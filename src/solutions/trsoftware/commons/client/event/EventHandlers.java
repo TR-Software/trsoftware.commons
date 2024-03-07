@@ -16,7 +16,10 @@
 
 package solutions.trsoftware.commons.client.event;
 
-import com.google.gwt.event.dom.client.*;
+import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.event.dom.client.HasKeyDownHandlers;
+import com.google.gwt.event.dom.client.HasKeyPressHandlers;
+import com.google.gwt.event.dom.client.KeyCodes;
 import com.google.gwt.user.client.Command;
 import com.google.gwt.user.client.ui.Widget;
 
@@ -49,11 +52,7 @@ public class EventHandlers {
    * Creates a {@link ClickHandler} from the given {@link Command}
    */
   public static ClickHandler clickHandler(final Command command) {
-    return new ClickHandler() {
-      public void onClick(ClickEvent event) {
-        command.execute();
-      }
-    };
+    return event -> command.execute();
   }
 
 }

@@ -20,8 +20,8 @@ import solutions.trsoftware.commons.client.jso.JsConsole;
 
 /**
  * This class is intended to be used (via deferred binding) when we don't
- * wish to log any debugging information to window.console.  Only the error(Object)
- * method will print output to the console (and only if window.console exists).
+ * wish to log any debugging information to window.console.  Only the {@link #error(Object)}
+ * method will print output to the console (and only if {@code window.console} exists).
  *
  * @author Alex
  * @since Mar 26, 2013
@@ -30,7 +30,7 @@ public class ConsoleMinimalImpl implements Console {
 
   private JsConsole jsConsole = JsConsole.get();
 
-  /** This is the only method actually implemented by ConsoleBlankImpl */
+  /** This is the only method actually implemented by {@link ConsoleMinimalImpl} */
   public void error(Object arg) {
     if (jsConsole != null)
       if (jsConsole.implementsError())

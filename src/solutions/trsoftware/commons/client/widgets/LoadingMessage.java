@@ -23,18 +23,18 @@ import com.google.gwt.user.client.ui.LabelBase;
 import solutions.trsoftware.commons.client.bundle.CommonsClientBundleFactory;
 
 /**
- * A lighter, experimental version of {@link HeavyLoadingMessage}, that does not use tables.  Instead the spinner image is
+ * A lighter version of {@link HeavyLoadingMessage}, that does not use tables.  Instead the spinner image is
  * configured via the CSS background property.
- *
- * TODO: try to replace all the usages HeavyLoadingMessage with this widget (however, that will be challenging, since there will certainly be layout problems in some cases)
  *
  * @author Alex
  */
 public class LoadingMessage extends Composite {
 
+  // TODO: try to replace all the usages HeavyLoadingMessage with this widget (however, that will be challenging, since there will certainly be layout problems in some cases)
+
   public enum SpinnerPosition { LEFT, RIGHT }
 
-  public LoadingMessage(LabelBase label, boolean startVisible, SpinnerPosition spinnerPosition) {
+  public LoadingMessage(LabelBase<?> label, boolean startVisible, SpinnerPosition spinnerPosition) {
     initWidget(label);
     setStyleName(CommonsClientBundleFactory.INSTANCE.getCss().loadingMessage());
     Style style = getStyleElement().getStyle();

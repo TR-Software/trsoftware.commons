@@ -18,6 +18,8 @@ package solutions.trsoftware.commons.client.jso;
 
 import com.google.gwt.core.client.*;
 
+import java.util.function.Consumer;
+
 /**
  * Utility methods for working with {@link JavaScriptObject} overlays.
  *
@@ -109,5 +111,56 @@ public class JsUtils {
     }
     return ret;
   }
-  
+
+  // TODO(1/4/2024): document and test the new methods below
+
+  /**
+   * Strict shallow equality test for 2 JS objects, applying the {@code ===} operator to each property value
+   * @param x
+   * @param y
+   * @return
+   */
+  public static native boolean equals(JavaScriptObject x, JavaScriptObject y) /*-{
+    if (x === y)
+      return true;
+    if ((typeof x) !== (typeof y))
+      return false;
+    if (x == null || y == null)  // "== null" matches both null and undefined
+      return false;
+    // TODO: test the above null/undefined logic
+    // Note: Object.keys should work for objects and arrays;
+    // for all other types the above code (combined with the below try/catch) should suffice
+    // TODO: make sure the above statement is true, e.g. for "number", "function", etc.
+    try {
+      var xKeys = Object.keys(x);
+      var yKeys = Object.keys(y);
+      if (xKeys.length !== yKeys.length)
+        return false;
+      for (var i in xKeys) {
+        var key = xKeys[i];
+        if (x[key] !== y[key])
+          return false;
+      }
+      return true;
+    }
+    catch (e) {
+      // probably Object.keys threw the exception b/c either x or y wasn't an object or array
+      console.warn("JsUtils.equals(", x, y, ") threw an exception: ", e);
+      return false;
+    }
+  }-*/;
+
+  /**
+   * Returns a native {@code function} (wrapped with {@code $entry}) that passes its arg to the given consumer.
+   *
+   * @param <T> a type that's safe to pass back from JavaScript, such as a {@link JavaScriptObject} or an {@link Object}
+   *   that originated in Java code
+   *   (see <a href="https://www.gwtproject.org/doc/latest/DevGuideCodingBasicsJSNI.html#passing-javascript">JSNI reference</a>)
+   */
+  public static native <T> JavaScriptObject toJsFunction(Consumer<T> consumer) /*-{
+    return $entry(function (arg) {
+      consumer.@java.util.function.Consumer::accept(*)(arg);
+    });
+  }-*/;
+
 }

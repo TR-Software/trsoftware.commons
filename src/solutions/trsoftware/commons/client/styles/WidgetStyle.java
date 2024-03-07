@@ -18,6 +18,7 @@ package solutions.trsoftware.commons.client.styles;
 
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.user.client.ui.Widget;
+import solutions.trsoftware.commons.client.widgets.WidgetBuilder;
 import solutions.trsoftware.commons.client.widgets.Widgets;
 
 import java.util.HashMap;
@@ -25,8 +26,8 @@ import java.util.Map;
 
 /**
  * Implements a builder pattern for declaring a widget's style properties.
- * The apply method will be called by a factory method in {@link Widgets} or {@link solutions.trsoftware.commons.client.widgets.WidgetBuilder}
- * to set the style properties after the widget is constructed.
+ * The {@link #apply(Widget)} method is used by the factory method in {@link Widgets} or {@link WidgetBuilder}
+ * to set the style properties after a widget is constructed.
  *
  * @author Alex
  */
@@ -42,6 +43,13 @@ public class WidgetStyle {
     this.styleName = styleName;
   }
 
+  /**
+   * Factory method that can be used as shorthand for the common use case of specifying only the primary
+   * {@linkplain Widget#setStyleName(String) style name} of a widget.
+   */
+  public static WidgetStyle styleName(String styleName) {
+    return new WidgetStyle(styleName);
+  }
 
   /** Applies the style to the widget and returns it (for chaining) */
   public <T extends Widget> T apply(T widget) {

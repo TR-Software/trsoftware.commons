@@ -53,61 +53,37 @@ public class EmailAddressValidatorGwtTest extends RegexValidationRuleGwtTestCase
     }
 
     assertValid("asdf@asdf.com");
-    assertValid("asdf@asdf.com");
-    assertNotValid("  alexander.epshteyn@gmail.com ");
-    // dots in username are ok
-    assertValid("alexander.epshteyn@gmail.com");
-    assertValid("a.lexanderepshteyn@gmail.com");
-    assertValid("al.exanderepshteyn@gmail.com");
-    assertValid("ale.xanderepshteyn@gmail.com");
-    assertValid("alex.anderepshteyn@gmail.com");
-    assertValid("alexanderepshtey.n@gmail.com");
-    assertValid("alexanderepshte.yn@gmail.com");
-    assertValid("alexanderepsht.eyn@gmail.com");
-    assertValid("alexander.epsh.teyn@gmail.foo.bar.us");
-    assertNotValid("alexander.epsh..teyn@gmail.foo.bar.us");
-    assertNotValid(".alexander.epshteyn@gmail.foo.bar.us");
-    assertNotValid("alexander.epshteyn.@gmail.foo.bar.us");
-    assertNotValid("alexander.epsh.@gmail.foo.bar.us");
-    assertValid("alexander.epsh.as@gmail.foo.bar.us");
-    assertValid("alexander.ep.s.h.as@gmail.foo.bar.us");
-    assertValid("alexander.epsh.a@gmail.foo.bar.us");
-    assertValid("alexander.e@gmail.foo.bar.us");
-    assertValid("a.l.e.xander.e@gmail.foo.bar.us");
+    assertNotValid("  foo@gmail.com ");  // whitespace not allowed
+    // dots in local-part are ok, provided that it is not the first/last char and that it doesn't appear consecutively
+    assertValid("ab.cd@gmail.com");
+    assertValid("ab.cd@gmail.com");
+    assertValid("ab.c.d@gmail.com");
+    assertNotValid(".ab.cd@gmail.com");
+    assertNotValid("abcd.@gmail.com");
+    assertNotValid("ab..cd@gmail.com");
+    assertNotValid("abcd@gmail.com.");
+
     assertValid("a@pidar.ru");
-    assertValid("ab@pidar.ru");
-    assertValid("a123a@pi--dar.ru");
     assertValid("a123a@pi-dar.ru");
-    assertValid("a123a@pidar.ru");
+    assertValid("a123a@pi--dar.ru");
     assertValid("a123a@pid190013ar.net");
-    assertValid("a123@pid190013ar.net");
-    assertValid("a_123@pid190013ar.net");
     assertValid("a_123_@pid190013ar.net");
     assertValid("123@pid190013ar.net");
     assertValid("123asdf@pid190013ar.net");
-    assertValid("123.asdf@pid190013ar.net");
     assertValid("123_asdf@pid190013ar.net");
-    assertValid("asdf@asdf.com");
     assertNotValid("@asdf.com");
     assertValid("asdf@asdf");
-    assertNotValid("asd@@sf.foo");
-    assertValid("as_d@sfnet.foo");
     assertValid("as_d@sf-net.foo");
     assertNotValid("as_d@sf_net.foo");
     assertNotValid("as_dtest@sf_net..foo");
     assertNotValid("as..d@sf_net.foo");
     assertNotValid("as.d@ sf_net.foo");
-    assertValid("joe@q.com");
     assertValid("the-stone@gmx.at");
     assertValid("-the-stone@gmx.at");
     assertNotValid("-the-st*(&$one@gmx.at");  // '(' not allowed in unquoted local part
     assertNotValid("-the-st*@&$one@gmx.at");  // '@' not allowed in unquoted local part
     assertValid("the-stone-@gmx.at");
     assertValid("the--stone@gmx.at");
-    assertValid("the-st-one@gmx.at");
-    assertValid("the-st-o-ne@gmx.at");
-    assertValid("typeracer@matthewmoore.org.uk");
-    assertValid("ljosa-typeracer@ljosa.com");
 
     // pretty much anything goes when the local part is quoted
     assertValid("\"asdf\"@example.com");

@@ -67,12 +67,12 @@ public enum Alphabet {
   public String getChars() {
     return chars;
   }
-  
+
   public String getPrettyName() {
     return constantNameToTitleCase(name());
   }
 
-  /** @return The enum value matching the given chars, or {@code null} if there's no match */
+  /** @return The enum value matching the given chars, or {@link #CUSTOM} if there's no match */
   public static Alphabet lookup(String chars) {
     Set<Character> givenCharSet = toCharacterSet(chars);
     for (Alphabet alpha : values()) {

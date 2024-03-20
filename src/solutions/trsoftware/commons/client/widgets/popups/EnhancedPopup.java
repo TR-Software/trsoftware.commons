@@ -31,6 +31,8 @@ import solutions.trsoftware.commons.client.util.geometry.WindowGeometry;
 import solutions.trsoftware.commons.client.widgets.HasFocusTarget;
 import solutions.trsoftware.commons.shared.util.StringUtils;
 
+import javax.annotation.Nullable;
+
 /**
  * Date: Apr 16, 2008 Time: 9:04:07 PM
  *
@@ -73,7 +75,8 @@ public class EnhancedPopup extends PopupPanel implements HasFocusTarget {
    * after the popup is shown.
    */
   @Override
-  public FocusWidget getFocusTarget() {
+  @Nullable
+  public Focusable getFocusTarget() {
     return null;
   }
 
@@ -82,8 +85,9 @@ public class EnhancedPopup extends PopupPanel implements HasFocusTarget {
    * places the cursor at the end of its text.
    */
   private void applyFocus() {
-    final FocusWidget focusTarget = getFocusTarget();
-    if (focusTarget != null) {
+    final Focusable focusTarget = getFocusTarget();
+    if (focusTarget instanceof IsWidget) {
+      // focusTarget not null and is a widget
       focusTarget.setFocus(true);
       // In most browsers, the above invocation of focusTarget.setFocus(true) would suffice, however with IE11, it won't work
       // until some time later (might have something to do with the resize animation), so we keep trying to
@@ -93,7 +97,7 @@ public class EnhancedPopup extends PopupPanel implements HasFocusTarget {
         @Override
         public boolean execute() {
           i++;
-          if (!isShowing() || JsDocument.get().getActiveElement() == getFocusTarget().getElement() || i > 50)
+          if (!isShowing() || JsDocument.get().getActiveElement() == ((IsWidget)focusTarget).asWidget().getElement() || i > 50)
             return false;  // either our work here is done or we're giving up after 50 attempts (we might never succeed if the browser doesn't support Document.activeElement
           // NOTE: we have to call getPrimaryWidget().setFocus(true) after we already checked Document.activeElement, not before
           focusTarget.setFocus(true);

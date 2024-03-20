@@ -16,16 +16,41 @@
 
 package solutions.trsoftware.commons.client.widgets;
 
-import com.google.gwt.user.client.ui.FocusWidget;
+import com.google.gwt.user.client.ui.Focusable;
 import com.google.gwt.user.client.ui.IsWidget;
 
 /**
+ * Can be implemented by a composite widget to delegate all {@link Focusable} methods to a child widget,
+ * as specified by {@link #getFocusTarget()}.
+ *
  * @author Alex
  * @since 11/17/2017
  */
-public interface HasFocusTarget extends IsWidget {
+public interface HasFocusTarget extends IsWidget, Focusable {
   /**
    * @return the child widget that should be focused when this widget is displayed.
    */
-  FocusWidget getFocusTarget();
+  Focusable getFocusTarget();
+
+  // delegate all Focusable methods to getFocusTarget():
+
+  @Override
+  default int getTabIndex() {
+    return getFocusTarget().getTabIndex();
+  }
+
+  @Override
+  default void setAccessKey(char key) {
+    getFocusTarget().setAccessKey(key);
+  }
+
+  @Override
+  default void setFocus(boolean focused) {
+    getFocusTarget().setFocus(focused);
+  }
+
+  @Override
+  default void setTabIndex(int index) {
+    getFocusTarget().setTabIndex(index);
+  }
 }

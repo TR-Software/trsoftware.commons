@@ -53,7 +53,7 @@ public abstract class FormWithUsernameAndPassword extends BasicInputForm impleme
    * @return the widget that should be focused when this form is displayed.
    */
   @Override
-  public FocusWidget getFocusTarget() {
+  public Focusable getFocusTarget() {
     return txtUsername;
   }
 

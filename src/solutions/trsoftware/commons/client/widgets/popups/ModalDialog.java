@@ -798,7 +798,7 @@ public class ModalDialog {
      * @return The widget that should be focused right after the dialog is displayed.
      */
     @Override
-    public FocusWidget getFocusTarget() {
+    public Focusable getFocusTarget() {
       return btnOK;
     }
 
@@ -954,7 +954,7 @@ public class ModalDialog {
       rightFocusTrap.setMaster(txtInput);
     }
     @Override
-    public FocusWidget getFocusTarget() {
+    public Focusable getFocusTarget() {
       return txtInput;
     }
     @Override

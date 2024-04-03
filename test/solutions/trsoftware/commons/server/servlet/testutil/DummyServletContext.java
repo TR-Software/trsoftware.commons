@@ -314,4 +314,39 @@ public class DummyServletContext extends DummyWebConfigObject<ServletContext> im
   public String getVirtualServerName() {
     throw new UnsupportedOperationException("Method solutions.trsoftware.commons.server.servlet.testutil.DummyServletContext.getVirtualServerName has not been fully implemented yet.");
   }
+
+  @Override
+  public void setResponseCharacterEncoding(String encoding) {
+    throw new UnsupportedOperationException("Method solutions.trsoftware.commons.server.servlet.testutil.DummyServletContext.setResponseCharacterEncoding has not been fully implemented yet.");
+  }
+
+  @Override
+  public String getResponseCharacterEncoding() {
+    throw new UnsupportedOperationException("Method solutions.trsoftware.commons.server.servlet.testutil.DummyServletContext.getResponseCharacterEncoding has not been fully implemented yet.");
+  }
+
+  @Override
+  public void setRequestCharacterEncoding(String encoding) {
+    throw new UnsupportedOperationException("Method solutions.trsoftware.commons.server.servlet.testutil.DummyServletContext.setRequestCharacterEncoding has not been fully implemented yet.");
+  }
+
+  @Override
+  public String getRequestCharacterEncoding() {
+    throw new UnsupportedOperationException("Method solutions.trsoftware.commons.server.servlet.testutil.DummyServletContext.getRequestCharacterEncoding has not been fully implemented yet.");
+  }
+
+  @Override
+  public void setSessionTimeout(int sessionTimeout) {
+    throw new UnsupportedOperationException("Method solutions.trsoftware.commons.server.servlet.testutil.DummyServletContext.setSessionTimeout has not been fully implemented yet.");
+  }
+
+  @Override
+  public int getSessionTimeout() {
+    throw new UnsupportedOperationException("Method solutions.trsoftware.commons.server.servlet.testutil.DummyServletContext.getSessionTimeout has not been fully implemented yet.");
+  }
+
+  @Override
+  public ServletRegistration.Dynamic addJspFile(String servletName, String jspFile) {
+    throw new UnsupportedOperationException("Method solutions.trsoftware.commons.server.servlet.testutil.DummyServletContext.addJspFile has not been fully implemented yet.");
+  }
 }

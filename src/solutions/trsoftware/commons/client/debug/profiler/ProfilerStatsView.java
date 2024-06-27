@@ -6,7 +6,8 @@ import solutions.trsoftware.commons.client.cellview.PatchedSimplePager;
 import solutions.trsoftware.commons.client.images.CommonsImages;
 import solutions.trsoftware.commons.client.widgets.ImageButton;
 
-import static solutions.trsoftware.commons.client.widgets.Widgets.*;
+import static solutions.trsoftware.commons.client.widgets.Widgets.disclosurePanel;
+import static solutions.trsoftware.commons.client.widgets.Widgets.flowPanel;
 
 /**
  * @author Alex
@@ -28,11 +29,9 @@ public class ProfilerStatsView extends Composite {
     pager.getWidget().add(new ImageButton(CommonsImages.INSTANCE.reloadIconSingleArrow().createImage(),
         clickEvent -> refresh()));
 
-    initWidget(flowPanel(
-        disclosurePanel = disclosurePanel("Profiler Stats",
-            flowPanel(table, pager)),
-        anchor("Refresh Stats", event -> refresh())
-    ));
+    initWidget(disclosurePanel = disclosurePanel("Profiler Stats",
+        flowPanel(table, pager))
+    );
 
     disclosurePanel.addOpenHandler(event -> refresh());
   }

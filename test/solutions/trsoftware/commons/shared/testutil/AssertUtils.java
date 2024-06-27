@@ -33,6 +33,7 @@ import javax.annotation.Nullable;
 import java.util.*;
 import java.util.function.*;
 
+import static com.google.common.base.Strings.lenientFormat;
 import static junit.framework.Assert.*;
 import static solutions.trsoftware.commons.shared.util.CollectionUtils.asList;
 import static solutions.trsoftware.commons.shared.util.CollectionUtils.first;
@@ -173,6 +174,7 @@ public abstract class AssertUtils {
    * Asserts that no given object is {@link Object#equals(Object) equal} to any other and that none of
    * them are {@code null}.
    */
+  @SuppressWarnings("SimplifiableJUnitAssertion")
   public static void assertNotEqualAndNotNull(Object... objects) {
     assertNotNull(objects);
     for (int i = 0; i < objects.length; i++) {
@@ -197,6 +199,7 @@ public abstract class AssertUtils {
     }
   }
 
+  @SuppressWarnings("SimplifiableJUnitAssertion")
   public static void assertNotEqual(Object o1, Object o2) {
     if (o1 == null)
       assertNotNull(o2);
@@ -570,6 +573,12 @@ public abstract class AssertUtils {
     assertTrue(Iterables.isEmpty(iterable));
   }
 
+  public static void assertEmpty(String message, Iterable<?> iterable) {
+    if (!Iterables.isEmpty(iterable)) {
+      fail(message + " should be empty; actual: " + iterable);
+    }
+  }
+
   public static <T> void assertEmpty(T[] array) {
     assertTrue(ArrayUtils.isEmpty(array));
   }
@@ -579,9 +588,15 @@ public abstract class AssertUtils {
   }
 
   public static void assertContains(Iterable<?> iterable, @Nullable Object element) {
-    assertNotNull(iterable);
-    assertTrue(iterable + " should contain " + element,
-        Iterables.contains(iterable, element));
+    assertContains(null, iterable, element);
+  }
+
+  public static void assertContains(String message, Iterable<?> iterable, @Nullable Object element) {
+    String messageSuffix = lenientFormat("Iterable %s should contain %s", iterable, element);
+    message = message != null ? message + " - " + messageSuffix : messageSuffix;
+    assertNotNull(message, iterable);
+    if (!Iterables.contains(iterable, element))
+      fail(message);
   }
 
   public static <T> void assertContains(T[] array, @Nullable T element) {

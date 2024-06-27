@@ -23,8 +23,10 @@ import com.google.common.collect.ImmutableList;
 import solutions.trsoftware.commons.shared.util.StringUtils;
 import solutions.trsoftware.commons.shared.util.compare.RichComparable;
 import solutions.trsoftware.commons.shared.util.time.SettableTicker;
+import solutions.trsoftware.tools.util.TablePrinter;
 
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import java.io.PrintStream;
 import java.util.*;
 import java.util.concurrent.*;
@@ -469,23 +471,33 @@ public class MockScheduledExecutorService implements ScheduledExecutorService {
     String headerText = StringUtils.join(System.lineSeparator(), headerLines);
     out.printf("%s%n%s%n%1$s%n",
         StringUtils.repeat('=', headerWidth), headerText);
-    out.printf("%d Scheduled tasks%n", tasks.length);
+    out.printf("%d Scheduled tasks:%n", tasks.length);
     if (tasks.length > 0) {
-      out.printf("%5s, %30s, %s%n", "id", "eta / delay", "name");
+      TablePrinter tp = new TablePrinter();
       for (ScheduledFutureTask<?> task : tasks) {
-        out.printf("%5d, %30s, %s%n", task.id, etaToString(task.time), printTaskName(task, verbose));
+        tp.newRow()
+            .addCol("id", task.id)
+            .addCol("eta / delay", etaToString(task.time))
+            .addCol("name", printTaskName(task, verbose));
       }
+      tp.printTable(out);
     }
     out.printf("%d Completed tasks", history.size());
     if (!selectedRange.isEmpty()) {
       out.printf(" (displaying time range [%,d, %,d]):%n", selectedRange.get(0).time, now());
-      out.printf("%5s, %30s, %8s, %12s, %s%n", "id", "time / offset", "runCount", "outcome", "name");
+      TablePrinter tp = new TablePrinter();
       for (TaskRunRecord task : selectedRange) {
-        out.printf("%5s, %30s, %,8d, %12s, %s%n",
-            task.id, timeToString(task.time), task.runCount, task.outcomeState, printTaskName(task, verbose));
+        tp.newRow()
+            .addCol("id", task.id)
+            .addCol("time / offset", timeToString(task.time))
+            .addCol("runCount", "%,d", task.runCount)
+            .addCol("outcome", task.outcomeState)
+            .addCol("name", printTaskName(task, verbose));
       }
+      tp.printTable(out);
     }
     out.println();
+    out.println(StringUtils.repeat('=', headerWidth));
   }
 
   private String printTaskName(TaskInfo task, boolean verbose) {
@@ -564,8 +576,22 @@ public class MockScheduledExecutorService implements ScheduledExecutorService {
     // copied from java.util.concurrent.FutureTask:
     private AtomicReference<TaskState> state = new AtomicReference<>(TaskState.NEW);
 
-    /** The underlying callable; nulled out after running */
+    /**
+     * The underlying callable that will be executed; nulled out after running.
+     * Note: this could be either the original {@link Callable} submitted to the executor or
+     * a {@link Runnable} wrapped with {@link Executors#callable(Runnable, Object)}, if it was submitted
+     * using a method like {@link #scheduleAtFixedRate}.
+     * @see #runnable
+     */
     private Callable<V> callable;
+
+    /**
+     * The original {@link Runnable} submitted to the executor, prior to being wrapped with
+     * {@link Executors#callable(Runnable, Object)}. Retained for debugging.
+     */
+    @Nullable
+    private Runnable runnable;
+
     /** The result to return or exception to throw from get() */
     private Object outcome;
 
@@ -623,10 +649,10 @@ public class MockScheduledExecutorService implements ScheduledExecutorService {
      * @see #scheduleWithFixedDelay(Runnable, long, long, TimeUnit)
      */
     public ScheduledFutureTask(@Nonnull Runnable runnable, V result, long time, long period, StackTraceElement[] debugTrace) {
-      this.debugTrace = debugTrace;
       this.callable = Executors.callable(runnable, result);
       this.time = time;
       this.name = runnable.toString();
+      this.debugTrace = debugTrace;
       this.period = period;
     }
 
@@ -721,6 +747,35 @@ public class MockScheduledExecutorService implements ScheduledExecutorService {
           }
         }
       }
+    }
+
+    public TaskState getState() {
+      return state.get();
+    }
+
+    public Callable<V> getCallable() {
+      return callable;
+    }
+
+    @Nullable
+    public Runnable getRunnable() {
+      return runnable;
+    }
+
+    public Object getOutcome() {
+      return outcome;
+    }
+
+    public int getRunCount() {
+      return runCount;
+    }
+
+    public long getLastRunTime() {
+      return lastRunTime;
+    }
+
+    public long getCancellationTime() {
+      return cancellationTime;
     }
 
     /**
@@ -854,6 +909,20 @@ public class MockScheduledExecutorService implements ScheduledExecutorService {
 
     }
 
+    @Override
+    public String toString() {
+      return MoreObjects.toStringHelper(this)
+          .add("id", id)
+          .add("name", name)
+          .add("time", time)
+          .add("period", period)
+          .add("state", state)
+          .add("outcome", outcome)
+          .add("debugTrace", debugTrace[1])
+          .add("runCount", runCount)
+          .add("lastRunTime", lastRunTime)
+          .toString();
+    }
   }
 
 

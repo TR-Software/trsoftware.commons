@@ -678,4 +678,28 @@ public class MapUtils {
     };
   }
 
+  /**
+   * Creates an immutable copy of the given map, using the specified function to copy the values.
+   * @param map the map to copy
+   * @param valueCopier creates a copy of each value
+   * @return an immutable copy of the given map, mapping each original key to a copy of the corresponding value
+   */
+  public static <K, V> ImmutableMap<K, V> deepCopy(Map<K, V> map, UnaryOperator<V> valueCopier) {
+    return deepCopy(map, UnaryOperator.identity(), valueCopier);
+  }
+
+  /**
+   * Creates an immutable copy of the given map, using the specified functions to copy the keys and values.
+   * @param map the map to copy
+   * @param keyCopier creates a copy of each key
+   * @param valueCopier creates a copy of each value
+   * @return an immutable deep copy of the given map
+   */
+  public static <K, V> ImmutableMap<K, V> deepCopy(Map<K, V> map, UnaryOperator<K> keyCopier, UnaryOperator<V> valueCopier) {
+    ImmutableMap.Builder<K, V> builder = ImmutableMap.builder();
+    map.forEach((key, value) -> builder.put(
+        keyCopier.apply(key),
+        valueCopier.apply(value)));
+    return builder.build();
+  }
 }

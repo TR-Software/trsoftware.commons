@@ -46,8 +46,17 @@ public class MultiHandlerRegistration implements HandlerRegistration {
   /**
    * Add another handler reg.
    * @return a reference to this object, for call chaining
+   * @deprecated use {@link #add(HandlerRegistration)} for less-verbose code
    */
   public MultiHandlerRegistration addHandlerRegistration(HandlerRegistration handlerRegistration) {
+    return add(handlerRegistration);
+  }
+
+  /**
+   * Add another handler registration.
+   * @return a reference to this object, for call chaining
+   */
+  public MultiHandlerRegistration add(HandlerRegistration handlerRegistration) {
     if (handlerRegistration != null) {
       handlerRegistrations.add(handlerRegistration);
     }

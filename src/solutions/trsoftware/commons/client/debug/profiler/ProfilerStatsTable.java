@@ -31,6 +31,7 @@ class ProfilerStatsTable extends SortableCellTable<ProfilerStatsSample> {
     addStatColumn("Mean", SampleStatistics::mean);
     addStatColumn("Min", SampleStatistics::min);
     addStatColumn("Max", SampleStatistics::max);
+    addStatColumn("σ", SampleStatistics::stdev);
 
   }
 

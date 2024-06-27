@@ -30,6 +30,7 @@ import java.util.*;
 
 import static solutions.trsoftware.commons.shared.util.MathUtils.*;
 
+@GwtIncompatible
 @SuppressWarnings("NonJREEmulationClassesInClientCode")
 public class MathUtilsJavaTest extends TestCase {
 

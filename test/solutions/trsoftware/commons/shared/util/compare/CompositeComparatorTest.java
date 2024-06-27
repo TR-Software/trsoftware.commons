@@ -1,5 +1,6 @@
 package solutions.trsoftware.commons.shared.util.compare;
 
+import com.google.gwt.core.shared.GwtIncompatible;
 import junit.framework.TestCase;
 
 import java.util.Arrays;
@@ -11,6 +12,7 @@ import java.util.Comparator;
  */
 public class CompositeComparatorTest extends TestCase {
 
+  @GwtIncompatible  // for some reason GWT compiler fails with "Line 17: The method asList(T...) in the type Arrays is not applicable for the arguments (Comparator<String>, Comparator<Comparable<? super Comparable<? super T>>>)"
   public void testCompare() throws Exception {
     // create a composite comparator that compares strings first according to their length, and then based on natural order
     Comparator<String> lengthComparator = Comparator.comparingInt(String::length);

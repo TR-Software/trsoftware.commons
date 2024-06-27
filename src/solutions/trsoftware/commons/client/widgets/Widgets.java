@@ -418,6 +418,10 @@ public class Widgets {
     return new InlineHTML(HtmlUtils.nbsp);
   }
 
+  public static InlineLabel inlineLabel(String txt) {
+    return new InlineLabel(txt);
+  }
+
   public static InlineLabel inlineLabel(String txt, String styleName) {
     return maybeSetStyleName(new InlineLabel(txt), styleName);
   }

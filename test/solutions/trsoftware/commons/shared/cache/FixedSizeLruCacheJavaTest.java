@@ -17,6 +17,7 @@
 
 package solutions.trsoftware.commons.shared.cache;
 
+import com.google.gwt.core.shared.GwtIncompatible;
 import junit.framework.TestCase;
 import solutions.trsoftware.commons.server.testutil.MultithreadedTestHarness;
 import solutions.trsoftware.commons.shared.annotations.Slow;
@@ -39,12 +40,14 @@ public class FixedSizeLruCacheJavaTest extends TestCase {
   }
 
   @Slow
+  @GwtIncompatible
   public void testCacheMultithreaded() throws Exception {
     checkCacheMultithreading(3, 2, 10000);
     checkCacheMultithreading(3, 32, 10000);
     checkCacheMultithreading(1000, 32, 10000);
   }
 
+  @GwtIncompatible
   public static void checkCacheMultithreading(int sizeLimit, int nThreads, int iterationsPerThread) throws Exception {
     // make sure that no exceptions arise from multithreading
     final Map<Integer, Integer> cache = new FixedSizeLruCache<Integer, Integer>(sizeLimit);

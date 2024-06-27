@@ -66,7 +66,7 @@ public abstract class CyclicFloatBuffer {
   }
 
   private int ordinalToIndex(int index) {
-    return (cursor+index) % maxSize();
+    return (cursor+index) % maxSize();  // TODO(6/20/2024): replace maxSize() calls with buffer.length
   }
 
   private void checkRange(int index) {
@@ -83,11 +83,15 @@ public abstract class CyclicFloatBuffer {
     int size = size();
     if (size == 0)
       return 0d;
+    return sum() / size;
+  }
+
+  public double sum() {
     double sum = 0d;
-    for (int i = 0; i < size; i++) {
+    for (int i = 0; i < size(); i++) {
       sum += get(i);
     }
-    return sum / size;
+    return sum;
   }
 
   public ArrayList<Float> asList() {
@@ -97,6 +101,7 @@ public abstract class CyclicFloatBuffer {
       ret.add(get(i));
     }
     return ret;
+    // TODO(6/20/2024): might be better to use Guava's Floats.asList(this.asArray())
   }
 
   public float[] asArray() {
@@ -107,5 +112,6 @@ public abstract class CyclicFloatBuffer {
       ret[i] = get(i);
     }
     return ret;
+    // TODO(6/20/2024): might be able to use 2 System.arraycopy calls (using subranges before/after cursor)
   }
 }

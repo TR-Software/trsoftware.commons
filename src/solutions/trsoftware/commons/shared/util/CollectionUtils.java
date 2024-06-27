@@ -35,9 +35,9 @@ import java.util.function.Supplier;
 import static java.util.Objects.requireNonNull;
 
 /**
- * Date: Sep 16, 2008 Time: 5:36:41 PM
  *
  * @author Alex
+ * @since Sep 16, 2008
  */
 public class CollectionUtils {
 
@@ -46,6 +46,13 @@ public class CollectionUtils {
    */
   public static boolean isEmpty(Collection<?> c) {
     return c == null || c.isEmpty();
+  }
+
+  /**
+   * @return {@code true} iff the given collection is neither {@code null} nor empty.
+   */
+  public static boolean notEmpty(Collection<?> c) {
+    return !isEmpty(c);
   }
 
   /**

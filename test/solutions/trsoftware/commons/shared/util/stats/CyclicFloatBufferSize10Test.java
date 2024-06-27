@@ -17,6 +17,7 @@
 
 package solutions.trsoftware.commons.shared.util.stats;
 
+import com.google.gwt.core.shared.GwtIncompatible;
 import junit.framework.TestCase;
 import solutions.trsoftware.commons.client.bridge.text.AbstractNumberFormatter;
 import solutions.trsoftware.commons.client.bridge.text.NumberFormatter;
@@ -29,6 +30,7 @@ import java.util.List;
 /**
  * @author Alex, 1/2/14
  */
+@GwtIncompatible
 public class CyclicFloatBufferSize10Test extends TestCase {
 
   private CyclicFloatBufferSize10 buf;

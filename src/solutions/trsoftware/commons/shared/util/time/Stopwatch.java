@@ -16,14 +16,16 @@
 
 package solutions.trsoftware.commons.shared.util.time;
 
+import com.google.common.annotations.Beta;
+
 /**
  * A more-flexible version of {@link com.google.common.base.Stopwatch}: allows manually setting the elapsed
  * duration and doesn't needlessly throw {@link IllegalStateException}s.
  *
  * @author Alex
  * @since 5/16/2023
- * @deprecated This class hasn't been implemented yet and may be removed altogether
  */
+@Beta
 public class Stopwatch {
 
   // TODO: impl this

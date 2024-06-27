@@ -18,6 +18,8 @@ package solutions.trsoftware.commons.shared.util;
 
 import solutions.trsoftware.commons.shared.util.text.SharedNumberFormat;
 
+import javax.annotation.Nonnull;
+
 import static java.util.Objects.requireNonNull;
 
 /**
@@ -63,6 +65,10 @@ public class TimeValue extends Number implements Comparable<TimeValue> {
 
   public double toMillis() {
     return unit.toMillis(value);
+  }
+
+  public static TimeValue ofMillis(double millis) {
+    return new TimeValue(millis, TimeUnit.MILLISECONDS);
   }
 
   /**
@@ -121,11 +127,24 @@ public class TimeValue extends Number implements Comparable<TimeValue> {
     return toString(value, unit);
   }
 
-  public static String toString(double value, TimeUnit unit) {
-    return getNumberFormat().format(value) + " " + unit.getPrettyName(value);
+  public String toString(SharedNumberFormat format) {
+    return toString(value, unit, format);
   }
 
-  public static SharedNumberFormat getNumberFormat() {
+  public String toString(int maxFractionDigits) {
+    return toString(value, unit, new SharedNumberFormat(maxFractionDigits));
+  }
+
+  public static String toString(double value, TimeUnit unit) {
+    return toString(value, unit, defaultNumberFormat());
+  }
+
+  @Nonnull
+  private static String toString(double value, TimeUnit unit, SharedNumberFormat format) {
+    return format.format(value) + " " + unit.getPrettyName(value);
+  }
+
+  private static SharedNumberFormat defaultNumberFormat() {
     return threadLocalNumberFormat.get();
   }
 

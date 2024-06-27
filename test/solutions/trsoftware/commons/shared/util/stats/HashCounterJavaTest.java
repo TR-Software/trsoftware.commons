@@ -18,6 +18,7 @@
 package solutions.trsoftware.commons.shared.util.stats;
 
 import com.google.common.collect.ImmutableMap;
+import com.google.gwt.core.shared.GwtIncompatible;
 import solutions.trsoftware.commons.server.testutil.MultithreadedTestHarness;
 import solutions.trsoftware.commons.server.util.ServerArrayUtils;
 import solutions.trsoftware.commons.shared.annotations.Slow;
@@ -132,6 +133,7 @@ public class HashCounterJavaTest extends CollectableStatsTestCase {
     assertEquals("[(3, 1), (2, 1), (1, 1)]", counter.entriesSortedByValueDescending().toString());
   }
 
+  @GwtIncompatible
   @Slow
   public void testMultithreaded() throws Exception {
     final Random rnd = new Random(1);

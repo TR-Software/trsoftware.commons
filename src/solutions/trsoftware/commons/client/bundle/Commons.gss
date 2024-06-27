@@ -1,0 +1,231 @@
+
+/*
+GSS version of the original Commons.css, which allows using modern CSS3 syntax (e.g. ":not")
+in a CssResource.
+@see:
+  - https://github.com/gwtproject/gwt/issues/8157#issuecomment-2118352096
+  - https://www.gwtproject.org/articles/gss_migration.html
+
+  TODO: remove the original Commons.css file after GSS migration complete
+*/
+
+/* have to make all the gwt-* styles external (https://stackoverflow.com/questions/8182917/how-to-override-default-css-in-modern-gwt-applications) */
+@external 'gwt-*';
+
+.ImageButton {
+  cursor: pointer;
+  display: inline-block;
+}
+
+/* NOTE: unable to control the opacity in IE when using ImageBundle (IE6 crashes and IE8 puts an ugly gray border around the image if we apply filter:alpha(opacity=50) ) */
+.ImageButton:hover {
+  opacity: 0.5;
+}
+
+.ImageButtonWithText {
+  display: inline-block;
+  white-space: nowrap;
+}
+
+.ImageButtonWithText .ImageButton {
+  vertical-align: middle;
+  margin-right: 2px;
+}
+
+/* TODO: make sure the -flashOn styleDependentName will work with obfuscation of CssResource */
+.timeDisplay .time-flashOn {
+  color: red;
+}
+
+.time {
+}
+
+.flashOn {
+}
+
+.timeDisplayCaption {
+}
+
+.loadingMessage {
+  font-style: italic;
+  display: inline-block;
+  /* TODO: try using ClientBundle to provide the image (and scale it to any size) */
+  /* inlined version of images/loading_circle.cache.gif, which is 16x16px (inlined using http://websemantics.co.uk/online_tools/image_to_data_uri_convertor/ ): */
+  background: url(data:image/gif;base64,R0lGODlhEAAQAPIAAP///wAAAMLCwkJCQgAAAGJiYoKCgpKSkiH/C05FVFNDQVBFMi4wAwEAAAAh/hpDcmVhdGVkIHdpdGggYWpheGxvYWQuaW5mbwAh+QQJCgAAACwAAAAAEAAQAAADMwi63P4wyklrE2MIOggZnAdOmGYJRbExwroUmcG2LmDEwnHQLVsYOd2mBzkYDAdKa+dIAAAh+QQJCgAAACwAAAAAEAAQAAADNAi63P5OjCEgG4QMu7DmikRxQlFUYDEZIGBMRVsaqHwctXXf7WEYB4Ag1xjihkMZsiUkKhIAIfkECQoAAAAsAAAAABAAEAAAAzYIujIjK8pByJDMlFYvBoVjHA70GU7xSUJhmKtwHPAKzLO9HMaoKwJZ7Rf8AYPDDzKpZBqfvwQAIfkECQoAAAAsAAAAABAAEAAAAzMIumIlK8oyhpHsnFZfhYumCYUhDAQxRIdhHBGqRoKw0R8DYlJd8z0fMDgsGo/IpHI5TAAAIfkECQoAAAAsAAAAABAAEAAAAzIIunInK0rnZBTwGPNMgQwmdsNgXGJUlIWEuR5oWUIpz8pAEAMe6TwfwyYsGo/IpFKSAAAh+QQJCgAAACwAAAAAEAAQAAADMwi6IMKQORfjdOe82p4wGccc4CEuQradylesojEMBgsUc2G7sDX3lQGBMLAJibufbSlKAAAh+QQJCgAAACwAAAAAEAAQAAADMgi63P7wCRHZnFVdmgHu2nFwlWCI3WGc3TSWhUFGxTAUkGCbtgENBMJAEJsxgMLWzpEAACH5BAkKAAAALAAAAAAQABAAAAMyCLrc/jDKSatlQtScKdceCAjDII7HcQ4EMTCpyrCuUBjCYRgHVtqlAiB1YhiCnlsRkAAAOwAAAAAAAAAAAA==) no-repeat;
+}
+
+.CustomActionCell {
+  cursor: pointer;
+}
+
+.ModalPromptPopup .bodyWidgetHolder {
+  text-align: center;
+}
+
+.ModalPromptPopup .bodyWidgetHolder .gwt-Button {
+  margin-top: 1em;
+  margin-right: 2ch;
+}
+
+.ModalPromptPopup .bodyWidgetHolder .gwt-Button:last-child {
+  margin-right: 0;
+}
+
+/*
+ NOTE: since the following 2 style classes (.DialogBox and .trPopupDialog) are more general than the style classes of
+ their Java subclasses, we are declaring them before any class names used by their Java subclasses (e.g. PlayerInfoPopup),
+ so that they may be overridden by later declarations according to the CSS specificity rules
+*/
+.DialogBox .Caption {
+  padding: 5px;
+  cursor: move;
+}
+
+.DialogBox .Caption.CaptionWithIcon img {
+  vertical-align: middle;
+  margin-right: 5px;
+}
+
+.DialogBox .dialogContent {
+  padding: 0 5px 5px 5px;
+}
+
+.trPopupDialog {
+  background-color: #a4e3ff;
+  border: 2px solid;
+  border-radius: 5px;
+  box-shadow: 1px 2px 7px #8aa;
+}
+
+.trPopupDialog .Caption {
+  white-space: nowrap;
+  /* TODO: wouldn't cursor be inherited from .DialogBox .Caption?*/
+  cursor: move;
+  vertical-align: top;
+  font-size: 125%;
+  font-weight: bold;
+}
+
+.trPopupDialog .xButton {
+  /* This button is implemented as a div containing an inner <svg> element (which draws an X, and is styled separately - see the .xShape style rule) */
+  cursor: pointer;
+  float: right;
+  /* We want to float this button slightly outside the top right corner of the popup (that's why margin-[top|right] values are negative) */
+  width: 1.5em;
+  height: 1.5em;
+  margin-right: -.9em;
+  margin-top: -.9em;
+  /* We make it fully rounded (radius: 100%) and give it the same background color and shadow as the border of the parent popup */
+  background-color: #466;
+  border-radius: 100%;
+  box-shadow: 1px 1px 2px #8aa;
+  /* This button contains no text other than a unicode multiplication symbol nested inside the <svg> element
+  (to be displayed on browsers that lack SVG support, like IE8 and older); so the following rules are here just to support that case */
+  font-weight: bold;
+  color: #eee;
+  text-align: center;
+}
+
+.trPopupDialog .xButton svg .xShape {
+  stroke: #eee;
+  stroke-width: 2.5;
+}
+
+.trPopupDialog .bodyWidgetHolder > .loadingMessage {
+  margin: 0 5px 5px 5px;
+  /* add extra margin when LoadingMessage is the body widget (we use ">", the direct descendant selector, to distinguish this case) */
+}
+
+.ErrorMessagePopup {
+  background-color: #d08383;
+}
+
+.gwt-TabPanel {
+  border: 2px solid black;
+  border-radius: 5px;
+}
+
+.gwt-TabPanel .gwt-TabPanelBottom {
+  padding: 5px;
+}
+
+.gwt-TabBar {
+  background-color: #e1f1f1;
+  /* prevent text selection inside the tabs (see https://stackoverflow.com/questions/3779534/how-do-i-disable-text-selection-with-css-or-javascript )  */
+  user-select: none;
+  -moz-user-select: none;
+  -webkit-user-select: none;
+  -ms-user-select: none;
+}
+
+.gwt-TabBar .gwt-TabBarItem {
+  cursor: pointer;
+  padding: 5px;
+  text-decoration: underline;
+}
+
+.gwt-TabBar .gwt-TabBarItem-selected {
+  background-color: #d1e1f1;
+}
+
+.gwt-PopupPanelGlass {
+  background-color: #000;
+  opacity: 0.3;
+}
+
+/* --------- The following styles on our DialogBox class exist to support our ModalDialog class --------- */
+.SoftModalDialogBox {
+  background-color: #f1f1f1;
+  border: 1px solid #d2d2d2;
+  border-radius: 4px;
+  box-shadow: 1px 3px 3px #555;
+  /* NOTE: Overriding "clip" in order to see the box-shadow (PopupPanel.ResizeAnimation sets "clip: rect(auto auto auto auto);", which hides everything outside the element, i.e. the shadow */
+  clip: auto !important;
+}
+
+.SoftModalDialogBox .Caption {
+  font-family: 'Arial Unicode MS',Arial,sans-serif;
+  font-weight: bold;
+  /* using bottom border as a horizontal rule to separate the caption from the body of the dialog */
+  border-bottom: 1px solid #bbb;
+}
+
+.SoftModalDialogBox .Caption.DefaultCaption {
+  min-height: .5em;
+}
+
+.SoftModalDialogBox .dialogMessage {
+  margin-top: 5px; /* separate the vertical sections */
+}
+
+.SoftModalDialogBox .dialogInput {
+  display: block;
+  width: 100%;
+  box-sizing: border-box;
+  margin-top: 5px; /* separate the vertical sections */
+  /*
+    NOTE: without the box-sizing property here (supported by all browsers except IE6&7), the input element (text box)
+    will extend beyond its parent container because its border width is counted on top of the 100% width of the parent;
+    see http://stackoverflow.com/a/16907625/1965404
+  */
+}
+
+.SoftModalDialogBox .dialogButtons {
+  margin-top: 5px; /* separate the vertical sections */
+  text-align: right;
+}
+
+/* --------- end ModalDialog styles --------- */
+
+.BasicInputForm td {
+  vertical-align: top;
+}
+
+.fieldErrorMsg {
+  color: red;
+  font-weight: bold;
+}
+
+a > img {
+  border: none;
+}

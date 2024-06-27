@@ -16,6 +16,8 @@
 
 package solutions.trsoftware.commons.shared.testutil;
 
+import solutions.trsoftware.commons.shared.util.StringUtils;
+
 import java.util.function.BooleanSupplier;
 
 /**
@@ -46,5 +48,32 @@ public class TestUtils {
   public static void busyWait(long millis) {
     long startTime = System.currentTimeMillis();
     while (System.currentTimeMillis() < startTime + millis);
+  }
+
+  /**
+   * Prints the given message surrounded by dashed lines of {@code '-'} chars of equal length
+   *
+   * @param msg the header text
+   * @return the resulting width of the header lines in the output
+   */
+  public static int printSectionHeader(String msg) {
+    int width = msg != null ? msg.length() : 0;
+    printSectionHeader(msg, width);
+    return width;
+  }
+
+  /**
+   * Prints the given message surrounded by dashed lines of {@code '-'} chars of equal length
+   * @param msg the header text
+   * @param width the length of the dashed lines
+   * @see #printSectionHeader(String)
+   */
+  public static void printSectionHeader(String msg, int width) {
+    if (StringUtils.notBlank(msg)) {
+      String hr = StringUtils.repeat('-', width);
+      System.out.println(hr);
+      System.out.println(msg);
+      System.out.println(hr);
+    }
   }
 }

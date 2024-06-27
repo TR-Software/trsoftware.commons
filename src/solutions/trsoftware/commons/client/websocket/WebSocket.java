@@ -53,7 +53,15 @@ public abstract class WebSocket extends JavaScriptObject {
   }-*/;
 
 
-  public final native void addHandlers(WebSocketClient client) /*-{
+  /**
+   * Binds the native event listener properties of this {@code WebSocket}
+   * ({@code onopen}, {@code onclose}, {@code onmessage}, and {@code onerror}) to the corresponding methods
+   * of the given {@link WebSocketClient} implementation.
+   * <p>
+   * <em>Note:</em> this method should be invoked only once; subsequent invocations will overwrite any existing bindings
+   * and could leak memory.
+   */
+  public final native void bindHandlers(WebSocketClient client) /*-{
     this.onopen = function (evt) {
       $entry(client.@solutions.trsoftware.commons.client.websocket.WebSocketClient::onOpen()());
     };
@@ -64,7 +72,7 @@ public abstract class WebSocket extends JavaScriptObject {
       $entry(client.@solutions.trsoftware.commons.client.websocket.WebSocketClient::onMessage(Ljava/lang/String;)(evt.data));
     };
     this.onerror = function (evt) {
-      $wnd.console.error("WS.onerror: ", this, evt); // TODO: check if console.error method available
+      $wnd.console.error("WS.onerror: ", this, evt);  // TODO: temp
       $entry(client.@solutions.trsoftware.commons.client.websocket.WebSocketClient::onError(*)(evt));
     };
   }-*/;

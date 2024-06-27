@@ -16,6 +16,7 @@
 
 package solutions.trsoftware.commons.shared.testutil;
 
+import com.google.gwt.core.shared.GwtIncompatible;
 import solutions.trsoftware.commons.server.io.ResourceLocator;
 import solutions.trsoftware.commons.server.servlet.filters.CachePolicyFilterTest;
 import solutions.trsoftware.commons.shared.util.LazyReference;
@@ -39,11 +40,13 @@ import static solutions.trsoftware.commons.server.io.ServerIOUtils.readLines;
  */
 public class TestData {
 
+  @GwtIncompatible
   public static final ResourceLocator ALICE_TEXT_RESOURCE = new ResourceLocator("aliceInWonderlandCorpus.txt", TestData.class);
   private static final Random rnd = new Random();
 
   // TODO: use private static "holder" classes instead of LazyReference (to avoid need for double-checked locking)
 
+  @GwtIncompatible
   private static LazyReference<String> aliceInWonderlandText = new LazyReference<String>() {
     @Override
     protected String create() {
@@ -57,6 +60,7 @@ public class TestData {
     }
   };
 
+  @GwtIncompatible
   private static LazyReference<List<String>> aliceInWonderlandTextLines = new LazyReference<List<String>>() {
     @Override
     protected List<String> create() {
@@ -64,10 +68,12 @@ public class TestData {
     }
   };
 
+  @GwtIncompatible
   public static String getAliceInWonderlandText() throws IOException {
     return aliceInWonderlandText.get();
   }
 
+  @GwtIncompatible
   public static List<String> getAliceInWonderlandTextLines() {
     return aliceInWonderlandTextLines.get();
   }

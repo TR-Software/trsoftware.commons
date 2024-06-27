@@ -17,6 +17,7 @@
 
 package solutions.trsoftware.commons.shared.util;
 
+import com.google.gwt.core.shared.GwtIncompatible;
 import junit.framework.TestCase;
 import solutions.trsoftware.commons.server.testutil.PerformanceComparison;
 import solutions.trsoftware.commons.shared.annotations.Slow;
@@ -31,6 +32,8 @@ import java.util.List;
  *
  * @author Alex
  */
+@GwtIncompatible("java.util.StringTokenizer")
+@SuppressWarnings("NonJREEmulationClassesInClientCode")
 public class StringTokenizerJavaTest extends TestCase {
   private String aliceText;
 
@@ -41,8 +44,8 @@ public class StringTokenizerJavaTest extends TestCase {
   }
 
   /**
-   * Compares performance of solutions.trsoftware.commons.shared.util.StringTokenizer
-   * to java.util.StringTokenizer.
+   * Compares performance of {@link solutions.trsoftware.commons.shared.util.StringTokenizer}
+   * to {@link java.util.StringTokenizer}.
    */
   public void testCompareTokenization() throws Exception {
     assertEquals(javaUtilTokenize(aliceText), typeracerCommonsUtilTokenize(aliceText));
@@ -79,6 +82,7 @@ public class StringTokenizerJavaTest extends TestCase {
    *
    * @return the tokens from the given string
    */
+
   private List javaUtilTokenize(String text) {
     return Collections.list(new java.util.StringTokenizer(text));
   }

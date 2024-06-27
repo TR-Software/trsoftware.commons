@@ -1,6 +1,7 @@
 package solutions.trsoftware.commons.client.cellview;
 
 import com.google.gwt.user.cellview.client.Column;
+import com.google.gwt.user.cellview.client.ColumnSortEvent;
 import com.google.gwt.user.cellview.client.ColumnSortEvent.ListHandler;
 import com.google.gwt.view.client.ListDataProvider;
 import com.google.gwt.view.client.ProvidesKey;
@@ -83,6 +84,9 @@ public class SortableCellTable<T> extends BaseCellTable<T> {
    */
   public void setData(List<T> listToWrap) {
     dataProvider.setList(listToWrap);
+    dataProvider.refresh();
     sortEventHandler.setList(dataProvider.getList());
+    // re-apply the current sort after data is modified (see https://stackoverflow.com/a/33674657)
+    ColumnSortEvent.fire(this, getColumnSortList());
   }
 }

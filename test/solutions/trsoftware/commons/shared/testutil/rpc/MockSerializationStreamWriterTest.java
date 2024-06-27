@@ -17,6 +17,7 @@
 package solutions.trsoftware.commons.shared.testutil.rpc;
 
 import com.google.common.base.MoreObjects;
+import com.google.gwt.core.shared.GwtIncompatible;
 import com.google.gwt.user.client.rpc.CustomFieldSerializer;
 import com.google.gwt.user.client.rpc.SerializationException;
 import com.google.gwt.user.client.rpc.SerializationStreamReader;
@@ -37,6 +38,7 @@ import static solutions.trsoftware.commons.shared.testutil.AssertUtils.assertThr
  * @author Alex
  * @since 1/14/2023
  */
+@GwtIncompatible("ServerSerializationStreamWriter")
 public class MockSerializationStreamWriterTest extends BaseTestCase {
 
   private MockSerializationStreamWriter mockWriter;

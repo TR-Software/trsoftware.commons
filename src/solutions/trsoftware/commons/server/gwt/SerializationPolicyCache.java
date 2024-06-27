@@ -25,6 +25,8 @@ import javax.annotation.Nullable;
 import javax.servlet.ServletContext;
 import java.util.Map;
 import java.util.Set;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import static java.lang.String.format;
 
@@ -37,6 +39,8 @@ import static java.lang.String.format;
  * @since 3/3/2023
  */
 public class SerializationPolicyCache {
+
+  private static Logger LOGGER = Logger.getLogger(SerializationPolicyCache.class.getName());
 
   private final ImmutableMap<String, SerializationPolicyMap> policiesByModuleName;
 
@@ -73,8 +77,9 @@ public class SerializationPolicyCache {
             mapBuilder.put(moduleName, policyMap);
           }
           catch (PolicyNotFoundException e) {
-            servletContext.log(
-                format("Error reading serialization policies for module '%s' from %s", moduleName, path), e);
+            LOGGER.log(Level.WARNING,
+                /*e,*/  // not logging the stack trace for now
+                () -> format("Unable to load serialization policies for module '%s' from %s", moduleName, path));
           }
         }
       }

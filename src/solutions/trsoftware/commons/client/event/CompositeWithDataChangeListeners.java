@@ -84,6 +84,11 @@ public abstract class CompositeWithDataChangeListeners extends Composite {
     });
   }
 
+  /* TODO(5/24/2024): can simplify by replacing the deferredRegistrations list and redundant DeferredHandlerRegistration class
+      with a List<Supplier<HandlerRegistration>> to be invoked onLoad and added to a single MultiHandlerRegistration,
+      whose removeHandler method is invoked onUnload
+   */
+
   private Remover addDeferredRegistration(DeferredHandlerRegistration deferredRegistration) {
     deferredRegistrations.add(deferredRegistration);
     return () -> deferredRegistrations.remove(deferredRegistration);
@@ -95,6 +100,8 @@ public abstract class CompositeWithDataChangeListeners extends Composite {
     for (DeferredHandlerRegistration reg : deferredRegistrations) {
       reg.addHandler();
     }
+    // TODO(5/24/2024): maybe replace the above loop with tryForEach:
+    // tryForEach(deferredRegistrations, DeferredHandlerRegistration::addHandler);
   }
 
   /**
@@ -107,6 +114,8 @@ public abstract class CompositeWithDataChangeListeners extends Composite {
     for (DeferredHandlerRegistration reg : deferredRegistrations) {
       reg.removeHandler();
     }
+    // TODO(5/24/2024): maybe replace the above loop with tryForEach:
+    // tryForEach(deferredRegistrations, DeferredHandlerRegistration::removeHandler);
   }
 
 

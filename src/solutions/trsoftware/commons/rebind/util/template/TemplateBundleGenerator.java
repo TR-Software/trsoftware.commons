@@ -219,6 +219,7 @@ public class TemplateBundleGenerator extends Generator {
     String fieldName = name + "_field";
     sw.println();
     // Example: private static Template field = null;
+    // TODO(6/12/2024): why is this field static? doesn't have to be
     sw.println(String.format("private static %s %s = null;", TEMPLATE_CLASS_NAME, fieldName));
     sw.println();
     String decl = method.getReadableDeclaration(false, true, true, true, true);

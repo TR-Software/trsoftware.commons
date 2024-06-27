@@ -119,6 +119,29 @@ public class ListUtils {
   }
 
   /**
+   * Shortcut for
+   * <code>
+   *   list.{@link List#subList subList}(fromIndex, list.size());
+   * </code>
+   *
+   * @return sublist starting at the given index
+   */
+  public static <E> List<E> tail(List<E> list, int fromIndex) {
+    return list.subList(fromIndex, list.size());
+  }
+
+  /**
+   * Shortcut for
+   * <code>
+   *   list.{@link List#subList subList}(1, list.size());
+   * </code>
+   * @return the tail of the list, i.e. sublist starting at index 1.
+   */
+  public static <E> List<E> tail(List<E> list) {
+    return tail(list, 1);
+  }
+
+  /**
    * Uses {@link Collections#binarySearch(List, Object)} to insert the given element into the given sorted list,
    * at the appropriate position (as defined by the elements' {@linkplain Comparable natural ordering}).
    *
@@ -297,6 +320,14 @@ public class ListUtils {
   }
 
   /**
+   * @param defaultValue the default value to return if the list is empty
+   * @return the last element of the given list or the default value if list is empty
+   */
+  public static <T> T last(@Nonnull List<T> list, T defaultValue) {
+    return list.isEmpty() ? defaultValue : list.get(list.size()-1);
+  }
+
+  /**
    * Including this method for symmetry with {@link #last(List)}.
    *
    * @return the first element of the given list
@@ -372,7 +403,7 @@ public class ListUtils {
   /**
    * @return the size of the given list or {@code 0} if it's {@code null}
    */
-  public static int size(List lst) {
+  public static int size(List<?> lst) {
     if (lst == null)
       return 0;
     return lst.size();

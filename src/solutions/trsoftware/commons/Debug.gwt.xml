@@ -85,4 +85,14 @@
     <when-property-is name="debug" value="off"/>
 	</replace-with>
 
+  <replace-with class="solutions.trsoftware.commons.client.debug.profiler.Profiler.HiResProfiler">
+    <when-type-is class="solutions.trsoftware.commons.client.debug.profiler.Profiler"/>
+    <when-property-is name="debug" value="on"/>
+	</replace-with>
+
+  <replace-with class="solutions.trsoftware.commons.client.debug.profiler.Profiler.DisabledProfiler">
+    <when-type-is class="solutions.trsoftware.commons.client.debug.profiler.Profiler"/>
+    <when-property-is name="debug" value="off"/>
+	</replace-with>
+
 </module>

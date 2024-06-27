@@ -311,7 +311,7 @@ public class RandomUtils {
   }
 
   /**
-   * @see Random#nextInt()
+   * @return {@link Random#nextInt()}
    */
   public static int randInt() {
     return rnd.nextInt();
@@ -326,7 +326,7 @@ public class RandomUtils {
   }
 
   /**
-   * @see Random#nextInt(int)
+   * @return {@link Random#nextInt(int)}
    */
   public static int randInt(int n) {
     return rnd.nextInt(n);

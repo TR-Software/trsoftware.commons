@@ -31,6 +31,8 @@ import javax.annotation.Nullable;
  */
 public class JsPerformance extends JavaScriptObject {
 
+  // TODO(5/7/2024): implement more methods (e.g. measure, mark, etc.)
+
   // Overlay types always have protected, zero-arg constructors, because the object must have been instantiated in javascript
   protected JsPerformance() {
   }
@@ -52,7 +54,14 @@ public class JsPerformance extends JavaScriptObject {
   }-*/;
 
   /**
+   * Returns {@code true} if the {@link #now()} method is supported by the current browser.
+   * <p>
+   * <em>Note:</em> This method is very unlikely to return {@code false} since the Performance API has very good
+   * browser support, going as far back as Chrome 24, FF 15, and IE 10.
+   *
    * @return {@code true} if the {@link #now()} method is supported by the current browser.
+   * @see <a href="https://developer.mozilla.org/en-US/docs/Web/API/Performance/now#browser_compatibility">
+   *   Browser compatibility of <tt>Performance.now()</tt></a>
    */
   public static native boolean implementsNow() /*-{
     return Boolean($wnd.performance && $wnd.performance.now);

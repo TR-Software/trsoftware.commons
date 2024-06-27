@@ -67,7 +67,7 @@ public class PopupWithIcon extends DialogBox {
       bodyWidgetHolder.setWidget(bodyWidget);
     pnlMain = Widgets.flowPanel(bodyWidgetHolder);
     if (closeLinkText != null) {
-      insertCloserButton(new PopupCloserButton(this));
+      insertCloserButton();
       if (!closeLinkText.equals(CLOSE_LINK_TEXT_DEFAULT)) {
         // omit the close link altogether if just says "close", since we've introduced the closer button (created with the above call to insertCloserButton)
         setCloserLinkText(closeLinkText);

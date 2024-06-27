@@ -274,9 +274,8 @@ public class ModalDialog {
   /**
    * Same as {@link #softAlert(String, ResponseHandler)} but does not invoke a response handler when user responds to the dialog.
    */
-  @SuppressWarnings("unchecked")
   public static void softAlert(String msg) {
-    softAlert(msg, ResponseHandler.NOOP);
+    softAlert(msg, ResponseHandler.noOp());
   }
 
   /**
@@ -374,7 +373,7 @@ public class ModalDialog {
    * Same as {@link #alert(String, ResponseHandler)} but does not invoke a response handler when user responds to the dialog.
    */
   public static void alert(String msg) {
-    alert(msg, ResponseHandler.NOOP);
+    alert(msg, ResponseHandler.noOp());
   }
 
 
@@ -398,7 +397,7 @@ public class ModalDialog {
    * Same as {@link #confirm(String, ResponseHandler)} but does not invoke a response handler when user responds to the dialog.
    */
   public static void confirm(String msg) {
-    confirm(msg, ResponseHandler.NOOP);
+    confirm(msg, ResponseHandler.noOp());
   }
 
   /**
@@ -421,7 +420,7 @@ public class ModalDialog {
    * Same as {@link #prompt(String, String, ResponseHandler)} but does not invoke a response handler when user responds to the dialog.
    */
   public static void prompt(String msg, String initialValue) {
-    prompt(msg, initialValue, ResponseHandler.NOOP);
+    prompt(msg, initialValue, ResponseHandler.noOp());
   }
 
 
@@ -429,15 +428,28 @@ public class ModalDialog {
   //  Helper classes:
   //  --------------------------------------------------------------------------------
 
-  /** A callback invoked right after the user closes the dialog, with the user's response as the argument */
+  /**
+   * A callback invoked right after the user closes the dialog, with the user's response as the argument.
+   * @param <T> the response type:
+   *   <ul>
+   *     <li>{@link String} for {@link #prompt} / {@link #softPrompt}</li>
+   *     <li>{@link Boolean} for {@link #confirm} / {@link #softConfirm}</li>
+   *     <li>{@link Void} for {@link #alert} / {@link #softAlert}</li>
+   *   </ul>
+   */
   public interface ResponseHandler<T> {
     void handleDialogResponse(T response);
 
     /** Use this singleton if you don't wish to handle the response.*/
-    ResponseHandler NOOP = new ResponseHandler() {
-      @Override
-      public void handleDialogResponse(Object response) { }
-    };
+    ResponseHandler NOOP = response -> { };
+
+    /**
+     * Returns the default ({@link #NOOP} {@link ResponseHandler} that doesn't do anything with the response.
+     */
+    @SuppressWarnings("unchecked")
+    static <T> ResponseHandler<T> noOp() {
+      return NOOP;
+    }
   }
 
   /** Allows invoking a {@link ResponseHandler} asynchronously */
@@ -649,7 +661,7 @@ public class ModalDialog {
     @Override
     public void open() {
       Duration blockingTime = new Duration();
-      T nativeResponse = null;
+      T nativeResponse;
       try {
         nativeResponse = showNativeDialog();
       }

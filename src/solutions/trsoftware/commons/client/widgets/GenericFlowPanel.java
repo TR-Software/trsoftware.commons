@@ -34,7 +34,8 @@ public class GenericFlowPanel extends ComplexPanel implements InsertPanel.ForIsW
    *
    * @param elem the element to use for this widget.
    */
-  protected GenericFlowPanel(Element elem) {
+  // TODO(4/14/2024): make sure that making this public doesn't break anything
+  public GenericFlowPanel(Element elem) {
     setElement(elem);
   }
 

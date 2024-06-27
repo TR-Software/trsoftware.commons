@@ -1,5 +1,6 @@
 package solutions.trsoftware.commons.shared.util.iterators;
 
+import com.google.gwt.core.shared.GwtIncompatible;
 import junit.framework.TestCase;
 import solutions.trsoftware.commons.shared.testutil.AssertUtils;
 import solutions.trsoftware.commons.shared.util.StringUtilsTest;
@@ -10,6 +11,7 @@ import java.util.stream.IntStream;
  * @author Alex
  * @since 5/14/2019
  */
+@GwtIncompatible
 @SuppressWarnings("NonJREEmulationClassesInClientCode")
 public class CodePointIteratorJavaTest extends TestCase {
 

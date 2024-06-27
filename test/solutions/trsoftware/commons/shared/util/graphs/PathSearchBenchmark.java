@@ -17,6 +17,7 @@
 package solutions.trsoftware.commons.shared.util.graphs;
 
 import com.google.common.base.MoreObjects;
+import com.google.gwt.core.shared.GwtIncompatible;
 import org.openjdk.jmh.annotations.*;
 import org.openjdk.jmh.infra.Blackhole;
 import solutions.trsoftware.commons.shared.util.text.CharRange;
@@ -30,6 +31,7 @@ import java.util.Set;
  * @author Alex
  * @since 4/29/2022
  */
+@GwtIncompatible
 @BenchmarkMode(Mode.Throughput)
 @Warmup(iterations = 1)
 @Fork(value = 1, warmups = 1)

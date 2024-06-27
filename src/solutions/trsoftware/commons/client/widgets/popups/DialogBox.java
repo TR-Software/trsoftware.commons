@@ -240,6 +240,14 @@ public class DialogBox extends EnhancedPopup {
   }
 
   /**
+   * Adds a simple "x" button (for hiding the dialog) to its top right corner.
+   * This button is styled in CSS using the {@code .xButton} style name.
+   */
+  protected void insertCloserButton() {
+    insertCloserButton(new PopupCloserButton(this));
+  }
+
+  /**
    * Controls the visibility of the button that was created by {@link #insertCloserButton(PopupCloserButton)}
    */
   public void setCloserButtonVisible(boolean visible) {

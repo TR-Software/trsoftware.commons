@@ -1,5 +1,6 @@
 package solutions.trsoftware.commons.shared.text;
 
+import com.google.gwt.core.shared.GwtIncompatible;
 import junit.framework.TestCase;
 import solutions.trsoftware.commons.shared.testutil.AssertUtils;
 import solutions.trsoftware.commons.shared.util.StringUtils;
@@ -10,6 +11,7 @@ import java.util.List;
  * @author Alex
  * @since 11/3/2018
  */
+@GwtIncompatible("printf")
 public class TextSplitterTest extends TestCase {
 
   public void testSplit() throws Exception {

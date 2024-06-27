@@ -18,6 +18,7 @@ package solutions.trsoftware.commons.client.widgets;
 
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.resources.client.ImageResource;
 import com.google.gwt.user.client.ui.AbstractImagePrototype;
 import com.google.gwt.user.client.ui.Composite;
 
@@ -49,6 +50,10 @@ public class ImageToggleButton extends Composite implements ClickHandler {
     this.onTitle = onTitle;
     initWidget(btn = new ImageButton(offImg, this));
     toggle(startOn);
+  }
+  
+  public ImageToggleButton(ImageResource offImg, String offTitle, ImageResource onImg, String onTitle, boolean startOn) {
+    this(AbstractImagePrototype.create(offImg), offTitle, AbstractImagePrototype.create(onImg), onTitle, startOn);
   }
 
   /** Sets the toggle {@link #on} state to the given value */

@@ -14,6 +14,17 @@
  * the License.
  */
 
+/*
+******************* DEPRECATED *******************
+Superceded by Commons.gss (the GSS version of the same file), which allows using modern CSS3 syntax (e.g. ":not")
+in a CssResource
+@see:
+  - https://github.com/gwtproject/gwt/issues/8157#issuecomment-2118352096
+  - https://www.gwtproject.org/articles/gss_migration.html
+
+  TODO: remove this file after GSS migration complete
+ */
+
 /* have to make all the gwt-* styles external (https://stackoverflow.com/questions/8182917/how-to-override-default-css-in-modern-gwt-applications) */
 @external .gwt-*;
 
@@ -177,13 +188,6 @@
 .gwt-PopupPanelGlass {
   background-color: #000;
   opacity: 0.3;
-}
-
-@if user.agent ie6 {
-  .gwt-PopupPanelGlass {
-    filter: literal("alpha(opacity=30)"); /* using the GSS literal function to suppress CSS parse warnings for the alpha expr */
-  }
-  /* NOTE: this will probably still not work in IE8 (see https://css-tricks.com/snippets/css/cross-browser-opacity/) */
 }
 
 /* --------- The following styles on our DialogBox class exist to support our ModalDialog class --------- */

@@ -137,7 +137,10 @@ public class TypingLogReplayPlayer extends Composite {
   }
   // player control buttons:
 
-  private ImageToggleButton btnPlayPause = new ImageToggleButton(PLAYER_ICONS_BUNDLE.play(), "Play", PLAYER_ICONS_BUNDLE.pause(), "Pause", false) {
+  private ImageToggleButton btnPlayPause = new ImageToggleButton(
+      PLAYER_ICONS_BUNDLE.play(), "Play",
+      PLAYER_ICONS_BUNDLE.pause(), "Pause",
+      false) {
 
     /**
      * We want to be able toggle the button both manually (UI click) as well as programmatically (e.g. when

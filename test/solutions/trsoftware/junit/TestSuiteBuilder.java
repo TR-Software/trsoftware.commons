@@ -19,10 +19,7 @@ package solutions.trsoftware.junit;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.MoreObjects;
-import com.google.common.collect.ImmutableSet;
-import com.google.common.collect.Iterators;
-import com.google.common.collect.MultimapBuilder;
-import com.google.common.collect.SetMultimap;
+import com.google.common.collect.*;
 import com.google.common.reflect.ClassPath;
 import com.google.gwt.junit.client.GWTTestCase;
 import com.google.gwt.junit.tools.GWTTestSuite;
@@ -51,6 +48,7 @@ import java.nio.file.Path;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.util.*;
 import java.util.function.BiPredicate;
+import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -58,12 +56,50 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import static java.lang.String.format;
+import static solutions.trsoftware.commons.shared.util.StringUtils.capitalize;
 import static solutions.trsoftware.commons.shared.util.StringUtils.indent;
 import static solutions.trsoftware.junit.TestSuiteBuilder.FilterMode.EXCLUDE;
 import static solutions.trsoftware.junit.TestSuiteBuilder.FilterMode.INCLUDE;
 
 /**
- * Builds a suite of tests by scanning filesystem paths for matching {@code .class} files.
+ * Builds a suite of tests from the test classes found in one or more {@linkplain #addContentRoot(Path) filesystem paths},
+ * filtered using one or more of the provided builder methods (e.g. {@link #includeOnlySubclassesOf},
+ * {@link #excludeSubpackagesOf}, etc.) and/or {@linkplain System#getProperty(String) system properties}
+ * prefixed with {@value #CONFIG_PROPERTY_PREFIX}.
+ * <p>
+ * <em>Note</em>: this class is designed to work with JUnit 3.8; newer versions of JUnit might provide some (or all) of this
+ * functionality natively.
+ * <p>
+ * <p>
+ *
+ * <h3>Examples:</h3>
+ * <ol>
+ *   <li>
+ *     Programmatic configuration:
+ *     <pre>
+ *       new {@link TestSuiteBuilder#TestSuiteBuilder()}
+ *         .{@link #addContentRoot}(Paths.get("~/projects/myproject"))
+ *         .{@link #includeOnlySubpackagesOf}("com.example")
+ *         .{@link #excludeSubpackagesOf}("com.example.server.model", "com.example.server.servlet")
+ *         .{@link #excludeSubclassesOf}(com.example.DatabaseTestCase.class)
+ *         .{@link #excludeTestsAnnotatedWith}(com.example.annotation.Slow.class)
+ *         .{@link #buildSuite()}
+ *     </pre>
+ *   </li>
+ *   <li>
+ *     Equivalent system properties (specified as VM options):
+ *     <pre>
+ *       -DTestSuiteBuilder.package.include="com.example"
+ *       -DTestSuiteBuilder.package.exclude="com.example.server.model,com.example.server.servlet"
+ *       -DTestSuiteBuilder.superclass.exclude="com.example.DatabaseTestCase"
+ *       -DTestSuiteBuilder.annotations.exclude="com.example.annotation.Slow"
+ *     </pre>
+ *     Property name syntax:
+ *     <pre style="font-style: italic;">
+ *       TestSuiteBuilder.[package|superclass|annotation].[include|exclude]
+ *     </pre>
+ *   </li>
+ * </ol>
  *
  * @author Alex
  * @since 4/18/2018
@@ -76,7 +112,31 @@ public class TestSuiteBuilder {
    * Matches filenames ending with {@code "Test.class"}}
    */
   public static final String DEFAULT_FILENAME_REGEX = ".*Test\\.class";
-  public static final String PACKAGES_CONFIG_PROPERTY = "TestSuiteBuilder.packages";
+  /**
+   * Additional configuration can be specified using {@linkplain System#getProperty(String) system properties}
+   * having this prefix.
+   * <p>
+   * <b>Example:</b>
+   * <pre>
+   *   -DTestSuiteBuilder.package.include="com.example"
+   *   -DTestSuiteBuilder.package.exclude="com.example.server.model,com.example.server.servlet"
+   *   -DTestSuiteBuilder.superclass.exclude="com.example.DatabaseTestCase"
+   *   -DTestSuiteBuilder.annotations.exclude="com.example.annotation.Slow"
+   * </pre>
+   * is equivalent to:
+   * <pre>
+   *   new {@link TestSuiteBuilder#TestSuiteBuilder()}
+   *     .{@link #includeOnlySubpackagesOf}("com.example")
+   *     .{@link #excludeSubpackagesOf}("com.example.server.model", "com.example.server.servlet")
+   *     .{@link #excludeSubclassesOf}(com.example.DatabaseTestCase.class)
+   *     .{@link #excludeTestsAnnotatedWith}(com.example.annotation.Slow.class)
+   * </pre>
+   * The system property naming syntax is
+   * <code>{@value #CONFIG_PROPERTY_PREFIX}.[package|superclass|annotation].[include|exclude]</code>
+   * @see #filterNames
+   * @see FilterMode
+   */
+  public static final String CONFIG_PROPERTY_PREFIX = "TestSuiteBuilder";
 
 //  /**
 //   * Matches filenames ending with {@code "Test.class"} or {@code "TestCase.class"}
@@ -110,6 +170,11 @@ public class TestSuiteBuilder {
   private boolean useGwtTestSuite;
 
   /**
+   * If not {@code null}, individual tests will be wrapped with a {@link TestTimeBoxDecorator}
+   */
+  private TestTimeBoxDecorator.TimeBoxSettings timeBoxSettings;
+
+  /**
    * Used by {@link #isValidPackage(String)}
    * <p>
    * TODO(9/18/2023): could refactor our whole whole from contentRoots file-tree walking mechanism
@@ -132,7 +197,17 @@ public class TestSuiteBuilder {
   private final FilterSet<String, Class<?>> packageFilters = new FilterSet<>(TestSuiteBuilder::isInSubpackageOf);
 
   /**
-   * Determines how {@link #superclassFilters} or {@link #annotationFilters} will be used.
+   * Names used with {@link #CONFIG_PROPERTY_PREFIX} for specifying filters as system properties.
+   * @see #addFiltersFromSystemProps
+   */
+  private final BiMap<String, FilterSet<?, ?>> filterNames = ImmutableBiMap.of(
+      "superclass", superclassFilters,
+      "annotation", annotationFilters,
+      "package", packageFilters
+  );
+
+  /**
+   * Determines how {@link #superclassFilters}, {@link #packageFilters}, or {@link #annotationFilters} will be used.
    */
   public enum FilterMode {
     /**
@@ -166,17 +241,21 @@ public class TestSuiteBuilder {
     }
   }
 
+  /**
+   *
+   * @param <T> the filter condition type
+   * @param <V> type of elements being filtered against the condition
+   */
+  private static class FilterSet<T, V> implements Predicate<V> {
 
-  private static class FilterSet<T, U> implements Predicate<U> {
-
-    private final BiPredicate<T, U> matcher;
+    private final BiPredicate<T, V> matcher;
     private final SetMultimap<FilterMode, T> map = MultimapBuilder.enumKeys(FilterMode.class).linkedHashSetValues().build();
 
     /**
      * @param matcher a predicate that determines whether the filter condition object, {@link T},
-     * matches the second argument, {@link U}
+     *     matches the second argument, {@link V}
      */
-    FilterSet(BiPredicate<T, U> matcher) {
+    FilterSet(BiPredicate<T, V> matcher) {
       this.matcher = matcher;
     }
 
@@ -194,28 +273,28 @@ public class TestSuiteBuilder {
 
     /**
      * @return {@code true} iff either
-     *   (1) given class or method is explicitly included, OR
-     *   (2) there aren't any explicit inclusions
+     *     (1) given class or method is explicitly included, OR
+     *     (2) there aren't any explicit inclusions
      */
-    boolean includes(U classOrMethod) {
-      return !map.containsKey(INCLUDE) || matches(INCLUDE, classOrMethod);
+    boolean includes(V value) {
+      return !map.containsKey(INCLUDE) || matches(INCLUDE, value);
     }
 
     /**
      * @return {@code true} iff the given class or method is explicitly excluded
      */
-    boolean excludes(U classOrMethod) {
-//      return !get(EXCLUDE).isEmpty() && isExcluded(classOrMethod);
-      return matches(EXCLUDE, classOrMethod);
+    boolean excludes(V value) {
+//      return !get(EXCLUDE).isEmpty() && isExcluded(value);
+      return matches(EXCLUDE, value);
     }
 
-    private boolean matches(FilterMode mode, U classOrMethod) {
-      return map.get(mode).stream().anyMatch(t -> matcher.test(t, classOrMethod));
+    private boolean matches(FilterMode mode, V value) {
+      return map.get(mode).stream().anyMatch(t -> matcher.test(t, value));
     }
 
     @Override
-    public boolean test(U classOrMethod) {
-      return includes(classOrMethod) && !excludes(classOrMethod);
+    public boolean test(V value) {
+      return includes(value) && !excludes(value);
     }
 
     public void clear() {
@@ -228,22 +307,9 @@ public class TestSuiteBuilder {
     }
   }
 
-  /**
-   * If not {@code null}, individual tests will be wrapped with a {@link TestTimeBoxDecorator}
-   */
-  private TestTimeBoxDecorator.TimeBoxSettings timeBoxSettings;
 
   public TestSuiteBuilder() {
 //    classPath = parseClassPath();
-    // TODO: don't do this by default: caller should specify if they want this feature (extract method)
-    // TODO(9/13/2023): document the usage of this property
-    String packages = System.getProperty(PACKAGES_CONFIG_PROPERTY);
-    if (StringUtils.notEmpty(packages)) {
-      String[] pkgNames = Pattern.compile(",").splitAsStream(packages).map(String::trim).toArray(String[]::new);
-      LOGGER.config(() -> format("Building suite of tests contained in packages %s (as specified by the %s property)",
-          Arrays.toString(pkgNames), PACKAGES_CONFIG_PROPERTY));
-      includeOnlySubpackagesOf(pkgNames);
-    }
   }
 
   static ClassPath parseClassPath() {  // TODO: experimental
@@ -293,18 +359,17 @@ public class TestSuiteBuilder {
    *
    * @param path a path containing test classes
    * @return self, for chaining
+   * @see #addContentRoot(Class)
    */
   public TestSuiteBuilder addContentRoot(@Nonnull Path path) {
-    if (contentRoots.add(Objects.requireNonNull(path, "path"))) {
-      LOGGER.config("Adding tests from " + path);
-    }
+    contentRoots.add(Objects.requireNonNull(path, "path"));
     return this;
   }
 
   /**
    * Adds the path of the given reference class to the set of content roots to be scanned for classes.
    *
-   * @param refClass the location of the corresponding {@code .class} file on will be used to look for tests to add to the suite
+   * @param refClass the location of the corresponding {@code .class} file will be used to look for tests to add to the suite
    * @return self, for chaining
    * @see ReflectionUtils#getCompilerOutputPath(Class)
    */
@@ -373,9 +438,62 @@ public class TestSuiteBuilder {
    * @throws IllegalStateException if the current configuration of this builder violates any constraints
    */
   private void prepareToBuild() throws IllegalStateException {
+    LOGGER.config(() -> format("Building a test suite from %s files in %s", filenameRegex, contentRoots));
     if (useGwtTestSuite && groupByPackage)
       throw new IllegalStateException("useGwtTestSuite and groupByPackage are mutually exclusive");
     classToTestSuiteMap.clear();  // reset the state
+    // add any additional filters specified as System properties
+    // TODO: unit test this
+    addFiltersFromSystemProps(packageFilters, Function.identity());  // TODO: not calling isValidPackage b/c that method currently doesn't do anything
+    addFiltersFromSystemProps(superclassFilters, TestSuiteBuilder::loadClass);
+    addFiltersFromSystemProps(annotationFilters, TestSuiteBuilder::loadAnnotation);
+  }
+
+  /**
+   * Adds to the given filter set any conditions specified as {@linkplain #CONFIG_PROPERTY_PREFIX system properties}.
+   *
+   * @param parser parses a system property value string into a filter condition for the given filter set;
+   *   should return {@code null} if unable to derive an appropriate object from the string
+   *
+   * @param <T> the filter condition type
+   */
+  private <T> void addFiltersFromSystemProps(FilterSet<T, ?> filterSet, Function<String, T> parser) {
+    String filterName = filterNames.inverse().get(filterSet);
+    for (FilterMode filterMode : FilterMode.values()) {
+      String filterModeName = filterMode.prettyName();
+      String propName = String.join(".", CONFIG_PROPERTY_PREFIX, filterName, filterModeName);
+      String propValue = System.getProperty(propName);
+      if (propValue != null) {
+        Pattern.compile(",").splitAsStream(propValue).map(String::trim)
+            .map(parser).filter(Objects::nonNull)
+            .forEach(item -> {
+              LOGGER.config(() -> format("%s %s: %s", capitalize(filterModeName), filterName, item));
+              filterSet.add(filterMode, item);
+            });
+      }
+    }
+  }
+
+  @Nullable
+  private static Class<?> loadClass(String className) {
+    // TODO: experimental helper for parsisng sys props
+    try {
+      return Class.forName(className);
+    }
+    catch (Throwable e) {
+      e.printStackTrace();
+      return null;
+    }
+  }
+
+  @Nullable
+  @SuppressWarnings("unchecked")
+  private static Class<? extends Annotation> loadAnnotation(String className) {
+    // TODO: experimental helper for parsisng sys props
+    Class<?> cls = loadClass(className);
+    if (cls != null && cls.isAnnotation())
+      return (Class<? extends Annotation>)cls;
+    return null;
   }
 
   /**
@@ -781,7 +899,7 @@ public class TestSuiteBuilder {
    */
   @VisibleForTesting
   boolean applySuperclassFilters(Class<?> cls) {  // exposed with package-private visibility for unit testing
-      return superclassFilters.test(cls);
+    return superclassFilters.test(cls);
   }
 
   /**

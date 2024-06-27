@@ -98,15 +98,12 @@ public final class SchedulerUtils {
       return true;
     }
     Duration waitingDuration = new Duration();
-    RepeatingCommand checkCondition = new RepeatingCommand() {
-      @Override
-      public boolean execute() {
-        if (condition.check()) {
-          onConditionMet.execute();
-          return false;
-        }
-        return waitingDuration.elapsedMillis() <= timeoutMillis;
+    RepeatingCommand checkCondition = () -> {
+      if (condition.check()) {
+        onConditionMet.execute();
+        return false;
       }
+      return waitingDuration.elapsedMillis() <= timeoutMillis;
     };
     Scheduler.get().scheduleFixedDelay(checkCondition, delayMillis);
     return false;

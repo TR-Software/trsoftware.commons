@@ -1,5 +1,6 @@
 package solutions.trsoftware.commons.shared.util.graphs;
 
+import com.google.gwt.core.shared.GwtIncompatible;
 import org.openjdk.jmh.infra.Blackhole;
 import solutions.trsoftware.commons.shared.BaseTestCase;
 import solutions.trsoftware.commons.shared.annotations.ExcludeFromSuite;
@@ -17,6 +18,7 @@ import static solutions.trsoftware.commons.shared.util.graphs.PathSearchBenchmar
  * @author Alex
  * @since 11/12/2023
  */
+@GwtIncompatible
 @ExcludeFromSuite
 public class PathSearchBenchmarkTest extends BaseTestCase {
 

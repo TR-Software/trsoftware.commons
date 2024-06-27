@@ -47,4 +47,10 @@ public abstract class HttpFilterAdapter extends AbstractFilter {
    * @see Filter#doFilter(ServletRequest, ServletResponse, FilterChain)
    */
   public abstract void doHttpFilter(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws IOException, ServletException;
+
+  /* TODO(5/17/2024): it's easy for a new subclass implementing doHttpFilter to forget to invoke filterChain.doFilter
+       in order to allow the request processing to continue.
+       Maybe change our abstract doHttpFilter method signature to return a boolean, and invoke filterChain
+       automatically if it returns true.  Requiring a return value would make developer realize they need to make this decision.
+   */
 }

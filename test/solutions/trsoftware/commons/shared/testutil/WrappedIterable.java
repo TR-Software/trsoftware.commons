@@ -11,7 +11,7 @@ import java.util.Iterator;
  */
 public class WrappedIterable<T> implements Iterable<T> {
 
-  private Iterable<T> delegate;
+  private final Iterable<T> delegate;
 
   public WrappedIterable(Iterable<T> delegate) {
     this.delegate = delegate;

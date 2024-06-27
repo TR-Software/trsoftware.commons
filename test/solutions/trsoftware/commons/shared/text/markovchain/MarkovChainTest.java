@@ -17,6 +17,7 @@
 
 package solutions.trsoftware.commons.shared.text.markovchain;
 
+import com.google.gwt.core.shared.GwtIncompatible;
 import junit.framework.TestCase;
 import solutions.trsoftware.commons.shared.annotations.Slow;
 import solutions.trsoftware.commons.shared.testutil.TestData;
@@ -37,6 +38,7 @@ import java.util.Random;
  *
  * @author Alex
  */
+@GwtIncompatible
 public class MarkovChainTest extends TestCase {
 
   private MarkovChain mc;

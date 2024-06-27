@@ -30,7 +30,7 @@ import solutions.trsoftware.commons.shared.util.HtmlElementBuilder;
  */
 public class HeaderWithTooltip extends Header<String> {
 
-  private String text;
+  private final String text;
 
   /**
    * Construct a new TextHeader with tooltip.

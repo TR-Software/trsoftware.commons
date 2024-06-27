@@ -64,12 +64,12 @@ public class Clock {
 
   /**
    * Causes {@link #currentTimeMillis()} and {@link #nanoTime()} to start returning returning fixed values
-   * that are initialized to their current real values, but can be adjusted with {@link #set(long)} or {@link
-   * #advance(long)}.
-   * This method has no affect if {@linkplain #isStopped() already stopped}
+   * that are initialized to their current real values, but can be adjusted with {@link #set(long, long)}
+   * or {@link #advance(long, TimeUnit)}.
+   * This method has no effect if {@linkplain #isStopped() already stopped}
    * <p>
    * NOTE: the requirement that this method is always called prior to
-   * {@link #advance(long)}, {@link #startTicking()}, etc., gives us a convenient way to search
+   * {@link #advance(long, TimeUnit)}, {@link #resume()}, etc., provides a convenient way to search
    * for all occurrences of code that stops the clock.
    */
   public static void stop() {

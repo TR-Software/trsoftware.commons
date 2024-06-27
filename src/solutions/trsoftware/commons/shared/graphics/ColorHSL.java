@@ -45,11 +45,11 @@ public final class ColorHSL {
 
   public enum Component {HUE, SATURATION, LIGHTNESS}
 
-  /** hue (specified in degrees, range: [0, 360]) */
+  /** Hue (specified in degrees, range: [0, 360]) */
   private double h;
-  /** saturation (as a percentage, range: [0,1]) */
+  /** Saturation (as a percentage, range: [0, 1]) */
   private double s;
-  /** lightness (as a percentage, range: [0,1]) */
+  /** Lightness (as a percentage, range: [0, 1]) */
   private double l;
 
   /**

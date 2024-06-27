@@ -17,7 +17,7 @@
 package solutions.trsoftware.commons.client.jso;
 
 import com.google.gwt.dom.client.Element;
-import com.google.gwt.dom.client.Style;
+import solutions.trsoftware.commons.client.css.CSSStyleDeclaration;
 
 /**
  * A JSNI overlay type for the window object. Supports a subset of the methods provided by the various browser implementations
@@ -52,11 +52,17 @@ public class JsWindow extends JsObject {
   }
 
   /**
-   * Gives the values of all the CSS properties of an element after applying the active stylesheets and resolving any basic computation those values may contain.
-   * @return a style object containing the computed styles for the given element, or {@code null} if the browser doesn't support this API or the element is not valid.
+   * Gives the values of all the CSS properties of an element after applying the active stylesheets
+   * and resolving any basic computation those values may contain.
+   *
+   * @param element the Element for which to get the computed style; must be attached to the DOM
+   * @param pseudoElement Optional string specifying the pseudo-element to match (e.g. {@code ::before}, {@code ::after}).
+   *     Omitted (or null) for real elements
+   * @return a style object containing the computed styles for the given element,
+   *     or {@code null} if the browser doesn't support this API or the element is not valid.
    * @see <a href="https://developer.mozilla.org/en-US/docs/Web/API/Window/getComputedStyle#Browser_compatibility">Window.getComputedStyle browser compatibility</a>
    */
-  public final native Style getComputedStyle(Element element, String pseudoElement) /*-{
+  public final native CSSStyleDeclaration getComputedStyle(Element element, String pseudoElement) /*-{
     if (this.getComputedStyle)
       return this.getComputedStyle(element, pseudoElement);
   }-*/;
@@ -65,7 +71,7 @@ public class JsWindow extends JsObject {
   /**
    * Same as {@link #getComputedStyle(Element, String)}, but without a pseudo-element.
    */
-  public final Style getComputedStyle(Element element) {
+  public final CSSStyleDeclaration getComputedStyle(Element element) {
     return getComputedStyle(element, null);
   }
 }

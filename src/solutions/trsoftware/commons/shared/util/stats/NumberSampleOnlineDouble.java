@@ -152,7 +152,7 @@ public class NumberSampleOnlineDouble implements Serializable, SampleStatisticsD
    */
   public static NumberSampleOnlineDouble collectDoubleStream(DoubleStream doubleStream) {
     return doubleStream.collect(NumberSampleOnlineDouble::new,
-        (numberSample, value) -> numberSample.update(value),
+        NumberSampleOnlineDouble::update,
         NumberSampleOnlineDouble::merge);
   }
   

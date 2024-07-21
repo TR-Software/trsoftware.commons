@@ -19,6 +19,7 @@ package solutions.trsoftware.commons.shared.util;
 import com.google.common.base.MoreObjects;
 
 import javax.annotation.Nullable;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.function.Supplier;
 
@@ -46,17 +47,23 @@ public class LogicUtils {
   }
 
   /**
-   * Like {@link Object#equals(Object)}, but allows {@code null} values.
+   * Same as {@link Objects#equals(Object, Object)}.
    * <p>
-   * <b>NOTE:</b> the performance of this method (as well as of {@link java.util.Objects#equals(Object, Object)})
-   * could be worse than writing the equivalent logical expression inline where the argument types can be determined
-   * statically (see <a href="https://bugs.openjdk.java.net/browse/JDK-8015417">JDK-8015417</a>).
-   *
+   * <b>Notes:</b>
+   * <ul>
+   *   <li>
+   *   This method provides a workaround for a <a href="https://github.com/gwtproject/gwt/issues/9522">GWT bug</a>
+   *   that makes it impossible to use {@link Objects#equals(Object, Object)} with {@link String} arguments in classic DevMode.
+   *   <li>
+   *   The performance of this method (as well as of {@link java.util.Objects#equals(Object, Object)})
+   *   could be worse than writing the equivalent logical expression inline where the argument types can be determined
+   *   statically (see <a href="https://bugs.openjdk.java.net/browse/JDK-8015417">JDK-8015417</a>).
+   * </ul>
    * @return true if the specified arguments are equal, or both null
    * @see java.util.Objects#equals(Object, Object)
    */
-  public static boolean eq(Object o1, Object o2) {
-    return o1 == null ? o2 == null : o1.equals(o2);
+  public static boolean eq(Object a, Object b) {
+    return (a == b) || (a != null && a.equals(b));
   }
 
   /**

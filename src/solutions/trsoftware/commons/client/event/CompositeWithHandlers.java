@@ -37,7 +37,7 @@ import java.util.function.Supplier;
  * @see #registerEventHandlerOnLoad(Event.Type, Object)
  * @author Alex
  */
-public abstract class CompositeWithDataChangeListeners extends Composite {
+public abstract class CompositeWithHandlers extends Composite {
 
   /* TODO:
       - rename this class to CompositeWithHandlers or something

@@ -53,7 +53,7 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import static solutions.trsoftware.commons.shared.testutil.AssertUtils.*;
-import static solutions.trsoftware.commons.shared.util.MapUtils.throwingMerger;
+import static solutions.trsoftware.commons.shared.util.MapUtils.toMap;
 import static solutions.trsoftware.junit.TestSuiteBuilder.*;
 
 /**
@@ -353,9 +353,9 @@ public class TestSuiteBuilderTest extends TestCase {
       TestSuite suite = buildSuite(builder);
       TreeMap<String, TestSuite> expectedTestSuitesByName = testClassesInBasePackage.stream()
           .map(TestSuite::new)
-          .collect(Collectors.toMap(TestSuite::getName, Function.identity(), throwingMerger(), TreeMap::new));
+          .collect(toMap(TestSuite::getName, Function.identity(), TreeMap::new));
       Map<String, TestSuite> actualTestSuitesByName = extractNestedSuites(suite).stream()
-          .collect(Collectors.toMap(TestSuite::getName, Function.identity(), throwingMerger(), TreeMap::new));
+          .collect(toMap(TestSuite::getName, Function.identity(), TreeMap::new));
       assertMapsEqual(expectedTestSuitesByName, actualTestSuitesByName, (BiConsumer<TestSuite, TestSuite>)TestSuiteBuilderTest::assertEquals);
     }
     {
@@ -365,9 +365,9 @@ public class TestSuiteBuilderTest extends TestCase {
       TreeMap<String, TestSuite> expectedTestSuitesByName = testClassesInBasePackage.stream()
           .filter(cls -> excludedSubpackages.stream().noneMatch(pak -> isInSubpackageOf(pak, cls)))
           .map(TestSuite::new)
-          .collect(Collectors.toMap(TestSuite::getName, Function.identity(), throwingMerger(), TreeMap::new));
+          .collect(toMap(TestSuite::getName, Function.identity(), TreeMap::new));
       Map<String, TestSuite> actualTestSuitesByName = extractNestedSuites(suite).stream()
-          .collect(Collectors.toMap(TestSuite::getName, Function.identity(), throwingMerger(), TreeMap::new));
+          .collect(toMap(TestSuite::getName, Function.identity(), TreeMap::new));
       assertMapsEqual(expectedTestSuitesByName, actualTestSuitesByName, (BiConsumer<TestSuite, TestSuite>)TestSuiteBuilderTest::assertEquals);
     }
     {
@@ -378,9 +378,9 @@ public class TestSuiteBuilderTest extends TestCase {
           .filter(cls -> excludedSubpackages.stream().noneMatch(pak -> isInSubpackageOf(pak, cls)))
           .filter(cls -> !GWTTestCase.class.isAssignableFrom(cls))
           .map(TestSuite::new)
-          .collect(Collectors.toMap(TestSuite::getName, Function.identity(), throwingMerger(), TreeMap::new));
+          .collect(toMap(TestSuite::getName, Function.identity(), TreeMap::new));
       Map<String, TestSuite> actualTestSuitesByName = extractNestedSuites(suite).stream()
-          .collect(Collectors.toMap(TestSuite::getName, Function.identity(), throwingMerger(), TreeMap::new));
+          .collect(toMap(TestSuite::getName, Function.identity(), TreeMap::new));
       assertMapsEqual(expectedTestSuitesByName, actualTestSuitesByName, (BiConsumer<TestSuite, TestSuite>)TestSuiteBuilderTest::assertEquals);
     }
   }

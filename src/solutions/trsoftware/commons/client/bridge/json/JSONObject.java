@@ -16,6 +16,7 @@
 
 package solutions.trsoftware.commons.client.bridge.json;
 
+import javax.annotation.Nullable;
 import java.util.Set;
 
 
@@ -27,6 +28,12 @@ import java.util.Set;
 public interface JSONObject {
 
   int getInteger(String key);
+
+  @Nullable
+  Integer getNullableInteger(String key);
+  /* TODO(10/12/2024): create method getNumber, returning a nullable Number
+       (wrapped with new Double(JSONNumber.doubleValue()) in GWT, and jsonElement.getAsNumber() in GSON) */
+
   long getLong(String key);
   boolean getBoolean(String key);
   double getDouble(String key);

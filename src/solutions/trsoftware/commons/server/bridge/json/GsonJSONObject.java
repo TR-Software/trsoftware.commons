@@ -21,6 +21,7 @@ import com.google.gson.JsonObject;
 import solutions.trsoftware.commons.client.bridge.json.JSONArray;
 import solutions.trsoftware.commons.client.bridge.json.JSONObject;
 
+import javax.annotation.Nullable;
 import java.util.Set;
 
 /**
@@ -37,6 +38,21 @@ public class GsonJSONObject implements JSONObject {
 
   public int getInteger(String key) {
     return delegate.get(key).getAsInt();
+  }
+
+  @Nullable
+  @Override
+  public Integer getNullableInteger(String key) {
+    JsonElement jsonElement = delegate.get(key);
+    if (jsonElement != null && jsonElement.isJsonPrimitive())
+      return jsonElement.getAsInt();
+    return null;
+    /*
+     TODO(10/5/2024): create equivalents of this method for other wrapper types (Long, Boolean, Double, etc.),
+      and deprecate the original methods in favor of the nullable kind
+      - or even better, create method getNumber, returning a nullable Number
+        (using jsonElement.getAsNumber())
+    */
   }
 
   public long getLong(String key) {

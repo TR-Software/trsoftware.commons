@@ -18,11 +18,14 @@ package solutions.trsoftware.commons.shared.util.iterators;
 
 import solutions.trsoftware.commons.shared.util.function.CharConsumer;
 
+import javax.annotation.Nonnull;
 import java.util.Iterator;
 import java.util.NoSuchElementException;
-import java.util.Objects;
 import java.util.PrimitiveIterator;
 import java.util.function.Consumer;
+import java.util.stream.IntStream;
+
+import static java.util.Objects.requireNonNull;
 
 /**
  * An {@link Iterator} specialized for primitive {@code char} values.
@@ -70,7 +73,7 @@ public interface CharIterator extends PrimitiveIterator<Character, CharConsumer>
    *     }</pre>
    */
   default void forEachRemaining(CharConsumer action) {
-    Objects.requireNonNull(action);
+    requireNonNull(action);
     while (hasNext())
       action.accept(nextChar());
   }
@@ -97,8 +100,47 @@ public interface CharIterator extends PrimitiveIterator<Character, CharConsumer>
     }
     else {
       // The method reference action::accept is never null
-      Objects.requireNonNull(action);
+      requireNonNull(action);
       forEachRemaining((CharConsumer)action::accept);
+    }
+  }
+
+  /**
+   * Adapts a primitive {@code int} iterator to the {@link CharIterator} protocol, by casting each value returned
+   * by {@link OfInt#nextInt()} to {@code char}.
+   *
+   * @param intIterator primitive {@code int} iterator to wrap
+   */
+  static CharIterator fromIntIterator(OfInt intIterator) {
+    return new IntAdapter(intIterator);
+  }
+
+  /**
+   * Constructs a primitive {@code char} iterator that returns the elements from the given {@link IntStream} as
+   * {@code char}s.
+   */
+  static CharIterator fromIntStream(IntStream intStream) {
+    return fromIntIterator(intStream.iterator());
+  }
+
+  /**
+   * Adapts a primitive {@code int} iterator to the {@link CharIterator} protocol.
+   */
+  class IntAdapter implements CharIterator {
+    private final PrimitiveIterator.OfInt delegate;
+
+    public IntAdapter(@Nonnull OfInt delegate) {
+      this.delegate = requireNonNull(delegate, "delegate");
+    }
+
+    @Override
+    public boolean hasNext() {
+      return delegate.hasNext();
+    }
+
+    @Override
+    public char nextChar() {
+      return (char)delegate.nextInt();
     }
   }
 

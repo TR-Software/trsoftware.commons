@@ -36,6 +36,8 @@ import java.text.ParseException;
  */
 public final class ColorHSL {
 
+  // TODO(2/24/2025): add support for HSLA (with an alpha component)
+
   /**
    * The {@link #h}, {@link #s}, {@link #l} component values will be rounded to this number of decimal places when
    * working with string representations (parsing and rendering), as well as comparisons using {@link #equals(Object)}

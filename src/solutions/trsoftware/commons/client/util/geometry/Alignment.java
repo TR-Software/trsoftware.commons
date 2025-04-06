@@ -16,12 +16,26 @@
 
 package solutions.trsoftware.commons.client.util.geometry;
 
+import com.google.gwt.dom.client.Element;
 import com.google.gwt.user.client.ui.Widget;
+import solutions.trsoftware.commons.client.widgets.popups.EnhancedPopup;
+import solutions.trsoftware.commons.shared.util.StringUtils;
+import solutions.trsoftware.commons.shared.util.geometry.Point;
+import solutions.trsoftware.commons.shared.util.geometry.RealPoint;
 
+import java.util.Objects;
+
+import static solutions.trsoftware.commons.client.dom.DomUtils.*;
 import static solutions.trsoftware.commons.client.util.geometry.Alignment.Horizontal.*;
 import static solutions.trsoftware.commons.client.util.geometry.Alignment.Vertical.*;
 
 /**
+ * Specifies a preferred popup position relative to a DOM element or widget,
+ * as an immutable ({@linkplain Horizontal horizontal}, {@linkplain Vertical vertical}) alignment pair.
+ * 
+ * @see RelativePosition
+ * @see EnhancedPopup#showRelativeTo(Widget, Alignment...)
+ * 
  * @author Alex, 2/16/2016
  */
 public class Alignment {
@@ -29,6 +43,7 @@ public class Alignment {
   public static final Alignment ABOVE_RIGHT_EDGES = new Alignment(RIGHT_EDGES, ABOVE);
   public static final Alignment ABOVE_RIGHT = new Alignment(RIGHT_OF, ABOVE);
   public static final Alignment BELOW_RIGHT_EDGES = new Alignment(RIGHT_EDGES, BELOW);
+  public static final Alignment BELOW_LEFT_EDGES = new Alignment(LEFT_EDGES, BELOW);
   public static final Alignment OVERLAY = new Alignment(LEFT_EDGES, TOP_EDGES);
   public static final Alignment RIGHTS_AND_TOPS = new Alignment(RIGHT_EDGES, TOP_EDGES);
   public static final Alignment[] NEXT_TO = {
@@ -40,7 +55,7 @@ public class Alignment {
       new Alignment(LEFT_OF, ABOVE),
       new Alignment(LEFT_OF, BELOW),
       new Alignment(LEFT_OF, MIDDLE),
-      new Alignment(LEFT_EDGES, BELOW),
+      BELOW_LEFT_EDGES,
       new Alignment(LEFT_EDGES, ABOVE),
       new Alignment(RIGHT_EDGES, BELOW),
       new Alignment(RIGHT_EDGES, ABOVE),
@@ -48,46 +63,80 @@ public class Alignment {
 
   public enum Horizontal {
     LEFT_OF() {
-      public int getX(Widget widget, int popupWidth, int popupHeight) {
-        return widget.getAbsoluteLeft() - popupWidth;
-      }},
+      public double getX(Element element, double popupWidth, double popupHeight) {
+        return getAbsoluteLeft(element) - popupWidth;
+      }
+    },
     RIGHT_OF() {
-      public int getX(Widget widget, int popupWidth, int popupHeight) {
-        return WindowGeometry.absoluteRight(widget);
-      }},
+      public double getX(Element element, double popupWidth, double popupHeight) {
+        return getAbsoluteRight(element);
+      }
+    },
     /** Right edges aligned */
     RIGHT_EDGES() {
-      public int getX(Widget widget, int popupWidth, int popupHeight) {
-        return WindowGeometry.absoluteRight(widget) - popupWidth;
-      }},
+      public double getX(Element element, double popupWidth, double popupHeight) {
+        return getAbsoluteRight(element) - popupWidth;
+      }
+    },
     /** Left edges aligned */
     LEFT_EDGES() {
-      public int getX(Widget widget, int popupWidth, int popupHeight) {
-        return widget.getAbsoluteLeft();
-      }};
-    public abstract int getX(Widget widget, int popupWidth, int popupHeight);
+      public double getX(Element element, double popupWidth, double popupHeight) {
+        return getAbsoluteLeft(element);
+      }
+    };
+
+    /**
+     * @return the {@code x}-coordinate for positioning a popup of the given dimensions next to the given element
+     * according to this alignment
+     */
+    public int getX(Element element, int popupWidth, int popupHeight) {
+      return (int)getX(element, (double)popupWidth, popupHeight);
+    }
+
+    /**
+     * @return the {@code x}-coordinate for positioning a popup of the given dimensions next to the given element according
+     * to this alignment
+     */
+    public abstract double getX(Element element, double popupWidth, double popupHeight);
   }
 
   public enum Vertical {
     ABOVE() {
-      public int getY(Widget widget, int popupWidth, int popupHeight) {
-        return widget.getAbsoluteTop() - popupHeight;
-      }},
+      public double getY(Element element, double popupWidth, double popupHeight) {
+        return getAbsoluteTop(element) - popupHeight;
+      }
+    },
     BELOW() {
-      public int getY(Widget widget, int popupWidth, int popupHeight) {
-        return WindowGeometry.absoluteBottom(widget);
-      }},
+      public double getY(Element element, double popupWidth, double popupHeight) {
+        return getAbsoluteBottom(element);
+      }
+    },
     TOP_EDGES() {
-      public int getY(Widget widget, int popupWidth, int popupHeight) {
-        return widget.getAbsoluteTop();
-      }},
+      public double getY(Element element, double popupWidth, double popupHeight) {
+        return getAbsoluteTop(element);
+      }
+    },
     /** Aligns the vertical midpoints of both rectangles */
     MIDDLE() {
-      public int getY(Widget widget, int popupWidth, int popupHeight) {
-        int widgetMiddle = widget.getAbsoluteTop() + widget.getOffsetHeight() / 2;
-        return widgetMiddle - (popupHeight / 2);
-      }};
-    public abstract int getY(Widget widget, int popupWidth, int popupHeight);
+      public double getY(Element element, double popupWidth, double popupHeight) {
+        double elementMiddle = getAbsoluteTop(element) + getRenderedHeight(element) / 2;
+        return elementMiddle - (popupHeight / 2);
+      }
+    };
+
+    /**
+     * @return the {@code y}-coordinate for positioning a popup of the given dimensions next to the given element
+     * according to this alignment
+     */
+    public int getY(Element element, int popupWidth, int popupHeight) {
+      return (int)getY(element, (double)popupWidth, popupHeight);
+    }
+
+    /**
+     * @return the {@code y}-coordinate for positioning a popup of the given dimensions next to the given element
+     * according to this alignment
+     */
+    public abstract double getY(Element element, double popupWidth, double popupHeight);
   }
 
   private final Horizontal horizontal;
@@ -104,5 +153,68 @@ public class Alignment {
 
   public Vertical getVertical() {
     return vertical;
+  }
+
+  /**
+   * @return the desired position of a popup of the given dimensions when placed next to the given element
+   * according to this alignment
+   */
+  public Point getPopupPosition(Element element, double popupWidth, double popupHeight) {
+    return new RealPoint(
+        getX(element, popupWidth, popupHeight),
+        getY(element, popupWidth, popupHeight));
+  }
+
+  /**
+   * @return the {@code x}-coordinate for positioning a popup of the given dimensions next to the given element
+   * according to this alignment
+   */
+  public int getX(Element element, int popupWidth, int popupHeight) {
+    return horizontal != null ? horizontal.getX(element, popupWidth, popupHeight) : 0;
+  }
+
+  /**
+   * @return the {@code x}-coordinate for positioning a popup of the given dimensions next to the given element
+   * according to this alignment
+   */
+  public double getX(Element element, double popupWidth, double popupHeight) {
+    return horizontal != null ? horizontal.getX(element, popupWidth, popupHeight) : 0;
+  }
+
+  /**
+   * @return the {@code y}-coordinate for positioning a popup of the given dimensions next to the given element
+   * according to this alignment
+   */
+  public int getY(Element element, int popupWidth, int popupHeight) {
+    return vertical != null ? vertical.getY(element, popupWidth, popupHeight): 0;
+  }
+
+  /**
+   * @return the {@code y}-coordinate for positioning a popup of the given dimensions next to the given element
+   * according to this alignment
+   */
+  public double getY(Element element, double popupWidth, double popupHeight) {
+    return vertical != null ? vertical.getY(element, popupWidth, popupHeight): 0;
+  }
+
+  @Override
+  public String toString() {
+    return StringUtils.tupleToString(horizontal, vertical);
+  }
+
+  @Override
+  public boolean equals(Object o) {
+    if (this == o)
+      return true;
+    if (o == null || getClass() != o.getClass())
+      return false;
+    Alignment alignment = (Alignment)o;
+    return horizontal == alignment.horizontal &&
+        vertical == alignment.vertical;
+  }
+
+  @Override
+  public int hashCode() {
+    return Objects.hash(horizontal, vertical);
   }
 }

@@ -16,7 +16,6 @@
 
 package solutions.trsoftware.commons.client.widgets;
 
-import com.google.gwt.user.client.ui.InlineLabel;
 import com.google.gwt.user.client.ui.LabelBase;
 import com.google.gwt.user.client.ui.Widget;
 
@@ -28,17 +27,23 @@ import com.google.gwt.user.client.ui.Widget;
  * @since 12/23/2017
  */
 public class LabeledWidget<T extends Widget> extends InlineFlowPanel {
-  private LabelBase label;
-  private T widget;
+  private final LabelBase<?> label;
+  private final T widget;
 
-  public LabeledWidget(LabelBase label, T widget) {
+  public LabeledWidget(LabelBase<?> label, T widget) {
     add(this.label = label);
     add(this.widget = widget);
   }
 
   public LabeledWidget(String label, T widget) {
-    this(new InlineLabel(label), widget);
+    this(Widgets.inlineLabel(label), widget);
   }
 
+  public LabelBase<?> getLabel() {
+    return label;
+  }
 
+  public T getWidget() {
+    return widget;
+  }
 }

@@ -18,8 +18,8 @@ package solutions.trsoftware.commons.server.management.monitoring;
 
 import com.google.common.collect.ImmutableMap;
 import solutions.trsoftware.commons.server.io.StringPrintStream;
-import solutions.trsoftware.commons.server.util.callables.DelegatedRunnable;
 import solutions.trsoftware.commons.shared.util.MemoryUnit;
+import solutions.trsoftware.commons.shared.util.callables.DelegatedRunnable;
 import solutions.trsoftware.commons.shared.util.stats.ImmutableStats;
 import solutions.trsoftware.commons.shared.util.stats.NumberSampleOnlineDouble;
 import solutions.trsoftware.commons.shared.util.stats.SampleStatistics;
@@ -29,6 +29,7 @@ import java.text.NumberFormat;
 import java.util.EnumMap;
 import java.util.EnumSet;
 import java.util.Map;
+import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
@@ -46,7 +47,7 @@ public class SystemLoadProfiler {
   private static final EnumSet<SystemLoadStatType> supportedStatTypes = EnumSet.of(HEAP_USED, HEAP_COMMITTED, CPU);
 
 
-  private ScheduledThreadPoolExecutor executor;
+  private ScheduledExecutorService executor;
   private Map<SystemLoadStatType, Entry> entries;
   private Map<SystemLoadStatType, ImmutableStats<Double>> summaries;
 
@@ -86,6 +87,7 @@ public class SystemLoadProfiler {
   public synchronized void start(long initialDelay, long period, TimeUnit unit) {
     if (executor != null)
       throw new IllegalStateException(toString() + " already started");
+    // TODO(3/30/2025): maybe allow passing an existing ScheduledExecutorService to constructor
     executor = new ScheduledThreadPoolExecutor(entries.size()); // ensure enough threads to execute all updates concurrently
     for (SystemLoadStatType statType : entries.keySet()) {
       Entry entry = entries.get(statType);

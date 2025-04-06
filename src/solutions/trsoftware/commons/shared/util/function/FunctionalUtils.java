@@ -16,8 +16,10 @@
 
 package solutions.trsoftware.commons.shared.util.function;
 
+import solutions.trsoftware.commons.shared.util.StringUtils;
 import solutions.trsoftware.commons.shared.util.callables.FunctionN;
 
+import java.util.Objects;
 import java.util.function.*;
 import java.util.stream.Stream;
 
@@ -178,6 +180,39 @@ public class FunctionalUtils {
    */
   public static <T> Predicate<T> alwaysFalse() {
     return any -> false;
+  }
+
+  /**
+   * @return a predicate that returns {@code true} iff its argument {@link Object#equals equals} {@code obj}
+   */
+  public static <T> Predicate<T> equalTo(T obj) {
+    return o -> Objects.equals(o, obj);
+  }
+
+  /**
+   * @return a predicate that returns {@code false} iff its argument {@link Object#equals equals} {@code obj}
+   */
+  public static <T> Predicate<T> notEqualTo(T obj) {
+    return o -> !Objects.equals(o, obj);
+  }
+
+  /**
+   * Applies the given consumer to the given value if the value is not {@code null}.
+   * <p>Equivalent to:
+   * <pre>
+   *   Optional.ofNullable(value).ifPresent(consumer);
+   * </pre>
+   * but doesn't create an intermediate optional.
+   *
+   * @return {@code true} if the consumer was invoked (i.e. the value wasn't {@code null})
+   * @see StringUtils#applyIfNotBlank(String, Consumer)
+   */
+  public static <T> boolean applyIfNotNull(T value, Consumer<T> consumer) {
+    if (value != null) {
+      consumer.accept(value);
+      return true;
+    }
+    return false;
   }
 
   // TODO: unit test this class

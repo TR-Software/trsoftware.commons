@@ -28,6 +28,6 @@ public interface CommonsClientBundle extends ClientBundle {
   CommonsClientBundleFactory FACTORY = GWT.create(CommonsClientBundleFactory.class);
   CommonsClientBundle INSTANCE = FACTORY.getCommonsClientBundle();
 
-  @Source("Commons.css")
+  @Source("Commons.gss")
   CommonsCss css();
 }

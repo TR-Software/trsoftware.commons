@@ -75,4 +75,14 @@ public class JsMixedArray extends JsArrayMixed {
     return this;
   }
 
+  /**
+   * Appends the given elements to the end of the array.
+   * @return this array, for method chaining.
+   */
+  public final JsMixedArray add(JavaScriptObject... values) {
+    for (JavaScriptObject value : values)
+      push(value);
+    return this;
+  }
+
 }

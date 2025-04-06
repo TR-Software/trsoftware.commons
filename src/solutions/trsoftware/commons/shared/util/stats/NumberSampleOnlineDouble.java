@@ -16,6 +16,8 @@
 
 package solutions.trsoftware.commons.shared.util.stats;
 
+import com.google.common.base.MoreObjects;
+
 import java.io.Serializable;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
@@ -45,7 +47,7 @@ import java.util.stream.Stream;
  * @see Collectors#summarizingDouble
  * @author Alex
  */
-public class NumberSampleOnlineDouble implements Serializable, SampleStatisticsDouble, CollectableStats<Double, NumberSampleOnlineDouble> {
+public class NumberSampleOnlineDouble implements Serializable, SampleStatisticsDouble, UpdatableDouble, CollectableStats<Double, NumberSampleOnlineDouble> {
 
   final MeanAndVariance mv = new MeanAndVariance();
   final MinDouble min = new MinDouble();
@@ -56,11 +58,6 @@ public class NumberSampleOnlineDouble implements Serializable, SampleStatisticsD
 
   // TODO: create a static factory method that wraps any SampleStatistics with an adapter (like Collections.synchronized*)
   // TODO: (might be able to do this for any interface using reflection)
-
-  @Override
-  public void update(Double x) {
-   update(x.doubleValue());
-  }
 
   public void update(double x) {
     if (Double.isFinite(x)) {
@@ -107,11 +104,23 @@ public class NumberSampleOnlineDouble implements Serializable, SampleStatisticsD
     throw new UnsupportedOperationException("This online algorithm doesn't support medians.");
   }
 
+  /**
+   * Returns the <a href="http://en.wikipedia.org/wiki/Variance#Population_variance">population variance</a> of the values.
+   * @return the population variance, or {@code 0} if empty
+   * @see #sampleVariance()
+   */
   public double variance() {
-    // variance_n = M2/n      # Population variance
-    // variance = M2/(n - 1)  # Sample variance
-    // NOTE: NumberSample uses the Population variance, so we use the same here
     return mv.variance();
+  }
+
+  /**
+   * Returns the <a href="http://en.wikipedia.org/wiki/Variance#Sample_variance">sample variance</a> of the values.
+   * @return the sample variance, or {@code 0} if empty
+   * @see #variance()
+   */
+  @Override
+  public double sampleVariance() {
+    return mv.sampleVariance();
   }
 
   @Override
@@ -128,6 +137,19 @@ public class NumberSampleOnlineDouble implements Serializable, SampleStatisticsD
     result = 31 * result + min.hashCode();
     result = 31 * result + max.hashCode();
     return result;
+  }
+
+  @Override
+  public String toString() {
+    return MoreObjects.toStringHelper(this)
+        .add("size", size())
+        .add("min", min())
+        .add("max", max())
+        .add("sum", sum())
+        .add("mean", mean())
+        .add("variance", variance())
+        .add("stdev", stdev())
+        .toString();
   }
 
   /**

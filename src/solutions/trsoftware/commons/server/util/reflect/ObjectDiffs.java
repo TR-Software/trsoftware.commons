@@ -19,10 +19,7 @@ package solutions.trsoftware.commons.server.util.reflect;
 import solutions.trsoftware.commons.shared.util.SimplePair;
 import solutions.trsoftware.commons.shared.util.StringUtils;
 
-import java.lang.reflect.Field;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Member;
-import java.lang.reflect.Method;
+import java.lang.reflect.*;
 import java.util.*;
 
 import static solutions.trsoftware.commons.shared.util.Assert.assertNotNull;
@@ -350,6 +347,9 @@ public class ObjectDiffs {
    * @return The value of the given member in the given class.
    */
   private static Object evalMember(Member member, Object instance) throws IllegalAccessException, InvocationTargetException {
+    if (member instanceof AccessibleObject) {
+      ((AccessibleObject)member).setAccessible(true);
+    }
     if (member instanceof Field)
       return ((Field)member).get(instance);
     else if (member instanceof Method)
@@ -510,6 +510,10 @@ public class ObjectDiffs {
       }
       Collections.reverse(path);
       return path;
+    }
+
+    public PathElement getPathElement() {
+      return pathElement;
     }
 
     public boolean isLeaf() {

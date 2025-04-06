@@ -19,6 +19,7 @@ package solutions.trsoftware.commons.shared.util;
 import java.io.Serializable;
 import java.util.Map;
 import java.util.Objects;
+import java.util.function.BiConsumer;
 
 /**
  * Convenience class for representing a pair of two objects. Extends {@link Map.Entry} with some additional convenience
@@ -70,7 +71,7 @@ public class Pair<K, V> implements Map.Entry<K,V>, Serializable {
 
   @Override
   public String toString() {
-    return StringUtils.template("($1, $2)", String.valueOf(first), String.valueOf(second));
+    return StringUtils.template("($1, $2)", first, second);
   }
 
   @Override
@@ -92,5 +93,24 @@ public class Pair<K, V> implements Map.Entry<K,V>, Serializable {
     int result = first != null ? first.hashCode() : 0;
     result = 31 * result + (second != null ? second.hashCode() : 0);
     return result;
+  }
+
+  /**
+   * Applies the given {@link BiConsumer} to an iterable of pairs, similar to the {@link Map#forEach(BiConsumer)}
+   * method.
+   * @param <K> entry key type
+   * @param <V> entry value type
+   */
+  public static <K, V> void forEach(Iterable<? extends Pair<K, V>> pairs, BiConsumer<? super K, ? super V> action) {
+    MapUtils.forEach(pairs, action);
+  }
+
+  /**
+   * Factory method that can be used with {@code import static} for cleaner code versus the {@link #Pair(Object, Object)}
+   * constructor.
+   * @return a new {@link Pair} instance with the given components
+   */
+  public static <K, V> Pair<K, V> pair(K first, V second) {
+    return new Pair<>(first, second);
   }
 }

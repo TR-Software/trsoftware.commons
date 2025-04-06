@@ -17,29 +17,24 @@
 package solutions.trsoftware.commons.client.util.geometry;
 
 import com.google.gwt.dom.client.Document;
+import com.google.gwt.dom.client.Element;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.PopupPanel;
 import com.google.gwt.user.client.ui.UIObject;
-import com.google.gwt.user.client.ui.Widget;
+import solutions.trsoftware.commons.client.dom.DomUtils;
 import solutions.trsoftware.commons.shared.util.geometry.Rectangle;
 
 import java.util.Arrays;
 
 /**
- * Date: Nov 2, 2008 Time: 5:03:32 PM
+ * Utils for positioning a {@link PopupPanel} in accordance to a list of preferences specified by a {@link RelativePosition}
  *
- * @author Alex
+ * @author Alex, Nov 2, 2008
+ * @see PopupPanel#showRelativeTo(UIObject)
  */
 public class WindowGeometry {
-
-
-  public static int absoluteRight(Widget widget) {
-    return widget.getAbsoluteLeft() + widget.getOffsetWidth();
-  }
-
-  public static int absoluteBottom(Widget widget) {
-    return widget.getAbsoluteTop() + widget.getOffsetHeight();
-  }
+  // TODO(12/5/2024): document this class
+  // TODO(3/28/2025): maybe replace this class with a PopupPositioner subclass
 
   /**
    * Sets the position of the popup relative to another widget (the "pivot") using the prefs defined by the argument.
@@ -47,23 +42,39 @@ public class WindowGeometry {
    * coordinates are both 0).
    */
   public static void positionPopupNextToWidget(PopupPanel popup, RelativePosition pos) {
-    positionPopupNextToWidget(pos.getPivot(), popup, popup.getOffsetWidth(), popup.getOffsetHeight(), pos.getOffsetX(), pos.getOffsetY(), pos.getAlignmentPrefs());
+    positionPopupNextToElement(popup, pos);  // TODO: remove duplicate method with same param types
   }
 
-  private static void positionPopupNextToWidget(Widget widget, PopupPanel popup,
-                                               int popupWidth, int popupHeight,
-                                               int xOffset, int yOffset,
-                                               Alignment... alignmentPrefs) {
-    if (!widget.isAttached())
-      return;  // when a widget is not attached, it's top and left coordinates are both 0, so this method doesn't make sense
+  /**
+   * Sets the position of the popup relative to another element (the "pivot") using the prefs defined by the argument.
+   * Does nothing if that the pivot element is not attached to the DOM (when element is not attached, it's top and left
+   * coordinates are both 0).
+   */
+  public static void positionPopupNextToElement(PopupPanel popup, RelativePosition pos) {
+    positionPopupNextToElement(pos.getPivot(), popup,
+        popup.getOffsetWidth(), popup.getOffsetHeight(), pos.getOffsetX(), pos.getOffsetY(),
+        pos.getAlignmentPrefs());
+  }
+
+  private static void positionPopupNextToElement(Element element, PopupPanel popup,
+                                                 int popupWidth, int popupHeight,
+                                                 Offset xOffset, Offset yOffset,
+                                                 Alignment... alignmentPrefs) {
+    if (!DomUtils.isAttached(element)) {
+      return;  // when a element is not attached, it's top and left coordinates are both 0, so this method doesn't make sense
+      // TODO: maybe throw ISE or use some default position (e.g. centered in window, or (0, 0)) in this case instead of not showing the popup at all
+    }
+    int xOffsetPx = (int)Math.round(xOffset.getX(element));
+    int yOffsetPx = (int)Math.round(yOffset.getY(element));
+
     Rectangle clientWindow = new Rectangle(Window.getScrollLeft(), Window.getScrollTop(), Window.getClientWidth(), Window.getClientHeight());
     
     // try each given alignment, checking to make sure that it fits the screen
     Rectangle best = null;
     Rectangle bestOverlap = null;
     for (Alignment alignment : alignmentPrefs) {
-      int x = alignment.getHorizontal().getX(widget, popupWidth, popupHeight);
-      int y = alignment.getVertical().getY(widget, popupWidth, popupHeight);
+      int x = alignment.getX(element, popupWidth, popupHeight);
+      int y = alignment.getY(element, popupWidth, popupHeight);
       Rectangle popupRectangle = new Rectangle(x, y, popupWidth, popupHeight);
       // if this rectangle fits within the client window, use it;
       Rectangle overlapRectangle = clientWindow.intersection(popupRectangle);
@@ -82,7 +93,8 @@ public class WindowGeometry {
     if (best == null)
       best = new Rectangle(0, 0, 0, 0);
 //    System.out.println("Drawing popup at " + best.toString());
-    popup.setPopupPosition(best.x + xOffset, best.y + yOffset);
+    // TODO(12/29/2024): maybe consider the offset args in the above loop (when looking for the best rectangle)?
+    popup.setPopupPosition(best.x + xOffsetPx, best.y + yOffsetPx);
   }
 
   /** Debugging method */

@@ -16,7 +16,7 @@
 
 package solutions.trsoftware.commons.client.dom;
 
-import com.google.gwt.user.client.Element;
+import com.google.gwt.dom.client.Element;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.PopupPanel;
 import com.google.gwt.user.client.ui.Widget;
@@ -24,6 +24,8 @@ import solutions.trsoftware.commons.client.util.GwtUtils;
 
 import javax.annotation.Nullable;
 import java.util.function.Predicate;
+
+import static com.google.common.base.Preconditions.checkArgument;
 
 /**
  * Performs lookups on the widget hierarchy (i.e. DOM).
@@ -37,19 +39,22 @@ public class WidgetQuery {
   /**
    * Finds the first ancestor of the given widget which is an instance of the
    * given concrete class (or a subclass of it).
+   * <p>
+   * <b>Note:</b> this method doesn't support interfaces (due to GWT's limited reflection support); if the argument
+   * is an interface, should instead use {@link #ancestorOf(Widget, Predicate)} with an {@code instanceof} predicate,
+   * e.g. {@code ancestorOf(widget, w -> w instanceof ParentClass)}.
    *
+   * @param parentClass must be a concrete class, not an interface
    * @return an instance of the given class which is an ancestor of {@code widget}, or {@code null} if not found.
+   * @throws IllegalArgumentException if {@code parentClass} is an iterface
    * @see #ancestorOf(Widget, Predicate)
    */
+  @SuppressWarnings("unchecked")
+  @Nullable
   public static <T extends Widget> T ancestorOf(Widget widget, Class<T> parentClass) {
-    // TODO(2/21/2024): can simplify by delegating to ancestorOf(Widget, Predicate)
-    Widget next = widget;
-    while ((next = next.getParent()) != null) {
-      if (GwtUtils.isAssignableFrom(parentClass, next.getClass()))
-        //noinspection unchecked
-        return (T)next;
-    }
-    return null;
+    checkArgument(parentClass != null && !parentClass.isInterface(),
+        "parentClass (%s) must be a class (not an interface)", parentClass);
+    return (T)ancestorOf(widget, w -> GwtUtils.isAssignableFrom(parentClass, w.getClass()));
   }
 
   /**

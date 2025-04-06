@@ -59,6 +59,14 @@ public class Area2d implements Serializable, Comparable<Area2d> {
     return width * height;
   }
 
+  /**
+   * @return a new area with width/height specified as offsets from this instance
+   */
+  public Area2d offset(int widthOffset, int heightOffset) {
+    // TODO: check preconditions, document, unit test
+    return new Area2d(width + widthOffset, height + heightOffset);
+  }
+
   @Override
   public String toString() {
     return "" + width + "x" + height;

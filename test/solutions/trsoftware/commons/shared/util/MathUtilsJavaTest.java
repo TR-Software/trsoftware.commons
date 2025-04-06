@@ -16,18 +16,24 @@
 
 package solutions.trsoftware.commons.shared.util;
 
+import com.google.common.base.Strings;
 import com.google.common.collect.LinkedHashMultimap;
 import com.google.common.collect.Multimap;
+import com.google.common.collect.Streams;
+import com.google.common.primitives.UnsignedBytes;
+import com.google.common.primitives.UnsignedInts;
 import com.google.gwt.core.shared.GwtIncompatible;
 import junit.framework.TestCase;
 import solutions.trsoftware.commons.server.util.ServerArrayUtils;
-import solutions.trsoftware.commons.shared.testutil.AssertUtils;
+import solutions.trsoftware.commons.shared.io.TablePrinter;
 import solutions.trsoftware.commons.shared.util.text.SharedNumberFormat;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.*;
+import java.util.stream.LongStream;
 
+import static solutions.trsoftware.commons.shared.testutil.AssertUtils.assertThrows;
 import static solutions.trsoftware.commons.shared.util.MathUtils.*;
 
 @GwtIncompatible
@@ -90,12 +96,7 @@ public class MathUtilsJavaTest extends TestCase {
     for (long i = -1000; i < 0xffffffffL + 1000; i++) {
       if (i < 0 || i > 0xffffffffL) {
         final long value = i;
-        AssertUtils.assertThrows(IllegalArgumentException.class,
-            new Runnable() {
-              public void run() {
-                packUnsignedInt(value);
-              }
-            });
+        assertThrows(IllegalArgumentException.class, () -> packUnsignedInt(value));
         illegalValuesChecked++;
       }
       if (i == 0)
@@ -147,12 +148,7 @@ public class MathUtilsJavaTest extends TestCase {
     for (int i = -1000; i < 1000; i++) {
       if (i < 0 || i > 255) {
         final int value = i;
-        AssertUtils.assertThrows(IllegalArgumentException.class,
-            new Runnable() {
-              public void run() {
-                packUnsignedByte(value);
-              }
-            });
+        assertThrows(IllegalArgumentException.class, () -> packUnsignedByte(value));
         illegalValuesChecked++;
       }
     }
@@ -188,10 +184,10 @@ public class MathUtilsJavaTest extends TestCase {
     assertEquals(2432902008176640000L, factorial(20));
 
     // factorial is undefined for negative numbers
-    AssertUtils.assertThrows(IllegalArgumentException.class, (Runnable)() -> factorial(-1));
-    AssertUtils.assertThrows(IllegalArgumentException.class, (Runnable)() -> factorial(-12345));
+    assertThrows(IllegalArgumentException.class, () -> factorial(-1));
+    assertThrows(IllegalArgumentException.class, () -> factorial(-12345));
     // 21! overflows a 64-bit long
-    AssertUtils.assertThrows(ArithmeticException.class, (Runnable)() -> factorial(21));
+    assertThrows(ArithmeticException.class, () -> factorial(21));
   }
 
   public void testNPr() throws Exception {
@@ -241,11 +237,7 @@ public class MathUtilsJavaTest extends TestCase {
     for (int i = 0; i < expectedSequence.length; i++) {
       checkFibonacci(i, expectedSequence[i]);
     }
-    AssertUtils.assertThrows(IllegalArgumentException.class, new Runnable() {
-      public void run() {
-        fibonacci(-1);
-      }
-    });
+    assertThrows(IllegalArgumentException.class, () -> fibonacci(-1));
   }
 
   private void checkFibonacci(int i, int expected) {
@@ -344,9 +336,7 @@ public class MathUtilsJavaTest extends TestCase {
           else {
             int finalX = x;
             int finalDivisor = divisor;
-            AssertUtils.assertThrows(ArithmeticException.class, (Runnable)() -> {
-              int resultMod0 = floorMod(finalX, finalDivisor);
-            });
+            assertThrows(ArithmeticException.class, () -> floorMod(finalX, finalDivisor));
           }
         }
       }
@@ -468,4 +458,60 @@ public class MathUtilsJavaTest extends TestCase {
 
     assertEquals(warnings.toString(), 0, warnings.size());
   }
+
+  public void testPackUnsignedByte() throws Exception {
+    // compare encoding with Guava's UnsignedBytes and Java's (byte) cast
+    TablePrinter table = new TablePrinter();
+    for (int i = 0; i < 256; i++) {
+      byte unsigned = packUnsignedByte(i);
+      assertEquals(i, unsignedByte(unsigned));  // verify the inverse method produces the original value
+      byte guava = UnsignedBytes.checkedCast(i);
+      byte cast = (byte)i;
+      table.newRow()
+          .addCol("i", i)
+          .addCol("packUnsignedByte", describeByte(i, unsigned))
+          .addCol("UnsignedBytes", describeByte(i, guava))
+          .addCol("(byte) cast", describeByte(i, cast));
+    }
+    table.printTable();
+    // should throw exception if arg not in range [0, 255]
+    assertThrows(IllegalArgumentException.class, () -> packUnsignedByte(-1));
+    assertThrows(IllegalArgumentException.class, () -> packUnsignedByte(256));
+  }
+
+  private String describeByte(int i, byte b) {
+    return String.format("%s (0x%02X, %8sb)", b, b, StringUtils.byteToBinary(b));
+  }
+
+
+  public void testPackUnsignedInt() throws Exception {
+    // TODO: experimental: counterpart to info table printed by testPackUnsignedByte;
+    // TODO: resolve conflicting test names with testPackUnsignedInt8 and testPackUnsignedInt32
+    // compare encoding with Guava's UnsignedInts and Java's (int) cast
+    TablePrinter table = new TablePrinter();
+    Streams.concat(
+        LongStream.range(0, 3),
+        LongStream.range(Integer.MAX_VALUE - 1, (long)Integer.MAX_VALUE + 2),
+        LongStream.rangeClosed(0xffffffffL - 1, 0xffffffffL)
+    ).forEach(i -> {
+      int unsigned = packUnsignedInt(i);
+      assertEquals(i, unsignedInt(unsigned));  // verify the inverse method produces the original value
+      int guava = UnsignedInts.checkedCast(i);
+      int cast = (int)i;
+      table.newRow()
+          .addCol("i", i)
+          .addCol("packUnsignedInt", describeInt(i, unsigned))
+          .addCol("UnsignedInts", describeInt(i, guava))
+          .addCol("(int) cast", describeInt(i, cast));
+    });
+    table.printTable();
+    // should throw exception if arg not in range [0, 255]
+    assertThrows(IllegalArgumentException.class, () -> packUnsignedInt(-1));
+    assertThrows(IllegalArgumentException.class, () -> packUnsignedInt(0xffffffffL + 1));
+  }
+
+  private String describeInt(long l, int i) {
+    return String.format("%11s (0x%08X, %sb)", i, i, Strings.padStart(Integer.toBinaryString(i), 32, '0'));
+  }
+
 }

@@ -38,6 +38,7 @@ import java.io.PrintWriter;
  *   The possible values of the {@code user.agent} property are specified in {@link UserAgentPropertyGenerator.UserAgent}
  * </p>
  * @see UserAgentPropertyGenerator
+ * @deprecated
  */
 public class UserAgentPermutationOracleGenerator extends Generator {
 

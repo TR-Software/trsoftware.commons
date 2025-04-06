@@ -17,9 +17,8 @@
 package solutions.trsoftware.commons.shared.util.text;
 
 
+import solutions.trsoftware.commons.shared.util.iterators.CharIterator;
 import solutions.trsoftware.commons.shared.util.iterators.CharSequenceIterator;
-
-import java.util.Iterator;
 
 /**
  * Represents a range of consecutive chars.
@@ -32,7 +31,7 @@ public class CharRange implements CharSequence, Iterable<Character> {
   public final char min;
   public final char max;
 
-  /** Will be lazily initialized on the first invocation of {@link #toString()} */
+  /** Cached value of {@link #toString()} */
   private String str;
 
   /**
@@ -81,22 +80,17 @@ public class CharRange implements CharSequence, Iterable<Character> {
   @Override
   public String toString() {
     if (str == null)
-      str = toString(this);
+      return str = new String(toArray());
     return str;
   }
 
-  public static String toString(CharSequence charSequence) {
-    if (charSequence != null) {
-      int len = charSequence.length();
-      if (len > 0) {
-        char[] chars = new char[len];
-        for (int i = 0; i < len; i++) {
-          chars[i] = charSequence.charAt(i);
-        }
-        return new String(chars);
-      }
+  public char[] toArray() {
+    int len = length();
+    char[] chars = new char[len];
+    for (int i = 0; i < len; i++) {
+      chars[i] = charAt(i);
     }
-    return "";
+    return chars;
   }
 
   @Override
@@ -111,7 +105,7 @@ public class CharRange implements CharSequence, Iterable<Character> {
   }
 
   @Override
-  public Iterator<Character> iterator() {
+  public CharIterator iterator() {
     return new CharSequenceIterator(this);
   }
 

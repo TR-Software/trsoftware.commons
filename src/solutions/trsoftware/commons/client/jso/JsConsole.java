@@ -23,7 +23,7 @@ import com.google.gwt.core.client.JsArrayMixed;
  * A JSNI overlay type for the <a href="https://developer.mozilla.org/en-US/docs/Web/API/Console">window.console</a> object.
  *
  * Supports a subset of the methods provided by the various browser implementations of {@code window.console}
- * (e.g. {@link #log}, {@link #time}, {@link #timeEnd}, etc.)
+ * (e.g. {@link #logVarArgs}, {@link #time}, {@link #timeEnd}, etc.)
  * <p style="font-style:italic;">
  * NOTE: {@link elemental.js.html.JsConsole} is a more full-featured implementation of this concept and is part of GWT's experimental new "Elemental" package.
  * However, that class doesn't compensate for lack of functionality of certain methods, and also Elemental only
@@ -89,27 +89,35 @@ public class JsConsole extends JavaScriptObject {
   }-*/;
 
   /**
-   * For general output of logging information. We assume that all implementations of {@code window.console} provide at least a {@code log} method
-   * @deprecated Use {@link #log(Level, String)} instead.
+   * Logs an object or a string with {@code console.log}
+   *
+   * @see #logVarArgs(JavaScriptObject)
+   * @see #logVarArgs(Level, JavaScriptObject)
+   * @see #log(Level, String)
    */
   public final native void log(Object arg) /*-{
     this.log && this.log(arg);
   }-*/;
 
   /**
-   * For general output of logging information. We assume that all implementations of {@code window.console} provide at least a {@code log} method.
-   * @param args can pass a {@link JsArrayMixed} to take advantage of {@code console.log}'s vararg capability. Example:
+   * Invokes {@code console.log} with multiple arguments using {@code console.log.apply(argsArray)}.
+   * <p>
+   * Can use {@link JsArrayMixed} to easily construct the args array.  For example:
    * <pre>
-   *   {@link #log(JavaScriptObject) log}(JsMixedArray.create().add("Event object: ").add(event))
+   *   {@link #logVarArgs}(JsMixedArray.create().add("Event object: ").add(event))
    * </pre>
-   * @deprecated Use {@link #log(Level, JavaScriptObject)} instead.
+   *
+   * @param argsArray must be an Array or an "array-like" object (otherwise {@code Function.apply}
+   *   could throw a {@code TypeError}) an pass a {@link JsArrayMixed} to take advantage of {@code console.log}'s vararg capability. Example:
+
+   * @see #logVarArgs(Level, JavaScriptObject)
    */
-  public final native <A extends JavaScriptObject> void log(A args) /*-{
-    this.log && this.log.apply(this, args);
+  public final native <A extends JavaScriptObject> void logVarArgs(A argsArray) /*-{
+    this.log && this.log.apply(this, argsArray);
   }-*/;
 
   public final void log(Level level, String arg) {
-    log(level, JsMixedArray.create().add(arg));
+    logVarArgs(level, JsMixedArray.create().add(arg));
   }
 
   /**
@@ -118,13 +126,13 @@ public class JsConsole extends JavaScriptObject {
    * <p>
    * Example:
    * <pre>
-   *   {@link #log(Level, JavaScriptObject) log}(JsMixedArray.create().add("Event object: ").add(event))
+   *   {@link #logVarArgs(Level, JavaScriptObject) log}(JsMixedArray.create().add("Event object: ").add(event))
    * </pre>
    * @param level the verbosity level
-   * @param args can pass a {@link JsMixedArray} to construct the args array using method chaining.
+   * @param args must be an Array (can pass a {@link JsMixedArray} to construct the args array using method chaining)
    */
-  public final <A extends JavaScriptObject> void log(Level level, A args) {
-    log(level.getJsMethodName(), args);
+  public final <A extends JavaScriptObject> void logVarArgs(Level level, A args) {
+    logVarArgs(level.getJsMethodName(), args);
   }
 
   /**
@@ -141,9 +149,39 @@ public class JsConsole extends JavaScriptObject {
     return !!this[level];
   }-*/;
 
-  private native <A extends JavaScriptObject> void log(String level, A args) /*-{
-    var method = this[level] ? this[level] : this.log; // fall back on the log method
+  private native <A extends JavaScriptObject> void logVarArgs(String level, A args) /*-{
+    var method = this[level] || this.log; // fall back on the log method
     method && method.apply(this, args);  // NOTE: we use method.apply because in Chromium 35 can't invoke console methods through a variable (see https://gist.github.com/euank/7523581)
+  }-*/;
+
+  /**
+   * Invokes a {@code console} method that accepts a variable number of args, by executing the equivalent of
+   * {@code console[name].apply(console, args)}.
+   * <p>
+   * If the invocation throws an error (e.g. if {@code argsArray} is not an array or an "array-like" object,
+   * the error will be printed using {@code console.warn}, or if the given method isn't available,
+   * will simply return {@code false}.
+   *
+   * @param name the name of the {@code console} method to invoke (e.g. "log", "debug", "trace", etc.)
+   * @param argsArray must be an array or an "array-like" object such as {@code NodeList}, otherwise {@code Function.apply}
+   *   throws a {@code TypeError}
+   * @return {@code true} iff the invocation was successful
+   */
+  // TODO(10/9/2024): use this to add var-args support for all the methods in this class
+  public final native boolean invokeVarArgsMethod(String name, JavaScriptObject argsArray) /*-{
+    var method = this[name];
+    if (method) {
+      try {
+        method.apply(this, argsArray);  // NOTE: another reason to use method.apply: in Chromium 35 can't invoke console methods through a variable (see https://gist.github.com/euank/7523581)
+        return true;
+      }
+      catch (e) {
+        // most likely because args is invalid for Function.apply (e.g. not array or array-like)
+        if (this.warn)
+          this.warn("Error invoking console." + name + "(", argsArray, "):", e);
+      }
+    }
+    return false;
   }-*/;
 
   /**
@@ -161,7 +199,7 @@ public class JsConsole extends JavaScriptObject {
   }-*/;
   
   /**
-   * Informative logging information.  There's no real difference between this method and {@link #log} in most browsers.
+   * Informative logging information.  There's no real difference between this method and {@link #logVarArgs} in most browsers.
    * <p>Equivalent to calling {@link #log(Level, String)} with {@link Level#INFO}.
    * To pass multiple arguments, call {@link #log(Level, JsArrayMixed)}
    * @deprecated Use {@link #log(Level, String)} or {@link #log(Level, JsArrayMixed)} instead.
@@ -239,6 +277,8 @@ public class JsConsole extends JavaScriptObject {
    * method, by which an app can add an annotation to the Timeline section
    * of the browser's developer tools.  This is particularly useful for the
    * Speed Tracer chrome extension (see: https://developers.google.com/web-toolkit/speedtracer/logging-api )
+   *
+   * @deprecated superceded by {@link #timeStamp(Object)} (which is also non-standard)
    */
   public final native void markTimeline(Object arg) /*-{
     this.markTimeline && this.markTimeline(arg);
@@ -250,7 +290,7 @@ public class JsConsole extends JavaScriptObject {
 
   /** "Turns on the JavaScript profiler. The optional argument title would contain the text to be printed in the header of the profile report." */
   public final native void profile(String title) /*-{
-    this.profile(title);
+    this.profile && this.profile(title);
   }-*/;
 
   public final native boolean implementsProfile() /*-{
@@ -259,7 +299,7 @@ public class JsConsole extends JavaScriptObject {
 
   /** "Turns off the JavaScript profiler and prints its report." */
   public final native void profileEnd(String title) /*-{
-    this.profileEnd(title);
+    this.profileEnd && this.profileEnd(title);
   }-*/;
 
   public final native boolean implementsProfileEnd() /*-{
@@ -268,7 +308,7 @@ public class JsConsole extends JavaScriptObject {
 
   /** "Creates a new timer under the given name. Call console.timeEnd(name) with the same name to stop the timer and print the time elapsed." */
   public final native void time(String title) /*-{
-    this.time(title);
+    this.time && this.time(title);
   }-*/;
 
   public final native boolean implementsTime() /*-{
@@ -277,7 +317,7 @@ public class JsConsole extends JavaScriptObject {
 
   /** "Stops a timer created by a call to console.time(name) and writes the time elapsed." */
   public final native void timeEnd(String title) /*-{
-    this.timeEnd(title);
+    this.timeEnd && this.timeEnd(title);
   }-*/;
 
   public final native boolean implementsTimeEnd() /*-{
@@ -300,5 +340,84 @@ public class JsConsole extends JavaScriptObject {
   public final native boolean implementsTrace() /*-{
     return !!this.trace;
   }-*/;
+
+
+  // TODO(12/21/2024): experimental builder class:
+
+  public static MessageBuilder newMessage() {
+    return new MessageBuilder();
+  }
+
+  public static MessageBuilder newMessage(Level level) {
+    return new MessageBuilder(level);
+  }
+  
+  public static class MessageBuilder {
+
+    private Level level;
+    private JsMixedArray args = JsMixedArray.create();
+
+    public MessageBuilder() {
+      this(Level.INFO);
+    }
+
+    public MessageBuilder(Level level) {
+      this.level = level;
+    }
+
+    public MessageBuilder setLevel(Level level) {
+      this.level = level;
+      return this;
+    }
+
+    /**
+     * Appends an argument for the logging method.
+     */
+    public MessageBuilder append(String value) {
+      args.add(value);
+      return this;
+    }
+
+    /**
+     * Appends an argument for the logging method
+     */
+    public MessageBuilder append(boolean value) {
+      args.add(value);
+      return this;
+    }
+
+    /**
+     * Appends an argument for the logging method.
+     */
+    public MessageBuilder append(double value) {
+      args.add(value);
+      return this;
+    }
+
+    /**
+     * Appends an argument for the logging method.
+     * @return this array, for method chaining.
+     * @param value
+     */
+    public MessageBuilder append(JavaScriptObject value) {
+      args.add(value);
+      return this;
+    }
+
+    /**
+     * Appends several arguments for the logging method.
+     * @return this array, for method chaining.
+     * @param values
+     */
+    public MessageBuilder append(JavaScriptObject... values) {
+      args.add(values);
+      return this;
+    }
+
+    public void log() {
+      JsConsole.get().logVarArgs(level, args);
+    }
+
+  }
 
 }

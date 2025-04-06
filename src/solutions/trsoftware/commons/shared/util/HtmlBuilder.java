@@ -16,10 +16,14 @@
 
 package solutions.trsoftware.commons.shared.util;
 
+import com.google.gwt.safehtml.shared.SafeHtmlUtils;
+
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+
+import static com.google.gwt.safehtml.shared.SafeHtmlUtils.htmlEscape;
 
 /**
  * A simple builder for HTML strings.
@@ -72,9 +76,7 @@ public class HtmlBuilder {
 
     StringBuilder write(StringBuilder str) {
       str.append('<').append(tagName);
-      for (Map.Entry<String, String> attr : attrs.entrySet()) {
-        str.append(' ').append(attr.getKey()).append("=\"").append(attr.getValue()).append('"');
-      }
+      appendAttributes(str, attrs);
       if (children.isEmpty() && innerHtml == null)
         str.append("/>");
       else {
@@ -142,10 +144,23 @@ public class HtmlBuilder {
     return this;
   }
 
+  /**
+   * Sets an attribute of the current element node, if the given value is non-null.
+   */
   public HtmlBuilder attr(String name, String value) {
     if (value != null) {
       current.isElement().attrs.put(name, value);
     }
+    return this;
+  }
+
+  /**
+   * Sets multiple attributes of the current element node.
+   *
+   * @param attributes attribute name-value pairs
+   */
+  public HtmlBuilder attrs(Map<String, String> attributes) {
+    attributes.forEach(this::attr);
     return this;
   }
 
@@ -198,6 +213,28 @@ public class HtmlBuilder {
       root.write(buffer);
     }
     return buffer.toString();
+  }
+
+  /**
+   * Generates an HTML fragment for the attribute list of an element from the given attribute map.
+   * The values will be {@linkplain SafeHtmlUtils#htmlEscape(String) escaped} if needed.
+   *
+   * @param str will append the result to this buffer, prefixed with a space
+   * @param attributes element attributes as name-value pairs
+   *   (the values will be {@linkplain SafeHtmlUtils#htmlEscape(String) escaped} if needed)
+   */
+  public static void appendAttributes(StringBuilder str, Map<String, String> attributes) {
+    attributes.forEach((name, value) -> appendAttribute(str, name, value));
+  }
+
+  /**
+   * Appends the given name-value pair to an HTML fragment for the attribute list of an element.
+   * The value will be {@linkplain SafeHtmlUtils#htmlEscape(String) escaped} if needed.
+   * @param str will append the result to this buffer, prefixed with a space
+   * @param name the attribute name
+   */
+  private static void appendAttribute(StringBuilder str, String name, String value) {
+    str.append(' ').append(name).append("=\"").append(htmlEscape(value)).append('"');
   }
 
 }

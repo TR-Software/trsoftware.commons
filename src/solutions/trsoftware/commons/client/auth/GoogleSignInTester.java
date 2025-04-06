@@ -69,7 +69,7 @@ public class GoogleSignInTester extends Composite {
         gsiClient = result;
         gsiButtonContainer.setWidget(gsiButton = new GoogleSignInButton(gsiClient, buttonConfig, event -> {
           CredentialResponse response = event.getCredentialResponse();
-          JsConsole.get().log(JsConsole.Level.INFO, JsMixedArray.create()
+          JsConsole.get().logVarArgs(JsConsole.Level.INFO, JsMixedArray.create()
               .add("GSI response:")
               .add(response)
               .add("JWT:")
@@ -93,12 +93,13 @@ public class GoogleSignInTester extends Composite {
 
     public Popup() {
       super(false, AbstractImagePrototype.create(CommonsImages.INSTANCE.user_arrow24()),
-          "GSI Tester`", null);
+          "GSI Tester", null);
       googleSignInTester = new GoogleSignInTester();
 //      googleSignInTester.setWidth("80vw");
 //      googleSignInTester.setHeight("80vh");
 
       setBodyWidget(googleSignInTester);
+      setGlassEnabled(true);
     }
 
     public static Popup getInstance() {

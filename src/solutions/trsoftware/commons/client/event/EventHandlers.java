@@ -16,12 +16,11 @@
 
 package solutions.trsoftware.commons.client.event;
 
-import com.google.gwt.event.dom.client.ClickHandler;
-import com.google.gwt.event.dom.client.HasKeyDownHandlers;
-import com.google.gwt.event.dom.client.HasKeyPressHandlers;
-import com.google.gwt.event.dom.client.KeyCodes;
+import com.google.gwt.event.dom.client.*;
 import com.google.gwt.user.client.Command;
 import com.google.gwt.user.client.ui.Widget;
+
+import javax.annotation.Nullable;
 
 /**
  * Provides utility methods that make working with event handlers a bit less
@@ -33,15 +32,12 @@ import com.google.gwt.user.client.ui.Widget;
 public class EventHandlers {
 
   /**
-   * Adds handlers for the Enter and Escape keyboard keys to the given widget.
-   * The Enter key is handled with a KeyPress event while Escape is
-   * handled with a KeyDown event because WebKit browsers don't generate a KeyPress
-   * for Escape.
-   * @param onEnter The action to be executed when the Enter key is pressed.
-   * @param onEscape The action to be executed when the Escape key is pressed.
+   * Adds {@link KeyDownHandler}s for the Enter and Escape keys to the given widget.
+   * @param onEnter action to be executed when the Enter key is pressed.
+   * @param onEscape action to be executed when the Escape key is pressed.
    */
   public static <T extends Widget & HasKeyPressHandlers & HasKeyDownHandlers> void addEnterAndEscapeKeyHandlers(
-      T widget, final Command onEnter, final Command onEscape) {
+      T widget, @Nullable Command onEnter, @Nullable Command onEscape) {
     if (onEnter != null)
       widget.addKeyDownHandler(new SpecificKeyDownHandler(KeyCodes.KEY_ENTER, onEnter));
     if (onEscape != null)

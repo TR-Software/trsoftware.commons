@@ -25,7 +25,7 @@ import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.RootPanel;
 import solutions.trsoftware.commons.client.CommonsGwtTestCase;
 import solutions.trsoftware.commons.client.util.SchedulerUtils;
-import solutions.trsoftware.commons.shared.util.Point;
+import solutions.trsoftware.commons.shared.util.geometry.Point;
 import solutions.trsoftware.commons.shared.util.mutable.MutableBoolean;
 import solutions.trsoftware.commons.shared.util.stats.FunctionStats;
 import solutions.trsoftware.commons.shared.util.text.SharedNumberFormat;

@@ -20,11 +20,12 @@ package solutions.trsoftware.commons.shared.util.text;
 import com.google.gwt.text.shared.Renderer;
 
 import java.io.IOException;
+import java.util.function.Function;
 
 /**
  * Same as the {@link com.google.gwt.text.shared.AbstractRenderer} class (provides a default implementation of {@link
  * Renderer#render(Object, Appendable)}), but implemented as an {@code interface} (using a Java 1.8 {@code default}
- * method), thus allowing mixin-style multiple inheritance.
+ * method), thus allowing mixin-style multiple inheritance and lambdas.
  *
  * @author Alex
  * @since 7/27/2018
@@ -34,5 +35,10 @@ public interface AbstractRenderer<T> extends Renderer<T> {
   @Override
   default void render(T object, Appendable appendable) throws IOException {
     appendable.append(render(object));
+  }
+
+  @SuppressWarnings("unchecked")
+  static <T> Renderer<T> asRenderer(Function<T, String> toStringFunction) {
+    return (AbstractRenderer<T>)toStringFunction;
   }
 }

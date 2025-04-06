@@ -3,6 +3,11 @@ package solutions.trsoftware.commons.client.css;
 import com.google.gwt.dom.client.Element;
 import com.google.gwt.dom.client.Style;
 
+import java.util.AbstractList;
+import java.util.List;
+
+import static java.util.Objects.requireNonNull;
+
 /**
  * Extends the GWT {@link Style} class with some additional capabilities provided by the {@code CSSStyleDeclaration}
  * interface of the CSS Object Model.
@@ -149,5 +154,47 @@ public class CSSStyleDeclaration extends Style {
   public final native String removeProperty(String name) /*-{
     return this.removeProperty(name);
   }-*/;
+
+  /**
+   * @return a list of all the property names comprising this style declaration
+   */
+  public final List<String> getPropertyNames() {
+    /* TODO: unit test this; hosted mode throws:
+        java.lang.IllegalAccessError: no such method: solutions.trsoftware.commons.client.css.CSSStyleDeclaration.item(int)String/invokeVirtual
+        	at solutions.trsoftware.commons.client.css.CSSStyleDeclaration$.getPropertyNames$(CSSStyleDeclaration.java:160)
+    */
+//    return new ListAdapter<>(this::item, this::length);  // Note: can't use method refs here in hosted mode
+    return new AbstractList<String>() {
+      @Override
+      public String get(int index) {
+        return item(index);
+      }
+
+      @Override
+      public int size() {
+        return length();
+      }
+    };
+  }
+
+  /**
+   * Parses a numeric string ending in {@code "px"}, such as a property value in a {@link CSSStyleDeclaration}
+   *
+   * @return the numeric value of the substring preceding the {@code "px"} suffix, or {@code 0} if the string
+   * doesn't end in {@code "px"}
+   *
+   * @throws NullPointerException  if the string is null
+   * @throws NumberFormatException if the string does not contain a parsable {@code double}.
+   */
+  public static double parsePx(String value) {
+    requireNonNull(value, "value");
+    if (value.endsWith("px")) {
+      return Double.parseDouble(value.substring(0, value.length() - 2));
+    }
+    return 0d;  // TODO: maybe return NaN by default?
+    /* TODO: in pure JS, this can be replaced by a simple parseFloat call (which automatically excludes any trailing non-numeric chars)
+       (see https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/parseFloat)
+     */
+  }
 
 }

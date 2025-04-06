@@ -18,7 +18,9 @@ package solutions.trsoftware.commons.shared.graphics;
 
 import solutions.trsoftware.commons.shared.util.MathUtils;
 import solutions.trsoftware.commons.shared.util.stats.MinAndMaxDouble;
+import solutions.trsoftware.commons.shared.util.text.SharedNumberFormat;
 
+import javax.annotation.Nullable;
 import java.io.Serializable;
 
 /**
@@ -183,10 +185,41 @@ public final class ColorRGB implements Serializable {
   }
 
   /**
-   * @return a hex string that can be used to represent this color in HTML/CSS. <strong>NOTE:</strong> browser support
-   *     for representing alpha in hex is still limited (see <a href="https://caniuse.com/#feat=css-rrggbbaa">browser
-   *     support table</a>)
+   * Computes the color resulting from a semi-transparent RGBA color overlaid on top of another color.
+   *
+   * @param frontRGBA foreground color with an alpha value
+   * @param backRGB background color (defaults to white if {@code null})
+   * @return opaque (no alpha) color resulting from blending the foreground color with the background color
+   */
+  public static ColorRGB blendAlpha(ColorRGB frontRGBA, @Nullable ColorRGB backRGB) {
+    // code borrowed from https://stackoverflow.com/a/65233542
+    // if background color not specified, assume a plain white background
+    if (backRGB == null)
+      backRGB = WHITE;
+
+    // convert alpha int to a fraction (default 1.0 if not specified - i.e. getAlpha()==255)
+    double alpha = frontRGBA.getAlpha() / 255d;
+
+    // normalise the alpha channel across the foreground and background.
+    double r = ((1 - alpha) * backRGB.getRed()) + (alpha * frontRGBA.getRed());
+    double g = ((1 - alpha) * backRGB.getGreen()) + (alpha * frontRGBA.getGreen());
+    double b = ((1 - alpha) * backRGB.getBlue()) + (alpha * frontRGBA.getBlue());
+
+   // just check that we don't end up with a value greater than 255 for any channel
+    return new ColorRGB(
+        Math.min(255, (int)r),
+        Math.min(255, (int)g),
+        Math.min(255, (int)b)
+    );
+  }
+
+  /**
+   * @return a hex color string prefixed with {@code #} that can be used to represent this color in HTML/CSS.
+   * <strong>NOTE:</strong> browser support for representing alpha in hex is still limited (see compatibility table).
+   *
+   * @see <a href="https://caniuse.com/#feat=css-rrggbbaa">browser support for RRGGBBAA notation</a>
    * @see <a href="https://en.wikipedia.org/wiki/Web_colors#Hex_triplet">Wikipedia: Web colors &raquo; Hex triplet</a>
+   * @see #toCssString()
    */
   @Override
   public String toString() {
@@ -206,6 +239,35 @@ public final class ColorRGB implements Serializable {
     if (hex.length() == 1)
       hex = "0" + hex;
     return hex;
+  }
+
+  /**
+   * Converts this color to a CSS {@code rgb} function literal, expressing its alpha value as an opacity fraction
+   * between 0 and 1.  If alpha is not needed (=255), it will be omitted in the output.
+   * For example:
+   * <ul>
+   *   <li>{@code ColorRGB.valueOf("#fff266bf").toCssString()} &rarr; {@code "rgba(255, 242, 102, 0.75)"}
+   *   <li>{@code ColorRGB.RED.toCssString()} &rarr; {@code "rgb(255, 0, 0)"}
+   * </ul>
+   * @return a CSS {@code rgb} or {@code rgba} function literal representing this color
+   * @see #toString()
+   */
+  public String toCssString() {
+    StringBuilder sb = new StringBuilder("rgb");
+    int alpha = getAlpha();
+    boolean hasAlpha = alpha < 255;
+    if (hasAlpha)
+      sb.append('a');
+    sb.append('(')
+        .append(getRed()).append(", ")
+        .append(getGreen()).append(", ")
+        .append(getBlue());
+    if (hasAlpha) {
+      double alphaPct = alpha / 255d;  // Note: dividing by 255 rather than 256 since 255 (0xFF) is the max opacity, which translates to 1.0 as a fraction
+      sb.append(", ").append(new SharedNumberFormat(2).format(alphaPct));
+    }
+    sb.append(')');
+    return sb.toString();
   }
 
   /**

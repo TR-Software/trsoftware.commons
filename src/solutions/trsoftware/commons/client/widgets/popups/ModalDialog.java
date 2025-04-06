@@ -247,7 +247,7 @@ public class ModalDialog {
     return sinceLastDialogClosed != null ? sinceLastDialogClosed.elapsedMillis() : Integer.MAX_VALUE;
   }
 
-  private static void dialogClosed(Dialog d, boolean showNextInQueue) {
+  private static void dialogClosed(Dialog<?> d, boolean showNextInQueue) {
     Assert.assertTrue(d == currentlyShowing);
     currentlyShowing = null;
     sinceLastDialogClosed = new Duration();
@@ -258,7 +258,7 @@ public class ModalDialog {
   /**
    * Queues up the given dialog to be displayed after all the other outstanding dialogs.
    */
-  private static void enqueue(Dialog d) {
+  private static void enqueue(Dialog<?> d) {
     toBeShown.addLast(d);
     maybeShowNextInQueue();
   }
@@ -266,7 +266,7 @@ public class ModalDialog {
   /**
    * Queues up the given dialog to be displayed at the next opportunity.
    */
-  private static void enqueueFirst(Dialog d) {
+  private static void enqueueFirst(Dialog<?> d) {
     toBeShown.addFirst(d);
     maybeShowNextInQueue();
   }
@@ -312,8 +312,8 @@ public class ModalDialog {
    * Same as {@link #softAlert(String, ResponseHandler)}, but allows specifying custom labels for the "OK" and "Cancel" buttons.
    * @param msg the message to be displayed
    * @param settings will be used to customize the dialog caption, and text/html for the "OK" and "Cancel" buttons.
-   * @param responseHandler Will be invoked with the argument {@code true} if the "OK" button is clicked, and
-   * {@code false} if the "Cancel" button is clicked
+   * @param responseHandler Will be invoked with the argument {@code true} if the "OK" button is clicked, or
+   *   {@code false} if the "Cancel" button is clicked
    */
   public static void softConfirm(String msg, SoftDialogSettings settings, ResponseHandler<Boolean> responseHandler) {
     enqueue(new SoftConfirm(msg, responseHandler, settings));
@@ -325,8 +325,8 @@ public class ModalDialog {
    * @param msg the message to be displayed
    * @param initialValue the initial value in the dialog's text field
    * @param responseHandler Will be invoked with the value entered by the user if "OK" was pressed.
-   * <b style="color:red;">WARNING</b>: the value passed back to {@link ResponseHandler#handleDialogResponse(Object)}
-   * will be {@code null} if user clicked the "Cancel" button instead of "OK"
+   *   <b style="color:red;">WARNING</b>: the value passed back to {@link ResponseHandler#handleDialogResponse(Object)}
+   *   will be {@code null} if user clicked the "Cancel" button instead of "OK"
    */
   public static void softPrompt(String msg, String initialValue, ResponseHandler<String> responseHandler) {
     enqueue(new SoftPrompt(msg, initialValue, responseHandler));
@@ -340,8 +340,8 @@ public class ModalDialog {
    * the dialog caption, and text/html for the "OK" and "Cancel" buttons.
    * @param settings the initial value in the dialog's text field
    * @param responseHandler Will be invoked with the value entered by the user if "OK" was pressed.
-   * <b style="color:red;">WARNING</b>: the value passed back to {@link ResponseHandler#handleDialogResponse(Object)}
-   * will be {@code null} if user clicked the "Cancel" button instead of "OK"
+   *   <b style="color:red;">WARNING</b>: the value passed back to {@link ResponseHandler#handleDialogResponse(Object)}
+   *   will be {@code null} if user clicked the "Cancel" button instead of "OK"
    */
   public static void softPrompt(String msg, SoftDialogSettings settings, ResponseHandler<String> responseHandler) {
     enqueue(new SoftPrompt(msg, responseHandler, settings));
@@ -356,9 +356,10 @@ public class ModalDialog {
    * unfortunately we cannot make blocking (this method will return immediately, before user responds to the dialog).
    * That's why this method takes a responseHandler as a callback to invoke when the user has responded to the dialog.
    * <p>
-   * Read the source code of the {@link NativeDialog#open()} method to see how when and how the fallback is triggered.
+   * Refer to the source code of the {@link NativeDialog#open()} method to see how when and how the fallback is triggered.
    *
-   * @see <a href="http://stackoverflow.com/questions/5848381/why-prevent-this-page-from-creating-additional-dialogs-appears-in-the-alert-bo">StackOverflow: Why "Prevent this page from creating additional dialogs" appears in the alert box?</a>
+   * @see <a href="http://stackoverflow.com/questions/5848381/why-prevent-this-page-from-creating-additional-dialogs-appears-in-the-alert-bo">
+   *   StackOverflow: Why "Prevent this page from creating additional dialogs" appears in the alert box?</a>
    * @param msg the message to be displayed
    * @param responseHandler Will be invoked with the argument {@code null} when user dismisses this dialog.
    */

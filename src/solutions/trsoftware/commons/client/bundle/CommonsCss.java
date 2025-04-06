@@ -24,6 +24,15 @@ import com.google.gwt.resources.client.CssResource;
  */
 public interface CommonsCss extends CssResource {
 
+  CommonsCss INSTANCE = CommonsClientBundle.INSTANCE.css();
+
+  @SuppressWarnings("GwtCssResourceErrors")
+  static CommonsCss get() {
+    return CommonsClientBundle.INSTANCE.css();
+  }
+
+  // TODO(12/18/2024): replace usages of CommonsClientBundleFactory.INSTANCE.getCss() with CommonsCss.get()
+
   String timeDisplay();
 
   String SoftModalDialogBox();
@@ -97,4 +106,10 @@ public interface CommonsCss extends CssResource {
   String flashOn();
 
   String timeDisplayCaption();
+
+  String PopupGlassSvg();
+
+  String glassBackground();
+
+  String contentSection();
 }

@@ -19,7 +19,7 @@ package solutions.trsoftware.commons.shared.util.stats;
 
 import junit.framework.TestCase;
 import solutions.trsoftware.commons.shared.util.ListUtils;
-import solutions.trsoftware.commons.shared.util.RealPoint;
+import solutions.trsoftware.commons.shared.util.geometry.RealPoint;
 
 import java.util.Arrays;
 import java.util.Collections;

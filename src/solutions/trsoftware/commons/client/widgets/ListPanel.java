@@ -17,9 +17,12 @@
 package solutions.trsoftware.commons.client.widgets;
 
 import com.google.gwt.dom.client.Document;
+import com.google.gwt.dom.client.Element;
 import com.google.gwt.dom.client.LIElement;
 import com.google.gwt.user.client.DOM;
 import com.google.gwt.user.client.ui.ComplexPanel;
+import com.google.gwt.user.client.ui.InsertPanel;
+import com.google.gwt.user.client.ui.IsWidget;
 import com.google.gwt.user.client.ui.Widget;
 
 import javax.annotation.Nonnull;
@@ -32,7 +35,7 @@ import static java.util.Objects.requireNonNull;
  *
  * @author Alex, 9/25/2017
  */
-public class ListPanel extends ComplexPanel {
+public class ListPanel extends ComplexPanel implements InsertPanel.ForIsWidget {
 
   private final Type listType;
 
@@ -90,7 +93,7 @@ public class ListPanel extends ComplexPanel {
      * Get the LI to be removed before calling super.remove() because
      * super.remove() will detach the child widget's element from its parent.
      */
-    com.google.gwt.dom.client.Element li = w.getElement().getParentElement();
+    Element li = w.getElement().getParentElement();
     boolean removed = super.remove(w);  // physically detaches w from li and logically detaches it from the panel
     if (removed) {
       getElement().removeChild(li);
@@ -98,36 +101,23 @@ public class ListPanel extends ComplexPanel {
     return removed;
   }
 
-  //  @Override
-//  public void clear() {
-//    try {
-//      doLogicalClear();
-//    }
-//    finally {
-//      // Remove all existing child nodes.
-//      Node child = getElement().getFirstChild();
-//      while (child != null) {
-//        getElement().removeChild(child);
-//        child = getElement().getFirstChild();
-//      }
-//    }
-//  }
+  /**
+   * Inserts a widget before the specified index.
+   *
+   * @param w the widget to be inserted
+   * @param beforeIndex the index before which it will be inserted
+   * @throws IndexOutOfBoundsException if <code>beforeIndex</code> is out of range
+   */
+  public void insert(Widget w, int beforeIndex) {
+    LIElement li = Document.get().createLIElement();
+    DOM.insertChild(getElement(), li, beforeIndex);
+    insert(w, li, beforeIndex, false);
+  }
 
-//  public void insert(IsWidget w, int beforeIndex) {
-//    insert(asWidgetOrNull(w), beforeIndex);
-//  }
-//
-//  /**
-//   * Inserts a widget before the specified index.
-//   *
-//   * @param w the widget to be inserted
-//   * @param beforeIndex the index before which it will be inserted
-//   * @throws IndexOutOfBoundsException if <code>beforeIndex</code> is out of range
-//   */
-//  public void insert(Widget w, int beforeIndex) {
-//    LIElement liElement = Document.get().createLIElement();
-//    liElement.appendChild(w.getElement());
-//    insert(w, getElement(), beforeIndex, true);
-//  }
+  public void insert(IsWidget w, int beforeIndex) {
+    insert(asWidgetOrNull(w), beforeIndex);
+  }
+
+  // TODO(1/21/2025): unit test this class, make sure the remove/clear methods clean up the DOM accordingly
 
 }

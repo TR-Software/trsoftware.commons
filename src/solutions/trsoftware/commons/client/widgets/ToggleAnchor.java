@@ -16,23 +16,22 @@
 
 package solutions.trsoftware.commons.client.widgets;
 
-import com.google.gwt.event.dom.client.ClickEvent;
-import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.ui.Anchor;
 import com.google.gwt.user.client.ui.Composite;
 
 /**
- * An Anchor that can be in one of two states. 
+ * An {@link Anchor} that can be in one of two states: "on" or "off".
  *
  * @author Alex
  */
-public abstract class ToggleAnchor extends Composite {
-  private final Anchor lnk;
+public class ToggleAnchor extends Composite {
+  private final Anchor anchor;
   /** The current state of the toggle */
   private boolean on;
 
   private final String onMessage;
   private final String offMessage;
+  private ToggleHandler handler;
 
   /**
    * @param startOn Upon creation, calls handleToggleEvent with this argument.
@@ -40,22 +39,62 @@ public abstract class ToggleAnchor extends Composite {
   public ToggleAnchor(String onMessage, String offMessage, boolean startOn) {
     this.onMessage = onMessage;
     this.offMessage = offMessage;
-    lnk = new Anchor(true);
-    lnk.addClickHandler(new ClickHandler() {
-      public void onClick(ClickEvent event) {
-        toggle(!on);
-      }
-    });
-    toggle(startOn);
-    initWidget(lnk);
+    on = startOn;
+    anchor = Widgets.anchor(on ? onMessage : offMessage,
+        event -> toggle(!on));
+    initWidget(anchor);
+  }
+
+  /**
+   * @return the current state of the toggle
+   */
+  public boolean isOn() {
+    return on;
+  }
+
+  /**
+   * Sets the toggle state of this widget without triggering the toggle handler.
+   *
+   * @return {@code true} if the state was changed
+   */
+  public boolean setState(boolean toggleOn) {
+    boolean changed = on != toggleOn;
+    on = toggleOn;
+    anchor.setText(on ? onMessage : offMessage);
+    return changed;
   }
 
   private void toggle(boolean toggleOn) {
-    on = toggleOn;
-    lnk.setText(on ? onMessage : offMessage);
-    handleToggleEvent(on);
+    // TODO(3/29/2025): maybe don't need this method (replace usages with setState, or setValue(toggleOn, true) and move handleToggleEvent there)
+    setState(toggleOn);
+    handleToggleEvent(toggleOn);
   }
 
-  public abstract void handleToggleEvent(boolean toggleOn);
+  /* TODO(3/29/2025): maybe extend HasValue<Boolean> (like in ImageToggleButton),
+       and replace handleToggleEvent/ToggleHandler with the ValueChangeEvent/ValueChangeHandler
+       mechanism of HasValue.setValue(T, boolean)
+   */
 
+  /**
+   * Subclasses should either override this legacy method to handle changes in this widget's toggle state
+   * or specify a handler with {@link #onToggle(ToggleHandler)}.
+   *
+   * @param toggleOn
+   */
+  protected void handleToggleEvent(boolean toggleOn) {
+    if (handler != null)
+      handler.handleToggleEvent(toggleOn);
+  }
+
+  /**
+   * Assigns a toggle handler that can be used instead of overriding {@link #handleToggleEvent(boolean)}.
+   */
+  public ToggleAnchor onToggle(ToggleHandler handler) {
+    this.handler = handler;
+    return this;
+  }
+
+  public interface ToggleHandler {
+    void handleToggleEvent(boolean toggleOn);
+  }
 }

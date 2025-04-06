@@ -19,7 +19,7 @@ package solutions.trsoftware.commons.shared.util.stats;
 import com.google.common.collect.Iterators;
 import com.google.common.collect.PeekingIterator;
 import solutions.trsoftware.commons.shared.util.CollectionUtils;
-import solutions.trsoftware.commons.shared.util.Point;
+import solutions.trsoftware.commons.shared.util.geometry.Point;
 import solutions.trsoftware.commons.shared.util.iterators.FilteringIterator;
 
 import java.util.ArrayList;

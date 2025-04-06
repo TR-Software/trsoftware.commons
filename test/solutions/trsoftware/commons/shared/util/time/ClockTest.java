@@ -16,7 +16,6 @@
 
 package solutions.trsoftware.commons.shared.util.time;
 
-import com.google.common.base.Stopwatch;
 import com.google.common.base.Ticker;
 import com.google.gwt.core.shared.GwtIncompatible;
 import junit.framework.TestCase;

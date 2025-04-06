@@ -24,7 +24,7 @@ import junit.framework.TestCase;
 
 import java.util.Map;
 
-import static solutions.trsoftware.commons.shared.graphics.ColorRGB.valueOf;
+import static solutions.trsoftware.commons.shared.graphics.ColorRGB.*;
 import static solutions.trsoftware.commons.shared.testutil.AssertUtils.assertEqualsAndHashCode;
 import static solutions.trsoftware.commons.shared.testutil.AssertUtils.assertNotEqualsAndHashCode;
 import static solutions.trsoftware.commons.shared.util.RandomUtils.nextIntInRange;
@@ -115,5 +115,24 @@ public class ColorRGBTest extends TestCase {
     assertEquals(0xffbbccdd, new ColorRGB(0xbb, 0xcc, 0xdd).getRGB());
     assertEquals(0xffbbccdd, new ColorRGB(0xaabbccdd, false).getRGB());
     assertEquals(0xffbbccdd, new ColorRGB(0xaabbccdd).getRGB());
+  }
+
+  public void testBlendAlpha() {
+    // any color blended with itself should result in the same color
+    assertEquals(RED, blendAlpha(RED, RED));
+    assertEquals(WHITE, blendAlpha(WHITE, WHITE));
+    // TODO: loop through all possible RGB values to check the above condition
+    // manual example
+    System.out.println("blendAlpha(#fff266, null) = " + blendAlpha(valueOf("#fff266"), null));
+    System.out.println("blendAlpha(#fff2664d, null) = " + blendAlpha(valueOf("#fff2664d"), null));
+    // no effect if foreground color is fully opaque (no explicit alpha)
+    System.out.println("blendAlpha(BLUE, YELLOW) = " + blendAlpha(BLUE, YELLOW));
+  }
+
+  public void testToCssString() {
+    // color with an opacity value (alpha < 255)
+    assertEquals("rgba(255, 242, 102, 0.75)", valueOf("#fff266bf").toCssString());
+    // color without opacity (alpha == 255)
+    assertEquals("rgb(255, 0, 0)", RED.toCssString());
   }
 }

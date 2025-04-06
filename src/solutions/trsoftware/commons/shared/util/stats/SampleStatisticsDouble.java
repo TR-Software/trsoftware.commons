@@ -17,11 +17,13 @@
 package solutions.trsoftware.commons.shared.util.stats;
 
 /**
- * Mar 26, 2009
+ * Primitive {@code double} specialization of {@link SampleStatistics}
  *
- * @author Alex
+ * @see com.google.common.math.Stats
+ * @see java.util.DoubleSummaryStatistics
+ * @author Alex, (Mar 26, 2009)
  */
-public interface SampleStatisticsDouble extends Updatable<Double>, UpdatableDouble {
+public interface SampleStatisticsDouble {
   int size();
 
   double min();
@@ -35,11 +37,36 @@ public interface SampleStatisticsDouble extends Updatable<Double>, UpdatableDoub
   /** The upper median of the dataset (if there are 2 medians) */
   double median();
 
+  /**
+   * Returns the <a href="http://en.wikipedia.org/wiki/Standard_deviation#Definition_of_population_values">
+   * population standard deviation</a> of the values. The {@linkplain #size() count} must be non-zero.
+   */
   default double stdev() {
     return Math.sqrt(variance());
   }
 
   double variance();
+
+  /**
+   * Returns the <a href="http://en.wikipedia.org/wiki/Variance#Sample_variance">sample variance</a> of the values.
+   * @return the sample variance, or {@code 0} if empty
+   * @see #variance()
+   */
+  double sampleVariance();
+
+  /**
+   * Returns the <a href="http://en.wikipedia.org/wiki/Standard_deviation#Corrected_sample_standard_deviation">
+   * corrected sample standard deviation</a> of the values. If this dataset is a sample drawn from a
+   * population, this is an estimator of the population standard deviation of the population which
+   * is less biased than {@linkplain #stdev() population standard deviation} (the unbiased estimator depends on
+   * the distribution). The {@linkplain #size() count} must be greater than one.
+   *
+   * @return the sample standard deviation or {@code 0} if {@linkplain #size() count} is not greater than one.
+   * @see #stdev()
+   */
+  default double sampleStdev() {
+    return Math.sqrt(sampleVariance());
+  }
 
   ImmutableStats<Double> summarize();
 

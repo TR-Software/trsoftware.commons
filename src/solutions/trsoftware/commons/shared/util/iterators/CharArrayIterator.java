@@ -25,7 +25,7 @@ public class CharArrayIterator extends IndexedCharIterator {
 
   private final char[] arr;
 
-  public CharArrayIterator(char[] arr) {
+  public CharArrayIterator(char... arr) {
     super(arr.length);
     this.arr = arr;
   }

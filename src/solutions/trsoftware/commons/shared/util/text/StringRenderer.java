@@ -19,21 +19,33 @@ package solutions.trsoftware.commons.shared.util.text;
 import com.google.gwt.text.shared.AbstractRenderer;
 
 /**
- * Uses {@link Object#toString()} to render values.  Renders {@code null} values as {@code ""}.
- *
- * This class is mostly the same as {@link com.google.gwt.text.shared.ToStringRenderer}, but allows a generic type
- * variable {@code <T>}.
+ * Uses {@link Object#toString()} to render values.  Renders {@code null} values as {@code ""} by default, but
+ * can specify a different replacement string using the {@link #StringRenderer(String)} constructor.
+ * <p>
+ * This class is functionally identical to {@link com.google.gwt.text.shared.ToStringRenderer},
+ * but allows using a generic type variable {@link T}.
  *
  * @author Alex
  * @since 12/2/2017
  */
+@SuppressWarnings("rawtypes")
 public class StringRenderer<T> extends AbstractRenderer<T> {
 
   private static StringRenderer instance;
 
+  private final String textForNull;
+
+  public StringRenderer() {
+    this("");
+  }
+
+  public StringRenderer(String textForNull) {
+    this.textForNull = textForNull;
+  }
+
   @Override
   public String render(T object) {
-    return object != null ? object.toString() : "";
+    return object != null ? object.toString() : textForNull;
   }
 
   @SuppressWarnings("unchecked")

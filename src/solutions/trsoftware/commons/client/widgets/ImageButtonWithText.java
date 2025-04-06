@@ -128,7 +128,7 @@ public class ImageButtonWithText extends Composite implements HasClickHandlers {
     return new MultiHandlerRegistration(
         imageButton.addClickHandler(handler),
         link.addClickHandler(handler)
-    ).asLegacyGwtRegistration();
+    );
   }
 
   /**

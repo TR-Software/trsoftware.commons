@@ -63,6 +63,7 @@ public class LogicUtils {
    * @see java.util.Objects#equals(Object, Object)
    */
   public static boolean eq(Object a, Object b) {
+    //noinspection EqualsReplaceableByObjectsCall
     return (a == b) || (a != null && a.equals(b));
   }
 
@@ -112,6 +113,7 @@ public class LogicUtils {
    * @return {@code obj} if it's not {@code null}, otherwise {@code supplier.get()}
    * @see #firstNonNull(Object, Object)
    * @see Optional#orElseGet(Supplier)
+   * @see StringUtils#notBlankOrElse(String, Supplier)
    */
   @Nullable
   public static <T> T nonNullOrElse(T value, Supplier<T> other) {

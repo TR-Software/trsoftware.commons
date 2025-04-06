@@ -523,7 +523,7 @@ public abstract class AssertUtils {
   public static void assertEqualsAndHashCode(Object a, Object b) {
     assertEquals(a, b);
     assertEquals(b, a);
-    assertEquals(a.hashCode(), b.hashCode());
+    assertEquals("hashCode", a.hashCode(), b.hashCode());
   }
 
   /**
@@ -595,13 +595,47 @@ public abstract class AssertUtils {
     String messageSuffix = lenientFormat("Iterable %s should contain %s", iterable, element);
     message = message != null ? message + " - " + messageSuffix : messageSuffix;
     assertNotNull(message, iterable);
-    if (!Iterables.contains(iterable, element))
-      fail(message);
+    assertTrue(message, Iterables.contains(iterable, element));
+  }
+
+  public static void assertNotContains(Iterable<?> iterable, @Nullable Object element) {
+    assertNotContains(null, iterable, element);
+  }
+
+  public static void assertNotContains(String message, Iterable<?> iterable, @Nullable Object element) {
+    String messageSuffix = lenientFormat("Iterable %s should not contain %s", iterable, element);
+    message = message != null ? message + " - " + messageSuffix : messageSuffix;
+    assertNotNull(message, iterable);
+    assertFalse(message, Iterables.contains(iterable, element));
   }
 
   public static <T> void assertContains(T[] array, @Nullable T element) {
     assertTrue(Arrays.deepToString(array) + " should contain " + element,
         ArrayUtils.contains(array, element));
+  }
+
+  public static <T> void assertContainsAll(@Nonnull Collection<T> collection, @Nonnull Collection<T> elements) {
+    assertThatCollection(collection).containsAll(elements);
+  }
+
+  @SafeVarargs
+  public static <T> void assertContainsAll(@Nonnull Collection<T> collection, @Nonnull T... elements) {
+    assertThatCollection(collection).containsAll(elements);
+  }
+
+  public static void assertContainsAll(@Nullable String message, @Nonnull Collection<?> collection, @Nonnull Collection<?> elements) {
+    // TODO: replace with assertThatCollection and refact AssertionBuilder to allow specifying a custom message
+    String messageSuffix = lenientFormat("Collection %s should contain %s", collection, elements);
+    message = message != null ? message + " - " + messageSuffix : messageSuffix;
+    assertNotNull(message, collection);
+    if (!collection.containsAll(elements))
+      fail(message);
+  }
+
+  @SafeVarargs
+  public static <T> void assertContainsAll(@Nullable String message, @Nonnull Collection<T> collection, @Nonnull T... elements) {
+    assertThat(elements.length).isGreaterThan(0);
+    assertContainsAll(message, collection, Arrays.asList(elements));
   }
 
   /**
@@ -660,6 +694,7 @@ public abstract class AssertUtils {
         assertLessThan(a, b);
       }
     }
+    // TODO(3/3/2025): create an overloaded version that also takes a ComparisonOperator
   }
 
   /**
@@ -673,13 +708,18 @@ public abstract class AssertUtils {
   // AssertionBuilder methods: --------------------------------------------------------------------------------
 
   /** @return a builder for specifying a chain of assertions on the given object */
-  public static <T> AssertionBuilder<T, AssertionBuilder> assertThat(T value) {
-    return new AssertionBuilder<T, AssertionBuilder>(value);
+  public static <T> SimpleAssertionBuilder<T> assertThat(T value) {
+    return new SimpleAssertionBuilder<>(value);
   }
 
-  /** @return a builder for specifying a chain of assertions on the given number */
+  /** @return a builder for specifying a chain of assertions on the given comparable (e.g. Number) */
   public static <T extends Comparable<T>> ComparableAssertionBuilder<T> assertThat(T value) {
     return new ComparableAssertionBuilder<T>(value);
+  }
+
+  /** @return a builder for specifying a chain of assertions on the given collection */
+  public static <C extends Collection<E>, E> CollectionAssertionBuilder<C, E> assertThatCollection(C collection) {
+    return new CollectionAssertionBuilder<>(collection);
   }
 
   /** @return a builder for specifying a chain of assertions on the given string */
@@ -748,20 +788,23 @@ public abstract class AssertUtils {
   }
 
   /**
-   * Calls {@link #assertListsEqual(List, List, BiPredicate)} with {@link Objects#equals(Object, Object)}
-   * as the predicate.
+   * Performs a pairwise element comparison on the given lists, of the lists aren't equal, reports
+   * the location of the first element where they differ.
+   * <p>
+   * This provides a more detailed failure message than {@link Assert#assertEquals(Object, Object)}
    *
    * @throws AssertionFailedError if the lists differ in size or any pair of elements are not equal
    */
-  public static <E> void assertListsEqual(List<E> expected, List<E> actual) {
-    assertListsEqual(expected, actual, (BiPredicate<E, E>)Objects::equals);
+  public static <E> void assertListsEqual(List<? extends E> expected, List<? extends E> actual) {
+    assertListsEqual(expected, actual, Objects::equals);
   }
 
   /**
    * Tests two lists for equality using a custom comparison function to compare the elements.
    * <p>
    * This is similar to {@link junit.framework.Assert#assertEquals(Object, Object) assertEquals(List, List)}, but
-   * allows the elements to be tested for equality using something other than {@link Object#equals(Object)}
+   * allows the elements to be tested for equality using something other than {@link Object#equals(Object)},
+   * and also provides a more detailed failure message, highlighting the actual position where the lists differ.
    *
    * @param equalityPredicate a predicate that takes a pair of elements and returns {@code true} if it considers
    *     them equal
@@ -769,7 +812,7 @@ public abstract class AssertUtils {
    * @throws AssertionFailedError if the lists differ in size or
    *                              if the given predicate returns {@code false} for any pair of elements
    */
-  public static <E> void assertListsEqual(List<E> expected, List<E> actual, BiPredicate<E, E> equalityPredicate) {
+  public static <E> void assertListsEqual(List<? extends E> expected, List<? extends E> actual, BiPredicate<E, E> equalityPredicate) {
     assertEquals("Lists differ in size", expected.size(), actual.size());
     for (int i = 0; i < expected.size(); i++) {
       E a = expected.get(i);
@@ -785,12 +828,14 @@ public abstract class AssertUtils {
    * Tests two maps for equality using a custom comparison function to compare the values.
    * <p>
    * This is similar to {@link junit.framework.Assert#assertEquals(Object, Object) assertEquals(Map, Map)}, but
-   * allows the values to be tested for equality using something other than {@link Object#equals(Object)}
+   * allows the values to be tested for equality using something other than {@link Object#equals(Object)},
+   * and also provides a more detailed failure message, highlighting the actual key where the maps differ.
    *
    * @param equalityPredicate a predicate that takes a pair of values and returns {@code true} if it considers
    *     them equal
    * @throws AssertionFailedError if the maps differ in size or
    *                              if the given predicate returns {@code false} for any pair of values for a key
+   * @see #assertMapsEqual(Map, Map, BiConsumer)
    */
   public static <K, V> void assertMapsEqual(Map<K, V> expected, Map<K, V> actual, BiPredicate<V, V> equalityPredicate) {
     assertEquals("Maps differ in size", expected.size(), actual.size());
@@ -811,6 +856,7 @@ public abstract class AssertUtils {
    *   and throws an exception (e.g. {@link AssertionFailedError}) if they don't pass the test
    * @throws AssertionFailedError if the maps differ in size, sets of keys, or
    *                              if the given function throws an exception for any pair of values corresponding to a key
+   * @see #assertMapsEqual(Map, Map, BiPredicate)
    */
   public static <K, V> void assertMapsEqual(Map<K, ? extends V> expected, Map<K, ? extends V> actual, BiConsumer<V, V> valueAssertion) {
     assertEquals("Maps differ in size", expected.size(), actual.size());
@@ -884,10 +930,10 @@ public abstract class AssertUtils {
    * @param <V> the value type
    * @see <a href="http://joel-costigliola.github.io/assertj/assertj-core-quick-start.html">AssertJ</a>
    */
-  public static class AssertionBuilder<V, T extends AssertionBuilder> {
+  public static abstract class AssertionBuilderBase<V, T extends AssertionBuilderBase> {
     protected final V value;
 
-    public AssertionBuilder(V value) {
+    public AssertionBuilderBase(V value) {
       this.value = value;
     }
 
@@ -917,12 +963,27 @@ public abstract class AssertUtils {
   }
 
   /**
+   * Allows chaining basic assertions that are applicable to any object type
+   * (e.g. {@link #isNull()}, {@link #isEqualTo(Object)}).
+   *
+   * @param <V> the object value type
+   * @see #assertThat(Object)
+   */
+  public static class SimpleAssertionBuilder<V> extends AssertionBuilderBase<V, SimpleAssertionBuilder<V>> {
+    public SimpleAssertionBuilder(V value) {
+      super(value);
+    }
+  }
+
+  /**
    * Allows chaining additional assertions for comparable types.
    * <p>
    * The simplest way to use this class is by calling {@link #assertThat(Comparable)} and chaining the assertions
    * to the result.
+   * @param <T> the {@link Comparable} value type
+   * @see #assertThat(Comparable)
    */
-  public static class ComparableAssertionBuilder<T extends Comparable<T>> extends AssertionBuilder<T, ComparableAssertionBuilder<T>> {
+  public static class ComparableAssertionBuilder<T extends Comparable<T>> extends AssertionBuilderBase<T, ComparableAssertionBuilder<T>> {
 
     public ComparableAssertionBuilder(T value) {
       super(value);
@@ -967,12 +1028,66 @@ public abstract class AssertUtils {
   }
 
   /**
-   * Allows chaining additional assertions for string types.
+   * Allows chaining additional assertions for collection types.
+   * <p>
+   * The simplest way to use this class is by calling {@link #assertThatCollection(Collection)} and chaining the assertions
+   * to the result.
+   * @param <T> generic collection type
+   * @param <E> element type of the collection
+   * @see #assertThatCollection(Collection)
+   */
+  public static class CollectionAssertionBuilder<T extends Collection<? extends E>, E> extends AssertionBuilderBase<T, CollectionAssertionBuilder<T, E>> {
+
+    public CollectionAssertionBuilder(T value) {
+      super(value);
+    }
+
+    public CollectionAssertionBuilder<T, E> contains(E element) {
+      if (!value.contains(element))
+        fail(formatFailedMessage("should contain", element));
+      return this;
+    }
+
+    public CollectionAssertionBuilder<T, E> containsAll(Collection<E> elements) {
+      if (!value.containsAll(elements))
+        fail(formatFailedMessage("should contain", elements));
+      return this;
+    }
+
+    @SafeVarargs
+    public final CollectionAssertionBuilder<T, E> containsAll(E... elements) {
+      return containsAll(Arrays.asList(elements));
+    }
+
+    public CollectionAssertionBuilder<T, E> containsNone(Collection<E> elements) {
+      if (elements.stream().anyMatch(value::contains))
+        fail(formatFailedMessage("should not contain", elements));
+      return this;
+    }
+
+    @SafeVarargs
+    public final CollectionAssertionBuilder<T, E> containsNone(E... elements) {
+      assertThat(elements.length).isGreaterThan(0);
+      return containsNone(Arrays.asList(elements));
+    }
+
+    public CollectionAssertionBuilder<T, E> doesNotContain(E element) {
+      return containsNone(element);
+    }
+
+    private String formatFailedMessage(String verb, Object arg) {
+      return lenientFormat("Collection %s %s %s", value, verb, arg);
+    }
+  }
+
+  /**
+   * Allows chaining additional assertions for strings.
    * <p>
    * The simplest way to use this class is by calling {@link #assertThat(String)} and chaining the assertions
    * to the result.
+   * @see #assertThat(String)
    */
-  public static class StringAssertionBuilder extends AssertionBuilder<String, StringAssertionBuilder> {
+  public static class StringAssertionBuilder extends AssertionBuilderBase<String, StringAssertionBuilder> {
 
     public StringAssertionBuilder(String value) {
       super(value);

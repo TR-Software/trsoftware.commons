@@ -37,7 +37,7 @@ import java.util.Objects;
  */
 public class NodeListWrapper<T extends Node> extends AbstractList<T> {
 
-  protected NodeList<T> nodeList;
+  private final NodeList<T> nodeList;
 
   public NodeListWrapper(@Nonnull NodeList<T> nodeList) {
     Objects.requireNonNull(nodeList);

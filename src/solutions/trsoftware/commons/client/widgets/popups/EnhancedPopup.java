@@ -16,13 +16,17 @@
 
 package solutions.trsoftware.commons.client.widgets.popups;
 
+import com.google.common.base.Preconditions;
 import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.dom.client.Document;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.user.client.Command;
+import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.*;
+import solutions.trsoftware.commons.client.animations.OpacityTweenAnimation;
 import solutions.trsoftware.commons.client.animations.ShakePopupAnimation;
+import solutions.trsoftware.commons.client.dom.DomUtils;
 import solutions.trsoftware.commons.client.jso.JsDocument;
 import solutions.trsoftware.commons.client.jso.JsWindow;
 import solutions.trsoftware.commons.client.util.geometry.Alignment;
@@ -34,12 +38,10 @@ import solutions.trsoftware.commons.shared.util.StringUtils;
 import javax.annotation.Nullable;
 
 /**
- * Date: Apr 16, 2008 Time: 9:04:07 PM
- *
- * WARNING: no subclass should be wider than 1000px (see showAlignedToWidget to
- * find out why - it's an ugly hack to work around an elusive bug)
+ * Extends {@link PopupPanel} with additional functionality and bug fixes.
  *
  * @author Alex
+ * @since Apr 16, 2008
  */
 public class EnhancedPopup extends PopupPanel implements HasFocusTarget {
 
@@ -156,19 +158,20 @@ public class EnhancedPopup extends PopupPanel implements HasFocusTarget {
   }
 
   /**
-   * Invokes {@link PopupPanel#setPopupPosition(int, int) super.setPopupPosition} and then corrects the misguided
-   * adjustment done by the call to super, which, for no good reason, subtracts {@link Document#getBodyOffsetLeft()}
+   * Invokes {@link PopupPanel#setPopupPosition(int, int) super.setPopupPosition(left, top)} and then corrects the misguided
+   * adjustment in the super method, which, for no good reason, subtracts {@link Document#getBodyOffsetLeft()}
    * and {@link Document#getBodyOffsetTop()} from the intended position.
+   * <p>
    * That seems to be a GWT bug that has gone unnoticed for a long time because it is almost never the case
    * when that adjustment actually affects anything.  However, it does appear to be misguided because
-   *   a) it's useless at best, because Document.get().getBodyOffset[Left|Right]() only returns a non-0 value with
-   *      DOMImplMozilla and DOMImplTrident (FF and IE<=9),
-   *   b) it's harmful at worst: if when we simulate a non-0 value for getBodyOffsetLeft
-   *      (by calling document.documentElement.style.marginLeft = "150px" in FF
-   *      or document.documentElement.style.borderLeft = "150px solid" in IE), it actually messes up the popup position.
-   * TODO: report this GWT bug (and maybe submit a patch)
+   *   (a) it's useless at best, because Document.get().getBodyOffset[Left|Right]() only returns a non-0 value with
+   *       DOMImplMozilla and DOMImplTrident (FF and IE<=9), and
+   *   (b) it's harmful at worst: if when we simulate a non-0 value for getBodyOffsetLeft
+   *       (by calling document.documentElement.style.marginLeft = "150px" in FF
+   *       or document.documentElement.style.borderLeft = "150px solid" in IE), it actually messes up the popup position.
    */
   private void setCorrectPopupPosition(int left, int top) {
+    // TODO: report this GWT bug (and maybe submit a patch)
     super.setPopupPosition(left, top);
     // set the correct position (to be what the caller actually intended)
     Style style = getStyleElement().getStyle();
@@ -255,11 +258,10 @@ public class EnhancedPopup extends PopupPanel implements HasFocusTarget {
   }
 
   /**
-   * @return true iff the pivot is attached and therefore this call succeeded
+   * @return true iff the {@linkplain RelativePosition#getPivot() relative widget} is attached and therefore this call succeeded
    */
   private boolean maybeShowRelativeTo(final RelativePosition position) {
-    final Widget pivot = position.getPivot();
-    if (pivot.isAttached()) {
+    if (DomUtils.isAttached(position.getPivot())) {
       setPopupPositionAndShow(new PopupPanel.PositionCallback() {
         public void setPosition(int offsetWidth, int offsetHeight) {
           setPopupPositionRelativeTo(position);
@@ -305,6 +307,127 @@ public class EnhancedPopup extends PopupPanel implements HasFocusTarget {
       if (isShowing() && shakingAnimation != null)
         shakingAnimation.cancel();
       super.hide(autoClosed);
+    }
+  }
+
+  private OpacityTweenAnimation fadeOutAnimation;
+  private Timer fadeOutTimer;
+
+  /**
+   * Runs a fade-out animation (opacity 100% to 0) and hides the popup upon its completion.
+   * @param animationDuration the animation duration, in millis
+   * @return {@code true} if the animation was started;
+   *   {@code false} if the popup isn't showing or a fade-out animation is already running
+   *
+   */
+  public boolean fadeOut(int animationDuration) {
+    if (fadeOutAnimation == null && isShowing()) {
+      fadeOutAnimation = new OpacityTweenAnimation(this, 1, 0) {
+        @Override
+        protected void onComplete() {
+          super.onComplete();
+          hide(false);
+          fadeOutAnimation = null;
+        }
+      };
+      fadeOutAnimation.run(animationDuration, getElement());
+      return true;
+    }
+    return false;
+  }
+
+  /**
+   * Starts a timer that invokes {@link #fadeOut(int)} after the given delay.  If this method is invoked again
+   * before the popup is hidden, the previously-set timer will be replaced with a new one.
+   *
+   * @param delayMillis millis to wait before invoking {@link #fadeOut(int)}
+   * @param animationDuration arg for {@link #fadeOut(int)}
+   * @return {@code true} if a timer was started;
+   *         {@code false} if the popup isn't showing or a fade-out animation is already running
+   */
+  public boolean fadeOutAfterDelay(int delayMillis, int animationDuration) {
+    if (!isShowing() || fadeOutAnimation != null)
+      return false;
+    if (fadeOutTimer != null) {
+      // cancel the previous timer and start a new one
+      fadeOutTimer.cancel();
+      fadeOutTimer = null;
+    }
+    fadeOutTimer = new Timer() {
+      @Override
+      public void run() {
+        fadeOut(animationDuration);
+      }
+    };
+    fadeOutTimer.schedule(delayMillis);
+    return true;
+    // TODO: test this
+  }
+
+  /**
+   * A custom "glass" widget to be displayed instead of the default {@link PopupPanel#glass}
+   */
+  private PopupGlassSvg glass;
+
+  public PopupGlassSvg getCustomGlass() {
+    return glass;
+  }
+
+  /**
+   * Assigns a custom SVG "glass" widget to be displayed instead of the default {@link PopupPanel#glass}.
+   * This glass element will be displayed in the background every time the popup is shown,
+   * and overrides any prior invocation of {@link #setGlassEnabled(boolean)}.
+   */
+  public EnhancedPopup setCustomGlass(PopupGlassSvg glass) {
+    // TODO: maybe don't allow calling this method while the popup is already showing (with or without the glass)
+    if (this.glass != null && this.glass != glass) {
+      // removing or replacing the custom glass
+      this.glass.hide();
+    }
+    if (glass != null) {
+      super.setGlassEnabled(false);
+    }
+    this.glass = glass;
+    return this;
+  }
+
+  /**
+   * When enabled, the background will be blocked with a semi-transparent pane
+   * the next time it is shown. If the PopupPanel is already visible, the glass
+   * will not be displayed until it is hidden and shown again.
+   *
+   * @param enabled true to enable, false to disable
+   * @throws IllegalStateException if a custom "glass" was assigned via {@link #setCustomGlass(PopupGlassSvg)}
+   */
+  @Override
+  public void setGlassEnabled(boolean enabled) {
+    Preconditions.checkState(!enabled || glass == null, "Using a custom glass widget");
+    super.setGlassEnabled(enabled);
+  }
+
+  /**
+   * Overriding {@link PopupPanel#show()} in order to display the {@linkplain #glass custom glass}.
+   * The "glass" widget must be attached to document's body
+   */
+  @Override
+  public void show() {
+    // must add the custom glass element before the popup is displayed
+    if (glass != null && !isShowing()) {
+      assert !glass.isShowing();
+      glass.show();
+    }
+    super.show();
+  }
+
+  @Override
+  protected void onUnload() {
+    super.onUnload();
+    if (glass != null && glass.isShowing()) {
+      glass.hide();
+    }
+    if (shakingAnimation != null) {
+      shakingAnimation.cancel();
+      shakingAnimation = null;
     }
   }
 

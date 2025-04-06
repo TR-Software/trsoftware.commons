@@ -32,6 +32,7 @@ import javax.annotation.Nullable;
  * @author Alex, 10/6/2015
  */
 public class JsDocument extends Document {
+  private static final String SVG_NAMESPACE_URI = "http://www.w3.org/2000/svg";
 
   // TODO: rename this class to Document and move to solutions.trsoftware.commons.client.dom
 
@@ -117,4 +118,30 @@ public class JsDocument extends Document {
     return ParentNode.as(get()).querySelector(selectors);
   }
 
+  /**
+   * Creates an element with the SVG namespace URI and qualified name.
+   * To create an element without specifying a namespace URI, use the {@link #createElement(String)} method.
+   *
+   * @param namespaceURI The namespace URI to associate with the element.
+   *   The namespaceURI property of the created element is initialized with this value.
+   * @param qualifiedName The type of element to be created.
+   *   The nodeName property of the created element is initialized with this value.
+   * @return the new element
+   * @see <a href="https://developer.mozilla.org/en-US/docs/Web/API/Document/createElementNS">MDN</a>
+   */
+  public final native Element createElementNS(String namespaceURI, String qualifiedName) /*-{
+    return this.createElementNS(namespaceURI, qualifiedName);
+  }-*/;
+
+  /**
+   * Creates an element with the SVG namespace URI ({@value #SVG_NAMESPACE_URI}).
+   *
+   * @param qualifiedName The type of element to be created.
+   *   The nodeName property of the created element is initialized with this value.
+   * @return the new element
+   * @see #createElementNS(String, String)
+   */
+  public final Element createSVGElement(String qualifiedName) {
+    return createElementNS(SVG_NAMESPACE_URI, qualifiedName);
+  }
 }

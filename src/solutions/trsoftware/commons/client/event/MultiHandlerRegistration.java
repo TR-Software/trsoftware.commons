@@ -27,9 +27,12 @@ import java.util.Set;
 /**
  * Combines several handler registrations into one.
  *
+ * @see CompositeWithHandlers
  * @author Alex, 10/6/2015
  */
-public class MultiHandlerRegistration implements HandlerRegistration {
+public class MultiHandlerRegistration implements HandlerRegistration,
+    com.google.gwt.event.shared.HandlerRegistration // also implement the old interface for compatibility with legacy APIs
+{
 
   private final Set<HandlerRegistration> handlerRegistrations = new LinkedHashSet<>();
 
@@ -68,15 +71,22 @@ public class MultiHandlerRegistration implements HandlerRegistration {
     return handlerRegistrations;
   }
 
+  /**
+   * Invokes {@link HandlerRegistration#removeHandler()} for each handler registration that was added to this set.
+   */
   @Override
   public void removeHandler() {
     CollectionUtils.tryForEach(handlerRegistrations, reg -> {
       if (reg != null)
         reg.removeHandler();
     });
+    handlerRegistrations.clear();
   }
 
+  /**
+   * @deprecated since 8/7/2024, this class implements both {@code HandlerRegistration} interfaces
+   */
   public com.google.gwt.event.shared.HandlerRegistration asLegacyGwtRegistration() {
-    return MultiHandlerRegistration.this::removeHandler;
+    return MultiHandlerRegistration.this;
   }
 }

@@ -20,6 +20,8 @@ import com.google.common.base.Splitter;
 import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableBiMap;
 import com.google.common.collect.ImmutableMap;
+import solutions.trsoftware.commons.shared.io.TablePrinter;
+import solutions.trsoftware.commons.shared.util.function.FunctionalUtils;
 import solutions.trsoftware.commons.shared.util.iterators.CharSequenceIterator;
 import solutions.trsoftware.commons.shared.util.iterators.CodePointIterator;
 import solutions.trsoftware.commons.shared.util.template.SimpleTemplateParser;
@@ -29,6 +31,8 @@ import solutions.trsoftware.commons.shared.util.text.CharRange;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.*;
+import java.util.function.Consumer;
+import java.util.function.Supplier;
 import java.util.function.UnaryOperator;
 import java.util.stream.IntStream;
 
@@ -123,6 +127,37 @@ public class StringUtils {
   public static boolean notBlank(String str) {
     return !isBlank(str);
   }
+  
+  /**
+   * Returns the given string if it's not {@linkplain #notBlank(String) blank},
+   * otherwise returns the string produced by the given supplier.
+   *
+   * @return the given string if it's not {@linkplain #notBlank(String) blank},
+   * otherwise {@code supplier.get()}
+   * @see LogicUtils#nonNullOrElse(Object, Supplier)
+   * @see #applyIfNotBlank(String, Consumer)
+   */
+  @Nullable
+  public static String notBlankOrElse(String s, Supplier<String> other) {
+    if (notBlank(s))
+      return s;
+    return other.get();
+  }
+
+  /**
+   * Applies the given consumer to the given string if it's not {@linkplain #notBlank(String) blank}.
+   *
+   * @return {@code true} if the consumer was invoked (i.e. the value wasn't {@linkplain #notBlank(String) blank})
+   * @see #notBlankOrElse(String, Supplier)
+   * @see FunctionalUtils#applyIfNotNull(Object, Consumer)
+   */
+  public static boolean applyIfNotBlank(String value, Consumer<String> consumer) {
+    if (notBlank(value)) {
+      consumer.accept(value);
+      return true;
+    }
+    return false;
+  }
 
   /**
    * Similar to {@link #isBlank(String)}, but doesn't use {@link String#trim()} to check whether the string contains
@@ -165,9 +200,11 @@ public class StringUtils {
 
   /**
    * @return the given string if it's not {@code null}, otherwise an empty string
+   * @see #trim(String)
+   * @see Strings#nullToEmpty(String)
    */
   public static String nonNull(String str) {
-    return LogicUtils.firstNonNull(str, "");
+    return str != null ? str : "";
   }
 
   /**
@@ -203,7 +240,10 @@ public class StringUtils {
    * @return the given string, trimmed by removing surrounding whitespace, if it's not null, otherwise an empty string.
    */
   public static String trim(String str) {
-    return nonNull(str).trim();
+    if (notEmpty(str))
+      return str.trim();
+    else
+      return "";
   }
 
 //  /**
@@ -447,7 +487,7 @@ public class StringUtils {
   }
 
   /**
-   * Returns a function that prepends the given number of space chars to a string.
+   * Returns a function that prepends the given number of space chars to a string:
    * <pre>
    *   s -> {@link #indent(int, String) indent(nSpaces, s)}
    * </pre>
@@ -460,9 +500,27 @@ public class StringUtils {
    * @return a function that applies {@link #justifyRight(String, int) justifyRight(s, width)} to a string {@code s}.
    * @see #justifyRight(String, int)
    */
-
+  // TODO(1/23/2025): rename this method to just "indent" (avoid naming conflict by renaming the original indent(int) to spaces(int))
   public static UnaryOperator<String> indenting(int nSpaces) {
     return s -> indent(nSpaces, s);
+  }
+
+  /**
+   * Returns a function that prepends the given prefix to a string:
+   * <pre>
+   *   s -> prefix + s
+   * </pre>
+   * This can be used, for example, to print a string array as a bulleted list:
+   * <pre>
+   *   Arrays.stream(stringArray).map({@link #prefixing}("  - ")).forEach(System.out::println);
+   * </pre>
+   *
+   * @param width the desired length of the result string
+   * @return a function that applies {@link #justifyRight(String, int) justifyRight(s, width)} to a string {@code s}.
+   * @see #justifyRight(String, int)
+   */
+  public static UnaryOperator<String> prefixing(String prefix) {
+    return s -> prefix + s;
   }
 
   /** @return a string of the given length using randomly-selected chars from the alphabet {@code [A-Za-z]} */
@@ -542,6 +600,20 @@ public class StringUtils {
    */
   public static <T> String join(String delimiter, String lastDelimiter, Iterator<T> iter) {
     return appendJoined(new StringBuilder(128), delimiter, lastDelimiter, iter).toString();
+  }
+
+  /**
+   * Returns the given strings ({@code s1} and {@code s2}) concatenated using the given delimiter if both inputs non-null.
+   * If one of the inputs
+   * is {@code null}, returns the other input, and if both {@code null}, returns {@code null}.
+   */
+  @Nullable
+  public static String joinNullable(@Nonnull String delimiter, @Nullable String s1, @Nullable String s2) {
+    if (s1 == null)
+      return s2;
+    if (s2 == null)
+      return s1;
+    return s1 + delimiter + s2;
   }
 
   /**
@@ -764,25 +836,30 @@ public class StringUtils {
   }
 
   /**
-   * Useful for printing debug info.
-   * @return a string that looks like {@code "arg1, arg2, ..."}, appropriately quoting
-   * and expanding the arg types as needed.  Arrays are printed using Arrays.toString
+   * Writes the {@linkplain #valueToString(Object) string values} of the given args joined by to the given buffer,
+   * joined by ", ".
+   * <p>
+   * Each value will be converted to a string in the most useful form for printing debug info or implementing {@link Object#toString()}:
+   * (strings/chars quoted, arrays printed using Arrays.toString/deepToString).
+   * 
+   * @return the same buffer after appending the generated string
    */
   public static StringBuilder appendArgs(StringBuilder buf, Object... args) {
-    if (args.length > 0) {
-      for (Object arg : args) {
-        appendValue(buf, arg);
+    for (int i = 0; i < args.length; i++) {
+      appendValue(buf, args[i]);
+      if (i < args.length - 1)
         buf.append(", ");
-      }
-      buf.delete(buf.length() - 2, buf.length());
     }
     return buf;
   }
 
   /**
+   * Appends a {@linkplain #valueToString(Object) verbose string value} of the given arg to the given buffer.
+   * 
    * @see #valueToString(Object)
+   * @return the same buffer after appending the generated string
    */
-  public static void appendValue(StringBuilder buf, Object value) {
+  public static StringBuilder appendValue(StringBuilder buf, Object value) {
     if (value instanceof CharSequence)
       appendSurrounded(buf, value, "\"");
     else if (value instanceof Character)
@@ -810,6 +887,7 @@ public class StringUtils {
       buf.append(Arrays.toString((char[])value));
     else
       buf.append(value);
+    return buf;
   }
 
   /**
@@ -1122,15 +1200,11 @@ public class StringUtils {
    * Pretty-prints a 2-dimensional array into a multiline string, such that columns are fixed-width and
    * right-justified.  The column values will be delimited by the given separator string.
    *
-   * <p style="color: #0073BF; font-weight: bold;">
-   * TODO: replace this method with a richer table printing facility
-   *  (see {@link solutions.trsoftware.tools.util.TablePrinter} and {@link solutions.trsoftware.commons.server.memquery.output.FixedWidthPrinter})
-   * </p>
-   *
    * @param colSep the column values will be delimited by this string
    *     (e.g. blank space, a box-drawing character like {@code \u2551}, etc.)
    * @see <a href="https://en.wikipedia.org/wiki/Box-drawing_character#Block_Elements">Box-drawing characters</a>
-   * @deprecated this implementation might be replaced by a richer table printing facility in the future
+   * @see TablePrinter
+   * @deprecated this implementation might be replaced by {@link TablePrinter} in the future
    */
   public static String matrixToPrettyString(String[][] matrix, String colSep) {
     checkArgument(!ArrayUtils.isEmpty(matrix), "Empty or null array given");
@@ -1186,8 +1260,8 @@ public class StringUtils {
    * @param matrix a non-empty rectangular array such that all rows have the same length
    * @throws IllegalArgumentException if the array is {@code null}, empty, or not all rows have the same length
    *
-   * @see #matrixToPrettyString(String[][], String)
-   * @deprecated this implementation might be replaced by a richer table printing facility in the future
+   * @see TablePrinter
+   * @deprecated this implementation might be replaced by {@link TablePrinter} in the future
    */
   public static String matrixToPrettyString(String[][] matrix) {
     return matrixToPrettyString(matrix, " ");
@@ -1446,5 +1520,12 @@ public class StringUtils {
   public static boolean isSurrogate(char ch) {
     // copied verbatim from the source code in Character.java
     return ch >= Character.MIN_SURROGATE && ch < (Character.MAX_SURROGATE + 1);
+  }
+
+  /**
+   * @return binary string representing the bits in the given byte
+   */
+  public static String byteToBinary(byte b) {
+    return Integer.toBinaryString((b & 0xFF) + 0x100).substring(1);  // see https://stackoverflow.com/a/17496691
   }
 }

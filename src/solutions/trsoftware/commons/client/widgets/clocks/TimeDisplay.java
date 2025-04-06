@@ -89,6 +89,7 @@ public class TimeDisplay extends Composite implements CountdownTimer.TickEvent.H
   public void setTime(double millis) {
     if (millis < 0)  // don't show negative values
       millis = 0;
+    // TODO(10/9/2024): can simplify by using solutions.trsoftware.commons.shared.util.text.DurationFormat
     int totalSeconds = Math.round((float)(millis / 1000d));  // cast to float to avoid GWT's long emulation
     int newMinutes = totalSeconds / 60;
     int newSeconds = totalSeconds % 60;
@@ -133,6 +134,7 @@ public class TimeDisplay extends Composite implements CountdownTimer.TickEvent.H
   }
 
   private void updateTimeDisplay(int newMinutes, int newSeconds) {
+    // TODO(10/9/2024): can simplify by using solutions.trsoftware.commons.shared.util.text.DurationFormat
     if (newMinutes != minutes || newSeconds != seconds || StringUtils.isBlank(lblTime.getText())) {
       // update the display text only if it's changed or was never displayed before
       String timeString = ":";

@@ -19,7 +19,6 @@ package solutions.trsoftware.commons.shared.util.stats;
 import solutions.trsoftware.commons.shared.util.HashCodeBuilder;
 
 import java.io.Serializable;
-import java.util.Set;
 import java.util.function.Supplier;
 import java.util.stream.DoubleStream;
 import java.util.stream.Stream;
@@ -27,6 +26,8 @@ import java.util.stream.Stream;
 /**
  * Uses Welford's online algorithm to compute the mean and variance of a stream of numbers
  * without storing all the individual data points.
+ * <p>
+ * This class is not thread-safe (since 10/23/2024).
  * <p>
  * <b>NOTE</b>: although this class implements {@link CollectableStats StatsCollector&lt;Double, ...&gt},
  * which allows it to be used with  {@link Stream#collect(java.util.stream.Collector) Stream&lt;Double&gt;.collect()},
@@ -36,9 +37,10 @@ import java.util.stream.Stream;
  * @see NumberSampleOnlineDouble
  * @see <a href="https://en.wikipedia.org/wiki/Algorithms_for_calculating_variance#Welford's_online_algorithm">
  *   Welford's online algorithm for calculating variance</a>
+ * @see com.google.common.math.StatsAccumulator
  * @author Alex
  */
-public class MeanAndVariance implements Serializable, SampleStatisticsDouble, CollectableStats<Double, MeanAndVariance> {
+public class MeanAndVariance implements Serializable, SampleStatisticsDouble, UpdatableDouble, CollectableStats<Double, MeanAndVariance> {
 
   /* -------------------- Algorithm --------------------------------------------
    *  def online_variance(data):
@@ -56,12 +58,21 @@ public class MeanAndVariance implements Serializable, SampleStatisticsDouble, Co
    *    variance = M2/(n - 1)  # Sample variance
    *    return (variance, variance_n)
    * ---------------------------------------------------------------------------
+   * Note: this is the same algorithm as com.google.common.math.StatsAccumulator.add, which Guava attributes to
+   * "Art of Computer Programming vol. 2, Knuth, 4.2.2, (15) and (16)"
    */
-  // NOTE: this algorithm is also implemented in variance.py
 
-  private int n;
+  private int n;  // TODO(10/23/2024): make long? (see com.google.common.math.StatsAccumulator); add SampleStatistics*.sum method variant that returns long, if available
   private double mean;
+  /**
+   * Sum of squares of deltas
+   * (equivalent to {@link com.google.common.math.StatsAccumulator#sumOfSquaresOfDeltas})
+   */
   private double m2;
+
+  /* TODO(10/21/2024):
+      - maybe add min/max, to avoid the need for MinDouble/MaxDouble in NumberSampleOnlineDouble
+  */
 
   public MeanAndVariance() {
     // public constructor needed to support Serializable
@@ -70,12 +81,12 @@ public class MeanAndVariance implements Serializable, SampleStatisticsDouble, Co
   /**
    * Add a new number to the sample.
    */
-  public synchronized void update(double x) {
+  public void update(double x) {
     if (Double.isFinite(x)) {
       // allow only finite values, otherwise a single bad input can destroy what we have (e.g. make everything NaN)
       n++;
       double delta = x - mean;
-      mean = mean + (delta/n);
+      mean += delta / n;
       m2 += delta * (x - mean);
     }
     else {
@@ -87,19 +98,20 @@ public class MeanAndVariance implements Serializable, SampleStatisticsDouble, Co
    * Merges another sample into this one.
    */
   @Override
-  public synchronized void merge(MeanAndVariance other) {
+  public void merge(MeanAndVariance other) {
     int newN = n + other.n;
     double newMean = (mean * n + other.mean * other.n) / newN;
     // using the "combined variance" formula given by http://www.emathzone.com/tutorials/basic-statistics/combined-variance.html
     m2 = (m2 + other.m2 + n*Math.pow(mean-newMean,2) + other.n*Math.pow(other.mean-newMean,2));
     mean = newMean;
     n = newN;
+    // TODO(10/23/2024): might be able to improve this code (see com.google.common.math.StatsAccumulator.merge)
   }
 
   /**
    * @return the number of inputs processed
    */
-  public synchronized int size() {
+  public int size() {
     return n;
   }
 
@@ -113,7 +125,7 @@ public class MeanAndVariance implements Serializable, SampleStatisticsDouble, Co
     throw new UnsupportedOperationException();
   }
 
-  public synchronized double mean() {
+  public double mean() {
     return mean;
   }
 
@@ -122,25 +134,47 @@ public class MeanAndVariance implements Serializable, SampleStatisticsDouble, Co
     throw new UnsupportedOperationException();
   }
 
-  public synchronized double sum() {
+  public double sum() {
     return mean * n;
   }
 
-  public synchronized double variance() {
+  /**
+   * Returns the <a href="http://en.wikipedia.org/wiki/Variance#Population_variance">population variance</a> of the values.
+   * @return the population variance, or {@code 0} if empty
+   * @see #sampleVariance()
+   */
+  public double variance() {
     if (n == 0) return 0;  // avoid divide-by-zero
+    // TODO: maybe throw ISE when empty (see com.google.common.math.Stats.populationVariance)
 
     // variance_n = M2/n      # Population variance
     // variance = M2/(n - 1)  # Sample variance
     // NOTE: NumberSample uses the Population variance, so we use the same here
     return m2/n;
+    // TODO: maybe ensure that m2 is non-negative? (see see com.google.common.math.Stats.populationVariance)
+  }
+
+  /**
+   * Returns the <a href="http://en.wikipedia.org/wiki/Variance#Sample_variance">sample variance</a> of the values.
+   * @return the sample variance, or {@code 0} if empty
+   * @see #variance()
+   */
+  public double sampleVariance() {
+    if (n <= 1) return 0;  // avoid divide-by-zero
+    // TODO: maybe throw ISE when n <= 1 (see com.google.common.math.Stats.sampleVariance)
+
+    // variance_n = M2/n      # Population variance
+    // variance = M2/(n - 1)  # Sample variance
+    return m2/(n-1);
+    // TODO: maybe ensure that m2 is non-negative? (see see com.google.common.math.Stats.sampleVariance)
   }
 
   @Override
-  public synchronized ImmutableStats<Double> summarize() {
+  public ImmutableStats<Double> summarize() {
     return new ImmutableStats<>(size(), null, null, null, sum(), mean(), variance());
   }
 
-  public synchronized boolean equals(Object o) {
+  public boolean equals(Object o) {
     if (this == o) return true;
     if (o == null || getClass() != o.getClass()) return false;
 
@@ -153,14 +187,14 @@ public class MeanAndVariance implements Serializable, SampleStatisticsDouble, Co
     return true;
   }
 
-  public synchronized int hashCode() {
+  public int hashCode() {
     // IntelliJ's default hash code block uses Double.doubleToLongBits which
     // isn't supported by GWT, so we use custom hashCode logic
     return new HashCodeBuilder().update(n, mean, m2).hashCode();
   }
 
   @Override
-  public synchronized String toString() {
+  public String toString() {
     final StringBuilder sb = new StringBuilder();
     sb.append("MeanAndVariance");
     sb.append("(n=").append(n);
@@ -168,11 +202,6 @@ public class MeanAndVariance implements Serializable, SampleStatisticsDouble, Co
     sb.append(", m2=").append(m2);
     sb.append(')');
     return sb.toString();
-  }
-
-  @Override
-  public void update(Double x) {
-    update(x.doubleValue());
   }
 
   @Override
@@ -185,7 +214,7 @@ public class MeanAndVariance implements Serializable, SampleStatisticsDouble, Co
    */
   public static MeanAndVariance collectDoubleStream(DoubleStream doubleStream) {
     return doubleStream.collect(MeanAndVariance::new,
-        (meanAndVariance, value) -> meanAndVariance.update(value),
+        MeanAndVariance::update,
         MeanAndVariance::merge);
   }
 
@@ -211,7 +240,6 @@ public class MeanAndVariance implements Serializable, SampleStatisticsDouble, Co
      * 
      * @return the cached instance of this {@link Collector}
      */
-    @SuppressWarnings("unchecked")
     public static Collector getInstance() {
       return INSTANCE;
     }
@@ -219,16 +247,6 @@ public class MeanAndVariance implements Serializable, SampleStatisticsDouble, Co
     @Override
     public Supplier<MeanAndVariance> supplier() {
       return MeanAndVariance::new;
-    }
-
-    /**
-     * Since all the methods in {@link MeanAndVariance} are synchronized, we can include
-     * {@link java.util.stream.Collector.Characteristics#CONCURRENT CONCURRENT} characteristic.
-     * @see #CH_CONCURRENT_ID
-     */
-    @Override
-    public Set<Characteristics> characteristics() {
-      return CH_CONCURRENT_ID;
     }
   }
 

@@ -30,11 +30,16 @@ import java.io.*;
  * @author Alex
  */
 public class SplitterOutputStream extends OutputStream {
-  private OutputStream[] destinationStreams;
+  private final OutputStream[] destinationStreams;
 
   public SplitterOutputStream(OutputStream ... destinationStreams) {
     this.destinationStreams = destinationStreams;
   }
+
+  /* TODO: consider trapping exceptions inside loop bodies of all the methods (same idea as CollectionUtils.tryForEach)
+     this would give all streams the chance to write/close/flush despite a different stream throwing
+     (could even subclass IOException similar to UmbrellaException)
+   */
 
   public void write(int b) throws IOException {
     for (OutputStream destinationStream : destinationStreams) {
@@ -44,7 +49,7 @@ public class SplitterOutputStream extends OutputStream {
 
   /**
    * Closes the underlying streams, but never closes {@link System#out} or {@link System#err},
-   * (closing these streams could cause a debugging nightmare).
+   * (to avoid a debugging nightmare).
    */
   @Override
   public void close() throws IOException {

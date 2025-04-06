@@ -1,7 +1,6 @@
 package solutions.trsoftware.commons.client.jso;
 
 import com.google.gwt.core.client.JavaScriptObject;
-import com.google.gwt.core.client.JsArray;
 import com.google.gwt.dom.client.NodeList;
 import solutions.trsoftware.commons.client.css.CSSRuleList;
 import solutions.trsoftware.commons.client.css.CSSStyleDeclaration;
@@ -21,7 +20,7 @@ import java.util.List;
  *   Glossary of Web platform classes with an <code>item(index)</code> method</a>
  * @see <a href="https://stackoverflow.com/a/74641156">Discussion on StackOverflow</a>
  */
-public abstract class ItemList<T extends JavaScriptObject> extends JavaScriptObject {
+public abstract class ItemList<T> extends JavaScriptObject {
 
   protected ItemList() {
   }
@@ -54,16 +53,7 @@ public abstract class ItemList<T extends JavaScriptObject> extends JavaScriptObj
    * Returns an unmodifiable {@link List java.util.List} view of this native {@link ItemList} object.
    */
   public final List<T> asList() {
-    return new ListAdapter<T>(this::item, this::length);
+    return new ListAdapter<>(this::item, this::length);
   }
-
-  /**
-   * Returns a new JS {@code Array} constructed from the items in this array-like object.
-   * The returned array is mutable, but changes will not propagate to this instance.
-   */
-  public final native JsArray<T> toArray() /*-{
-    // NOTE: using Array.apply instead of Array.from for maximal browser compatibility (see https://stackoverflow.com/a/20616985)
-    return Array.apply(null, this);
-  }-*/;
 
 }

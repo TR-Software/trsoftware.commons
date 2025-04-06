@@ -69,4 +69,8 @@
     <when-type-is class="solutions.trsoftware.commons.client.bundle.CommonsClientBundleFactory"/>
   </replace-with>
 
+  <!-- enable GSS support (see Commons.gss stylesheet) -->
+  <set-configuration-property name="CssResource.enableGss" value="true" />
+  <set-configuration-property name="CssResource.conversionMode" value="strict" />
+
 </module>

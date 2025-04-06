@@ -18,9 +18,9 @@ package solutions.trsoftware.tools.cli;
 
 import com.google.common.collect.BiMap;
 import com.google.common.collect.HashBiMap;
+import solutions.trsoftware.commons.shared.io.TablePrinter;
 import solutions.trsoftware.commons.shared.util.NumberRange;
 import solutions.trsoftware.commons.shared.util.StringUtils;
-import solutions.trsoftware.tools.util.TablePrinter;
 
 import java.io.BufferedReader;
 import java.io.IOException;

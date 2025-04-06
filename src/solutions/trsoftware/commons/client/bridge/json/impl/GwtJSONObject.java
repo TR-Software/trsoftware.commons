@@ -16,11 +16,13 @@
 
 package solutions.trsoftware.commons.client.bridge.json.impl;
 
+import com.google.gwt.json.client.JSONNumber;
 import com.google.gwt.json.client.JSONString;
 import com.google.gwt.json.client.JSONValue;
 import solutions.trsoftware.commons.client.bridge.json.JSONArray;
 import solutions.trsoftware.commons.client.bridge.json.JSONObject;
 
+import javax.annotation.Nullable;
 import java.util.Set;
 
 /**
@@ -40,6 +42,26 @@ public class GwtJSONObject implements JSONObject {
 
   public int getInteger(String key) {
     return (int)delegate.get(key).isNumber().doubleValue();
+  }
+
+  @Nullable
+  @Override
+  public Integer getNullableInteger(String key) {
+    JSONValue jsonValue = delegate.get(key);
+    if (jsonValue != null) {
+      JSONNumber number = jsonValue.isNumber();
+      if (number != null) {
+        // TODO(3/15/2025): why parsing string rather than number.doubleValue()?
+        return Integer.valueOf(number.toString());
+      }
+    }
+    return null;
+    /*
+     TODO(10/5/2024): create equivalents of this method for other wrapper types (Long, Boolean, Double, etc.),
+      and deprecate the original methods in favor of the nullable kind
+      - or even better, create method getNumber, returning a nullable Number
+        (wrapped with new Double(JSONNumber.doubleValue()) in GWT, and jsonElement.getAsNumber() in GSON)
+    */
   }
 
   public long getLong(String key) {

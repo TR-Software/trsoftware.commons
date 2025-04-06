@@ -16,7 +16,6 @@
 
 package solutions.trsoftware.commons.shared.util.time;
 
-import com.google.common.base.Stopwatch;
 import com.google.common.base.Ticker;
 import com.google.gwt.core.shared.GwtIncompatible;
 import solutions.trsoftware.commons.shared.util.StringUtils;
@@ -306,9 +305,8 @@ public class Clock {
 
     @Override
     public long read() {
-      // NOTE: starting with GWT 2.10, could use System.nanoTime directly, but for backward compatibility using Guava's version
-      // TODO: for potentially-better perf, return System.nanoTime() directly after upgrading to GWT 2.10
-      return Ticker.systemTicker().read();
+      // Note: System.nanoTime() requires GWT 2.10+
+      return System.nanoTime();
     }
 
     @Override

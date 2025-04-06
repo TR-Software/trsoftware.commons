@@ -17,6 +17,7 @@
 package solutions.trsoftware.commons.client.templates;
 
 import com.google.gwt.core.shared.GWT;
+import solutions.trsoftware.commons.client.widgets.popups.PopupGlassSvg;
 import solutions.trsoftware.commons.shared.util.template.Template;
 import solutions.trsoftware.commons.shared.util.template.TemplateBundle;
 
@@ -35,4 +36,10 @@ public interface CommonTemplates extends TemplateBundle {
    */
   @Resource("triangle.svg")
   Template triangle();
+
+  /**
+   * Template for {@link PopupGlassSvg}
+   */
+  @Resource("popup_glass.svg")
+  Template popup_glass_svg();
 }

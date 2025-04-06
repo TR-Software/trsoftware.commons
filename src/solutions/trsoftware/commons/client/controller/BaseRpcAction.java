@@ -151,7 +151,7 @@ public abstract class BaseRpcAction<T> implements Command, AsyncCallback<T> {
     endTime = Duration.currentTimeMillis();
     Log.write("Call to " + name + " succeeded (" + getRoundTripTime() + " ms)");
     handleSuccess(result);
-    getEventBus().fireEventFromSource(new SuccessEvent<T>(result), this);
+    getEventBus().fireEventFromSource(new SuccessEvent<>(result), this);
     onFinished();
   }
 
@@ -171,12 +171,9 @@ public abstract class BaseRpcAction<T> implements Command, AsyncCallback<T> {
   public final void execute() {
     if (suspendedUntilPageReload) {
       maybePromptToReloadPage();
-      Scheduler.get().scheduleDeferred(new Scheduler.ScheduledCommand() {
-        @Override
-        public void execute() {
-          onFinished();  // since neither onSuccess nor onFailure will ever be called, we call onFinally to allow the subclass to clean up (e.g. hide a popup dialog that triggered this action)
-        }
-      });
+      // since neither onSuccess nor onFailure will ever be called, we call onFinished in a deferred command
+      // to allow the subclass to clean up (e.g. hide a popup dialog that triggered this action)
+      Scheduler.get().scheduleDeferred(this::onFinished);
     }
     else {
       // invoke the RPC call
@@ -234,7 +231,7 @@ public abstract class BaseRpcAction<T> implements Command, AsyncCallback<T> {
     return getEventBus().addHandlerToSource(FinishedEvent.TYPE, this, handler);
   }
 
-  public HandlerRegistration addSuccessHandler(SuccessEvent.Handler handler) {
+  public HandlerRegistration addSuccessHandler(SuccessEvent.Handler<T> handler) {
     return getEventBus().addHandlerToSource(SuccessEvent.TYPE, this, handler);
   }
 

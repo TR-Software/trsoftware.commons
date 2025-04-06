@@ -16,6 +16,8 @@
 
 package solutions.trsoftware.commons.shared.util.graphs;
 
+import com.google.common.base.MoreObjects;
+
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.List;
@@ -77,6 +79,18 @@ public class AStarMultiPath<T> extends AStarBase<T, AStarMultiPathResult<T>> {
     @Nullable
     public Set<List<T>> getShortestPaths() {
       return delegate.getShortestPaths();
+    }
+
+    @Override
+    public String toString() {
+      Set<List<T>> shortestPaths = getShortestPaths();
+      return MoreObjects.toStringHelper(this)
+          .add("start", getStart())
+          .add("reachedGoals", getReachedGoals())
+          .add("shortestPathCost", getShortestPathCost())
+          .add("numNodesExamined", getNumNodesExamined())
+          .add("numPathsFound", shortestPaths != null ? shortestPaths.size() : 0)
+          .toString();
     }
   }
 

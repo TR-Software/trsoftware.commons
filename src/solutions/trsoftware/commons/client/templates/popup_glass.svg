@@ -1,0 +1,18 @@
+<!--
+================================================================================
+Template for solutions.trsoftware.commons.client.widgets.popups.PopupGlassSvg
+================================================================================
+Used as a semi-transparent full-screen "glass" element which allows making certain regions fully transparent
+(e.g. to emphasize particular page elements during a tutorial).  These cut-outs are added as rects to the <mask> element.
+-->
+<svg class="${svgClass}">
+  <mask id="${maskId}">
+    <!-- Everything under a white pixel will be visible -->
+    <rect width="100%" height="100%" fill="white" />
+    <!-- Everything under a black pixel will be invisible - add each mask element below, for example: -->
+    <!-- <rect x="757" y="261" width="61" height="32" fill="black"/> -->
+  </mask>
+  <!-- The semi-transparent "glass" background: -->
+  <rect width="100%" height="100%" fill="#0008" mask="url(#${maskId})" class="${backgroundClass}"/>
+  <!-- Note: using default fill color #0008, but can be customized in stylesheet (see .PopupGlassSvg .glassBackground rule in Commons.gss) -->
+</svg>

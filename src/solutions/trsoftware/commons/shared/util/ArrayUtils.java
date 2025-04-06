@@ -404,13 +404,12 @@ public class ArrayUtils {
   }
 
   /**
-   * Returns {@code arr[i]} if present, otherwise returns the value computed by the given function
+   * Returns {@code arr[i]} if non-null, otherwise returns the value computed by the given function
    * after entering it into the array.
    * <p>
    * Same idea as {@link Map#computeIfAbsent}, but intended for using an array instead of Map as a cache.
    *
    * @param i array index (and arg for producer)
-   * @param y row index
    * @param producer a function that computes the value for {@code arr[i]} if it's absent
    * @return the current (existing or computed) value associated with the specified array indices,
    *     or null if the computed value is null
@@ -423,7 +422,7 @@ public class ArrayUtils {
   }
 
   /**
-   * Returns {@code arr[y][x]} if present, otherwise returns the value computed by the given function
+   * Returns {@code arr[y][x]} if non-null, otherwise returns the value computed by the given function
    * after entering it into the array.
    * <p>
    * Same idea as {@link Map#computeIfAbsent}, but intended for using an array instead of Map as a cache.

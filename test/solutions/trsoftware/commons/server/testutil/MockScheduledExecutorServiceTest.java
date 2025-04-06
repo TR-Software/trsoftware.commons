@@ -536,6 +536,7 @@ public class MockScheduledExecutorServiceTest extends BaseTestCase {
     {
       ScheduledFutureTask<?>[] futureTasks = scheduler.examineTasks();
       assertEquals(taskSpecs.size(), futureTasks.length);
+      assertComparablesOrdering(futureTasks);  // examineTasks should be sorted by delay
       List<RepeatingTaskSpec<T>> sortedTaskSpecs = CollectionUtils.sortedCopy(taskSpecs,
           Comparator.comparingLong(RepeatingTaskSpec::getInitialDelayNanos));
       for (int i = 0; i < sortedTaskSpecs.size(); i++) {

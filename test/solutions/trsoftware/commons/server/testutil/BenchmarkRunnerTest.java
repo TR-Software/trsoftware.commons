@@ -4,6 +4,7 @@ import com.google.common.collect.ListMultimap;
 import com.google.common.collect.Multimaps;
 import junit.framework.TestCase;
 import solutions.trsoftware.commons.server.util.Duration;
+import solutions.trsoftware.commons.shared.annotations.ExcludeFromSuite;
 import solutions.trsoftware.commons.shared.annotations.Slow;
 import solutions.trsoftware.commons.shared.util.RandomUtils;
 import solutions.trsoftware.commons.shared.util.StringUtils;
@@ -53,6 +54,7 @@ public class BenchmarkRunnerTest extends TestCase {
    * (and, as a consequence, also {@link BenchmarkRunner.Result#add(Result)})
    */
   @Slow
+  @ExcludeFromSuite // too slow and also deprecated
   public void testCombine() throws Exception {
     BenchmarkRunner benchmarkRunner = new BenchmarkRunner();
     benchmarkRunner.setEqualNumIterations(true);

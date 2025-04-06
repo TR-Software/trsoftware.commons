@@ -23,6 +23,8 @@ import com.google.gwt.user.client.ui.TextBoxBase;
 import com.google.gwt.user.client.ui.Widget;
 import solutions.trsoftware.commons.shared.util.StringUtils;
 
+import java.util.function.Consumer;
+
 /**
  * Provides static methods to apply various properties to widgets using method chaining,
  * so that large widget tree structures can be constructed within a single statement.
@@ -81,7 +83,8 @@ public class WidgetDecorator {
   /**
    * Sets a {@link Style} property of the given {@link Widget}'s {@link Element}.
    * @param propertyName the property name, will be camel-cased if needed
-   * (e.g. a background color is {@code background-color} in CSS, but {@code backgroundColor} in the DOM API)
+   *   (e.g. a background color is {@code background-color} in CSS, but {@code backgroundColor} in the DOM API)
+   * @see #applyInlineStyles(Widget, Consumer)
    */
   public static <W extends Widget> W setStyleProperty(W widget, String propertyName, String propertyValue) {
     setStyleProperty(widget.getElement(), propertyName, propertyValue);
@@ -169,5 +172,40 @@ public class WidgetDecorator {
   public static <T extends TextBoxBase> T disableAutoTextForIOS(T textBoxBase) {
     addAttribute(textBoxBase, "autocorrect", "off");
     return addAttribute(textBoxBase, "autocapitalize", "off");
+  }
+
+  /**
+   * Applies the given function to the inline {@link Style} object of the widget's element.
+   * @since 10/7/2024
+   */
+  public static <W extends Widget> W applyInlineStyles(W widget, Consumer<Style> styleMutator) {
+    styleMutator.accept(widget.getElement().getStyle());
+    return widget;
+  }
+
+  /**
+   * For styles that define a CSS animation, this method should be used instead of {@link Element#addClassName(String)}
+   * if the element might already have the given animated style, in order to ensure that the animation will be restarted.
+   * <p>
+   * This is achieved by first removing the given CSS class from the element, triggering reflow, and then adding it again,
+   * thereby re-starting the animation.
+   */
+  public static void reapplyStyleName(Element element, String styleName) {
+    // see: https://stackoverflow.com/a/45036752
+    element.removeClassName(styleName);
+    // simply accessing element.offsetHeight triggers layout reflow, which removes the old animation so it can be restarted on the next call to addClassName
+    element.getOffsetHeight();
+    element.addClassName(styleName);
+  }
+
+  /**
+   * Replaces {@code styleToRemove} in the element's classList with {@code styleToAdd}, triggering layout reflow
+   * in-between in order to restart any animations defined for the class in stylesheet.
+   * <p>
+   * Note: the second style is added even if the first wasn't present.
+   */
+  public static void replaceAnimatedStyle(Element element, String styleToRemove, String styleToAdd) {
+    element.removeClassName(styleToRemove);
+    reapplyStyleName(element, styleToAdd);
   }
 }

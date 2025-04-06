@@ -57,6 +57,13 @@ public class ColorSequence {
   }
 
   /**
+   * Copy constructor
+   */
+  public ColorSequence(ColorSequence other) {
+    nextHue = other.nextHue;
+  }
+
+  /**
    * @return An HTML/CSS RGB color hex string representing the next color in the sequence.
    * @see <a href="https://en.wikipedia.org/wiki/Web_colors#Hex_triplet">Wikipedia: Web colors &raquo; Hex triplet</a>
    * @see ColorRGB#toString()

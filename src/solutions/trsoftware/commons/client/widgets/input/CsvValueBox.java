@@ -41,6 +41,6 @@ public class CsvValueBox<T> extends ValueBox<List<T>> {
    *
    */
   protected CsvValueBox(Renderer<T> renderer, Parser<T> parser) {
-    super(Document.get().createTextInputElement(), new CsvRenderer<T>(renderer), new CsvParser<T>(parser));
+    super(Document.get().createTextInputElement(), new CsvRenderer<>(renderer), new CsvParser<>(parser));
   }
 }

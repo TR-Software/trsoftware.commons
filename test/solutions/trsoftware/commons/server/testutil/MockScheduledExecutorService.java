@@ -20,10 +20,10 @@ import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.MoreObjects;
 import com.google.common.base.Ticker;
 import com.google.common.collect.ImmutableList;
+import solutions.trsoftware.commons.shared.io.TablePrinter;
 import solutions.trsoftware.commons.shared.util.StringUtils;
 import solutions.trsoftware.commons.shared.util.compare.RichComparable;
 import solutions.trsoftware.commons.shared.util.time.SettableTicker;
-import solutions.trsoftware.tools.util.TablePrinter;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -34,6 +34,7 @@ import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.BooleanSupplier;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 
 /**
@@ -118,6 +119,7 @@ public class MockScheduledExecutorService implements ScheduledExecutorService {
   }
 
   private TaskRunRecord runTask(ScheduledFutureTask<?> task) {
+    // TODO(9/27/2024): allow caller to set a listener to be notified of each task run, in sequence (to verify the side-effects of each task)
     task.run();
     TaskRunRecord record = task.getRunRecord();
     history.add(record);
@@ -393,9 +395,12 @@ public class MockScheduledExecutorService implements ScheduledExecutorService {
   /** @return a copy of the currently scheduled tasks, sorted by delay */
   @VisibleForTesting
   public ScheduledFutureTask<?>[] examineTasks() {
-    ScheduledFutureTask<?>[] ret = tasks.toArray(new ScheduledFutureTask[0]);
-    Arrays.sort(ret);
-    return ret;
+    return streamTasks().toArray(ScheduledFutureTask[]::new);
+  }
+
+  /** @return a stream of the currently scheduled tasks, sorted by delay */
+  public Stream<ScheduledFutureTask<?>> streamTasks() {
+    return tasks.stream().sorted();
   }
 
   /**
@@ -440,6 +445,11 @@ public class MockScheduledExecutorService implements ScheduledExecutorService {
     printDebugInfo(out, false, getHistory());
   }
 
+  /**
+   * Prints a table of all currently-scheduled tasks along with a subset of the execution history.
+   *
+   * @param verbose if {@code true} will include topmost stack trace element from where each task was submitted
+   */
   public void printDebugInfo(boolean verbose) {
     printDebugInfo(System.out, verbose, getHistory());
   }
@@ -452,6 +462,7 @@ public class MockScheduledExecutorService implements ScheduledExecutorService {
   }
 
   /**
+   * Prints a table of all currently-scheduled tasks along with a subset of the execution history.
    * @param nRecords will limit the output to this number of history items
    */
   public void printDebugInfo(int nRecords) {
@@ -459,10 +470,12 @@ public class MockScheduledExecutorService implements ScheduledExecutorService {
   }
 
   /**
+   * Prints a table of all currently-scheduled tasks along with a subset of the execution history.
+   *
+   * @param verbose if {@code true} will include topmost stack trace element from where each task was submitted
    * @param selectedRange will include only this history subset in the output
    */
   public void printDebugInfo(PrintStream out, boolean verbose, List<TaskRunRecord> selectedRange) {
-    ScheduledFutureTask<?>[] tasks = examineTasks();
     String[] headerLines = new String[] {
         String.format("%s state at ticker time %,d:", toString(), now()),
         "\tat " + getCallerStackTrace()[0]
@@ -471,17 +484,7 @@ public class MockScheduledExecutorService implements ScheduledExecutorService {
     String headerText = StringUtils.join(System.lineSeparator(), headerLines);
     out.printf("%s%n%s%n%1$s%n",
         StringUtils.repeat('=', headerWidth), headerText);
-    out.printf("%d Scheduled tasks:%n", tasks.length);
-    if (tasks.length > 0) {
-      TablePrinter tp = new TablePrinter();
-      for (ScheduledFutureTask<?> task : tasks) {
-        tp.newRow()
-            .addCol("id", task.id)
-            .addCol("eta / delay", etaToString(task.time))
-            .addCol("name", printTaskName(task, verbose));
-      }
-      tp.printTable(out);
-    }
+    printScheduledTasks(out, Integer.MAX_VALUE, verbose);
     out.printf("%d Completed tasks", history.size());
     if (!selectedRange.isEmpty()) {
       out.printf(" (displaying time range [%,d, %,d]):%n", selectedRange.get(0).time, now());
@@ -497,9 +500,68 @@ public class MockScheduledExecutorService implements ScheduledExecutorService {
       tp.printTable(out);
     }
     out.println();
-    out.println(StringUtils.repeat('=', headerWidth));
   }
 
+  /**
+   * Prints debug info for a subset of the currently-scheduled tasks.
+   *
+   * @param verbose if {@code true} will include topmost stack trace element from where each task was submitted
+   */
+  public void printScheduledTasks(boolean verbose) {
+    printScheduledTasks(Integer.MAX_VALUE, verbose);
+  }
+
+  /**
+   * Prints debug info for a subset of the currently-scheduled tasks.
+   *
+   * @param limit the number of tasks to show (if less than the total, will display approximately {@code limit/2} at
+   * @param verbose if {@code true} will include topmost stack trace element from where each task was submitted
+   */
+  public void printScheduledTasks(int limit, boolean verbose) {
+    printScheduledTasks(System.out, limit, verbose);
+  }
+
+  /**
+   * Prints debug info for a subset of the currently-scheduled tasks.
+   *
+   * @param out print destination
+   * @param limit the number of tasks to show (if less than the total, will display approximately {@code limit/2} at
+   * @param verbose if {@code true} will include topmost stack trace element from where each task was submitted
+   */
+  public void printScheduledTasks(PrintStream out, int limit, boolean verbose) {
+    ScheduledFutureTask<?>[] tasks = examineTasks();
+    int nTasks = tasks.length;
+    out.printf("%d Scheduled tasks:%n", nTasks);
+    if (nTasks > 0) {
+      TablePrinter tp = new TablePrinter();
+      // TODO: print the head and tail of array if limit < tasks.length
+      int tailFragmentSize = limit / 2;  // floor(limit / 2);  i.e. if limit is odd, put the remainder in the head segment
+      int headFragmentSize = limit - tailFragmentSize;  // ceil(limit / 2)
+      int iHeadStop = Math.min(nTasks, headFragmentSize);
+      int iTailStart = nTasks - tailFragmentSize;  // Note: doesn't matter if this idx is out-of-bounds b/c the loop would terminate at iHeadStop if that's the case
+      for (int i = 0; i < nTasks; i++) {
+        ScheduledFutureTask<?> task = tasks[i];
+        if (i < iHeadStop || i >= iTailStart) {
+          tp.newRow()
+              .addCol("id", task.id)
+              .addCol("eta / delay", etaToString(task.time))
+              .addCol("name", printTaskName(task, verbose));
+        }
+        else if (i == iHeadStop) {
+          // print a blank row, showing the number of tasks skipped over
+          tp.newRow()
+              .addCol("id", "..")
+              .addCol("eta / delay", String.format("(%d tasks not displayed)", iTailStart - iHeadStop))
+              .addCol("name", "..");
+        }
+      }
+      tp.printTable(out);
+    }
+  }
+
+  /**
+   * @param verbose if {@code true} will include topmost stack trace frame from where the task was submitted
+   */
   private String printTaskName(TaskInfo task, boolean verbose) {
     StringBuilder ret = new StringBuilder(task.getName());
     if (verbose)
@@ -649,6 +711,7 @@ public class MockScheduledExecutorService implements ScheduledExecutorService {
      * @see #scheduleWithFixedDelay(Runnable, long, long, TimeUnit)
      */
     public ScheduledFutureTask(@Nonnull Runnable runnable, V result, long time, long period, StackTraceElement[] debugTrace) {
+      this.runnable = runnable;
       this.callable = Executors.callable(runnable, result);
       this.time = time;
       this.name = runnable.toString();

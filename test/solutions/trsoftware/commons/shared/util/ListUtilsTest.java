@@ -30,6 +30,7 @@ import java.util.stream.Collectors;
 
 import static com.google.common.base.Strings.lenientFormat;
 import static java.util.Arrays.asList;
+import static solutions.trsoftware.commons.shared.testutil.AssertUtils.assertThrows;
 import static solutions.trsoftware.commons.shared.util.ListUtils.*;
 
 public class ListUtilsTest extends TestCase {
@@ -254,5 +255,33 @@ public class ListUtilsTest extends TestCase {
 
     assertTrue(trimTail(list, 0));
     assertTrue(list.isEmpty());
+  }
+
+  public void testNormalizeIndex() throws Exception {
+    for (int size = 0; size < 5; size++) {
+      // for non-negative indices should return the index unchanged
+      for (int i = 0; i < size; i++)
+        assertEquals(i, normalizeIndex(i, size));
+      int finalSize = size;  // must copy to effectiv. final var to use in assertThrows lambdas
+      assertThrows(IndexOutOfBoundsException.class, () -> normalizeIndex(finalSize, finalSize));
+      // for negative indices should subtract from size
+      for (int i = 1; i <= size; i++)
+        assertEquals(size - i, normalizeIndex(-i, size));
+      assertThrows(IndexOutOfBoundsException.class, () -> normalizeIndex(-(finalSize + 1), finalSize));
+    }
+  }
+
+  public void testNormalizePositionIndex() throws Exception {
+    for (int size = 0; size < 5; size++) {
+      // for non-negative indices should return the index unchanged
+      for (int i = 0; i <= size; i++)
+        assertEquals(i, normalizePositionIndex(i, size));
+      int finalSize = size;  // must copy to effectiv. final var to use in assertThrows lambdas
+      assertThrows(IndexOutOfBoundsException.class, () -> normalizePositionIndex(finalSize + 1, finalSize));
+      // for negative indices should subtract from size
+      for (int i = 1; i <= size; i++)
+        assertEquals(size - i, normalizePositionIndex(-i, size));
+      assertThrows(IndexOutOfBoundsException.class, () -> normalizePositionIndex(-(finalSize + 1), finalSize));
+    }
   }
 }

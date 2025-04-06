@@ -65,10 +65,10 @@ public class GwtUtils {
    * because this method is able to check only {@link Class#getSuperclass()} (but not {@link Class#getInterfaces()},
    * which isn't emulated by GWT).
    */
-  public static boolean isAssignableFrom(Class c1, Class c2) {
+  public static boolean isAssignableFrom(Class<?> c1, Class<?> c2) {
     // TODO: could replace this method by emulating Class (put it in super-source, or extract it to gwt-stack-trace-kit\patch\src\com\google\gwt\emul\java\lang\Class.java)
     // c2 can be cast to c1 if c1 is a superclass of c2
-    Class next = c2;
+    Class<?> next = c2;
     while (next != null) {
       if (c1.equals(next))
         return true;
@@ -94,7 +94,7 @@ public class GwtUtils {
    *
    * @deprecated GWT now supports {@link Class#getSimpleName()} natively (via JRE emulation)
    */
-  public static String getSimpleName(Class c) {
+  public static String getSimpleName(Class<?> c) {
     ClassNameParser parser = new ClassNameParser(c);
     if (!parser.isAnonymous())
       return parser.getSimpleName();
@@ -104,7 +104,7 @@ public class GwtUtils {
        so we return the "complex name" as well as the simple name of the superclass.  This should work fine,
        because there isn't any way for a superclass to be anonymous.
         */
-      Class sup = c.getSuperclass();
+      Class<?> sup = c.getSuperclass();
       if (sup == Object.class)
         return parser.getComplexName();
       else {
@@ -132,12 +132,13 @@ public class GwtUtils {
   public static Widget elementToWidget(Element element) {
     // idea borrowed from https://stackoverflow.com/questions/17855096/gwt-how-to-retrive-real-clicked-widget/17863305#17863305
     EventListener listener = DOM.getEventListener(element);
-    // No listener attached to the element, so no widget exist for this element
-    if (listener != null && (listener instanceof Widget)) {
+    // If listener is null, no Widget exist for this element
+    if (listener instanceof Widget) {
       // GWT uses the widget as event listener
       return (Widget) listener;
     }
     return null;
+    // TODO(10/6/2024): move this method to WidgetQuery
   }
 
   public static Widget getFocusedWidget() {
@@ -145,6 +146,7 @@ public class GwtUtils {
     if (activeElement != null)
       return elementToWidget(activeElement);
     return null;
+    // TODO(10/6/2024): move this method to WidgetQuery
   }
 
   /**

@@ -25,27 +25,24 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Supplier;
 
+import static solutions.trsoftware.commons.shared.util.CollectionUtils.tryForEach;
+
 /**
  * A convenience superclass which facilitates managing handler registrations on a global event bus in a way that
- * doesn't leak memory.
+ * doesn't leak memory when the widget is removed from the DOM.
  * <p>
  * Handler registrations are deferred until the widget becomes attached to the DOM ({@link #onLoad}),
  * and the registered handlers are automatically removed when the widget becomes detached ({@link #onUnload}).
  * This process repeats on every attach/detach cycle (i.e. if the widget ever becomes attached again,
- * the same handlers will be registered again and removed when it becomes detached).
+ * the same handlers will be automatically registered again and removed when it becomes detached).
  *
  * @see #registerEventHandlerOnLoad(Event.Type, Object)
+ * @see MultiHandlerRegistration
  * @author Alex
  */
 public abstract class CompositeWithHandlers extends Composite {
 
-  /* TODO:
-      - rename this class to CompositeWithHandlers or something
-      - unit test this class
-   */
-
-  private final List<DeferredHandlerRegistration> deferredRegistrations = new ArrayList<>();
-
+  private final List<DeferredRegistration> deferredRegistrations = new ArrayList<>();
 
   /**
    * The given handler will be {@linkplain EventBus#addHandler(Event.Type, Object) added}
@@ -61,12 +58,11 @@ public abstract class CompositeWithHandlers extends Composite {
    * @return memento that can be used to stop the add/remove cycle for the given handler
    */
   protected <H> Remover registerEventHandlerOnLoad(Event.Type<H> eventType, H handler) {
-//    return addDeferredRegistration(new DeferredHandlerRegistrationImpl<H>(eventType, handler));
     return registerEventHandlerOnLoad(() -> Events.BUS.addHandler(eventType, handler));
   }
 
   /**
-   * Similar to {@link #registerEventHandlerOnLoad(Event.Type, Object)}, but allows using a custom event bus implementation
+   * Similar to {@link #registerEventHandlerOnLoad(Event.Type, Object)}, but allows using a custom event bus
    * instead of {@link Events#BUS}.
    * <p>
    * The given function should perform the equivalent of {@link EventBus#addHandler(Event.Type, Object)}.
@@ -75,21 +71,10 @@ public abstract class CompositeWithHandlers extends Composite {
    * @return memento that can be used to stop the add/remove cycle for the given handler
    */
   protected Remover registerEventHandlerOnLoad(Supplier<HandlerRegistration> registrar) {
-    return addDeferredRegistration(new DeferredHandlerRegistration() {
-      // TODO: convert anonymous to inner
-      @Override
-      HandlerRegistration doAddHandler() {
-        return registrar.get();
-      }
-    });
+    return addDeferredRegistration(DeferredRegistration.fromSupplier(registrar));
   }
 
-  /* TODO(5/24/2024): can simplify by replacing the deferredRegistrations list and redundant DeferredHandlerRegistration class
-      with a List<Supplier<HandlerRegistration>> to be invoked onLoad and added to a single MultiHandlerRegistration,
-      whose removeHandler method is invoked onUnload
-   */
-
-  private Remover addDeferredRegistration(DeferredHandlerRegistration deferredRegistration) {
+  private Remover addDeferredRegistration(DeferredRegistration deferredRegistration) {
     deferredRegistrations.add(deferredRegistration);
     return () -> deferredRegistrations.remove(deferredRegistration);
   }
@@ -97,11 +82,7 @@ public abstract class CompositeWithHandlers extends Composite {
   @Override
   protected void onLoad() {
     super.onLoad();
-    for (DeferredHandlerRegistration reg : deferredRegistrations) {
-      reg.addHandler();
-    }
-    // TODO(5/24/2024): maybe replace the above loop with tryForEach:
-    // tryForEach(deferredRegistrations, DeferredHandlerRegistration::addHandler);
+    tryForEach(deferredRegistrations, DeferredRegistration::addHandler);
   }
 
   /**
@@ -111,38 +92,45 @@ public abstract class CompositeWithHandlers extends Composite {
   @Override
   protected void onUnload() {
     super.onUnload();
-    for (DeferredHandlerRegistration reg : deferredRegistrations) {
-      reg.removeHandler();
-    }
-    // TODO(5/24/2024): maybe replace the above loop with tryForEach:
-    // tryForEach(deferredRegistrations, DeferredHandlerRegistration::removeHandler);
+    tryForEach(deferredRegistrations, DeferredRegistration::removeHandler);
   }
 
 
-  private abstract static class DeferredHandlerRegistration {
+  private abstract static class DeferredRegistration {
     private HandlerRegistration handlerRegistration;
 
     /**
-     * Internal method invoked from {@link #onLoad()}: adds the encapsulated handler with the event bus.
+     * Internal method invoked from {@link #onLoad()}: adds the encapsulated handler to the event bus.
      */
-    void addHandler() {
+    final void addHandler() {
       handlerRegistration = doAddHandler();
     }
 
     /**
      * Internal method invoked from {@link #onUnload()}: removes the encapsulated handler from the event bus.
      */
-    void removeHandler() {
-      if (handlerRegistration != null)
+    final void removeHandler() {
+      if (handlerRegistration != null) {
         handlerRegistration.removeHandler();
+        handlerRegistration = null;
+      }
     }
 
     /**
-     * Adds the desired method to the event bus.  This method can be overridden to use custom event bus logic.
+     * Adds the desired handler to the event bus.  This method can be overridden to use custom event bus logic.
      *
      * @return the object returned by {@link EventBus#addHandler(Event.Type, Object)}
      */
     abstract HandlerRegistration doAddHandler();
+
+    static DeferredRegistration fromSupplier(Supplier<HandlerRegistration> registrar) {
+      return new DeferredRegistration() {
+        @Override
+        HandlerRegistration doAddHandler() {
+          return registrar.get();
+        }
+      };
+    }
   }
 
 

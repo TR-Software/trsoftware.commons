@@ -31,6 +31,10 @@ public interface CommonsImages extends ClientBundle {
 
   CommonsImages INSTANCE = GWT.create(CommonsImages.class);
 
+  static CommonsImages get() {
+    return INSTANCE;
+  }
+
   /*
     NOTE: don't rely on GWT's ClientBundle generator to scale the images
     (e.g. with @ImageResource.ImageOptions(width = 22, height = 30))
@@ -49,4 +53,36 @@ public interface CommonsImages extends ClientBundle {
 
   @Source("reloadIconSingleArrow.svg")  // https://commons.wikimedia.org/wiki/File:OOjs_UI_icon_reload-progressive.svg
   SvgImageResource reloadIconSingleArrow();
+  @Source("reloadIconDoubleArrows.svg")
+  SvgImageResource reloadIconDoubleArrows();
+  
+  // copied from IconsBundle:
+  ImageResource user32();
+  ImageResource user_group();
+  ImageResource user_group_car();
+  //  ImageResource red_car();
+//  ImageResource user_chat();
+  ImageResource user_chat32();
+  //  ImageResource user_chat24();
+  //  ImageResource user_arrow();
+  ImageResource user_plus24();
+  ImageResource help24();
+//  /** Original: http://commons.wikimedia.org/wiki/File:Pin.JPG */
+//  ImageResource pin16();
+  /** Original: http://commons.wikimedia.org/wiki/File:Pin.JPG */
+  ImageResource pin24();
+//  /** Original: http://commons.wikimedia.org/wiki/File:Pin.JPG */
+//  ImageResource pin32();
+  /** Source: http://commons.wikimedia.org/wiki/File:Flag_icon_red_4.svg */
+  ImageResource red_flag24();
+  ImageResource globe24();
+  ImageResource excel_file16();
+  /** Source: http://code.mayanportal.org/browser/trunk/media/templates/default/img/gnome-icon-theme-2.20.0/24x24/devices/media-floppy.png?rev=29 */
+  ImageResource disk24();
+  /** Source: http://commons.wikimedia.org/wiki/File:User-invisible.svg */
+  ImageResource ghost24();
+  ImageResource triangleDown();
+  ImageResource triangleLeft();
+  ImageResource triangleRight();
+  
 }

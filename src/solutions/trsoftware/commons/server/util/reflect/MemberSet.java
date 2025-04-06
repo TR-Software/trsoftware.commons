@@ -62,7 +62,7 @@ public class MemberSet<T> implements Iterable<Member> {
   public MemberSet(Class<T> type, boolean instanceMembersOnly, boolean fieldsAndGettersOnly) {
     Assert.assertNotNull(type);
     this.type = type;
-    filteredMembers.addAll(ReflectionUtils.listMembersAccessibleFrom(type));
+    filteredMembers.addAll(ReflectionUtils.listMembersAccessibleFrom(type));  // TODO: why limit this to only accessible members? that limits the usefulness of ObjectDiffs
     if (instanceMembersOnly)
       exclude(MemberPattern.modifiers(Modifier.STATIC));
     if (fieldsAndGettersOnly) {
@@ -73,6 +73,12 @@ public class MemberSet<T> implements Iterable<Member> {
               MemberPattern.not(MemberPattern.valueTypeIs(void.class)))));
     }
   }
+
+  public MemberSet(Class<T> type, Collection<Member> members) {
+    this.type = type;
+    filteredMembers.addAll(members);
+  }
+
 
   public Class<T> getType() {
     return type;

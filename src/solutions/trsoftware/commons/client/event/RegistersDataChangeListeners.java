@@ -24,6 +24,7 @@ import solutions.trsoftware.commons.client.util.DestroyableAdapter;
  * automatically removed when the subclass is destroyed.
  *
  * @author Alex
+ * @deprecated use GWT's new {@link com.google.web.bindery.event.shared.Event} paradigm instead.
  */
 public class RegistersDataChangeListeners extends DestroyableAdapter implements DestroyableRegistersDataChangeListeners {
 

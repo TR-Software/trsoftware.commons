@@ -16,7 +16,7 @@
 
 package solutions.trsoftware.commons.server.util;
 
-import solutions.trsoftware.commons.server.util.codec.UrlSafeBase64Alphabet;
+import solutions.trsoftware.commons.shared.io.codec.UrlSafeBase64Alphabet;
 
 import java.security.SecureRandom;
 

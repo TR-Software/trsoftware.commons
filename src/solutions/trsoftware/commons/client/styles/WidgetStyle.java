@@ -19,21 +19,27 @@ package solutions.trsoftware.commons.client.styles;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.user.client.ui.Widget;
 import solutions.trsoftware.commons.client.widgets.WidgetBuilder;
+import solutions.trsoftware.commons.client.widgets.WidgetDecorator;
 import solutions.trsoftware.commons.client.widgets.Widgets;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.function.Consumer;
 
 /**
- * Implements a builder pattern for declaring a widget's style properties.
- * The {@link #apply(Widget)} method is used by the factory method in {@link Widgets} or {@link WidgetBuilder}
+ * Implements a builder pattern for declaring a widget's inline style properties.
+ * <p>
+ * The {@link #apply(Widget)} method is used by the factory methods in {@link Widgets} or {@link WidgetBuilder}
  * to set the style properties after a widget is constructed.
  *
  * @author Alex
  */
 public class WidgetStyle {
   private String styleName, width, height;
-  private Map<String,String> styleProperties;
+  /** Allows specifying individual {@link Style} properties as name-value pairs */
+  private Map<String, String> styleProperties;
+  /** Allows direct access to the {@link Style} object */
+  private Consumer<Style> styleSetter;
 
 
   public WidgetStyle() {
@@ -41,6 +47,13 @@ public class WidgetStyle {
 
   public WidgetStyle(String styleName) {
     this.styleName = styleName;
+  }
+
+  /**
+   * @param styleSetter to set inline styles directly on the widget's elements
+   */
+  public WidgetStyle(Consumer<Style> styleSetter) {
+    this.styleSetter = styleSetter;
   }
 
   /**
@@ -59,11 +72,12 @@ public class WidgetStyle {
       widget.setHeight(height);
     if (styleName != null)
       widget.setStyleName(styleName);
-    if (styleProperties != null) {
+    if (styleProperties != null || styleSetter != null) {
       Style style = widget.getElement().getStyle();
-      for (String styleProp : styleProperties.keySet()) {
-        style.setProperty(styleProp, styleProperties.get(styleProp));
-      }
+      if (styleProperties != null)
+        styleProperties.forEach(style::setProperty);
+      if (styleSetter != null)
+        styleSetter.accept(style);
     }
     return widget;
   }
@@ -90,12 +104,29 @@ public class WidgetStyle {
     return this;
   }
 
-  /** Sets a CSS style property directly on the underlying element */
+  /**
+   * Will apply the given a {@linkplain Style#setProperty(String, String) style property} to the widget's
+   * {@linkplain Widget#getElement() element}.
+   * @see #withStyleSetter(Consumer)
+   */
   public WidgetStyle setStyleProperty(String name, String value) {
     if (styleProperties == null) {
-      styleProperties = new HashMap<String, String>();  // lazy init
+      styleProperties = new HashMap<>();
     }
     styleProperties.put(name, value);
+    return this;
+  }
+
+  /**
+   * Allows specifying a function that manipulates the {@link Style} object directly.
+   * This function will be applied after setting all the individual name-value properties specified by
+   * {@link #setStyleProperty(String, String)}.  Subsequent invocations of this method will overwrite this value.
+   *
+   * @since 10/7/2024
+   * @see WidgetDecorator#applyInlineStyles(Widget, Consumer)
+   */
+  public WidgetStyle withStyleSetter(Consumer<Style> styleSetter) {
+    this.styleSetter = styleSetter;
     return this;
   }
 }

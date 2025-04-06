@@ -13,7 +13,6 @@ import java.util.stream.Collectors;
 import static com.google.common.base.Strings.lenientFormat;
 import static java.util.Arrays.asList;
 import static solutions.trsoftware.commons.shared.testutil.AssertUtils.assertContains;
-import static solutions.trsoftware.commons.shared.util.MapUtils.throwingMerger;
 import static solutions.trsoftware.commons.shared.util.StringUtils.methodCallToString;
 import static solutions.trsoftware.commons.shared.util.graphs.Location.loc;
 
@@ -158,7 +157,7 @@ public class DijkstraTest extends PathSearchTestCase {
     System.out.println("\tnodesExamined: " + result.getNumNodesExamined());
     Set<T> reachableNodes = result.getReachableNodes();
     Map<T, Double> pathCosts = reachableNodes.stream().collect(
-        Collectors.toMap(Function.identity(), result::getShortestPathCost, throwingMerger(), LinkedHashMap::new));
+        MapUtils.toMap(Function.identity(), result::getShortestPathCost, LinkedHashMap::new));
     System.out.println("\treachableNodes: " + reachableNodes.size());
     System.out.println("\tshortestPathCost: " + pathCosts);
 

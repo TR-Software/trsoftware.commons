@@ -62,7 +62,10 @@ public class CountdownTimer extends Timer {
     return this;
   }
 
-  private double getTimeRemaining() {
+  /**
+   * @return time (millis) remaining before the countdown is finished
+   */
+  public double getTimeRemaining() {
     return clock.getMillisUntil(targetTimestamp);
   }
 

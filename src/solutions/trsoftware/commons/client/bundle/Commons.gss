@@ -173,6 +173,16 @@ in a CssResource.
   opacity: 0.3;
 }
 
+.gwt-RadioButton {
+  /* prevent line break between the radio <input> and its <label> */
+  white-space: nowrap;
+  cursor: pointer;
+}
+.gwt-RadioButton * {
+  /* cursor property isn't inherited, so need this descendant rule to have the cursor apply to both the radio <input> and its <label> */
+  cursor: pointer;
+}
+
 /* --------- The following styles on our DialogBox class exist to support our ModalDialog class --------- */
 .SoftModalDialogBox {
   background-color: #f1f1f1;
@@ -229,3 +239,15 @@ in a CssResource.
 a > img {
   border: none;
 }
+
+.PopupGlassSvg .glassBackground {
+  fill: #000;
+  fill-opacity: .33; /* RGBA fill color not supported in Chrome35, so have to use fill-opacity for alpha */
+}
+
+.contentSection {
+  border: 2px solid gray;
+  border-radius: 5px;
+  padding: 5px;
+}
+

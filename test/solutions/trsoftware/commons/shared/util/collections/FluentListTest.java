@@ -39,20 +39,6 @@ public class FluentListTest extends TestCase {
     assertEquals(Arrays.asList(0, 1, 2, 33, 333, 4), original);
   }
 
-  public void testNormalizeIndex() throws Exception {
-    // for non-negative indices should return the index unchanged
-    int size = fluent.size();
-    for (int i = 0; i < size; i++) {
-      assertEquals(i, fluent.normalizeIndex(i));
-    }
-    // for negative indices should subtract from end of list
-    for (int i = 1; i <= size; i++) {
-      assertEquals(size - i, fluent.normalizeIndex(-i));
-    }
-    assertThrows(IndexOutOfBoundsException.class, () -> fluent.normalizeIndex(size));
-    assertThrows(IndexOutOfBoundsException.class, () -> fluent.normalizeIndex(-(size + 1)));
-  }
-
   public void testGet() throws Exception {
     // for non-negative indices should be the same as List.get
     for (int i = 0; i < fluent.size(); i++) {

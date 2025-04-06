@@ -23,7 +23,7 @@ import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.Composite;
-import com.google.gwt.user.client.ui.Label;
+import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.RootPanel;
 import com.google.web.bindery.event.shared.UmbrellaException;
 import solutions.trsoftware.commons.client.widgets.Widgets;
@@ -96,7 +96,7 @@ public class ExceptionSimulator extends Composite {
 
   public ExceptionSimulator() {
     initWidget(Widgets.horizontalPanel(
-        new Label("ExceptionSimulator: "),
+        new HTML("<b>ExceptionSimulator:</b> "),
         new Button("RuntimeException", new ClickHandler() {
           @Override
           public void onClick(ClickEvent event) {

@@ -26,6 +26,7 @@ import solutions.trsoftware.commons.shared.util.stats.Mergeable;
 import javax.annotation.Nullable;
 import java.util.*;
 import java.util.function.*;
+import java.util.stream.Collector;
 import java.util.stream.Collectors;
 
 /**
@@ -662,11 +663,9 @@ public class MapUtils {
   }
 
   /**
-   * Returns a merge function, suitable for use in
-   * {@link Map#merge(Object, Object, BiFunction) Map.merge()} or
-   * {@link Collectors#toMap(Function, Function, BinaryOperator) toMap()}, which always
-   * throws {@code IllegalStateException}.  This can be used to enforce the
-   * assumption that the elements being collected are distinct.
+   * Returns a function that always throws {@code IllegalStateException}, which can be used with
+   * {@link Collectors#toMap(Function, Function, BinaryOperator) Collectors.toMap()}
+   * to ensure that the elements being collected have distinct keys.
    *
    * @param <T> the type of input arguments to the merge function
    * @return a merge function which always throw {@code IllegalStateException}
@@ -676,6 +675,21 @@ public class MapUtils {
     return (u,v) -> {
       throw new IllegalStateException("Duplicate key: " + u);
     };
+  }
+
+  /**
+   * Shortcut for {@link Collectors#toMap(Function, Function, BinaryOperator, Supplier)} using {@link #throwingMerger()}.
+   * This allows collecting a stream to a specific {@link Map} implementation without having to specify an
+   * unnecessary merge function when keys are expected to be unique.
+   *
+   * @return a {@link Collector} which collects elements into a {@code Map} using the given key/value mappers
+   * and map supplier.
+   */
+  public static <T, K, V, M extends Map<K, V>> Collector<T, ?, M> toMap(
+      Function<? super T, ? extends K> keyMapper,
+      Function<? super T, ? extends V> valueMapper,
+      Supplier<M> mapSupplier) {
+    return Collectors.toMap(keyMapper, valueMapper, throwingMerger(), mapSupplier);
   }
 
   /**
@@ -701,5 +715,17 @@ public class MapUtils {
         keyCopier.apply(key),
         valueCopier.apply(value)));
     return builder.build();
+  }
+
+  /**
+   * Applies the given {@link BiConsumer} to an iterable of {@linkplain Map.Entry map entries},
+   * similar to {@link Map#forEach(BiConsumer)}.
+   * @param <K> entry key type
+   * @param <V> entry value type
+   */
+  public static <K, V> void forEach(Iterable<? extends Map.Entry<K, V>> entries, BiConsumer<? super K, ? super V> action) {
+    entries.forEach(entry -> {
+      action.accept(entry.getKey(), entry.getValue());
+    });
   }
 }

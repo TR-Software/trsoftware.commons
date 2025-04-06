@@ -20,8 +20,12 @@
         <setting name="gwtScriptOutputStyle" value="DETAILED" />
         <setting name="gwtSdkUrl" value="file://$GWT_HOME$/gwt-2.10.0" />
         <packaging>
+          <module name="solutions.trsoftware.commons.Commons" enabled="false" />
           <module name="solutions.trsoftware.commons.Debug" enabled="false" />
           <module name="solutions.trsoftware.commons.PreserveStackTraces" enabled="false" />
+          <module name="solutions.trsoftware.commons.StackTraceDeobfuscator" enabled="false" />
+          <module name="solutions.trsoftware.commons.TestCommons" enabled="false" />
+          <module name="solutions.trsoftware.jsonp.JSONP" enabled="false" />
         </packaging>
       </configuration>
     </facet>
@@ -34,6 +38,7 @@
       <sourceFolder url="file://$MODULE_DIR$/resources" type="java-resource" />
       <sourceFolder url="file://$MODULE_DIR$/test/resources" type="java-test-resource" />
       <excludeFolder url="file://$MODULE_DIR$/build" />
+      <excludeFolder url="file://$MODULE_DIR$/gwtTestsStaging" />
       <excludeFolder url="file://$MODULE_DIR$/out" />
       <excludeFolder url="file://$MODULE_DIR$/src/solutions/trsoftware/commons/translatable" />
       <excludeFolder url="file://$MODULE_DIR$/test/solutions/trsoftware/commons/translatable/solutions" />
@@ -49,36 +54,8 @@
         <SOURCES />
       </library>
     </orderEntry>
-    <orderEntry type="module-library">
-      <library name="gson-2.8.2">
-        <CLASSES>
-          <root url="jar://$PROGRAMMING_LIBS_DIR$/gson-2.8.2/gson-2.8.2.jar!/" />
-        </CLASSES>
-        <JAVADOC>
-          <root url="jar://$PROGRAMMING_LIBS_DIR$/gson-2.8.2/gson-2.8.2-javadoc.jar!/" />
-        </JAVADOC>
-        <SOURCES>
-          <root url="jar://$PROGRAMMING_LIBS_DIR$/gson-2.8.2/gson-2.8.2-sources.jar!/" />
-        </SOURCES>
-      </library>
-    </orderEntry>
-    <orderEntry type="module-library">
-      <library name="bcel-6.2 (Byte Code Engineering Library from Apache Commons)">
-        <CLASSES>
-          <root url="file://$PROGRAMMING_LIBS_DIR$/bcel-6.2" />
-        </CLASSES>
-        <JAVADOC>
-          <root url="file://$PROGRAMMING_LIBS_DIR$/bcel-6.2/apidocs" />
-        </JAVADOC>
-        <SOURCES>
-          <root url="file://$PROGRAMMING_LIBS_DIR$/bcel-6.2/src/examples" />
-          <root url="file://$PROGRAMMING_LIBS_DIR$/bcel-6.2" />
-        </SOURCES>
-        <jarDirectory url="file://$PROGRAMMING_LIBS_DIR$/bcel-6.2" recursive="false" />
-        <jarDirectory url="file://$PROGRAMMING_LIBS_DIR$/bcel-6.2" recursive="false" type="SOURCES" />
-      </library>
-    </orderEntry>
     <orderEntry type="library" name="javax.websocket:javax.websocket-api:1.1" level="application" />
+    <orderEntry type="library" name="org.apache.bcel:bcel:6.10.0" level="application" />
     <orderEntry type="library" scope="TEST" name="HtmlUnit 2.55" level="application" />
     <orderEntry type="module-library">
       <library name="Apache Tomcat 8.5.31 (minus ECJ)">
@@ -122,8 +99,8 @@
         <jarDirectory url="file://$TOMCAT_8_HOME$" recursive="false" type="SOURCES" />
       </library>
     </orderEntry>
-    <orderEntry type="library" name="gwt-2.10" level="application" />
     <orderEntry type="library" name="com.google.guava:guava-gwt:28.2-jre" level="application" />
+    <orderEntry type="library" name="com.google.code.gson:gson:2.12.1" level="application" />
     <orderEntry type="module-library" scope="TEST">
       <library name="junit3.8.1">
         <CLASSES>
@@ -269,20 +246,7 @@
         </SOURCES>
       </library>
     </orderEntry>
-    <orderEntry type="module-library">
-      <library name="org.apache.commons:commons-lang3:3.4" type="repository">
-        <properties maven-id="org.apache.commons:commons-lang3:3.4" />
-        <CLASSES>
-          <root url="jar://$PROGRAMMING_LIBS_DIR$/commons-lang3-3.4/commons-lang3-3.4.jar!/" />
-        </CLASSES>
-        <JAVADOC>
-          <root url="jar://$PROGRAMMING_LIBS_DIR$/commons-lang3-3.4/commons-lang3-3.4-javadoc.jar!/" />
-        </JAVADOC>
-        <SOURCES>
-          <root url="jar://$PROGRAMMING_LIBS_DIR$/commons-lang3-3.4/commons-lang3-3.4-sources.jar!/" />
-        </SOURCES>
-      </library>
-    </orderEntry>
+    <orderEntry type="library" name="org.apache.commons:commons-lang3:3.17.0" level="application" />
     <orderEntry type="module-library">
       <library name="slf4j-1.7-simple">
         <CLASSES>
@@ -361,5 +325,6 @@
     </orderEntry>
     <orderEntry type="library" name="org.jsoup:jsoup:1.15.3" level="application" />
     <orderEntry type="library" name="org.slf4j:slf4j-jdk14:2.0.7" level="application" />
+    <orderEntry type="library" name="gwt-2.10" level="application" />
   </component>
 </module>

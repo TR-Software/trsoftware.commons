@@ -62,11 +62,6 @@ public abstract class MinMaxDoubleBase<R extends MinMaxDoubleBase<R>> implements
   }
 
   @Override
-  public void update(Double x) {
-    update(x.doubleValue());
-  }
-
-  @Override
   public boolean equals(Object o) {
     if (this == o) return true;
     if (!(o instanceof MinMaxDoubleBase)) return false;

@@ -16,17 +16,21 @@
 
 package solutions.trsoftware.commons.shared.util;
 
+import com.google.common.base.Preconditions;
+import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import com.google.gwt.core.client.JavaScriptException;
 import solutions.trsoftware.commons.shared.util.collections.FluentList;
 import solutions.trsoftware.commons.shared.util.collections.SortedList;
 
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import java.util.*;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
 
 import static java.util.Objects.requireNonNull;
+import static solutions.trsoftware.commons.shared.util.LogicUtils.firstNonNull;
 
 /**
  * @author Alex
@@ -53,7 +57,6 @@ public class ListUtils {
    * @see FluentList#subList(int)
    */
   public static <E, L extends List<E>> L copyOfRange(List<E> list, int fromIndex, int toIndex, Supplier<L> newListSupplier) {
-    // TODO: rename this method to copyOfRange, since it most-closely resembles Arrays#copyOfRange(Object[], int, int) rather than List#subList(int, int)
     // NOTE: this implementation only runs fast on random-access lists
     // (this is true for all lists in javascript code compiled with GWT, since it uses JS arrays for all list implementations)
     L ret = newListSupplier.get();
@@ -125,6 +128,7 @@ public class ListUtils {
    * </code>
    *
    * @return sublist starting at the given index
+   * @throws IndexOutOfBoundsException if {@code fromIndex} is greater than {@code list.size()}
    */
   public static <E> List<E> tail(List<E> list, int fromIndex) {
     return list.subList(fromIndex, list.size());
@@ -136,6 +140,7 @@ public class ListUtils {
    *   list.{@link List#subList subList}(1, list.size());
    * </code>
    * @return the tail of the list, i.e. sublist starting at index 1.
+   * @throws IndexOutOfBoundsException if the list is empty
    */
   public static <E> List<E> tail(List<E> list) {
     return tail(list, 1);
@@ -287,7 +292,6 @@ public class ListUtils {
 
   /**
    * Returns a new instance of {@link ArrayList} containing all the elements of the given lists, in the same order.
-   * @param inputs the lists to concatenate
    * @return a new list representing the concatenation of the inputs
    */
   public static <T> ArrayList<T> concat(List<T> first, List<T> second) {
@@ -303,11 +307,24 @@ public class ListUtils {
    * Adds the given element to the given list (using {@link List#add(Object)}) and returns the same list instance
    * to facilitate call chaining.
    *
-   * @param inputs the lists to concatenate
-   * @return a new list representing the concatenation of the inputs
+   * @param list the list to which the element will be added
+   * @param element the element to append
+   * @return the given list after adding the given element
    */
   public static <L extends List<E>, E> L append(L list, E element) {
     list.add(element);
+    return list;
+  }
+
+  /**
+   * Inserts the given element at the beginning of the given list and returns the same list.
+   *
+   * @param element the element to append
+   * @param list the list to which the element will be added
+   * @return the given list after adding the given element
+   */
+  public static <L extends List<E>, E> L prepend(E element, L list) {
+    list.add(0, element);
     return list;
   }
 
@@ -322,6 +339,7 @@ public class ListUtils {
   /**
    * @param defaultValue the default value to return if the list is empty
    * @return the last element of the given list or the default value if list is empty
+   * @see Iterables#getLast(Iterable, Object)
    */
   public static <T> T last(@Nonnull List<T> list, T defaultValue) {
     return list.isEmpty() ? defaultValue : list.get(list.size()-1);
@@ -335,6 +353,15 @@ public class ListUtils {
    */
   public static <T> T first(List<T> lst) {
     return lst.get(0);
+  }
+
+  /**
+   * @param defaultValue the default value to return if the list is empty
+   * @return the first element of the given list or the default value if list is empty
+   * @see Iterables#getFirst(Iterable, Object)
+   */
+  public static <T> T first(@Nonnull List<T> list, T defaultValue) {
+    return list.isEmpty() ? defaultValue : list.get(0);
   }
 
   /**
@@ -475,5 +502,123 @@ public class ListUtils {
    */
   public static int checkBounds(List<?> list, int index) {
     return checkBounds(list.size(), index);
+  }
+
+  /**
+   * Helper for using negative indices to indicate an offset from the end of the list, array, or string.
+   * <p>
+   * Converts a possibly-negative index value into a valid list/array/string <i>element</i> index,
+   * or throws {@link IndexOutOfBoundsException} if the result is not in range {@code [0, size)}.
+   * <p>
+   * An element index may range from zero, inclusive, to {@code size}, exclusive, and can be used as an argument for
+   * methods such as {@link List#get(int)}, {@link String#charAt(int)}, or to access an array element.
+   *
+   * @param index a user-supplied index identifying an element in an array, list or string
+   * @param size the size of that array, list or string
+   * @return the given {@code index} or {@code size - index} if {@code index} is negative
+   * @throws IndexOutOfBoundsException if the resulting index is not a valid element index for the given {@code size}
+   *   (less than {@code 0} or not less than {@code size})
+   * @see #normalizePositionIndex(int, int, String)
+   * @see Preconditions#checkElementIndex(int, int)
+   */
+  public static int normalizeIndex(int index, int size) {
+    String desc = "index";
+    return normalizeIndex(index, size, desc);
+  }
+
+  /**
+   * Helper for using negative indices to indicate an offset from the end of the list, array, or string.
+   * <p>
+   * Converts a possibly-negative index value into a valid list/array/string <i>element</i> index,
+   * or throws {@link IndexOutOfBoundsException} if the result is not in range {@code [0, size)}.
+   * <p>
+   * An element index may range from zero, inclusive, to {@code size}, exclusive, and can be used as an argument for
+   * methods such as {@link List#get(int)}, {@link String#charAt(int)}, or to access an array element.
+   *
+   * @param index a user-supplied index identifying an element in an array, list or string
+   * @param size the size of that array, list or string
+   * @param desc the text to use to describe this index in an error message
+   * @return the given {@code index} or {@code size - index} if {@code index} is negative
+   * @throws IndexOutOfBoundsException if the resulting index is not a valid element index for the given {@code size}
+   *   (less than {@code 0} or not less than {@code size})
+   * @see #normalizePositionIndex(int, int)
+   * @see Preconditions#checkElementIndex(int, int)
+   */
+  public static int normalizeIndex(int index, int size, @Nullable String desc) {
+    int normalized = normalizeIndexUnchecked(index, size);
+    if (normalized < 0 || normalized >= size)
+      throw new IndexOutOfBoundsException(badNormalizedIndex(index, normalized, size, desc));
+    return normalized;
+  }
+
+  /**
+   * Helper for using negative indices to indicate an offset from the end of the list, array, or string.
+   * Converts a possibly-negative index value into a valid list/array/string <i>position</i>,
+   * or throws {@link IndexOutOfBoundsException} if the result is not in range {@code [0, size]}.
+   * <p>
+   * A position index may range from zero to {@code size}, inclusive, and can be used as an argument for methods
+   * such as {@link List#subList(int, int)}, {@link String#substring(int, int)}, and {@link Arrays#sort(int[], int, int)}.
+   *
+   * @param index a user-supplied index identifying a position in an array, list or string
+   * @param size the size of that array, list or string
+   * @return the given {@code index} or {@code size - index} if {@code index} is negative
+   * @throws IndexOutOfBoundsException if the resulting index is not a valid position for the given {@code size}
+   *   (less than {@code 0} or greater than {@code size})
+   * @see #normalizeIndex(int, int)
+   * @see Preconditions#checkPositionIndex(int, int)
+   */
+  public static int normalizePositionIndex(int index, int size) {
+    return normalizePositionIndex(index, size, "index");
+  }
+
+  /**
+   * Helper for using negative indices to indicate an offset from the end of the list, array, or string.
+   * Converts a possibly-negative index value into a valid list/array/string <i>position</i>,
+   * or throws {@link IndexOutOfBoundsException} if the result is not in range {@code [0, size]}.
+   * <p>
+   * A position index may range from zero to {@code size}, inclusive, and can be used as an argument for methods
+   * such as {@link List#subList(int, int)}, {@link String#substring(int, int)}, and {@link Arrays#sort(int[], int, int)}.
+   *
+   * @param index a user-supplied index identifying a position in an array, list or string
+   * @param size the size of that array, list or string
+   * @param desc the text to use to describe this index in an error message
+   *
+   * @return the given {@code index} or {@code size - index} if {@code index} is negative
+   * @throws IndexOutOfBoundsException if the resulting index is not a valid position for the given {@code size}
+   *   (less than {@code 0} or greater than {@code size})
+   * @see #normalizeIndex(int, int, String)
+   * @see Preconditions#checkPositionIndex(int, int)
+   */
+  public static int normalizePositionIndex(int index, int size, @Nullable String desc) {
+    int normalized = normalizeIndexUnchecked(index, size);
+    if (normalized < 0 || normalized > size)
+      throw new IndexOutOfBoundsException(badNormalizedIndex(index, normalized, size, desc));
+    return normalized;
+    // TODO: maybe create a similar method for subranges, e.g. normalizeRange(fromIndex, toIndex)
+  }
+
+  /**
+   * Helper for using negative indices to indicate an offset from the end of the list, array, or string.
+   *
+   * @param index a user-supplied index identifying a position in an array, list or string
+   * @param size the size of that array, list or string
+   * @return the given {@code index} or {@code size - index} if {@code index} is negative
+   * @see #normalizeIndex(int, int)
+   * @see #normalizePositionIndex(int, int)
+   */
+  private static int normalizeIndexUnchecked(int index, int size) {
+    return (index < 0) ? size + index : index;
+  }
+
+  /**
+   * Generates error message for {@link #normalizeIndex} or {@link #normalizePositionIndex}.
+   */
+  private static String badNormalizedIndex(int index, int normalizedIndex, int size, @Nullable String desc) {
+    StringBuilder out = new StringBuilder();
+    out.append(firstNonNull(desc, "index")).append(" ").append(index);
+    if (index < 0)
+      out.append(" (normalized to ").append(normalizedIndex).append(")");
+    out.append(" is out of bounds for length ").append(size);
+    return out.toString();
   }
 }

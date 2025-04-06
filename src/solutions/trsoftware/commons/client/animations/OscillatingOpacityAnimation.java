@@ -19,7 +19,7 @@ package solutions.trsoftware.commons.client.animations;
 import com.google.gwt.dom.client.Element;
 
 /**
- * Fades an element in & out at the given rate.
+ * Fades an element in & out at a specified rate.
  *
  * @author Alex
  */
@@ -35,6 +35,13 @@ public class OscillatingOpacityAnimation extends OscillatingAnimation {
   @Override
   protected void setValue(double value) {
     element.getStyle().setOpacity(value);
+  }
+
+  @Override
+  protected void onComplete() {
+    super.onComplete();
+    // clear the inline opacity style set by this animation in setValue
+    element.getStyle().clearOpacity();
   }
 
   /**

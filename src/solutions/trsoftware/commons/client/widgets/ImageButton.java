@@ -19,6 +19,7 @@ package solutions.trsoftware.commons.client.widgets;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.dom.client.HasClickHandlers;
 import com.google.gwt.event.shared.HandlerRegistration;
+import com.google.gwt.resources.client.ImageResource;
 import com.google.gwt.user.client.ui.AbstractImagePrototype;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.Image;
@@ -39,8 +40,16 @@ public class ImageButton extends Composite implements HasClickHandlers {
     this(img.createImage());
   }
 
+  public ImageButton(ImageResource img) {
+    this(AbstractImagePrototype.create(img));
+  }
+
   public ImageButton(AbstractImagePrototype img, ClickHandler clickHandler) {
     this(img.createImage(), clickHandler);
+  }
+
+  public ImageButton(ImageResource img, ClickHandler clickHandler) {
+    this(AbstractImagePrototype.create(img), clickHandler);
   }
 
   public ImageButton(AbstractImagePrototype img, String title, ClickHandler clickHandler) {
@@ -48,14 +57,22 @@ public class ImageButton extends Composite implements HasClickHandlers {
     setTitle(title);
   }
 
-  public ImageButton(Image img, ClickHandler clickHandler) {
-    this(img);
-    if (clickHandler != null)
-      addClickHandler(clickHandler);
+  public ImageButton(ImageResource img, String title, ClickHandler clickHandler) {
+    this(AbstractImagePrototype.create(img), title, clickHandler);
   }
 
   public ImageButton(AbstractImagePrototype img, String title) {
     this(img, title, null);
+  }
+
+  public ImageButton(ImageResource img, String title) {
+    this(AbstractImagePrototype.create(img), title);
+  }
+
+  public ImageButton(Image img, ClickHandler clickHandler) {
+    this(img);
+    if (clickHandler != null)
+      addClickHandler(clickHandler);
   }
 
   public ImageButton(Image img) {

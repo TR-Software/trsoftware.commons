@@ -47,7 +47,7 @@ public class Size {
 
   @Override
   public String toString() {
-    return String.valueOf(value) + unit.getType();
+    return value + unit.getType();
   }
 
   // factory methods:

@@ -310,6 +310,14 @@ public class StringUtilsTest extends TestCase {
   }
 
   @SuppressWarnings("ConstantConditions")
+  public void testJoinNullable() throws Exception {
+    assertNull(joinNullable(" ", null, null));
+    assertEquals("foo", joinNullable(" ", "foo", null));
+    assertEquals("foo", joinNullable(" ", null, "foo"));
+    assertEquals("foo bar", joinNullable(" ", "foo", "bar"));
+  }
+
+  @SuppressWarnings("ConstantConditions")
   public void testLastIntegerInString() throws Exception {
     assertEquals(0, (int)lastIntegerInString("0"));
     assertEquals(1, (int)lastIntegerInString("1"));

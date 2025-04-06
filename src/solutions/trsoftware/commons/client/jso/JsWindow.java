@@ -52,15 +52,15 @@ public class JsWindow extends JsObject {
   }
 
   /**
-   * Gives the values of all the CSS properties of an element after applying the active stylesheets
+   * Computes the values of all the CSS properties of an element or pseudo-element after applying the active stylesheets
    * and resolving any basic computation those values may contain.
    *
    * @param element the Element for which to get the computed style; must be attached to the DOM
    * @param pseudoElement Optional string specifying the pseudo-element to match (e.g. {@code ::before}, {@code ::after}).
    *     Omitted (or null) for real elements
-   * @return a style object containing the computed styles for the given element,
+   * @return live CSSStyleDeclaration object, which updates automatically when the element's styles are changed,
    *     or {@code null} if the browser doesn't support this API or the element is not valid.
-   * @see <a href="https://developer.mozilla.org/en-US/docs/Web/API/Window/getComputedStyle#Browser_compatibility">Window.getComputedStyle browser compatibility</a>
+   * @see <a href="https://developer.mozilla.org/en-US/docs/Web/API/Window/getComputedStyle">Window.getComputedStyle (MDN)</a>
    */
   public final native CSSStyleDeclaration getComputedStyle(Element element, String pseudoElement) /*-{
     if (this.getComputedStyle)
@@ -69,9 +69,35 @@ public class JsWindow extends JsObject {
 
 
   /**
-   * Same as {@link #getComputedStyle(Element, String)}, but without a pseudo-element.
+   * Computes the values of all the CSS properties of an element after applying the active stylesheets
+   * and resolving any basic computation those values may contain.
+   *
+   * @param element the Element for which to get the computed style; must be attached to the DOM
+   * @param pseudoElement Optional string specifying the pseudo-element to match (e.g. {@code ::before}, {@code ::after}).
+   *     Omitted (or null) for real elements
+   * @return live CSSStyleDeclaration object, which updates automatically when the element's styles are changed,
+   *     or {@code null} if the browser doesn't support this API or the element is not valid.
+   * @see <a href="https://developer.mozilla.org/en-US/docs/Web/API/Window/getComputedStyle">Window.getComputedStyle (MDN)</a>
    */
   public final CSSStyleDeclaration getComputedStyle(Element element) {
     return getComputedStyle(element, null);
   }
+
+  /**
+   * Returns the ratio of the resolution in physical pixels to the resolution in CSS pixels for the current display device.
+   * <p>
+   * This value could also be interpreted as the ratio of pixel sizes: the size of one CSS pixel to the size of one physical pixel.
+   * In simpler terms, this tells the browser how many of the screen's actual pixels should be used to draw a single CSS pixel.
+   * <p>
+   * Page zooming affects the value of devicePixelRatio. When a page is zoomed in (made larger), the size of a CSS pixel increases,
+   * and so the devicePixelRatio value increases.
+   * Pinch-zooming does not affect devicePixelRatio, because this magnifies the page without changing the size of a CSS pixel.
+   *
+   * @return the value of {@code window.devicePixelRatio} or {@code 1} if not supported by current browser
+   * @see <a href="https://developer.mozilla.org/en-US/docs/Web/API/Window/devicePixelRatio">MDN reference</a>
+   */
+  public native final double getDevicePixelRatio() /*-{
+    return this.devicePixelRatio || 1;
+  }-*/;
+
 }

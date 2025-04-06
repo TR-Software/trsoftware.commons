@@ -32,7 +32,9 @@ public class EnumValueListBox<E extends Enum<E>> extends ValueListBox<E> {
 
   /**
    * An empty {@link ValueListBox} using the default {@link StringRenderer}.
-   * Should call {@link #setAcceptableValues(Collection)} or {@link #addValue(Object)} to add the selectable options.
+   * Should call {@link #setAcceptableValues(Collection)} to add the selectable options.
+   *
+   * @deprecated use {@link #EnumValueListBox(Class)} or {@link #EnumValueListBox(EnumSet)}
    */
   public EnumValueListBox() {
     this(StringRenderer.getInstance());
@@ -40,7 +42,9 @@ public class EnumValueListBox<E extends Enum<E>> extends ValueListBox<E> {
 
   /**
    * An empty {@link ValueListBox} with the given {@link Renderer} for displaying values.
-   * Should call {@link #setAcceptableValues(Collection)} or {@link #addValue(Object)} to add the selectable options.
+   * Should call {@link #setAcceptableValues(Collection)} to add the selectable options.
+   *
+   * @deprecated use {@link #EnumValueListBox(Class, Renderer)} or {@link #EnumValueListBox(EnumSet, Renderer)}
    */
   public EnumValueListBox(Renderer<E> renderer) {
     super(renderer);
@@ -48,7 +52,9 @@ public class EnumValueListBox<E extends Enum<E>> extends ValueListBox<E> {
 
   /**
    * An empty {@link ValueListBox} with the given {@link Renderer} for displaying values.
-   * Should call {@link #setAcceptableValues(Collection)} or {@link #addValue(Object)} to add the selectable options.
+   * Should call {@link #setAcceptableValues(Collection)} to add the selectable options.
+   *
+   * @deprecated use {@link #EnumValueListBox(Class, Renderer)} or {@link #EnumValueListBox(EnumSet, Renderer)}
    */
   public EnumValueListBox(Renderer<E> renderer, ProvidesKey<E> keyProvider) {
     super(renderer, keyProvider);

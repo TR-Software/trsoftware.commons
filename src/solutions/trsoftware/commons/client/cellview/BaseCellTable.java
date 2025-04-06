@@ -26,6 +26,13 @@ import com.google.gwt.view.client.NoSelectionModel;
  */
 public class BaseCellTable<T> extends CellTable<T> {
 
+  public BaseCellTable() {
+  }
+
+  public BaseCellTable(int pageSize, Resources resources) {
+    super(pageSize, resources);
+  }
+
   protected void addColumn(String heading, Column<T, ?> col) {
     addColumn(col, heading);
   }

@@ -17,6 +17,7 @@
 package solutions.trsoftware.commons.server.util;
 
 import solutions.trsoftware.commons.server.TestCaseCanStopClock;
+import solutions.trsoftware.commons.shared.annotations.ExcludeFromSuite;
 import solutions.trsoftware.commons.shared.annotations.Slow;
 import solutions.trsoftware.commons.shared.util.StringUtils;
 
@@ -24,6 +25,11 @@ import java.util.concurrent.TimeUnit;
 
 import static solutions.trsoftware.commons.shared.testutil.AssertUtils.assertThrows;
 
+/**
+ * @deprecated {@link Clock} superceded by {@link solutions.trsoftware.commons.shared.util.time.Clock}
+ */
+@Deprecated
+@ExcludeFromSuite
 public class ClockTest extends TestCaseCanStopClock {
 
   @Slow

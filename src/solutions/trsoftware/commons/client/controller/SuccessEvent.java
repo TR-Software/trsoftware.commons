@@ -64,6 +64,7 @@ public class SuccessEvent<T> extends RpcEvent<SuccessEvent.Handler> {
   }
 
   @Override
+  @SuppressWarnings("unchecked")
   protected void dispatch(Handler handler) {
     handler.onSuccess(this);
   }

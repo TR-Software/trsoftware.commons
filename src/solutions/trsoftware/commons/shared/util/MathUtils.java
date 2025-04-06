@@ -16,9 +16,14 @@
 
 package solutions.trsoftware.commons.shared.util;
 
-import java.math.BigDecimal;
-import java.math.RoundingMode;
+import com.google.common.primitives.*;
 
+import java.math.BigDecimal;
+import java.math.BigInteger;
+import java.math.RoundingMode;
+import java.util.Arrays;
+
+import static com.google.common.base.Preconditions.checkArgument;
 import static java.lang.Math.*;
 
 /**
@@ -30,7 +35,8 @@ import static java.lang.Math.*;
 public class MathUtils {
 
   /**
-   * An arbitrarily small positive quantity that can be used to ignore precision loss with floating-point operations.
+   * An arbitrarily small positive quantity that can be used to ignore precision loss from floating-point operations.
+   * @see #equal(double, double, double)
    */
   public static final double EPSILON = 0.0001;
 
@@ -49,44 +55,111 @@ public class MathUtils {
   }
 
   /**
-   * Maps the given unsigned 32-bit number into the range of a signed int.
-   * {@code 0} maps to {@link Integer#MIN_VALUE} and {@code 0xFFFFFFFF} maps to {@link Integer#MAX_VALUE}
-   * This ensures that the values will still be comparable by their natural ordering.
+   * Maps a non-negative 32-bit number onto the range of a signed {@code int}, such that
+   * the results retain their natural order comparison semantics (but lose their identity).
+   * Specifically, this conversion maps:
+   * <br>{@code 0}                                             &rarr; {@link Integer#MIN_VALUE}
+   * <br>{@link Integer#MAX_VALUE} (<tt>2<sup>31</sup>-1</tt>) &rarr; {@code -1}
+   * <br><tt>2<sup>31</sup></tt>                               &rarr; {@code 0}, and
+   * <br><tt>2<sup>32</sup></tt>                               &rarr; {@link Integer#MAX_VALUE}
+   * <br>The conversion can be reversed by invoking {@link #unsignedInt(int)} on the result.
+   * <p>
+   * <b>Note:</b> This scheme differs from the more-standard conversions produced by Java's {@code (int)} cast
+   * and Guava's {@link UnsignedInts#saturatedCast(long)}, which map values
+   * {@code 0}..{@value Integer#MAX_VALUE} to themselves, <tt>2<sup>31</sup></tt> to {@value Integer#MIN_VALUE},
+   * and <tt>2<sup>32</sup></tt> to {@code -1}.
+   * <p>
+   * The advantage of our approach is the retention of comparison semantics, e.g.
+   * <nobr><code>{@link #packUnsignedInt}({@value Integer#MAX_VALUE}) < 2147483648</code></nobr>,
+   * (whereas a plain cast results in <nobr><code>(int){@value Integer#MAX_VALUE} > (int)2147483648</code></nobr>).
+   * However, the downside is the loss of identity for values that already fit into the {@code int} range.
+   * <p>
+   * Therefore, unless the comparison semantics are really needed, we recommend just using a standard {@code (int)} cast
+   * along with {@link Integer#toUnsignedLong(int)} instead of {@link #packUnsignedInt(long)} / {@link #unsignedInt(int)}.
+   *
+   * @param unsigned value between {@code 0} and <tt>2<sup>32</sup></tt>
+   * @return {@code int} representation of the argument that can be converted back to the original {@code long}
+   *   by invoking {@link #unsignedInt(int)}
+   * @throws IllegalArgumentException if argument not in range <tt>[0, 2<sup>32</sup>]</tt>
+   * @see #unsignedInt(int)
    * @see com.google.common.primitives.UnsignedInteger
+   * @see UnsignedInts#saturatedCast(long)
    */
   public static int packUnsignedInt(long unsigned) {
-    if (unsigned < 0 || unsigned > 0xffffffffL)
-      throw new IllegalArgumentException("Expected value in range 0..0xffffffffL");
+    checkArgument(unsigned >= 0 && unsigned <= 0xffffffffL,
+        "Out of range [0, 0xffffffffL]: %s", unsigned);
     return (int)(unsigned + Integer.MIN_VALUE);
   }
 
   /**
-   * Returns the unsigned representation of the given integer as a long.
-   * This is the inverse of {@link #packUnsignedInt(long)}
+   * Converts a signed {@code int} value produced by {@link #packUnsignedInt(long)}
+   * back to a {@code long} representing an "unsigned int" [0, 2<sup>32</sup>]
+   *
    * @see com.google.common.primitives.UnsignedInteger
+   * @see Integer#toUnsignedLong(int)
    */
   public static long unsignedInt(int i) {
     return (long)i - Integer.MIN_VALUE;
   }
 
   /**
-   * Converts an 8 bit integer value (0..255) into a signed byte (-128..127).
-   * The results will still be comparable by their natural ordering.
-   * @see com.google.common.primitives.UnsignedBytes
+   * Maps a non-negative 8-bit number [0, 255] onto the range of a signed {@code byte} [-128, 127], such that
+   * the results retain their natural order comparison semantics (but lose their identity).
+   * <p>
+   * Specifically, this conversion maps
+   * {@code 0} to {@value Byte#MIN_VALUE} ({@code 0x80}),
+   * {@code 128} to {@code 0}, and
+   * {@code 255} to {@value Byte#MAX_VALUE} ({@code 0x7F}).
+   * The conversion can be reversed by invoking {@link #unsignedByte(byte)} on the result.
+   * <p>
+   * <b>Note:</b> This scheme differs from the more-standard values produced by Java's {@code (byte)} cast
+   * and {@link UnsignedBytes#saturatedCast(long)}, which map values {@code 0}..{@code 127} to themselves,
+   * {@code 128} to {@code -1} ({@code 0x80}), and
+   * {@code 255} to {@code -128} ({@code 0xFF}).
+   * <p>
+   * The advantage of our approach is the retention of comparison semantics, e.g.
+   * <nobr><code>({@link #packUnsignedByte}(127) < {@link #packUnsignedByte}(128))</code></nobr>, whereas a plain cast
+   * results in <nobr><code>((byte)127 > (byte)128)</code></nobr>.  However, the downside is the loss of identity
+   * for values {@code 0}..{@code 127}.
+   * <p>
+   * Therefore, unless the comparison semantics are really needed, we recommend just using a standard {@code (byte)} cast
+   * along with {@link Byte#toUnsignedInt(byte)} instead of {@link #packUnsignedByte(int)} / {@link #unsignedByte(byte)}.
+   * @param unsigned integer between {@code 0} and {@code 255}
+   * @return a {@code byte} representation of the argument that can be converted back to the original {@code int}
+   *   by invoking {@link #unsignedByte(byte)}
+   * @throws IllegalArgumentException if argument not in range {@code [0, 255]}
+   * @see UnsignedBytes#saturatedCast(long)
    */
-  public static byte packUnsignedByte(int i) {
-    if (i < 0 || i > 255)
-      throw new IllegalArgumentException("Expected value in range 0..255");
-    return (byte)(i + Byte.MIN_VALUE);
+  public static byte packUnsignedByte(int unsigned) {
+    checkArgument(unsigned >= 0 && unsigned <= 255,
+        "Out of range [0, 255]: %s", unsigned);
+    return (byte)(unsigned + Byte.MIN_VALUE);
   }
 
   /**
-   * Convert a signed byte (-128..127) to an "unsigned byte" (0..255) int value.
-   * This is the inverse of {@link #packUnsignedByte(int)}
-   * @see com.google.common.primitives.UnsignedBytes
+   * Converts a signed {@code byte} value produced by {@link #packUnsignedByte(int)}
+   * back to an {@code int} representing an "unsigned byte" [0, 255]
+   * @see UnsignedBytes
+   * @see Byte#toUnsignedInt(byte)
    */
   public static int unsignedByte(byte b) {
     return (int)b - Byte.MIN_VALUE;
+  }
+
+  /**
+   * Returns {@link BigInteger#toByteArray()} without the extra sign byte if the sign byte is {@code 0}
+   *
+   * @return the value of {@link BigInteger#toByteArray()} if the sign byte is not {@code 0}, or a copy of that array without
+   * the leading byte if it's {@code 0}
+   */
+  public static byte[] bigIntToUnsignedByteArray(BigInteger bigInt) {
+    // TODO: maybe add a corresponding bigIntFromUnsignedByteArray method (returning new BigInteger(1, byteArr))
+    // see https://stackoverflow.com/a/4408124/1965404
+    byte[] bytes = bigInt.toByteArray();
+    // remove the extra sign byte if it's 0 (i.e. positive)
+    if (bytes.length > 1 && bytes[0] == (byte)0)
+      bytes = Arrays.copyOfRange(bytes, 1, bytes.length);
+    return bytes;
   }
 
   /**
@@ -292,6 +365,7 @@ public class MathUtils {
   /**
    * @return the number closest to {@code value} in the range {@code [a, b]}
    * @see NumberRange#coerce(Number)
+   * @see Doubles#constrainToRange(double, double, double)
    */
   public static double restrict(double value, double a, double b) {
     return min(max(value, a), b);
@@ -300,6 +374,7 @@ public class MathUtils {
   /**
    * @return the number closest to {@code value} in the range {@code [a, b]}
    * @see NumberRange#coerce(Number)
+   * @see Floats#constrainToRange
    */
   public static float restrict(float value, float a, float b) {
     return min(max(value, a), b);
@@ -308,6 +383,7 @@ public class MathUtils {
   /**
    * @return the number closest to {@code value} in the range {@code [a, b]}
    * @see NumberRange#coerce(Number)
+   * @see Ints#constrainToRange
    */
   public static int restrict(int value, int a, int b) {
     return min(max(value, a), b);
@@ -316,6 +392,7 @@ public class MathUtils {
   /**
    * @return the number closest to {@code value} in the range {@code [a, b]}
    * @see NumberRange#coerce(Number)
+   * @see Longs#constrainToRange
    */
   public static long restrict(long value, long a, long b) {
     return min(max(value, a), b);
@@ -334,12 +411,7 @@ public class MathUtils {
    * @see Math#signum(double)
    */
   public static int signum(int x) {
-    if (x == 0)
-      return 0;
-    else if (x > 0)
-      return 1;
-    else
-      return -1;
+    return Integer.compare(x, 0);
   }
 
   /**

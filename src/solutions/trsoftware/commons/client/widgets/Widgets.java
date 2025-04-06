@@ -16,10 +16,11 @@
 
 package solutions.trsoftware.commons.client.widgets;
 
+import com.google.gwt.dom.client.Element;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.resources.client.ImageResource;
 import com.google.gwt.user.client.Command;
-import com.google.gwt.user.client.Element;
 import com.google.gwt.user.client.ui.*;
 import solutions.trsoftware.commons.client.event.EventHandlers;
 import solutions.trsoftware.commons.client.styles.CellPanelStyle;
@@ -28,6 +29,7 @@ import solutions.trsoftware.commons.client.styles.WidgetStyle;
 import solutions.trsoftware.commons.shared.util.HtmlUtils;
 
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 
 /** A collections of convenience factory methods for creating widgets */
 public class Widgets {
@@ -140,6 +142,9 @@ public class Widgets {
     return dp;
   }
 
+  /**
+   * @deprecated {@link DisclosurePanel#DisclosurePanel(DisclosurePanelImages, String, boolean)} is deprecated
+   */
   public static DisclosurePanel disclosurePanel(final AbstractImagePrototype openImage,
                                                 final AbstractImagePrototype closeImage,
                                                 String headerText, boolean startOpened,
@@ -156,16 +161,31 @@ public class Widgets {
     return dp;
   }
 
+  public static DisclosurePanel disclosurePanel(ImageResource openImage,
+                                                ImageResource closeImage,
+                                                String headerText, boolean startOpened,
+                                                Widget content) {
+    DisclosurePanel dp = new DisclosurePanel(openImage, closeImage, headerText);
+    dp.setOpen(startOpened);
+    dp.setContent(content);
+    return dp;
+  }
+
   public static DisclosurePanel disclosurePanel(Widget header, boolean startOpened, Widget content) {
     DisclosurePanel dp = new DisclosurePanel(header, startOpened);
     dp.setContent(content);
     return dp;
   }
 
-  public static TextBox textBox(int visibleChars, int maxChars) {
+  public static TextBox textBox(int visibleLength) {
     TextBox txt = new TextBox();
-    txt.setVisibleLength(visibleChars);
-    txt.setMaxLength(maxChars);
+    txt.setVisibleLength(visibleLength);
+    return txt;
+  }
+
+  public static TextBox textBox(int visibleLength, int maxLength) {
+    TextBox txt = textBox(visibleLength);
+    txt.setMaxLength(maxLength);
     return txt;
   }
 
@@ -175,42 +195,57 @@ public class Widgets {
     return txt;
   }
 
-  public static TextBox textBox(String text, String styleName) {
+  public static TextBox textBox(String text, @Nullable String styleName) {
     TextBox txt = textBox(text);
-    maybeSetStyleName(txt, styleName);
+    applyStyleName(txt, styleName);
     return txt;
   }
 
-  public static TextBox textBox(int visibleChars, int maxChars, String text, String styleName) {
-    TextBox txt = textBox(visibleChars, maxChars);
+  public static TextBox textBox(int visibleLength, int maxLength, String text, @Nullable String styleName) {
+    TextBox txt = textBox(visibleLength, maxLength);
     txt.setText(text);
-    maybeSetStyleName(txt, styleName);
+    applyStyleName(txt, styleName);
     return txt;
   }
 
-  public static TextBox textBox(int visibleChars, int maxChars, String text, String styleName, Command onEnterKey, Command onEscapeKey) {
-    TextBox txt = textBox(visibleChars, maxChars, text, styleName);
+  public static TextBox textBox(int visibleLength, int maxLength, String text, @Nullable String styleName, @Nullable Command onEnterKey, @Nullable Command onEscapeKey) {
+    TextBox txt = textBox(visibleLength, maxLength, text, styleName);
     EventHandlers.addEnterAndEscapeKeyHandlers(txt, onEnterKey, onEscapeKey);
     return txt;
   }
 
-  public static PasswordTextBox passwordBox(Integer visibleChars, Integer maxChars) {
+  public static TextArea textArea(int visibleLines) {
+    TextArea txt = new TextArea();
+    txt.setVisibleLines(visibleLines);
+    return txt;
+  }
+
+  public static TextArea textArea(int visibleLines, int characterWidth) {
+    TextArea txt = textArea(visibleLines);
+    txt.setCharacterWidth(characterWidth);
+    return txt;
+  }
+  
+  // TODO(1/21/2025): why do the passwordBox methods take Integer rather than int?
+
+  public static PasswordTextBox passwordBox(@Nullable Integer visibleLength, @Nullable Integer maxLength) {
     PasswordTextBox txt = new PasswordTextBox();
-    if (visibleChars != null)
-      txt.setVisibleLength(visibleChars);
-    if (maxChars != null)
-      txt.setMaxLength(maxChars);
+    if (visibleLength != null)
+      txt.setVisibleLength(visibleLength);
+    if (maxLength != null)
+      txt.setMaxLength(maxLength);
     return txt;
   }
 
-  public static PasswordTextBox passwordBox(Integer visibleChars, Integer maxChars, String styleName) {
-    PasswordTextBox txt = passwordBox(visibleChars, maxChars);
-    maybeSetStyleName(txt, styleName);
+  public static PasswordTextBox passwordBox(@Nullable Integer visibleLength, @Nullable Integer maxLength, String styleName) {
+    PasswordTextBox txt = passwordBox(visibleLength, maxLength);
+    applyStyleName(txt, styleName);
     return txt;
   }
 
-  public static PasswordTextBox passwordBox(Integer visibleChars, Integer maxChars, String styleName, Command onEnterKey, Command onEscapeKey) {
-    PasswordTextBox txt = passwordBox(visibleChars, maxChars, styleName);
+  public static PasswordTextBox passwordBox(@Nullable Integer visibleLength, @Nullable Integer maxLength, String styleName,
+                                            Command onEnterKey, Command onEscapeKey) {
+    PasswordTextBox txt = passwordBox(visibleLength, maxLength, styleName);
     EventHandlers.addEnterAndEscapeKeyHandlers(txt, onEnterKey, onEscapeKey);
     return txt;
   }
@@ -221,7 +256,7 @@ public class Widgets {
 
   public static CheckBox checkBox(String label, boolean asHTML, boolean checked) {
     CheckBox chk = new CheckBox(label, asHTML);
-    chk.setChecked(checked);
+    chk.setValue(checked);
     return chk;
   }
 
@@ -229,37 +264,84 @@ public class Widgets {
    * Creates a simple panel initially containing the given widget
    */
   public static SimplePanel simplePanel(Widget widget) {
-    SimplePanel sp = new SimplePanel();
-    sp.setWidget(widget);
-    return sp;
+    return new SimplePanel(widget);
+  }
+
+  /**
+   * Creates an empty label without a style name
+   * (i.e. without the default {@code "gwt-Label"} style name imposed by its {@linkplain Label#Label() constructor})
+   */
+  public static Label label() {
+    return clearStyleName(new Label());
+  }
+
+  /**
+   * Creates a label containing the given text, without a style name
+   * (i.e. without the default {@code "gwt-Label"} style name imposed by its {@linkplain Label#Label() constructor})
+   */
+  public static Label label(String text) {
+    return clearStyleName(new Label(text));
   }
 
   public static Label label(String text, String styleName) {
-    return maybeSetStyleName(new Label(text), styleName);
+    return applyStyleName(new Label(text), styleName);
   }
 
   public static Label label(String text, String styleName, boolean wordWrap) {
-    return maybeSetStyleName(new Label(text, wordWrap), styleName);
+    return applyStyleName(new Label(text, wordWrap), styleName);
   }
 
-  private static <W extends Widget> W maybeSetStyleName(W w, String styleName) {
-    if (styleName != null && !styleName.equals(""))
-      w.setStyleName(styleName);
+  /**
+   * Sets the widget's {@linkplain Widget#setStyleName(String) style name} and returns the widget (for chaining).
+   */
+  public static <W extends Widget> W applyStyleName(W w, String styleName) {
+    /* Update(11/18/2024): now allows null/empty styleName to facilitate removal of default GWT styles (e.g. gwt-Label)
+       Originally had: `if (StringUtils.notEmpty(styleName))`
+     */
+    w.setStyleName(styleName);
     return w;
   }
 
+  /**
+   * Facilitates removing the default style names imposed by various GWT widget constructors
+   * (e.g. {@code gwt-Label}, {@code gwt-InlineLabel}, {@code gwt-Anchor}, etc.)
+   *
+   * @return the given widget after invoking {@code widget}.{@link Widget#setStyleName(String) setStyleName}{@code ("")}
+   */
+  public static <W extends Widget> W clearStyleName(W widget) {
+    widget.setStyleName("");
+    return widget;
+  }
+
+  /**
+   * Creates an empty {@link HTML} without the default {@code "gwt-HTML"} style name imposed by its
+   * {@linkplain HTML#HTML() constructor}
+   */
+  public static HTML HTML() {
+    return clearStyleName(new HTML());
+  }
+  
+  /**
+   * Creates an {@link HTML} with empty style name instead of {@code "gwt-HTML"}.
+   */
+  public static HTML html(String html) {
+    return html(html, "");
+  }
+
   public static HTML html(String html, String styleName) {
-    return maybeSetStyleName(new HTML(html), styleName);
+    return applyStyleName(new HTML(html), styleName);
   }
 
   public static HTML html(String html, String styleName, boolean wordWrap) {
-    return maybeSetStyleName(new HTML(html, wordWrap), styleName);
+    return applyStyleName(new HTML(html, wordWrap), styleName);
   }
 
   public static SimplePanel simplePanel(WidgetStyle style, Widget widget) {
-    SimplePanel sp = simplePanel(widget);
-    style.apply(sp);
-    return sp;
+    return style.apply(new SimplePanel(widget));
+  }
+
+  public static SimplePanel simplePanel(String styleName, Widget widget) {
+    return applyStyleName(new SimplePanel(widget), styleName);
   }
 
   public static VerticalPanel verticalPanel(Widget... widgets) {
@@ -292,6 +374,14 @@ public class Widgets {
 
   public static FlowPanel flowPanel(WidgetStyle style, Iterable<? extends Widget> widgets) {
     return initPanel(new FlowPanel(), style, widgets);
+  }
+
+  public static FlowPanel flowPanel(String styleName, Widget... widgets) {
+    return initPanel(new FlowPanel(), new WidgetStyle(styleName), widgets);
+  }
+
+  public static FlowPanel flowPanel(String styleName, Iterable<? extends Widget> widgets) {
+    return initPanel(new FlowPanel(), new WidgetStyle(styleName), widgets);
   }
 
   public static InlineFlowPanel inlineFlowPanel(Widget... widgets) {
@@ -371,6 +461,10 @@ public class Widgets {
     return sp;
   }
 
+  public static ScrollPanel scrollPanel(String styleName, Widget child) {
+    return applyStyleName(new ScrollPanel(child), styleName);
+  }
+
   public static TabPanel tabPanel(Widget[] widgets, String[] captions) {
     TabPanel tp = new TabPanel();
     for (int i = 0; i < widgets.length; i++) {
@@ -409,7 +503,7 @@ public class Widgets {
     for (String[] item : items) {
       lb.addItem(item[0], item[1]);
     }
-    maybeSetStyleName(lb, styleName);
+    applyStyleName(lb, styleName);
     return lb;
   }
 
@@ -418,12 +512,22 @@ public class Widgets {
     return new InlineHTML(HtmlUtils.nbsp);
   }
 
+  /**
+   * Creates an empty {@link InlineLabel} without a style name (instead of {@code "gwt-InlineLabel"}).
+   */
+  public static InlineLabel inlineLabel() {
+    return clearStyleName(new InlineLabel());
+  }
+
+  /**
+   * Creates an {@link InlineLabel} without a style name (instead of {@code "gwt-InlineLabel"}).
+   */
   public static InlineLabel inlineLabel(String txt) {
-    return new InlineLabel(txt);
+    return inlineLabel(txt, "");
   }
 
   public static InlineLabel inlineLabel(String txt, String styleName) {
-    return maybeSetStyleName(new InlineLabel(txt), styleName);
+    return applyStyleName(new InlineLabel(txt), styleName);
   }
   
   public static InlineLabel inlineLabel(String txt, String styleName, boolean wordWrap) {
@@ -432,8 +536,22 @@ public class Widgets {
     return lbl;
   }
 
+  /**
+   * Creates an empty {@link InlineHTML} without a style name (instead of {@code "gwt-InlineHTML"}).
+   */
+  public static InlineHTML inlineHTML() {
+    return clearStyleName(new InlineHTML());
+  }
+
+  /**
+   * Creates an {@link InlineHTML} without a style name (instead of {@code "gwt-InlineHTML"}).
+   */
+  public static InlineHTML inlineHTML(String txt) {
+    return inlineHTML(txt, "");
+  }
+
   public static InlineHTML inlineHTML(String txt, String styleName) {
-    return maybeSetStyleName(new InlineHTML(txt), styleName);
+    return applyStyleName(new InlineHTML(txt), styleName);
   }
 
   public static InlineHTML inlineHTML(String txt, WidgetStyle style) {
@@ -453,6 +571,11 @@ public class Widgets {
     return anchor;
   }
 
+  /** A hyperlink with a click handler that invokes the given command */
+  public static Anchor anchor(String text, Command onClick) {
+    return anchor(text, click -> onClick.execute());
+  }
+
   /** A hyperlink with a click handler and help (title) text */
   public static Anchor anchor(String text, String title, ClickHandler clickHandler) {
     Anchor anchor = anchor(text, clickHandler);
@@ -460,18 +583,33 @@ public class Widgets {
     return anchor;
   }
 
+  /** A hyperlink with a click handler, title, and style name */
+  public static Anchor anchor(String text, String title, String styleName, ClickHandler clickHandler) {
+    return applyStyleName(anchor(text, title, clickHandler), styleName);
+  }
+
   /** A hyperlink rendered as HTML with a click handler */
-  public static Anchor anchorHTML(String text, ClickHandler clickHandler) {
-    Anchor anchor = new Anchor(text, true);
+  public static Anchor anchorHTML(String html, ClickHandler clickHandler) {
+    Anchor anchor = new Anchor(html, true);
     anchor.addClickHandler(clickHandler);
     return anchor;
   }
 
+  /** A hyperlink rendered as HTML with a click handler that invokes the given command */
+  public static Anchor anchorHTML(String html, Command onClick) {
+    return anchorHTML(html, click -> onClick.execute());
+  }
 
   /** A hyperlink with text rendered as HTML, with a click handler and help (title) text */
-  public static Anchor anchorHTML(String text, String title, ClickHandler clickHandler) {
-    Anchor anchor = anchorHTML(text, clickHandler);
+  public static Anchor anchorHTML(String html, String title, ClickHandler clickHandler) {
+    Anchor anchor = anchorHTML(html, clickHandler);
     anchor.setTitle(title);
     return anchor;
+  }
+
+  /** A hyperlink with text rendered as HTML, with a click handler, title text, and style name */
+  public static Anchor anchorHTML(String html, String title, String styleName, ClickHandler clickHandler) {
+    return applyStyleName(
+        anchorHTML(html, title, clickHandler), styleName);
   }
 }

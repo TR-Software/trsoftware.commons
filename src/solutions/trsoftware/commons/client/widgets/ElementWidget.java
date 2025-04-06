@@ -32,10 +32,10 @@ import com.google.gwt.user.client.ui.Widget;
 public class ElementWidget extends Widget implements HasHTML {
 
   /**
-   * Wraps an existing {@link Element}
+   * Wraps a custom {@link Element}
    * @param element the HTML element to be wrapped.
    */
-  protected ElementWidget(Element element) {
+  public ElementWidget(Element element) {
     setElement(element);
   }
 
@@ -50,13 +50,13 @@ public class ElementWidget extends Widget implements HasHTML {
   /**
    * Creates a new {@link Element} with the given tag name, and sets its {@code innerHTML} to the given string.
    * @param tagName HTML tag name (e.g. {@code div}, {@code h1}, etc.)
-   * @param html the value to assign to the element's {@code innerHTML} property
+   * @param innerHtml the value to assign to the element's {@code innerHTML} property
    * @see #ElementWidget(String)
    * @see #setHTML(String)
    */
-  public ElementWidget(String tagName, String html) {
+  public ElementWidget(String tagName, String innerHtml) {
     this(tagName);
-    setHTML(html);
+    setHTML(innerHtml);
   }
 
   @Override

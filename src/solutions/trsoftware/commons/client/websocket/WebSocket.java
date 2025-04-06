@@ -48,8 +48,18 @@ public abstract class WebSocket extends JavaScriptObject {
     this.send(message);
   }-*/;
 
+  // TODO: add a version of send() for binary messages (see https://developer.mozilla.org/en-US/docs/Web/API/WebSocket/send)
+
   public final native void close() /*-{
     this.close();
+  }-*/;
+
+  public final native void close(int code) /*-{
+    this.close(code);
+  }-*/;
+
+  public final native void close(int code, String reason) /*-{
+    this.close(code, reason);
   }-*/;
 
 

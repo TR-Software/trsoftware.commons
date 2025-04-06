@@ -33,6 +33,8 @@ import solutions.trsoftware.commons.shared.util.mutable.MutableNumber;
 
 import java.util.*;
 import java.util.function.BiFunction;
+import java.util.function.Function;
+import java.util.stream.Stream;
 
 import static solutions.trsoftware.commons.shared.testutil.AssertUtils.assertThrows;
 import static solutions.trsoftware.commons.shared.util.MapUtils.*;
@@ -336,5 +338,10 @@ public class MapUtilsTest extends TestCase {
     assertEquals((Integer)3, getSingleValue(map, "b", 0));
     assertEquals((Integer)0, getSingleValue(map, "c", 0));
     assertEquals((Integer)5, getSingleValue(map, "d", 5));
+  }
+
+  public void testToMap() throws Exception {
+    assertEquals(hashMap("a", 1, "ab", 2, "abc", 3),
+        Stream.of("a", "ab", "abc").collect(toMap(Function.identity(), String::length, TreeMap::new)));
   }
 }

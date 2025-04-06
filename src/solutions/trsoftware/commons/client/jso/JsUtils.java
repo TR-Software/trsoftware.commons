@@ -19,6 +19,7 @@ package solutions.trsoftware.commons.client.jso;
 import com.google.gwt.core.client.*;
 
 import java.util.function.Consumer;
+import java.util.function.IntFunction;
 
 /**
  * Utility methods for working with {@link JavaScriptObject} overlays.
@@ -112,6 +113,22 @@ public class JsUtils {
     return ret;
   }
 
+  /**
+   * Creates a Java array from the given native {@link JsArray}.
+   *
+   * @param jsArray the native array to convert
+   * @param arrayGenerator a function which produces a new array of the desired type and the provided length
+   * @param <T>
+   */
+  public static <T extends JavaScriptObject> T[] toJavaArray(JsArray<T> jsArray, IntFunction<T[]> arrayGenerator) {
+    // TODO: test this
+    T[] ret = arrayGenerator.apply(jsArray.length());
+    for (int i = 0; i < ret.length; i++) {
+      ret[i] = jsArray.get(i);
+    }
+    return ret;
+  }
+
   // TODO(1/4/2024): document and test the new methods below
 
   /**
@@ -161,6 +178,20 @@ public class JsUtils {
     return $entry(function (arg) {
       consumer.@java.util.function.Consumer::accept(*)(arg);
     });
+  }-*/;
+
+  /**
+   * Returns a new JS {@code Array} constructed from the items in the given array-like object.
+   * The returned array is mutable, but changes will not propagate to the original object.
+   * @see <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/from">
+   *   JS Array.from() method</a>
+   * @see <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Guide/Indexed_collections#working_with_array-like_objects">
+   *   array-like objects</a>
+   *
+   */
+  public static native <T extends JavaScriptObject> JsArray<T> toJsArray(JavaScriptObject arrayLike) /*-{
+    // NOTE: using Array.apply instead of Array.from for maximal browser compatibility (see https://stackoverflow.com/a/20616985)
+    return Array.apply(null, this);
   }-*/;
 
 }

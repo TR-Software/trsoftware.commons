@@ -198,15 +198,15 @@ public class AssertUtilsTest extends TestCase {
     }
     // 2) test an AssertionBuilder with a null arg
     {
-      AssertionBuilder assNull = assertThat((Object)null);
+      SimpleAssertionBuilder<?> assNull = assertThat((Object)null);
       assertNotNull(assNull);
-      assertEquals(null, assNull.value);
+      assertNull(assNull.value);
       assNull.isNull();
     }
     {
-      AssertionBuilder assNumberNull = assertThat((Double)null);
+      ComparableAssertionBuilder<Double> assNumberNull = assertThat((Double)null);
       assertNotNull(assNumberNull);
-      assertEquals(null, assNumberNull.value);
+      assertNull(assNumberNull.value);
       assNumberNull.isNull();
     }
     // 3) test an AssertionBuilder with some numeric args

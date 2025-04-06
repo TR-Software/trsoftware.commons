@@ -25,7 +25,7 @@ public class IncrementalTaskQueue<T extends Command> implements Scheduler.Repeat
   private boolean running;
 
   public IncrementalTaskQueue(Queue<T> queue) {
-    // TODO: make this private or protected, in favor of IncrementalTaskQueue(Supplier), to discourage leaking the queue
+    // TODO: make this constructor private or protected, in favor of IncrementalTaskQueue(Supplier), to discourage leaking the queue
     this.queue = queue;
   }
 

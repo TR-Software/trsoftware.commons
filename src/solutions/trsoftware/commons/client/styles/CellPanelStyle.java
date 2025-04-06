@@ -30,6 +30,7 @@ import com.google.gwt.user.client.ui.Widget;
  */
 public class CellPanelStyle extends WidgetStyle {
   private int spacing;
+  private int padding;
 
   public CellPanelStyle() {
     super();
@@ -49,12 +50,20 @@ public class CellPanelStyle extends WidgetStyle {
     // apply properties specific to a CellPanel
     if (spacing != 0)
       targetPanel.setSpacing(spacing);
+    if (padding != 0)
+      targetPanel.getElement().setPropertyInt("cellPadding", padding);
+    
 
     return widget;
   }
 
   public CellPanelStyle setSpacing(int spacing) {
     this.spacing = spacing;
+    return this;
+  }
+
+  public CellPanelStyle setPadding(int padding) {
+    this.padding = padding;
     return this;
   }
 

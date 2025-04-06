@@ -162,6 +162,11 @@ public class FileUtils {
     Files.walkFileTree(root, new SimpleFileVisitor<Path>() {
       @Override
       public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
+        /* TODO(3/12/2025): Files.delete call can succeed (not throw), but file not actually deleted on disk (Windows OS)
+            even though Files.exists reports false after this call.
+            This happens when file is still open by the application (e.g. an I/O stream not closed)
+            (see https://stackoverflow.com/q/31606978)
+         */
         Files.delete(file);
         return FileVisitResult.CONTINUE;
       }

@@ -16,21 +16,46 @@
 
 package solutions.trsoftware.commons.client.util.geometry;
 
+import com.google.common.base.MoreObjects;
+import com.google.gwt.dom.client.Element;
+import com.google.gwt.user.client.ui.PopupPanel;
 import com.google.gwt.user.client.ui.Widget;
+import solutions.trsoftware.commons.client.widgets.popups.EnhancedPopup;
 
 /**
- * Defines a position of a widget on screen relative to another widget which we call the "pivot".
+ * Specifies a list of preferences for choosing the position of an absolutely-positioned widget
+ * (e.g. a {@link PopupPanel}) relative to another widget or element ({@link #pivot}).
  *
+ * @see Alignment
+ * @see EnhancedPopup#showRelativeTo(RelativePosition)
  * @author Alex, 11/17/2014
  */
 public class RelativePosition {
 
-  private final Widget pivot;
-  private final int offsetX;
-  private final int offsetY;
+  /**
+   * The element relative to which the position will be computed
+   */
+  private final Element pivot;
+  /**
+   * Horizontal offset for the position computed by each {@link Alignment}
+   */
+  private final Offset offsetX;
+  /**
+   * Vertical offset for the position computed by each {@link Alignment}
+   */
+  private final Offset offsetY;
+  /**
+   * The alignments to consider when choosing the best position, ordered by preference
+   */
   private final Alignment[] alignmentPrefs;
 
-  public RelativePosition(Widget pivot, int offsetX, int offsetY,
+  /**
+   * @param pivot element relative to which the position will be computed
+   * @param offsetX horizontal offset for the position computed by each {@link Alignment}
+   * @param offsetY vertical offset for the position computed by each {@link Alignment}
+   * @param alignmentPrefs the alignments to consider when choosing the best position, ordered by preference
+   */
+  public RelativePosition(Element pivot, Offset offsetX, Offset offsetY,
                           Alignment... alignmentPrefs) {
     this.pivot = pivot;
     this.offsetX = offsetX;
@@ -38,30 +63,85 @@ public class RelativePosition {
     this.alignmentPrefs = alignmentPrefs;
   }
 
+  /**
+   * @param pivot element relative to which the position will be computed
+   * @param offsetX horizontal offset (in pixels) for the position computed by each {@link Alignment}
+   * @param offsetY vertical offset (in pixels) for the position computed by each {@link Alignment}
+   * @param alignmentPrefs the alignments to consider when choosing the best position, ordered by preference
+   */
+  public RelativePosition(Element pivot, int offsetX, int offsetY,
+                          Alignment... alignmentPrefs) {
+    this(pivot, Offset.px(offsetX), Offset.px(offsetY), alignmentPrefs);
+  }
+
+  /**
+   * @param pivot element relative to which the position will be computed
+   * @param alignmentPrefs the alignments to consider when choosing the best position, ordered by preference
+   */
+  public RelativePosition(Element pivot,
+                          Alignment... alignmentPrefs) {
+    this(pivot, 0, 0, alignmentPrefs);
+  }
+
+  /**
+   * @param pivot widget relative to which the position will be computed
+   * @param offsetX horizontal offset (in pixels) for the position computed by each {@link Alignment}
+   * @param offsetY vertical offset (in pixels) for the position computed by each {@link Alignment}
+   * @param alignmentPrefs the alignments to consider when choosing the best position, ordered by preference
+   */
+  public RelativePosition(Widget pivot, int offsetX, int offsetY,
+                          Alignment... alignmentPrefs) {
+    this(pivot.getElement(), offsetX, offsetY, alignmentPrefs);
+  }
+
+  /**
+   * @param pivot widget relative to which the position will be computed
+   * @param alignmentPrefs the alignments to consider when choosing the best position, ordered by preference
+   */
   public RelativePosition(Widget pivot,
                           Alignment... alignmentPrefs) {
     this(pivot, 0, 0, alignmentPrefs);
   }
 
-  /** Factory method */
+  /**
+   * @param pivot widget relative to which the position will be computed
+   * @return an instance configured with {@link Alignment#NEXT_TO} preferences
+   */
   public static RelativePosition nextTo(Widget pivot) {
+    return nextTo(pivot.getElement());
+  }
+
+  /**
+   * @param pivot element relative to which the position will be computed
+   * @return an instance configured with {@link Alignment#NEXT_TO} preferences
+   */
+  public static RelativePosition nextTo(Element pivot) {
     return new RelativePosition(pivot, Alignment.NEXT_TO);
   }
 
-
-  public Widget getPivot() {
+  public Element getPivot() {
     return pivot;
   }
 
-  public int getOffsetX() {
+  public Offset getOffsetX() {
     return offsetX;
   }
 
-  public int getOffsetY() {
+  public Offset getOffsetY() {
     return offsetY;
   }
 
   public Alignment[] getAlignmentPrefs() {
     return alignmentPrefs;
+  }
+
+  @Override
+  public String toString() {
+    return MoreObjects.toStringHelper(this)
+        .add("pivot", pivot)
+        .add("offsetX", offsetX)
+        .add("offsetY", offsetY)
+        .add("alignmentPrefs", alignmentPrefs)
+        .toString();
   }
 }

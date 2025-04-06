@@ -33,6 +33,9 @@ import com.google.gwt.useragent.rebind.UserAgentPropertyGenerator;
  * @author Alex
  * @since Jun 5, 2013
  * @see UserAgentPropertyGenerator
+ * @deprecated This class hasn't been updated in a long time and can be considered obsolete, given that the relevance
+ * of the "user.agent" binding property in GWT has dwindled over time (as of GWT 2.10, it's down to only 2 values:
+ * "gecko1_8" and "safari").
  */
 public interface UserAgentPermutationOracle {
 
@@ -48,6 +51,7 @@ public interface UserAgentPermutationOracle {
   boolean opera();
   boolean ie9();
   boolean ie10();
+  // TODO(8/9/2024): as of GWT 2.10, there are only 2 valid user.agent values remaining: "gecko1_8" and "safari".
 
   /**
    * @return The value of the "user.agent" GWT property for the current permutation.

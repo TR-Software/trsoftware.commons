@@ -35,7 +35,7 @@ public class MapDecorator<K, V> {
          (that name was probably chosen to avoid clashing with Guava's MultimapBuilder class)
    */
 
-  private Map<K, V> map;
+  private final Map<K, V> map;
 
   public MapDecorator(Map<K, V> delegate) {
     this.map = delegate;

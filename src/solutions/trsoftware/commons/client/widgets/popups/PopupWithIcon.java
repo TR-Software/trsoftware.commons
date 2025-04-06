@@ -84,6 +84,16 @@ public class PopupWithIcon extends DialogBox {
     this(autoHide, icon, headingText, styleName, new Label(bodyText), closeLinkText);
   }
 
+  /**
+   * Provides access to the dialog's caption.
+   *
+   * @return the logical caption for this dialog box
+   */
+  @Override
+  public CaptionWithIcon getCaption() {
+    return (CaptionWithIcon)super.getCaption();
+  }
+
   /** Subclasses may override this method to use a different name for the secondary style (CSS class attribute value) */
   protected String getSecondaryStyleName() {
     return "PopupWithIcon";

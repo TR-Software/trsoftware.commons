@@ -23,7 +23,7 @@ import java.util.function.DoubleConsumer;
  *
  * @author Alex, 1/7/14
  */
-public interface UpdatableDouble extends DoubleConsumer {
+public interface UpdatableDouble extends Updatable<Double>, DoubleConsumer {
   /**
    * Updates itself with the given value.
    */
@@ -32,6 +32,11 @@ public interface UpdatableDouble extends DoubleConsumer {
   @Override
   default void accept(double value) {
     update(value);
+  }
+
+  @Override
+  default void update(Double x) {
+    update(x.doubleValue());
   }
 
   default void updateAll(double... candidates) {

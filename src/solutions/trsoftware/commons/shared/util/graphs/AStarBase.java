@@ -1,5 +1,7 @@
 package solutions.trsoftware.commons.shared.util.graphs;
 
+import com.google.common.base.MoreObjects;
+
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.Collections;
@@ -91,6 +93,17 @@ abstract class AStarBase<T, R extends AStarSearchResult<T>> {
     @Nullable
     public List<T> getShortestPath() {
       return delegate.getShortestPath();
+    }
+
+    @Override
+    public String toString() {
+      return MoreObjects.toStringHelper(this)
+          .add("start", getStart())
+          .add("reachedGoal", getReachedGoal())
+          .add("shortestPathCost", getShortestPathCost())
+          .add("numNodesExamined", getNumNodesExamined())
+          .add("shortestPath", getShortestPath())
+          .toString();
     }
   }
 

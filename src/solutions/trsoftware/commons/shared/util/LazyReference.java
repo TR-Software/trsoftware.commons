@@ -19,6 +19,8 @@ package solutions.trsoftware.commons.shared.util;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Supplier;
 
+import static java.util.Objects.requireNonNull;
+
 /**
  * A cache for an instance that will be created only once (on the first invocation of {@link #get()}).
  *
@@ -43,9 +45,16 @@ public abstract class LazyReference<V> implements Supplier<V> {
   }
 
   public V get() {
-    // TODO: what if create() throws exception? should we set hasValue back to false in that case?
-    if (hasValue.compareAndSet(false, true))
-      return value = create();
+    if (hasValue.compareAndSet(false, true)) {
+      try {
+        return value = create();
+      }
+      catch (RuntimeException ex) {
+        // should revert hasValue back to false if create() throws exception
+        hasValue.set(value != null);  // TODO: maybe compareAndSet would be safer?
+        throw ex; // rethrow
+      }
+    }
     return value;
   }
 
@@ -56,14 +65,22 @@ public abstract class LazyReference<V> implements Supplier<V> {
   protected abstract V create();
 
   /**
-   * Factory method that uses the given supplier function to implement the {@link #create()} method.
+   * Creates a {@link LazyReference} using the given function to implement the {@link #create()} method
    */
   public static <T> LazyReference<T> fromSupplier(Supplier<T> supplier) {
-    return new LazyReference<T>() {
-      @Override
-      protected T create() {
-        return supplier.get();
-      }
-    };
+    return new LazyReferenceFromSupplier<>(supplier);
+  }
+
+  private static class LazyReferenceFromSupplier<T> extends LazyReference<T> {
+    private final Supplier<T> supplier;
+
+    LazyReferenceFromSupplier(Supplier<T> supplier) {
+      this.supplier = requireNonNull(supplier, "supplier");
+    }
+
+    @Override
+    protected T create() {
+      return supplier.get();
+    }
   }
 }

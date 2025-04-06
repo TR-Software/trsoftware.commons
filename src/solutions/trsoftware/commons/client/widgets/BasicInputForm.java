@@ -30,6 +30,8 @@ import solutions.trsoftware.commons.client.event.SpecificKeyDownHandler;
 import solutions.trsoftware.commons.shared.validation.ValidationResult;
 import solutions.trsoftware.commons.shared.validation.ValidationRule;
 
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -178,12 +180,13 @@ public abstract class BasicInputForm extends FlowPanel {
   }
 
 
-  private class TextInput extends Composite implements HasKeyDownHandlers {
+  private static class TextInput extends Composite implements HasKeyDownHandlers {
     private TextBox textBox;
-    private ValidationRule validator;
+    @Nullable
+    private ValidationRule<String> validator;
     private HTML lblError;
 
-    TextInput(final TextBox textBox, ValidationRule validator) {
+    TextInput(@Nonnull TextBox textBox, @Nullable ValidationRule<String> validator) {
       this.textBox = textBox;
       this.validator = validator;
       FlowPanel container = flowPanel(textBox);

@@ -102,7 +102,7 @@ public class MockSerializationStreamWriter extends AbstractSerializationStreamWr
   protected String getObjectTypeSignature(Object instance) throws SerializationException {
     Class<?> cls = getClassForSerialization(instance);
     String typeSignature = cls.getName(); // abridged, for simplicity
-    classesByTypeSignature.put(typeSignature, cls);
+    classesByTypeSignature.put(typeSignature, cls);  // TODO(5/24/2025): get typeSig from serializationPolicy (can write a GwtCompatible wrapper for the server-only SerializationPolicy class
     return typeSignature;  // abridged, for simplicity
   }
 
@@ -163,7 +163,7 @@ public class MockSerializationStreamWriter extends AbstractSerializationStreamWr
    *
    * @see ServerSerializationStreamWriter#getClassForSerialization(Object)
    */
-  private static Class<?> getClassForSerialization(Object instance) {
+  protected static Class<?> getClassForSerialization(Object instance) {
     assert (instance != null);
 
     if (instance instanceof Enum<?>) {

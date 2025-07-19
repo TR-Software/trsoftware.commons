@@ -40,6 +40,7 @@ public abstract class PopupCloser<W extends Widget & HasClickHandlers> extends C
   }
 
   @Override
+  @SuppressWarnings("unchecked")
   public W getWidget() {
     return (W)super.getWidget();
   }

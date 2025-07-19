@@ -54,4 +54,37 @@ public class VersionNumberTest extends TestCase {
         versionNumber -> VersionNumber.parse(versionNumber.toString()));
   }
 
+  /**
+   * Tests {@link VersionNumber#getMajor()}, {@link VersionNumber#getMinor()}, and {@link VersionNumber#getPatch()}
+   */
+  public void testComponentGetters() {
+    assertComponents(new VersionNumber(), 0, 0, 0);
+    assertComponents(new VersionNumber(0), 0, 0, 0);
+    assertComponents(new VersionNumber(0, 1), 0, 1, 0);
+    assertComponents(new VersionNumber(0, 1, 2), 0, 1, 2);
+    assertComponents(new VersionNumber(0, 1, 2, 3), 0, 1, 2);
+  }
+
+  private void assertComponents(VersionNumber v, int major, int minor, int patch) {
+    assertEquals(major, v.getMajor());
+    assertEquals(minor, v.getMinor());
+    assertEquals(patch, v.getPatch());
+  }
+
+  public void testGetComponent() throws Exception {
+    for (int i = 0; i < 10; i++) {
+      assertEquals(0, new VersionNumber().getComponent(i));
+    }
+    assertEquals(1, new VersionNumber(1).getComponent(0));
+    assertEquals(2, new VersionNumber(1, 2).getComponent(1));
+    assertEquals(3, new VersionNumber(1, 2, 3).getComponent(2));
+    // TODO: write a loop to test all possible arg
+  }
+
+  public void testIncrement() throws Exception {
+    assertEquals(new VersionNumber(1), new VersionNumber().increment());
+    assertEquals(new VersionNumber(1), new VersionNumber(0).increment());
+    assertEquals(new VersionNumber(0, 2), new VersionNumber(0, 1).increment());
+    assertEquals(new VersionNumber(0, 2, 3), new VersionNumber(0, 2, 2).increment());
+  }
 }

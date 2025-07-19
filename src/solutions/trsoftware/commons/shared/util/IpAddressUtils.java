@@ -27,7 +27,8 @@ import java.util.Objects;
 public class IpAddressUtils {
 
   /**
-   * Packs the 4 unsigned bytes of the given IP address string into a {@code long} integer.
+   * Packs the 4 unsigned bytes of the given IPv4 address string into a {@code long} integer
+   * representing the numeric value of the address in network byte order (big endian).
    *
    * For example, {@code "127.255.127.255"} will be converted to {@code 0x7fff7fffL}
    *
@@ -36,6 +37,8 @@ public class IpAddressUtils {
    * @throws IllegalArgumentException if the given string is not a valid IPv4 address in dot-decimal notation
    * @throws NullPointerException if the argument is null
    * @see #ip4StringToInt(String)
+   * @see <a href="https://dev.mysql.com/doc/refman/5.7/en/miscellaneous-functions.html#function_inet-aton">
+   *   <tt>INET_ATON</tt> (MySQL function)</a>
    */
   public static long ip4StringToLong(String ip) {
     Objects.requireNonNull(ip, "Argument is null");
@@ -63,6 +66,8 @@ public class IpAddressUtils {
 
   /**
    * Inverse of {@link #ip4StringToLong(String)}
+   * @see <a href="https://dev.mysql.com/doc/refman/5.7/en/miscellaneous-functions.html#function_inet-ntoa">
+   *   <tt>INET_NTOA</tt> (MySQL function)</a>
    */
   public static String ip4LongToString(long ip) {
     StringBuilder str = new StringBuilder();

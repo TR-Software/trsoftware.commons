@@ -157,7 +157,7 @@ public class DijkstraTest extends PathSearchTestCase {
     System.out.println("\tnodesExamined: " + result.getNumNodesExamined());
     Set<T> reachableNodes = result.getReachableNodes();
     Map<T, Double> pathCosts = reachableNodes.stream().collect(
-        MapUtils.toMap(Function.identity(), result::getShortestPathCost, LinkedHashMap::new));
+        MapUtils.mapCollector(Function.identity(), result::getShortestPathCost, LinkedHashMap::new));
     System.out.println("\treachableNodes: " + reachableNodes.size());
     System.out.println("\tshortestPathCost: " + pathCosts);
 

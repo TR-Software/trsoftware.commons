@@ -173,7 +173,7 @@ public class CollectionUtilsTest extends TestCase {
       // 2.a) starting with an empty collection
       IntSequenceSupplier supplier = new IntSequenceSupplier();
       ArrayList<Integer> list = new ArrayList<>();
-      ArrayList<Integer> expected = asList(new NumberRange<>(0, 9));
+      List<Integer> expected = asList(new NumberRange<>(0, 9));
       assertEquals(expected, addFromSupplier(list, 10, supplier));
       assertEquals(expected, Stream.generate(new IntSequenceSupplier()).limit(10).collect(Collectors.toList()));
       // 2.b) appending to an existing collection

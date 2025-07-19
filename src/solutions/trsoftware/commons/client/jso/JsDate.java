@@ -16,12 +16,17 @@
 
 package solutions.trsoftware.commons.client.jso;
 
+import com.google.common.base.Preconditions;
 import com.google.gwt.core.client.JavaScriptObject;
+import com.google.gwt.core.client.JsArrayInteger;
+import org.jetbrains.annotations.NotNull;
 import solutions.trsoftware.commons.client.useragent.Polyfill;
 import solutions.trsoftware.commons.shared.util.TimeUnit;
 
 import java.util.Comparator;
 import java.util.Date;
+
+import static java.util.Objects.requireNonNull;
 
 /**
  * JSNI overlay for the JavaScript
@@ -63,6 +68,13 @@ public class JsDate extends com.google.gwt.core.client.JsDate {
    */
   public static JsDate create(double milliseconds) {
     return com.google.gwt.core.client.JsDate.create(milliseconds).cast();
+  }
+
+  /**
+   * Creates an instance with the same value as the given Java {@link Date}.
+   */
+  public static JsDate create(Date date) {
+    return create(date.getTime());
   }
 
   /**
@@ -126,6 +138,29 @@ public class JsDate extends com.google.gwt.core.client.JsDate {
    */
   public static JsDate create(int year, int month, int dayOfMonth, int hours, int minutes, int seconds, int millis) {
     return com.google.gwt.core.client.JsDate.create(year, month, dayOfMonth, hours, minutes, seconds, millis).cast();
+  }
+
+  // TODO(6/9/2025): maybe add explicit overloads for UTC method with each number of args (instead of a catch-all varargs method)
+  /**
+   * Returns the internal millisecond representation of the specified UTC date and time.
+   * @param args var-args array representing {@code year, monthIndex, day, hours, minutes, seconds, milliseconds}
+   *   (must contain at least 1 element).<br>
+   *   <b>Note: </b> month is 0-indexed (e.g. {@code monthIndex = 6} is May, not June)
+   */
+  public static native double UTC(JsArrayInteger args) /*-{
+    return Date.UTC.apply(Date, args);
+  }-*/;
+
+  /**
+   * Returns the internal millisecond representation of the specified UTC date and time.
+   * @param args var-args array representing {@code year, monthIndex, day, hours, minutes, seconds, milliseconds}
+   *   (must contain at least 1 element).<br>
+   *   <b>Note: </b> month is 0-indexed (e.g. {@code monthIndex = 6} is May, not June)
+   * @throws IllegalArgumentException if args array is empty
+   */
+  public static double UTC(int... args) {
+    Preconditions.checkArgument(args != null && args.length > 0, "At least 1 arg required");  // o.w. would return NaN
+    return UTC(JsUtils.toJsArray(args));
   }
 
 
@@ -252,12 +287,12 @@ public class JsDate extends com.google.gwt.core.client.JsDate {
    * implementation dependent.
    *
    * @param locales an array of BCP 47 language tag strings (refer to the MDN docs for possible values)
-   * @param options optional object containing additional options (refer to the MDN docs for possible values)
+   * @param options optional object containing additional options (see {@link JsDateFormat.Options})
    * @return A string representing the date portion of the given Date instance according to language-specific conventions.
    * @see <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Date/toLocaleDateString">MDN
    *     Reference</a>
    */
-  public final native String toLocaleDateString(JsStringArray locales, JsObject options) /*-{
+  public final native String toLocaleDateString(JsStringArray locales, JavaScriptObject options) /*-{
     return this.toLocaleDateString(locales, options);
   }-*/;
 
@@ -314,13 +349,31 @@ public class JsDate extends com.google.gwt.core.client.JsDate {
    * customize the behavior of the function. In older implementations, which ignore the locales and options arguments,
    * the locale used and the form of the string returned are entirely implementation dependent.
    *
+   * @param options optional object containing additional options (see {@link JsDateFormat.Options})
+   * @return A string representing the given date according to language-specific conventions.
+   * @see <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Date/toLocaleString">MDN
+   *     Reference</a>
+   * @see JsDateFormat.Options
+   */
+  public final String toLocaleString(JavaScriptObject options) {
+    // passing empty array to use the default locale
+    return toLocaleString(JsStringArray.create(), options);
+  }
+
+  /**
+   * Invokes the <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Date/toLocaleString">{@code
+   * toLocaleString()}</a> method, which returns a string with a language sensitive representation of this date. The new
+   * locales and options arguments let applications specify the language whose formatting conventions should be used and
+   * customize the behavior of the function. In older implementations, which ignore the locales and options arguments,
+   * the locale used and the form of the string returned are entirely implementation dependent.
+   *
    * @param locales an array of BCP 47 language tag strings (refer to the MDN docs for possible values)
-   * @param options optional object containing additional options (refer to the MDN docs for possible values)
+   * @param options optional object containing additional options (see {@link JsDateFormat.Options})
    * @return A string representing the given date according to language-specific conventions.
    * @see <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Date/toLocaleString">MDN
    *     Reference</a>
    */
-  public final native String toLocaleString(JsStringArray locales, JsObject options) /*-{
+  public final native String toLocaleString(JsStringArray locales, JavaScriptObject options) /*-{
     return this.toLocaleString(locales, options);
   }-*/;
 
@@ -381,12 +434,12 @@ public class JsDate extends com.google.gwt.core.client.JsDate {
    * implementation dependent.
    *
    * @param locales an array of BCP 47 language tag strings (refer to the MDN docs for possible values)
-   * @param options optional object containing additional options (refer to the MDN docs for possible values)
+   * @param options optional object containing additional options (see {@link JsDateFormat.Options})
    * @return A string representing the given date according to language-specific conventions.
    * @see <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Date/toLocaleTimeString">MDN
    *     Reference</a>
    */
-  public final native String toLocaleTimeString(JsStringArray locales, JsObject options) /*-{
+  public final native String toLocaleTimeString(JsStringArray locales, JavaScriptObject options) /*-{
     return this.toLocaleTimeString(locales, options);
   }-*/;
 
@@ -454,7 +507,7 @@ public class JsDate extends com.google.gwt.core.client.JsDate {
         date.setDate(date.getDate() + amount);
         return date;
       case WEEKS:
-        // JsDate doesn't have a setter for "weeks", so we'll just use the one for days multiplied by 7
+        // JsDate doesn't have a setter for "weeks", so we just use days multiplied by 7
         date.setDate(date.getDate() + amount * 7);
         return date;
       case MONTHS:
@@ -466,6 +519,18 @@ public class JsDate extends com.google.gwt.core.client.JsDate {
       default:
         throw new IllegalArgumentException("JS Date doesn't support " + unit.name().toLowerCase());
     }
+  }
+
+  /**
+   * Sets all the time-of-day components of this date to 0, effectively changing it to represent midnight on the same day.
+   * <p>
+   * This is equivalent to <code>{@link #setHours(int, int, int, int) setHours}(0, 0, 0, 0)</code>, but returns
+   * this instance (for call chaining) instead of a timestamp.
+   * @return this instance
+   */
+  public final JsDate truncateTime() {
+    setHours(0, 0, 0, 0);
+    return this;
   }
 
   /**
@@ -493,7 +558,7 @@ public class JsDate extends com.google.gwt.core.client.JsDate {
     }
     if (!Date.prototype.hashCode) {
       Date.prototype.hashCode = function() {
-        return this.getTime() % @java.lang.Integer::MAX_VALUE;
+        return this.getTime() | 0;  // bitwise OR to get 32-bit int
       }
     }
   }-*/;
@@ -502,7 +567,138 @@ public class JsDate extends com.google.gwt.core.client.JsDate {
    * @return comparator based on {@link #getTime()}
    */
   public static Comparator<JsDate> comparator() {
-    return Comparator.comparingDouble(com.google.gwt.core.client.JsDate::getTime);
+    // Note: can't use a lambda here due to inexplicable devMode failure
+    return new Comparator<JsDate>() {
+      @Override
+      public int compare(JsDate d1, JsDate d2) {
+        return JsDate.compare(d1, d2);
+      }
+    };
   }
 
+  /**
+   * Compares the given date to this date based on their {@linkplain #getTime() time values}.
+   * <p>
+   * <b>Note</b>: this class doesn't actually implement {@code Comparable<JsDate>}, due to the limitation of
+   * <blockquote cite="https://github.com/gwtproject/old_google_code_wiki/blob/master/OverlayTypes.wiki.md">
+   *   "Overlay types cannot implement interfaces that define methods"
+   * </blockquote>
+   * @see #asComparable()
+   */
+  public final int compareTo(JsDate other) {
+    return compare(this, other);
+  }
+
+  /**
+   * Compares the given date instances based on their {@linkplain #getTime() time values}.
+   */
+  public static int compare(JsDate d1, JsDate d2) {
+    requireNonNull(d1, "d1");
+    requireNonNull(d2, "d2");
+    return Double.compare(d1.getTime(), d2.getTime());
+  }
+
+  /**
+   * Returns a {@code Comparable<JsDate>} wrapping this instance.
+   * <p>
+   * <b>Note</b>: this class doesn't itself implement {@code Comparable<JsDate>}, due to the limitation of
+   * <blockquote cite="https://github.com/gwtproject/old_google_code_wiki/blob/master/OverlayTypes.wiki.md">
+   *   "Overlay types cannot implement interfaces that define methods"
+   * </blockquote>
+   */
+  public final Comparable<JsDate> asComparable() {
+    // Note: can't use a lambda shorthand here due to inexplicable devMode failure
+    return new ComparableJsDate(this);
+  }
+
+  // TODO: experimental query methods:
+
+  /**
+   * @return {@code true} if the given date has the same year, month, and day of month as this date (in the current locale)
+   * @param date the date to compare with this date
+   * @see #isSameDay(JsDate, JsDate)
+   */
+  public final boolean isSameDay(JsDate date) {
+    return isSameDay(this, date);
+  }
+
+  /**
+   * @return {@code true} if this date has the same year, month, and day of month as today's date (in the current locale)
+   */
+  public final boolean isToday() {
+    JsDate today = create();
+    return isSameDay(this, today);
+  }
+
+  /**
+   * @return {@code true} if this date has the same year, month, and day of month as yesterday's date (in the current locale)
+   */
+  public final boolean isYesterday() {
+    JsDate yesterday = create().add(TimeUnit.DAYS, -1);
+    return isSameDay(this, yesterday);
+  }
+
+  /**
+   * @return {@code true} if this date is in the same week as today's date (in the current locale)
+   * @see #isSameWeek(JsDate, JsDate)
+   */
+  public final boolean isThisWeek() {
+    JsDate today = create();
+    return isSameWeek(this, today);
+  }
+
+  /**
+   * @return {@code true} if the given date is in the same week as today (in the current locale)
+   * @see #isSameWeek(JsDate, JsDate)
+   */
+  public final boolean isSameWeek(JsDate date) {
+    return isSameWeek(this, date);
+  }
+
+  /**
+   * @return {@code true} if the given dates are in the same week as today's date (in the current locale)
+   */
+  public static boolean isSameWeek(JsDate d1, JsDate d2) {
+    int day = d1.getDay();
+    // compute the min/max timestamps in week of d1 and check if d2 falls within that range
+    JsDate weekStart = d1.add(TimeUnit.DAYS, -day).truncateTime(); // midnight of first day of this week (Sunday)
+    assert weekStart.getDay() == 0;
+    JsDate nextWeekStart = weekStart.add(TimeUnit.WEEKS, 1);  // midnight of first day of next week (upperbound)
+    double d2Time = d2.getTime();
+    return d2Time >= weekStart.getTime() && d2Time < nextWeekStart.getTime();
+  }
+
+  /**
+   * @return {@code true} if the given dates have the same year, month, and day of month (in the current locale)
+   */
+  public static boolean isSameDay(JsDate d1, JsDate d2) {
+    return d1.getFullYear() == d2.getFullYear()
+        && d1.getMonth() == d2.getMonth()
+        && d1.getDate() == d2.getDate();
+  }
+
+  /**
+   * Adapter for {@code Comparable<JsDate>}, wrapping a {@link JsDate} instance.
+   * <p>
+   * <b>Note</b>: {@link JsDate} doesn't itself implement {@code Comparable<JsDate>}, due to the limitation of
+   * <blockquote cite="https://github.com/gwtproject/old_google_code_wiki/blob/master/OverlayTypes.wiki.md">
+   *   "Overlay types cannot implement interfaces that define methods"
+   * </blockquote>
+   */
+  public static class ComparableJsDate implements Comparable<JsDate> {
+    private final JsDate date;
+
+    public ComparableJsDate(JsDate date) {
+      this.date = requireNonNull(date, "date");
+    }
+
+    @Override
+    public int compareTo(@NotNull JsDate o) {
+      return date.compareTo(o);
+    }
+
+    public JsDate getDate() {
+      return date;
+    }
+  }
 }

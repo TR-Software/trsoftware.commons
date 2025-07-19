@@ -81,6 +81,12 @@ public class TablePrinterTest extends TestCase {
       }
       printer.printTable(teeTo(out));
       validateTableOutput(out.toString(), expectedLineTokens);
+      {
+        // TODO: test CSV output
+        StringPrintStream csvOut = new StringPrintStream();
+        printer.printTable(TablePrinter.OutputType.CSV);
+        printer.printTable(teeTo(csvOut), TablePrinter.OutputType.CSV);
+      }
     }
     // 2) sparse table
     {
@@ -111,6 +117,13 @@ public class TablePrinterTest extends TestCase {
       }
       printer.printTable(teeTo(out));
       validateTableOutput(out.toString(), expectedLineTokens);
+
+      {
+        // TODO: test CSV output
+        StringPrintStream csvOut = new StringPrintStream();
+        printer.printTable(TablePrinter.OutputType.CSV);
+        printer.printTable(teeTo(csvOut), TablePrinter.OutputType.CSV);
+      }
     }
   }
 

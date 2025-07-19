@@ -678,18 +678,20 @@ public class MapUtils {
   }
 
   /**
-   * Shortcut for {@link Collectors#toMap(Function, Function, BinaryOperator, Supplier)} using {@link #throwingMerger()}.
+   * Shortcut for {@link Collectors#toMap(Function, Function, BinaryOperator, Supplier)} using {@link #throwingMerger()}
+   * as the {@code mergeFunction}.
    * This allows collecting a stream to a specific {@link Map} implementation without having to specify an
    * unnecessary merge function when keys are expected to be unique.
    *
    * @return a {@link Collector} which collects elements into a {@code Map} using the given key/value mappers
    * and map supplier.
    */
-  public static <T, K, V, M extends Map<K, V>> Collector<T, ?, M> toMap(
+  public static <T, K, V, M extends Map<K, V>> Collector<T, ?, M> mapCollector(
       Function<? super T, ? extends K> keyMapper,
       Function<? super T, ? extends V> valueMapper,
       Supplier<M> mapSupplier) {
     return Collectors.toMap(keyMapper, valueMapper, throwingMerger(), mapSupplier);
+    // TODO(4/30/2025): why does this use a separate type var M? (why is mapSupplier a Supplier<M> instead of just Supplier<Map<T, V>>)
   }
 
   /**
@@ -727,5 +729,40 @@ public class MapUtils {
     entries.forEach(entry -> {
       action.accept(entry.getKey(), entry.getValue());
     });
+  }
+
+  /**
+   * Creates a copy of the given map with the keys transformed by the given function.
+   * The returned map's entries will have the same values as the original map, with the corresponding keys computed
+   * by applying the given function to the original keys.
+   */
+  public static <K, K2, V> LinkedHashMap<K2, V> transformKeys(Map<K, V> map, Function<K, K2> keyTransformer) {
+    // TODO: maybe add overload that takes a merge function
+    return map.entrySet().stream().collect(mapCollector(
+        entry -> keyTransformer.apply(entry.getKey()), Map.Entry::getValue,
+        LinkedHashMap::new));
+  }
+
+  /**
+   * Creates a copy of the given map with the values transformed by the given function.
+   * The returned map's entries will have the same keys as the original map, with the corresponding values computed
+   * by applying the given function to the original values.
+   * @see Maps#transformValues(Map, com.google.common.base.Function)
+   */
+  public static <K, V, V2> LinkedHashMap<K, V2> transformValues(Map<K, V> map, Function<V, V2> valueTransformer) {
+    // TODO: maybe add overload that takes a merge function; maybe add a symmetric transformEntries method (similar to Maps.transformEntries)
+    return map.entrySet().stream().collect(mapCollector(
+        Map.Entry::getKey, entry -> valueTransformer.apply(entry.getValue()),
+        LinkedHashMap::new));
+  }
+
+  public static <T, V> Map<T, V> toMap(Collection<T> collection, Function<T, V> valueMapper) {
+    // TODO: doc this
+    return collection.stream().collect(Collectors.toMap(Function.identity(), valueMapper));
+  }
+
+  public static <T, V, M extends Map<T, V>> M toMap(Collection<T> collection, Function<T, V> valueMapper, Supplier<M> mapSupplier) {
+    // TODO: doc this
+    return collection.stream().collect(mapCollector(Function.identity(), valueMapper, mapSupplier));
   }
 }

@@ -28,11 +28,19 @@ import java.io.IOException;
 import java.io.StringReader;
 import java.util.zip.GZIPInputStream;
 
-// License for the underlying CSV database: DonationWare (i.e. completely open, see the ZIP file for more info)
-// Update Instructions: Download the latest version by running
-// wget software77.net/geo-ip/?DL=1 -O IpToCountry.csv.gz
-// NOTE: Run IpToCountryMapperTest after updating
+/*
+ License for the underlying CSV database: DonationWare (i.e. completely open, see the ZIP file for more info)
+ Update Instructions: Download the latest version by running
+ wget software77.net/geo-ip/?DL=1 -O IpToCountry.csv.gz
+ NOTE: Run IpToCountryMapperTest after updating
+*/
 
+/*
+TODO(5/14/2025): the original IpToCountry database is no longer maintained (software77.net site is gone)
+                 (our latest version of IpToCountry.csv.gz is from May, 2020)
+ - consider migrating to https://db-ip.com/db/download/ip-to-country-lite
+   (see https://simpledns.plus/news/82/updated-geodns-plug-in)
+*/
 /**
  * Maps IPv4 addresses (represented by {@link IpAddress}) to <a href="https://en.wikipedia.org/wiki/ISO_3166-1_alpha-2">
  * ISO 3166-1 alpha-2</a> country codes.
@@ -57,12 +65,12 @@ public class IpToCountryMapper {
 
   private IpRangeDatabase database = new IpRangeDatabase(100000);
 
-  private static IpToCountryMapper instance;
+  private static class SingletonHolder {  // using inner class to avoid concurrency issues at runtime
+    private static final IpToCountryMapper INSTANCE = new IpToCountryMapper(); // lazy init on first access of this inner class
+  }
 
   public static IpToCountryMapper get() {
-    if (instance == null)
-      instance = new IpToCountryMapper(); // lazy init
-    return instance;
+    return SingletonHolder.INSTANCE;
   }
 
   /**

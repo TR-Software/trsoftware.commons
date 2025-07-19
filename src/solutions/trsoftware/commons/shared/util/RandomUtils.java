@@ -287,10 +287,8 @@ public class RandomUtils {
 
   /** @return a random element from the collection, using the given RNG */
   public static <T> T randomElement(Collection<T> collection, Random rnd) {
-    if (collection instanceof List)
-      return randomElement((List<T>)collection, rnd);
     int index = rnd.nextInt(collection.size());
-    return Iterables.get(collection, index);
+    return Iterables.get(collection, index);  // Iterables.get has a fast-path if collection is a List
   }
 
   /**

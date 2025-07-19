@@ -22,23 +22,34 @@ package solutions.trsoftware.commons.shared.io.codec;
  * @author Alex
  */
 public interface Alphabet {
+  // TODO: rename to RadixAlphabet
   /**
-   * @param plainInt Must be in range 0..radix (exclusive)
-   * @return The character representing the int
+   * @param digit the digit to encode;  must be in range <code>[0, radix)</code>
+   * @return the character representing the given digit
+   * @see #decode(char)
    */
-  byte encode(int plainInt);
+  byte encode(int digit);  // TODO: maybe change sig to: char encode(int digit)
 
   /**
-   * @param codedByte A character representing an int in the range 0..radix (exclusive)
-   * @return The int in the range 0..radix (exclusive)
+   * @param codedDigit a character representing an {@code int} in the range <code>[0, radix)</code>
+   * @return the {@code int} corresponding to the given digit character
+   * @see #encode(int)
    */
-  int decode(byte codedByte);
+  int decode(byte codedDigit);  // TODO: maybe change sig to: int decode(char codedDigit)
+
+  /**
+   * @return the maximum radix supported by this alphabet (i.e. the number of unique chars it contains)
+   */
+  int maxRadix();
+
+  /**
+   * @return the characters in this alphabet, such that {@code chars[i]} is the byte used to encode
+   * a digit <code>i &isin; [0, {@link #maxRadix})</code>)
+   */
+  byte[] getChars();
 
   /**
    * @return The character used to encode a minus sign (for negative numbers)
    */
   byte sign();
-
-  /** The base of the alphabet, e.g. 2, 10, 16, 36, 62, 64 */
-  int base();
 }

@@ -17,6 +17,7 @@
 package solutions.trsoftware.commons.shared.testutil;
 
 import com.google.common.collect.Iterables;
+import com.google.common.collect.Iterators;
 import com.google.common.collect.Multimap;
 import com.google.gwt.user.client.Element;
 import junit.framework.Assert;
@@ -26,6 +27,7 @@ import solutions.trsoftware.commons.shared.util.ArrayUtils;
 import solutions.trsoftware.commons.shared.util.StringUtils;
 import solutions.trsoftware.commons.shared.util.compare.ComparisonOperator;
 import solutions.trsoftware.commons.shared.util.function.BiConsumerThrows;
+import solutions.trsoftware.commons.shared.util.function.FunctionalUtils;
 import solutions.trsoftware.commons.shared.util.function.ThrowingRunnable;
 
 import javax.annotation.Nonnull;
@@ -33,6 +35,7 @@ import javax.annotation.Nullable;
 import java.util.*;
 import java.util.function.*;
 
+import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Strings.lenientFormat;
 import static junit.framework.Assert.*;
 import static solutions.trsoftware.commons.shared.util.CollectionUtils.asList;
@@ -163,11 +166,16 @@ public abstract class AssertUtils {
     }
     assertNotNull(expectedThrowableClass.getName() + " expected but wasn't thrown.", caught);
     assertTrue(GwtUtils.isAssignableFrom(expectedThrowableClass, caught.getClass()));
-    String successMsg = "---------- Caught expected exception: ----------";
-    System.out.println(successMsg);
-    caught.printStackTrace(System.out);
-    System.out.println(StringUtils.repeat('-', successMsg.length()));
+    printStackTraceBlock("Caught expected exception", caught);
     return (T)caught;  // this cast should succeed because we've asserted that the class we expect is assignable from the exception
+  }
+
+  private static void printStackTraceBlock(String message, Throwable caught) {
+    // TODO(6/10/2025): maybe extract printMessageBlock method to TestUtils
+    String msgHeader = "---------- " + message + ": ----------";
+    System.out.println(msgHeader);
+    caught.printStackTrace(System.out);
+    System.out.println(StringUtils.repeat('-', msgHeader.length()));
   }
 
   /**
@@ -255,7 +263,19 @@ public abstract class AssertUtils {
     }
   }
 
+  /**
+   * Asserts that both iterators return equivalent sequences of elements
+   * @see Iterators#elementsEqual(Iterator, Iterator)
+   */
   public static <T> void assertSameSequence(Iterator<T> expected, Iterator<T> actual) {
+    assertEquals(asList(expected), asList(actual));
+  }
+
+  /**
+   * Asserts that both iterables return equivalent sequences of elements
+   * @see Iterables#elementsEqual(Iterable, Iterable)
+   */
+  public static <T> void assertSameSequence(Iterable<T> expected, Iterable<T> actual) {
     assertEquals(asList(expected), asList(actual));
   }
 
@@ -921,6 +941,41 @@ public abstract class AssertUtils {
           expectedResult, result);
     }
   }
+
+  public static void assertWithRetry(Runnable assertion) {
+    assertWithRetries(1, assertion);
+  }
+
+  public static void assertWithRetries(int retries, Runnable assertion) {
+    // TODO: doc this
+    // TODO: could extract a general-purpose method for retrying any exception to a util class (like CollectionUtils.tryForEach)
+    checkArgument(retries > 0, "retries (%s) must be > 0", retries);
+    for (int i = 0; i <= retries; i++) {
+      try {
+        assertion.run();
+      } catch (AssertionFailedError ex) {
+        if (i < retries) {
+          printStackTraceBlock(
+              lenientFormat("Suppressed AssertionFailedError (%s retries remaining)", retries - i),
+              ex);
+        } else {
+          throw ex;
+        }
+      }
+    }
+  }
+
+  /**
+   * Wraps the given consumer with an {@link #assertWithRetry(Runnable)} block.
+   * @param assertion
+   * @param <T>
+   * @return the wrapped consumer
+   */
+  public static <T> Consumer<T> assertWithRetry(Consumer<T> assertion) {
+    return t -> assertWithRetries(1, FunctionalUtils.partial(assertion, t));
+  }
+
+
 
   /**
    * Allows chaining assertions (sort of like a simpler version of the AssertJ library).

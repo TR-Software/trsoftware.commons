@@ -21,9 +21,7 @@ import solutions.trsoftware.commons.client.dom.observer.ResizeObserver;
 import solutions.trsoftware.commons.client.dom.observer.ResizeObserverEntry;
 import solutions.trsoftware.commons.client.event.MultiHandlerRegistration;
 import solutions.trsoftware.commons.client.images.CommonsImages;
-import solutions.trsoftware.commons.client.jso.JsConsole;
 import solutions.trsoftware.commons.client.jso.JsDocument;
-import solutions.trsoftware.commons.client.jso.JsObjectArray;
 import solutions.trsoftware.commons.client.templates.CommonTemplates;
 import solutions.trsoftware.commons.client.widgets.ListPanel;
 import solutions.trsoftware.commons.client.widgets.RadioButtonGroup;
@@ -272,7 +270,7 @@ public class PopupGlassSvg {
       resizeObserver = ResizeObserver.Impl.create(this::onElementResize);
     }
     if (resizeObserver != null) {
-      resizeObserverTargets.keySet().forEach(resizeObserver::observe);
+      resizeObserverTargets.keySet().forEach(target -> resizeObserver.observe(target));
     }
     return () -> {  // remover:
       if (resizeObserver != null) {
@@ -289,10 +287,11 @@ public class PopupGlassSvg {
    * @param observer
    */
   private void onElementResize(ResizeObserverEntry[] entries, ResizeObserver observer) {
-    // TODO: temp debug logging
+    /*// TODO: temp debug logging
+    //noinspection RedundantCast - (Object)observer cast needed to suppress javac warning ("non-varargs call of varargs method with inexact argument type for last parameter;  cast to java.lang.Object for a varargs call'  cast to java.lang.Object[] for a non-varargs call and to suppress this warning")
     JsConsole.get().logVarArgs(JsConsole.Level.DEBUG, JsObjectArray.create()
         .add(lenientFormat("%s.resizeObserver", getClass().getSimpleName()))
-        .add(entries).add(observer));
+        .add(entries).add((Object)observer));*/
 
     if (isShowing()) {
       // only need to invoke adjustMaskRects (don't need to resize the full glass unless the full window is resized or scrolled)

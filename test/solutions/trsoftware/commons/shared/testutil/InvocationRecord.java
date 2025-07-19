@@ -17,6 +17,7 @@
 package solutions.trsoftware.commons.shared.testutil;
 
 import com.google.common.base.MoreObjects;
+import solutions.trsoftware.commons.server.testutil.RecordingInvocationHandler;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -25,6 +26,7 @@ import java.util.Objects;
 /**
  * Can be used to record method invocations for testing.
  *
+ * @see RecordingInvocationHandler
  * @see java.lang.reflect.Proxy
  * @see java.lang.reflect.InvocationHandler
  *

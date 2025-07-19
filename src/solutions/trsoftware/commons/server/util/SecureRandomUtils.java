@@ -19,6 +19,7 @@ package solutions.trsoftware.commons.server.util;
 import solutions.trsoftware.commons.shared.io.codec.UrlSafeBase64Alphabet;
 
 import java.security.SecureRandom;
+import java.util.Base64;
 
 /**
  * @author Alex, 9/14/2017
@@ -26,6 +27,13 @@ import java.security.SecureRandom;
 public abstract class SecureRandomUtils {
 
   public static final SecureRandom rnd = new SecureRandom();
+
+  /* TODO(7/17/2025):
+      see org.apache.catalina.util.SessionIdGeneratorBase.getRandomBytes:
+        - could improve concurrency by having a concurrent queue of SecureRandom instances
+          (see comment for org.apache.catalina.util.SessionIdGeneratorBase.randoms queue)
+        - maybe could improve security by specifying a secureRandomAlgorithm (e.g. "SHA1PRNG", which is what Tomcat uses by default)
+   */
 
   /**
    * @return A string of {@code length} chars chosen at random from {@link UrlSafeBase64Alphabet#CHARS}
@@ -46,13 +54,19 @@ public abstract class SecureRandomUtils {
    *
    * @param n the number of random bytes to use for generating the string
    * @return A url-safe base64-encoded string generated from {@code n} random bytes.
+   * @see ServerStringUtils#urlSafeBase64Encode(byte[])
    */
   public static String randBytes(int n) {
     if (n <= 0)
       return "";
+    byte[] bytes = getBytes(n);
+    return ServerStringUtils.urlSafeBase64Encode(bytes);
+  }
+
+  public static byte[] getBytes(int n) {
     byte[] bytes = new byte[n];
     rnd.nextBytes(bytes);
-    return ServerStringUtils.urlSafeBase64Encode(bytes);
+    return bytes;
   }
 
   /**
@@ -76,8 +90,13 @@ public abstract class SecureRandomUtils {
    */
   public static void main(String[] args) {
     System.out.println("randString(64): " + randString(64));
+    System.out.println("Encoded with ServerStringUtils.urlSafeBase64Encode:");
     for (int i = 12; i < 40; i++) {
       System.out.printf("randBytes(%d): %s%n", i, randBytes(i));
+    }
+    System.out.println("Encoded with java.util.Base64.getEncoder():");
+    for (int i = 12; i < 40; i++) {
+      System.out.printf("randBytes(%d): %s%n", i, Base64.getEncoder().encodeToString(getBytes(i)));
     }
   }
 }

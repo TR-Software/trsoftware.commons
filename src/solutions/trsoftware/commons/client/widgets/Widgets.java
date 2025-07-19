@@ -612,4 +612,9 @@ public class Widgets {
     return applyStyleName(
         anchorHTML(html, title, clickHandler), styleName);
   }
+
+  /** A {@link Button} with a click handler that invokes the given command */
+  public static Button button(String html, Command onClick) {
+    return new Button(html, (ClickHandler)click -> onClick.execute());
+  }
 }

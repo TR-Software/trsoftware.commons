@@ -21,6 +21,7 @@ import com.google.web.bindery.event.shared.Event;
 import com.google.web.bindery.event.shared.EventBus;
 import com.google.web.bindery.event.shared.HandlerRegistration;
 
+import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Supplier;
@@ -36,13 +37,15 @@ import static solutions.trsoftware.commons.shared.util.CollectionUtils.tryForEac
  * This process repeats on every attach/detach cycle (i.e. if the widget ever becomes attached again,
  * the same handlers will be automatically registered again and removed when it becomes detached).
  *
- * @see #registerEventHandlerOnLoad(Event.Type, Object)
+ * @see #registerEventHandlerOnLoad(Event.Type, Object, Object)
  * @see MultiHandlerRegistration
  * @author Alex
  */
 public abstract class CompositeWithHandlers extends Composite {
 
   private final List<DeferredRegistration> deferredRegistrations = new ArrayList<>();
+
+  // TODO(5/12/2025): rename the registerEventHandlerOnLoad methods to addEventHandlerOnLoad and addEventHandlerToSourceOnLoad
 
   /**
    * The given handler will be {@linkplain EventBus#addHandler(Event.Type, Object) added}
@@ -62,8 +65,26 @@ public abstract class CompositeWithHandlers extends Composite {
   }
 
   /**
-   * Similar to {@link #registerEventHandlerOnLoad(Event.Type, Object)}, but allows using a custom event bus
-   * instead of {@link Events#BUS}.
+   * The given handler will be {@linkplain EventBus#addHandlerToSource(Event.Type, Object, Object) added}
+   * to the {@linkplain Events#BUS default event bus}, using the given {@code source} value, in {@link #onLoad()} and
+   * {@linkplain HandlerRegistration#removeHandler() removed} in {@link #onUnload()}.
+   * <p>
+   * This add/remove cycle will repeat ad-infinitum, or until interrupted by calling {@link HandlerRegistration#removeHandler()}
+   * on the object returned by this method.
+   *
+   * @param <H> the handler type
+   * @param eventType the event type
+   * @param source the source argument for {@link EventBus#addHandlerToSource(Event.Type, Object, Object)}
+   * @param handler the handler instance
+   * @return memento that can be used to stop the add/remove cycle for the given handler
+   */
+  protected <H> Remover registerEventHandlerOnLoad(Event.Type<H> eventType, @Nullable Object source, H handler) {
+    return registerEventHandlerOnLoad(() -> Events.BUS.addHandlerToSource(eventType, source, handler));
+  }
+
+  /**
+   * Similar to {@link #registerEventHandlerOnLoad(Event.Type, Object, Object)}, but allows using a custom event bus
+   * instead of {@link Events#BUS} and a different {@link EventBus} method (e.g. {@link EventBus#addHandlerToSource}).
    * <p>
    * The given function should perform the equivalent of {@link EventBus#addHandler(Event.Type, Object)}.
    *

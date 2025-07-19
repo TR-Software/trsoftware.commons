@@ -55,6 +55,7 @@ public enum Alphabet {
       return "Letters, numbers, and symbols";
     }
   },
+  /** All lowercase ASCII letters and digits (i.e. {@code [a-z0-9]}) */
   LETTERS_AND_NUMBERS(LETTERS.chars + NUMBERS.chars)
   ; // WARNING: if adding new enum values, add them at the end, so to not affect the values that might have already been persisted in a DB
 

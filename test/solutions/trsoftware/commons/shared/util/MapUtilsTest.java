@@ -342,6 +342,6 @@ public class MapUtilsTest extends TestCase {
 
   public void testToMap() throws Exception {
     assertEquals(hashMap("a", 1, "ab", 2, "abc", 3),
-        Stream.of("a", "ab", "abc").collect(toMap(Function.identity(), String::length, TreeMap::new)));
+        Stream.of("a", "ab", "abc").collect(mapCollector(Function.identity(), String::length, TreeMap::new)));
   }
 }

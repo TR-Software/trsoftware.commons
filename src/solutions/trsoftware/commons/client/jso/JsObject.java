@@ -204,6 +204,16 @@ public class JsObject extends JavaScriptObject {
   }-*/;
 
   /**
+   * Assigns a new value for a numeric property ({@code this[key] = value}).
+   * @param key name of the property
+   * @param value new value for the property (provided by {@link Number#doubleValue()})
+   * @return self (for chaining)
+   */
+  public final JsObject set(String key, Number value) {
+    return set(key, value.doubleValue());
+  };
+
+  /**
    * Removes the given property from this native object.
    * @param key the name of the property to be deleted, the call will succeed even if this property doesn't exist.
    * @return self (for chaining)

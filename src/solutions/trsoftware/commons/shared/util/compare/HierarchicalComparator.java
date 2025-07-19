@@ -38,10 +38,12 @@ import static solutions.trsoftware.commons.shared.util.ListUtils.isEmpty;
  * </ul>
  *
  * @param <E> the element type of the lists
+ * @see LexicographicComparator
  * @see CompositeComparator
  *
  * @author Alex
  * @since 8/9/2018
+ * @deprecated superceded by {@link LexicographicComparator}
  */
 public class HierarchicalComparator<E extends Comparable<E>> implements Comparator<List<E>> {
 

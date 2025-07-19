@@ -19,11 +19,11 @@ package solutions.trsoftware.commons.shared.util;
 import com.google.common.collect.Iterators;
 import com.google.gwt.core.shared.GwtIncompatible;
 import junit.framework.TestCase;
-import solutions.trsoftware.commons.shared.testutil.AssertUtils;
 
 import java.util.*;
 
 import static org.junit.Assert.assertArrayEquals;
+import static solutions.trsoftware.commons.shared.testutil.AssertUtils.*;
 import static solutions.trsoftware.commons.shared.util.StringUtils.*;
 import static solutions.trsoftware.commons.shared.util.function.FunctionalUtils.partial;
 
@@ -383,12 +383,12 @@ public class StringUtilsTest extends TestCase {
     assertEquals("ab", commonPrefix("abe", "abcd"));
     assertEquals("abc", commonPrefix("abc", "abc"));
     for (final String s : new String[]{"", "a", "ab"}) {
-      AssertUtils.assertThrows(NullPointerException.class, new Runnable() {
+      assertThrows(NullPointerException.class, new Runnable() {
         public void run() {
           commonPrefix(null, s);
         }
       });
-      AssertUtils.assertThrows(NullPointerException.class, new Runnable() {
+      assertThrows(NullPointerException.class, new Runnable() {
         public void run() {
           commonPrefix(s, null);
         }
@@ -423,12 +423,12 @@ public class StringUtilsTest extends TestCase {
     assertEquals("abc", commonSuffix("abc", "1234abc"));
     assertEquals("  a", commonSuffix("acb        a", "abc  a"));
     for (final String s : new String[]{"", "a", "ab"}) {
-      AssertUtils.assertThrows(NullPointerException.class, new Runnable() {
+      assertThrows(NullPointerException.class, new Runnable() {
         public void run() {
           commonSuffix(null, s);
         }
       });
-      AssertUtils.assertThrows(NullPointerException.class, new Runnable() {
+      assertThrows(NullPointerException.class, new Runnable() {
         public void run() {
           commonSuffix(s, null);
         }
@@ -571,8 +571,19 @@ public class StringUtilsTest extends TestCase {
   }
 
   public void testToCharacterSet() throws Exception {
-    assertEquals(new ArrayList<Character>(toCharacterSet("asdfasdf")), Arrays.asList('a', 's', 'd', 'f'));
-    assertEquals(new ArrayList<Character>(toCharacterSet("fasdfasdf")), Arrays.asList('f', 'a', 's', 'd'));
+    assertEquals(new ArrayList<>(toCharacterSet("asdfasdf")), Arrays.asList('a', 's', 'd', 'f'));
+    assertEquals(new ArrayList<>(toCharacterSet("fasdfasdf")), Arrays.asList('f', 'a', 's', 'd'));
+  }
+
+  public void testToCharacterCollection() throws Exception {
+    // to List
+    assertEquals(Collections.emptyList(), toCharacterCollection("", ArrayList::new));
+    assertEquals(Arrays.asList('a', 's', 'd', 'f', 'a', 's'), toCharacterCollection("asdfas", ArrayList::new));
+
+    // to Set (insertion-ordered)
+    assertSameSequence(Arrays.asList('a', 's', 'd', 'f'), toCharacterCollection("asdfas", LinkedHashSet::new));
+    // to Set (unordered)
+    assertEquals(SetUtils.newSet('a', 's', 'd', 'f'), toCharacterCollection("asdfas", HashSet::new));
   }
 
   public void testValueToString() throws Exception {
@@ -696,7 +707,7 @@ public class StringUtilsTest extends TestCase {
     assertEquals(" ", indent(1));
     assertEquals("  ", indent(2));
     assertEquals("   ", indent(3));
-    AssertUtils.assertThrows(IllegalArgumentException.class, (Runnable)() -> indent(-1));
+    assertThrows(IllegalArgumentException.class, (Runnable)() -> indent(-1));
     // 2) test indent(int, String)
     assertEquals("foo", indent(0, "foo"));
     assertEquals(" foo", indent(1, "foo"));
@@ -849,7 +860,7 @@ public class StringUtilsTest extends TestCase {
     assertTrue(endsWith("foo", 2, "o"));
 
     for (int badIndex : new int[] {-1, 4}) {
-      AssertUtils.assertThrows(new StringIndexOutOfBoundsException(badIndex), new Runnable() {
+      assertThrows(new StringIndexOutOfBoundsException(badIndex), new Runnable() {
         @Override
         public void run() {
           endsWith("foo", badIndex, "foo");
@@ -889,14 +900,14 @@ public class StringUtilsTest extends TestCase {
   public void testLastCodePoint() throws Exception {
     assertEquals(0x1F64A, lastCodePoint(THREE_MONKEYS));
     assertEquals((int)'o', lastCodePoint("foo"));
-    AssertUtils.assertThrows(IllegalArgumentException.class, partial(StringUtils::lastCodePoint, null));
-    AssertUtils.assertThrows(IllegalArgumentException.class, partial(StringUtils::lastCodePoint, ""));
+    assertThrows(IllegalArgumentException.class, partial(StringUtils::lastCodePoint, null));
+    assertThrows(IllegalArgumentException.class, partial(StringUtils::lastCodePoint, ""));
   }
 
   public void testLastChar() throws Exception {
     assertEquals('o', lastChar("foo"));
-    AssertUtils.assertThrows(IllegalArgumentException.class, partial(StringUtils::lastChar, null));
-    AssertUtils.assertThrows(IllegalArgumentException.class, partial(StringUtils::lastChar, ""));
+    assertThrows(IllegalArgumentException.class, partial(StringUtils::lastChar, null));
+    assertThrows(IllegalArgumentException.class, partial(StringUtils::lastChar, ""));
   }
 
   public void testIsLowercase() throws Exception {
@@ -937,11 +948,84 @@ public class StringUtilsTest extends TestCase {
       outputs[i+1][1] = longVersion;
       outputs[i+1][2] = shortVerion;
       if (input == null)
-        AssertUtils.assertAllEqualTo("null", longVersion, shortVerion);
+        assertAllEqualTo("null", longVersion, shortVerion);
       else
-        AssertUtils.assertThat(shortVerion.length()).isLessThan(longVersion.length());
+        assertThat(shortVerion.length()).isLessThan(longVersion.length());
     }
     System.out.println(matrixToPrettyString(outputs, " \u2551 "));
+  }
+
+  public void testByteToBinary()  {
+    // positive values
+    assertEquals("00000000", byteToBinary((byte)0));
+    assertEquals("00000001", byteToBinary((byte)1));
+    assertEquals("00000010", byteToBinary((byte)2));
+    assertEquals("00000011", byteToBinary((byte)3));
+    assertEquals("01111111", byteToBinary((byte)127));
+    // negative values
+    assertEquals("10000000", byteToBinary((byte)-128));
+    assertEquals("10000001", byteToBinary((byte)-127));
+    assertEquals("10000010", byteToBinary((byte)-126));
+    assertEquals("11111111", byteToBinary((byte)-1));
+    assertEquals("11111110", byteToBinary((byte)-2));
+  }
+
+  public void testByteToHex()  {
+    // positive values
+    assertEquals("00", byteToHex((byte)0));
+    assertEquals("0f", byteToHex((byte)15));
+    assertEquals("10", byteToHex((byte)16));
+    assertEquals("7f", byteToHex((byte)127));
+    // negative values
+    assertEquals("80", byteToHex((byte)-128));
+    assertEquals("81", byteToHex((byte)-127));
+    assertEquals("ff", byteToHex((byte)-1));
+    assertEquals("fe", byteToHex((byte)-2));
+  }
+
+  public void testIntToBinary()  {
+    // positive values
+    assertEquals("00000000000000000000000000000000", intToBinary(0));
+    assertEquals("00000000000000000000000000000001", intToBinary(1));
+    assertEquals("00000000000000000000000000000010", intToBinary(2));
+    assertEquals("00000000000000000000000000000011", intToBinary(3));
+    assertEquals("01111111111111111111111111111111", intToBinary(Integer.MAX_VALUE));
+    // negative values
+    assertEquals("10000000000000000000000000000000", intToBinary(Integer.MIN_VALUE));
+    assertEquals("11111111111111111111111111111111", intToBinary(-1));
+    assertEquals("11111111111111111111111111111110", intToBinary(-2));
+  }
+
+  public void testIntToHex()  {
+    // positive values
+    assertEquals("00000000", intToHex(0));
+    assertEquals("0000000f", intToHex(15));
+    assertEquals("00000010", intToHex(16));
+    assertEquals("7fffffff", intToHex(Integer.MAX_VALUE));
+    // negative values
+    assertEquals("80000000", intToHex(Integer.MIN_VALUE));
+    assertEquals("ffffffff", intToHex(-1));
+    assertEquals("fffffffe", intToHex(-2));
+  }
+
+  public void testByteArrayToHex()  {
+    byte[] bytes = new byte[]{0, 15, 16, 127, -128, -127, -1, -2};
+    String expected = "000f107f8081fffe";
+    assertEquals(expected, byteArrayToHex(bytes));
+    // overloaded method with digit grouping (space as grouping separator):
+    // 1) groupingSize <= 0 or >= bytes.length: should be the same as no grouping
+    assertEquals(expected, byteArrayToHex(bytes, 0));
+    assertEquals(expected, byteArrayToHex(bytes, -1));
+    assertEquals(expected, byteArrayToHex(bytes, bytes.length));
+    assertEquals(expected, byteArrayToHex(bytes, bytes.length + 1));
+    // 2) positive group size
+    assertEquals("00 0f 10 7f 80 81 ff fe", byteArrayToHex(bytes, 1));
+    assertEquals("000f 107f 8081 fffe", byteArrayToHex(bytes, 2));
+    assertEquals("000f10 7f8081 fffe", byteArrayToHex(bytes, 3));
+    assertEquals("000f107f 8081fffe", byteArrayToHex(bytes, 4));
+    assertEquals("000f107f80 81fffe", byteArrayToHex(bytes, 5));
+    assertEquals("000f107f8081 fffe", byteArrayToHex(bytes, 6));
+    assertEquals("000f107f8081ff fe", byteArrayToHex(bytes, 7));
   }
 
 }

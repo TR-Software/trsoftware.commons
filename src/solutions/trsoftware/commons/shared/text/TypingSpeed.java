@@ -118,7 +118,7 @@ public class TypingSpeed extends Number implements RichComparable<TypingSpeed> {
   }
 
   /** Initializes instance from a computed value in the given {@link Unit} */
-  public TypingSpeed(double value, Unit unit, Language language) {
+  public TypingSpeed(double value, Unit unit, @Nonnull Language language) {
     Objects.requireNonNull(language, "language");
     // TODO: throw exception if value too high (such that scaledCpm() > Long.MAX_VALUE)?
     this.cpm = unit.to(Unit.CPM, value, language);
@@ -130,7 +130,7 @@ public class TypingSpeed extends Number implements RichComparable<TypingSpeed> {
    * @param charsTyped the number of characters typed
    * @param timeMillis the time taken to type those chars
    */
-  public TypingSpeed(int charsTyped, double timeMillis, Language language) {
+  public TypingSpeed(int charsTyped, double timeMillis, @Nonnull Language language) {
     this(calcCpm(charsTyped, timeMillis), Unit.CPM, language);
   }
 

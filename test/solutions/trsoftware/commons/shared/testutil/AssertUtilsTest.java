@@ -21,6 +21,7 @@ import junit.framework.AssertionFailedError;
 import junit.framework.TestCase;
 
 import static solutions.trsoftware.commons.shared.testutil.AssertUtils.*;
+import static solutions.trsoftware.commons.shared.util.StringUtils.ordinal;
 
 /**
  * Date: Nov 28, 2008 Time: 6:25:03 PM
@@ -253,5 +254,30 @@ public class AssertUtilsTest extends TestCase {
     assertComparablesOrdering("bar", "foo");
     assertThrows(AssertionFailedError.class, (Runnable)() -> assertComparablesOrdering(1, 0));
     assertThrows(AssertionFailedError.class, (Runnable)() -> assertComparablesOrdering("foo", "foo"));
+  }
+
+  public void testAssertWithRetries() throws Exception {
+    class FailingAssertion extends CountingRunnable {
+      private final int nFails;
+      FailingAssertion(int nFails) {
+        this.nFails = nFails;
+      }
+      @Override
+      public void run() {
+        super.run();
+        int runCount = getRunCount();
+        if (runCount <= nFails) {
+          fail("Simulated failure on " + ordinal(runCount) + " run.");
+        }
+      }
+    }
+    assertWithRetries(1, new FailingAssertion(0));
+    assertWithRetries(1, new FailingAssertion(1));
+    assertThrows(AssertionFailedError.class, (Runnable)() -> assertWithRetries(1, new FailingAssertion(2)));
+
+    assertWithRetries(2, new FailingAssertion(0));
+    assertWithRetries(2, new FailingAssertion(1));
+    assertWithRetries(2, new FailingAssertion(2));
+    assertThrows(AssertionFailedError.class, (Runnable)() -> assertWithRetries(1, new FailingAssertion(3)));
   }
 }

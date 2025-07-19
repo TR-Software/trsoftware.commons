@@ -132,19 +132,24 @@ public class TimeValue extends Number implements Comparable<TimeValue> {
   }
 
   public String toString(int maxFractionDigits) {
-    return toString(value, unit, new SharedNumberFormat(maxFractionDigits));
+    return toString(value, unit, maxFractionDigits);
   }
 
   public static String toString(double value, TimeUnit unit) {
     return toString(value, unit, defaultNumberFormat());
   }
 
+  public static String toString(double value, TimeUnit unit, int maxFractionDigits) {
+    return toString(value, unit, new SharedNumberFormat(maxFractionDigits));
+  }
+
   @Nonnull
-  private static String toString(double value, TimeUnit unit, SharedNumberFormat format) {
+  public static String toString(double value, TimeUnit unit, SharedNumberFormat format) {
     return format.format(value) + " " + unit.getPrettyName(value);
   }
 
   private static SharedNumberFormat defaultNumberFormat() {
+    // TODO(5/2/2025): maybe move caching of ThreadLocal SharedNumberFormat instances to SharedNumberFormat (as a static getInstance(maxFractionDigits) method)
     return threadLocalNumberFormat.get();
   }
 

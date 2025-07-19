@@ -476,6 +476,46 @@ public class ListUtils {
     return false;
   }
 
+  // Deque-like methods:
+
+  /**
+   * Retrieves and removes the last element of the list.  This method
+   * differs from {@link #pollLast} only in that it throws an
+   * exception if the list is empty.
+   *
+   * @return the tail of the list
+   * @throws NoSuchElementException if the list is empty
+   * @see Deque#removeLast()
+   */
+  public static <E> E removeLast(List<E> list) {
+    if (list.isEmpty())
+      throw new NoSuchElementException();
+    int iLast = list.size() - 1;
+    E ret = list.get(iLast);
+    list.remove(iLast);
+    return ret;
+  }
+
+  /**
+   * Retrieves and removes the last element of the list, or returns {@code null} if the list is empty.
+   *
+   * @return the tail of the list, or {@code null} if the list is empty
+   * @see Deque#pollLast()
+   */
+  public static <E> E pollLast(List<E> list) {
+    if (list.isEmpty())
+      return null;
+    int iLast = list.size() - 1;
+    E ret = list.get(iLast);
+    list.remove(iLast);
+    return ret;
+  }
+
+  /* TODO(4/17/2025):
+      - add other Deque methods similar to removeLast/pollLast
+      - maybe also create a DequeAdapter that wraps a List (could extend FluentList)
+   */
+
   /**
    * Throws an {@link IndexOutOfBoundsException} if the given index is not in range for the given list size.
    * This method is useful for client-side GWT code, which might throw a generic {@link JavaScriptException}

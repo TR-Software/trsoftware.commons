@@ -16,27 +16,51 @@
 
 package solutions.trsoftware.commons.shared.io.codec;
 
+import static com.google.common.base.Strings.lenientFormat;
+
 /**
  * Jan 28, 2009
  *
  * @author Alex
  */
-public class AlphabetAdapter implements Alphabet {
+public abstract class AlphabetAdapter implements Alphabet {
+  // TODO: rename to BaseAlphabet or RadixAlphabetBase
 
-  private int base;
   private final byte[] codingAlphabet;
-  private final byte[] decodingAlphabet;
-  private final byte sign;
+  private final byte[] decodingAlphabet;  // reverse mapping of codingAlphabet
 
-
-  public AlphabetAdapter(int base, byte[] codingAlphabet, byte sign) {
-    this.base = base;
-    this.codingAlphabet = codingAlphabet;
-    this.sign = sign;
-
+  public AlphabetAdapter(byte[] codingAlphabet) {
+    int maxRadix = maxRadix();
+    int nChars = codingAlphabet.length;
+    // codingAlphabet must have enough chars to encode max digit in radix and cannot be longer than max byte value
+    if (nChars < maxRadix || nChars > 128) {
+      throw new IllegalArgumentException(lenientFormat(
+          "codingAlphabet length (%s) for radix %s must be in range [%s, 128]", nChars, maxRadix, maxRadix));
+    }
+//    this.codingAlphabet = codingAlphabet;
+    this.codingAlphabet = getChars();
+    // compute the reverse mapping
     decodingAlphabet = new byte[Byte.MAX_VALUE];
     for (int j = 0; j < decodingAlphabet.length; j++) {
-      if (j < codingAlphabet.length)
+      if (j < maxRadix)
+        decodingAlphabet[codingAlphabet[j]] = (byte)j;
+    }
+  }
+
+  public AlphabetAdapter() {
+    int maxRadix = maxRadix();
+    this.codingAlphabet = getChars();
+    int nChars = codingAlphabet.length;
+    // codingAlphabet must have enough chars to encode max digit in radix and cannot be longer than max byte value
+    if (nChars < maxRadix || nChars > 128) {
+      throw new IllegalArgumentException(lenientFormat(
+          "codingAlphabet length (%s) for radix %s must be in range [%s, 128]", nChars, maxRadix, maxRadix));
+    }
+//    this.codingAlphabet = codingAlphabet;
+    // compute the reverse mapping
+    decodingAlphabet = new byte[Byte.MAX_VALUE];
+    for (int j = 0; j < decodingAlphabet.length; j++) {
+      if (j < maxRadix)
         decodingAlphabet[codingAlphabet[j]] = (byte)j;
     }
   }
@@ -57,14 +81,10 @@ public class AlphabetAdapter implements Alphabet {
     return decodingAlphabet[codedByte];
   }
 
-  /**
-   * @return The character used to encode a minus sign (for negative numbers)
-   */
-  public byte sign() {
-    return sign;
-  }
-
-  public int base() {
-    return base;
+  @Override
+  // TODO: document the mutability of the array returned by this method
+  // TODO: maybe make this method abstract or remove the subclass overrides (i.e. pass it to constructor)
+  public byte[] getChars() {
+    return codingAlphabet;
   }
 }

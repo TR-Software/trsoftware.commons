@@ -16,6 +16,7 @@
 
 package solutions.trsoftware.commons.shared.util;
 
+import com.google.common.base.Preconditions;
 import com.google.common.primitives.*;
 
 import java.math.BigDecimal;
@@ -35,8 +36,11 @@ import static java.lang.Math.*;
 public class MathUtils {
 
   /**
-   * An arbitrarily small positive quantity that can be used to ignore precision loss from floating-point operations.
+   * An arbitrarily small positive quantity that can be used to ignore precision loss from floating-point operations
+   * when comparing {@code double} values.
+   *
    * @see #equal(double, double, double)
+   * @see junit.framework.Assert#assertEquals(double, double, double)
    */
   public static final double EPSILON = 0.0001;
 
@@ -153,12 +157,19 @@ public class MathUtils {
    * the leading byte if it's {@code 0}
    */
   public static byte[] bigIntToUnsignedByteArray(BigInteger bigInt) {
+    // TODO: reconcile code dup in BigIntRadixCodec.decodeUnsignedBytes
     // TODO: maybe add a corresponding bigIntFromUnsignedByteArray method (returning new BigInteger(1, byteArr))
     // see https://stackoverflow.com/a/4408124/1965404
     byte[] bytes = bigInt.toByteArray();
     // remove the extra sign byte if it's 0 (i.e. positive)
     if (bytes.length > 1 && bytes[0] == (byte)0)
       bytes = Arrays.copyOfRange(bytes, 1, bytes.length);
+    /*
+     TODO(5/22/2025): might be wrong to always remove leading 0 byte,
+      (see com.typingsnake.shared.util.UuidConverter.decodeToBytes, https://stackoverflow.com/a/79631341)
+      - perhaps add a parameter to specify the expected number of bytes (currently just checking bytes.length > 1)
+        - see BigIntRadixCodec.decodeUnsignedBytes
+    */
     return bytes;
   }
 
@@ -444,5 +455,42 @@ public class MathUtils {
   public static boolean isPowerOf2(int n) {
     // see https://stackoverflow.com/a/600306/1965404
     return n > 0 && ((n & (n-1)) == 0);
+  }
+
+  /**
+   * Computes the logarithm of the given number in the specified base.
+   * <p>
+   * This calculation uses {@link Math#log(double)} and the identity formula
+   * <nobr><code>
+   *   log<sub>b</sub>(x) = log<sub>e</sub>(x) / log<sub>e</sub>(b)
+   * </code></nobr>
+   *
+   * @param base the base of the logarithm
+   * @param x the argument
+   * @return <code>log<sub>b</sub>(x)</code>
+   * @see #log2(int)
+   * @see <a href="https://en.wikipedia.org/wiki/Logarithm#Change_of_base">Changing base of logarithm</a>
+   */
+  public static double log(double base, double x) {
+    return Math.log(x) / Math.log(base);
+  }
+
+  /**
+   * Computes the base 2 logarithm of the given value using only bitwise operations.
+   * <p>
+   * Our benchmarking showed this method to perform ~33% faster than the equivalent computation using {@link Math#log(double)}
+   * (on Java8, Intel i7, Windows 8).
+   *
+   * @return <code>log<sub>2</sub>(value)</code>
+   * @see #log(double, double)
+   */
+  public static int log2(int value) {
+    // see MathUtilsBenchmark
+    Preconditions.checkArgument(value > 0, "Arg (%s) must be positive", value);
+    // just count the number of right-shifts it takes to reach 0 (see https://stackoverflow.com/a/18139978)
+    int i = 0;
+    while ((value >>= 1) != 0)
+      i++;
+    return i;
   }
 }

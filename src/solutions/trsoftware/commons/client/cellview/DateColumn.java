@@ -23,6 +23,8 @@ import com.google.gwt.user.cellview.client.Column;
 import java.util.Date;
 
 /**
+ * A column using {@link DateCell}.
+ *
  * @author Alex, 9/19/2017
  */
 public abstract class DateColumn<T> extends Column<T, Date> {

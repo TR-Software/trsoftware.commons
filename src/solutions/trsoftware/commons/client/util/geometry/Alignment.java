@@ -122,6 +122,11 @@ public class Alignment {
         double elementMiddle = getAbsoluteTop(element) + getRenderedHeight(element) / 2;
         return elementMiddle - (popupHeight / 2);
       }
+    },
+    BOTTOM_EDGES() {
+      public double getY(Element element, double popupWidth, double popupHeight) {
+        return getAbsoluteBottom(element) - popupHeight;
+      }
     };
 
     /**

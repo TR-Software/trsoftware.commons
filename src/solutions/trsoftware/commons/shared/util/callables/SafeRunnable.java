@@ -44,8 +44,10 @@ public interface SafeRunnable extends Runnable {
 
 
   /**
-   * Invokes {@link #doRun()} in a {@code try / catch} block, to allow logging and handling unchecked exceptions
+   * Invokes {@link #doRun()} in a {@code try}-{@code catch} block, to allow logging and handling unchecked exceptions
    * instead of letting them escape.
+   * <p><b>Note:</b> implementing classes should not override this method (treat it the same as if it were {@code final}).
+   * The runnable logic should be implemented in {@link #doRun()}.
    */
   @Override
   default void run() {

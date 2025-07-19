@@ -15,7 +15,7 @@
  *
  */
 
-package solutions.trsoftware.commons.server.testutil;
+package solutions.trsoftware.commons.shared.testutil;
 
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -23,7 +23,7 @@ import java.util.concurrent.atomic.AtomicInteger;
  * A dummy {@link Runnable} that simply counts the number of times its {@link Runnable#run()} method was invoked.
  */
 public class CountingRunnable implements Runnable {
-  private AtomicInteger runCount = new AtomicInteger();
+  private final AtomicInteger runCount = new AtomicInteger();
 
   @Override
   public void run() {

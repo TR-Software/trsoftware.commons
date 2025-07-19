@@ -19,6 +19,7 @@ package solutions.trsoftware.commons.shared.util.function;
 import solutions.trsoftware.commons.shared.util.StringUtils;
 import solutions.trsoftware.commons.shared.util.callables.FunctionN;
 
+import java.util.Map;
 import java.util.Objects;
 import java.util.function.*;
 import java.util.stream.Stream;
@@ -213,6 +214,40 @@ public class FunctionalUtils {
       return true;
     }
     return false;
+  }
+
+
+  // TODO: "impartial functions" (see https://www.snoyman.com/blog/2023/04/opposite-of-partial-functions/)
+  /**
+   * Returns a "constant" function that invokes the given supplier to produce the result (ignoring its arguments).
+   * In other words, this adapts the given supplier to the {@link Function} interface.
+   * One possible use-case for this is with {@link Map#computeIfAbsent(Object, Function)}
+   *
+   * @param supplier produces the result of the function
+   * @param <T> the type of the ignored input to the function
+   * @param <R> the type of the result of the function
+   * @return a function that always returns the value produced by the given supplier
+   * @see #partial(Function, Object)
+   * @see <a href="https://www.snoyman.com/blog/2023/04/opposite-of-partial-functions/#impartial-functions">"Impartial" functions</a>
+   */
+  public static <T, R> Function<T, R> toFunction(Supplier<R> supplier) {
+    return any -> supplier.get();
+  }
+
+  /**
+   * Returns a "constant" bi-function that invokes the given supplier to produce the result (ignoring its arguments).
+   * In other words, this adapts the given supplier to the {@link BiFunction} interface.
+   *
+   * @param supplier produces the result of the function
+   * @param <T> the type of the first argument to the function (ignored)
+   * @param <U> the type of the second argument to the function (ignored)
+   * @param <R> the type of the result of the function
+   * @return a bi-function that always returns the value produced by the given supplier
+   * @see #partial(BiFunction, Object, Object)
+   * @see <a href="https://www.snoyman.com/blog/2023/04/opposite-of-partial-functions/#impartial-functions">"Impartial" functions</a>
+   */
+  public static <T, U, R> BiFunction<T, U, R> toBiFunction(Supplier<R> supplier) {
+    return (t, u) -> supplier.get();
   }
 
   // TODO: unit test this class

@@ -128,10 +128,14 @@ public class CollectionUtils {
   }
 
   /**
-   * @return a new list containing all the elements returned by the iterator of the given {@link Iterable}.
+   * @return a new list containing all the elements returned by the iterator of the given {@link Iterable},
+   *   or the iterable itself if it's already an instance of {@link List}
    */
-  public static <T> ArrayList<T> asList(Iterable<T> iterable) {
+  public static <T> List<T> asList(Iterable<T> iterable) {
+    if (iterable instanceof List)
+      return (List<T>)iterable;
     return asList(iterable.iterator());
+    // TODO(4/17/2025): maybe rename method to toList, since "asList" implies that the iterable is being wrapped (like Arrays.asList wraps an array)
   }
 
   /**

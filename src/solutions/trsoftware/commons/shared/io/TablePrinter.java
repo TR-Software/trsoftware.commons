@@ -16,16 +16,21 @@
 
 package solutions.trsoftware.commons.shared.io;
 
-import com.google.common.base.Preconditions;
 import com.google.common.collect.HashBasedTable;
 import com.google.common.collect.Table;
 import com.google.gwt.core.shared.GwtIncompatible;
-import solutions.trsoftware.commons.shared.util.LogicUtils;
 import solutions.trsoftware.commons.shared.util.StringUtils;
 
+import javax.annotation.Nonnull;
 import java.io.PrintStream;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.logging.Logger;
 
+import static com.google.common.base.Preconditions.checkState;
+import static java.util.Objects.requireNonNull;
+import static solutions.trsoftware.commons.shared.util.LogicUtils.firstNonNull;
 import static solutions.trsoftware.commons.shared.util.StringUtils.*;
 
 /**
@@ -58,6 +63,7 @@ import static solutions.trsoftware.commons.shared.util.StringUtils.*;
  * @see StringUtils#matrixToPrettyString(String[][], String)
  */
 public class TablePrinter {
+  public static final TextAlignment DEFAULT_TEXT_ALIGNMENT = TextAlignment.RIGHT;
 
   /*
    * TODO: extract the table-printing functionality from the MemQuery package (e.g {@link FixedWidthPrinter} and {@link HtmlTablePrinter})
@@ -67,8 +73,15 @@ public class TablePrinter {
 
   // print config options:
   private boolean bordersEnabled = true;  // TODO: allow setting this to false for a fixed-width table without borders
+  private final Map<String, TextAlignment> colTextAlignments = new LinkedHashMap<>();
+  /**
+   * The default text alignment for columns that don't have explicit alignments specified
+   * @see #setColAlignment(String, TextAlignment)
+   * @see #colTextAlignments
+   */
+  private TextAlignment defaultTextAlignment = DEFAULT_TEXT_ALIGNMENT;
 
-  // builder fields:
+  // data builder fields:
   private final Table<Integer, String, String> table = HashBasedTable.create();
   private int rowIdx = 0;  // row 0 is reserved for the col headings
 
@@ -77,9 +90,17 @@ public class TablePrinter {
   /**
    * Starts a new row in the table.  This method should be invoked before adding any column data for a row.
    * Subsequent calls to {@link #addCol} will set the cell values in this new row.
+   * <p>
+   * <i>Note:</i> to insert an empty row, invoke this method followed by a single {@link #addCol(String, String)}
+   * with an existing column name and an empty string value.
+   * @throws IllegalStateException if no data has been written to the preceding row
+   *   (see above comment about inserting an empty row)
    */
   public TablePrinter newRow() {
-    rowIdx++;
+    // verify that the current row has some data (see above comment about inserting an empty row)
+    checkState(rowIdx == 0 || table.row(rowIdx).size() > 0,
+        "Row %s contains no data (to insert an empty row, invoke addCol with an empty value)", rowIdx);
+        rowIdx++;
     return this;
   }
 
@@ -90,11 +111,13 @@ public class TablePrinter {
    * @throws IllegalStateException if the {@link #newRow()} hasn't been invoked yet
    */
   public TablePrinter addCol(String name, String value) {
-    Preconditions.checkState(rowIdx > 0, "Must invoke newRow() before writing any column data");
+    checkState(rowIdx > 0, "Must invoke newRow() before writing any column data");
     table.put(0, name, name);  // insert colName into top row (for col headings)
     table.put(rowIdx, name, value);
     return this;
   }
+
+  // TODO(5/24/2025): allow grouping columns (to be printed as a super-heading above several columns), s.t. groups can have duplicated col names
 
   /**
    * Adds a column value for the {@linkplain #newRow() current row}.
@@ -107,7 +130,8 @@ public class TablePrinter {
   }
 
   /**
-   * Adds a column value for the {@linkplain #newRow() current row}.
+   * Adds a formatted column value for the {@linkplain #newRow() current row}.
+   * <p><b>Note:</b> this method is not GWT-compatible.
    * @param name the column name
    * @param format {@linkplain String#format format string} for the value
    * @param value the cell value (will be converted with {@link String#format(String, Object...)})
@@ -117,6 +141,35 @@ public class TablePrinter {
   public TablePrinter addCol(String name, String format, Object value) {
     return addCol(name, String.format(format, value));
     // TODO: maybe create a GWT-compatible version that uses a Function<Object, String> or a Renderer instead of String.format
+  }
+
+  /**
+   * Sets the text alignment for all cells in the specified column.
+   *
+   * @param colName the column name
+   * @param alignment the alignment to use for the named column,
+   *   or {@code null} to remove the current setting for this column (i.e. revert to {@link #defaultTextAlignment})
+   */
+  public TablePrinter setColAlignment(String colName, TextAlignment alignment) {
+    if (alignment != null)
+      colTextAlignments.put(colName, alignment);
+    else
+      colTextAlignments.remove(colName);  // o/w storing a null value would break Map.getOrDefault
+    return this;
+  }
+
+  public TextAlignment getDefaultTextAlignment() {
+    return defaultTextAlignment;
+  }
+
+  /**
+   * Changes the default text alignment for all cells.
+   * This can be overridden on a per-column basis via {@link #setColAlignment(String, TextAlignment)}.
+   * @see #DEFAULT_TEXT_ALIGNMENT
+   */
+  public TablePrinter setDefaultTextAlignment(@Nonnull TextAlignment textAlignment) {
+    this.defaultTextAlignment = requireNonNull(textAlignment, "defaultTextAlignment");
+    return this;
   }
 
   /**
@@ -134,12 +187,89 @@ public class TablePrinter {
   }
 
   /**
-   * Prints the table to the given stream
+   * Prints the table to the given stream, using the {@linkplain OutputType#GRAPHIC default format}.
    */
   public void printTable(PrintStream out) {
-    new Printer(table, out).printTable();
+    printTable(out, OutputType.GRAPHIC);
   }
-  
+
+  /**
+   * Prints the table to {@link System#out} in the specified format.
+ * @param outputType the output format
+   */
+  public void printTable(OutputType outputType) {
+    printTable(System.out, outputType);
+  }
+
+  /**
+   * Prints the table to the given stream in the specified format.
+   * @param outputType the output format
+   */
+  public void printTable(PrintStream out, OutputType outputType) {
+    Printer printer = outputType == OutputType.CSV
+        ? new CsvPrinter(out, table, colTextAlignments, defaultTextAlignment)
+        : new Printer(out, table, colTextAlignments, defaultTextAlignment);
+    printer.printTable();
+  }
+
+  /**
+   * Prints the table to the given logger in the {@linkplain OutputType#GRAPHIC default format}.
+   */
+  public void printTableToLogger(Logger logger) {
+    printTableToLogger(logger, OutputType.GRAPHIC);
+  }
+
+  /**
+   * Prints the table to the given logger in the specified format.
+   * @param outputType the output format
+   */
+  public void printTableToLogger(Logger logger, OutputType outputType) {
+    logger.info("\n" // start logger message on a new line
+        + printTableToString(outputType));
+  }
+
+  /**
+   * Prints the table to a string in the {@linkplain OutputType#GRAPHIC default format}.
+   */
+  public String printTableToString() {
+    return printTableToString(OutputType.GRAPHIC);
+  }
+
+  /**
+   * Prints the table to a string in the specified format.
+   * @param outputType the output format
+   */
+  public String printTableToString(OutputType outputType) {
+    StringPrintStream out = new StringPrintStream();
+    printTable(out, outputType);
+    return out.toString();
+  }
+
+  public enum OutputType {
+    GRAPHIC, CSV;
+  }
+
+  public enum TextAlignment implements AlignmentFunction {
+    LEFT(StringUtils::justifyLeft),
+    RIGHT(StringUtils::justifyRight),
+    CENTER(StringUtils::justifyCenter);
+
+    private transient final AlignmentFunction aligner;
+
+    TextAlignment(AlignmentFunction aligner) {
+      this.aligner = aligner;
+    }
+
+    public String apply(String str, int width) {
+      return aligner.apply(str, width);
+    }
+  }
+
+  @FunctionalInterface
+  public interface AlignmentFunction {
+    String apply(String str, int width);
+  }
+
 
   /* NOTE:
       the printing code is based on FixedWidthPrinter from solutions.trsoftware.commons.server.memquery.output
@@ -149,20 +279,30 @@ public class TablePrinter {
   static class Printer {
     // TODO: can create subclasses for other formats (e.g. CsvPrinter, HtmlTablePrinter, etc.); see solutions.trsoftware.commons.server.memquery.output.ResultSetPrinter
     private boolean bordersEnabled = true;
-    private final PrintStream out;
+    protected final PrintStream out;
 
-    private final Table<Integer, String, String> table;
+    protected final Table<Integer, String, String> table;
 
-    private final String[] colNames;
+    protected final String[] colNames;
     private final int[] maxColWidths;
-    private final int nRows;
-    private final int nCols;
+    protected final int nRows;
+    protected final int nCols;
+
+    private Map<String, TextAlignment> colAlignments;
+    /**
+     * The default text alignment for columns that don't have explicit alignments specified in {@link #colTextAlignments}
+     * @see #setColAlignment(String, TextAlignment)
+     * @see #colTextAlignments
+     */
+    private final TextAlignment defaultAlignment;
 
     int rowIdx = 0;
 
-    public Printer(Table<Integer, String, String> table, PrintStream out) {
-      this.table = table;
+    public Printer(PrintStream out, Table<Integer, String, String> table, Map<String, TextAlignment> colTextAlignments, TextAlignment defaultTextAlignment) {
       this.out = out;
+      this.table = table;
+      this.colAlignments = colTextAlignments;
+      this.defaultAlignment = defaultTextAlignment;
 
       // compute max col widths
       colNames = table.columnKeySet().toArray(new String[0]);
@@ -185,14 +325,13 @@ public class TablePrinter {
       for (int i = 0; i < nRows; i++) {
         beginRow(i);
         for (int j = 0; j < nCols; j++) {
-          String value = LogicUtils.firstNonNull(table.get(i, colNames[j]), "");
+          String value = firstNonNull(table.get(i, colNames[j]), "");
           printCell(value, j);
         }
         endRow(i);
       }
       endTable();
     }
-
 
     /**
      * @param rowType 0 for top row, 1 for middle, and 2 for last
@@ -239,9 +378,14 @@ public class TablePrinter {
     protected void printCell(String value, int col) {
       if (isBordersEnabled()/* && isFirstCol(col)*/)
         out.print(getVBorder());
-      out.print(StringUtils.justifyRight(value, getColWidth(col)));
+      out.print(justifyText(value, col));
       if (isBordersEnabled() && isLastCol(col))
         out.print(getVBorder());
+    }
+
+    protected String justifyText(String value, int col) {
+      TextAlignment alignment = colAlignments.getOrDefault(colNames[col], defaultAlignment);
+      return alignment.apply(value, getColWidth(col));
     }
 
     private boolean isFirstCol(int col) {
@@ -261,6 +405,32 @@ public class TablePrinter {
     }
   }
 
+
+  static class CsvPrinter extends Printer {
+
+    private CSVWriter csvWriter;
+
+    public CsvPrinter(PrintStream out, Table<Integer, String, String> table, Map<String, TextAlignment> colTextAlignments, TextAlignment defaultTextAlignment) {
+      super(out, table, colTextAlignments, defaultTextAlignment);
+      csvWriter = new CSVWriter(null); // since we're only using the writeNextElement method of CSVWriter, we can just pass a null Writer
+    }
+
+    public void printTable() {
+      if (table.isEmpty()) {
+        out.println("<Empty table>");
+        return;
+      }
+      for (int i = 0; i < nRows; i++) {
+        StringBuilder sb = new StringBuilder();
+        for (int j = 0; j < nCols; j++) {
+          String value = firstNonNull(table.get(i, colNames[j]), "");
+          csvWriter.writeNextElement(sb, value, j == 0);
+        }
+        out.println(sb);
+      }
+    }
+  }
+
   /**
    * Prints a single-column table.
    * <h3>Example:</h3>
@@ -277,13 +447,14 @@ public class TablePrinter {
    * @param lines the body of the table
    */
   // TODO(4/29/2024): maybe deprecate this method
+  @SuppressWarnings("NonJREEmulationClassesInClientCode")
   @GwtIncompatible("printf")
   public static void printMenu(PrintStream out, String heading, List<String> lines) {
     // if the heading is not already padded with whitespace on both ends, do so now
     if (!heading.matches("\\s+.*?\\s+"))
       heading = pad(heading, 1);
-    // now we want to wrap the heading with h-border symbols, such that it becomes the same length as the longest row in the body
-    int maxLineLength = Math.max(heading.length()+10, lines.stream().mapToInt(String::length).max().orElse(0) + 2);
+    // now we want to wrap the heading with h-border symbols, such that it becomes at least the same length as the longest row in the body
+    int maxLineLength = Math.max(heading.length()+2, lines.stream().mapToInt(String::length).max().orElse(0) + 2);
 //    String wrappedHeading = surround(heading, repeat(H_BORDER_CHAR, (maxLineLength - heading.length()) / 2));
     heading = CORNER_CHARS[0][0] + padCenter(heading, maxLineLength, H_BORDER_CHAR) + CORNER_CHARS[0][2];
     out.println(heading);

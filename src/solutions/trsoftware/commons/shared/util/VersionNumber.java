@@ -50,6 +50,7 @@ public class VersionNumber implements RichComparable<VersionNumber> {
    * @param components the components of the version number listed in decreasing order of significance.
    * Each element should be &ge; 0 (to ensure the correct behavior of {@link #compareTo(VersionNumber)}),
    * and the array should not be concurrently modified until the constructor has finished.
+   * @see #parse(String)
    */
   public VersionNumber(int... components) {
     /*
@@ -89,6 +90,65 @@ public class VersionNumber implements RichComparable<VersionNumber> {
     else if (b.length > i)
       return -1; // b has more non-zero components remaining
     return 0;  // both have the same number of components, all of which are equal
+  }
+
+  public int[] getComponents() {
+    // defensive copy
+    return Arrays.copyOf(components, components.length);
+    // TODO(7/9/2025): document that array is empty for e.g. VersionNumber(), VersionNumber(0), VersionNumber(0, 0), etc.
+  }
+
+  /*
+   getters based on https://semver.org/spec/v2.0.0.html
+   TODO(7/9/2025):
+    - document these new methods
+    - maybe add support for alpha-numeric "pre-release version" and "build metadata"
+      (possibly as a new class SemanticVersion, to preserve backward-compatibility of this class)
+  */
+  public int getMajor() {
+    return getComponent(0);
+  }
+  public int getMinor() {
+    return getComponent(1);
+  }
+  public int getPatch() {
+    return getComponent(2);
+  }
+
+  /**
+   * @param i the component index (e.g.
+   *   {@code 0} for {@linkplain #getMajor() major version},
+   *   {@code 1} for {@linkplain #getMinor() minor version},
+   *   {@code 2} for {@linkplain #getPatch() patch version}, etc.)
+   * @return the {@code i}<sup>th</sup> numeric component in this instance,
+   *          or {@code 0} if there are less than {@code i + 1} components present
+   * @see <a href="https://semver.org/">Semantic Versioning Spec</a>
+   */
+  public int getComponent(int i) {
+    return components.length > i ? components[i] : 0;
+  }
+
+  /**
+   * Returns a new instance with the least-significant component of this instance incremented by 1.
+   * <p>
+   * For example:
+   * <ul>
+   *   <li>{@code 0} &rarr; {@code 1}</li>
+   *   <li>{@code 0.1} &rarr; {@code 0.2}</li>
+   *   <li>{@code 0.1.2} &rarr; {@code 0.1.3}</li>
+   * </ul>
+   * 
+   */
+  public VersionNumber increment() {
+    // TODO: experimental:
+    // increment the least-significant component
+    /*
+     Note: for VersionNumber(0), components will be an empty array (see constructor);
+     the Math.max in the Arrays.copyOf ensures that the new array will have at least 1 element to be incremented
+    */
+    int[] newComponents = Arrays.copyOf(components, Math.max(components.length, 1));
+    newComponents[newComponents.length-1]++;
+    return new VersionNumber(newComponents);
   }
 
   @Override

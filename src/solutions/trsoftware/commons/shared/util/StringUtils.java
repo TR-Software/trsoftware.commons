@@ -1353,13 +1353,26 @@ public class StringUtils {
    * order that they appeared in the sequence
    */
   public static Set<Character> toCharacterSet(CharSequence str) {
-    return toCharacterSet(str, new LinkedHashSet<Character>());
+    return toCharacterCollection(str, LinkedHashSet::new);
   }
 
-  private static Set<Character> toCharacterSet(CharSequence str, Set<Character> charSet) {
+  /**
+   * @param collectionSupplier provides the destination collection (e.g. {@code ArrayList::new})
+   * @return the collection produced by {@code collectionSupplier}, after adding all the characters from the
+   *   given sequence
+   */
+  public static <C extends Collection<Character>> C toCharacterCollection(CharSequence str, Supplier<C> collectionSupplier) {
+    C col = collectionSupplier.get();
     for (int i = 0; i < str.length(); i++)
-      charSet.add(str.charAt(i));
-    return charSet;
+      col.add(str.charAt(i));
+    return col;
+  }
+
+  /**
+   * @return {@code obj.toString()} if object not {@code null}, otherwise {@code valueIfNull}
+   */
+  public static String nullableToString(@Nullable Object obj, String valueIfNull) {
+    return obj != null ? obj.toString() : valueIfNull;
   }
 
   /**
@@ -1523,9 +1536,113 @@ public class StringUtils {
   }
 
   /**
-   * @return binary string representing the bits in the given byte
+   * Returns a string representation of the byte argument as an unsigned byte in base 2.
+   * @return 8-char string of representing the exact bits in the given byte
    */
   public static String byteToBinary(byte b) {
-    return Integer.toBinaryString((b & 0xFF) + 0x100).substring(1);  // see https://stackoverflow.com/a/17496691
+    String str = Integer.toBinaryString(b & 0xFF);  // (b & 0xFF) is equivalent to Byte.toUnsignedInt, which isn't available in GWT
+    // prepend leading 0s if needed
+    return Strings.padStart(str, 8, '0');
+  }
+
+  /**
+   * Returns the string representation of the byte argument as an unsigned byte in base 16.
+   * @return 2-char lowercase hex string representing the exact bits in the given byte
+   */
+  public static String byteToHex(byte b) {
+    String s = Integer.toHexString(b & 0xFF);  // (b & 0xFF) is equivalent to Byte.toUnsignedInt, which isn't available in GWT
+    if (s.length() == 1)
+      s = "0" + s;  // prepend leading 0 if needed
+    return s;
+  }
+
+  /**
+   * Returns a string representation of the integer argument as an unsigned integer in base 2, padded with 0s to
+   * make the length of the string exactly 32.
+   * This padding is the only difference from {@link Integer#toBinaryString(int)}.
+   *
+   * @return 32-char string of representing the exact bits in the given int
+   * @see Integer#toBinaryString(int)
+   */
+  public static String intToBinary(int i) {
+    String str = Integer.toBinaryString(i);
+    // prepend leading 0s if needed
+    return Strings.padStart(str, 32, '0');
+  }
+
+  /**
+   * Returns a string representation of the integer argument as an unsigned integer in base 2, padded with 0s to
+   * make the length of the string exactly 32.
+   * This padding is the only difference from {@link Integer#toHexString(int)}.
+   *
+   * @return 8-char lowercase hex string of representing the exact bits in the given int
+   * @see Integer#toHexString(int)
+   */
+  public static String intToHex(int i) {
+    String str = Integer.toHexString(i);
+    // prepend leading 0s if needed
+    return Strings.padStart(str, 8, '0');
+  }
+
+  /**
+   * Returns a hex string for the given byte array
+   */
+  public static String byteArrayToHex(byte[] bytes) {
+    return byteArrayToHex(bytes, -1);
+  }
+
+  /**
+   * Returns a hex string for the given byte array
+   * @param groupingSize will insert a grouping separator (space char) between each grouping of this number of bytes;
+   *   (passing any value &le; 0 effectively disables grouping)
+   */
+  public static String byteArrayToHex(byte[] bytes, int groupingSize) {
+    if (groupingSize == 0)
+      groupingSize = -1;  // treat 0 the same as no grouping (-1), o/w the code below would prepend a single space if groupingSize == 0
+    StringBuilder sb = new StringBuilder();
+    int bytesInGroup = 0;
+    for (byte b : bytes) {
+      if (bytesInGroup == groupingSize) {
+        sb.append(' ');
+        bytesInGroup = 0;
+      }
+      String hex = byteToHex(b);
+      sb.append(hex);
+      bytesInGroup++;
+    }
+    return sb.toString();
+    // TODO: maybe write a similar method for int[]
+  }
+
+  /**
+   * Returns a binary string for the given byte array  
+   */
+  public static String byteArrayToBinary(byte[] bytes) {
+    return byteArrayToBinary(bytes, -1);
+  }
+
+  /**
+   * Returns a binary string for the given byte array
+   * @param groupingSize will insert a grouping separator (space char) between each grouping of this number of bytes;
+   *   (passing any value &le; 0 effectively disables grouping)
+   */
+  public static String byteArrayToBinary(byte[] bytes, int groupingSize) {
+    // TODO: maybe make groupingSize represent number of bits rather than bytes
+    if (groupingSize == 0)
+      groupingSize = -1;  // treat 0 the same as no grouping (-1), o/w the code below would prepend a single space if groupingSize == 0
+    StringBuilder sb = new StringBuilder();
+    int bytesInGroup = 0;
+    for (byte b : bytes) {
+      if (bytesInGroup == groupingSize) {
+        sb.append(' ');
+        bytesInGroup = 0;
+      }
+      String s = byteToBinary(b);
+      sb.append(s);
+      bytesInGroup++;
+    }
+    return sb.toString();
+    // TODO: extract dup code from byteArrayToHex
+    // TODO: add unit test
   }
 }

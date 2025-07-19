@@ -25,7 +25,7 @@ import java.util.Arrays;
  * Efficient data structure for mapping sorted 32-bit IP address ranges to country codes.
  *
  * Multithreading Issues: this class is NOT synchronized.  Mutual exclusion
- * must be ensured for calls to addRange and lookupCountry 
+ * must be ensured for calls to {@link #addRange} and {@link #lookupCountry}.
  *
  * 
  * Nov 6, 2009

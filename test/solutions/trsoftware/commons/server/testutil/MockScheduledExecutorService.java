@@ -606,7 +606,7 @@ public class MockScheduledExecutorService implements ScheduledExecutorService {
   private static final AtomicLong nextSequenceNumber = new AtomicLong(0);
 
   public enum TaskState implements RichComparable<TaskState> {
-    NEW, NORMAL, EXCEPTIONAL, CANCELLED;
+    NEW, NORMAL, EXCEPTION, CANCELLED;
   }
 
   /**
@@ -875,7 +875,7 @@ public class MockScheduledExecutorService implements ScheduledExecutorService {
      * @param t the cause of failure
      */
     protected void setException(Throwable t) {
-      if (state.compareAndSet(TaskState.NEW, TaskState.EXCEPTIONAL)) {
+      if (state.compareAndSet(TaskState.NEW, TaskState.EXCEPTION)) {
         outcome = t;
         done();
       }
@@ -915,7 +915,7 @@ public class MockScheduledExecutorService implements ScheduledExecutorService {
           return (V)x;
         case CANCELLED:
           throw new CancellationException();
-        case EXCEPTIONAL:
+        case EXCEPTION:
           throw new ExecutionException((Throwable)x);
       }
       // should never happen:

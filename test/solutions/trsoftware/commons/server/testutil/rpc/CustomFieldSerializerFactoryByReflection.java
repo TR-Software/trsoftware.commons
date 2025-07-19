@@ -53,7 +53,6 @@ import static solutions.trsoftware.commons.server.util.reflect.ReflectionUtils.e
  * @author Alex
  * @since 1/11/2023
  */
-@SuppressWarnings("NonJREEmulationClassesInClientCode")
 @GwtIncompatible
 public class CustomFieldSerializerFactoryByReflection extends CustomFieldSerializerFactory {
 
@@ -70,7 +69,7 @@ public class CustomFieldSerializerFactoryByReflection extends CustomFieldSeriali
     this.serializationPolicy = Objects.requireNonNull(serializationPolicy, "serializationPolicy");
   }
 
-  @Override@SuppressWarnings("unchecked")
+  @Override
   public CustomFieldSerializer<Object> getCustomFieldSerializer(Class<?> instanceClass)
       throws SerializationException {
     return MapUtils.computeIfAbsent(serializerCache, instanceClass, this::createCustomFieldSerializer);
@@ -347,7 +346,7 @@ public class CustomFieldSerializerFactoryByReflection extends CustomFieldSeriali
     public void serializeInstance(SerializationStreamWriter streamWriter, Object instance) throws SerializationException {
       // this code is based on com.google.gwt.user.server.rpc.impl.ServerSerializationStreamWriter.serializeClass
       Class<?> instanceClass = instance.getClass();
-      serializeImpl(streamWriter, instance, instanceClass);
+      serializeImpl(streamWriter, instance, instanceClass);  // TODO(5/26/2025): stack overflow when instanceClass is super of instance.getClass: maybe use instanceClass=this.instanceClass
     }
 
     @Override
@@ -471,9 +470,11 @@ public class CustomFieldSerializerFactoryByReflection extends CustomFieldSeriali
      */
     private void serializeImpl(SerializationStreamWriter streamWriter, Object instance, Class<?> instanceClass) throws SerializationException {
       assert instance != null;
-      CustomFieldSerializer<Object> customFieldSerializer = (instanceClass != this.instanceClass) ?
+      // Note: checking !Class.isAssignableFrom rather than (instanceClass != this.instanceClass) b/c this
+      //       might be a re-entrant call from the superClass branch of serializeClass
+      CustomFieldSerializer<Object> customFieldSerializer = !this.instanceClass.isAssignableFrom(instanceClass) ?
           getCustomFieldSerializer(instanceClass) : null;
-      if (customFieldSerializer != null) {
+      if (customFieldSerializer != null) {  // TODO(5/26/2025): stack overflow when instanceClass is super of instance.getClass
         customFieldSerializer.serializeInstance(streamWriter, instance);
       }
       else if (instanceClass.isArray()) {

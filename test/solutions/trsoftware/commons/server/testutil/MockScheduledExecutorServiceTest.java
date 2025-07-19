@@ -122,7 +122,7 @@ public class MockScheduledExecutorServiceTest extends BaseTestCase {
       assertTrue(tasks[2].wasRun());
       assertExceptional(futures[2], SimulatedException.class);
       TaskRunRecord record = runRecords.get(1); // the run record index of this task is 1 b/c the previous task never ran
-      verifyRunRecord(record, tasks[2], "submit", TaskState.EXCEPTIONAL, new SimulatedException(2));
+      verifyRunRecord(record, tasks[2], "submit", TaskState.EXCEPTION, new SimulatedException(2));
     }
     // 4th task should've completed normally
     {
@@ -209,7 +209,7 @@ public class MockScheduledExecutorServiceTest extends BaseTestCase {
       assertEquals(2, runRecords.size());
       assertTrue(tasks[2].wasRun());
       assertExceptional(futures[2], SimulatedException.class);
-      verifyRunRecord(runRecords.get(0), tasks[2], methodName, TaskState.EXCEPTIONAL);
+      verifyRunRecord(runRecords.get(0), tasks[2], methodName, TaskState.EXCEPTION);
       assertTrue(tasks[3].wasRun());
       assertCompleted(futures[3], null);
       verifyRunRecord(runRecords.get(1), tasks[3], methodName, TaskState.NORMAL);
@@ -503,7 +503,7 @@ public class MockScheduledExecutorServiceTest extends BaseTestCase {
           task0Spec.getFixedDelayTriggerTime(task0PreviousRunCount), task0PreviousRunCount+1);
       verifyRunRecord(newRecords.get(1), killTask0, "schedule", TaskState.NORMAL,
           killTask0TargetTime, 1);
-      verifyRunRecord(newRecords.get(2), task0Spec, TaskState.EXCEPTIONAL,
+      verifyRunRecord(newRecords.get(2), task0Spec, TaskState.EXCEPTION,
           task0TargetTime, task0TargetRunCount);
       expectedHistory.addAll(newRecords);
     }

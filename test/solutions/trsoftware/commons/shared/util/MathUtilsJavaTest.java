@@ -23,14 +23,16 @@ import com.google.common.collect.Streams;
 import com.google.common.primitives.UnsignedBytes;
 import com.google.common.primitives.UnsignedInts;
 import com.google.gwt.core.shared.GwtIncompatible;
-import junit.framework.TestCase;
 import solutions.trsoftware.commons.server.util.ServerArrayUtils;
+import solutions.trsoftware.commons.shared.BaseTestCase;
 import solutions.trsoftware.commons.shared.io.TablePrinter;
 import solutions.trsoftware.commons.shared.util.text.SharedNumberFormat;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.*;
+import java.util.stream.DoubleStream;
+import java.util.stream.IntStream;
 import java.util.stream.LongStream;
 
 import static solutions.trsoftware.commons.shared.testutil.AssertUtils.assertThrows;
@@ -38,7 +40,7 @@ import static solutions.trsoftware.commons.shared.util.MathUtils.*;
 
 @GwtIncompatible
 @SuppressWarnings("NonJREEmulationClassesInClientCode")
-public class MathUtilsJavaTest extends TestCase {
+public class MathUtilsJavaTest extends BaseTestCase {
 
   public void testInt128ToByteArray() throws Exception {
     final int iterations = 100;
@@ -85,7 +87,6 @@ public class MathUtilsJavaTest extends TestCase {
       assertEquals(i, unsignedInt(packUnsignedInt(i)));
     }
 
-    Random rnd = new Random();
     for (int i = 0; i < 1000000; i++) {
       long value = Math.abs(rnd.nextLong()) % 0xffffffffL;  // put the long in the 32-bit range
       assertEquals(value, unsignedInt(packUnsignedInt(value)));
@@ -122,7 +123,6 @@ public class MathUtilsJavaTest extends TestCase {
     assertEquals(Integer.MIN_VALUE, packUnsignedInt(unsignedInt(Integer.MIN_VALUE)));
     assertEquals(Integer.MAX_VALUE, packUnsignedInt(unsignedInt(Integer.MAX_VALUE)));
 
-    Random rnd = new Random();
     for (int i = 0; i < 1000000; i++) {
       int value = rnd.nextInt();
       assertEquals(value, packUnsignedInt(unsignedInt(value)));
@@ -278,7 +278,6 @@ public class MathUtilsJavaTest extends TestCase {
     assertTrue(equal(32450.0, 32450.0 / 3.75 * 3.75, -delta));
     // 3) now test a million random finite values
     double[] nonFiniteValues = {Double.POSITIVE_INFINITY, Double.NEGATIVE_INFINITY, Double.NaN};
-    Random rnd = new Random();
     for (int i = 0; i < 1_000_000; i++) {
       double x = rnd.nextDouble();
       assertTrue(equal(x, x, delta));
@@ -410,7 +409,6 @@ public class MathUtilsJavaTest extends TestCase {
     assertEquals(BigDecimal.valueOf(2.68), round(BigDecimal.valueOf(2.675), 2));  // same input produces a more-accurate result with BigDecimal instead of double
 
     // some random values
-    Random rnd = new Random(1);
     int n = 1000;
 //    int n = 100;
     double[] inputs = new double[n];
@@ -484,7 +482,7 @@ public class MathUtilsJavaTest extends TestCase {
   }
 
 
-  public void testPackUnsignedInt() throws Exception {
+  public void testPackUnsignedInt() {
     // TODO: experimental: counterpart to info table printed by testPackUnsignedByte;
     // TODO: resolve conflicting test names with testPackUnsignedInt8 and testPackUnsignedInt32
     // compare encoding with Guava's UnsignedInts and Java's (int) cast
@@ -512,6 +510,24 @@ public class MathUtilsJavaTest extends TestCase {
 
   private String describeInt(long l, int i) {
     return String.format("%11s (0x%08X, %sb)", i, i, Strings.padStart(Integer.toBinaryString(i), 32, '0'));
+  }
+
+  public void testLog() {
+    PrimitiveIterator.OfDouble randDoubles = DoubleStream.generate(() -> RandomUtils.nextDoubleInRange(Double.MIN_VALUE, 100d)).iterator();
+    for (int i = 0; i < 1000; i++) {
+      double exp = randDoubles.nextDouble();
+      double base = randDoubles.nextDouble();
+      double arg = Math.pow(base, exp);
+      assertEquals(exp, log(base, arg), EPSILON);
+    }
+  }
+
+  public void testLog2() {
+    // can simply compare the the result of log2(i) with log(2, i), since we know that our log(base, i) method is correct
+    // just test with 1000 random args
+    IntStream.generate(rnd::nextInt).filter(i -> i > 0).limit(1000).forEach(i -> {
+      assertEquals((int)log(2, i), log2(i));
+    });
   }
 
 }

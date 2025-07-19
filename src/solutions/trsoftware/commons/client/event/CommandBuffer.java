@@ -55,6 +55,11 @@ public class CommandBuffer implements KeyDownHandler {
     textBox.addKeyDownHandler(this);
   }
 
+  /* TODO(6/6/2025):
+      - persist commandHistory in localStorage (pass storage key to constructor)
+      - allow filtering commands that are saved to history (e.g. append only strings prefixed with "//")
+   */
+
   @Override
   public void onKeyDown(KeyDownEvent event) {
     switch (event.getNativeKeyCode()) {

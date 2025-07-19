@@ -11,7 +11,7 @@ import static java.util.Objects.requireNonNull;
 
 /**
  * Provides an unmodifiable {@link List java.util.List} view of any data structure that has a size
- * and allows access to elements by index.
+ * and allows accessing elements by index.
  * <p>
  * <em>Note:</em> Since this list is unmodifiable, any operations relying on mutability
  * (such as {@link #sort(Comparator)}) will throw an {@link UnsupportedOperationException}.

@@ -32,7 +32,7 @@ import java.util.Collection;
  *
  * @author Alex
  */
-public class TestUtils {
+public class TestUtils extends solutions.trsoftware.commons.shared.testutil.TestUtils {
 
   public static String printMemoryStats() {
     Runtime runtime = Runtime.getRuntime();

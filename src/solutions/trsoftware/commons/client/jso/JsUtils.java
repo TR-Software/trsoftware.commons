@@ -17,7 +17,9 @@
 package solutions.trsoftware.commons.client.jso;
 
 import com.google.gwt.core.client.*;
+import solutions.trsoftware.commons.shared.util.collections.ListAdapter;
 
+import java.util.List;
 import java.util.function.Consumer;
 import java.util.function.IntFunction;
 
@@ -53,7 +55,7 @@ public class JsUtils {
   /**
    * Creates a new JavaScript array containing the same strings as the given Java array.
    */
-  public static JsArrayString toJsArray(String[] arr) {
+  public static JsArrayString toJsArray(String... arr) {
     JsArrayString ret = JsArrayString.createArray(arr.length).cast();
     for (int i = 0; i < arr.length; i++) {
       ret.set(i, arr[i]);
@@ -88,6 +90,19 @@ public class JsUtils {
   }
 
   /**
+   * Creates a new JavaScript array containing the same integer values as the given Java array.
+   *
+   * @see #toJavaArray(JsArrayInteger)
+   */
+  public static JsArrayInteger toJsArray(int... arr) {
+    JsArrayInteger ret = JsArrayInteger.createArray(arr.length).cast();
+    for (int i = 0; i < arr.length; i++) {
+      ret.set(i, arr[i]);
+    }
+    return ret;
+  }
+
+  /**
    * Creates a new Java {@code boolean[]} containing the same boolean values as the given native array.
    *
    * @see #toJsArray(boolean[])
@@ -105,7 +120,7 @@ public class JsUtils {
    *
    * @see #toJavaArray(JsArrayBoolean)
    */
-  public static JsArrayBoolean toJsArray(boolean[] arr) {
+  public static JsArrayBoolean toJsArray(boolean... arr) {
     JsArrayBoolean ret = JsArrayBoolean.createArray(arr.length).cast();
     for (int i = 0; i < arr.length; i++) {
       ret.set(i, arr[i]);
@@ -118,7 +133,7 @@ public class JsUtils {
    *
    * @param jsArray the native array to convert
    * @param arrayGenerator a function which produces a new array of the desired type and the provided length
-   * @param <T>
+   * @param <T> array element type
    */
   public static <T extends JavaScriptObject> T[] toJavaArray(JsArray<T> jsArray, IntFunction<T[]> arrayGenerator) {
     // TODO: test this
@@ -127,6 +142,17 @@ public class JsUtils {
       ret[i] = jsArray.get(i);
     }
     return ret;
+  }
+
+  /**
+   * Creates a Java array from the given native {@link JsArray}.
+   *
+   * @param jsArray the native array to convert
+   * @param <T> array element type
+   */
+  public static <T extends JavaScriptObject> List<T> toList(JsArray<T> jsArray) {
+    //noinspection Convert2MethodRef - can't use method refs in hosted mode (java.lang.IllegalAccessError: no such method)
+    return new ListAdapter<>(index -> jsArray.get(index), () -> jsArray.length());
   }
 
   // TODO(1/4/2024): document and test the new methods below

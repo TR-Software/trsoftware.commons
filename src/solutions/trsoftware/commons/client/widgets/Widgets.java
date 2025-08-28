@@ -30,6 +30,7 @@ import solutions.trsoftware.commons.shared.util.HtmlUtils;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+import java.util.function.Supplier;
 
 /** A collections of convenience factory methods for creating widgets */
 public class Widgets {
@@ -616,5 +617,22 @@ public class Widgets {
   /** A {@link Button} with a click handler that invokes the given command */
   public static Button button(String html, Command onClick) {
     return new Button(html, (ClickHandler)click -> onClick.execute());
+  }
+
+  public static LazyPanel lazyPanel(Supplier<Widget> widgetSupplier) {
+    return new LazyPanelFromSupplier(widgetSupplier);
+  }
+
+  private static class LazyPanelFromSupplier extends LazyPanel {
+    private final Supplier<Widget> widgetSupplier;
+
+    public LazyPanelFromSupplier(Supplier<Widget> widgetSupplier) {
+      this.widgetSupplier = widgetSupplier;
+    }
+
+    @Override
+    protected Widget createWidget() {
+      return widgetSupplier.get();
+    }
   }
 }

@@ -187,14 +187,30 @@ public enum TimeUnit implements RichComparable<TimeUnit> {
   }
 
   /**
+   * @param singular whether to use the alternate singular form (without the "s" suffix)
+   * @return the name of this unit in lowercase, in its singular or plural form, depending on the specified arg
+   */
+  public String getPrettyName(boolean singular) {
+    String ret = name().toLowerCase();
+    if (singular)
+      ret = ret.substring(0, ret.length() - 1);  // we want the singular form of the name, so strip the trailing "s"
+    return ret;
+  }
+
+  /**
    * @return The name of this unit in lowercase, in its singular or plural form, depending on whether the given
    * duration is equal to 1.
    */
   public String getPrettyName(double duration) {
-    String ret = name().toLowerCase();
-    if (duration == 1)
-      ret = ret.substring(0, ret.length()-1);  // we want the singular form of the name, so strip the trailing "s"
-    return ret;
+    return getPrettyName(duration == 1);
+  }
+
+  /**
+   * @return The name of this unit in lowercase, in its singular or plural form, depending on whether the given
+   * numeric string is equal to "1".
+   */
+  public String getPrettyName(String duration) {
+    return getPrettyName("1".equals(duration));
   }
 
   /**

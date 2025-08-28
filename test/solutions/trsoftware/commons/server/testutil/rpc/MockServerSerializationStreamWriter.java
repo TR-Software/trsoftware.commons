@@ -20,13 +20,25 @@ import com.google.gwt.user.client.rpc.SerializationException;
 import com.google.gwt.user.server.Base64Utils;
 import com.google.gwt.user.server.rpc.SerializationPolicy;
 import com.google.gwt.user.server.rpc.impl.SerializabilityUtil;
+import com.google.gwt.user.server.rpc.impl.ServerSerializationStreamWriter;
 import com.google.gwt.user.server.rpc.impl.TypeNameObfuscator;
 import solutions.trsoftware.commons.shared.testutil.rpc.CustomFieldSerializerFactory;
 import solutions.trsoftware.commons.shared.testutil.rpc.MockSerializationStreamWriter;
 
 /**
+ * Extends {@link MockSerializationStreamWriter} to more-closely emulate GWT's {@link ServerSerializationStreamWriter}.
+ * Can be used in server-side tests (where the {@link com.google.gwt.user.server.rpc} package is available).
+ * <p>
+ * Unlike the base {@link MockSerializationStreamWriter}, this implementation supports the following features:
+ * <ol>
+ *   <li>type name elision
+ *   <li>{@link #writeLong(long)} outputs a {@linkplain Base64Utils#toBase64 base64}-encoded string
+ *       or a pair of doubles (depending on the {@linkplain #SERIALIZATION_STREAM_MIN_VERSION protocol version})
+ * </ol>
+ *
  * @author Alex
  * @since 5/24/2025
+ * @see MockClientSerializationStreamReader
  */
 public class MockServerSerializationStreamWriter extends MockSerializationStreamWriter {
 
@@ -42,11 +54,8 @@ public class MockServerSerializationStreamWriter extends MockSerializationStream
   }
 
   @Override
-  protected String getObjectTypeSignature(Object instance) throws SerializationException {
+  protected String computeTypeSignature(Class<?> clazz) throws SerializationException {
     // copied from com.google.gwt.user.server.rpc.impl.ServerSerializationStreamWriter.getObjectTypeSignature
-    assert (instance != null);
-
-    Class<?> clazz = getClassForSerialization(instance);
     if (hasFlags(FLAG_ELIDE_TYPE_NAMES)) {
       if (serializationPolicy instanceof TypeNameObfuscator) {
         return ((TypeNameObfuscator) serializationPolicy).getTypeIdForClass(clazz);

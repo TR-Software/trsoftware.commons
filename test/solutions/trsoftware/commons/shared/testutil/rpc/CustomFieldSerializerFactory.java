@@ -24,7 +24,7 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
- * Can be used with {@link MockSerializationStreamWriter} to provide custom serializers for non-primitive types.
+ * Can be used with {@link MockSerializationStreamWriter} to provide serializers for non-primitive types.
  *
  * @author Alex
  * @since 1/13/2023

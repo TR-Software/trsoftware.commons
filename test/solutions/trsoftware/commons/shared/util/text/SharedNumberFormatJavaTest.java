@@ -28,7 +28,18 @@ import static solutions.trsoftware.commons.shared.util.text.SharedNumberFormat.b
  */
 public class SharedNumberFormatJavaTest extends TestCase {
 
-  SharedNumberFormatGwtTest delegate = new SharedNumberFormatGwtTest();
+  private SharedNumberFormatGwtTest delegate;
+
+  public void setUp() throws Exception {
+    super.setUp();
+    delegate = new SharedNumberFormatGwtTest();
+  }
+
+  @Override
+  protected void tearDown() throws Exception {
+    delegate = null;
+    super.tearDown();
+  }
 
   public void testFormat() throws Exception {
     delegate.testFormat();

@@ -50,16 +50,16 @@ public class TestUtils {
    * Busy waits for the given number of milliseconds, using {@link System#currentTimeMillis()}
    */
   public static void busyWait(long millis) {
-    long startTime = System.currentTimeMillis();
-    while (System.currentTimeMillis() < startTime + millis);
+    long target = System.currentTimeMillis() + millis;
+    while (System.currentTimeMillis() < target);
   }
 
   /**
    * Busy waits for the given number of nanoseconds, using {@link System#nanoTime()}
    */
   public static void busyWaitNanos(long nanos) {
-    long startTime = System.nanoTime();
-    while (System.nanoTime() < startTime + nanos);
+    long target = System.nanoTime() + nanos;
+    while (System.nanoTime() < target);
   }
 
   /**

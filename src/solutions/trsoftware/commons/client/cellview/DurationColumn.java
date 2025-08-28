@@ -34,5 +34,5 @@ public abstract class DurationColumn<T> extends TextColumn<T> {
   /**
    * @return A value in milliseconds
    */
-  public abstract int getDuration(T object);
+  public abstract double getDuration(T object);
 }

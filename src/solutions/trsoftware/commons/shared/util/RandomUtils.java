@@ -17,10 +17,12 @@
 package solutions.trsoftware.commons.shared.util;
 
 import com.google.common.collect.Iterables;
+import com.google.gwt.core.shared.GwtIncompatible;
 import solutions.trsoftware.commons.shared.util.random.RandomCharGenerator;
 import solutions.trsoftware.commons.shared.util.text.Alphabet;
 import solutions.trsoftware.commons.shared.util.text.CharRange;
 
+import java.io.IOException;
 import java.util.*;
 
 /**
@@ -45,8 +47,8 @@ public class RandomUtils {
   private static Random rnd = new Random();
 
   /**
-   * @return The default random number generator instance used by the static methods that don't take a custom
-   * {@link Random} instance as a parameter.
+   * @return the internal RNG instance used by the static methods in this class
+   * that don't take a custom {@link Random} instance as a parameter.
    *
    * @see #setRnd(Random)
    */
@@ -55,13 +57,57 @@ public class RandomUtils {
   }
 
   /**
-   * Replaces the default random number generator.
+   * Sets the {@linkplain #rnd() internal RNG} to be used by all the static methods in this class
+   * that don't take a custom {@link Random} instance as a parameter.
+   * <p>
    * This allows unit tests to produce repeatable test runs by using a {@linkplain Random#Random(long) seeded} instance.
+   * @see #restoreInternalState(String)
    */
   public static void setRnd(Random rnd) {
     RandomUtils.rnd = rnd;
   }
 
+  /**
+   * Returns a memento that can be used to the {@linkplain #restoreInternalState(String) restore the internal RNG state}
+   * of this class to the current point in time.
+   * <p>
+   * This facilitates reproducing unit test failures that resulted from the usage of randomness.
+   *
+   * @return a Base64-encoded string representing a serialized copy of the {@linkplain #rnd() internal RNG}
+   * @see #restoreInternalState(String)
+   */
+  @GwtIncompatible
+  public static String exportInternalState() {
+    try {
+      return ObjectUtils.serializeBase64(rnd());
+    }
+    catch (IOException e) {
+      throw new RuntimeException("Unable to serialize Random", e);  // should never happen
+    }
+    // TODO: unit test (can reuse the code from ObjectUtilsTest)z
+  }
+
+  /**
+   * Restores the {@linkplain #rnd() internal RNG} state to the point in time when the give string was returned
+   * by {@link #exportInternalState()}.
+   * <p>
+   * This facilitates reproducing unit test failures that resulted from the usage of randomness.
+   *
+   * @param randomState a memento obtained using {@link #exportInternalState()}
+   * @return {@code true} if the operation succeeded; {@code false} if the string wasn't valid
+   * @see #setRnd(Random)
+   */
+  @GwtIncompatible
+  public static boolean restoreInternalState(String randomState) {
+    try {
+      setRnd(ObjectUtils.deserializeBase64(randomState));
+      return true;
+    }
+    catch (Exception e) {
+      return false;
+    }
+    // TODO: unit test (can reuse the code from ObjectUtilsTest)z
+  }
 
   private RandomUtils() {  // uninstantiable class
   }

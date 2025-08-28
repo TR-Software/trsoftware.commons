@@ -91,30 +91,30 @@ public class SharedNumberFormat {
 
   /**
    * Creates a format pattern string suitable for the {@link DecimalFormat} constructor based on the given parameters.
-   * <p style="color: #0073BF; font-weight: bold;">
-   *   TODO: add support for digit grouping (e.g. {@code #,###.##} to group thousands, or {@code #,##.##} to group hundreds, etc.)
-   * </p>
+   *
    * @return a string suitable for {@link DecimalFormat#DecimalFormat(String)}
    */
   public static String buildPattern(int minIntegerDigits, int minFractionDigits, int maxFractionDigits, boolean percent) {
-    StringBuilder patternBuffer = new StringBuilder();
+    // TODO: add support for digit grouping (e.g. "#,###.##" to group thousands, or "#,##.##" to group hundreds, etc.)
+    StringBuilder sb = new StringBuilder();
     if (minIntegerDigits <= 0)
-      patternBuffer.append('#');
+      sb.append('#');
     else
-      patternBuffer.append(requiredDigitsPattern(minIntegerDigits));
+      sb.append(requiredDigitsPattern(minIntegerDigits));
     maxFractionDigits = Math.max(minFractionDigits, maxFractionDigits);  // ensure that maxFD >= minFD
-    if (minFractionDigits > 0 || maxFractionDigits > 0)
-      patternBuffer.append('.');
-    if (minFractionDigits > 0)
-      patternBuffer.append(requiredDigitsPattern(minFractionDigits));
-    if (maxFractionDigits > 0) {
-      int nOptional = maxFractionDigits - minFractionDigits;
-      if (nOptional > 0)
-        patternBuffer.append(optionalDigitsPattern(nOptional));
+    if (minFractionDigits > 0 || maxFractionDigits > 0) {
+      sb.append('.');
+      if (minFractionDigits > 0)
+        sb.append(requiredDigitsPattern(minFractionDigits));
+      if (maxFractionDigits > 0) {
+        int nOptional = maxFractionDigits - minFractionDigits;
+        if (nOptional > 0)
+          sb.append(optionalDigitsPattern(nOptional));
+      }
     }
     if (percent)
-      patternBuffer.append('%');
-    return patternBuffer.toString();
+      sb.append('%');
+    return sb.toString();
   }
 
   private static String requiredDigitsPattern(int nDigits) {

@@ -161,7 +161,9 @@ public class StopwatchTest extends BaseTestCase {
       Ticker sysTicker = sw.getTicker();  // defaults to System.nanoTime
       assertTrue(sysTicker.read() > 0);
       assertTrue(sw.isRunning());
+      TestUtils.busyWaitNanos(1);
       long swNanos = sw.elapsedNanos();
+      TestUtils.busyWaitNanos(1);
       long t2 = System.nanoTime();
       assertThat(swNanos).isGreaterThan(0L).isLessThan(t2 - t1);
       sw.stop();
@@ -171,8 +173,9 @@ public class StopwatchTest extends BaseTestCase {
       assertEquals(stoppedNanos, sw.elapsedNanos());  // value shouldn't change after stopping
       assertFalse(sw.isRunning());
       sw.start();
+      TestUtils.busyWaitNanos(10);
       long resumedNanos = sw.elapsedNanos();
-      assertTrue(resumedNanos > stoppedNanos);
+      assertThat(resumedNanos).isGreaterThan(stoppedNanos);
       System.out.println("sysTickerStopwatch: " + sw);
     }
   }

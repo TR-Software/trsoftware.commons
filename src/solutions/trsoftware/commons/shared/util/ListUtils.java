@@ -346,6 +346,27 @@ public class ListUtils {
   }
 
   /**
+   * Returns the element at the specified position in the given list.
+   * If the index is out-of-bounds, returns the specified {@code defaultValue} instead
+   * of throwing {@link IndexOutOfBoundsException}.
+   *
+   * @param index index of the element to return
+   * @param defaultValue the default value to return if the index is out-of-bounds
+   * @return the element at the specified position or the default value if the index is out-of-bounds
+   * @see Iterables#get(Iterable, int, Object)
+   */
+  public static <T> T get(@Nonnull List<T> list, int index, T defaultValue) {
+    try {
+      return list.get(index);
+    }
+    catch (IndexOutOfBoundsException e) {
+      // TODO: might have better perf if try/catch replaced with explicit index check
+      return defaultValue;
+    }
+    // TODO: unit test
+  }
+
+  /**
    * Including this method for symmetry with {@link #last(List)}.
    *
    * @return the first element of the given list

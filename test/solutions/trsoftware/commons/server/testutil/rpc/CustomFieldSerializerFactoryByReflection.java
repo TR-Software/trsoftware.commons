@@ -89,9 +89,13 @@ public class CustomFieldSerializerFactoryByReflection extends CustomFieldSeriali
       }
     }
     if (customFieldSerializer == null) {
-      customFieldSerializer = new DefaultSerializer(instanceClass);
+      customFieldSerializer = createDefaultSerializer(instanceClass);
     }
     return ensureHasCustomInstantiate(instanceClass, (CustomFieldSerializer<Object>)customFieldSerializer);
+  }
+
+  public DefaultSerializer createDefaultSerializer(Class<?> instanceClass) {
+    return new DefaultSerializer(instanceClass);
   }
 
   /**
@@ -151,31 +155,36 @@ public class CustomFieldSerializerFactoryByReflection extends CustomFieldSeriali
     synchronized (settersByClass) {
       Map<String, Method> setters = settersByClass.get(instanceClass);
       if (setters == null) {
-        setters = new HashMap<String, Method>();
-
-        // Iterate over each field and locate a suitable setter method
-        Field[] fields = instanceClass.getDeclaredFields();
-        for (Field field : fields) {
-          // Consider non-static, non-transient (or @GwtTransient) fields only
-          if (isNotStaticOrTransient(field)
-              && isNotFinal(field)) {
-            String fieldName = field.getName();
-            String setterName =
-                "set" + Character.toUpperCase(fieldName.charAt(0)) + fieldName.substring(1);
-            try {
-              Method setter = instanceClass.getMethod(setterName, field.getType());
-              setters.put(fieldName, setter);
-            } catch (NoSuchMethodException e) {
-              // Just leave this field out of the map
-            }
-          }
-        }
+        setters = getSettersInClass(instanceClass);
 
         settersByClass.put(instanceClass, setters);
       }
 
       return setters;
     }
+  }
+
+  private static Map<String, Method> getSettersInClass(Class<?> instanceClass) {
+    Map<String, Method> setters = new HashMap<>();
+
+    // Iterate over each field and locate a suitable setter method
+    Field[] fields = instanceClass.getDeclaredFields();
+    for (Field field : fields) {
+      // Consider non-static, non-transient (or @GwtTransient) fields only
+      if (isNotStaticOrTransient(field)
+          && isNotFinal(field)) {
+        String fieldName = field.getName();
+        String setterName =
+            "set" + Character.toUpperCase(fieldName.charAt(0)) + fieldName.substring(1);
+        try {
+          Method setter = instanceClass.getMethod(setterName, field.getType());
+          setters.put(fieldName, setter);
+        } catch (NoSuchMethodException e) {
+          // Just leave this field out of the map
+        }
+      }
+    }
+    return setters;
   }
 
   /**
@@ -227,6 +236,13 @@ public class CustomFieldSerializerFactoryByReflection extends CustomFieldSeriali
     @Override
     public void serializeInstance(SerializationStreamWriter streamWriter, T instance) throws SerializationException {
       delegate.serializeInstance(streamWriter, instance);
+    }
+
+    @Override
+    public String toString() {
+      return MoreObjects.toStringHelper(ForwardingCustomFieldSerializer.class)
+          .add("delegate", delegate)
+          .toString();
     }
   }
 
@@ -334,8 +350,7 @@ public class CustomFieldSerializerFactoryByReflection extends CustomFieldSeriali
   }
 
 
-
-  class DefaultSerializer extends CustomFieldSerializer<Object> {
+  public class DefaultSerializer extends CustomFieldSerializer<Object> {
     private final Class<?> instanceClass;
 
     public DefaultSerializer(Class<?> instanceClass) {

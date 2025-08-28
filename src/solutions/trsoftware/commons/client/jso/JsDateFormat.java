@@ -108,6 +108,10 @@ public class JsDateFormat {
     }
   }
 
+  /**
+   * Builder for an options object that can be passed to native {@code Date} formatting methods like
+   * {@link JsDate#toLocaleString(JavaScriptObject) toLocaleString}
+   */
   public static class Options extends JavaScriptObject {
     
     protected Options() {

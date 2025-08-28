@@ -18,9 +18,7 @@ package solutions.trsoftware.commons.shared.testutil.rpc;
 
 import com.google.common.base.MoreObjects;
 import com.google.common.base.Strings;
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.Lists;
+import com.google.common.collect.*;
 import com.google.gwt.user.client.rpc.CustomFieldSerializer;
 import com.google.gwt.user.client.rpc.SerializationException;
 import com.google.gwt.user.client.rpc.SerializationStreamWriter;
@@ -28,10 +26,13 @@ import com.google.gwt.user.client.rpc.impl.AbstractSerializationStreamWriter;
 import com.google.gwt.user.client.rpc.impl.ClientSerializationStreamWriter;
 import com.google.gwt.user.server.rpc.impl.ServerSerializationStreamWriter;
 import solutions.trsoftware.commons.shared.util.ListUtils;
+import solutions.trsoftware.commons.shared.util.MapUtils;
 import solutions.trsoftware.commons.shared.util.StringUtils;
 
 import javax.annotation.Nullable;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.NoSuchElementException;
+import java.util.StringJoiner;
 import java.util.stream.Collectors;
 
 /**
@@ -40,7 +41,8 @@ import java.util.stream.Collectors;
  * <p>
  * GWT provides 2 asymmetric serializers for its RPC protocol: {@link ClientSerializationStreamWriter}
  * and {@link ServerSerializationStreamWriter}, which use different encoding formats.
- * Our mock implementation produces strings that more-closely resemble those produced by
+ * <p>
+ * This mock implementation produces strings that more-closely resemble those produced by
  * {@link ServerSerializationStreamWriter}, but are not fully compatible with either.
  * It's designed to work both in clientside and serverside unit tests, and therefore requires
  * a {@link CustomFieldSerializer} to be {@linkplain #setClassSerializer(Class, CustomFieldSerializer)  provided}
@@ -54,12 +56,13 @@ public class MockSerializationStreamWriter extends AbstractSerializationStreamWr
 
   private final ArrayList<String> tokenList = new ArrayList<>();
   private final ArrayList<String> header = new ArrayList<>();
+
   /**
-   * We save the class instances so that {@link MockSerializationStreamReader} can
+   * We save the possibly-obfuscated type names so that {@link MockSerializationStreamReader} can
    * {@linkplain MockSerializationStreamReader#deserialize(String) deserialize} them when running in
    * a GWT clientside environment, which doesn't support {@link Class#forName(String)}.
    */
-  private final Map<String, Class<?>> classesByTypeSignature = new LinkedHashMap<>();
+  protected final BiMap<Class<?>, String> classTypeSignatures = Maps.synchronizedBiMap(HashBiMap.create());
 
   private final CustomFieldSerializerFactory serializerFactory;
 
@@ -72,7 +75,7 @@ public class MockSerializationStreamWriter extends AbstractSerializationStreamWr
   }
 
   @SuppressWarnings("unchecked")
-  public <T> MockSerializationStreamWriter setClassSerializer(Class<T> key, CustomFieldSerializer<T> serializer) {
+  public <T> MockSerializationStreamWriter setClassSerializer(Class<?> key, CustomFieldSerializer<?> serializer) {
     serializerFactory.setCustomFieldSerializer(key, (CustomFieldSerializer<Object>)serializer);
     return this;
   }
@@ -82,7 +85,7 @@ public class MockSerializationStreamWriter extends AbstractSerializationStreamWr
     super.prepareToWrite();
     tokenList.clear();
     header.clear();
-    classesByTypeSignature.clear();
+    classTypeSignatures.clear();
     header.add(String.valueOf(getFlags()));
     header.add(String.valueOf(getVersion()));
   }
@@ -99,11 +102,21 @@ public class MockSerializationStreamWriter extends AbstractSerializationStreamWr
   }
 
   @Override
-  protected String getObjectTypeSignature(Object instance) throws SerializationException {
-    Class<?> cls = getClassForSerialization(instance);
-    String typeSignature = cls.getName(); // abridged, for simplicity
-    classesByTypeSignature.put(typeSignature, cls);  // TODO(5/24/2025): get typeSig from serializationPolicy (can write a GwtCompatible wrapper for the server-only SerializationPolicy class
-    return typeSignature;  // abridged, for simplicity
+  protected final String getObjectTypeSignature(Object instance) throws SerializationException {
+    assert instance != null;
+    return MapUtils.computeIfAbsent(classTypeSignatures, getClassForSerialization(instance), this::computeTypeSignature);
+  }
+
+  /**
+   * Can override to use a {@link com.google.gwt.user.server.rpc.impl.TypeNameObfuscator} serialization policy.
+   */
+  protected String computeTypeSignature(Class<?> cls) throws SerializationException {
+    if (hasFlags(FLAG_ELIDE_TYPE_NAMES))
+      throw new UnsupportedOperationException(Strings.lenientFormat(
+          "Type name elision not supported by %s; try using a MockServerSerializationStreamWriter if possible",
+          getClass().getSimpleName()));
+    // TODO: maybe write a GWT-compatible wrapper for the server-only SerializationPolicy class
+    return cls.getName();
   }
 
   @Override
@@ -233,7 +246,7 @@ public class MockSerializationStreamWriter extends AbstractSerializationStreamWr
   }
 
   public ImmutableMap<String, Class<?>> getClassesByTypeSignature() {
-    return ImmutableMap.copyOf(classesByTypeSignature);
+    return ImmutableMap.copyOf(classTypeSignatures.inverse());
   }
 
 }

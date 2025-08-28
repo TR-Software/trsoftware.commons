@@ -207,8 +207,15 @@ public abstract class AssertUtils {
     }
   }
 
+  /**
+   * Asserts that two objects are not equal. Throws an <tt>AssertionFailedError</tt> if they are equal.
+   * <p>
+   * <i>Note:</i> this method provides a more detailed default error message than the equivalent
+   * {@link junitx.framework.Assert#assertNotEquals(Object, Object)}.
+   */
   @SuppressWarnings("SimplifiableJUnitAssertion")
   public static void assertNotEqual(Object o1, Object o2) {
+    // TODO(7/30/2025): can probably simplify the if-stmt using Objects.equals; see junitx.framework.Assert#assertNotEquals
     if (o1 == null)
       assertNotNull(o2);
     else if (o2 == null)
@@ -217,6 +224,8 @@ public abstract class AssertUtils {
       assertFalse("expected:<" + o1 + "> should not be equal to:<" + o2 + ">", o1.equals(o2));
       assertFalse("expected:<" + o2 + "> should not be equal to:<" + o1 + ">", o2.equals(o1));
     }
+    // TODO(7/30/2025): unit test, verify that this does indeed produce a more detailed default error message than junitx
+    // TODO(7/30/2025): maybe provide primitive overloads for this method, similar to junitx.framework.Assert#assertNotEquals
   }
 
   /**
@@ -666,7 +675,8 @@ public abstract class AssertUtils {
    * @see Iterables#getOnlyElement(Iterable)
    */
   public static <T> T getOnlyElement(Collection<T> collection) {
-    assertEquals(collection.toString(), 1, collection.size());
+    assertEquals(lenientFormat("Should contain exactly 1 element: %s", collection.toString()),
+        1, collection.size());
     return Iterables.getOnlyElement(collection);
   }
 

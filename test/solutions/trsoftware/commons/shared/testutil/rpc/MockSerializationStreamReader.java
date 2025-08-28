@@ -143,7 +143,7 @@ public class MockSerializationStreamReader extends AbstractSerializationStreamRe
    * @return the next token
    * @see ServerSerializationStreamReader#extract()
    */
-  private String next() throws SerializationException {
+  protected String next() throws SerializationException {
     try {
       return tokenIterator.next();
     }

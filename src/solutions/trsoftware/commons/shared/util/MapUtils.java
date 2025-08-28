@@ -669,6 +669,7 @@ public class MapUtils {
    *
    * @param <T> the type of input arguments to the merge function
    * @return a merge function which always throw {@code IllegalStateException}
+   * @see Collectors#throwingMerger()
    */
   public static <T> BinaryOperator<T> throwingMerger() {
     // NOTE: this is an exact copy of the private method java.util.stream.Collectors.throwingMerger
@@ -680,11 +681,15 @@ public class MapUtils {
   /**
    * Shortcut for {@link Collectors#toMap(Function, Function, BinaryOperator, Supplier)} using {@link #throwingMerger()}
    * as the {@code mergeFunction}.
+   * <p>
    * This allows collecting a stream to a specific {@link Map} implementation without having to specify an
    * unnecessary merge function when keys are expected to be unique.
+   * <p>
+   * If the mapped keys actually do contain duplicates (according to {@link Object#equals(Object)}),
+   * an {@code IllegalStateException} is thrown when the collection operation is performed.
    *
    * @return a {@link Collector} which collects elements into a {@code Map} using the given key/value mappers
-   * and map supplier.
+   *         and map supplier.
    */
   public static <T, K, V, M extends Map<K, V>> Collector<T, ?, M> mapCollector(
       Function<? super T, ? extends K> keyMapper,
@@ -735,6 +740,9 @@ public class MapUtils {
    * Creates a copy of the given map with the keys transformed by the given function.
    * The returned map's entries will have the same values as the original map, with the corresponding keys computed
    * by applying the given function to the original keys.
+   *
+   * @throws IllegalStateException if the mapped keys contains duplicates (according to {@link Object#equals(Object)})
+   * @see Collectors#toConcurrentMap(Function, Function, BinaryOperator)
    */
   public static <K, K2, V> LinkedHashMap<K2, V> transformKeys(Map<K, V> map, Function<K, K2> keyTransformer) {
     // TODO: maybe add overload that takes a merge function

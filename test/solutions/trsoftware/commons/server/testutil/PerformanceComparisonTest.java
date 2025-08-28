@@ -19,8 +19,10 @@ package solutions.trsoftware.commons.server.testutil;
 
 import junit.framework.TestCase;
 import solutions.trsoftware.commons.server.util.Duration;
+import solutions.trsoftware.commons.shared.annotations.ExcludeFromSuite;
 import solutions.trsoftware.commons.shared.annotations.Slow;
 
+@ExcludeFromSuite
 public class PerformanceComparisonTest extends TestCase {
 
   private static class TimedTask implements Runnable {

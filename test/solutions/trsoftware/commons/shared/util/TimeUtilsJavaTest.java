@@ -131,7 +131,8 @@ public class TimeUtilsJavaTest extends TestCase {
    * Compares {@link TimeUtils#truncateTime(long, long)} to {@link LocalDateTime#truncatedTo(TemporalUnit)}
    * and {@link Instant#truncatedTo(TemporalUnit)}.
    */
-  @GwtIncompatible
+  @GwtIncompatible("java.time")
+  @SuppressWarnings("NonJREEmulationClassesInClientCode")
   public void testTruncateTime() {
     // test various truncation methods for rounding to the closest 15-minute time frame
     Clock clock = new Clock();
@@ -161,7 +162,8 @@ public class TimeUtilsJavaTest extends TestCase {
     }
   }
 
-  @GwtIncompatible
+  @GwtIncompatible("java.time")
+  @SuppressWarnings("NonJREEmulationClassesInClientCode")
   public void testSecondsToInstant() throws Exception {
     double seconds = 1606363944.125;
     Instant result = secondsToInstant(seconds);

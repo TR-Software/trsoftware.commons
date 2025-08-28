@@ -140,7 +140,9 @@ public class TablePrinter {
   @GwtIncompatible("String.format")
   public TablePrinter addCol(String name, String format, Object value) {
     return addCol(name, String.format(format, value));
-    // TODO: maybe create a GWT-compatible version that uses a Function<Object, String> or a Renderer instead of String.format
+    /* TODO: maybe create a GWT-compatible version that uses a Function<Object, String> or a Renderer instead of String.format
+         - replace format parameter with a method to set format for the whole column (similar to setColAlignment)
+    */
   }
 
   /**

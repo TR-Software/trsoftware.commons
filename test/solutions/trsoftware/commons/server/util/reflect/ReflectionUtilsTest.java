@@ -35,7 +35,11 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.*;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
+import static java.util.Arrays.asList;
+import static java.util.Collections.*;
 import static javax.lang.model.element.Modifier.*;
 import static solutions.trsoftware.commons.server.util.reflect.ReflectionUtils.*;
 
@@ -81,7 +85,7 @@ public class ReflectionUtilsTest extends TestCase {
 
   public void testGetActualTypeArguments() throws Exception {
     assertEquals(Arrays.<Type>asList(Integer.class, String.class),
-        Arrays.asList(getGenericTypeArgumentsForInterface(FooIntString.class, IFoo.class)));
+        asList(getGenericTypeArgumentsForInterface(FooIntString.class, IFoo.class)));
     assertNull(getGenericTypeArgumentsForInterface(Foo.class, IFoo.class));
     assertNull(getGenericTypeArgumentsForInterface(FooIntString.class, Object.class));
   }
@@ -151,9 +155,9 @@ public class ReflectionUtilsTest extends TestCase {
   }
 
   public void testParseModifiers() throws Exception {
-    assertEquals(Arrays.asList(PUBLIC), parseModifiers("public"));
-    assertEquals(Arrays.asList(PUBLIC, STATIC), parseModifiers("  public\n static\n"));
-    assertEquals(Arrays.asList(DEFAULT, STRICTFP), parseModifiers("default strictfp void"));  // void is not a modifier
+    assertEquals(asList(PUBLIC), parseModifiers("public"));
+    assertEquals(asList(PUBLIC, STATIC), parseModifiers("  public\n static\n"));
+    assertEquals(asList(DEFAULT, STRICTFP), parseModifiers("default strictfp void"));  // void is not a modifier
   }
 
   private static void assertAllAssignableFrom(Class<?> arg, Set<Class<?>> expected) {
@@ -319,7 +323,7 @@ public class ReflectionUtilsTest extends TestCase {
   private List<Class> getInnerLocalAndAnonClasses() throws Exception {
     Class thisClass = getClass();
     EnclosingClassTester tester = new EnclosingClassTester();
-    return Arrays.asList(thisClass,
+    return asList(thisClass,
         EnclosingClassTester.class,
         EnclosingClassTester.Inner.class,
         EnclosingClassTester.Inner.InnerInner.class,
@@ -373,9 +377,9 @@ public class ReflectionUtilsTest extends TestCase {
 
   public void testGetAllDeclaredFields() throws Exception {
     // 1) test some edge cases
-    assertEquals(Collections.emptySet(), getAllDeclaredFields(int.class));  // primitive
-    assertEquals(Collections.emptySet(), getAllDeclaredFields(Object.class));  // Object has no fields
-    assertEquals(Collections.emptySet(), getAllDeclaredFields(Sub[].class));  // array
+    assertEquals(emptySet(), getAllDeclaredFields(int.class));  // primitive
+    assertEquals(emptySet(), getAllDeclaredFields(Object.class));  // Object has no fields
+    assertEquals(emptySet(), getAllDeclaredFields(Sub[].class));  // array
 
     // 2) test with the classes in our dummy hierarchy
     LinkedHashSet<Field> baseFields = SetUtils.newSet(
@@ -399,6 +403,20 @@ public class ReflectionUtilsTest extends TestCase {
         InnerSub.class.getDeclaredField("this$0"));
     assertEquals(SetUtils.union(allFields, innerSubFields),
         getAllDeclaredFields(InnerSub.class));
+  }
+
+  public void testFilterByType() throws Exception {
+    List<Object> objects = asList("foo", 1, "a", 2.0);
+    assertEquals(objects, toList(filterByType(objects.stream(), Serializable.class)));  // all are serializable
+    assertEquals(asList("foo", "a"), toList(filterByType(objects.stream(), String.class)));
+    assertEquals(asList(1, 2.0), toList(filterByType(objects.stream(), Number.class)));
+    assertEquals(singletonList(1), toList(filterByType(objects.stream(), Integer.class)));
+    assertEquals(singletonList(2.0), toList(filterByType(objects.stream(), Double.class)));
+    assertEquals(emptyList(), toList(filterByType(objects.stream(), Boolean.class)));
+  }
+  
+  public static <T> List<T> toList(Stream<T> stream) {
+    return stream.collect(Collectors.toList());
   }
 
   private static class Base {
@@ -426,7 +444,7 @@ public class ReflectionUtilsTest extends TestCase {
 
   public void testListPublicGetters() throws Exception {
     Class<SimpleBean> cls = SimpleBean.class;
-    List<Method> expected = Arrays.asList(
+    List<Method> expected = asList(
         cls.getMethod("getX"),
         cls.getMethod("getY"),
         cls.getMethod("getName"),

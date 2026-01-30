@@ -25,6 +25,7 @@ import com.google.common.primitives.UnsignedInts;
 import com.google.gwt.core.shared.GwtIncompatible;
 import solutions.trsoftware.commons.server.util.ServerArrayUtils;
 import solutions.trsoftware.commons.shared.BaseTestCase;
+import solutions.trsoftware.commons.shared.annotations.Slow;
 import solutions.trsoftware.commons.shared.io.TablePrinter;
 import solutions.trsoftware.commons.shared.util.text.SharedNumberFormat;
 
@@ -72,6 +73,7 @@ public class MathUtilsJavaTest extends BaseTestCase {
     }
   }
 
+  @Slow
   public void testPackUnsignedInt32() throws Exception {
     // check that the values come out in ascending order
     assertEquals(Integer.MIN_VALUE, packUnsignedInt(0));
@@ -129,6 +131,7 @@ public class MathUtilsJavaTest extends BaseTestCase {
     }
   }
 
+  @Slow
   public void testPackUnsignedInt8() throws Exception {
     assertEquals(Byte.MIN_VALUE, packUnsignedByte(0));
     assertEquals(Byte.MIN_VALUE + 1, packUnsignedByte(1));
@@ -401,6 +404,7 @@ public class MathUtilsJavaTest extends BaseTestCase {
   }
 
   @GwtIncompatible
+  @Slow
   public void testRound() throws Exception {
     // very basic test
     assertEquals(1.0, round(0.5, 0));

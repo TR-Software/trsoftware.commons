@@ -19,6 +19,7 @@ package solutions.trsoftware.commons.server.bridge.util;
 
 import junit.framework.TestCase;
 import solutions.trsoftware.commons.server.testutil.PerformanceComparison;
+import solutions.trsoftware.commons.shared.annotations.ExcludeFromSuite;
 import solutions.trsoftware.commons.shared.annotations.Slow;
 import solutions.trsoftware.commons.shared.text.Language;
 import solutions.trsoftware.commons.shared.util.MapUtils;
@@ -77,6 +78,7 @@ public class URIComponentEncoderJavaImplTest extends TestCase {
   }
 
   @Slow
+  @ExcludeFromSuite
   public void testBenchmarks() throws Exception {
     // 1) compare performance of our encoder vs calling encodeURIComponent via the JS engine
     {

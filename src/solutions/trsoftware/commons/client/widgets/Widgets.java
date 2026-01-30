@@ -27,6 +27,7 @@ import solutions.trsoftware.commons.client.styles.CellPanelStyle;
 import solutions.trsoftware.commons.client.styles.HtmlTableStyle;
 import solutions.trsoftware.commons.client.styles.WidgetStyle;
 import solutions.trsoftware.commons.shared.util.HtmlUtils;
+import solutions.trsoftware.commons.shared.util.StringUtils;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -528,7 +529,8 @@ public class Widgets {
   }
 
   public static InlineLabel inlineLabel(String txt, String styleName) {
-    return applyStyleName(new InlineLabel(txt), styleName);
+    InlineLabel label = StringUtils.isEmpty(txt) ? new InlineLabel() : new InlineLabel(txt);
+    return applyStyleName(label, styleName);
   }
   
   public static InlineLabel inlineLabel(String txt, String styleName, boolean wordWrap) {

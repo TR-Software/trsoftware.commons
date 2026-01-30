@@ -70,6 +70,12 @@ public class StringUtilsTest extends TestCase {
    */
   public static final String THREE_MONKEYS = SEE_NO_EVIL + " " + HEAR_NO_EVIL + " " + SPEAK_NO_EVIL;
 
+  /**
+   * Unicode code point that reverses the displayed direction of subsequent chars.
+   * @see #THREE_MONKEYS
+   */
+  public static final String RTL_OVERRIDE = "\u202E";
+
   public void testTemplate() throws Exception {
     assertEquals("x-y+x", template("$1-$2+$1", "x", "y"));
     assertEquals("\\w+@example.com", template("$1@$2.com", "\\w+", "example"));
@@ -1019,13 +1025,90 @@ public class StringUtilsTest extends TestCase {
     assertEquals(expected, byteArrayToHex(bytes, bytes.length));
     assertEquals(expected, byteArrayToHex(bytes, bytes.length + 1));
     // 2) positive group size
-    assertEquals("00 0f 10 7f 80 81 ff fe", byteArrayToHex(bytes, 1));
-    assertEquals("000f 107f 8081 fffe", byteArrayToHex(bytes, 2));
-    assertEquals("000f10 7f8081 fffe", byteArrayToHex(bytes, 3));
-    assertEquals("000f107f 8081fffe", byteArrayToHex(bytes, 4));
-    assertEquals("000f107f80 81fffe", byteArrayToHex(bytes, 5));
-    assertEquals("000f107f8081 fffe", byteArrayToHex(bytes, 6));
-    assertEquals("000f107f8081ff fe", byteArrayToHex(bytes, 7));
+    Map<Integer, String> expectedGroupings = MapUtils.linkedHashMap(
+        1, "00 0f 10 7f 80 81 ff fe",
+        2, "000f 107f 8081 fffe",
+        3, "000f10 7f8081 fffe",
+        4, "000f107f 8081fffe",
+        5, "000f107f80 81fffe",
+        6, "000f107f8081 fffe",
+        7, "000f107f8081ff fe"
+    );
+    expectedGroupings.forEach((groupSize, s) -> assertEquals(s, byteArrayToHex(bytes, groupSize)));
+    // 3) same thing with a different grouping separator
+    expectedGroupings.forEach((groupSize, s) -> assertEquals(s.replaceAll(" ", "--"), byteArrayToHex(bytes, groupSize, "--")));
+    // a group size greater than array size does not produce any grouping
+    for (int i = 0; i < 4; i++) {
+      int groupSize = bytes.length + i;
+      assertEquals(expected, byteArrayToHex(bytes, groupSize));
+      assertEquals(expected, byteArrayToHex(bytes, groupSize, "--"));
+    }
+
+  }
+
+  public void testByteArrayToBinary() throws Exception {
+    byte[] bytes = new byte[]{0, 15, 16, 127, -128, -127, -1, -2};
+    String expected = "0000000000001111000100000111111110000000100000011111111111111110";
+    assertEquals(expected, byteArrayToBinary(bytes));
+    // overloaded method with digit grouping (space as grouping separator):
+    // 1) groupingSize <= 0: should be the same as no grouping
+    assertEquals(expected, byteArrayToBinary(bytes, 0));
+    assertEquals(expected, byteArrayToBinary(bytes, -1));
+    // 2) positive group size
+    Map<Integer, String> expectedGroupings = MapUtils.linkedHashMap(
+        1, "0 0 0 0 0 0 0 0 0 0 0 0 1 1 1 1 0 0 0 1 0 0 0 0 0 1 1 1 1 1 1 1 1 0 0 0 0 0 0 0 1 0 0 0 0 0 0 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 0",
+        2, "00 00 00 00 00 00 11 11 00 01 00 00 01 11 11 11 10 00 00 00 10 00 00 01 11 11 11 11 11 11 11 10",
+        3, "000 000 000 000 111 100 010 000 011 111 111 000 000 010 000 001 111 111 111 111 111 0",
+        4, "0000 0000 0000 1111 0001 0000 0111 1111 1000 0000 1000 0001 1111 1111 1111 1110",
+        5, "00000 00000 00111 10001 00000 11111 11100 00000 10000 00111 11111 11111 1110",
+        6, "000000 000000 111100 010000 011111 111000 000010 000001 111111 111111 1110",
+        7, "0000000 0000011 1100010 0000111 1111100 0000010 0000011 1111111 1111111 0",
+        8, "00000000 00001111 00010000 01111111 10000000 10000001 11111111 11111110",
+        16, "0000000000001111 0001000001111111 1000000010000001 1111111111111110"
+    );
+    expectedGroupings.forEach((groupSize, s) -> assertEquals(s, byteArrayToBinary(bytes, groupSize)));
+    // 3) same thing with a different grouping separator
+    expectedGroupings.forEach((groupSize, s) -> assertEquals(s.replaceAll(" ", "--"), byteArrayToBinary(bytes, groupSize, "--")));
+    // a group size greater than array size does not produce any grouping
+    for (int i = 0; i < 4; i++) {
+      int groupSize = 64 + i;
+      assertEquals(expected, byteArrayToBinary(bytes, groupSize));
+      assertEquals(expected, byteArrayToBinary(bytes, groupSize, "--"));
+    }
+  }
+
+  public void testLongToHex() throws Exception {
+    // verify that the string is left-padded with 0s, up to 16 chars
+    assertEquals("f7f6f5f473727170",
+        longToHex(0xf7f6f5f473727170L));
+    assertEquals("07f6f5f473727170",
+        longToHex(0x07f6f5f473727170L));
+    assertEquals("00f6f5f473727170",
+        longToHex(0x00f6f5f473727170L));
+    assertEquals("0006f5f473727170",
+        longToHex(0x0006f5f473727170L));
+    assertEquals("0000000000007170",
+        longToHex(0x0000000000007170L));
+    assertEquals("0000000000000070",
+        longToHex(0x0000000000000070L));
+    assertEquals("0000000000000000",
+        longToHex(0x0000000000000000L));
+    assertEquals("0000000000000001",
+        longToHex(0x0000000000000001L));
+  }
+
+  public void testLongToBinary() throws Exception {
+    // verify that the string is left-padded with 0s, up to 64 chars
+    assertEquals("1111011111110110111101011111010001110011011100100111000101110000",
+        longToBinary(0xf7f6f5f473727170L));
+    assertEquals("0000011111110110111101011111010001110011011100100111000101110000",
+        longToBinary(0x07f6f5f473727170L));
+    assertEquals("0000000011110110111101011111010001110011011100100111000101110000",
+        longToBinary(0x00f6f5f473727170L));
+    assertEquals("0000000000000110111101011111010001110011011100100111000101110000",
+        longToBinary(0x0006f5f473727170L));
+    assertEquals("0000000000000000111101011111010001110011011100100111000101110000",
+        longToBinary(0x0000f5f473727170L));
   }
 
 }

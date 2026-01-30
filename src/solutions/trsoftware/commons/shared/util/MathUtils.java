@@ -300,8 +300,8 @@ public class MathUtils {
    * if two multiples are equally close, rounding is done away from 0
    * (so, for example, {@code round(0.5, 0)} is 1.0 and {@code round(-0.5, 0)} is -1.0).
    * <p>
-   * <b>Warning</b>: The rounding behavior of this method can be surprising due to the fact that most decimal fractions can't be
-   * represented exactly with floating point values.
+   * <b>Warning</b>: The rounding behavior of this method can be surprising due to the fact that most decimal fractions
+   * can't be represented exactly with floating point values.
    * For example, {@code round(2.675, 2)} gives {@code 2.67} instead of the expected {@code 2.68}.
    * <p>
    * <em>Note:</em>
@@ -476,20 +476,22 @@ public class MathUtils {
   }
 
   /**
-   * Computes the base 2 logarithm of the given value using only bitwise operations.
+   * Computes the base 2 logarithm of the given integer using only bitwise operations.
    * <p>
    * Our benchmarking showed this method to perform ~33% faster than the equivalent computation using {@link Math#log(double)}
-   * (on Java8, Intel i7, Windows 8).
+   * (i.e. {@code Math.log(n)/Math.log(2)}), tested on Java8, Intel i7, Windows 8.
    *
-   * @return <code>log<sub>2</sub>(value)</code>
+   * @param n a positive integer
+   * @return <code>log<sub>2</sub>(n)</code>
+   * @throws IllegalArgumentException if <code>n &le; 0</code>
    * @see #log(double, double)
    */
-  public static int log2(int value) {
+  public static int log2(int n) {
     // see MathUtilsBenchmark
-    Preconditions.checkArgument(value > 0, "Arg (%s) must be positive", value);
-    // just count the number of right-shifts it takes to reach 0 (see https://stackoverflow.com/a/18139978)
+    Preconditions.checkArgument(n > 0, "Arg (%s) must be positive", n);
+    // count the number of right-shifts needed to reach 0 (see https://stackoverflow.com/a/18139978)
     int i = 0;
-    while ((value >>= 1) != 0)
+    while ((n >>= 1) != 0)
       i++;
     return i;
   }

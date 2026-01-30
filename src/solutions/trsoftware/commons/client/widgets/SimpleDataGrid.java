@@ -297,7 +297,7 @@ public class SimpleDataGrid<K, T> extends Composite {
       for (Column<T, ?, ?> column : columns) {
         column.initRowCell(item, getCellElement(column));
       }
-      // TODO: init the row element, e.g. tblActivePlayers.getRowFormatter().getElement(row).setAttribute("data-snake", ""+snake.getId());
+      // init the row element, if a rowListener was provided (e.g. to add particular styles or attributes to the row element based on the item being displayed in this row)
       if (rowListener != null)
         rowListener.rowAdded(item, getRowElement(), rowIndex);
       update(item);

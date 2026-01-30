@@ -59,8 +59,7 @@ public class SortableCellTable<T> extends BaseCellTable<T> {
    */
   protected <C extends Column<T, V>, V> C addSortableColumn(String name, C column, Comparator<V> comparator) {
     addColumn(name, column);
-    column.setSortable(true);
-    sortEventHandler.setComparator(column, Comparator.comparing(column::getValue, comparator));
+    setSortable(column, sortEventHandler, comparator);
     return column;
   }
 
@@ -72,9 +71,20 @@ public class SortableCellTable<T> extends BaseCellTable<T> {
    */
   protected <C extends Column<T, V>, V extends Comparable<? super V>> C addSortableColumn(String name, C column) {
     addColumn(name, column);
+    setSortable(column, this.sortEventHandler);
+    return column;
+  }
+
+  public static <T, C extends Column<T, V>, V> void setSortable(C column, ListHandler<T> sortEventHandler, Comparator<V> comparator) {
+    // TODO(9/12/2025): experimental util method
+    column.setSortable(true);
+    sortEventHandler.setComparator(column, Comparator.comparing(column::getValue, comparator));
+  }
+
+  public static <T, C extends Column<T, V>, V extends Comparable<? super V>> void setSortable(C column, ListHandler<T> sortEventHandler) {
+    // TODO(9/12/2025): experimental util method
     column.setSortable(true);
     sortEventHandler.setComparator(column, Comparator.comparing(column::getValue));
-    return column;
   }
 
   /**

@@ -16,102 +16,48 @@
 
 package solutions.trsoftware.commons.server.util.crypto;
 
-import solutions.trsoftware.commons.server.util.ServerStringUtils;
+import solutions.trsoftware.commons.server.util.crypto.aes.*;
 
 import javax.crypto.Cipher;
-import javax.crypto.KeyGenerator;
-import javax.crypto.SecretKey;
-import javax.crypto.spec.IvParameterSpec;
-import javax.crypto.spec.SecretKeySpec;
-import java.security.GeneralSecurityException;
-import java.util.Arrays;
+
+import static solutions.trsoftware.commons.server.util.crypto.aes.AESConstants.Mode;
 
 /**
- * Uses the Advanced Encryption Standard (AES) algorithm with block size 16 (128-bit encryption)
- * in CBC mode with PKC5Padding to perform crypto on strings.
+ * Uses the Advanced Encryption Standard (AES) algorithm with block size {@value AESConstants#BLOCK_SIZE} (128-bit encryption)
+ * in {@link AESConstants.Mode#CBC CBC} mode with {@code PKC5Padding} to encrypt/decrypt strings or byte arrays.
+ * <p>
+ * <i>Note:</i> this class is immutable and thread-safe, which is achieved by creating a new {@link Cipher} instance for every
+ * operation, making it suboptimal for reuse, since {@link Cipher#getInstance(String)} is a costly operation.
+ * <p>
+ * The recommended alternatives are the new {@link SynchronizedAESCipher} and {@link ConcurrentAESCipher} classes,
+ * which can be used as a global singletons shared by multiple threads, and allow different AES {@linkplain AESCipherMode modes},
+ * such as {@link AESCipherMode_GCM GCM}.
  *
- * Reference docs:
-   http://www.javamex.com/tutorials/cryptography/symmetric.shtml
- *
+ * @see solutions.trsoftware.commons.server.util.crypto.aes.AESCipher
+ * @see ConcurrentAESCipher
+ * @see SynchronizedAESCipher
  * @author Alex, 5/1/2015
+ * @deprecated Use one of the newer {@link solutions.trsoftware.commons.server.util.crypto.aes.AESCipher AESCipher}
+ *   implementations instead, all of which provide better performance than this original class.
+ *   The recommended replacement is {@link ConcurrentAESCipher}.
  */
-public class AESCipher {
+public class AESCipher extends solutions.trsoftware.commons.server.util.crypto.aes.AESCipher  {
 
-  private static final String ALGORITHM = "AES";
-  public static final String TRANSFORMATION_SPEC = ALGORITHM + "/CBC/PKCS5Padding";
-
-  private final SecretKeySpec secretKeySpec;
+  // TODO(12/15/2025): maybe extend SynchronizedAESCipher, to make this deprecated class at least somewhat useful (without changing the OG functionality)
 
   /**
-   * @param key A 16-byte secret key.
+   * @param key a 16, 24, or 32-byte secret key;
+   * According Google AI, key size has the following implications for the AES/CBC algorithm:
+   *  <ul>
+   *    <li>128-bit key (16 bytes): Uses 10 rounds.
+   *    <li>192-bit key (24 bytes): Uses 12 rounds.
+   *    <li>256-bit key (32 bytes): Uses 14 rounds.
+   *  </ul>
+   * @throws NullPointerException if the argument is null
+   * @throws IllegalArgumentException if the argument does not contain the required number of bytes
    */
   public AESCipher(byte[] key) {
-    secretKeySpec = new SecretKeySpec(key, ALGORITHM);
+    super(key, Mode.CBC);
   }
-
-  /**
-   * @param plaintext binary data to be encrypted.
-   * @return The result of encrypting the given plaintext: the first 16 bytes will contain the initialization vector (IV),
-   * which will be chosen at random, and the rest will contain the ciphertext.
-   */
-  public byte[] encrypt(byte[] plaintext) throws GeneralSecurityException {
-    Cipher cipher = Cipher.getInstance(TRANSFORMATION_SPEC);
-    cipher.init(Cipher.ENCRYPT_MODE, secretKeySpec);
-    byte[] ciphertext = cipher.doFinal(plaintext);
-    byte[] iv = cipher.getIV();
-    byte[] ret = new byte[ciphertext.length + iv.length];
-    System.arraycopy(iv, 0, ret, 0, iv.length);
-    System.arraycopy(ciphertext, 0, ret, iv.length, ciphertext.length);
-    return ret;
-  }
-
-  /**
-   * @param ciphertext: A result of invoking {@link #encrypt(byte[])}:
-   * the first 16 bytes contain the initialization vector (IV), and the rest contain the ciphertext.
-   * @return The decrypted data.
-   */
-  public byte[] decrypt(byte[] ciphertext) throws GeneralSecurityException {
-    Cipher cipher = Cipher.getInstance(TRANSFORMATION_SPEC);
-    int blockSize = cipher.getBlockSize();
-    cipher.init(Cipher.DECRYPT_MODE, secretKeySpec, new IvParameterSpec(ciphertext, 0, blockSize));
-    return cipher.doFinal(ciphertext, blockSize, ciphertext.length - blockSize);
-  }
-
-  /**
-   * @param plaintext this string will be converted to UTF-8 bytes prior to encoding.
-   * @return The result of encrypting the given plaintext
-   */
-  public byte[] encryptStringUtf8(String plaintext) throws GeneralSecurityException {
-    return encrypt(ServerStringUtils.stringToBytesUtf8(plaintext));
-  }
-
-  /**
-   * @param ciphertext: A result of invoking {@link #encryptStringUtf8(String)}:
-   * the first 16 bytes contain the initialization vector (IV), and the rest contain the ciphertext.
-   * @return The decrypted string.
-   */
-  public String decryptStringUtf8(byte[] ciphertext) throws GeneralSecurityException {
-    return ServerStringUtils.bytesToStringUtf8(decrypt(ciphertext));
-  }
-
-
-  /**
-   * @return a random key that can be used with this algorithm
-   */
-  public static byte[] randomKey() throws GeneralSecurityException {
-    KeyGenerator keyGen = KeyGenerator.getInstance(ALGORITHM);
-    SecretKey secretKey = keyGen.generateKey();
-    return secretKey.getEncoded();
-  }
-
-  /** Generates a random key */
-  public static void main(String[] args) throws GeneralSecurityException {
-    byte[] key = randomKey();
-    System.out.println("Random key:");
-    System.out.println("Bytes: " + Arrays.toString(key));
-    System.out.println("urlSafeBase64 encoding: " + ServerStringUtils.urlSafeBase64Encode(key));
-
-  }
-
 
 }

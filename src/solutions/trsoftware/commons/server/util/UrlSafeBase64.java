@@ -24,16 +24,14 @@ package solutions.trsoftware.commons.server.util;
  *   <li>padding character is '*' instead of '='</li>
  * </ul>
  *
- * <p>
- * This class is still useful despite the fact that the JDK (1.8+) now provides its own {@link java.util.Base64 Base64}
- * implementation, because {@link java.util.Base64#getUrlEncoder() Base64.getUrlEncoder()} still uses {@code '='} as the
- * padding character, which is actually not URL-safe.
- * </p>
- *
  * NOTE: this code was borrowed from <a href="https://commons.apache.org/proper/commons-codec/">Apache Commons Codec</a>.
  *
  * @see <a href="http://www.ietf.org/rfc/rfc2045.txt">RFC 2045</a>
  * @see com.google.common.io.BaseEncoding#base64Url()
+ *
+ * @deprecated With Java 8+ can just use
+ *   {@link java.util.Base64#getUrlEncoder() Base64.getUrlEncoder().withoutPadding()}
+ *   (padding isn't needed for decoding, and omitting it makes the output fully url-safe)
  */
 public class UrlSafeBase64 {
 

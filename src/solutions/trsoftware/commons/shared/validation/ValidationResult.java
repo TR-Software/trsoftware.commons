@@ -79,7 +79,9 @@ public class ValidationResult implements Serializable {
   public String toString() {
     final StringBuilder sb = new StringBuilder("ValidationResult{");
     sb.append("valid=").append(valid);
-    sb.append(", errorMessage=").append(StringUtils.valueToString(errorMessage));
+    if (!valid) {
+      sb.append(", errorMessage=").append(StringUtils.valueToString(errorMessage));
+    }
     sb.append('}');
     return sb.toString();
   }

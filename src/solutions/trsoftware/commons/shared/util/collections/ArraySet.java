@@ -6,11 +6,16 @@ import java.util.*;
 import java.util.function.Consumer;
 
 /**
+ * A simple {@link Set} implementation using a backing array (similar to an {@link ArrayList})
+ * This offers the tradeoff of using only {@code Θ(n)} memory at the expense of {@code O(n)} lookups and modifications.
+ * <p>
+ * Note: this class is recommended only for storing a small number of elements, due to the slow {@code O(n)} lookup speed.
+ *
  * @author Alex
  * @since 4/24/2025
  */
 public class ArraySet<E> extends AbstractSet<E> {
-  // TODO: experimental Set implementation using a simple array (similar to ArrayList)
+  // Note: most of this code was borrowed from ArrayList
 
   /**
    * Default initial capacity.
@@ -94,7 +99,6 @@ public class ArraySet<E> extends AbstractSet<E> {
       elementData = EMPTY_ELEMENTDATA;
     }
   }
-
 
   @Override
   public boolean contains(Object o) {

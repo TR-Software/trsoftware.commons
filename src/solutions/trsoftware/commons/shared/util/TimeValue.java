@@ -60,7 +60,7 @@ public class TimeValue extends Number implements Comparable<TimeValue> {
   }
 
   public TimeValue to(TimeUnit newUnit) {
-    return new TimeValue(unit.to(newUnit, value), newUnit);
+    return newUnit == this.unit ? this : new TimeValue(unit.to(newUnit, value), newUnit);
   }
 
   public double toMillis() {

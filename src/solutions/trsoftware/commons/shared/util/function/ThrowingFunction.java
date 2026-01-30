@@ -32,24 +32,38 @@ import java.util.function.Function;
  *
  * @see MapUtils#computeIfAbsent(Map, Object, ThrowingFunction)
  * @see ThrowingRunnable
+ * @see ThrowingSupplier
  * @author Alex
  * @since 1/12/2023
  */
 @FunctionalInterface
 public interface ThrowingFunction<T, R, E extends Exception> extends Function<T, R> {
 
-  R applyUnsafe(T t) throws E;
+  // TODO(11/13/2025): maybe rename to "applyOrThrow", "doApply", or "applyImpl"
+  R applyThrowing(T t) throws E;
 
   @Override
   default R apply(T t) {
     try {
-      return applyUnsafe(t);
+      return applyThrowing(t);
     }
     catch (Exception e) {
       throw (e instanceof RuntimeException)
           ? (RuntimeException)e
           : new WrappedException(e);
     }
+  }
+
+  /**
+   * Facilitates passing a method reference of a method that declares a checked exception to an API that expects a normal
+   * {@link Function}.
+   *
+   * @param function the function or method reference that throws a checked exception
+   * @return the throwing function cast to a normal function, such that any checked exceptions thrown by the given function
+   *   will be rethrown as unchecked {@link WrappedException}
+   */
+  static <T, R, E extends Exception> Function<T, R> unchecked(ThrowingFunction<T, R, E> function) {
+    return function;
   }
 
   class WrappedException extends RuntimeException {
@@ -63,17 +77,5 @@ public interface ThrowingFunction<T, R, E extends Exception> extends Function<T,
     public WrappedException(Throwable cause) {
       super(cause);
     }
-  }
-
-  /**
-   * Facilitates using a reference to a method that throws a checked exception with an API that expects a normal
-   * {@link Function}.
-   *
-   * @param function the function or method reference that throws a checked exception
-   * @return the throwing function cast to a normal function, such that any checked exceptions thrown by the given function
-   *   will be rethrown as unchecked {@link WrappedException} exceptions
-   */
-  static <T, R, E extends Exception> Function<T, R> unchecked(ThrowingFunction<T, R, E> function) {
-    return function;
   }
 }

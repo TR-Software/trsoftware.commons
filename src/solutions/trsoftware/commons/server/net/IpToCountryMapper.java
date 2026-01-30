@@ -115,7 +115,7 @@ public class IpToCountryMapper {
    * the ZIP file
    */
   private static BufferedReader readDataFile() throws IOException {
-    System.out.println("Reading IP address ranges from " + DATA_RESOURCE);
+    System.out.println("Reading IP address ranges from " + DATA_RESOURCE);  // TODO(1/19/2026): replace sout w/ Logger.config()
     return new BufferedReader(ServerIOUtils.readUTF8(new GZIPInputStream(DATA_RESOURCE.getInputStream())));
   }
 

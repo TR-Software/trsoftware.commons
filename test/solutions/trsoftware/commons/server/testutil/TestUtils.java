@@ -21,11 +21,19 @@ import com.google.common.testing.GcFinalization;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import junit.framework.TestCase;
+import org.apache.bcel.classfile.JavaClass;
+import solutions.trsoftware.commons.server.io.ResourceLocator;
+import solutions.trsoftware.commons.server.util.reflect.ReflectionUtils;
 import solutions.trsoftware.commons.shared.util.MemoryUnit;
+import solutions.trsoftware.commons.shared.util.StringUtils;
 import solutions.trsoftware.commons.shared.util.callables.Function0;
+import solutions.trsoftware.tools.util.BytecodeParser;
 
+import java.io.IOException;
 import java.io.PrintStream;
-import java.util.Collection;
+import java.nio.file.Path;
+import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * Jul 29, 2009
@@ -166,7 +174,7 @@ public class TestUtils extends solutions.trsoftware.commons.shared.testutil.Test
    * Prints the given collection to {@link System#out} such that every element is on a new line.
    * Elements are printed using their default {@link Object#toString()} representation.
    */
-  public static void printCollection(String name, Collection collection) {
+  public static void printCollection(String name, Collection<?> collection) {
     PrintStream out = System.out;
     if (name != null)
       out.print(name + " = ");
@@ -184,5 +192,34 @@ public class TestUtils extends solutions.trsoftware.commons.shared.testutil.Test
   public static String toPrettyJson(Object o) {
     Gson gson = new GsonBuilder().setPrettyPrinting().create();
     return gson.toJson(o);
+  }
+
+  /**
+   * Finds all subclasses of {@code baseClass} that are in the same package as {@code baseClass}
+   */
+  public static <T, C extends T> List<Class<C>> findSubClassesOf(Class<T> baseClass) throws IOException, ClassNotFoundException {
+    String baseClassName = baseClass.getName();
+    ResourceLocator baseClassResource = ReflectionUtils.getClassFile(baseClass);
+    assert baseClassResource != null;
+    // TODO: extract getPackagePath method to ReflectionUtils; can use it in TestSuiteBuilderTest.getTestSuiteBuilder()
+    Path packageDir = baseClassResource.toPath().getParent();
+    // parse all the classes in package dir
+    List<JavaClass> javaClasses = BytecodeParser.parseClassFiles(packageDir).collect(Collectors.toList());
+    List<Class<C>> classesDerivedFromBase = new ArrayList<>();
+//    printSectionHeader(String.format("Classes in %s:", packageDir));
+    for (JavaClass javaClass : javaClasses) {
+      String className = javaClass.getClassName();
+      JavaClass[] superClasses = javaClass.getSuperClasses();
+      Set<String> superClassNames = Arrays.stream(superClasses).map(JavaClass::getClassName).collect(Collectors.toSet());
+//      System.out.printf("%s:%n  extends:%s%n", className, superClassNames);
+      if (superClassNames.contains(baseClassName)) {
+        //noinspection unchecked
+        classesDerivedFromBase.add((Class<C>)Class.forName(className));
+      }
+    }
+    printSectionHeader(String.format("Classes derived from %s:", baseClassName));
+    classesDerivedFromBase.stream().map(Class::getSimpleName).map(StringUtils.indenting(2))
+        .forEach(System.out::println);
+    return classesDerivedFromBase;
   }
 }

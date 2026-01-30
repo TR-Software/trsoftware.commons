@@ -22,13 +22,15 @@ import solutions.trsoftware.commons.bridge.BridgeTypeFactory;
  * Provides string escaping logic compatible with the JavaScript
  * {@code encodeURIComponent} and {@code decodeURIComponent} functions.
  * <p>
- * This class should always be used instead of {@link java.net.URLEncoder} when the encoded value needs to
+ * This class should be used instead of {@link java.net.URLEncoder} when the encoded value needs to
  * be compatible with {@code decodeURIComponent} (e.g. a cookie value that might be read client-side
  * with {@link com.google.gwt.user.client.Cookies}).
  * <p>
- * <b>Example:</b>  {@code URLEncoder.encode("{a: 1, b: 2}", "UTF-8")}
- * returns {@code "%7Ba%3A+1%2C+b%3A+2%7D"} (because it encodes spaces as {@code '+'}), but
- * {@code decodeURIComponent("%7Ba%3A+1%2C+b%3A+2%7D")} returns {@code "{a:+1,+b:+2}"}, which is invalid JSON!
+ * One major difference is that {@link java.net.URLEncoder} replaces spaces with {@code '+'} whereas
+ * {@code decodeURIComponent} expects spaces to be percent-encoded (as {@code "%20"}).
+ * <p>
+ * For example, invoking {@code decodeURIComponent} on the result of {@code URLEncoder.encode("{a: 1, b: 2}", "UTF-8")}
+ * &rarr; {@code "%7Ba%3A+1%2C+b%3A+2%7D"}, would produce {@code "{a:+1,+b:+2}"}, which is not valid JSON.
  *
  * @see java.net.URLEncoder
  * @see java.net.URLDecoder

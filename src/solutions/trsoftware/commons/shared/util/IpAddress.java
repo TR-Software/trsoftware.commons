@@ -58,8 +58,8 @@ public class IpAddress implements Serializable, RichComparable<IpAddress> {
   /**
    * @see IpAddressUtils#ip4StringToLong(String)
    */
-  public IpAddress(long ipStr) {
-    this(ip4LongToInt(ipStr));
+  public IpAddress(long ipLong) {
+    this(ip4LongToInt(ipLong));
   }
 
   // default constructor for serialization

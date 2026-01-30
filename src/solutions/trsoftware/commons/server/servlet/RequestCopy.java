@@ -16,6 +16,7 @@
 
 package solutions.trsoftware.commons.server.servlet;
 
+import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Multimap;
 
 import javax.servlet.*;
@@ -26,7 +27,7 @@ import java.security.Principal;
 import java.util.*;
 
 /**
- * Saves the parts of the underlying {@link HttpServletRequest} to make them available after the response has been committed
+ * Saves parts of the underlying {@link HttpServletRequest} to make them available after the response has been committed
  * (e.g. from an asynchronous thread). It's probably not a good idea to refer to the original request object outside of
  * the request processing sequence because Tomcat will reuse the underlying object after the response has been committed.
  *
@@ -44,7 +45,7 @@ public class RequestCopy implements HttpServletRequest {
   private final Map<String, String[]> params;
   private final String method;
   private final String requestURI;
-  private final StringBuffer requestURL;
+  private final String requestURL;
   private final HttpHeaders headers;
 
   public RequestCopy(HttpServletRequest originalRequest) {
@@ -52,9 +53,9 @@ public class RequestCopy implements HttpServletRequest {
     remoteAddr = originalRequest.getRemoteAddr();
     queryString = originalRequest.getQueryString();
     locale = originalRequest.getLocale();
-    params = originalRequest.getParameterMap();
+    params = ImmutableMap.copyOf(originalRequest.getParameterMap());  // TODO(8/23/2025): maybe also defensive-copy the String[] values?
     method = originalRequest.getMethod();
-    requestURL = new StringBuffer(originalRequest.getRequestURL());  // defensive copy, since the original buffer likely to get reused
+    requestURL = originalRequest.getRequestURL().toString();  // defensive copy, since the original buffer likely to get reused
     requestURI = originalRequest.getRequestURI();
     headers = new HttpHeaders(originalRequest);
   }
@@ -113,7 +114,7 @@ public class RequestCopy implements HttpServletRequest {
 
   @Override
   public String getParameter(String s) {
-    return params.get(s)[0];
+    return params.containsKey(s) ? params.get(s)[0] : null;
   }
 
   @Override
@@ -347,7 +348,7 @@ public class RequestCopy implements HttpServletRequest {
 
   @Override
   public StringBuffer getRequestURL() {
-    return requestURL;
+    return new StringBuffer(requestURL);
   }
 
   @Override

@@ -141,8 +141,9 @@ in a CssResource.
 }
 
 .gwt-TabPanel {
-  border: 2px solid black;
-  border-radius: 5px;
+  /* TODO(9/12/2025): why did this have the border styles? */
+  /*border: 2px solid black;
+  border-radius: 5px;*/
 }
 
 .gwt-TabPanel .gwt-TabPanelBottom {

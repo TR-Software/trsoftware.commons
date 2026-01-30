@@ -78,6 +78,7 @@ public class InvocationRecorder implements Iterable<InvocationRecord> {
     Preconditions.checkNotNull(methodName, "methodName");
     // TODO: can extract this to a util class (e.g. "InvocationRecorder")
     invocationRecords.put(methodName, new InvocationRecord(timestamp, target, methodName, args));
+    // TODO(1/29/2026) maybe also record the current stack trace and return value?
   }
 
   /**

@@ -17,15 +17,18 @@
 
 package solutions.trsoftware.commons.server.util.crypto;
 
-import junit.framework.TestCase;
-
-import java.util.Arrays;
-import java.util.Random;
+import solutions.trsoftware.commons.shared.BaseTestCase;
+import solutions.trsoftware.commons.shared.util.RandomUtils;
 
 import static solutions.trsoftware.commons.server.util.ServerStringUtils.urlSafeBase64Decode;
 import static solutions.trsoftware.commons.server.util.ServerStringUtils.urlSafeBase64Encode;
+import static solutions.trsoftware.commons.shared.testutil.AssertUtils.assertArraysEqual;
 
-public class AESCipherTest extends TestCase {
+/**
+ * @deprecated The original {@link AESCipher} class is now deprecated; the new implementations
+ * are tested in {@link solutions.trsoftware.commons.server.util.crypto.aes.AESCipherTest}
+ */
+public class AESCipherTest extends BaseTestCase {
 
   private AESCipher cipher;
   private final String plaintextString = "Foo bar baz, пиздец, Foo bar baz";
@@ -38,10 +41,9 @@ public class AESCipherTest extends TestCase {
   }
 
   public void testEncrypt() throws Exception {
-    byte[] plaintext = new byte[100];
-    new Random().nextBytes(plaintext);
+    byte[] plaintext = RandomUtils.randBytes(100);
     byte[] result = cipher.encrypt(plaintext);
-    assertTrue(Arrays.equals(plaintext, cipher.decrypt(result)));
+    assertArraysEqual(plaintext, cipher.decrypt(result));
   }
 
   public void testEncryptStringUtf8() throws Exception {

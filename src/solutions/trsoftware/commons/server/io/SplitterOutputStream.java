@@ -48,16 +48,15 @@ public class SplitterOutputStream extends OutputStream {
   }
 
   /**
-   * Closes the underlying streams, but never closes {@link System#out} or {@link System#err},
-   * (to avoid a debugging nightmare).
+   * Closes all the underlying streams (except {@link System#out} or {@link System#err}, which should never be closed).
    */
   @Override
   public void close() throws IOException {
-    for (OutputStream destinationStream : destinationStreams) {
-      if (destinationStream != System.out && destinationStream != System.err)
-        destinationStream.close();
+    for (OutputStream dest : destinationStreams) {
+      if (dest != System.out && dest != System.err)
+        dest.close();
       else
-        destinationStream.flush();
+        dest.flush();  // for stdout/stderr: just flush them without closing (which would be dangerous)
     }
   }
 
@@ -87,16 +86,13 @@ public class SplitterOutputStream extends OutputStream {
    * Factory method that constructs an instance that behaves like the Unix {@code tee} utility,
    * except allows writing to any output stream, not just a file.
    *
-   * @return an output stream that writes both to stdout and the given output stream.
+   * @return an output stream that writes to both {@link System#out} and the given output stream.
    * @see <a href="https://en.wikipedia.org/wiki/Tee_(command)">tee (shell command)</a>
    */
   @Nonnull
   public static PrintStream teeTo(OutputStream outStream) {
     return new PrintStream(
-        new SplitterOutputStream(
-            new NonCloseableOutputStream(System.out), // wrap stdout to prevent accidentally closing it
-            outStream
-        ),
+        new SplitterOutputStream(System.out, outStream),
         true);
   }
 }

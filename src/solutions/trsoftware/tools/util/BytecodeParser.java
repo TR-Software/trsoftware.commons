@@ -22,6 +22,12 @@ import org.apache.bcel.classfile.JavaClass;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.stream.Stream;
+
+import static solutions.trsoftware.commons.shared.util.function.ThrowingFunction.WrappedException;
+import static solutions.trsoftware.commons.shared.util.function.ThrowingFunction.unchecked;
 
 /**
  * A simple utility for extracting info from {@code .class} files,
@@ -34,6 +40,8 @@ import java.io.IOException;
  * @since 4/18/2018
  */
 public class BytecodeParser {
+  
+  // TODO(12/4/2025): upgrade BCEL dependency to latest (6.11.0); currently using 6.10.0 (see https://commons.apache.org/proper/commons-bcel/changes.html#a6.11.0)
 
   /**
    * Extracts the fully-qualified name ("binary name") of the class represented by the given bytecode file.
@@ -63,4 +71,19 @@ public class BytecodeParser {
     return new ClassParser(filePath).parse();
   }
 
+  /**
+   * Uses BCEL to parse all classes in the given directory the given {@code .class} file.
+   *
+   * @param packageDir compiler output directory in which the class files are located
+   * @return a stream of the parsed classes
+   *   (Note: iterating over this stream could throw a {@link WrappedException} if the next element can't be parsed as {@link JavaClass})
+   *
+   * @see ClassParser#parse()
+   * @throws IOException any exception encountered while reading the data
+   */
+  public static Stream<JavaClass> parseClassFiles(Path packageDir) throws IOException {
+    return Files.list(packageDir).map(Path::toString)
+        .filter(path -> path.endsWith(".class"))
+        .map(unchecked(BytecodeParser::parseClassFile));
+  }
 }

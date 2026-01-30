@@ -22,6 +22,9 @@
   <inherits name="com.google.common.collect.Collect"/>
   <inherits name="com.google.common.net.Net"/>
   <inherits name="com.google.common.util.concurrent.Concurrent"/>
+  <!-- common.io module allows using Guava's com.google.common.io.BaseEncoding: -->
+  <inherits name="com.google.common.io.Io"/>
+
   <!-- Enable stack traces with Java line numbers in production: -->
   <inherits name="solutions.trsoftware.commons.StackTraceDeobfuscator"/>
 
@@ -33,7 +36,7 @@
 
   <!-- Enable support for bridge types (see BridgeTypeFactory) -->
   <super-source path="translatable" />
-  <!-- The source path doesn't default to "client" in the presence of the "bridge" package -->
+  <!-- The source path doesn't default to "client" with the presence of the "translatable" package -->
   <source path="client"/>
   <!--TODO: move all the non-client (i.e. non UI) code from "client" to "shared" (and maybe exclude the "client" package from server-side build?) -->
   <source path="shared"/>

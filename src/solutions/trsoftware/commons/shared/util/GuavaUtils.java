@@ -43,9 +43,8 @@ public class GuavaUtils {
    *
    * @return the current (existing or computed) value associated with
    *         the specified {@code (rowKey, columnKey)} pair, or {@code null} if the computed value is {@code null}
-   * @throws NullPointerException if the specified keys are null and
-   *         the table does not support null keys, or the mappingFunction
-   *         is null
+   * @throws NullPointerException if the specified keys are null and the table does not support null keys,
+   *         or the mappingFunction is null
    * @throws IllegalArgumentException if the specified keys do not satisfy some constraint
    *         imposed by the the table implementation (e.g. {@link ArrayTable#put})
    *         (<a href="{@docRoot}/java/util/Collection.html#optional-restrictions">optional</a>)
@@ -54,7 +53,7 @@ public class GuavaUtils {
   public static <R, C, V> V computeIfAbsent(Table<R, C, V> table, R rowKey, C columnKey,
                                             BiFunction<R, C, V> mappingFunction) {
     /*
-     TODO: consider extracting to a util class, contribute patch to Guava (as a default method of Table)
+     TODO: maybe contribute patch to Guava (as a default method of Table interface)
      (see https://github.com/google/guava/issues/2170)
     */
     Objects.requireNonNull(mappingFunction);

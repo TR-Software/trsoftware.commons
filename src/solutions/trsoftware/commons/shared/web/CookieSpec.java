@@ -18,12 +18,14 @@ package solutions.trsoftware.commons.shared.web;
 
 import com.google.common.base.MoreObjects;
 import solutions.trsoftware.commons.client.bridge.util.URIComponentEncoder;
+import solutions.trsoftware.commons.shared.util.LogicUtils;
 import solutions.trsoftware.commons.shared.util.TimeUnit;
 import solutions.trsoftware.commons.shared.util.TimeValue;
 
 import javax.annotation.Nullable;
 import javax.servlet.http.Cookie;
 import java.util.Date;
+import java.util.Objects;
 
 /**
  * Encapsulates all the info needed to set a particular cookie.
@@ -51,17 +53,23 @@ import java.util.Date;
 public class CookieSpec {
 
   /**
+   * Default value for {@link #maxAge}: expire cookie at the end of browser session.
+   * This is the same default value as {@link javax.servlet.http.Cookie#maxAge}
+   */
+  private static final int DEFAULT_MAX_AGE = -1;
+
+  /**
    * Name of the cookie.
    */
   @Nullable
-  private String name;
+  private final String name;
 
   /**
    * Value (data) of the cookie. If you use a binary value, you may want to use BASE64 encoding.
    * <p>
    * With Version 0 cookies, values should not contain white space, brackets,
    * parentheses, equals signs, commas, double quotes, slashes, question
-   * marks, at signs, colons, and semicolons. Empty values may not behave the
+   * marks, @ symbols, colons, and semicolons. Empty values may not behave the
    * same way on all browsers.
    * <p>
    * If the cookie might be read client-side with {@link com.google.gwt.user.client.Cookies}, the value
@@ -70,7 +78,7 @@ public class CookieSpec {
    * @see Cookie#setValue(String)
    */
   @Nullable
-  private String value;
+  private final String value;
 
   /**
    * The version of the cookie protocol this cookie complies with:
@@ -80,28 +88,33 @@ public class CookieSpec {
    * </ol>
    * @see Cookie#setVersion(int)
    */
-  private int version;
+  private final int version;
 
   /**
-   * How long the cookie should persist on the client.
-   * If {@code null}, cookie will be removed after browser shutdown.
+   * How long the cookie should persist on the client, in seconds.
+   * <p>
+   * A positive value indicates that the cookie will expire after that many
+   * seconds have passed. Note that the value is the <i>maximum</i> age when
+   * the cookie will expire, not the cookie's current age.
+   * <p>
+   * A negative value means that the cookie is not stored persistently and
+   * will be deleted when the Web browser exits.
+   * <p>
+   * A zero value causes the cookie to be deleted.
    *
-   * <p style="color: #0073BF; font-weight: bold;">
-   * TODO: {@link Cookie#setMaxAge(int)} defines special meanings for 0 and negative args; should probably
-   *   document those here as well (Note: {@link Cookie#getMaxAge()} defaults to {@code -1})
-   * </p>
+   * @see Cookie#setMaxAge(int)
    * @see Cookie#getMaxAge()
    */
-  @Nullable
-  private TimeValue maxAge;
+  // Note(9/4/2025): field type changed from TimeValue to int, to allow the special meanings for 0 and -1
+  private final int maxAge;
 
   /**
    * Specifies the domain within which this cookie should be presented.
    * Defaults to the current request host if {@code null}.
-   * @see Cookie#setDomain(java.lang.String)
+   * @see Cookie#setDomain(String)
    */
   @Nullable
-  private String domain;
+  private final String domain;
 
   /**
    * Specifies the subset of URLs to which this cookie applies.
@@ -119,7 +132,7 @@ public class CookieSpec {
    * </ul>
    */
   @Nullable
-  private String path;
+  private final String path;
 
   /**
    * Indicates to the browser whether the cookie should only be sent using a
@@ -132,14 +145,14 @@ public class CookieSpec {
    *   indicating that it is in the session's interest to protect the cookie contents.
    * </blockquote>
    */
-  private boolean secure;
+  private final boolean secure;
 
   /**
    * Flag that controls if this cookie will be hidden from scripts on the client side.
    * <p>
    * NOTE: this option is not part of RFC 2109, but most browsers do support it
    */
-  private boolean httpOnly;
+  private final boolean httpOnly;
 
   /**
    * NOTE: might be easier to use {@link Builder} instead of this constructor.
@@ -155,7 +168,7 @@ public class CookieSpec {
    * @see #builder(String)
    * @see #builder()
    */
-  public CookieSpec(String name, String value, int version, TimeValue maxAge, String domain, String path, boolean secure, boolean httpOnly) {
+  private CookieSpec(String name, String value, int version, int maxAge, String domain, String path, boolean secure, boolean httpOnly) {
     this.name = name;
     this.value = value;
     this.version = version;
@@ -195,18 +208,19 @@ public class CookieSpec {
   }
 
   @Nullable
-  public TimeValue getMaxAge() {
+  public int getMaxAge() {
     return maxAge;
   }
 
   /**
    * @param currentTimeMillis time in epoch millis
    * @return a {@link Date} constructed by adding {@link #maxAge} to the current time,
-   *     or {@code null} if {@link #maxAge} is {@code null}
+   *     or {@code null} if {@link #maxAge} &le; {@code 0}
    */
   @Nullable
   public Date getExpirationDate(long currentTimeMillis) {
-    return maxAge != null ? new Date(currentTimeMillis + maxAge.toLongMillis()) : null;
+    // Note: this method is provided to support GWT's Cookies.setCookie method, which takes an expiration Date instead of maxAge
+    return maxAge > 0 ? new Date(currentTimeMillis + maxAge * 1000L) : null;
   }
 
   @Nullable
@@ -233,8 +247,7 @@ public class CookieSpec {
   public Cookie toCookie() {
     Cookie cookie = new Cookie(name, value);
     cookie.setVersion(version);
-    if (maxAge != null)
-      cookie.setMaxAge((int)maxAge.to(TimeUnit.SECONDS).getValue());
+    cookie.setMaxAge(maxAge);
     if (domain != null)
       cookie.setDomain(domain);
     if (path != null)
@@ -250,37 +263,20 @@ public class CookieSpec {
       return true;
     if (o == null || getClass() != o.getClass())
       return false;
-
     CookieSpec that = (CookieSpec)o;
-
-    if (version != that.version)
-      return false;
-    if (secure != that.secure)
-      return false;
-    if (httpOnly != that.httpOnly)
-      return false;
-    if (name != null ? !name.equals(that.name) : that.name != null)
-      return false;
-    if (value != null ? !value.equals(that.value) : that.value != null)
-      return false;
-    if (maxAge != null ? !maxAge.equals(that.maxAge) : that.maxAge != null)
-      return false;
-    if (domain != null ? !domain.equals(that.domain) : that.domain != null)
-      return false;
-    return path != null ? path.equals(that.path) : that.path == null;
+    return version == that.version &&
+        maxAge == that.maxAge &&
+        secure == that.secure &&
+        httpOnly == that.httpOnly &&
+        LogicUtils.eq(name, that.name) &&
+        LogicUtils.eq(value, that.value) &&
+        LogicUtils.eq(domain, that.domain) &&
+        LogicUtils.eq(path, that.path);
   }
 
   @Override
   public int hashCode() {
-    int result = name != null ? name.hashCode() : 0;
-    result = 31 * result + (value != null ? value.hashCode() : 0);
-    result = 31 * result + version;
-    result = 31 * result + (maxAge != null ? maxAge.hashCode() : 0);
-    result = 31 * result + (domain != null ? domain.hashCode() : 0);
-    result = 31 * result + (path != null ? path.hashCode() : 0);
-    result = 31 * result + (secure ? 1 : 0);
-    result = 31 * result + (httpOnly ? 1 : 0);
-    return result;
+    return Objects.hash(name, value, version, maxAge, domain, path, secure, httpOnly);
   }
 
   @Override
@@ -306,7 +302,7 @@ public class CookieSpec {
     private String name;
     private String value;
     private int version;
-    private TimeValue maxAge;
+    private int maxAge = DEFAULT_MAX_AGE;
     private String domain;
     private String path;
     private boolean secure;
@@ -362,25 +358,50 @@ public class CookieSpec {
     }
 
     /**
-     * Optional, defaults to end of browser session.
+     * Sets {@link CookieSpec#maxAge}.
+     * <p>
+     * A positive value indicates that the cookie will expire after that many
+     * seconds have passed. Note that the value is the <i>maximum</i> age when
+     * the cookie will expire, not the cookie's current age.
+     * <p>
+     * A negative value means that the cookie is not stored persistently and
+     * will be deleted when the Web browser exits.
+     * <p>
+     * A zero value causes the cookie to be deleted.
+     * @param maxAge the maximum age of the cookie in seconds
      * @see Cookie#setMaxAge(int)
      */
-    public Builder setMaxAge(TimeValue maxAge) {
+    public Builder setMaxAge(int maxAge) {
       this.maxAge = maxAge;
       return this;
     }
 
     /**
      * Optional, defaults to end of browser session.
+     * @see Cookie#setMaxAge(int)
+     * @deprecated use {@link #setMaxAge(int)}
+     */
+    public Builder setMaxAge(TimeValue timeValue) {
+      this.maxAge = timeValue != null ? (int)timeValue.to(TimeUnit.SECONDS).getValue() : DEFAULT_MAX_AGE;
+      return this;
+    }
+
+    /**
+     * Optional, defaults to end of browser session.
      * @param maxAgeMillis the max age specified in milliseconds (should be a positive integer; otherwise
-     *  will set {@link #maxAge} to {@code null})
+     *  will set {@link #maxAge} to {@code -1} if negative)
      * @see Cookie#setMaxAge(int)
      * @see #setMaxAge(TimeValue)
+     * @deprecated use {@link #setMaxAge(int)}
      */
-    public Builder setMaxAge(long maxAgeMillis) {
-      this.maxAge = maxAgeMillis > 0 ?
-          new TimeValue(maxAgeMillis, TimeUnit.MILLISECONDS)
-          : null;
+    public Builder setMaxAgeMillis(long maxAgeMillis) {
+      if (maxAgeMillis > 0)
+        maxAge = (int)(maxAgeMillis / 1000L);
+      // Note: this preserves the special meanings of maxAge 0 and -1
+      else if (maxAgeMillis < 0)
+        maxAge = -1;
+      else
+        maxAge = 0;
       return this;
     }
 

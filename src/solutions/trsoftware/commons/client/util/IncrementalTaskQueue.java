@@ -8,7 +8,6 @@ import com.google.gwt.user.client.Command;
 
 import javax.annotation.Nonnull;
 import java.util.ArrayDeque;
-import java.util.List;
 import java.util.Queue;
 import java.util.function.Supplier;
 
@@ -57,6 +56,9 @@ public class IncrementalTaskQueue<T extends Command> implements Scheduler.Repeat
       return running = true;
     }
     return running;
+    /* TODO(10/9/2025): this revives the job even if handleFailedTask returned false on a previous iteration
+         - is this the desired outcome?
+     */
   }
 
   /**
@@ -70,23 +72,44 @@ public class IncrementalTaskQueue<T extends Command> implements Scheduler.Repeat
 
   /**
    * Executes the next task in the queue.
+   * <p>
+   * <b>Caution:</b> this method should only be called by {@link Scheduler}, otherwise the {@linkplain #running internal state}
+   * of this instance could become compromised, risking the possibility of a subsequent call to {@link #add(Command)}
+   * scheduling this job again, even if it is already scheduled.
    *
-   * @return {@code true} iff the queue is not empty
+   * @return {@code true} if the queue is not empty and {@link #handleFailedTask(Command, Throwable)} didn't return false
+   *   if the task failed
    */
   @Override
   public boolean execute() {
     if (!queue.isEmpty()) {
       T task = queue.poll();
       assert task != null;
-      try {
-        // NOTE: without this try/catch, an uncaught exception would cause this incremental job to cancelled by SchedulerImpl
-        task.execute();
-      }
-      catch (Throwable ex) {
-        return running = handleFailedTask(task, ex);
-      }
+      if (!executeTask(task))
+        return running = false;
     }
     return running = !queue.isEmpty();
+  }
+
+  /**
+   * Executes the given task in a {@code try-catch} block.  If the task throws an exception,
+   * will invoke {@link #handleFailedTask(Command, Throwable)} and return the result of that call.
+   * Otherwise (if no exception thrown), will return {@code true}.
+   *
+   * @return {@code true} to continue executing tasks
+   *           (if task succeeded or {@link #handleFailedTask} returned {@code true});
+   *         {@code false} to stop the incremental job
+   *           (if task failed and {@link #handleFailedTask} returned {@code false})
+   */
+  protected boolean executeTask(T task) {
+    try {
+      // NOTE: without this try/catch, an uncaught exception would cause this incremental job to be cancelled by SchedulerImpl
+      task.execute();
+      return true;
+    }
+    catch (Throwable ex) {
+      return handleFailedTask(task, ex);
+    }
   }
 
   /**
@@ -96,7 +119,8 @@ public class IncrementalTaskQueue<T extends Command> implements Scheduler.Repeat
    *
    * @param task the failed task
    * @param ex the exception thrown by the task's {@link Command#execute()} method
-   * @return {@code true} to continue executing tasks or {@code false} to stop the queue
+   * @return {@code true} to continue executing tasks or {@code false} to stop the incremental job until the next invocation
+   * of {@link #add(Command)} or {@link #startIfNotRunning()}
    */
   public boolean handleFailedTask(T task, Throwable ex) {
     GWT.reportUncaughtException(ex);
@@ -126,7 +150,8 @@ public class IncrementalTaskQueue<T extends Command> implements Scheduler.Repeat
   /**
    * @return an immutable list of tasks currently awaiting execution
    */
-  public List<T> examineTasks() {
+  @VisibleForTesting
+  public ImmutableList<T> examineTasks() {
     return ImmutableList.copyOf(queue);
   }
 }

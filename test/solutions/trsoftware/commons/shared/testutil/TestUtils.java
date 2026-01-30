@@ -16,9 +16,16 @@
 
 package solutions.trsoftware.commons.shared.testutil;
 
+import com.google.gwt.core.shared.GWT;
+import com.google.gwt.core.shared.GwtIncompatible;
+import com.google.gwtmockito.GwtMockito;
+import junit.framework.Assert;
+import junit.framework.TestCase;
+import solutions.trsoftware.commons.client.debug.Debug;
 import solutions.trsoftware.commons.shared.util.StringUtils;
 
 import java.io.PrintStream;
+import java.lang.reflect.Field;
 import java.util.Collection;
 import java.util.Objects;
 import java.util.function.BooleanSupplier;
@@ -141,5 +148,38 @@ public class TestUtils {
   public static void printIndented(Stream<?> stream, int nSpaces, PrintStream out) {
     stream.map(Objects::toString).map(StringUtils.indenting(nSpaces))
         .forEach(out::println);
+  }
+
+  /**
+   * Temporarily sets <code>{@link Debug#ENABLED} = true</code> (if needed) and runs the given code.
+   * <p>
+   * This allows testing logic that requires that requires {@link Debug#ENABLED} to be {@code true} in a plain Java
+   * {@link TestCase} (without using a {@code GWTTestCase} that overrides the {@code Debug.gwt.xml} module).
+   * <p>
+   * <b>Note:</b> since the {@link Debug} class relies on {@link GWT#create(Class)}, any code outside a {@code GWTTestCase}
+   * should first invoke {@link GwtMockito#initMocks(Object)} to make this work.
+   *
+   * @param code logic that requires {@link Debug#ENABLED} to be {@code true}
+   * @see Injections#setFieldValue(Field, Object)
+   * @see FieldValueReplacement#setFieldValue(Field, Object)
+   * @see <a href="https://github.com/google/gwtmockito">GwtMockito project</a>
+   */
+  @GwtIncompatible("Reflection")
+  @SuppressWarnings("NonJREEmulationClassesInClientCode")
+  public static void withDebugEnabled(Runnable code) throws Exception {
+    // TODO: extract this method to a util class
+    // Note: we have to modify the Debug.ENABLED value by reflection, to allow testing this case
+    if (!Debug.ENABLED) {
+      Field debugEnabledField = Debug.class.getDeclaredField("ENABLED");
+      try (FieldValueReplacement<Boolean> temp = FieldValueReplacement.setFieldValue(debugEnabledField, true)) {
+        //noinspection ConstantConditions - just making sure the value was replaced
+        Assert.assertTrue(Debug.ENABLED);
+        code.run();
+      }
+      Assert.assertFalse(Debug.ENABLED);  // make sure OG value was restored
+    }
+    else {  // Debug.ENABLED is already true
+      code.run();
+    }
   }
 }

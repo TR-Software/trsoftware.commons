@@ -173,14 +173,6 @@ public abstract class InteractiveCommandLineApp implements Runnable {
     }
   }
 
-  /**
-   *
-   *<pre>
-   * ╔════
-   * ║
-   *</pre>
-   * @param out
-   */
   protected void printMainMenu(PrintStream out) {
     ArrayList<String> lines = new ArrayList<>();
     for (CommandLineAction action : actions) {

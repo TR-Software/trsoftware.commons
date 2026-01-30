@@ -67,8 +67,12 @@ public class DummyHttpServletRequest implements HttpServletRequest {
     this(null, null, paramMap);
   }
 
-  public DummyHttpServletRequest(String url, String queryString) {
+  public DummyHttpServletRequest(String url) {
     this.url = url;
+  }
+
+  public DummyHttpServletRequest(String url, String queryString) {
+    this(url);
     this.queryString = queryString;
   }
 
@@ -135,13 +139,18 @@ public class DummyHttpServletRequest implements HttpServletRequest {
     return this;
   }
 
+  public DummyHttpServletRequest addCookies(Collection<Cookie> cookie) {
+    cookies.addAll(cookie);
+    return this;
+  }
+
   public String getAuthType() {
     System.err.println("Method DummyHttpServletRequest.getAuthType has not been fully implemented yet.");
     return null;
   }
 
   public Cookie[] getCookies() {
-    return cookies.toArray(new Cookie[cookies.size()]);
+    return cookies.toArray(new Cookie[0]);
   }
 
   public DummyHttpServletRequest setHeaders(Multimap<String, String> headers) {

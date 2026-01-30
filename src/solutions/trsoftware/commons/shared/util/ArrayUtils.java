@@ -411,7 +411,7 @@ public class ArrayUtils {
    *
    * @param i array index (and arg for producer)
    * @param producer a function that computes the value for {@code arr[i]} if it's absent
-   * @return the current (existing or computed) value associated with the specified array indices,
+   * @return the current (existing or computed) value at the specified array index,
    *     or null if the computed value is null
    */
   public static <T> T computeIfAbsent(T[] arr, int i, IntFunction<T> producer) {

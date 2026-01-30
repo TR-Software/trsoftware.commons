@@ -1309,8 +1309,9 @@ public class StringUtils {
   public static List<String> split(String str, String separator) {
     int start = 0;
     int end = str.indexOf(separator, start);
-    if (end < 0)
+    if (end == -1)
       return Collections.singletonList(str);  // string not empty and contains no delimiters: treat the whole string as a token
+      // TODO(8/21/2025): the above comment about "string not empty" seems wrong
     else {
       ArrayList<String> ret = new ArrayList<String>();
       while (end != -1) {
@@ -1558,7 +1559,7 @@ public class StringUtils {
 
   /**
    * Returns a string representation of the integer argument as an unsigned integer in base 2, padded with 0s to
-   * make the length of the string exactly 32.
+   * make the length of the string exactly 32 characters.
    * This padding is the only difference from {@link Integer#toBinaryString(int)}.
    *
    * @return 32-char string of representing the exact bits in the given int
@@ -1568,11 +1569,12 @@ public class StringUtils {
     String str = Integer.toBinaryString(i);
     // prepend leading 0s if needed
     return Strings.padStart(str, 32, '0');
+    // TODO: maybe add an overload that enables bit grouping (see byteArrayToBinary(byte[], int))
   }
 
   /**
-   * Returns a string representation of the integer argument as an unsigned integer in base 2, padded with 0s to
-   * make the length of the string exactly 32.
+   * Returns a string representation of the integer argument as an unsigned integer in base 16, padded with 0s to
+   * make the length of the string exactly 8 characters.
    * This padding is the only difference from {@link Integer#toHexString(int)}.
    *
    * @return 8-char lowercase hex string of representing the exact bits in the given int
@@ -1582,6 +1584,37 @@ public class StringUtils {
     String str = Integer.toHexString(i);
     // prepend leading 0s if needed
     return Strings.padStart(str, 8, '0');
+    // TODO: maybe add an overload that enables digit grouping (see byteArrayToHex(byte[], int))
+  }
+
+  /**
+   * Returns a string representation of the 64-bit integer argument as an unsigned integer in base 2, padded with 0s to
+   * make the length of the string exactly 64 characters.
+   * This padding is the only difference from {@link Long#toBinaryString(long)}.
+   *
+   * @return 32-char string of representing the exact bits in the given int
+   * @see Long#toBinaryString(long)
+   */
+  public static String longToBinary(long i) {
+    String str = Long.toBinaryString(i);
+    // prepend leading 0s if needed
+    return Strings.padStart(str, 64, '0');
+    // TODO: maybe add an overload that enables bit grouping (see byteArrayToBinary(byte[], int))
+  }
+
+  /**
+   * Returns a string representation of the 64-bit integer argument as an unsigned integer in base 16, padded with 0s to
+   * make the length of the string exactly 16.
+   * This padding is the only difference from {@link Long#toHexString(long)}.
+   *
+   * @return 8-char lowercase hex string of representing the exact bits in the given long
+   * @see Long#toHexString(long)
+   */
+  public static String longToHex(long i) {
+    String str = Long.toHexString(i);
+    // prepend leading 0s if needed
+    return Strings.padStart(str, 16, '0');
+    // TODO: maybe add an overload that enables digit grouping (see byteArrayToHex(byte[], int))
   }
 
   /**
@@ -1597,13 +1630,23 @@ public class StringUtils {
    *   (passing any value &le; 0 effectively disables grouping)
    */
   public static String byteArrayToHex(byte[] bytes, int groupingSize) {
+    return byteArrayToHex(bytes, groupingSize, " ");
+  }
+
+  /**
+   * Returns a hex string for the given byte array
+   * @param groupingSize will insert a grouping separator between each grouping of this number of bytes;
+   *   (passing any value &le; 0 or &ge; {@code bytes.length} effectively disables grouping)
+   * @param separator the char sequence to insert between consecutive groups
+   */
+  public static String byteArrayToHex(byte[] bytes, int groupingSize, String separator) {
     if (groupingSize == 0)
       groupingSize = -1;  // treat 0 the same as no grouping (-1), o/w the code below would prepend a single space if groupingSize == 0
-    StringBuilder sb = new StringBuilder();
+    StringBuilder sb = new StringBuilder(bytes.length * 2 + bytes.length / groupingSize);
     int bytesInGroup = 0;
     for (byte b : bytes) {
       if (bytesInGroup == groupingSize) {
-        sb.append(' ');
+        sb.append(separator);
         bytesInGroup = 0;
       }
       String hex = byteToHex(b);
@@ -1623,23 +1666,37 @@ public class StringUtils {
 
   /**
    * Returns a binary string for the given byte array
-   * @param groupingSize will insert a grouping separator (space char) between each grouping of this number of bytes;
-   *   (passing any value &le; 0 effectively disables grouping)
+   * @param groupingSize will insert a grouping separator (single space) between each group with this number of bits;
+   *   (passing any value &le; 0 or &ge; the total number of bits effectively disables grouping)
+   * @param separator the char sequence to insert between consecutive groups
    */
   public static String byteArrayToBinary(byte[] bytes, int groupingSize) {
-    // TODO: maybe make groupingSize represent number of bits rather than bytes
+    return byteArrayToBinary(bytes, groupingSize, " ");
+  }
+
+  /**
+   * Returns a binary string for the given byte array
+   * @param groupingSize will insert a grouping separator between each group with this number of bits;
+   *   (passing any value &le; 0 or &ge; the total number of bits effectively disables grouping)
+   * @param separator the char sequence to insert between consecutive groups
+   */
+  public static String byteArrayToBinary(byte[] bytes, int groupingSize, String separator) {
     if (groupingSize == 0)
       groupingSize = -1;  // treat 0 the same as no grouping (-1), o/w the code below would prepend a single space if groupingSize == 0
-    StringBuilder sb = new StringBuilder();
-    int bytesInGroup = 0;
+    int totalBits = bytes.length * 8;
+    StringBuilder sb = new StringBuilder(totalBits + totalBits / groupingSize);
+    int bitsInGroup = 0;
     for (byte b : bytes) {
-      if (bytesInGroup == groupingSize) {
-        sb.append(' ');
-        bytesInGroup = 0;
+      String byteStr = byteToBinary(b);
+      for (int i = 0; i < byteStr.length(); i++) {
+        char bit = byteStr.charAt(i);
+        if (bitsInGroup == groupingSize) {
+          sb.append(separator);
+          bitsInGroup = 0;
+        }
+        bitsInGroup++;
+        sb.append(bit);
       }
-      String s = byteToBinary(b);
-      sb.append(s);
-      bytesInGroup++;
     }
     return sb.toString();
     // TODO: extract dup code from byteArrayToHex

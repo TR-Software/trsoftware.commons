@@ -23,11 +23,11 @@ import solutions.trsoftware.commons.shared.util.StringUtils;
 
 import javax.annotation.Nonnull;
 import java.io.PrintStream;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.logging.Logger;
+import java.util.stream.Stream;
 
+import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkState;
 import static java.util.Objects.requireNonNull;
 import static solutions.trsoftware.commons.shared.util.LogicUtils.firstNonNull;
@@ -112,6 +112,9 @@ public class TablePrinter {
    */
   public TablePrinter addCol(String name, String value) {
     checkState(rowIdx > 0, "Must invoke newRow() before writing any column data");
+    // throw IAE if the given col name already exists in the current row
+    String priorValue = table.get(rowIdx, name);
+    checkArgument(priorValue == null, "Current row already contains a \"%s\" column (with value \"%s\")", name, priorValue);
     table.put(0, name, name);  // insert colName into top row (for col headings)
     table.put(rowIdx, name, value);
     return this;
@@ -143,6 +146,25 @@ public class TablePrinter {
     /* TODO: maybe create a GWT-compatible version that uses a Function<Object, String> or a Renderer instead of String.format
          - replace format parameter with a method to set format for the whole column (similar to setColAlignment)
     */
+  }
+
+  // TODO(1/23/2026): doc the addRow* methods:
+
+  public TablePrinter addRow(PrintableTableRow row) {
+    return row.printTableRow(this);
+  }
+
+  public TablePrinter addRows(Iterable<? extends PrintableTableRow> rows) {
+    return addRows(rows.iterator());
+  }
+
+  public TablePrinter addRows(Iterator<? extends PrintableTableRow> rows) {
+    rows.forEachRemaining(this::addRow);
+    return this;
+  }
+
+  public TablePrinter addRows(PrintableTableRow... rows) {
+    return addRows(Arrays.asList(rows));
   }
 
   /**
@@ -183,35 +205,40 @@ public class TablePrinter {
 
   /**
    * Prints the table to {@link System#out}
+   * @return self, to allow printing in multiple formats as a one-liner
    */
-  public void printTable() {
-    printTable(System.out);
+  public TablePrinter printTable() {
+    return printTable(System.out);
   }
 
   /**
    * Prints the table to the given stream, using the {@linkplain OutputType#GRAPHIC default format}.
+   * @return self, to allow printing in multiple formats as a one-liner
    */
-  public void printTable(PrintStream out) {
-    printTable(out, OutputType.GRAPHIC);
+  public TablePrinter printTable(PrintStream out) {
+    return printTable(out, OutputType.GRAPHIC);
   }
 
   /**
    * Prints the table to {@link System#out} in the specified format.
- * @param outputType the output format
+   * @param outputType the output format
+   * @return self, to allow printing in multiple formats as a one-liner
    */
-  public void printTable(OutputType outputType) {
-    printTable(System.out, outputType);
+  public TablePrinter printTable(OutputType outputType) {
+    return printTable(System.out, outputType);
   }
 
   /**
    * Prints the table to the given stream in the specified format.
    * @param outputType the output format
+   * @return self, to allow printing in multiple formats as a one-liner
    */
-  public void printTable(PrintStream out, OutputType outputType) {
+  public TablePrinter printTable(PrintStream out, OutputType outputType) {
     Printer printer = outputType == OutputType.CSV
         ? new CsvPrinter(out, table, colTextAlignments, defaultTextAlignment)
         : new Printer(out, table, colTextAlignments, defaultTextAlignment);
     printer.printTable();
+    return this;
   }
 
   /**
@@ -431,6 +458,48 @@ public class TablePrinter {
         out.println(sb);
       }
     }
+  }
+
+  /**
+   * Interface that can be implemented to facilitate printing a table of similar objects using a {@link TablePrinter}.
+   * @see #addRows(PrintableTableRow...)
+   */
+  public interface PrintableTableRow {
+
+    /**
+     * Invokes {@link #newRow() tp.newRow()} followed by {@link #addCol(String, String) .addCol(name, value)}
+     * for each of this object's attributes that are to be printed in the corresponding row
+     * using the given {@link TablePrinter}.
+     * <p>
+     *
+     * @param tp the printer instance to use for printing this row
+     * @return the same printer instance that was passed in
+     *
+     * @apiNote This method returns the {@link TablePrinter} to facilitate call chaining and to allow using
+     *   {@link Stream#reduce} to print a stream of {@linkplain PrintableTableRow row elements}, e.g.
+     *    <pre>rowStream.reduce(new TablePrinter(), (tp, row) -> row.printTableRow(tp), (tp, tp2) -> tp).printTable()</pre>
+     */
+    TablePrinter printTableRow(TablePrinter tp);
+
+  }
+
+  public static TablePrinter printRows(Stream<? extends PrintableTableRow> rowStream) {
+    return rowStream.reduce(new TablePrinter(), (tp, row) -> row.printTableRow(tp), (tp, tp2) -> tp);
+    /* TODO(1/23/2026):
+         - this method might be redundant; can just call tp.addRows(rowStream.iterator())
+         - doc this method if we're keeping
+         - maybe create a Collector class with this functionality
+     */
+  }
+
+  public static TablePrinter printRows(Iterable<? extends PrintableTableRow> rows) {
+    return new TablePrinter().addRows(rows);
+    // TODO(1/23/2026): maybe/inline remove this method; o/w add javadoc if keeping it
+  }
+
+  public static TablePrinter printRows(PrintableTableRow... rows) {
+    return new TablePrinter().addRows(rows);
+    // TODO(1/23/2026): doc this method; maybe rename to something else, to avoid clashing with instance method printTable that actually prints the table
   }
 
   /**

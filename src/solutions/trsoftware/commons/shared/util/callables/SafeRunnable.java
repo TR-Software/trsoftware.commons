@@ -24,10 +24,10 @@ import java.util.logging.Logger;
 import static com.google.common.base.Strings.lenientFormat;
 
 /**
- * A Runnable that traps uncaught exceptions so they can handled as needed (e.g. logged and suppressed).
+ * A {@link Runnable} that traps uncaught exceptions so they can handled as needed (e.g. logged and suppressed).
  * <p>
- * Intended to be used with {@link ScheduledExecutorService}, which <em>silently</em> cancels recurring runnables
- * when they throw an unchecked exception.
+ * This provides an easy way to prevent automatic cancellation of repeating tasks submitted to a
+ * {@link ScheduledExecutorService}, which stops executing a task if it throws an uncaught exception.
  *
  * @author Alex
  * @since 9/1/2023
@@ -77,7 +77,7 @@ public interface SafeRunnable extends Runnable {
    *
    * @param e the {@link RuntimeException} or {@link Error}
    * @return {@code true} to ignore the exception and continue or {@code false} to rethrow the exception, thereby
-   *   potentially cancelling any scheduled repeat executions if running from a {@link ScheduledExecutorService}
+   *   potentially cancelling all recurring future executions if running from a {@link ScheduledExecutorService}
    */
   default boolean onError(Throwable e) {
     return true;

@@ -77,11 +77,12 @@ public abstract class ServerAssertUtils extends AssertUtils {
     Set<Field> allFields = ReflectionUtils.getAllDeclaredFields(cls);
     for (Field field : allFields) {
       if (field.isSynthetic() || (filter != null && !filter.test(field)))
-        continue;  // ignore synthetic fields (like "this$0")
+        continue;  // ignore synthetic fields (like "this$0") and fields excluded by the given filter predicate
       if (!field.isAccessible()) {
         field.setAccessible(true);
         // Note: this override is temporary: future invocations of getDeclaredField will have the original value for isAccessible
       }
+      // TODO(1/9/2026): maybe recursively invoke assertEqualsByReflection2 instead of assertDeepEquals?
       assertDeepEquals(field.toString(), field.get(expected), field.get(actual));
     }
   }
@@ -194,8 +195,10 @@ public abstract class ServerAssertUtils extends AssertUtils {
    * </pre>
    *
    * @return the given object cast to the expected type
+   * @throws junit.framework.AssertionFailedError if the given object is null or is not assignable to {@code expectedType}
    */
   public static <T> T assertInstanceOf(String message, @Nonnull Class<T> expectedType, @Nonnull Object o) {
+    assertNotNull(o);
     assertTrue(formatComparisonFailedMessage(message, expectedType, o.getClass()),
         expectedType.isAssignableFrom(o.getClass()));
     return expectedType.cast(o);

@@ -18,6 +18,7 @@
 package solutions.trsoftware.commons.shared.util;
 
 import junit.framework.TestCase;
+import solutions.trsoftware.commons.shared.annotations.Slow;
 import solutions.trsoftware.commons.shared.testutil.AssertUtils;
 import solutions.trsoftware.commons.shared.util.mutable.MutableInteger;
 import solutions.trsoftware.commons.shared.util.stats.HashCounter;
@@ -116,6 +117,7 @@ public class RandomUtilsTest extends TestCase {
     }
   }
 
+  @Slow
   public void testNextIntInRange() {
     for (int lowerBound = -5; lowerBound < 5; lowerBound++) {
       for (int upperBound = lowerBound+1; upperBound < lowerBound+5; upperBound++) {
@@ -219,7 +221,7 @@ public class RandomUtilsTest extends TestCase {
     }
   }
 
-
+  @Slow
   public void testShuffle() {
     List<Integer> list = Arrays.asList(1, 2, 3, 4);
     // try several different list implementations
@@ -249,6 +251,7 @@ public class RandomUtilsTest extends TestCase {
     }
   }
 
+  @Slow
   public void testRandomSampleWithReplacement() {
     // corner cases:
     assertEquals(Collections.<Integer>emptyList(), randomSampleWithReplacement(Arrays.<Integer>asList(), 0));

@@ -22,6 +22,7 @@ import solutions.trsoftware.commons.shared.util.StringUtils;
 import solutions.trsoftware.commons.shared.util.concurrent.AtomicUtils;
 
 import javax.annotation.Nonnull;
+import java.sql.Timestamp;
 import java.time.Instant;
 import java.util.Arrays;
 import java.util.concurrent.TimeUnit;
@@ -59,6 +60,10 @@ public class Clock {
   @GwtIncompatible
   public static Instant instant() {
     return Instant.ofEpochMilli(currentTimeMillis());
+  }
+
+  public static Timestamp timestamp() {
+    return new Timestamp(currentTimeMillis());
   }
 
   /**
@@ -359,6 +364,7 @@ public class Clock {
 
     @Override
     public synchronized void advance(long duration, TimeUnit unit) {
+      // TODO(1/13/2026): maybe also keep track of nanos for currentTimeMillis, o/w a call with a duration < 1ms will not change the time at all
       millis.addAndGet(unit.toMillis(duration));
       nanos.addAndGet(unit.toNanos(duration));
     }

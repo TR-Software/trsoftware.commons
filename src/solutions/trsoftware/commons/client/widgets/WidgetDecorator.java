@@ -158,20 +158,36 @@ public class WidgetDecorator {
     return "hidden".equals(getStyleProperty(widget, "visibility"));
   }
 
-  /** Adds a custom DOM attribute to the widget's underlying element */ 
-  public static <W extends Widget> W addAttribute(W widget, String attrName, String attrValue) {
+  /**
+   * Sets an attribute on the widget's underlying element.
+   * @see Element#setAttribute(String, String)
+   */
+  public static <W extends Widget> W setAttribute(W widget, String attrName, String attrValue) {
     widget.getElement().setAttribute(attrName, attrValue);
     return widget;
   }
 
   /**
-   * Sets the custom attributes autocorrect="off" and autocapitalize="off"
-   * that are supported by iOS devices
-   * (see https://developer.apple.com/library/safari/#codinghowtos/Mobile/UserExperience/_index.html )
+   * Sets the "autocomplete" attribute on the widget's underlying element.
+   * <p>
+   * See the <a href="https://developer.mozilla.org/en-US/docs/Web/HTML/Reference/Attributes/autocomplete">MDN Reference</a>
+   * for a full list of supported values.
+   * @param widget a widget wrapping an {@code <input>}, {@code <textarea>}, {@code <select>}, or {@code <form>} element
+   */
+  public static <W extends Widget> W setAutocomplete(W widget, String value) {
+    // see https://developer.mozilla.org/en-US/docs/Web/HTML/Reference/Attributes/autocomplete
+    // TODO: assert that the element type is input, textarea, select, or form?
+    return setAttribute(widget, "autocomplete", value);
+  }
+
+  /**
+   * Sets the custom attributes {@code autocorrect="off"} and {@code autocapitalize="off"}
+   * that are supported by iOS devices.
    */
   public static <T extends TextBoxBase> T disableAutoTextForIOS(T textBoxBase) {
-    addAttribute(textBoxBase, "autocorrect", "off");
-    return addAttribute(textBoxBase, "autocapitalize", "off");
+    // (see https://developer.apple.com/library/safari/#codinghowtos/Mobile/UserExperience/_index.html )
+    setAttribute(textBoxBase, "autocorrect", "off");
+    return setAttribute(textBoxBase, "autocapitalize", "off");
   }
 
   /**

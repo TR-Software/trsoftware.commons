@@ -19,6 +19,7 @@ package solutions.trsoftware.commons.shared.util.rpc;
 import com.google.gwt.core.shared.GwtIncompatible;
 import com.google.gwt.user.client.rpc.SerializationException;
 import junit.framework.TestCase;
+import solutions.trsoftware.commons.shared.annotations.Slow;
 import solutions.trsoftware.commons.shared.testutil.rpc.MockSerializationStreamReader;
 import solutions.trsoftware.commons.shared.testutil.rpc.MockSerializationStreamWriter;
 import solutions.trsoftware.commons.shared.util.MathUtils;
@@ -68,6 +69,7 @@ public class SerializationUtilsTest extends TestCase {
     assertEquals(expected, actual);
   }
 
+  @Slow
   @GwtIncompatible @SuppressWarnings("NonJREEmulationClassesInClientCode")
   public void testDoubleToScaledInt() throws Exception {
     // review some basic examples manually

@@ -16,6 +16,9 @@
 
 package solutions.trsoftware.commons.server.servlet.testutil;
 
+import com.google.common.base.MoreObjects;
+import solutions.trsoftware.commons.shared.util.JsonBuilder;
+import solutions.trsoftware.commons.shared.util.RandomUtils;
 import solutions.trsoftware.commons.shared.util.StringUtils;
 
 import javax.servlet.ServletContext;
@@ -35,7 +38,7 @@ public class DummyHttpSession implements HttpSession {
 
   private Map<String, Object> attributeMap = new HashMap<>();
 
-  private final String sessionId = "DummySession_" + StringUtils.randString(8);
+  private final String sessionId = Integer.toHexString(RandomUtils.randInt());
 
   private final long creationTime;
 
@@ -117,6 +120,14 @@ public class DummyHttpSession implements HttpSession {
   public boolean isNew() {
     System.err.println("Method DummyHttpSession.isNew has not been fully implemented yet.");
     return false;
+  }
+
+  @Override
+  public String toString() {
+    return MoreObjects.toStringHelper(StringUtils.idToString(this))
+        .add("id", getId())
+        .add("attrs", JsonBuilder.mapToJson(attributeMap))
+        .toString();
   }
 }
 

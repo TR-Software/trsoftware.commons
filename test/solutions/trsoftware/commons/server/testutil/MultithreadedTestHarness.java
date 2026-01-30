@@ -68,7 +68,7 @@ public class MultithreadedTestHarness {
   }
 
 
-  /** Calls barrier.await and supresses all its checked exceptions */
+  /** Calls barrier.await and suppresses all its checked exceptions */
   public static void awaitOnBarrier(CyclicBarrier barrier, int timeoutSeconds) {
     try {
       barrier.await(timeoutSeconds, TimeUnit.SECONDS);

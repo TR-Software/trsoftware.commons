@@ -292,9 +292,12 @@ public abstract class AssertUtils {
     assertEquals(expected.size(), actual.size());
   }
 
-
   public static void assertSameSize(Collection<?> expected, Collection<?> actual) {
     assertEquals(expected.size(), actual.size());
+  }
+
+  public static void assertSizeEquals(Collection<?> collection, int expectedSize) {
+    assertEquals("Size of " + collection, expectedSize, collection.size());
   }
 
   /*
@@ -571,16 +574,27 @@ public abstract class AssertUtils {
   }
 
   /**
+   * Asserts that the given args are {@linkplain Object#equals(Object) equal} and have the same {@link Object#hashCode() hashCode},
+   * but are not the same object.
+   *
+   * @see #assertEqualsAndHashCode(Object, Object)
+   * @see Assert#assertNotSame(Object, Object)
+   */
+  public static void assertEqualsButNotSame(Object a, Object b) {
+    assertEqualsAndHashCode(a, b);
+    assertNotSame(a, b);
+  }
+
+  /**
    * Asserts that the given are not equal according to the {@link Object#equals} method, and that
    * they have different hash codes (according to {@link Object#hashCode}).
    * <p>
    * <strong>NOTE</strong>: this assertion makes sense only when you absolutely have to assure that your implementation
-   * of {@link Object#hashCode} produces a <em>perfect hashing</em> (i.e. a unique hash when {@link Object#equals}
+   * of {@link Object#hashCode} produces a <em>perfect hashing</em> (i.e. a distinct hash when {@link Object#equals}
    * returns {@code false}), despite the fact this behavior is not required by the contract of {@link Object#equals}.
    *
-   * @deprecated this assertion is too restrictive, because, as described above, objects are
+   * @deprecated This assertion is too restrictive, because, as described above, objects are
    *     allowed to have the same hash code despite {@link Object#equals} returning {@code false}.
-   *     In other words, there is no prescribed relationship between {@link Object#equals} and {@link Object#hashCode}
    *     Use {@link #assertNotEqual(Object, Object)} instead of this method.
    */
   public static void assertNotEqualsAndHashCode(Object a, Object b) {
@@ -675,7 +689,8 @@ public abstract class AssertUtils {
    * @see Iterables#getOnlyElement(Iterable)
    */
   public static <T> T getOnlyElement(Collection<T> collection) {
-    assertEquals(lenientFormat("Should contain exactly 1 element: %s", collection.toString()),
+    assertNotNull(collection);
+    assertEquals(collection.toString() + " should contain exactly 1 element",
         1, collection.size());
     return Iterables.getOnlyElement(collection);
   }
@@ -688,7 +703,9 @@ public abstract class AssertUtils {
    * @see #getOnlyElement(Collection)
    */
   public static <T> T getOnlyElement(T[] arr) {
-    assertEquals(Arrays.deepToString(arr), 1, arr.length);
+    assertNotNull(arr);
+    assertEquals(Arrays.deepToString(arr) + " should contain exactly 1 element",
+        1, arr.length);
     return arr[0];
   }
 
@@ -736,13 +753,14 @@ public abstract class AssertUtils {
   }
 
   // AssertionBuilder methods: --------------------------------------------------------------------------------
+  // TODO(10/9/2025): maybe add optional String param to assertThat methods to describe the value being tested in error messages
 
   /** @return a builder for specifying a chain of assertions on the given object */
   public static <T> SimpleAssertionBuilder<T> assertThat(T value) {
     return new SimpleAssertionBuilder<>(value);
   }
 
-  /** @return a builder for specifying a chain of assertions on the given comparable (e.g. Number) */
+  /** @return a builder for specifying a chain of assertions on the given comparable (e.g. {@link Number}) */
   public static <T extends Comparable<T>> ComparableAssertionBuilder<T> assertThat(T value) {
     return new ComparableAssertionBuilder<T>(value);
   }
@@ -869,6 +887,7 @@ public abstract class AssertUtils {
    */
   public static <K, V> void assertMapsEqual(Map<K, V> expected, Map<K, V> actual, BiPredicate<V, V> equalityPredicate) {
     assertEquals("Maps differ in size", expected.size(), actual.size());
+    assertEquals("Maps contain different keys", expected.keySet(), actual.keySet());
     for (K key : expected.keySet()) {
       V a = expected.get(key);
       V b = actual.get(key);
@@ -986,44 +1005,70 @@ public abstract class AssertUtils {
   }
 
 
-
   /**
    * Allows chaining assertions (sort of like a simpler version of the AssertJ library).
-   * The simplest way to use this class is by calling {@link #assertThat(Object)} and chaining the assertions
+   * The simplest way to use this class is by calling {@link #and(Object)} and chaining the assertions
    * to the result.
    *
    * @param <V> the value type
    * @see <a href="http://joel-costigliola.github.io/assertj/assertj-core-quick-start.html">AssertJ</a>
    */
-  public static abstract class AssertionBuilderBase<V, T extends AssertionBuilderBase> {
+  public static abstract class AssertionBuilderBase<V, Builder extends AssertionBuilderBase<V, Builder>> {
     protected final V value;
 
     public AssertionBuilderBase(V value) {
       this.value = value;
     }
 
-    @SuppressWarnings("unchecked")
-    public T isEqualTo(V expected) {
+    public Builder isEqualTo(V expected) {
       assertEquals(expected, value);
-      return (T)this;
+      return self();
     }
 
-    @SuppressWarnings("unchecked")
-    public T isNotEqualTo(V expected) {
+    public Builder isNotEqualTo(V expected) {
       assertNotEqual(expected, value);
-      return (T)this;
+      return self();
     }
 
-    @SuppressWarnings("unchecked")
-    public T isNull() {
+    public Builder isNull() {
       assertNull(value);
-      return (T)this;
+      return self();
+    }
+
+    public Builder isNotNull() {
+      assertNotNull(value);
+      return self();
     }
 
     @SuppressWarnings("unchecked")
-    public T isNotNull() {
-      assertNotNull(value);
-      return (T)this;
+    protected Builder self() {
+      return (Builder)this;
+    }
+
+    // New(12/21/2025): chained assertions on a value of a different type:
+
+    /**
+     * Appends another chain of assertions on a value of a different type.
+     * @return a builder for specifying a chain of assertions on the given object
+     */
+    public <T> SimpleAssertionBuilder<T> and(T value) {
+      return new SimpleAssertionBuilder<>(value);
+    }
+
+    /**
+     * Appends another chain of assertions on a value of a different type.
+     * @return a builder for specifying a chain of assertions on the given comparable (e.g. {@link Number})
+     */
+    public <T extends Comparable<T>> ComparableAssertionBuilder<T> and(T value) {
+      return new ComparableAssertionBuilder<T>(value);
+    }
+
+    /**
+     * Appends another chain of assertions on a value of a different type.
+     * @return a builder for specifying a chain of assertions on the given string
+     */
+    public StringAssertionBuilder and(String value) {
+      return new StringAssertionBuilder(value);
     }
   }
 
@@ -1032,7 +1077,7 @@ public abstract class AssertUtils {
    * (e.g. {@link #isNull()}, {@link #isEqualTo(Object)}).
    *
    * @param <V> the object value type
-   * @see #assertThat(Object)
+   * @see #and(Object)
    */
   public static class SimpleAssertionBuilder<V> extends AssertionBuilderBase<V, SimpleAssertionBuilder<V>> {
     public SimpleAssertionBuilder(V value) {
@@ -1043,10 +1088,10 @@ public abstract class AssertUtils {
   /**
    * Allows chaining additional assertions for comparable types.
    * <p>
-   * The simplest way to use this class is by calling {@link #assertThat(Comparable)} and chaining the assertions
+   * The simplest way to use this class is by calling {@link #and(Comparable)} and chaining the assertions
    * to the result.
    * @param <T> the {@link Comparable} value type
-   * @see #assertThat(Comparable)
+   * @see #and(Comparable)
    */
   public static class ComparableAssertionBuilder<T extends Comparable<T>> extends AssertionBuilderBase<T, ComparableAssertionBuilder<T>> {
 
@@ -1085,7 +1130,7 @@ public abstract class AssertUtils {
       return compare(ComparisonOperator.GE, lowerBound);
     }
 
-    /** Assert that {@link #value} is in the range {@code [lowerBound, upperBound]} */
+    /** Assert that {@link #value} is in the range {@code [lowerBound, upperBound]} (both endpoints included) */
     public ComparableAssertionBuilder<T> isBetween(T lowerBound, T upperBound) {
       assertTrue(StringUtils.template("Invalid interval: [$1, $2]", lowerBound, upperBound), lowerBound.compareTo(upperBound) <= 0);
       return isGreaterThanOrEqualTo(lowerBound).isLessThanOrEqualTo(upperBound);
@@ -1101,6 +1146,7 @@ public abstract class AssertUtils {
    * @param <E> element type of the collection
    * @see #assertThatCollection(Collection)
    */
+  @SuppressWarnings("UnusedReturnValue")
   public static class CollectionAssertionBuilder<T extends Collection<? extends E>, E> extends AssertionBuilderBase<T, CollectionAssertionBuilder<T, E>> {
 
     public CollectionAssertionBuilder(T value) {
@@ -1132,7 +1178,7 @@ public abstract class AssertUtils {
 
     @SafeVarargs
     public final CollectionAssertionBuilder<T, E> containsNone(E... elements) {
-      assertThat(elements.length).isGreaterThan(0);
+      and(elements.length).isGreaterThan(0);
       return containsNone(Arrays.asList(elements));
     }
 
@@ -1148,9 +1194,9 @@ public abstract class AssertUtils {
   /**
    * Allows chaining additional assertions for strings.
    * <p>
-   * The simplest way to use this class is by calling {@link #assertThat(String)} and chaining the assertions
+   * The simplest way to use this class is by calling {@link #and(String)} and chaining the assertions
    * to the result.
-   * @see #assertThat(String)
+   * @see #and(String)
    */
   public static class StringAssertionBuilder extends AssertionBuilderBase<String, StringAssertionBuilder> {
 
@@ -1165,12 +1211,17 @@ public abstract class AssertUtils {
     }
 
     public StringAssertionBuilder isNotEmpty() {
-      assertFalse(value.isEmpty());
+      assertFalse(value, value.isEmpty());
       return this;
     }
 
     public StringAssertionBuilder isEmpty() {
-      assertTrue(value.isEmpty());
+      assertTrue(value, value.isEmpty());
+      return this;
+    }
+
+    public StringAssertionBuilder lengthEquals(int expectedLength) {
+      assertEquals(value, expectedLength, value.length());
       return this;
     }
 

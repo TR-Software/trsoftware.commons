@@ -1,6 +1,7 @@
 package solutions.trsoftware.commons.server.management.monitoring;
 
 import junit.framework.TestCase;
+import solutions.trsoftware.commons.shared.annotations.ExcludeFromSuite;
 import solutions.trsoftware.commons.shared.annotations.Slow;
 
 import java.util.ArrayList;
@@ -14,6 +15,7 @@ import static solutions.trsoftware.commons.server.management.monitoring.SystemLo
  * @author Alex
  * @since 1/14/2019
  */
+@ExcludeFromSuite
 public class SystemLoadProfilerTest extends TestCase {
 
   private SystemLoadProfiler memoryProfiler;

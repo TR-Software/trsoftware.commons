@@ -682,8 +682,8 @@ public abstract class ReflectionUtils {
    * @return the new stream
    */
   public static <T> Stream<T> filterByType(Stream<?> stream, Class<T> type) {
-    return stream.filter(o -> type.isAssignableFrom(o.getClass())).map(type::cast);
-  }  // TODO: unit test this method
+    return stream.filter(type::isInstance).map(type::cast);
+  }
 
   /**
    * Calls {@link AccessibleObject#setAccessible(boolean) setAccessible(true)} on the given member if it's not
@@ -697,6 +697,7 @@ public abstract class ReflectionUtils {
     if (needsAccessOverride) {
       // Override the access restrictions
       member.setAccessible(true);
+      // Note: this override isn't permanent: future invocations of getDeclared[Field|Method] will return a new object that has the original value for isAccessible
     }
     return member;
   }

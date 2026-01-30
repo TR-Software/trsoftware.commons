@@ -102,14 +102,16 @@ public class NumberRange<N extends Number & Comparable<N>> implements Iterable<N
    * @return {@code true} iff value is in the given range (both endpoints inclusive)
    */
   public static boolean inRange(int rangeMin, int rangeMax, int value) {
-    return value >= rangeMin && value <= rangeMax;
+    // Note: using Math.min/max to make sure the bound args aren't reversed
+    return value >= Math.min(rangeMin, rangeMax) && value <= Math.max(rangeMin, rangeMax);
   }
 
   /**
    * @return {@code true} iff value is in the given range (both endpoints inclusive)
    */
   public static boolean inRange(double rangeMin, double rangeMax, double value) {
-    return value >= rangeMin && value <= rangeMax;
+    // Note: using Math.min/max to make sure the bound args aren't reversed
+    return value >= Math.min(rangeMin, rangeMax) && value <= Math.max(rangeMin, rangeMax);
   }
 
   /**

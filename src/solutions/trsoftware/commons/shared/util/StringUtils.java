@@ -1285,6 +1285,30 @@ public class StringUtils {
         ret.add(trimmedPart);
     }
     return ret;
+    // TODO(7/6/2026): maybe simplify by delegating to the new Consumer-taking version: splitAndTrim(String, String, Consumer<String>)
+  }
+
+  /**
+   * Splits the given string on the given delimiter, passing each (trimmed) token to the given consumer.
+   * Ignores tokens whose value is an empty string after trimming.
+   *
+   * @param str a string like "a, b, c"
+   * @param delimRegex a regular expression like ","
+   * @param accumulator consumer accepting the trimmed tokens
+   * @return the number of tokens passed to the consumer
+   * @see Splitter
+   */
+  public static int splitAndTrim(String str, String delimRegex, Consumer<String> accumulator) {
+    String[] parts = str.trim().split(delimRegex);
+    int count = 0;
+    for (String part : parts) {
+      String trimmedPart = part.trim();
+      if (notBlank(trimmedPart)) {
+        accumulator.accept(trimmedPart);
+        count++;
+      }
+    }
+    return count;
   }
 
   /**
@@ -1478,8 +1502,8 @@ public class StringUtils {
 
 
   /**
-   * Generates the same default string representation of the given object as the one that would been produced by
-   * {@link Object#toString()} if the object's class didn't override either {@link Object#toString()} or {@link Object#hashCode()}).
+   * Generates the same default string representation of the given object as {@link Object#toString()}
+   * (as if the object's class didn't override either {@link Object#toString()} or {@link Object#hashCode()}).
    * <p>
    * More precisely, this method returns a string equal to the value of:
    * <pre>

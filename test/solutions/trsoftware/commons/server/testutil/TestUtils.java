@@ -40,7 +40,7 @@ import java.util.stream.Collectors;
  *
  * @author Alex
  */
-public class TestUtils extends solutions.trsoftware.commons.shared.testutil.TestUtils {
+public abstract class TestUtils extends solutions.trsoftware.commons.shared.testutil.TestUtils {
 
   public static String printMemoryStats() {
     Runtime runtime = Runtime.getRuntime();

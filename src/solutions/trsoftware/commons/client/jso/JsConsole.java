@@ -25,14 +25,14 @@ import com.google.gwt.core.client.JsArrayMixed;
  * Supports a subset of the methods provided by the various browser implementations of {@code window.console}
  * (e.g. {@link #logVarArgs}, {@link #time}, {@link #timeEnd}, etc.)
  * <p style="font-style:italic;">
- * NOTE: {@link elemental.js.html.JsConsole} is a more full-featured implementation of this concept and is part of GWT's experimental new "Elemental" package.
+ * NOTE: {@code elemental.js.html.JsConsole} is a more full-featured implementation of this concept and is part of GWT's experimental new "Elemental" package.
  * However, that class doesn't compensate for lack of functionality of certain methods, and also Elemental only
  * works with SuperDevMode (<a href="http://stackoverflow.com/questions/17428265/adding-elemental-to-gwt">GWT compiler
  * error in normal DevMode</a>)
  * </p>
  *
- * @see <a href="http://getfirebug.com/wiki/index.php/Console_API">Firebug Console Reference</a>
- * @see <a href="https://developers.google.com/chrome-developer-tools/docs/console-api">Chrome Dev Tools Console Reference</a>
+ * @see <a href="https://developer.mozilla.org/en-US/docs/Web/API/console">MDN {@code console} Reference</a>
+ * @see <a href="https://developers.google.com/chrome-developer-tools/docs/console-api">Chrome DevTools Console Reference</a>
  * 
  * @since Mar 26, 2013
  * @author Alex
@@ -40,13 +40,14 @@ import com.google.gwt.core.client.JsArrayMixed;
 public class JsConsole extends JavaScriptObject {
 
   /**
-   * The available verbosity levels, can be used to select the output method to be invoked.
+   * The available verbosity levels, used to select the {@code console} method to be invoked.
    * @see #log(Level, String)
-   * @see #log(Level, JsArrayMixed)
+   * @see #logVarArgs(Level, JavaScriptObject)
    */
   public enum Level {
     DEBUG, INFO, WARN, ERROR;
 
+    /** @return name of the native {@code console} method that logs output at this level */
     public String getJsMethodName() {
       return name().toLowerCase();
     }
@@ -187,8 +188,8 @@ public class JsConsole extends JavaScriptObject {
   /**
    * Writes a message to the console with the visual "error" icon and color coding and a hyperlink to the line where it was called.
    * <p>Equivalent to calling {@link #log(Level, String)} with {@link Level#ERROR}.
-   * To pass multiple arguments, call {@link #log(Level, JsArrayMixed)}
-   * @deprecated Use {@link #log(Level, String)} or {@link #log(Level, JsArrayMixed)} instead.
+   * To pass multiple arguments, call {@link #logVarArgs(Level, JavaScriptObject)}
+   * @deprecated Use {@link #log(Level, String)} or {@link #logVarArgs(Level, JavaScriptObject)} instead.
    */
   public final native void error(Object arg) /*-{
     this.error && this.error(arg);
@@ -201,8 +202,8 @@ public class JsConsole extends JavaScriptObject {
   /**
    * Informative logging information.  There's no real difference between this method and {@link #logVarArgs} in most browsers.
    * <p>Equivalent to calling {@link #log(Level, String)} with {@link Level#INFO}.
-   * To pass multiple arguments, call {@link #log(Level, JsArrayMixed)}
-   * @deprecated Use {@link #log(Level, String)} or {@link #log(Level, JsArrayMixed)} instead.
+   * To pass multiple arguments, call {@link #logVarArgs(Level, JavaScriptObject)}
+   * @deprecated Use {@link #log(Level, String)} or {@link #logVarArgs(Level, JavaScriptObject)} instead.
    */
   public final native void info(Object arg) /*-{
     this.info && this.info(arg);
@@ -217,8 +218,8 @@ public class JsConsole extends JavaScriptObject {
    * Prints debugging info.  This is the lowest logging output level, and will likely not be displayed by default.
    * In Chrome, you can make these messages visible by selecting the "Verbose" filter level.
    * <p>Equivalent to calling {@link #log(Level, String)} with {@link Level#DEBUG}.
-   * To pass multiple arguments, call {@link #log(Level, JsArrayMixed)}
-   * @deprecated Use {@link #log(Level, String)} or {@link #log(Level, JsArrayMixed)} instead.
+   * To pass multiple arguments, call {@link #logVarArgs(Level, JavaScriptObject)}
+   * @deprecated Use {@link #log(Level, String)} or {@link #logVarArgs(Level, JavaScriptObject)} instead.
    */
   public final native void debug(Object arg) /*-{
     this.debug && this.debug(arg);
@@ -231,8 +232,8 @@ public class JsConsole extends JavaScriptObject {
   /**
    * Writes a message to the console with the visual "warning" icon and color coding and a hyperlink to the line where it was called.
    * <p>Equivalent to calling {@link #log(Level, String)} with {@link Level#WARN}.
-   * To pass multiple arguments, call {@link #log(Level, JsArrayMixed)}
-   * @deprecated Use {@link #log(Level, String)} or {@link #log(Level, JsArrayMixed)} instead.
+   * To pass multiple arguments, call {@link #logVarArgs(Level, JavaScriptObject)}
+   * @deprecated Use {@link #log(Level, String)} or {@link #logVarArgs(Level, JavaScriptObject)} instead.
    */
   public final native void warn(Object arg) /*-{
     this.warn && this.warn(arg);

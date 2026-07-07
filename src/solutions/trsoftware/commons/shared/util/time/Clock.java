@@ -25,6 +25,7 @@ import javax.annotation.Nonnull;
 import java.sql.Timestamp;
 import java.time.Instant;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.atomic.AtomicReference;
@@ -60,6 +61,10 @@ public class Clock {
   @GwtIncompatible
   public static Instant instant() {
     return Instant.ofEpochMilli(currentTimeMillis());
+  }
+  
+  public static Date date() {
+    return new Date(currentTimeMillis());
   }
 
   public static Timestamp timestamp() {

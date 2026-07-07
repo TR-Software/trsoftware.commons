@@ -31,6 +31,7 @@ import com.google.gwt.user.client.rpc.AsyncCallback;
  * @author Alex
  * @since 2/14/2018
  */
+@SuppressWarnings("rawtypes")
 public class SuccessEvent<T> extends RpcEvent<SuccessEvent.Handler> {
 
   /**
@@ -42,9 +43,9 @@ public class SuccessEvent<T> extends RpcEvent<SuccessEvent.Handler> {
     void onSuccess(SuccessEvent<T> event);
   }
 
-  public static final Type<Handler> TYPE = new Type<Handler>();
+  public static final Type<Handler> TYPE = new Type<>();
 
-  private T result;
+  private final T result;
 
   public SuccessEvent(T result) {
     this.result = result;

@@ -188,9 +188,16 @@ public class EnhancedPopup extends PopupPanel implements HasFocusTarget {
    * </pre>
    */
   public void setPopupPositionRelativeToWindowScrollAndSize(final double leftPct, final double topPct) {
-    setPopupPositionRelativeToWindowScroll(
-        (int)(Window.getClientWidth() * leftPct) - (getOffsetWidth() / 2),
-        (int)(Window.getClientHeight() * topPct) - (getOffsetHeight() / 2));
+    int leftOffset = (int)(Window.getClientWidth() * leftPct) - (getOffsetWidth() / 2);
+    int topOffset = (int)(Window.getClientHeight() * topPct) - (getOffsetHeight() / 2);
+    /* adjust the offset for case when window is relatively small compared to the popup size:
+       if the desired left/top percentages are greater than 0, give the popup at least 10px clearance
+     */
+    if (leftOffset <= 0 && leftPct > 0)
+      leftOffset = 10;
+    if (topOffset <= 0 && topPct > 0)
+      topOffset = 10;
+    setPopupPositionRelativeToWindowScroll(leftOffset, topOffset);
   }
 
   /**
@@ -198,8 +205,6 @@ public class EnhancedPopup extends PopupPanel implements HasFocusTarget {
    * rectangle (scroll position) by (x, y) pixels.
    */
   public void setPopupPositionRelativeToWindowScroll(int leftOffset, int topOffset) {
-    //    return getScrollTopNative();
-    //    return getScrollLeftNative();
     setPopupPosition(
         Math.max(0, Window.getScrollLeft() + leftOffset),
         Math.max(0, Window.getScrollTop() + topOffset));

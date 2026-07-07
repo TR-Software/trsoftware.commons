@@ -18,6 +18,7 @@ package solutions.trsoftware.commons.shared.util.stats;
 
 import solutions.trsoftware.commons.shared.util.HasValue;
 
+import javax.annotation.Nullable;
 import java.io.Serializable;
 
 /**
@@ -28,7 +29,7 @@ import java.io.Serializable;
  *
  * @author Alex
  */
-public abstract class AbstractMinMaxComparable<T extends Comparable<T>, R extends AbstractMinMaxComparable<T, R>> implements Serializable, CollectableStats<T, R>, HasValue<T> {
+public abstract class AbstractMinMaxComparable<T extends Comparable<? super T>, R extends AbstractMinMaxComparable<T, R>> implements Serializable, CollectableStats<T, R>, HasValue<T> {
   /** The current max or min value of all the samples that have been given */
   private T best;
 
@@ -54,6 +55,7 @@ public abstract class AbstractMinMaxComparable<T extends Comparable<T>, R extend
   protected abstract int getMultiplier();
 
   @Override
+  @Nullable // null if update hasn't been called yet
   public T getValue() {
     return best;
   }

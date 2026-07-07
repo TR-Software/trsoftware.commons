@@ -28,8 +28,8 @@ public class StringLengthValidationRuleTest extends TestCase {
 
   public void testValidate() throws Exception {
     StringLengthValidationRule rule = new StringLengthValidationRule("foo", 5, 10, false);
-    assertEquals(ValidationResult.error("Foo must be specified"), rule.validate(null));
-    assertEquals(ValidationResult.error("Foo must be specified"), rule.validate(""));
+    assertEquals(ValidationResult.error("Foo is required"), rule.validate(null));
+    assertEquals(ValidationResult.error("Foo is required"), rule.validate(""));
     assertEquals(ValidationResult.error("Foo must be between 5 and 10 characters long"), rule.validate("x"));
     assertEquals(ValidationResult.error("Foo must be between 5 and 10 characters long"), rule.validate(RandomUtils.randString(4)));
     assertEquals(ValidationResult.error("Foo must be between 5 and 10 characters long"), rule.validate(RandomUtils.randString(11)));

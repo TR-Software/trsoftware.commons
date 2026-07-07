@@ -195,7 +195,7 @@ public class BitwiseUtils {
   public static byte getByte(long x, int i) {
     assert i >= 0 && i <= 7;  // using assert instead of Preconditions so that this doesn't slow down prod code
     // Note: this code is based on java.nio.Bits (methods long0 ... long7)
-    return (byte)(x >> (i *8));
+    return (byte)(x >> (i * 8));
   }
 
   /**

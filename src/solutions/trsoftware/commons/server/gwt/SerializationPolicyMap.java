@@ -17,13 +17,16 @@
 package solutions.trsoftware.commons.server.gwt;
 
 import com.google.common.base.MoreObjects;
+import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.ImmutableMap;
 import com.google.gwt.user.client.rpc.RemoteService;
 import com.google.gwt.user.server.rpc.SerializationPolicy;
 import com.google.gwt.user.server.rpc.SerializationPolicyLoader;
 import solutions.trsoftware.commons.server.io.ServerIOUtils;
 import solutions.trsoftware.commons.shared.util.MapUtils;
+import solutions.trsoftware.commons.shared.util.Pair;
 import solutions.trsoftware.commons.shared.util.StringUtils;
+import solutions.trsoftware.commons.shared.util.stats.ArgMax;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -32,11 +35,16 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.text.ParseException;
+import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.BiConsumer;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 import static java.lang.String.format;
 import static java.util.Objects.requireNonNull;
@@ -52,6 +60,8 @@ import static java.util.Objects.requireNonNull;
  * @since 3/3/2023
  */
 public class SerializationPolicyMap {
+
+  private static Logger LOGGER = Logger.getLogger(SerializationPolicyMap.class.getName());
 
   public static final String DEFAULT_DEPLOY_PATH = "/WEB-INF/deploy";
 
@@ -228,7 +238,7 @@ public class SerializationPolicyMap {
           line = line.trim();
           if (line.isEmpty() || line.startsWith("#"))
             continue;
-          success |= parseServiceMapping(line, pattern, serviceNameToPolicyStrongName);
+          success |= parseServiceMapping(line, pattern, serviceNameToPolicyStrongName::put);
         }
       }
     }
@@ -260,25 +270,68 @@ public class SerializationPolicyMap {
    * of the {@code rpcPolicyManifest/manifests} directory
    */
   public static Optional<ImmutableMap<String, String>> readManifestsFromSubdir(@Nonnull ServletContext servletContext, @Nonnull String manifestPath) {
-    boolean success = false;
-    Set<String> manifests = servletContext.getResourcePaths(manifestPath + "/manifests");
-    ImmutableMap.Builder<String, String> serviceNameToPolicyStrongName = null;
-    if (manifests != null) {
-      serviceNameToPolicyStrongName = ImmutableMap.builder();
-      Pattern pattern = Pattern.compile("serviceClass: (\\S*)\\s*path: ((\\S*)\\.gwt\\.rpc).*", Pattern.DOTALL);
-      for (String manifest : manifests) {
-        try (InputStream in = servletContext.getResourceAsStream(manifest)) {
+    Set<String> manifests;
+    if ((manifests = servletContext.getResourcePaths(manifestPath + "/manifests")) != null) {
+      Pattern pattern = Pattern.compile("serviceClass: (\\S*)\\s*path: ((\\S*)\\.gwt\\.rpc).*", Pattern.DOTALL);  // TODO(6/10/2026): extract constant?
+      ArrayListMultimap<String, Pair<String, String>> serviceNameToPolicyMappings = ArrayListMultimap.create();
+
+      for (String resourceName : manifests) {
+        try (InputStream in = servletContext.getResourceAsStream(resourceName)) {
           if (in != null) {
             String manifestText = ServerIOUtils.readCharactersIntoString(in);
-            success |= parseServiceMapping(manifestText, pattern, serviceNameToPolicyStrongName);
+            parseServiceMapping(manifestText, pattern, (serviceName, policyStrongName) -> {
+              serviceNameToPolicyMappings.put(serviceName, Pair.pair(resourceName, policyStrongName));
+            });
           }
         }
         catch (IOException e) {
-          servletContext.log("Error reading " + manifest, e);
+          servletContext.log("Error reading " + resourceName, e);
         }
       }
+      if (!serviceNameToPolicyMappings.isEmpty()) {
+        // remove any duplicate serviceName->policyStrongName entries, in case there are multiple manifest.txt files for the same service
+        // (this could happen with IntelliJ's build artifact command not deleting stale files)
+        ImmutableMap.Builder<String, String> mapBuilder = ImmutableMap.builder();
+        for (String serviceName : serviceNameToPolicyMappings.keySet()) {
+          List<Pair<String, String>> entries = serviceNameToPolicyMappings.get(serviceName);
+          int nMatches = entries.size();
+          if (nMatches == 1) {
+            // only 1 manifest file contained a mapping for this service
+            mapBuilder.put(serviceName, entries.get(0).getValue());
+          }
+          else {
+            assert nMatches > 1;
+            // multiple manifest files contained mappings for this service (which could happen with IntelliJ build artifact command not deleting stale files)
+            // disambiguate by finding the freshest manifest file among the candidates
+            LOGGER.warning(() -> format(
+                "Ambiguous serialization policy mapping for %s (was present in %d different manifest files: %s);\n" +
+                    "  will use the value from the most-recently-modified file",
+                serviceName, nMatches, entries.stream().map(Pair::getKey).collect(Collectors.toList())));
+            ArgMax<String, Long> mostRecentValue = new ArgMax<>();
+            for (Pair<String, String> entry : entries) {
+              String manifestResource = entry.getKey();
+              try {
+                long lastModified = servletContext.getResource(manifestResource).openConnection().getLastModified();
+                mostRecentValue.update(entry.getValue(), lastModified);
+              }
+              catch (IOException ex) {
+                LOGGER.log(Level.WARNING, ex, () -> format("Unable to get last-modified date of manifest resource %s containing policy mapping %s", manifestResource, entry));
+              }
+            }
+            if (mostRecentValue.hasValue()) {
+              //noinspection ConstantConditions (value never null if ArgMax.hasValue returns true)
+              mapBuilder.put(serviceName, mostRecentValue.get());
+            }
+            else {
+              throw new RuntimeException(format("Unable to disambiguate serialization policy mapping for %s among the candidates %s",
+                  serviceName, entries));
+            }
+          }
+        }
+        return Optional.of(mapBuilder.build());
+      }
     }
-    return success ? Optional.of(serviceNameToPolicyStrongName.build()) : Optional.empty();
+    return Optional.empty();
   }
 
   /**
@@ -286,16 +339,17 @@ public class SerializationPolicyMap {
    *
    * @param text the string to match
    * @param pattern the pattern for extracting the serviceClass name (group 0), and policy strong name (group 3)
-   * @param mapBuilder the mapping will be added to this builder
-   * @return {@code true} iff mapping was found and added to the map builder
+   * @param resultConsumer will be invoked with the extracted (<i>serviceClass</i>, <i>policyStrongName</i>)
+   *   pair if the given text matches the regex
+   * @return {@code true} iff mapping was found and was passed to {@code resultConsumer}
    */
-  private static boolean parseServiceMapping(String text, Pattern pattern, ImmutableMap.Builder<String, String> mapBuilder) {
+  private static boolean parseServiceMapping(String text, Pattern pattern, BiConsumer<String, String> resultConsumer) {
     Matcher matcher = pattern.matcher(text);
     if (matcher.matches()) {
       String servletClassName = matcher.group(1);
       String policyFileName = matcher.group(2);
       String policyStrongName = matcher.group(3);
-      mapBuilder.put(servletClassName, policyStrongName);
+      resultConsumer.accept(servletClassName, policyStrongName);
       return true;
     }
     return false;

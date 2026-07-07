@@ -16,6 +16,7 @@
 
 package solutions.trsoftware.commons.shared.util;
 
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Iterators;
 import com.google.common.collect.Lists;
@@ -25,6 +26,7 @@ import solutions.trsoftware.commons.shared.util.compare.ComparisonOperator;
 import solutions.trsoftware.commons.shared.util.iterators.ArrayIterator;
 import solutions.trsoftware.commons.shared.util.iterators.ChainedIterator;
 
+import javax.annotation.Nullable;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Consumer;
@@ -276,7 +278,7 @@ public class CollectionUtils {
   /**
    * Null-safe implementation of {@link Collection#contains(Object)}: trapping any {@link NullPointerException}
    * or {@link ClassCastException} that might result from the argument being {@code null}
-   * (e.g. {@link ConcurrentHashMap#keySet()}) or of the wrong type (e.g. {@link TreeSet}).
+   * (e.g. {@link ConcurrentHashMap#keySet()}) or having the wrong type (e.g. {@link TreeSet}).
    * Returns {@code false} if either exception is thrown.
    *
    * @return true iff collection contains the specified object
@@ -362,8 +364,8 @@ public class CollectionUtils {
    }
 
   /**
-   * @return the first element returned by the given collection's iterator
-   * @throws NoSuchElementException if the collection is empty
+   * @return the first element returned by the given object's iterator
+   * @throws NoSuchElementException if the iterable is empty
    * @see Iterables#getFirst(Iterable, Object)
    */
   public static <T> T first(Iterable<T> iterable) {
@@ -396,23 +398,21 @@ public class CollectionUtils {
 
   /**
    * @param collection a collection of mutually-comparable elements
-   * @return a new list containing the same elements as the given collection, but sorted with {@link Collections#sort(List)}
-   * @see com.google.common.collect.ImmutableList#sortedCopyOf(Iterable)
+   * @return a new list containing the same elements as the given collection, sorted in natural order
+   * @see ImmutableList#sortedCopyOf(Iterable)
    */
   public static <T extends Comparable<? super T>> ArrayList<T> sortedCopy(Collection<T> collection) {
-    ArrayList<T> ret = new ArrayList<>(collection);
-    Collections.sort(ret);
-    return ret;
+    return sortedCopy(collection, null);
   }
 
   /**
    * @param collection a collection of elements comparable with the given {@link Comparator}
    * @param cmp the comparator to determine the order of the result.
-   * A {@code null} value indicates that the elements' <i>natural ordering</i> should be used.
+   *   A {@code null} value indicates that the elements' <i>natural ordering</i> should be used.
    * @return a new list containing the same elements as the given collection, but sorted with {@link Collections#sort(List, Comparator)}
-   * @see com.google.common.collect.ImmutableList#sortedCopyOf(Comparator, Iterable)
+   * @see ImmutableList#sortedCopyOf(Comparator, Iterable)
    */
-  public static <T> ArrayList<T> sortedCopy(Collection<T> collection, Comparator<? super T> cmp) {
+  public static <T> ArrayList<T> sortedCopy(Collection<T> collection, @Nullable Comparator<? super T> cmp) {
     ArrayList<T> ret = new ArrayList<>(collection);
     ret.sort(cmp);
     return ret;

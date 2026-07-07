@@ -34,11 +34,12 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.*;
 import java.util.function.*;
+import java.util.stream.Stream;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Strings.lenientFormat;
+import static java.util.stream.Collectors.toList;
 import static junit.framework.Assert.*;
-import static solutions.trsoftware.commons.shared.util.CollectionUtils.asList;
 import static solutions.trsoftware.commons.shared.util.CollectionUtils.first;
 
 /**
@@ -238,7 +239,7 @@ public abstract class AssertUtils {
 
   /**
    * Generates the same message as {@link Assert#format(java.lang.String, java.lang.Object, java.lang.Object)}.
-   * Adhering to this message format allows the IntelliJ to show diffs for this type of failure.
+   * Adhering to this message format allows the IDE to show visual diffs for this type of failure.
    *
    * @return a message that can be passed to the {@link AssertionFailedError} constructor
    */
@@ -261,31 +262,43 @@ public abstract class AssertUtils {
     assertEquals(expected, actual);
   }
 
+  /**
+   * Asserts that both enumerations return equivalent sequences of elements
+   */
   public static void assertSameSequence(Enumeration<?> expected, Enumeration<?> actual) {
-    while (true) {
-      if (!expected.hasMoreElements()) {
-        assertFalse(actual.hasMoreElements());
-        break;  // both enums are finished
-      }
-      assertTrue(actual.hasMoreElements());
-      assertEquals(expected.nextElement(), actual.nextElement());
-    }
+    assertSameSequence(Iterators.forEnumeration(expected), Iterators.forEnumeration(actual));
   }
 
   /**
    * Asserts that both iterators return equivalent sequences of elements
    * @see Iterators#elementsEqual(Iterator, Iterator)
    */
-  public static <T> void assertSameSequence(Iterator<T> expected, Iterator<T> actual) {
-    assertEquals(asList(expected), asList(actual));
+  public static void assertSameSequence(Iterator<?> expected, Iterator<?> actual) {
+    int i;
+    for (i = 0; expected.hasNext(); i++) {
+      assertTrue("Sequence contains fewer elements than expected (" + i + ")", actual.hasNext());
+      Object e1 = expected.next();
+      Object e2 = actual.next();
+      if (!Objects.equals(e1, e2)) {
+        failNotEquals("Sequences differ on element " + i, e1, e2);
+      }
+    }
+    assertFalse("Sequence contains more elements than expected (" + i + ")", actual.hasNext());
   }
 
   /**
    * Asserts that both iterables return equivalent sequences of elements
    * @see Iterables#elementsEqual(Iterable, Iterable)
    */
-  public static <T> void assertSameSequence(Iterable<T> expected, Iterable<T> actual) {
-    assertEquals(asList(expected), asList(actual));
+  public static void assertSameSequence(Iterable<?> expected, Iterable<?> actual) {
+    assertSameSequence(expected.iterator(), actual.iterator());
+  }
+
+  /**
+   * Asserts that both streams produce equivalent sequences of elements
+   */
+  public static void assertSameSequence(Stream<?> expected, Stream<?> actual) {
+    assertSameSequence(expected.iterator(), actual.iterator());
   }
 
   public static void assertSameSize(Map<?, ?> expected, Map<?, ?> actual) {
@@ -616,6 +629,18 @@ public abstract class AssertUtils {
     assertTrue(Iterables.isEmpty(iterable));
   }
 
+  /**
+   * Asserts that the given optional is equal to {@link Optional#empty()}.
+   * This is equivalent to <pre>assertFalse(optional.{@link Optional#isPresent() isPresent()})</pre>
+   *
+   * @param optional
+   */
+  @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
+  public static void assertEmpty(Optional<?> optional) {
+    // Note: using assertEquals instead of assertFalse(optional.isPresent()) to get a more-detailed failure message
+    assertEquals(Optional.empty(), optional);
+  }
+
   public static void assertEmpty(String message, Iterable<?> iterable) {
     if (!Iterables.isEmpty(iterable)) {
       fail(message + " should be empty; actual: " + iterable);
@@ -914,6 +939,15 @@ public abstract class AssertUtils {
   }
 
   /**
+   * Asserts that a list produced from the given stream equals {@code expected}.
+   * The stream is consumed by this method.
+   */
+  public static <T> void assertStreamEquals(List<T> expected, Stream<T> stream) {
+    // TODO: maybe more efficient to invoke assertSameSequence(expected.iterator(), stream.iterator())?
+    assertEquals(expected, stream.collect(toList()));
+  }
+
+  /**
    * Similar to {@link Assert#assertEquals(Object, Object)}, but uses the given predicate instead of
    * {@link Object#equals(Object)} to compare the given objects.
    *
@@ -933,6 +967,28 @@ public abstract class AssertUtils {
     // TODO: should this first perform the same null checks as Assert.assertEquals(String, Object, Object)?
     if (!equalityPredicate.test(expected, actual))
       failNotEquals(message, expected, actual);
+  }
+
+  @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
+  public static <T> void assertOptionalsEqual(Optional<T> expected, Optional<T> actual, BiPredicate<T, T> equalityPredicate) {
+    // TODO(3/16/2026): experimental - doc this if end up keeping it
+    if (!expected.isPresent())
+      assertFalse(actual.isPresent());
+    else {
+      assertTrue(actual.isPresent());
+      assertEqual(expected.get(), actual.get(), equalityPredicate);
+    }
+  }
+
+  @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
+  public static <T> void assertOptionalsEqual(Optional<T> expected, Optional<T> actual, BiConsumer<T, T> valueAssertion) {
+    // TODO(3/16/2026): experimental - doc this if end up keeping it
+    if (!expected.isPresent())
+      assertFalse(actual.isPresent());
+    else {
+      assertTrue(actual.isPresent());
+      valueAssertion.accept(expected.get(), actual.get());
+    }
   }
 
   /**
@@ -1003,7 +1059,6 @@ public abstract class AssertUtils {
   public static <T> Consumer<T> assertWithRetry(Consumer<T> assertion) {
     return t -> assertWithRetries(1, FunctionalUtils.partial(assertion, t));
   }
-
 
   /**
    * Allows chaining assertions (sort of like a simpler version of the AssertJ library).

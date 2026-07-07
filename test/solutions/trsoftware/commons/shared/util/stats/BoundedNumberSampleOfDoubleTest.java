@@ -67,7 +67,7 @@ public class BoundedNumberSampleOfDoubleTest extends BaseTestCase {
   }
 
   private void verifySample(BoundedNumberSampleOfDouble sample, List<Double> values) {
-    FluentList<Double> expected = FluentList.from(values);
+    FluentList<Double> expected = FluentList.wrap(values);
     int size = expected.size();
     assertEquals(size, sample.size());
     assertEquals(expected, sample.asList());

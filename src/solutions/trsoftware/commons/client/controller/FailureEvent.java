@@ -21,7 +21,7 @@ import com.google.gwt.user.client.rpc.AsyncCallback;
 /**
  * Fired from {@link BaseRpcAction#onFailure(Throwable)}.
  *
- * Encapsulates the exception thrown by the RPC call, which can be obtained by calling {@link #getReason()}.
+ * Encapsulates the exception thrown by the RPC call, which can be obtained by calling {@link #getException()}.
  * The action instance that fired this event can be obtained by calling {@link #getSource()}
  *
  * @see AsyncCallback#onFailure(Throwable)
@@ -31,7 +31,7 @@ import com.google.gwt.user.client.rpc.AsyncCallback;
  */
 public class FailureEvent extends RpcEvent<FailureEvent.Handler> {
 
-  private final Throwable reason;
+  private final Throwable exception;
 
   /**
    * Handles the {@link FailureEvent} fired by {@link BaseRpcAction#onFailure(Throwable)}
@@ -42,12 +42,12 @@ public class FailureEvent extends RpcEvent<FailureEvent.Handler> {
 
   public static final Type<Handler> TYPE = new Type<Handler>();
 
-  public FailureEvent(Throwable reason) {
-    this.reason = reason;
+  public FailureEvent(Throwable exception) {
+    this.exception = exception;
   }
 
-  public Throwable getReason() {
-    return reason;
+  public Throwable getException() {
+    return exception;
   }
 
   @Override

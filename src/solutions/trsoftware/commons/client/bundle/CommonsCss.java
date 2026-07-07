@@ -79,6 +79,8 @@ public interface CommonsCss extends CssResource {
 
   String fieldErrorMsg();
 
+  String fieldErrorHighlight();
+
   String ErrorMessagePopup();
 
   String trPopupDialog();
@@ -112,4 +114,10 @@ public interface CommonsCss extends CssResource {
   String glassBackground();
 
   String contentSection();
+
+  @ClassName("gwt-CheckBox")
+  String gwtCheckBox();
+
+  @ClassName("gwt-RadioButton")
+  String gwtRadioButton();
 }

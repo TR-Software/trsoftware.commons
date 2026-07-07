@@ -35,7 +35,7 @@ public class ReflectionPredicates {
    *
    * @see ReflectionUtils#hasDeclaredAnnotation(Class, AnnotatedElement)
    */
-  public static Predicate<AnnotatedElement> mustHaveDeclaredAnnotation(Class<? extends Annotation> ann) {
+  public static Predicate<AnnotatedElement> hasDeclaredAnnotation(Class<? extends Annotation> ann) {
     return annotatedElement -> annotatedElement.getDeclaredAnnotation(ann) != null;
   }
 
@@ -46,7 +46,7 @@ public class ReflectionPredicates {
    * (this is similar to the generic type expression {@code <T extends superClass>})
    * @see Class#isAssignableFrom(Class)
    */
-  public static Predicate<Class<?>> mustBeSubclassOf(Class<?> superClass) {
+  public static Predicate<Class<?>> isSubclassOf(Class<?> superClass) {
     return superClass::isAssignableFrom;
   }
 }

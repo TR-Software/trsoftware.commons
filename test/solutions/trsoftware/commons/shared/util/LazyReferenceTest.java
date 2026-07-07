@@ -18,6 +18,13 @@ package solutions.trsoftware.commons.shared.util;
 
 import solutions.trsoftware.commons.shared.BaseTestCase;
 
+import java.util.IdentityHashMap;
+import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
+import java.util.stream.Stream;
+
 /**
  * @author Alex
  * @since 1/22/2023
@@ -47,7 +54,7 @@ public class LazyReferenceTest extends BaseTestCase {
     boolean created;
     T toCreate;
 
-    public MockLazyReference(T toCreate) {
+    MockLazyReference(T toCreate) {
       this.toCreate = toCreate;
     }
 
@@ -59,4 +66,22 @@ public class LazyReferenceTest extends BaseTestCase {
       return toCreate;
     }
   }
+
+  public void testMultithreaded() throws Exception {
+    // run this loop a number of times to account for multiple
+    for (int i = 0; i < 20; i++) {
+      AtomicInteger nextInt = new AtomicInteger();
+      LazyReference<Integer> lazyRef = LazyReference.fromSupplier(nextInt::incrementAndGet);
+      Stream<Integer> valueStream = IntStream.range(0, 50).parallel().mapToObj(__ -> lazyRef.get());
+      List<Integer> values = valueStream.collect(Collectors.toList());
+      System.out.println("Returned values: " + values);
+      // all invocations of lazyRef.get should've returned the same Integer instance
+      // (i.e. the int computed by the 1st thread that invoked lazyRef.get)
+      IdentityHashMap<Integer, Integer> instanceCounts = new IdentityHashMap<>();
+      values.forEach(value -> instanceCounts.merge(value, 1, Integer::sum));
+      System.out.println("instanceCounts = " + instanceCounts);
+      assertEquals(1, instanceCounts.size());
+    }
+  }
+
 }

@@ -17,7 +17,7 @@
 
 package solutions.trsoftware.commons.client.useragent;
 
-import com.google.common.base.Predicate;
+import com.google.common.collect.ImmutableMap;
 import junit.framework.TestCase;
 import solutions.trsoftware.commons.server.io.ResourceLocator;
 import solutions.trsoftware.commons.shared.util.VersionNumber;
@@ -26,9 +26,12 @@ import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Predicate;
 
+import static com.google.common.base.Strings.lenientFormat;
 import static solutions.trsoftware.commons.client.useragent.UserAgent.parseVersionNumber;
 import static solutions.trsoftware.commons.server.io.ServerIOUtils.readLines;
+import static solutions.trsoftware.commons.shared.util.StringUtils.methodCallToString;
 
 /**
  * Dec 14, 2008
@@ -49,14 +52,11 @@ public class UserAgentJavaTest extends TestCase {
 
   public void testIsIE() throws Exception {
     // load all the strings expected to match Firefox
-    List<String> positiveExamples = new ArrayList<String>();
-    positiveExamples.addAll(readLinesFromFile("ie.txt"));
-
-    List<String> negativeExamples = new ArrayList<String>();
-    negativeExamples.addAll(readLinesFromFile("ff.txt"));
+    List<String> positiveExamples = new ArrayList<>(readLinesFromFile("ie.txt"));
+    List<String> negativeExamples = new ArrayList<>(readLinesFromFile("ff.txt"));
 
     // Opera and Safari can emulate IE - make an exception for these strings
-    List<String> safariAndOperaStrings = readLinesFromFile("safari.txt");
+    List<String> safariAndOperaStrings = new ArrayList<>(readLinesFromFile("safari.txt"));
     safariAndOperaStrings.addAll(readLinesFromFile("opera.txt"));
     for (String s : safariAndOperaStrings) {
       String sl = s.toLowerCase();
@@ -66,21 +66,17 @@ public class UserAgentJavaTest extends TestCase {
         negativeExamples.add(s);
     }
 
-    checkPredicate(positiveExamples, negativeExamples, new Predicate<String>() {
-      public boolean apply(String str) {
-        return new UserAgent(str).isIE();
-      }
-    });
+    checkPredicate(positiveExamples, negativeExamples, str -> new UserAgent(str).isIE());
   }
 
   private void checkPredicate(List<String> positiveStrings, List<String> negativeStrings, Predicate<String> predicate) {
     assertTrue(positiveStrings.size() > 5);
     assertTrue(negativeStrings.size() > 5);
     for (String str : positiveStrings) {
-      assertTrue("UA expected to pass: " + str, predicate.apply(str));
+      assertTrue("UA expected to pass: " + str, predicate.test(str));
     }
     for (String str : negativeStrings) {
-      assertFalse("UA expected to fail: " + str, predicate.apply(str));
+      assertFalse("UA expected to fail: " + str, predicate.test(str));
     }
   }
 
@@ -100,7 +96,7 @@ public class UserAgentJavaTest extends TestCase {
         // 1) test the static version of the method
         {
           VersionNumber result = parseVersionNumber(uaString, arg);
-          System.out.printf("Parsed %s version %s from '%s'%n", browserName, result, uaString);
+          System.out.println(lenientFormat("Parsed %s version %s from '%s'", browserName, result, uaString));
           assertEquals(expectations.get(browserName), result);
         }
         // 2) test the instance version of the method
@@ -112,4 +108,36 @@ public class UserAgentJavaTest extends TestCase {
     }
   }
 
+  public void testParseVersionNumbers() throws Exception {
+    // Chrome 67:
+    testParseVersionNumbers(
+        "Mozilla/5.0 (Windows NT 6.3; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/67.0.3396.99 Safari/537.36",
+        ImmutableMap.of(
+            "Mozilla", new VersionNumber(5, 0),
+            "AppleWebKit", new VersionNumber(537, 36),
+            "Chrome", new VersionNumber(67, 0, 3396, 99),
+            "Safari", new VersionNumber(537, 36)
+        )
+    );
+    // IE 11:
+    testParseVersionNumbers(
+        "Mozilla/5.0 (Windows NT 6.3; WOW64; Trident/7.0; .NET4.0E; .NET4.0C; .NET CLR 3.5.30729; .NET CLR 2.0.50727; .NET CLR 3.0.30729; MALCJS; Zoom 3.6.0; rv:11.0) like Gecko",
+        ImmutableMap.of(
+            "Mozilla", new VersionNumber(5),
+            "Trident", new VersionNumber(7)
+        )
+    );
+
+  }
+
+  private void testParseVersionNumbers(String uaString, Map<String, VersionNumber> expected) {
+    // 1) static method
+    System.out.println(methodCallToString("parseVersionNumbers", uaString));
+    ImmutableMap<String, VersionNumber> result = UserAgent.parseVersionNumbers(uaString);
+    System.out.println("  -> " + result);
+    assertEquals(expected, result);
+
+    // 2) instance method
+    assertEquals(expected, new UserAgent(uaString).parseVersionNumbers());
+  }
 }

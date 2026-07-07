@@ -19,9 +19,12 @@ package solutions.trsoftware.commons.shared.util;
 import com.google.common.collect.Iterators;
 import com.google.gwt.core.shared.GwtIncompatible;
 import junit.framework.TestCase;
+import solutions.trsoftware.commons.shared.io.TablePrinter;
 
 import java.util.*;
 
+import static java.util.Arrays.asList;
+import static java.util.Collections.emptyList;
 import static org.junit.Assert.assertArrayEquals;
 import static solutions.trsoftware.commons.shared.testutil.AssertUtils.*;
 import static solutions.trsoftware.commons.shared.util.StringUtils.*;
@@ -76,7 +79,7 @@ public class StringUtilsTest extends TestCase {
    */
   public static final String RTL_OVERRIDE = "\u202E";
 
-  public void testTemplate() throws Exception {
+  public void testTemplate() {
     assertEquals("x-y+x", template("$1-$2+$1", "x", "y"));
     assertEquals("\\w+@example.com", template("$1@$2.com", "\\w+", "example"));
     assertEquals("foo$bar", template("$1$$2", "foo", "bar"));
@@ -86,7 +89,7 @@ public class StringUtilsTest extends TestCase {
     assertEquals("foo$xfoo$$bar$", template("foo$x$1$$$2$", "foo", "bar"));
   }
 
-  public void testStripSuffix() throws Exception {
+  public void testStripSuffix() {
     assertEquals("foo", stripSuffix("foo,", ","));
     assertEquals("foo", stripSuffix("foo", ","));
     assertEquals("foo", stripSuffix("foobar", "bar"));
@@ -96,7 +99,7 @@ public class StringUtilsTest extends TestCase {
     assertEquals("foo", stripSuffix("foo", ""));
   }
 
-  public void testStripPrefix() throws Exception {
+  public void testStripPrefix() {
     assertEquals("foo", stripPrefix(",foo", ","));
     assertEquals("foo", stripPrefix("foo", ","));
     assertEquals("bar", stripPrefix("foobar", "foo"));
@@ -106,7 +109,7 @@ public class StringUtilsTest extends TestCase {
     assertEquals("foo", stripPrefix("foo", ""));
   }
 
-  public void testRepeat() throws Exception {
+  public void testRepeat() {
     // test the version taking a char arg
     assertEquals("", repeat('a', 0));
     assertEquals("a", repeat('a', 1));
@@ -126,7 +129,7 @@ public class StringUtilsTest extends TestCase {
     assertEquals(repeat(SEE_NO_EVIL, 3), repeat(SEE_NO_EVIL.codePointAt(0), 3));
   }
 
-  public void testConstantNameToTitleCase() throws Exception {
+  public void testConstantNameToTitleCase() {
     assertEquals("Foo bar", constantNameToTitleCase("FOO_BAR"));
     assertEquals("Foo bar baz", constantNameToTitleCase("FOO_BAR_BAZ"));
     assertEquals("Foo", constantNameToTitleCase("FOO"));
@@ -142,7 +145,7 @@ public class StringUtilsTest extends TestCase {
    * Test a few strings of length 0..10 and check them for length, alphabet, and
    * degree of randomness
    */
-  public void testRandString() throws Exception {
+  public void testRandString() {
     int iterations = 5;
     for (int len = 0; len < 10; len++) {
       for (int i = 0; i < iterations; i++) {
@@ -165,7 +168,7 @@ public class StringUtilsTest extends TestCase {
     System.out.println("Successfully generated all possible characters in [A-Za-z]: " + charSet.toString());
   }
 
-  public void testToCamelCase() throws Exception {
+  public void testToCamelCase() {
     assertEquals(null, toCamelCase(null, "_"));
     assertEquals("", toCamelCase("", "_"));
     assertEquals("mystring", toCamelCase("MYSTRING", "_"));
@@ -193,19 +196,19 @@ public class StringUtilsTest extends TestCase {
     assertEquals("greaterThanOrEqualTo", toCamelCase("greater than or equal to", " "));
   }
 
-  public void testNotBlank() throws Exception {
+  public void testNotBlank() {
     assertTrue(notBlank("a"));
     assertFalse(notBlank(""));
     assertFalse(notBlank(null));
   }
 
-  public void testIsBlank() throws Exception {
+  public void testIsBlank() {
     assertFalse(isBlank("a"));
     assertTrue(isBlank(""));
     assertTrue(isBlank(null));
   }
 
-  public void testCount() throws Exception {
+  public void testCount() {
     assertEquals(0, count(null, 'a'));
     assertEquals(0, count("", 'a'));
     assertEquals(1, count("a", 'a'));
@@ -213,7 +216,7 @@ public class StringUtilsTest extends TestCase {
     assertEquals(3, count("java.util.function.Function", '.'));
   }
 
-  public void testAbbreviate() throws Exception {
+  public void testAbbreviate() {
     // 1 - test the default version of the method
     // 1.1 - test some unusual arg values
     for (int i = -100; i < 100; i++) {
@@ -273,7 +276,7 @@ public class StringUtilsTest extends TestCase {
     assertEquals("", abbreviate("abcd", 0, ".."));
   }
 
-  public void testTruncate() throws Exception {
+  public void testTruncate() {
     for (int i = 0; i < 100; i++) {
       assertNull(truncate(null, i));
     }
@@ -292,9 +295,9 @@ public class StringUtilsTest extends TestCase {
     assertEquals("abcdef", truncate("abcdef", 9));
   }
 
-  public void testJoin() throws Exception {
+  public void testJoin() {
     assertEquals("a,b,c,d", StringUtils.<String>join(",", "a", "b", "c", "d"));
-    assertEquals("a,b,c,d", join(",", Arrays.asList("a", "b", "c", "d")));
+    assertEquals("a,b,c,d", join(",", asList("a", "b", "c", "d")));
     assertEquals("a - b - c - d", join(" - ", "a", "b", "c", "d"));
     assertEquals("a", join(" - ", "a"));
     assertEquals("", join(" - ", ""));
@@ -307,16 +310,16 @@ public class StringUtilsTest extends TestCase {
     assertEquals("", join(", ", ", and ", Collections.emptyIterator()));
   }
 
-  public void testJoinEnumerated() throws Exception {
-    assertEquals("a, b, c, and d", joinEnumerated(",", "and", Arrays.asList("a", "b", "c", "d")));
-    assertEquals("a, b, or c", joinEnumerated(",", "or", Arrays.asList("a", "b", "c")));
-    assertEquals("a and b", joinEnumerated(",", "and", Arrays.asList("a", "b")));
+  public void testJoinEnumerated() {
+    assertEquals("a, b, c, and d", joinEnumerated(",", "and", asList("a", "b", "c", "d")));
+    assertEquals("a, b, or c", joinEnumerated(",", "or", asList("a", "b", "c")));
+    assertEquals("a and b", joinEnumerated(",", "and", asList("a", "b")));
     assertEquals("a", joinEnumerated(",", "and", Collections.singletonList("a")));
-    assertEquals("", joinEnumerated(",", "and", Collections.emptyList()));
+    assertEquals("", joinEnumerated(",", "and", emptyList()));
   }
 
   @SuppressWarnings("ConstantConditions")
-  public void testJoinNullable() throws Exception {
+  public void testJoinNullable() {
     assertNull(joinNullable(" ", null, null));
     assertEquals("foo", joinNullable(" ", "foo", null));
     assertEquals("foo", joinNullable(" ", null, "foo"));
@@ -324,7 +327,7 @@ public class StringUtilsTest extends TestCase {
   }
 
   @SuppressWarnings("ConstantConditions")
-  public void testLastIntegerInString() throws Exception {
+  public void testLastIntegerInString() {
     assertEquals(0, (int)lastIntegerInString("0"));
     assertEquals(1, (int)lastIntegerInString("1"));
     assertEquals(1, (int)lastIntegerInString("a1"));
@@ -342,14 +345,14 @@ public class StringUtilsTest extends TestCase {
     assertNull(lastIntegerInString("aba asdf cwer &(*&!"));
   }
 
-  public void testQuantity() throws Exception {
+  public void testQuantity() {
     assertEquals("1 second", quantity(1, "second"));
     assertEquals("2 seconds", quantity(2, "second"));
     assertEquals("0 seconds", quantity(0, "second"));
     assertEquals("-1 seconds", quantity(-1, "second"));
   }
 
-  public void testPluralize() throws Exception {
+  public void testPluralize() {
     // 1) test regular words
     assertEquals("foo", pluralize("foo", 1));
     assertEquals("foos", pluralize("foo", 2));
@@ -362,7 +365,7 @@ public class StringUtilsTest extends TestCase {
     assertEquals("Are", pluralize("Is", -1)); // the result should be capitalized if the argument is
   }
 
-  public void testCommonPrefix() throws Exception {
+  public void testCommonPrefix() {
     // the examples have no common prefix
     assertEquals("", commonPrefix("", ""));
     assertEquals("", commonPrefix("", "b"));
@@ -402,7 +405,7 @@ public class StringUtilsTest extends TestCase {
     }
   }
 
-  public void testCommonSuffix() throws Exception {
+  public void testCommonSuffix() {
     // the examples have no common suffix
     assertEquals("", commonSuffix("", ""));
     assertEquals("", commonSuffix("", "b"));
@@ -442,13 +445,13 @@ public class StringUtilsTest extends TestCase {
     }
   }
 
-  public void testAppendSurrounded() throws Exception {
+  public void testAppendSurrounded() {
     assertEquals("'a'", appendSurrounded(new StringBuilder(), "a", "'").toString());
     assertEquals("'a'", appendSurrounded(new StringBuilder(), 'a', "'").toString());
     assertEquals("abc1234abc", appendSurrounded(new StringBuilder(), 1234, "abc").toString());
   }
 
-  public void testAppendArgs() throws Exception {
+  public void testAppendArgs() {
     assertEquals("\"a\"", appendArgs(new StringBuilder(), "a").toString());
     assertEquals("'a'", appendArgs(new StringBuilder(), 'a').toString());
     assertEquals("1", appendArgs(new StringBuilder(), 1).toString());
@@ -458,19 +461,19 @@ public class StringUtilsTest extends TestCase {
     assertEquals("[a, 1]", appendArgs(new StringBuilder(), (Object)new Object[]{"a", 1}).toString());  // the "a" isn't quoted because the array is passed to Arrays.toString
     assertEquals("\"foo\", \"a\", 'b', 123, 45.6, [1, 2], [[foo, bar], [3.4, 5.6]]", // the "foo" and "bar" aren't quoted because the nested arrays are passed to Arrays.toString
         appendArgs(new StringBuilder(), "foo", "a", 'b', 123, 45.6, new int[]{1, 2},
-            new Object[]{Arrays.asList("foo", "bar"), Arrays.asList(3.4, 5.6)}).toString());
+            new Object[]{asList("foo", "bar"), asList(3.4, 5.6)}).toString());
   }
 
-  public void testMethodCallToString() throws Exception {
+  public void testMethodCallToString() {
     assertEquals("a(1)", methodCallToString("a", 1));
     assertEquals("a(\"b\")", methodCallToString("a", "b"));
     assertEquals("a('b')", methodCallToString("a", 'b'));
     assertEquals("foo(\"a\", 'b', 123, 45.6, [1, 2], [[foo, bar], [3.4, 5.6]])", // the "foo" and "bar" aren't quoted because the nested arrays are passed to Arrays.toString
         methodCallToString("foo", "a", 'b', 123, 45.6, new int[]{1, 2},
-            new Object[]{Arrays.asList("foo", "bar"), Arrays.asList(3.4, 5.6)}));
+            new Object[]{asList("foo", "bar"), asList(3.4, 5.6)}));
   }
 
-  public void testReverse() throws Exception {
+  public void testReverse() {
     assertEquals("", reverse(""));
     assertEquals("a", reverse("a"));
     assertEquals("ba", reverse("ab"));
@@ -479,7 +482,7 @@ public class StringUtilsTest extends TestCase {
     assertEquals("edcba", reverse("abcde"));
   }
 
-  public void testSubstringBefore() throws Exception {
+  public void testSubstringBefore() {
     assertEquals("", substringBefore("", "x"));
     assertEquals("a", substringBefore("a", "x"));
     assertEquals("a", substringBefore("ax", "x"));
@@ -489,7 +492,7 @@ public class StringUtilsTest extends TestCase {
     assertEquals("abx", substringBefore("abxaxa", "ax"));
   }
 
-  public void testSubstringAfter() throws Exception {
+  public void testSubstringAfter() {
     assertEquals("", substringAfter("", "x"));
     assertEquals("a", substringAfter("a", "x"));
     assertEquals("a", substringAfter("xa", "x"));
@@ -499,7 +502,7 @@ public class StringUtilsTest extends TestCase {
     assertEquals("b", substringAfter("abxab", "xa"));
   }
 
-  public void testSubstringBetween() throws Exception {
+  public void testSubstringBetween() {
     assertEquals("", substringBetween("", "x", "X"));
     assertEquals("", substringBetween("x", "x", "X"));
     assertEquals("", substringBetween("X", "x", "X"));
@@ -511,36 +514,44 @@ public class StringUtilsTest extends TestCase {
     assertEquals("cab", substringBetween("cabXd", "x", "X"));
   }
 
-  public void testSplitAndTrim() throws Exception {
-    assertEquals(Arrays.asList("a", "b", "c"), splitAndTrim("a,b,c", ","));
-    assertEquals(Arrays.asList("a", "b", "c"), splitAndTrim("  a  ,b,   c", ","));
-    assertEquals(Arrays.asList("a", "b", "c"), splitAndTrim("a,  b  ,c,,", ","));
-    assertEquals(Arrays.asList("a"), splitAndTrim("a", ","));
-    assertEquals(Arrays.asList("a"), splitAndTrim("  a  ", ","));
-    assertEquals(Arrays.asList("a"), splitAndTrim("  a , , ,,, ", ","));
-    assertEquals(Collections.<String>emptyList(), splitAndTrim("", ","));
-    assertEquals(Collections.<String>emptyList(), splitAndTrim("  ", ","));
-    assertEquals(Collections.<String>emptyList(), splitAndTrim("  , , ,,, ", ","));
+  public void testSplitAndTrim() {
+    testSplitAndTrim(asList("a", "b", "c"), "a,b,c", ",");
+    testSplitAndTrim(asList("a", "b", "c"), "  a  ,b,   c", ",");
+    testSplitAndTrim(asList("a", "b", "c"), "a,  b  ,c,,", ",");
+    testSplitAndTrim(asList("a"), "a", ",");
+    testSplitAndTrim(asList("a"), "  a  ", ",");
+    testSplitAndTrim(asList("a"), "  a , , ,,, ", ",");
+    testSplitAndTrim(emptyList(), "", ",");
+    testSplitAndTrim(emptyList(), "  ", ",");
+    testSplitAndTrim(emptyList(), "  , , ,,, ", ",");
   }
 
-  public void testSplit() throws Exception {
+  private void testSplitAndTrim(List<String> expected, String str, String delim) {
+    assertEquals(expected, splitAndTrim(str, delim));
+    // test the Consumer version the method (splitAndTrim(String, String, Consumer<String>)
+    ArrayList<String> accumulator = new ArrayList<>();
+    assertEquals(expected.size(), splitAndTrim(str, delim, accumulator::add));
+    assertEquals(expected, accumulator);
+  }
+
+  public void testSplit() {
     // test a delimiter of length 1
-    checkSplitResult(Arrays.asList("a", "b", "c"), "a,b,c", ",");
+    checkSplitResult(asList("a", "b", "c"), "a,b,c", ",");
     // test a delimiter that is not a valid regex (String#split would either not work or throw exception in this case)
-    checkSplitResult(Arrays.asList("a", "b", "c"), "a$b$c", "$", false);
-    checkSplitResult(Arrays.asList("a", "b", "c"), "a(.b(.c", "(.", false);
+    checkSplitResult(asList("a", "b", "c"), "a$b$c", "$", false);
+    checkSplitResult(asList("a", "b", "c"), "a(.b(.c", "(.", false);
     // test some delimiters of length > 1
-    checkSplitResult(Arrays.asList("a", "b", "c"), "a__b__c", "__");
-    checkSplitResult(Arrays.asList("a", "b", "c"), "a___b___c", "___");
+    checkSplitResult(asList("a", "b", "c"), "a__b__c", "__");
+    checkSplitResult(asList("a", "b", "c"), "a___b___c", "___");
     // test no delimiters
     checkSplitResult(Collections.singletonList(""), "", "_");
     checkSplitResult(Collections.singletonList("foo"), "foo", "_");
     // test repeated delimiters
     // (empty tokens should be returned in-between the delimiters, to match the functionality of String#split)
-    checkSplitResult(Arrays.asList("a","","","b","","","c"), "a___b___c", "_");
+    checkSplitResult(asList("a","","","b","","","c"), "a___b___c", "_");
     // test delimiters in the beginning and end of the string
     // (empty tokens should be returned at the beginning, but not at the end, to match the functionality of String#split)
-    checkSplitResult(Arrays.asList("","","a","","","b","","","c","","",""), "__a___b___c___", "_");
+    checkSplitResult(asList("","","a","","","b","","","c","","",""), "__a___b___c___", "_");
   }
 
   /**
@@ -551,7 +562,7 @@ public class StringUtilsTest extends TestCase {
   private static void checkSplitResult(List<String> expected, String str, String separator, boolean compareWithRegex) {
     assertEquals(expected, split(str, separator));
     if (compareWithRegex)
-      assertEquals(expected, Arrays.asList(str.split(separator, -1)));
+      assertEquals(expected, asList(str.split(separator, -1)));
   }
 
   /**
@@ -562,44 +573,44 @@ public class StringUtilsTest extends TestCase {
     checkSplitResult(expected, str, separator, true);
   }
 
-  public void testAsList() throws Exception {
-    assertEquals(Collections.<Character>emptyList(), asList(""));
-    assertEquals(Arrays.asList('a'), asList("a"));
-    assertEquals(Arrays.asList('a', 'b'), asList("ab"));
-    assertEquals(Arrays.asList('a', 'b', 'c'), asList("abc"));
+  public void testAsList() {
+    assertEquals(Collections.<Character>emptyList(), StringUtils.asList(""));
+    assertEquals(asList('a'), StringUtils.asList("a"));
+    assertEquals(asList('a', 'b'), StringUtils.asList("ab"));
+    assertEquals(asList('a', 'b', 'c'), StringUtils.asList("abc"));
   }
 
-  public void testSorted() throws Exception {
+  public void testSorted() {
     assertEquals("", sorted(""));
     assertEquals("x", sorted("x"));
     assertEquals("adfs", sorted("asdf"));
     assertEquals("eiopqrtuwy", sorted("qwertyuiop"));
   }
 
-  public void testToCharacterSet() throws Exception {
-    assertEquals(new ArrayList<>(toCharacterSet("asdfasdf")), Arrays.asList('a', 's', 'd', 'f'));
-    assertEquals(new ArrayList<>(toCharacterSet("fasdfasdf")), Arrays.asList('f', 'a', 's', 'd'));
+  public void testToCharacterSet() {
+    assertEquals(new ArrayList<>(toCharacterSet("asdfasdf")), asList('a', 's', 'd', 'f'));
+    assertEquals(new ArrayList<>(toCharacterSet("fasdfasdf")), asList('f', 'a', 's', 'd'));
   }
 
-  public void testToCharacterCollection() throws Exception {
+  public void testToCharacterCollection() {
     // to List
-    assertEquals(Collections.emptyList(), toCharacterCollection("", ArrayList::new));
-    assertEquals(Arrays.asList('a', 's', 'd', 'f', 'a', 's'), toCharacterCollection("asdfas", ArrayList::new));
+    assertEquals(emptyList(), toCharacterCollection("", ArrayList::new));
+    assertEquals(asList('a', 's', 'd', 'f', 'a', 's'), toCharacterCollection("asdfas", ArrayList::new));
 
     // to Set (insertion-ordered)
-    assertSameSequence(Arrays.asList('a', 's', 'd', 'f'), toCharacterCollection("asdfas", LinkedHashSet::new));
+    assertSameSequence(asList('a', 's', 'd', 'f'), toCharacterCollection("asdfas", LinkedHashSet::new));
     // to Set (unordered)
     assertEquals(SetUtils.newSet('a', 's', 'd', 'f'), toCharacterCollection("asdfas", HashSet::new));
   }
 
-  public void testValueToString() throws Exception {
+  public void testValueToString() {
     assertEquals("null", valueToString(null));
     assertEquals("123", valueToString(123));
     assertEquals("\"foo\"", valueToString("foo"));
     assertEquals("[1, 2, [a, b, c]]", valueToString(new Object[]{1, 2, new char[]{'a', 'b', 'c'}}));
   }
 
-  public void testCapitalize() throws Exception {
+  public void testCapitalize() {
     assertEquals("", capitalize(""));
     assertEquals("A", capitalize("a"));
     assertEquals("A", capitalize("A"));
@@ -610,7 +621,7 @@ public class StringUtilsTest extends TestCase {
     assertEquals("Пизда", capitalize("Пизда"));
   }
 
-  public void testIsCapitalized() throws Exception {
+  public void testIsCapitalized() {
     assertFalse(isCapitalized(""));
     assertFalse(isCapitalized("a"));
     assertTrue(isCapitalized("A"));
@@ -621,7 +632,7 @@ public class StringUtilsTest extends TestCase {
     assertTrue(isCapitalized("Пизда"));
   }
 
-  public void testMaybeCapitalize() throws Exception {
+  public void testMaybeCapitalize() {
     assertEquals("", maybeCapitalize("", "Foo"));
     assertEquals("", maybeCapitalize("", "foo"));
     assertEquals("A", maybeCapitalize("a", "Foo"));
@@ -632,13 +643,13 @@ public class StringUtilsTest extends TestCase {
     assertEquals("Пизда", maybeCapitalize("пизда", "Хуй"));
   }
 
-  public void testNonNull() throws Exception {
+  public void testNonNull() {
     assertEquals("", nonNull(null));
     assertEquals("", nonNull(""));
     assertEquals("foo", nonNull("foo"));
   }
 
-  public void testFirstNotBlank() throws Exception {
+  public void testFirstNotBlank() {
     // 1) test the 2-arg version (which always returns the 2nd arg if the 1st doesn't satisfy)
     assertFirstNotBlankEquals("", "", "");
     assertFirstNotBlankEquals("", null, "");
@@ -670,13 +681,13 @@ public class StringUtilsTest extends TestCase {
     assertEquals(expected, firstNotBlank(args));
   }
 
-  public void testTrim() throws Exception {
+  public void testTrim() {
     assertEquals("", trim(null));
     assertEquals("", trim("   "));
     assertEquals("foo  bar", trim("  foo  bar "));
   }
 
-  public void testOrdinal() throws Exception {
+  public void testOrdinal() {
     assertEquals("1st", ordinal(1));
     assertEquals("11th", ordinal(11));
     assertEquals("21st", ordinal(21));
@@ -707,7 +718,7 @@ public class StringUtilsTest extends TestCase {
     }
   }
 
-  public void testIndent() throws Exception {
+  public void testIndent() {
     // 1) test indent(int)
     assertEquals("", indent(0));
     assertEquals(" ", indent(1));
@@ -721,19 +732,19 @@ public class StringUtilsTest extends TestCase {
     assertEquals("   foo", indent(3, "foo"));
   }
 
-  public void testTupleToString() throws Exception {
+  public void testTupleToString() {
     assertEquals("()", tupleToString());
     assertEquals("(1)", tupleToString(1));
     assertEquals("(1, \"foo\")", tupleToString(1, "foo"));
   }
 
-  public void testParenthesize() throws Exception {
+  public void testParenthesize() {
     assertEquals("()", parenthesize(""));
     assertEquals("(foo)", parenthesize("foo"));
     assertEquals("(null)", parenthesize(null));
   }
 
-  public void testMethodCallToStringWithResult() throws Exception {
+  public void testMethodCallToStringWithResult() {
     assertEquals("foo(\"b\", 1, 'c') = 2",
         methodCallToStringWithResult("foo", 2,"b", 1, 'c'));
     assertEquals("foo(\"b\", 1, 'c') = 'x'",
@@ -742,21 +753,21 @@ public class StringUtilsTest extends TestCase {
         methodCallToStringWithResult("foo", "bar","b", 1, 'c'));
   }
 
-  public void testSurround() throws Exception {
+  public void testSurround() {
     assertEquals("", surround("", ""));
     assertEquals("xx", surround("", "x"));
     assertEquals("__null__", surround(null, "__"));
     assertEquals("-*-Foo-*-", surround("Foo", "-*-"));
   }
 
-  public void testQuote() throws Exception {
+  public void testQuote() {
     assertEquals("\"\"", quote(""));
     assertEquals("\"null\"", quote(null));
     assertEquals("\"1\"", quote("1"));
     assertEquals("\"foo\"", quote("foo"));
   }
 
-  public void testPad() throws Exception {
+  public void testPad() {
     // 1) test the 2-arg version (pads with spaces)
     assertEquals("", pad("", 0));
     assertEquals("  ", pad("", 1));
@@ -769,7 +780,7 @@ public class StringUtilsTest extends TestCase {
     assertEquals("--foo--", pad("foo", 2, '-'));
   }
 
-  public void testPadLeft() throws Exception {
+  public void testPadLeft() {
     // 1) test the 2-arg version (pads with spaces)
     assertEquals("", padLeft("", 0));
     assertEquals(" ", padLeft("", 1));
@@ -782,7 +793,7 @@ public class StringUtilsTest extends TestCase {
     assertEquals("--foo", padLeft("foo", 2, '-'));
   }
 
-  public void testPadRight() throws Exception {
+  public void testPadRight() {
     // 1) test the 2-arg version (pads with spaces)
     assertEquals("", padRight("", 0));
     assertEquals(" ", padRight("", 1));
@@ -795,7 +806,7 @@ public class StringUtilsTest extends TestCase {
     assertEquals("foo--", padRight("foo", 2, '-'));
   }
 
-  public void testPadCenter() throws Exception {
+  public void testPadCenter() {
     // 1) test some specific examples manually
     assertEquals("", padCenter("", 0, '-'));
     assertEquals("-", padCenter("", 1, '-'));
@@ -827,7 +838,7 @@ public class StringUtilsTest extends TestCase {
     }
   }
 
-  public void testJustifyCenter() throws Exception {
+  public void testJustifyCenter() {
     for (int i = 0; i <= 3; i++) {
       assertEquals("foo", justifyCenter("foo", i ));
     }
@@ -837,7 +848,7 @@ public class StringUtilsTest extends TestCase {
     assertEquals("  foo  ", justifyCenter("foo", 7 ));
   }
 
-  public void testJustifyLeft() throws Exception {
+  public void testJustifyLeft() {
     for (int i = 0; i <= 3; i++) {
       assertEquals("foo", justifyLeft("foo", i ));
     }
@@ -847,7 +858,7 @@ public class StringUtilsTest extends TestCase {
     assertEquals("foo    ", justifyLeft("foo", 7 ));
   }
 
-  public void testJustifyRight() throws Exception {
+  public void testJustifyRight() {
     for (int i = 0; i <= 3; i++) {
       assertEquals("foo", justifyRight("foo", i ));
     }
@@ -857,7 +868,7 @@ public class StringUtilsTest extends TestCase {
     assertEquals("    foo", justifyRight("foo", 7 ));
   }
 
-  public void testEndsWith() throws Exception {
+  public void testEndsWith() {
     assertTrue(endsWith("foo", 3, "foo"));
     assertTrue(endsWith("foo", 3, "oo"));
     assertTrue(endsWith("foo", 3, "o"));
@@ -875,21 +886,21 @@ public class StringUtilsTest extends TestCase {
     }
   }
 
-  public void testIsEmpty() throws Exception {
+  public void testIsEmpty() {
     assertTrue(isEmpty(null));
     assertTrue(isEmpty(""));
     assertFalse(isEmpty(" "));
     assertFalse(isEmpty("x"));
   }
 
-  public void testNotEmpty() throws Exception {
+  public void testNotEmpty() {
     assertFalse(notEmpty(null));
     assertFalse(notEmpty(""));
     assertTrue(notEmpty(" "));
     assertTrue(notEmpty("x"));
   }
 
-  public void testBracket() throws Exception {
+  public void testBracket() {
     // 1) test the (String, char) version of the method
     assertEquals("(foo)", bracket("foo", '('));
     assertEquals("{foo}", bracket("foo", '{'));
@@ -903,20 +914,20 @@ public class StringUtilsTest extends TestCase {
     assertEquals("XyZfooZyX", bracket("foo", "XyZ"));
   }
 
-  public void testLastCodePoint() throws Exception {
+  public void testLastCodePoint() {
     assertEquals(0x1F64A, lastCodePoint(THREE_MONKEYS));
     assertEquals((int)'o', lastCodePoint("foo"));
     assertThrows(IllegalArgumentException.class, partial(StringUtils::lastCodePoint, null));
     assertThrows(IllegalArgumentException.class, partial(StringUtils::lastCodePoint, ""));
   }
 
-  public void testLastChar() throws Exception {
+  public void testLastChar() {
     assertEquals('o', lastChar("foo"));
     assertThrows(IllegalArgumentException.class, partial(StringUtils::lastChar, null));
     assertThrows(IllegalArgumentException.class, partial(StringUtils::lastChar, ""));
   }
 
-  public void testIsLowercase() throws Exception {
+  public void testIsLowercase() {
     assertFalse(isLowercase(null));
     assertFalse(isLowercase(""));
     assertFalse(isLowercase("fooBar123"));
@@ -925,40 +936,39 @@ public class StringUtilsTest extends TestCase {
 
   @GwtIncompatible
   @SuppressWarnings("NonJREEmulationClassesInClientCode")
-  public void testCodePoints() throws Exception {
+  public void testCodePoints() {
     String inputString = StringUtilsTest.THREE_MONKEYS;
     assertArrayEquals(inputString.codePoints().toArray(), codePoints(inputString));
   }
 
   @GwtIncompatible
   @SuppressWarnings("NonJREEmulationClassesInClientCode")
-  public void testCodePointsStream() throws Exception {
+  public void testCodePointsStream() {
     String inputString = StringUtilsTest.THREE_MONKEYS;
     assertArrayEquals(inputString.codePoints().toArray(), codePointsStream(inputString).toArray());
   }
 
-  public void testIdentityToString() throws Exception {
+  public void testIdentityToString() {
     // 1) print out some examples to verify visually (and compare to the shorter version produced by idToString)
     /*
       TODO: might want to extract this code to TestUtils, to allow visually comparing the output of various method calls
         (can pass it an array of args and method references to invoke)
     */
     Object[] inputs = new Object[]{null, "", Boolean.TRUE, "foo", 45, new Pair<>("foo", 45)};
-    String[][] outputs = new String[inputs.length+1][3];
-    outputs[0] = new String[]{"x", "identityToString(x)", "idToString(x)"};  // table header
-    for (int i = 0; i < inputs.length; i++) {
-      Object input = inputs[i];
-      String longVersion = identityToString(input);
-      String shortVerion = idToString(input);
-      outputs[i+1][0] = valueToString(input);
-      outputs[i+1][1] = longVersion;
-      outputs[i+1][2] = shortVerion;
+    TablePrinter tablePrinter = new TablePrinter();
+    for (Object input : inputs) {
+      String identityToString = identityToString(input);
+      String idToString = idToString(input);
+      tablePrinter.newRow()
+          .addCol("x", valueToString(input))
+          .addCol("identityToString(x)", identityToString)
+          .addCol("idToString(x)", idToString);
       if (input == null)
-        assertAllEqualTo("null", longVersion, shortVerion);
+        assertAllEqualTo("null", identityToString, idToString);
       else
-        assertThat(shortVerion.length()).isLessThan(longVersion.length());
+        assertThat(idToString.length()).isLessThan(identityToString.length());
     }
-    System.out.println(matrixToPrettyString(outputs, " \u2551 "));
+    tablePrinter.printTable();
   }
 
   public void testByteToBinary()  {
@@ -1046,7 +1056,7 @@ public class StringUtilsTest extends TestCase {
 
   }
 
-  public void testByteArrayToBinary() throws Exception {
+  public void testByteArrayToBinary() {
     byte[] bytes = new byte[]{0, 15, 16, 127, -128, -127, -1, -2};
     String expected = "0000000000001111000100000111111110000000100000011111111111111110";
     assertEquals(expected, byteArrayToBinary(bytes));
@@ -1077,7 +1087,7 @@ public class StringUtilsTest extends TestCase {
     }
   }
 
-  public void testLongToHex() throws Exception {
+  public void testLongToHex() {
     // verify that the string is left-padded with 0s, up to 16 chars
     assertEquals("f7f6f5f473727170",
         longToHex(0xf7f6f5f473727170L));
@@ -1097,7 +1107,7 @@ public class StringUtilsTest extends TestCase {
         longToHex(0x0000000000000001L));
   }
 
-  public void testLongToBinary() throws Exception {
+  public void testLongToBinary() {
     // verify that the string is left-padded with 0s, up to 64 chars
     assertEquals("1111011111110110111101011111010001110011011100100111000101110000",
         longToBinary(0xf7f6f5f473727170L));

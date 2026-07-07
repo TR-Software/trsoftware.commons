@@ -53,7 +53,7 @@ public class FluentList<E> extends ForwardingList<E> {
 
   /**
    * Protected constructor for subclassing.
-   * Use the {@code public} factory method {@link #from(List)} instead of this constructor.
+   * Use the {@code public} factory method {@link #wrap(List)} instead of this constructor.
    */
   protected FluentList(@Nonnull List<E> delegate) {
     this.delegate = requireNonNull(delegate, "delegate");
@@ -62,7 +62,7 @@ public class FluentList<E> extends ForwardingList<E> {
   /**
    * @return a {@link FluentList} that wraps the given list or itself if it's already a {@link FluentList}
    */
-  public static <E> FluentList<E> from(@Nonnull List<E> list) {
+  public static <E> FluentList<E> wrap(@Nonnull List<E> list) {
     requireNonNull(list, "list");
     return (list instanceof FluentList)
         ? (FluentList<E>) list
@@ -118,7 +118,7 @@ public class FluentList<E> extends ForwardingList<E> {
   @Override
   public FluentList<E> subList(int fromIndex, int toIndex) {
     int size = size();
-    return from(super.subList(
+    return wrap(super.subList(
         normalizePositionIndex(fromIndex, size, "fromIndex"),
         normalizePositionIndex(toIndex, size, "toIndex")));
   }

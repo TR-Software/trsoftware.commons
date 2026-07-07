@@ -191,10 +191,27 @@ public class FunctionalUtils {
   }
 
   /**
+   * @return a predicate that returns {@code true} iff the given {@code valueGetter} function applied to its argument
+   *   {@link Object#equals equals} {@code value}
+   */
+  public static <T, V> Predicate<T> equalTo(V value, Function<T, V> valueGetter) {
+    return o -> Objects.equals(valueGetter.apply(o), value);
+  }
+
+  /**
    * @return a predicate that returns {@code false} iff its argument {@link Object#equals equals} {@code obj}
    */
   public static <T> Predicate<T> notEqualTo(T obj) {
     return o -> !Objects.equals(o, obj);
+  }
+
+  /**
+   * Backport of {@code Predicate.not()} from Java 11.
+   *
+   * @return negation of the given predicate
+   */
+  public static <T> Predicate<T> not(Predicate<T> predicate) {
+    return predicate.negate();
   }
 
   /**
@@ -209,6 +226,7 @@ public class FunctionalUtils {
    * @see StringUtils#applyIfNotBlank(String, Consumer)
    */
   public static <T> boolean applyIfNotNull(T value, Consumer<T> consumer) {
+    // TODO(3/4/2026): maybe rename this method to acceptIfNotNull?
     if (value != null) {
       consumer.accept(value);
       return true;

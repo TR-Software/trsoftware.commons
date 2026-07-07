@@ -9,6 +9,7 @@ import solutions.trsoftware.commons.shared.util.Area2d;
  * @author Alex
  * @since 7/29/2019
  */
+@SuppressWarnings("GwtServiceNotRegistered")
 public class MockRpcServiceServlet extends BaseRpcServlet implements MockRpcService {
 
   /**
@@ -23,7 +24,7 @@ public class MockRpcServiceServlet extends BaseRpcServlet implements MockRpcServ
    * Allows examining the RPC payload of the current request.
    * Initialized by {@link #onBeforeRequestDeserialized(String)}.
    */
-  private ThreadLocal<String> threadLocalRequestPayload = new ThreadLocal<>();
+  private final ThreadLocal<String> threadLocalRequestPayload = new ThreadLocal<>();
 
   @Override
   public String sayHello(String name) {
@@ -73,5 +74,13 @@ public class MockRpcServiceServlet extends BaseRpcServlet implements MockRpcServ
   @Override
   public void setMaxContentLength(long maxContentLength) {
     this.maxContentLength = maxContentLength;
+  }
+
+  @SuppressWarnings("unchecked")
+  @Override
+  public void throwException(String clsName, String message) throws Exception {
+    Class<? extends Exception> exClass = (Class<? extends Exception>)Class.forName(clsName);
+    Exception ex = exClass.getConstructor(String.class).newInstance(message);
+    throw ex;
   }
 }

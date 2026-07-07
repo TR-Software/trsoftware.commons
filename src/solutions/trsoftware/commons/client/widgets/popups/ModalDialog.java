@@ -44,34 +44,23 @@ import java.util.LinkedList;
 
 /**
  * <p>
- *   Provides a more reliable alternative to {@link Window#alert(String)}, {@link Window#confirm(String)}, and
- *   {@link Window#prompt(String, String)} for showing a message/prompt in a modal dialog box.
- * </p>
+ * Provides a more reliable alternative to {@link Window#alert(String)}, {@link Window#confirm(String)}, and
+ * {@link Window#prompt(String, String)} for showing a message/prompt in a modal dialog box.
  * <p>
- *   Those native methods are unreliable because Chrome and Firefox give the the user a checkbox to
- *   "<i>Prevent this page from creating additional dialogs</i>", and if the user opts out of dialogs that way,
- *   Javascript doesn't know about it, and all future calls to those methods will either
- *   <ol>
- *     <li>throw an exception (Firefox), or,</li>
- *     <li>even worse, simply return without showing the dialog (Chrome)</li>
- *   </ol>
- * </p>
+ * Those native methods are unreliable because Chrome and Firefox give the the user a checkbox to
+ * "<i>Prevent this page from creating additional dialogs</i>", and if the user opts out of dialogs that way,
+ * all future calls to those methods will either throw an exception (Firefox)
+ * or just return without showing the dialog (Chrome), providing no indication that the dialog was suppressed.
  * <p>
- *   This class is designed to ensure that the desired dialog gets displayed, by falling back on a
- *   {@linkplain #softAlert(String, ResponseHandler) soft modal dialog} implementation when
- *   the native dialog fails to display.
- * </p>
- *   Tested in Chrome, FF, and IE8/9/10/11 on Windows.
+ * This class is able to detect when a native dialog is suppressed and implements a fallback
+ * using a {@linkplain #softAlert(String, ResponseHandler) custom modal dialog}
+ * to ensure that the desired message or prompt actually gets displayed to the user.
  * <p>
- *   <strong>Example:</strong>
- *   <ol>
- *     <li>
- *       The safe {@link #alert(String)} method implemented here first tries to delegate to {@link Window#alert(String)}
- *       (if {@link #nativeDialogsEnabled} == {@code true}), and if that fails.
- *     </li>
- *     <li>falls back on {@link #softAlert(String)}.</li>
- *   </ol>
- * </p>
+ * For example, the {@link ModalDialog#alert(String)} method first invokes {@link Window#alert(String)}
+ * (if {@link #nativeDialogsEnabled} == {@code true}), and if that fails to display,
+ * falls back on {@link #softAlert(String)}.
+ * <p>
+ * <i>Tested in Chrome, FF, and IE8/9/10/11 on Windows.</i>
  * @author Alex, 10/4/2015
  * @see #alert(String, ResponseHandler)
  * @see #prompt(String, String, ResponseHandler)
@@ -606,6 +595,11 @@ public class ModalDialog {
     public SoftDialogSettings() {
     }
 
+    public SoftDialogSettings(String okLabel, String cancelLabel) {
+      this.okLabel = okLabel;
+      this.cancelLabel = cancelLabel;
+    }
+
     public SoftDialogSettings setOkLabel(String okLabel) {
       this.okLabel = okLabel;
       return this;
@@ -640,6 +634,13 @@ public class ModalDialog {
 
     public String getInitialValue() {
       return initialValue;
+    }
+
+    /**
+     * @return an instance of this class using "Yes" and "No" for the button labels
+     */
+    public static SoftDialogSettings yesNo() {
+      return new SoftDialogSettings("Yes", "No");
     }
   }
 

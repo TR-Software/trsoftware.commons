@@ -16,6 +16,7 @@
 
 package solutions.trsoftware.commons.shared.util;
 
+import com.google.common.base.Preconditions;
 import com.google.common.collect.Iterables;
 import com.google.gwt.core.shared.GwtIncompatible;
 import solutions.trsoftware.commons.shared.util.random.RandomCharGenerator;
@@ -198,8 +199,8 @@ public class RandomUtils {
    * with roughly equal probability of any particular {@code int} in this range
    */
   public static int nextIntInRange(Random rnd, int lowerBound, int upperBound) {
-    if (!(lowerBound < upperBound))
-      throw new IllegalArgumentException("Expected lowerBound < upperBound");
+    Preconditions.checkArgument(lowerBound < upperBound,
+        "Expected lowerBound (%s) < upperBound (%s)", lowerBound, upperBound);
     return rnd.nextInt(upperBound - lowerBound) + lowerBound;
   }
 

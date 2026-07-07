@@ -21,12 +21,13 @@ import com.google.gwt.event.dom.client.HasKeyDownHandlers;
 import com.google.gwt.event.dom.client.KeyCodes;
 import com.google.gwt.event.dom.client.KeyDownHandler;
 import com.google.gwt.event.shared.HandlerRegistration;
-import com.google.gwt.user.client.Command;
 import com.google.gwt.user.client.ui.*;
 import solutions.trsoftware.commons.client.bundle.CommonsClientBundleFactory;
+import solutions.trsoftware.commons.client.bundle.CommonsCss;
 import solutions.trsoftware.commons.client.event.CapsLockDetector;
-import solutions.trsoftware.commons.client.event.EventHandlers;
 import solutions.trsoftware.commons.client.event.SpecificKeyDownHandler;
+import solutions.trsoftware.commons.client.widgets.popups.ModalDialog;
+import solutions.trsoftware.commons.shared.util.StringUtils;
 import solutions.trsoftware.commons.shared.validation.ValidationResult;
 import solutions.trsoftware.commons.shared.validation.ValidationRule;
 
@@ -34,12 +35,17 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
+import static com.google.common.base.Strings.lenientFormat;
+import static java.util.Objects.requireNonNull;
 import static solutions.trsoftware.commons.client.widgets.Widgets.flowPanel;
 import static solutions.trsoftware.commons.client.widgets.Widgets.html;
+import static solutions.trsoftware.commons.shared.util.ListUtils.isEmpty;
+import static solutions.trsoftware.commons.shared.util.StringUtils.joinEnumerated;
 
 /**
- * A convenience class for building user input forms.
+ * A convenience class for building user input forms with validation.
  * <p>
  * Input widgets can be added by calling either
  * <ul>
@@ -52,23 +58,18 @@ import static solutions.trsoftware.commons.client.widgets.Widgets.html;
  *   {@link #addInputWidget(Widget)} for all other fields.
  * </li>
  * </ul>
- * </p>
  * <p>
- * The submit button should be added by calling {@link #addSubmitButton(Button)}, and it will receive a {@link ClickHandler}
- * that invokes {@link #doValidatedSubmit()} when clicked.
- * </p>
- *
+ * A submit button added by {@link #addSubmitButton(Button)}, will have a {@link ClickHandler}
+ * that validates all inputs and invokes {@link #onValidatedSubmit()} if all inputs are valid.
  * <p>
- * Subclasses should implement {@link #doValidatedSubmit()}, which will be invoked when the submit button is clicked
+ * Subclasses should implement {@link #onValidatedSubmit()}, which will be invoked when the submit button is clicked
  * or the {@code Enter} key is pressed on one of the input fields.
  *
  * If any {@link ValidationRule}s were added with {@link #addTextField(Label, TextBox, ValidationRule)}
- * or {@link #addTextField(String, TextBox, ValidationRule)}, then those will be invoked prior to calling {@link #doValidatedSubmit()}.
+ * or {@link #addTextField(String, TextBox, ValidationRule)}, then those will be invoked prior to calling {@link #onValidatedSubmit()}.
  *
- * Subclasses may also override {@link #validate()} to provide additional validation logic not covered by the added
- * {@link ValidationRule}s (just don't forget to call <code>super.{@link #validate()}</code>)
- * </p>
- *
+ * Subclasses may also override {@link #validate(boolean)} to provide additional validation logic not covered by the added
+ * {@link ValidationRule}s (just don't forget to call <code>super.{@link #validate(boolean)}</code>)
  * <p>
  * Uses a {@link CapsLockDetector} to show a warning whenever a contained {@link PasswordTextBox}
  * receives a keystroke while the {@code Caps Lock} key is on.
@@ -77,16 +78,16 @@ import static solutions.trsoftware.commons.client.widgets.Widgets.html;
  * @since 11/15/2017
  */
 public abstract class BasicInputForm extends FlowPanel {
+  private static final CommonsCss CSS = CommonsClientBundleFactory.INSTANCE.getCss();
 
-  public static final String FIELD_ERROR_STYLE = CommonsClientBundleFactory.INSTANCE.getCss().fieldErrorMsg();
-  private Layout layout;
+  public static final String FIELD_ERROR_STYLE = CSS.fieldErrorMsg();
+  private final Layout layout;
 
-  private FlexTable tblForm = new FlexTable();
+  private final FlexTable tblForm = new FlexTable();
   private int nextRow;
 
-  private Command submitCommand;
-  private SpecificKeyDownHandler enterKeyHandler;
-  private List<TextInput> textInputs = new ArrayList<TextInput>();
+  private final SpecificKeyDownHandler enterKeyHandler;
+  private final List<TextInput> inputFields = new ArrayList<>();
 
   public enum Layout {
     /**
@@ -110,43 +111,66 @@ public abstract class BasicInputForm extends FlowPanel {
    */
   public BasicInputForm(Layout layout) {
     this.layout = layout;
-    submitCommand = () -> {
-      if (validate())
-        doValidatedSubmit();
-    };
-    enterKeyHandler = new SpecificKeyDownHandler(KeyCodes.KEY_ENTER, submitCommand);
+    enterKeyHandler = new SpecificKeyDownHandler(KeyCodes.KEY_ENTER, this::submit);
     add(tblForm);
-    setStyleName(CommonsClientBundleFactory.INSTANCE.getCss().BasicInputForm());
+    setStyleName(CSS.BasicInputForm());
+  }
+
+  protected void submit() {
+    List<String> failedFieldNames = validate(true);
+    if (isEmpty(failedFieldNames))
+      onValidatedSubmit();
+    else
+      onInvalidSubmit(failedFieldNames);
   }
 
   /**
    * Invoked when the submit button is clicked or the {@code Enter} key is pressed on one of the input fields.
    */
-  protected abstract void doValidatedSubmit();
+  protected abstract void onValidatedSubmit();
 
-  protected boolean validate() {
-    boolean allValid = true;
-    for (TextInput input : textInputs) {
-      allValid &= input.validate();
-    }
-    return allValid;
+  /**
+   * Invoked when the submit button is clicked but one or more fields fails validation.
+   *
+   * @param failedFieldNames names of the fields that failed to validate
+   */
+  protected void onInvalidSubmit(List<String> failedFieldNames) {
+    ModalDialog.softAlert(lenientFormat("Please fix your input%s for %s",
+        failedFieldNames.size() > 1 ? "s" : "",
+        joinEnumerated(",", "and", failedFieldNames)));
+
   }
 
-  private BasicInputForm addTextInput(Object label, TextInput inputWidget) {
-    textInputs.add(inputWidget);
+  /**
+   * Validates all the form inputs and returns a list of field names that failed validation,
+   * or empty list if all fields are valid.
+   *
+   * @param onSubmit {@code true} if invoked from {@link #submit()}
+   */
+  protected List<String> validate(boolean onSubmit) {
+    return inputFields.stream().filter(input -> !input.validate(onSubmit))
+        .map(TextInput::getFieldName).collect(Collectors.toList());
+  }
+
+  /**
+   * @param label a {@link String} or {@link Widget} to display before the input widget
+   * @return
+   */
+  protected TextInput addTextInput(Object label, TextInput inputWidget) {
+    inputFields.add(inputWidget);
     inputWidget.addKeyDownHandler(enterKeyHandler);
     if (label instanceof String)
       tblForm.setText(nextRow, 0, (String)label);
     else if (label instanceof Widget)
       tblForm.setWidget(nextRow, 0, (Widget)label);
     else
-      throw new IllegalArgumentException();
+      throw new IllegalArgumentException("label");
     if (layout == Layout.VERTICAL)
       tblForm.setWidget(++nextRow, 0, inputWidget);
     else
       tblForm.setWidget(nextRow, 1, inputWidget);
     nextRow++;
-    return this;
+    return inputWidget;
   }
 
   public BasicInputForm addInputWidget(Widget inputWidget) {
@@ -157,39 +181,59 @@ public abstract class BasicInputForm extends FlowPanel {
     return this;
   }
 
+  public BasicInputForm addInputWidget(Widget inputWidget, int colSpan) {
+    // TODO(6/19/2026): experimental colSpan
+    int row = nextRow++;
+    if (layout == Layout.VERTICAL)
+      tblForm.setWidget(row, 0, inputWidget);
+    else {
+//      Preconditions.checkArgument(NumberRange.inRange(0, 2, colSpan));
+      int column = 1;
+      if (colSpan > 1) {
+        column = 0;
+        tblForm.getFlexCellFormatter().setColSpan(row, column, 2);
+      }
+      tblForm.setWidget(row, column, inputWidget);
+    }
+    return this;
+  }
+
   public BasicInputForm addSubmitButton(Button submitButton) {
-    submitButton.addClickHandler(EventHandlers.clickHandler(submitCommand));
+    submitButton.addClickHandler(click -> submit());
     addInputWidget(submitButton);
     return this;
   }
 
-  public BasicInputForm addTextField(Label label, TextBox textBox) {
+  public TextInput addTextField(Label label, TextBox textBox) {
     return addTextField(label, textBox, null);
   }
 
-  public BasicInputForm addTextField(String label, TextBox textBox) {
+  public TextInput addTextField(String label, TextBox textBox) {
     return addTextField(label, textBox, null);
   }
 
-  public BasicInputForm addTextField(Label label, TextBox textBox, ValidationRule<String> validator) {
+  public TextInput addTextField(Label label, TextBox textBox, ValidationRule<String> validator) {
     return addTextInput(label, new TextInput(textBox, validator));
   }
 
-  public BasicInputForm addTextField(String label, TextBox textBox, ValidationRule<String> validator) {
+  public TextInput addTextField(String label, TextBox textBox, ValidationRule<String> validator) {
     return addTextInput(label, new TextInput(textBox, validator));
   }
 
-
-  private static class TextInput extends Composite implements HasKeyDownHandlers {
-    private TextBox textBox;
+  /**
+   * A widget wrapping a {@link TextBox} to perform validation and display validation error messages
+   */
+  protected static class TextInput extends Composite implements HasKeyDownHandlers {
+    private final TextBox textBox;
     @Nullable
-    private ValidationRule<String> validator;
+    private final ValidationRule<String> validator;
     private HTML lblError;
+    protected final FlowPanel container;
 
-    TextInput(@Nonnull TextBox textBox, @Nullable ValidationRule<String> validator) {
-      this.textBox = textBox;
+    protected TextInput(@Nonnull TextBox textBox, @Nullable ValidationRule<String> validator) {
+      this.textBox = requireNonNull(textBox, "textBox");
       this.validator = validator;
-      FlowPanel container = flowPanel(textBox);
+      container = flowPanel(textBox);
       if (validator != null) {
         lblError = html("", FIELD_ERROR_STYLE);
         lblError.setVisible(false);
@@ -208,22 +252,57 @@ public abstract class BasicInputForm extends FlowPanel {
         container.add(lblCapsLockWarning);
       }
       initWidget(container);
+      // validate input automatically, to hide the error when a valid input is entered
+      textBox.addChangeHandler(event -> validate(false));
     }
 
-    boolean validate() {
+    /**
+     * Invokes this field's {@link ValidationRule} and shows or hides {@link #lblError} based on whether the input is valid.
+     *
+     * @param onSubmit {@code true} if invoked from {@link #submit()}, or {@code false} if invoked for value change
+     * @return {@code true} iff the input is valid
+     */
+    public boolean validate(boolean onSubmit) {
       if (validator == null)
         return true;
       ValidationResult result = validator.validate(textBox.getText());
       boolean valid = result.isValid();
-      if (!valid)
-        lblError.setHTML("&uarr; " + result.getErrorMessage());
-      lblError.setVisible(!valid);
+      setErrorMessage(valid ? null : "&uarr; " + result.getErrorMessage());
       return valid;
+    }
+
+    protected void setErrorMessage(@Nullable String errorMsg) {
+      if (StringUtils.notBlank(errorMsg)) {
+        lblError.setHTML(errorMsg);
+        lblError.setVisible(true);
+        textBox.addStyleName(CSS.fieldErrorHighlight());
+      } else {
+        lblError.setHTML("");
+        lblError.setVisible(false);
+        textBox.removeStyleName(CSS.fieldErrorHighlight());
+      }
     }
 
     @Override
     public HandlerRegistration addKeyDownHandler(KeyDownHandler handler) {
       return textBox.addKeyDownHandler(handler);
+    }
+
+    public TextBox getTextBox() {
+      return textBox;
+    }
+
+    public String getText() {
+      return textBox.getText();
+    }
+
+    public void setText(String text) {
+      textBox.setText(text);
+    }
+
+    public String getFieldName() {
+      // TODO(6/27/2026): maybe require non-null validator?  currently no usages where it's actually null
+      return validator != null ? validator.getFieldName() : null;
     }
   }
 }

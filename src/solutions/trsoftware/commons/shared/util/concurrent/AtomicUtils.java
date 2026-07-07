@@ -1,9 +1,14 @@
 package solutions.trsoftware.commons.shared.util.concurrent;
 
+import solutions.trsoftware.commons.shared.util.LazyReference;
+
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.concurrent.atomic.AtomicReferenceArray;
 import java.util.function.IntFunction;
+import java.util.function.Supplier;
 import java.util.function.UnaryOperator;
+
+import static java.util.Objects.requireNonNull;
 
 /**
  * Fills in some of the {@link java.util.concurrent.atomic} functionality that isn't
@@ -68,19 +73,46 @@ public abstract class AtomicUtils {
    * @param i array index (and arg for producer)
    * @param producer a side-effect-free function that computes the value for {@code arr.get(i)} if it's absent
    * @return the current (existing or computed) value at the specified array index
+   * @throws NullPointerException if {@code producer} returns {@code null}
    */
   public static <E> E computeIfAbsent(AtomicReferenceArray<E> arr, int i, IntFunction<E> producer) {
     E existing = arr.get(i);
     if (existing != null)
       return existing;
     else {
-      E newValue = producer.apply(i);
+      E newValue = requireNonNull(producer.apply(i), "producer returned null");
       if (arr.compareAndSet(i, null, newValue)) {
         // this is now the saved value
         return newValue;
       } else {
         // lost the race for compareAndSet, return the value that was computed by the winning thread
         return arr.get(i);
+      }
+    }
+    // TODO: unit test?
+  }
+
+  /**
+   * Returns {@link AtomicReference#get() ref.get()} if non-null,
+   * otherwise returns the value computed by the given function after writing it into the the reference.
+   *
+   * @param producer a side-effect-free function that computes the referent value if it's absent
+   * @return the current (existing or computed) value at the specified array index
+   * @throws NullPointerException if {@code producer} returns {@code null}
+   * @see LazyReference
+   */
+  public static <V> V computeIfAbsent(AtomicReference<V> ref, Supplier<V> producer) {
+    V existing = ref.get();
+    if (existing != null)
+      return existing;
+    else {
+      V newValue = requireNonNull(producer.get(), "producer returned null");
+      if (ref.compareAndSet(null, newValue)) {
+        // this is now the saved value
+        return newValue;
+      } else {
+        // lost the race for compareAndSet, return the value that was computed by the winning thread
+        return ref.get();
       }
     }
     // TODO: unit test?

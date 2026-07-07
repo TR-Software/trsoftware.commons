@@ -18,6 +18,7 @@ package solutions.trsoftware.commons.shared.testutil;
 
 import com.google.common.base.MoreObjects;
 import solutions.trsoftware.commons.server.testutil.RecordingInvocationHandler;
+import solutions.trsoftware.commons.shared.util.StringUtils;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -100,5 +101,9 @@ public class InvocationRecord {
         .add("args", args)
         .add("timestamp", timestamp)
         .toString();
+  }
+
+  public String toInvocationString() {
+    return StringUtils.methodCallToString(methodName, args);
   }
 }

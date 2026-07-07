@@ -165,7 +165,7 @@ public final class ServerIOUtils {
 
 
   public static ArrayList<String> readLines(Reader reader, boolean ignoreBlankLines) {
-    ArrayList<String> lines = new ArrayList<>(2048);
+    ArrayList<String> lines = new ArrayList<>();
     try (BufferedReader br = new BufferedReader(reader)) {
       for (String line = br.readLine(); line != null; line = br.readLine()) {
         if (line.trim().length() > 0 || !ignoreBlankLines)

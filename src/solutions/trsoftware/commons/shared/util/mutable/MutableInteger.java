@@ -16,12 +16,17 @@
 
 package solutions.trsoftware.commons.shared.util.mutable;
 
+import java.util.concurrent.atomic.AtomicInteger;
+
 /**
- * A GWT-compatible replacement for {@link java.util.concurrent.atomic.AtomicInteger AtomicInteger}
+ * A GWT-compatible replacement for {@link AtomicInteger AtomicInteger}
  * and {@code org.apache.commons.lang3.mutable.MutableInt}.
- *
+ * <p>
  * This class uses locking to synchronize updates, so in pure Java code it's more efficient to use {@code AtomicInteger}
  * (in client-side GWT code the {@code synchronized} keyword is simply ignored).
+ * <p style="color: #0073BF; font-weight: bold;">
+ *   TODO: Update(2/17/2026): GWT now emulates AtomicInteger (since 2.6.1)
+ * </p>
  *
  * @author Alex
  */

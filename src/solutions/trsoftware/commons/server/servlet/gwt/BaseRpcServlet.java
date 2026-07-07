@@ -149,7 +149,7 @@ public class BaseRpcServlet extends RemoteServiceServlet {
      to 413 ("Payload Too Large" or "Request Entity Too Large")
     */
     InputStreamTooLongException inputStreamTooLongException =
-        ExceptionUtils.getFirstByType(e, InputStreamTooLongException.class, 2);
+        ExceptionUtils.findCause(e, InputStreamTooLongException.class);
     if (inputStreamTooLongException != null) {
       getThreadLocalResponse().setStatus(HttpServletResponse.SC_REQUEST_ENTITY_TOO_LARGE);
     }

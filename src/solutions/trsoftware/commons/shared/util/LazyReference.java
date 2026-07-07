@@ -16,7 +16,8 @@
 
 package solutions.trsoftware.commons.shared.util;
 
-import java.util.concurrent.atomic.AtomicBoolean;
+import javax.annotation.Nullable;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Supplier;
 
 import static java.util.Objects.requireNonNull;
@@ -28,38 +29,59 @@ import static java.util.Objects.requireNonNull;
  *
  * @author Alex
  */
+@SuppressWarnings("unchecked")
 public abstract class LazyReference<V> implements Supplier<V> {
+
+  /**
+   * Placeholder representing uninitialized value
+   */
+  private static final Object EMPTY = new Object() {
+    // overriding hashCode and toString, following the example of java.util.EnumMap.NULL
+    public int hashCode() { return 0; }
+    public String toString() { return "LazyReference.EMPTY"; }
+  };
 
   /**
    * The value computed by {@link #create()}.
    */
-  protected volatile V value;
+  private final AtomicReference<V> ref = new AtomicReference<>((V)EMPTY);
 
-  protected final AtomicBoolean hasValue = new AtomicBoolean();
-
+  @Nullable
   public V get(boolean create) {
-    // TODO: unit test this new lock-free implementation; document these methods
     if (create)
       return get();
-    return value;
+    V value = ref.get();
+    // return null if current value is EMPTY (avoid leaking this placeholder object)
+    return value != EMPTY ? value : null;
   }
 
   public V get() {
-    if (hasValue.compareAndSet(false, true)) {
-      try {
-        return value = create();
-      }
-      catch (RuntimeException ex) {
-        // should revert hasValue back to false if create() throws exception
-        hasValue.set(value != null);  // TODO: maybe compareAndSet would be safer?
-        throw ex; // rethrow
+    // TODO: code dup in AtomicUtils.computeIfAbsent(AtomicReference<V>, Supplier<V>)
+    V value = ref.get();
+    if (value != EMPTY)
+      return value;
+    else {
+      V newValue = create();
+      if (ref.compareAndSet((V)EMPTY, newValue)) {
+        // this is now the saved value
+        return newValue;
+      } else {
+        // lost the race for compareAndSet, return the value that was computed by the winning thread
+        return ref.get();
       }
     }
-    return value;
+  }
+
+  protected void set(V newValue) {  // protected access, to be exposed only by MutableLazyReference
+    ref.set(newValue);
+  }
+
+  protected void clear() {  // protected access, to be exposed only by MutableLazyReference
+    ref.set((V)EMPTY);
   }
 
   public boolean hasValue() {
-    return hasValue.get();
+    return ref.get() != EMPTY;
   }
 
   protected abstract V create();

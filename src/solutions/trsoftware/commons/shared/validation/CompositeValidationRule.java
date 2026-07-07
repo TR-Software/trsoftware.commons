@@ -16,12 +16,11 @@
 
 package solutions.trsoftware.commons.shared.validation;
 
+import com.google.common.base.Preconditions;
+import com.google.common.collect.ImmutableList;
 import solutions.trsoftware.commons.shared.util.CollectionUtils;
 
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
-import java.util.List;
 
 import static solutions.trsoftware.commons.shared.validation.ValidationResult.success;
 
@@ -33,16 +32,20 @@ import static solutions.trsoftware.commons.shared.validation.ValidationResult.su
  */
 public class CompositeValidationRule<V> implements ValidationRule<V> {
 
-  private List<ValidationRule<V>> rules = new ArrayList<ValidationRule<V>>();
+  private final ImmutableList<ValidationRule<V>> rules;
 
-  public CompositeValidationRule(Collection<ValidationRule<V>> rules) {
-    if (CollectionUtils.isEmpty(rules))
-      throw new IllegalArgumentException("no rules given");
-    this.rules.addAll(rules);
+  public CompositeValidationRule(ImmutableList<ValidationRule<V>> rules) {
+    Preconditions.checkArgument(!CollectionUtils.isEmpty(rules), "no rules given");
+    this.rules = rules;
   }
 
+  public CompositeValidationRule(Collection<ValidationRule<V>> rules) {
+    this(ImmutableList.copyOf(rules));
+  }
+
+  @SafeVarargs
   public CompositeValidationRule(ValidationRule<V>... rules) {
-    this(Arrays.asList(rules));
+    this(ImmutableList.copyOf(rules));
   }
 
   /**

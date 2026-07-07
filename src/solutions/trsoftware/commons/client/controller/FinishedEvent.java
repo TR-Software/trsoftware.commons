@@ -17,7 +17,7 @@
 package solutions.trsoftware.commons.client.controller;
 
 /**
- * Fired from {@link BaseRpcAction#onFinished()}, which is invoked after the RPC call returns (either successfully or not).
+ * Fired after {@link BaseRpcAction#onFinished()}, which is invoked after the RPC call returns (either successfully or not).
  * This event will usually be preceded by a {@link SuccessEvent} or a {@link FailureEvent}.
  *
  * The action instance that fired this event can be obtained by calling {@link #getSource()}

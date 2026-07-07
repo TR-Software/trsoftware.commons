@@ -22,13 +22,13 @@ public class FluentListTest extends TestCase {
   public void setUp() throws Exception {
     super.setUp();
     delegate = arrayList(0, 1, 2, 3, 4);
-    fluent = FluentList.from(delegate);
+    fluent = FluentList.wrap(delegate);
   }
 
   public void testExamples() throws Exception {
     // tests the example code given in the FluentList class javadoc
     ArrayList<Integer> original = ListUtils.arrayList(0, 1, 2, 3, 4);
-    FluentList<Integer> fluent = FluentList.from(original);
+    FluentList<Integer> fluent = FluentList.wrap(original);
     assertEquals((Integer)4, fluent.get(-1));
     fluent.set(-2, 33);
     assertEquals(Arrays.asList(0, 1, 2, 33, 4), original);

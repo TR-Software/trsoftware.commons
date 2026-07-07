@@ -73,16 +73,7 @@ public class MultithreadedTestHarness {
     try {
       barrier.await(timeoutSeconds, TimeUnit.SECONDS);
     }
-    catch (InterruptedException e) {
-      e.printStackTrace();
-      throw new RuntimeException(e);
-    }
-    catch (BrokenBarrierException e) {
-      e.printStackTrace();
-      throw new RuntimeException(e);
-    }
-    catch (TimeoutException e) {
-      e.printStackTrace();
+    catch (InterruptedException | BrokenBarrierException | TimeoutException e) {
       throw new RuntimeException(e);
     }
   }

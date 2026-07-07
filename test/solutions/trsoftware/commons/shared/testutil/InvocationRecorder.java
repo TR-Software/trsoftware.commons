@@ -19,12 +19,14 @@ package solutions.trsoftware.commons.shared.testutil;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Iterators;
-import com.google.common.collect.LinkedListMultimap;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
  * Can be used to record method invocations on a particular object instance.
@@ -42,8 +44,7 @@ public class InvocationRecorder implements Iterable<InvocationRecord> {
    */
   private final Object target;
 
-  private final LinkedListMultimap<String, InvocationRecord> invocationRecords = LinkedListMultimap.create();
-
+  private final ArrayList<InvocationRecord> invocationRecords = new ArrayList<>();
 
   /**
    * @param target The instance for which the method calls are being recorded
@@ -62,9 +63,10 @@ public class InvocationRecorder implements Iterable<InvocationRecord> {
    *
    * @param methodName The name of the invoked method
    * @param args The args passed to the method
+   * @return the created record
    */
-  public void recordInvocation(@Nonnull String methodName, Object... args) {
-    recordInvocation(System.currentTimeMillis(), methodName, args);
+  public InvocationRecord recordInvocation(@Nonnull String methodName, Object... args) {
+    return recordInvocation(System.currentTimeMillis(), methodName, args);
   }
 
   /**
@@ -73,33 +75,43 @@ public class InvocationRecorder implements Iterable<InvocationRecord> {
    * @param timestamp The time (epoch millis) when the invocation occurred
    * @param methodName The name of the invoked method
    * @param args The args passed to the method
+   * @return the created record
    */
-  public void recordInvocation(long timestamp, @Nonnull String methodName, Object... args) {
+  public InvocationRecord recordInvocation(long timestamp, @Nonnull String methodName, Object... args) {
     Preconditions.checkNotNull(methodName, "methodName");
-    // TODO: can extract this to a util class (e.g. "InvocationRecorder")
-    invocationRecords.put(methodName, new InvocationRecord(timestamp, target, methodName, args));
+    InvocationRecord record = new InvocationRecord(timestamp, target, methodName, args);
     // TODO(1/29/2026) maybe also record the current stack trace and return value?
+    invocationRecords.add(record);
+    return record;
   }
 
   /**
    * @return an immutable chronologically-ordered list of invocation records for the given method
    */
   public List<InvocationRecord> getInvocationRecords(@Nonnull String methodName) {
-    return ImmutableList.copyOf(invocationRecords.get(methodName));
+    return streamRecordsForMethod(methodName).collect(Collectors.toList());
+  }
+
+  public Stream<InvocationRecord> streamRecordsForMethod(@Nonnull String methodName) {
+    return getInvocationRecordsStream().filter(record -> methodName.equals(record.getMethodName()));
+  }
+
+  public Stream<InvocationRecord> getInvocationRecordsStream() {
+    return invocationRecords.stream();
   }
 
   /**
    * @return an immutable chronologically-ordered list of all recorded method invocations
    */
   public List<InvocationRecord> getInvocationRecords() {
-    return ImmutableList.copyOf(invocationRecords.values());
+    return ImmutableList.copyOf(invocationRecords);
   }
 
   /**
    * @return the number of recorded invocations for the given method
    */
   public int count(@Nonnull String methodName) {
-    return invocationRecords.get(methodName).size();
+    return (int)streamRecordsForMethod(methodName).count();
   }
 
   /**
@@ -119,6 +131,6 @@ public class InvocationRecorder implements Iterable<InvocationRecord> {
   @Nonnull
   @Override
   public Iterator<InvocationRecord> iterator() {
-    return Iterators.unmodifiableIterator(invocationRecords.values().iterator());
+    return Iterators.unmodifiableIterator(invocationRecords.iterator());
   }
 }

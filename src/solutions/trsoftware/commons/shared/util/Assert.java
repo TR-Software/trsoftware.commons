@@ -86,14 +86,36 @@ public abstract class Assert {
 
   public static void assertEquals(String message, Object expected, Object actual) {
     if (!LogicUtils.eq(expected, actual))
-      fail(formatNotEqualsMsg(message, expected, actual));
+      failNotEquals(message, expected, actual);
+  }
+
+  /**
+ 	 * Asserts that two doubles are equal concerning a delta.
+   * If the expected value is infinity then the delta value is ignored.
+ 	 */
+ 	static public void assertEquals(double expected, double actual, double delta) {
+    assertEquals(null, expected, actual, delta);
+  }
+
+  /**
+ 	 * Asserts that two doubles are equal concerning a delta.  If they are not
+ 	 * an {@link AssertionError} is thrown with the given message.
+   * If the expected value is infinity then the delta value is ignored.
+ 	 */
+ 	static public void assertEquals(String message, double expected, double actual, double delta) {
+ 		if (!MathUtils.equal(expected, actual, delta))
+      failNotEquals(message, expected, actual);
+ 	}
+
+  private static void failNotEquals(String message, Object expected, Object actual) {
+    fail(formatNotEqualsMsg(message, expected, actual));
   }
 
   private static String formatNotEqualsMsg(String message, Object expected, Object actual) {
     StringBuilder str = new StringBuilder();
     if (message != null)
-      str.append(message);
-    str.append(": ").append("expected:<").append(expected).append("> but was:<").append(actual).append(">");
+      str.append(message).append(": ");
+    str.append("expected:<").append(expected).append("> but was:<").append(actual).append(">");
     return str.toString();
   }
 

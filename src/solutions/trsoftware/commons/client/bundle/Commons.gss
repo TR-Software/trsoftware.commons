@@ -184,6 +184,11 @@ in a CssResource.
   cursor: pointer;
 }
 
+.gwt-CheckBox * {
+  /* cursor property isn't inherited, so need this descendant rule to have the cursor apply to both the <input> and its <label> */
+  cursor: pointer;
+}
+
 /* --------- The following styles on our DialogBox class exist to support our ModalDialog class --------- */
 .SoftModalDialogBox {
   background-color: #f1f1f1;
@@ -235,6 +240,10 @@ in a CssResource.
 .fieldErrorMsg {
   color: red;
   font-weight: bold;
+}
+
+.BasicInputForm .fieldErrorHighlight {
+  border: 2px solid red;
 }
 
 a > img {

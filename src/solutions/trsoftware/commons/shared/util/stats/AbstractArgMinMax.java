@@ -37,11 +37,13 @@ public abstract class AbstractArgMinMax<A, V extends Comparable<V>> implements S
   /** The current argument associated with the best value */
   private A bestArg;
 
-  /** Updates the current argmax (or argmin) from the given sample, returning the current best arg */
+  private boolean hasValue;
+
+  /** Updates the current argmax (or argmin) from the given sample, returning the current best value */
   public V update(@Nonnull A arg, @Nonnull V value) {
     requireNonNull(arg, "arg");
     requireNonNull(value, "value");
-    if (bestValue == null) {
+    if (!hasValue) {
       bestValue = value;
       bestArg = arg;
     }
@@ -49,17 +51,31 @@ public abstract class AbstractArgMinMax<A, V extends Comparable<V>> implements S
       bestValue = value;
       bestArg = arg;
     }
+    hasValue = true;
     return bestValue;
   }
 
   protected abstract int getMultiplier();
 
   /**
-   * @return the arg associated with the best value, or {@code null} if the {@link #update} method was never invoked.
+   * @return the arg associated with the best value, or {@code null} if either
+   *   <ul>
+   *     <li>the {@link #update} method was never invoked (in which case {@link #hasValue()} returns {@code false})</li>
+   *     <li>the best arg passed to {@link #update} was {@code null}</li>
+   *   </ul>
+   *   .
    */
   @Nullable
   public A get() {
     return bestArg;
+  }
+
+  /**
+   * @return {@code true} iff {@link #update} has been invoked at least once,
+   *   in which case {@link #get()} will re
+   */
+  public boolean hasValue() {
+    return hasValue;
   }
 
   @Override

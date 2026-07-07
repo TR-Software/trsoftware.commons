@@ -17,12 +17,14 @@
 package solutions.trsoftware.commons.client.useragent;
 
 import com.google.common.base.MoreObjects;
+import com.google.common.collect.ImmutableMap;
 import com.google.gwt.core.shared.GWT;
 import com.google.gwt.regexp.shared.MatchResult;
 import com.google.gwt.regexp.shared.RegExp;
 import com.google.gwt.user.client.Window;
 import solutions.trsoftware.commons.shared.util.VersionNumber;
 
+import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
 /**
@@ -53,17 +55,29 @@ public class UserAgent {
     return ourInstance;
   }
 
+
+  /** The current browser's {@code navigator.userAgent} string */
+  @Nonnull
+  private final String userAgentString;
+
+
   /** Exposed with protected visibility for unit testing */
   protected UserAgent(String userAgentString) {
-    this.userAgentStringLowercase = userAgentString.toLowerCase();
+    this.userAgentString = userAgentString;
   }
 
-  private String userAgentStringLowercase;
-
+  /**
+   *
+   * @return the value of the current browser's {@code navigator.userAgent} property
+   */
+  @Nonnull
+  public String getUserAgentString() {
+    return userAgentString;
+  }
 
   /** Returns the browser user agent string in lowercase */
   public String getUserAgentStringLowercase() {
-    return userAgentStringLowercase;
+    return userAgentString.toLowerCase();
   }
 
   /**
@@ -80,10 +94,10 @@ public class UserAgent {
         - MS Edge 90.0.818.49 UA Header:
           "Mozilla/5.0 (Windows NT 6.3; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/90.0.4430.85 Safari/537.36 Edg/90.0.818.49"
         - IE 11 header:
-          "Mozilla/5.0 (Windows NT 6.3; WOW64; Trident/7.0; MALCJS; rv:11.0) like Gecko"
-          - perhaps could use the "MALCJS; rv:11.0" part?
+          "Mozilla/5.0 (Windows NT 6.3; WOW64; Trident/7.0; .NET4.0E; .NET4.0C; .NET CLR 3.5.30729; .NET CLR 2.0.50727; .NET CLR 3.0.30729; MALCJS; Zoom 3.6.0; rv:11.0) like Gecko"
+          - perhaps could use the "MALCJS;" part or "Trident"?
      */
-    return userAgentStringLowercase.contains("msie");
+    return getUserAgentStringLowercase().contains("msie");
   }
 
   public String getReloadPageVerb() {
@@ -122,27 +136,61 @@ public class UserAgent {
    *   "Mozilla/5.0 (Windows NT 6.3; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/67.0.3396.99 Safari/537.36"
    * </code>
    * <p>
-   * NOTE: some browsers also provide a <a href="https://web.dev/user-agent-client-hints/#javascript-api">{@code navigator.userAgentData}</a>
+   * <i>Note:</i> some browsers also provide a <a href="https://web.dev/user-agent-client-hints/#javascript-api">{@code navigator.userAgentData}</a>
    * property, which serves a similar purpose.
    *
-   * @param browserName the name of the product to look for in the UA string, e.g. {@code Chrome}, {@code Mozilla}, etc.
-   * @return the version number of the given browser from the UA string, if present, or {@code null} if the given browser
-   * name isn't mentioned anywhere in the UA string
+   * @param browserName <i>case-insensitive</i> name of the product to look for in the UA string (e.g. {@code "Chrome"}, {@code "Mozilla"})
+   * @return the version number of the given browser from the UA string, if present, or
+   *   {@code null} if the given browser name is not present in the UA string
+   * @see #parseVersionNumbers()
+   * @see <a href="https://web.dev/user-agent-client-hints/#javascript-api"><code>navigator.userAgentData</code></a>
    */
   @Nullable
   public VersionNumber parseVersionNumber(String browserName) {
-    return parseVersionNumber(this.userAgentStringLowercase, browserName);
+    return parseVersionNumber(userAgentString, browserName);
+  }
+
+  /**
+   * Parses all the browserName/versionNumber entries (e.g. "Chrome/67.0.3396.99") contained in the current
+   * {@link #userAgentString}.
+   * <p>
+   * For example, if the UA string is <code style="white-space: nowrap;">
+   *   "Mozilla/5.0 (Windows NT 6.3; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/67.0.3396.99 Safari/537.36"</code>,
+   * this method will return the equivalent of:
+   * <pre>
+   *   ImmutableMap.of(
+   *     "Mozilla",     new {@link VersionNumber}(5, 0),
+   *     "AppleWebKit", new {@link VersionNumber}(537, 36),
+   *     "Chrome",      new {@link VersionNumber}(67, 0, 3396, 99),
+   *     "Safari",      new {@link VersionNumber}(537, 36));
+   * </pre>
+   * Note: the character case of the browser names is retained from the original {@code userAgent} string.
+   * To perform case-insensitive lookups, the returned map can be wrapped in a
+   * {@link java.util.TreeMap} with the {@link String#CASE_INSENSITIVE_ORDER} comparator.
+   *
+   * @return a mapping of all the browserName/versionNumber entries extracted from the given string, or
+   *   {@code null} if it contains no substrings matching the pattern
+   *     <code style="white-space:nowrap;text-decoration:underline">/(\w+)/([\d.]+)/i</code>
+   * @see #parseVersionNumber(String)
+   * @see <a href="https://www.baeldung.com/java-map-with-case-insensitive-keys#treemap">Java Map With Case-Insensitive Keys</a>
+   */
+  @Nullable
+  public ImmutableMap<String, VersionNumber> parseVersionNumbers() {
+    return parseVersionNumbers(userAgentString);
   }
 
   /**
    * Modern browsers list several products in their user agent string, for example
-   * <pre>Mozilla/5.0 (Windows NT 6.3; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/67.0.3396.99 Safari/537.36</pre>
-   * Therefore this method takes a specific browser name, and attempts to extract the version of that particular
-   * browser from the user agent string.
+   * <pre>"Mozilla/5.0 (Windows NT 6.3; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/67.0.3396.99 Safari/537.36"</pre>
+   *
+   * This method takes a specific browser name, and attempts to extract the version of that particular
+   * browser from the given user agent string.
+   *
    * @param uaString the value of {@code navigator.userAgent}
-   * @param browserName the name of the product to look for in the UA string, e.g. {@code Chrome}, {@code Mozilla}, etc.
-   * @return the version number of the given browser from the UA string, if present, or {@code null} if the given browser
-   * name isn't mentioned anywhere in the UA string
+   * @param browserName <i>case-insensitive</i> name of the product to look for in the UA string (e.g. {@code "Chrome"}, {@code "Mozilla"})
+   * @return the version number of the given browser from the UA string, if present, or
+   *   {@code null} if the given browser name is not present in the UA string
+   * @see #parseVersionNumbers(String)
    */
   @Nullable
   public static VersionNumber parseVersionNumber(String uaString, String browserName) {
@@ -151,6 +199,47 @@ public class UserAgent {
     if (match != null) {
       String versionStr = match.getGroup(1);  // e.g. "67.0.3396.99"
       return VersionNumber.parse(versionStr);
+    }
+    return null;  // match not found
+  }
+
+  /**
+   * Parses all the browserName/versionNumber entries (e.g. "Chrome/67.0.3396.99") contained in the given {@code userAgent} string.
+   * <p>For example:
+   * <pre>
+   *   {@link #parseVersionNumbers}("Mozilla/5.0 (Windows NT 6.3; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/67.0.3396.99 Safari/537.36")
+   *     // equals:
+   *     ImmutableMap.of(
+   *       "Mozilla",     new {@link VersionNumber}(5, 0),
+   *       "AppleWebKit", new {@link VersionNumber}(537, 36),
+   *       "Chrome",      new {@link VersionNumber}(67, 0, 3396, 99),
+   *       "Safari",      new {@link VersionNumber}(537, 36));
+   * </pre>
+   * Note: the character case of the browser names is retained from the original {@code userAgent} string.
+   * To perform case-insensitive lookups, the returned map can be wrapped in a
+   * {@link java.util.TreeMap} with the {@link String#CASE_INSENSITIVE_ORDER} comparator.
+   *
+   * @param userAgent a {@code navigator.userAgent} string
+   * @return a mapping of all the browserName/versionNumber entries extracted from the given string, or
+   *   {@code null} if it contains no substrings matching the pattern
+   *     <code style="white-space:nowrap;text-decoration:underline">/(\w+)/([\d.]+)/i</code>
+   * @see #parseVersionNumber(String, String)
+   * @see <a href="https://www.baeldung.com/java-map-with-case-insensitive-keys#treemap">Java Map With Case-Insensitive Keys</a>
+   */
+  @Nullable
+  public static ImmutableMap<String, VersionNumber> parseVersionNumbers(String userAgent) {
+    // Note: global flag ("g") required to find all matches; see Google AI overview @ https://www.google.com/search?q=gwt+regexp+find+all+matches&oq=gwt+regexp+find+all+matches&aqs=chrome..69i57j0i22i30l3j0i546i649j0i751j0i546i649.5057j0j7&sourceid=chrome&ie=UTF-8
+    RegExp regExp = RegExp.compile("(\\w+)/([\\d.]+)", "gi");
+    MatchResult match = regExp.exec(userAgent);
+    if (match != null) {
+      ImmutableMap.Builder<String, VersionNumber> builder = ImmutableMap.builder();
+      while (match != null) {
+        String browserName = match.getGroup(1);  // e.g. "Chrome"
+        String versionStr = match.getGroup(2);  // e.g. "67.0.3396.99"
+        builder.put(browserName, VersionNumber.parse(versionStr));
+        match = regExp.exec(userAgent);
+      }
+      return builder.build();
     }
     return null;  // match not found
   }

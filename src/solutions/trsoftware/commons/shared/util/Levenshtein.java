@@ -21,10 +21,12 @@ import solutions.trsoftware.commons.shared.util.stats.ArgMax;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.List;
 
 import static java.util.Objects.requireNonNull;
-import static solutions.trsoftware.commons.shared.util.ListUtils.arrayList;
 
 /**
  * Two algorithms for calculating the Levenshtein distance between two strings.

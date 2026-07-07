@@ -130,7 +130,7 @@ public enum ComparisonOperator implements IntPredicate {
 
   /**
    * Tests whether the given args satisfy this operator.
-   * Can also be used as a {@link BiPredicate} lambda or method refence (e.g. {@code GT::compare}).
+   * Can also be used as a {@link BiPredicate} lambda or method reference (e.g. {@code GT::compare}).
    * <p>
    * Example:
    * <pre>
@@ -141,7 +141,7 @@ public enum ComparisonOperator implements IntPredicate {
    * @param <T> the type of object being compared
    * @return {@code true} iff the arg satisfies this operator
    */
-  public <T> boolean compare(Comparable<T> lhs, T rhs) {
+  public <T> boolean compare(Comparable<? super T> lhs, T rhs) {
     return test(lhs.compareTo(rhs));
   }
 
@@ -157,7 +157,7 @@ public enum ComparisonOperator implements IntPredicate {
    * @see <a href="https://en.wikipedia.org/wiki/Partial_application">Partial application</a>
    * @see <a href="https://en.wikipedia.org/wiki/Higher-order_function">Higher-order function</a>
    */
-  public <T extends Comparable<T>> Predicate<T> comparingTo(T rhs) {
+  public <T extends Comparable<? super T>> Predicate<T> comparingTo(T rhs) {
     return t -> compare(t, rhs);
   }
 

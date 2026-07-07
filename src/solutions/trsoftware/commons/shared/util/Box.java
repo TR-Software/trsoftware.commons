@@ -16,6 +16,10 @@
 
 package solutions.trsoftware.commons.shared.util;
 
+import java.util.function.Consumer;
+
+import static java.util.Objects.requireNonNull;
+
 /**
  * A container for a value, useful for inside closures, where all references
  * must be final.
@@ -24,7 +28,7 @@ package solutions.trsoftware.commons.shared.util;
  */
 public class Box<V> implements TakesValue<V> {
   private V value;
-  private boolean initialized;
+  private boolean hasValue;
 
   public Box() {
   }
@@ -39,7 +43,7 @@ public class Box<V> implements TakesValue<V> {
 
   public void setValue(V value) {
     this.value = value;
-    initialized = true;
+    hasValue = true;
   }
 
   /**
@@ -58,6 +62,26 @@ public class Box<V> implements TakesValue<V> {
    * @return {@code true} iff the value has ever been set (even if it's {@code null})
    */
   public boolean hasValue() {
-    return initialized;
+    return hasValue;
+  }
+
+  /**
+   * If a value {@linkplain #hasValue() is present}, invoke the specified consumer with the value and return {@code true},
+   * otherwise do nothing and return {@code false}.
+   *
+   * @param consumer block to be executed if a value is present
+   * @return {@code true} if consumer was invoked; {@code false} if no value is present
+   *
+   * @throws NullPointerException if value is present and {@code consumer} is null
+   * @see #hasValue()
+   * @see java.util.Optional#ifPresent(Consumer)
+   */
+  public boolean ifPresent(Consumer<? super V> consumer) {
+    // TODO(7/1/2026): experimental
+    if (value != null) {
+      requireNonNull(consumer, "consumer").accept(value);
+      return true;
+    }
+    return false;
   }
 }

@@ -35,4 +35,6 @@ public interface MockRpcService extends RemoteService {
   long getMaxContentLength();
 
   void setMaxContentLength(long maxContentLength);
+
+  void throwException(String clsName, String message) throws Exception;
 }

@@ -136,6 +136,9 @@ public class NativeEvents {
    * the "preview" phase)
    * @param listener Will be called by the added listener function.
    * @return A memento that can remove the listener added by this method.
+   *
+   * @see <a href="https://developer.mozilla.org/en-US/docs/Web/API/EventTarget/addEventListener">
+   *   JS <tt>addEventListener</tt> function (MDN docs)</a>
    */
   public static HandlerRegistration addNativeEventListener(JavaScriptObject target, String eventName, boolean useCapture, EventListener listener) {
     return new Registration(addNativeEventListenerImpl(target, eventName, useCapture, listener));

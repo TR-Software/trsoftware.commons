@@ -52,6 +52,7 @@ public class DynamicRowImplGenerator {
    The whole API is designed with only the vocabulary of the Java language.
    You can even specify inserted bytecode in the form of source text; Javassist compiles it on the fly."
    - https://www.javassist.org/
+  **UPDATE(2/10/2026): Byte Buddy seems to be the preferred alternative to Javassist nowadays
   */
 
   /**

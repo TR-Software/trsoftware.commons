@@ -28,8 +28,8 @@ import static com.google.common.base.Preconditions.checkArgument;
 import static java.lang.Math.*;
 
 /**
- * @since Oct 23, 2008
  * @author Alex
+ * @since Oct 23, 2008
  *
  * @see com.google.common.math
  */
@@ -52,8 +52,8 @@ public class MathUtils {
   public static byte[] int128ToByteArray(long msb, long lsb) {
     byte[] bytes = new byte[16];
     for (int i = 0; i < 8; i++) {
-      bytes[i] = (byte)((msb >> (64-8*(i+1))) & 0xffL);
-      bytes[8+i] = (byte)((lsb >> (64-8*(i+1))) & 0xffL);
+      bytes[i] = (byte)((msb >> (64 - 8 * (i + 1))) & 0xffL);
+      bytes[8 + i] = (byte)((lsb >> (64 - 8 * (i + 1))) & 0xffL);
     }
     return bytes;
   }
@@ -78,12 +78,12 @@ public class MathUtils {
    * (whereas a plain cast results in <nobr><code>(int){@value Integer#MAX_VALUE} > (int)2147483648</code></nobr>).
    * However, the downside is the loss of identity for values that already fit into the {@code int} range.
    * <p>
-   * Therefore, unless the comparison semantics are really needed, we recommend just using a standard {@code (int)} cast
-   * along with {@link Integer#toUnsignedLong(int)} instead of {@link #packUnsignedInt(long)} / {@link #unsignedInt(int)}.
+   * Therefore, unless the comparison semantics are really needed, we recommend just using a standard {@code (int)}
+   * cast along with {@link Integer#toUnsignedLong(int)} instead of {@link #packUnsignedInt(long)} / {@link #unsignedInt(int)}.
    *
    * @param unsigned value between {@code 0} and <tt>2<sup>32</sup></tt>
    * @return {@code int} representation of the argument that can be converted back to the original {@code long}
-   *   by invoking {@link #unsignedInt(int)}
+   *     by invoking {@link #unsignedInt(int)}
    * @throws IllegalArgumentException if argument not in range <tt>[0, 2<sup>32</sup>]</tt>
    * @see #unsignedInt(int)
    * @see com.google.common.primitives.UnsignedInteger
@@ -113,8 +113,8 @@ public class MathUtils {
    * Specifically, this conversion maps
    * {@code 0} to {@value Byte#MIN_VALUE} ({@code 0x80}),
    * {@code 128} to {@code 0}, and
-   * {@code 255} to {@value Byte#MAX_VALUE} ({@code 0x7F}).
-   * The conversion can be reversed by invoking {@link #unsignedByte(byte)} on the result.
+   * {@code 255} to {@value Byte#MAX_VALUE} ({@code 0x7F}),
+   * and can be reversed by invoking {@link #unsignedByte(byte)} on the result.
    * <p>
    * <b>Note:</b> This scheme differs from the more-standard values produced by Java's {@code (byte)} cast
    * and {@link UnsignedBytes#saturatedCast(long)}, which map values {@code 0}..{@code 127} to themselves,
@@ -126,11 +126,12 @@ public class MathUtils {
    * results in <nobr><code>((byte)127 > (byte)128)</code></nobr>.  However, the downside is the loss of identity
    * for values {@code 0}..{@code 127}.
    * <p>
-   * Therefore, unless the comparison semantics are really needed, we recommend just using a standard {@code (byte)} cast
-   * along with {@link Byte#toUnsignedInt(byte)} instead of {@link #packUnsignedByte(int)} / {@link #unsignedByte(byte)}.
+   * Therefore, unless the comparison semantics are really needed, we recommend just using a standard {@code (byte)}
+   * cast along with {@link Byte#toUnsignedInt(byte)} instead of {@link #packUnsignedByte(int)} / {@link #unsignedByte(byte)}.
+   *
    * @param unsigned integer between {@code 0} and {@code 255}
    * @return a {@code byte} representation of the argument that can be converted back to the original {@code int}
-   *   by invoking {@link #unsignedByte(byte)}
+   *     by invoking {@link #unsignedByte(byte)}
    * @throws IllegalArgumentException if argument not in range {@code [0, 255]}
    * @see UnsignedBytes#saturatedCast(long)
    */
@@ -143,6 +144,7 @@ public class MathUtils {
   /**
    * Converts a signed {@code byte} value produced by {@link #packUnsignedByte(int)}
    * back to an {@code int} representing an "unsigned byte" [0, 255]
+   *
    * @see UnsignedBytes
    * @see Byte#toUnsignedInt(byte)
    */
@@ -153,8 +155,8 @@ public class MathUtils {
   /**
    * Returns {@link BigInteger#toByteArray()} without the extra sign byte if the sign byte is {@code 0}
    *
-   * @return the value of {@link BigInteger#toByteArray()} if the sign byte is not {@code 0}, or a copy of that array without
-   * the leading byte if it's {@code 0}
+   * @return the value of {@link BigInteger#toByteArray()} if the sign byte is not {@code 0}, or a copy of that array
+   *     without the leading byte if it's {@code 0}
    */
   public static byte[] bigIntToUnsignedByteArray(BigInteger bigInt) {
     // TODO: reconcile code dup in BigIntRadixCodec.decodeUnsignedBytes
@@ -177,8 +179,7 @@ public class MathUtils {
    * Computes {@code n!}
    *
    * @throws IllegalArgumentException is {@code n} is negative
-   * @throws ArithmeticException if the result doesn't fit in a {@code long} (i.e. if {@code n > 20})
-   *
+   * @throws ArithmeticException      if the result doesn't fit in a {@code long} (i.e. if {@code n > 20})
    * @see com.google.common.math.LongMath#factorial(int)
    * @see com.google.common.math.IntMath#factorial(int)
    */
@@ -189,29 +190,30 @@ public class MathUtils {
   }
 
   /**
-   * Computes the number of permutations (order matters) of {@code r} elements from a sequence of {@code n}.
+   * Computes the number of (ordered) permutations of {@code r} elements from a collection of {@code n} elements.
    * <p>
-   * Equal to {@code n!/(n-r)!}
+   * @return {@code n! / (n-r)!}
    *
+   * @throws ArithmeticException if the result overflows a {@code long}
    * @see <a href="http://en.wikipedia.org/wiki/Permutation">"Permutation" on Wikipedia</a>
    */
   public static long nPr(int n, int r) {
-    if (n < 0 || r < 0 || n < r)
+    if (r < 0 || n < r)
       throw new IllegalArgumentException("nPr is not defined for inputs " + n + " and " + r);
     long product = 1;
-    for (int i = n-r+1; i <= n; i++) {
-      product = Math.multiplyExact(product, i);
-      if (product < 0)
-        throw new ArithmeticException("Result is too large to be represented by the long integer type.");
+    for (int i = n - r + 1; i <= n; i++) {
+      product = Math.multiplyExact(product, i);  // throws ArithmeticException if overflow
     }
     return product;
   }
 
   /**
-   * Computes <i>n choose r</i>, which is the number of subsets (order irrelevant) of {@code r} elements from a set of {@code n}.
+   * Computes {@code n} <i>choose</i> {@code r}, which is the number of subsets (order irrelevant) of
+   * {@code r} elements from a set of size {@code n}.
    * <p>
-   * Equal to {@code n!/(r!(n-r)!)}
+   * @return {@code n! / (r!(n-r)!)}
    *
+   * @throws ArithmeticException if the result overflows a {@code long}
    * @see <a href="http://en.wikipedia.org/wiki/Choose_function">"Choose function" on Wikipedia</a>
    */
   public static long nCr(int n, int r) {
@@ -219,22 +221,24 @@ public class MathUtils {
   }
 
   /**
-   * A Fibonacci implementation that runs in O(n) time and O(1) space without
-   * using recursion.
+   * A Fibonacci implementation that runs in O(n) time and O(1) space without using recursion.
+   * <p>
+   * The Fibonacci sequence is 0, 1, 1, 2, 3, 5, 8, 13, 21, 34, 55, 89, 144, 233, 377, 610, 987, 1597, etc...
    *
-   * @param n must be positive
-   * @return The n-th number in the Fibonacci sequence (starting with first,
-   * the numbers are 0, 1, 1, 2, 3, 5, 8, 13, 21, 34, 55, 89, 144, 233,
-   * 377, 610, 987, 1597, etc..)
+   * @param n 0-indexed ordinal of the desired Fibonacci number
+   * @return The n-th number in the Fibonacci sequence
+   * @throws IllegalArgumentException if {@code n} is negative
+   * @throws ArithmeticException if the result overflows an {@code int} (i.e. {@code n} &gt; 46)
    */
   public static int fibonacci(int n) {
+    // TODO: could just use a lookup table for better perf (see from https://stackoverflow.com/a/60682787)
     if (n < 0)
       throw new IllegalArgumentException("fibonacci(n): n must be nonnegative");
     int a = 0;
     int b = 1;
     for (int i = 0; i < n; i++) {
-      a = a + b;
-      b = a - b;
+      a = Math.addExact(a, b);
+      b = Math.subtractExact(a, b);
     }
     return a;
   }
@@ -255,11 +259,11 @@ public class MathUtils {
 
   /**
    * @return the fractional part of the given double
-   * <strong>Examples</strong>:
-   * {@code 3.456 &rarr; .456}; {@code 3 &rarr; 0}
+   *   (e.g. {@code 3.456} &rarr; {@code .456}; {@code 3.0} &rarr; {@code 0})
    */
   public static double getFractionalPart(double val) {
     if (val <= Integer.MAX_VALUE) {
+      // GWT optimization: avoid `long` emulation if possible
       int wholePart = (int)val;
       return val - wholePart;
     } else {
@@ -277,8 +281,8 @@ public class MathUtils {
    * (which could have precision error). For example:
    * {@code 32450.0 / 3.75 * 3.75} &rarr; {@code 32450.000000000004} (whereas we would expect {@code 32450.0}).
    *
-   * @param delta the margin of error for the comparison;
-   *              the {@link #EPSILON} constant is provided for this use-case
+   * @param delta the margin of error for the comparison
+   *     (see the {@link #EPSILON} constant is provided for this use-case)
    * @return {@code true} iff {@code expected == actual} or the difference between the two values is {@code <= delta}
    * @throws IllegalArgumentException if {@code delta} is negative
    * @see #EPSILON
@@ -289,12 +293,12 @@ public class MathUtils {
     if (Double.isInfinite(a) || Double.isInfinite(b)) {
       return a == b;
     }
-    return Math.abs(a-b) <= Math.abs(delta);
+    return Math.abs(a - b) <= Math.abs(delta);
   }
 
   /**
    * Returns {@code x} rounded to {@code n} digits after the decimal point
-   * (just like the <a href="https://docs.python.org/2.7/library/functions.html#round">{@code round}</a> function in Python).
+   * (like Python's <a href="https://docs.python.org/2.7/library/functions.html#round">{@code round}</a> function).
    * <p>
    * Values are rounded to the closest multiple of <code>10<sup>-n</sup></code>;
    * if two multiples are equally close, rounding is done away from 0
@@ -314,8 +318,8 @@ public class MathUtils {
    * @param x the number to round
    * @param n decimal places
    * @return {@code x} rounded to {@code n} decimal places
-   *
-   * @see <a href="https://docs.python.org/2.7/tutorial/floatingpoint.html">Floating Point Arithmetic: Issues and Limitations</a>
+   * @see <a href="https://docs.python.org/2.7/tutorial/floatingpoint.html">
+   *   Floating Point Arithmetic: Issues and Limitations</a>
    * @see #round(BigDecimal, int)
    */
   public static double round(double x, int n) {
@@ -351,23 +355,25 @@ public class MathUtils {
    * @param x the number to round
    * @param n decimal places
    * @return {@code x} rounded to {@code n} decimal places
-   *
-   * @see <a href="https://docs.python.org/2.7/library/functions.html#round">The <code>round</code> function in Python</a>
+   * @see <a href="https://docs.python.org/2.7/library/functions.html#round">The <code>round</code> function in
+   *     Python</a>
    */
   public static BigDecimal round(BigDecimal x, int n) {
     return x.setScale(n, RoundingMode.HALF_UP);
   }
 
   /**
-   * The equivalent of Python's {@code %} operator, which always returns a number with the same sign as the divisor {@code b}.
+   * The equivalent of Python's {@code %} operator, which always returns a number with the same sign as the divisor.
    * This is useful for things like wrapping array indices.
    * <p>
    * Note: this method is equivalent to {@link Math#floorMod(int, int)} (introduced in Java 1.8), so the only reason
    * to use it instead of the one in {@link Math} is compatibility with older GWT versions.
    *
+   * @param a the dividend
+   * @param b the divisor
    * @return The mathematical {@code a mod b}, which unlike the native {@code %} operator,
-   * is guaranteed to have the same sign as the divisor {@code b}
-   * @see Math#floorMod(int, int)
+   *     is guaranteed to have the same sign as the divisor {@code b}
+   * @deprecated use Math#floorMod(int, int)
    */
   public static int floorMod(int a, int b) {
     return (a % b + b) % b;
@@ -454,16 +460,16 @@ public class MathUtils {
    */
   public static boolean isPowerOf2(int n) {
     // see https://stackoverflow.com/a/600306/1965404
-    return n > 0 && ((n & (n-1)) == 0);
+    return n > 0 && ((n & (n - 1)) == 0);
   }
 
   /**
    * Computes the logarithm of the given number in the specified base.
    * <p>
    * This calculation uses {@link Math#log(double)} and the identity formula
-   * <nobr><code>
+   * <code style="whitespace: nowrap;">
    *   log<sub>b</sub>(x) = log<sub>e</sub>(x) / log<sub>e</sub>(b)
-   * </code></nobr>
+   * </code>
    *
    * @param base the base of the logarithm
    * @param x the argument
@@ -478,8 +484,8 @@ public class MathUtils {
   /**
    * Computes the base 2 logarithm of the given integer using only bitwise operations.
    * <p>
-   * Our benchmarking showed this method to perform ~33% faster than the equivalent computation using {@link Math#log(double)}
-   * (i.e. {@code Math.log(n)/Math.log(2)}), tested on Java8, Intel i7, Windows 8.
+   * Our benchmarking showed this method to perform ~33% faster than the equivalent computation with
+   * {@link Math#log(double)} (i.e. {@code Math.log(n)/Math.log(2)}); tested on Java8, Intel i7, Windows 8.
    *
    * @param n a positive integer
    * @return <code>log<sub>2</sub>(n)</code>
@@ -495,4 +501,249 @@ public class MathUtils {
       i++;
     return i;
   }
+
+
+  /*
+   ================================================================================
+   Math.ceilDiv / Math.ceilMod methods backported from Java 18:
+   https://github.com/openjdk/jdk/blob/70c92d6c2bce373067b6a8df72f194b6f9d08259/src/java.base/share/classes/java/lang/Math.java#L1653-L1866
+   ================================================================================
+   * Copyright (c) 1994, 2026, Oracle and/or its affiliates. All rights reserved.
+   * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
+   *
+   * This code is free software; you can redistribute it and/or modify it
+   * under the terms of the GNU General Public License version 2 only, as
+   * published by the Free Software Foundation.  Oracle designates this
+   * particular file as subject to the "Classpath" exception as provided
+   * by Oracle in the LICENSE file that accompanied this code.
+   *
+   * This code is distributed in the hope that it will be useful, but WITHOUT
+   * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+   * FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
+   * version 2 for more details (a copy is included in the LICENSE file that
+   * accompanied this code).
+   *
+   * You should have received a copy of the GNU General Public License version
+   * 2 along with this work; if not, write to the Free Software Foundation,
+   * Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA.
+   *
+   * Please contact Oracle, 500 Oracle Parkway, Redwood Shores, CA 94065 USA
+   * or visit www.oracle.com if you need additional information or have any
+   * questions.
+   */
+
+  /**
+   * Returns the smallest (closest to negative infinity)
+   * {@code int} value that is greater than or equal to the algebraic quotient.
+   * There is one special case: if the dividend is
+   * {@linkplain Integer#MIN_VALUE Integer.MIN_VALUE} and the divisor is {@code -1},
+   * then integer overflow occurs and
+   * the result is equal to {@code Integer.MIN_VALUE}.
+   * <p>
+   * Normal integer division operates under the round to zero rounding mode
+   * (truncation).  This operation instead acts under the round toward
+   * positive infinity (ceiling) rounding mode.
+   * The ceiling rounding mode gives different results from truncation
+   * when the exact quotient is not an integer and is positive.
+   * <ul>
+   *   <li>If the signs of the arguments are different, the results of
+   *       {@code ceilDiv} and the {@code /} operator are the same.  <br>
+   *       For example, {@code ceilDiv(-4, 3) == -1} and {@code (-4 / 3) == -1}.</li>
+   *   <li>If the signs of the arguments are the same, {@code ceilDiv}
+   *       returns the smallest integer greater than or equal to the quotient
+   *       while the {@code /} operator returns the largest integer less
+   *       than or equal to the quotient.
+   *       They differ if and only if the quotient is not an integer.<br>
+   *       For example, {@code ceilDiv(4, 3) == 2},
+   *       whereas {@code (4 / 3) == 1}.
+   *   </li>
+   * </ul>
+   *
+   * @param x the dividend
+   * @param y the divisor
+   * @return the smallest (closest to negative infinity)
+   *     {@code int} value that is greater than or equal to the algebraic quotient.
+   * @throws ArithmeticException if the divisor {@code y} is zero
+   * @see #ceilMod(int, int)
+   * @see Math#ceil(double)
+   * @since 18
+   */
+  public static int ceilDiv(int x, int y) {
+    final int q = x / y;
+    // if the signs are the same and modulo not zero, round up
+    if ((x ^ y) >= 0 && (q * y != x)) {
+      return q + 1;
+    }
+    return q;
+  }
+
+  /**
+   * Returns the smallest (closest to negative infinity)
+   * {@code long} value that is greater than or equal to the algebraic quotient.
+   * There is one special case: if the dividend is
+   * {@linkplain Long#MIN_VALUE Long.MIN_VALUE} and the divisor is {@code -1},
+   * then integer overflow occurs and
+   * the result is equal to {@code Long.MIN_VALUE}.
+   * <p>
+   * Normal integer division operates under the round to zero rounding mode
+   * (truncation).  This operation instead acts under the round toward
+   * positive infinity (ceiling) rounding mode.
+   * The ceiling rounding mode gives different results from truncation
+   * when the exact result is not an integer and is positive.
+   * <p>
+   * For examples, see {@link #ceilDiv(int, int)}.
+   *
+   * @param x the dividend
+   * @param y the divisor
+   * @return the smallest (closest to negative infinity)
+   *     {@code long} value that is greater than or equal to the algebraic quotient.
+   * @throws ArithmeticException if the divisor {@code y} is zero
+   * @see #ceilMod(int, int)
+   * @see Math#ceil(double)
+   * @since 18
+   */
+  public static long ceilDiv(long x, int y) {
+    return ceilDiv(x, (long)y);
+  }
+
+  /**
+   * Returns the smallest (closest to negative infinity)
+   * {@code long} value that is greater than or equal to the algebraic quotient.
+   * There is one special case: if the dividend is
+   * {@linkplain Long#MIN_VALUE Long.MIN_VALUE} and the divisor is {@code -1},
+   * then integer overflow occurs and
+   * the result is equal to {@code Long.MIN_VALUE}.
+   * <p>
+   * Normal integer division operates under the round to zero rounding mode
+   * (truncation).  This operation instead acts under the round toward
+   * positive infinity (ceiling) rounding mode.
+   * The ceiling rounding mode gives different results from truncation
+   * when the exact result is not an integer and is positive.
+   * <p>
+   * For examples, see {@link #ceilDiv(int, int)}.
+   *
+   * @param x the dividend
+   * @param y the divisor
+   * @return the smallest (closest to negative infinity)
+   *     {@code long} value that is greater than or equal to the algebraic quotient.
+   * @throws ArithmeticException if the divisor {@code y} is zero
+   * @see #ceilMod(int, int)
+   * @see Math#ceil(double)
+   * @since 18
+   */
+  public static long ceilDiv(long x, long y) {
+    final long q = x / y;
+    // if the signs are the same and modulo not zero, round up
+    if ((x ^ y) >= 0 && (q * y != x)) {
+      return q + 1;
+    }
+    return q;
+  }
+
+  /**
+   * Returns the ceiling modulus of the {@code int} arguments.
+   * <p>
+   * The ceiling modulus is {@code r = x - (ceilDiv(x, y) * y)},
+   * has the opposite sign as the divisor {@code y} or is zero, and
+   * is in the range of {@code -abs(y) < r < +abs(y)}.
+   *
+   * <p>
+   * The relationship between {@code ceilDiv} and {@code ceilMod} is such that:
+   * <ul>
+   *   <li>{@code ceilDiv(x, y) * y + ceilMod(x, y) == x}</li>
+   * </ul>
+   * <p>
+   * The difference in values between {@code ceilMod} and the {@code %} operator
+   * is due to the difference between {@code ceilDiv} and the {@code /}
+   * operator, as detailed in {@linkplain #ceilDiv(int, int)}.
+   * <p>
+   * Examples:
+   * <ul>
+   *   <li>Regardless of the signs of the arguments, {@code ceilMod}(x, y)
+   *       is zero exactly when {@code x % y} is zero as well.</li>
+   *   <li>If neither {@code ceilMod}(x, y) nor {@code x % y} is zero,
+   *       they differ exactly when the signs of the arguments are the same.<br>
+   *       <ul>
+   *       <li>{@code ceilMod(+4, +3) == -2}; &nbsp; and {@code (+4 % +3) == +1}</li>
+   *       <li>{@code ceilMod(-4, -3) == +2}; &nbsp; and {@code (-4 % -3) == -1}</li>
+   *       <li>{@code ceilMod(+4, -3) == +1}; &nbsp; and {@code (+4 % -3) == +1}</li>
+   *       <li>{@code ceilMod(-4, +3) == -1}; &nbsp; and {@code (-4 % +3) == -1}</li>
+   *       </ul>
+   *   </li>
+   * </ul>
+   *
+   * @param x the dividend
+   * @param y the divisor
+   * @return the ceiling modulus {@code x - (ceilDiv(x, y) * y)}
+   * @throws ArithmeticException if the divisor {@code y} is zero
+   * @see #ceilDiv(int, int)
+   * @since 18
+   */
+  public static int ceilMod(int x, int y) {
+    final int r = x % y;
+    // if the signs are the same and modulo not zero, adjust result
+    if ((x ^ y) >= 0 && r != 0) {
+      return r - y;
+    }
+    return r;
+  }
+
+  /**
+   * Returns the ceiling modulus of the {@code long} and {@code int} arguments.
+   * <p>
+   * The ceiling modulus is {@code r = x - (ceilDiv(x, y) * y)},
+   * has the opposite sign as the divisor {@code y} or is zero, and
+   * is in the range of {@code -abs(y) < r < +abs(y)}.
+   *
+   * <p>
+   * The relationship between {@code ceilDiv} and {@code ceilMod} is such that:
+   * <ul>
+   *   <li>{@code ceilDiv(x, y) * y + ceilMod(x, y) == x}</li>
+   * </ul>
+   * <p>
+   * For examples, see {@link #ceilMod(int, int)}.
+   *
+   * @param x the dividend
+   * @param y the divisor
+   * @return the ceiling modulus {@code x - (ceilDiv(x, y) * y)}
+   * @throws ArithmeticException if the divisor {@code y} is zero
+   * @see #ceilDiv(long, int)
+   * @since 18
+   */
+  public static int ceilMod(long x, int y) {
+    // Result cannot overflow the range of int.
+    return (int)ceilMod(x, (long)y);
+  }
+
+  /**
+   * Returns the ceiling modulus of the {@code long} arguments.
+   * <p>
+   * The ceiling modulus is {@code r = x - (ceilDiv(x, y) * y)},
+   * has the opposite sign as the divisor {@code y} or is zero, and
+   * is in the range of {@code -abs(y) < r < +abs(y)}.
+   *
+   * <p>
+   * The relationship between {@code ceilDiv} and {@code ceilMod} is such that:
+   * <ul>
+   *   <li>{@code ceilDiv(x, y) * y + ceilMod(x, y) == x}</li>
+   * </ul>
+   * <p>
+   * For examples, see {@link #ceilMod(int, int)}.
+   *
+   * @param x the dividend
+   * @param y the divisor
+   * @return the ceiling modulus {@code x - (ceilDiv(x, y) * y)}
+   * @throws ArithmeticException if the divisor {@code y} is zero
+   * @see #ceilDiv(long, long)
+   * @since 18
+   */
+  public static long ceilMod(long x, long y) {
+    final long r = x % y;
+    // if the signs are the same and modulo not zero, adjust result
+    if ((x ^ y) >= 0 && r != 0) {
+      return r - y;
+    }
+    return r;
+  }
+
 }

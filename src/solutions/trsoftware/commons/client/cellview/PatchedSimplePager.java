@@ -34,5 +34,7 @@ public class PatchedSimplePager extends SimplePager {
   public ComplexPanel getWidget() {
     // the SimplePager widget is a HorizontalPanel, but we'll assume it's any ComplexPanel, just to be safe from future changes
     return (ComplexPanel)super.getWidget();
+    // NOTE(4/16/2026): this method seems to be overridden only for ProfilerStatsView to add a Refresh button to the pager widget
+    // TODO: maybe just cast to Panel instead of ComplexPanel?
   }
 }

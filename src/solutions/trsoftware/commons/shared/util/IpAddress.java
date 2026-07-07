@@ -26,7 +26,9 @@ import static solutions.trsoftware.commons.shared.util.IpAddressUtils.*;
  * Wrapper class representing an IP address.  For now, only supports IPv4 addresses, which are
  * internally stored as 32-bit integers.
  * <p>
- * NOTE: when using this class in a webapp, the servlet container (e.g. Tomcat) should be started with the JVM arg
+ * This {@code int} representation is compatible with the database functions {@code INET_ATON} and {@code INET_NTOA}.
+ * <p>
+ * <b>Note:</b> when using this class in a webapp, the servlet container (e.g. Tomcat) should be started with the JVM arg
  * {@code -Djava.net.preferIPv4Stack=true}
  *
  * @author Alex
@@ -34,6 +36,10 @@ import static solutions.trsoftware.commons.shared.util.IpAddressUtils.*;
  *
  * @see IpAddressUtils#ip4StringToInt(String)
  * @see IpAddressUtils#ip4StringToLong(String)
+ * @see <a href="https://dev.mysql.com/doc/refman/5.7/en/miscellaneous-functions.html#function_inet-aton">
+ *      <tt>INET_ATON</tt> (MySQL function)</a>
+ * @see <a href="https://dev.mysql.com/doc/refman/5.7/en/miscellaneous-functions.html#function_inet-ntoa">
+ *      <tt>INET_NTOA</tt> (MySQL function)</a>
  */
 public class IpAddress implements Serializable, RichComparable<IpAddress> {
   private int packedInt;

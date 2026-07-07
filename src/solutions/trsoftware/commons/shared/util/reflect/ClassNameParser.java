@@ -96,34 +96,22 @@ public class ClassNameParser {
     }
   }
 
-  public ClassNameParser(Class cls) {
+  public ClassNameParser(Class<?> cls) {
     this(cls.getName());
   }
 
-  /**
-   * @return {@link #packageName}
-   */
   public String getPackageName() {
     return packageName;
   }
 
-  /**
-   * @return {@link #complexName}
-   */
   public String getComplexName() {
     return complexName;
   }
 
-  /**
-   * @return {@link #simpleName}
-   */
   public String getSimpleName() {
     return simpleName;
   }
 
-  /**
-   * @return {@link #anonymousId}
-   */
   public String getAnonymousId() {
     return anonymousId;
   }
@@ -151,5 +139,19 @@ public class ClassNameParser {
     sb.append(", anonymousId='").append(anonymousId).append('\'');
     sb.append('}');
     return sb.toString();
+  }
+
+  // factory methods (can be used with import static for cleaner code)
+
+  /**
+   * @param clsName the "binary name" of a class (which would be returned by {@link Class#getName()}.
+   * @see <a href="https://docs.oracle.com/javase/specs/jls/se8/html/jls-13.html#jls-13.1">JLS §13.1: The Form of a Binary (re: binary name of a class)</a>
+   */
+  public static ClassNameParser parseClassName(String clsName) {
+    return new ClassNameParser(clsName);
+  }
+
+  public static ClassNameParser parseClassName(Class<?> cls) {
+    return new ClassNameParser(cls.getName());
   }
 }

@@ -38,4 +38,6 @@ public interface MockRpcServiceAsync {
    * @return the RPC payload posted for this request
    */
   void echoRpcPayload(String arg, AsyncCallback<String> async);
+
+  void throwException(String clsName, String message, AsyncCallback<Void> async);
 }

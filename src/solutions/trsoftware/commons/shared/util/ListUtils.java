@@ -472,6 +472,17 @@ public class ListUtils {
     return CollectionUtils.filter(list, predicate);
   }
 
+  public static <T> Optional<T> findLast(List<T> list, Predicate<T> predicate) {
+    for (ListIterator<T> it = list.listIterator(list.size()); it.hasPrevious(); ) {
+      T previous = it.previous();
+      if (predicate.test(previous))
+        /* TODO: if element is null, this doesn't distinguish between found and not found
+        *   Note: Stream.findFirst has the same issue: throws NPE if null element */
+        return Optional.ofNullable(previous);
+    }
+    return Optional.empty();
+  }
+
   /**
    * Removes elements from the tail of the list until its size is &le; {@code maxSize}.
    *

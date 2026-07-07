@@ -29,7 +29,7 @@ import java.util.stream.Stream;
  * @see Collections#max(Collection)
  * @author Alex
  */
-public class MaxComparable<T extends Comparable<T>> extends AbstractMinMaxComparable<T, MaxComparable<T>> {
+public class MaxComparable<T extends Comparable<? super T>> extends AbstractMinMaxComparable<T, MaxComparable<T>> {
 
   public MaxComparable() {}
 
@@ -79,7 +79,7 @@ public class MaxComparable<T extends Comparable<T>> extends AbstractMinMaxCompar
    * @param <T> the input element type
    * @see #getInstance()
    */
-  public static class Collector<T extends Comparable<T>> extends CollectableStats.Collector<T, MaxComparable<T>> {
+  public static class Collector<T extends Comparable<? super T>> extends CollectableStats.Collector<T, MaxComparable<T>> {
 
     /**
      * NOTE: static fields are automatically lazy-init for singletons and safer to use than double-checked locking.
@@ -94,7 +94,7 @@ public class MaxComparable<T extends Comparable<T>> extends AbstractMinMaxCompar
      * @see Stream#max(Comparator)
      */
     @SuppressWarnings("unchecked")
-    public static <T extends Comparable<T>> Collector<T> getInstance() {
+    public static <T extends Comparable<? super T>> Collector<T> getInstance() {
       return INSTANCE;
     }
 

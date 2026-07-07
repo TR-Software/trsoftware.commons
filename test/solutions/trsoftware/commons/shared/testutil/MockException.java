@@ -1,5 +1,7 @@
 package solutions.trsoftware.commons.shared.testutil;
 
+import solutions.trsoftware.commons.shared.util.LogicUtils;
+
 import java.util.Objects;
 
 /**
@@ -14,8 +16,7 @@ import java.util.Objects;
  */
 public class MockException extends Exception {
 
-  public MockException() {
-  }
+  public MockException() {}
 
   public MockException(String message) {
     super(message);
@@ -37,7 +38,7 @@ public class MockException extends Exception {
       return false;
 
     MockException that = (MockException)o;
-    return Objects.equals(getMessage(), that.getMessage());
+    return LogicUtils.eq(getMessage(), that.getMessage());
   }
 
   @Override

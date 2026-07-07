@@ -109,8 +109,14 @@ public abstract class SetUtils {
 
   /**
    * @return the powerset (the set of all subsets) of the given set
+   *
+   * @deprecated This implementation is memory-inefficient, using <i>O(2<sup>n</sup>)</i> memory to create all the subsets
+   * ahead-of-time, which is likely to trigger an {@link OutOfMemoryError} if given a large-enough set as an argument.
+   * Consider using Guava's {@link Sets#powerSet(Set)} instead, which uses only <i>O(n)</i> memory.
    */
   public static <T> Set<Set<T>> powerset(Set<T> set) {
+    assert set.size() <= 30 : "Too many elements to create power set";  // 2^31 overflows Integer.MAX_VALUE
+
     // there is a simpler recursive alg, but we use iteration here for speed
     ArrayList<T> elements = new ArrayList<>(set);
     LinkedHashSet<Set<T>> powerset = new LinkedHashSet<>();

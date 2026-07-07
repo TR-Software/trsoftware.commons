@@ -58,6 +58,7 @@ public class LoadingMessage extends Composite {
 
   public LoadingMessage(boolean startVisible) {
     this("Loading...", startVisible);
+    // TODO(6/23/2026): could have CSS animation for the "..." using an :after pseudoclass (keyframes: "." ".." "...")
   }
 
   public LoadingMessage() {

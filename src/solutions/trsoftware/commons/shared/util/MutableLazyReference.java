@@ -25,13 +25,14 @@ import java.util.function.Supplier;
  */
 public abstract class MutableLazyReference<V> extends LazyReference<V> {
 
-  public synchronized void set(V value) {
-    hasValue.set(true);
-    this.value = value;
+  @Override
+  public void set(V newValue) {  // overriding to make public
+    super.set(newValue);
   }
 
-  public synchronized void refresh() {
-    set(create());
+  @Override
+  protected void clear() {  // overriding to make public
+    super.clear();
   }
 
   /**

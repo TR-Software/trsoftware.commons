@@ -415,10 +415,10 @@ public class ArrayUtils {
    *     or null if the computed value is null
    */
   public static <T> T computeIfAbsent(T[] arr, int i, IntFunction<T> producer) {
-    T cached = arr[i];
-    if (cached == null)
+    T existing = arr[i];
+    if (existing == null)
       return arr[i] = producer.apply(i);
-    return cached;
+    return existing;
   }
 
   /**
@@ -435,10 +435,10 @@ public class ArrayUtils {
    *     or null if the computed value is null
    */
   public static <T> T computeIfAbsent(T[][] arr, int y, int x, IntBiFunction<T> producer) {
-    T cached = arr[y][x];
-    if (cached == null)
+    T existing = arr[y][x];
+    if (existing == null)
       return arr[y][x] = producer.apply(y, x);
-    return cached;
+    return existing;
   }
 
 }

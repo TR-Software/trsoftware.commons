@@ -3,15 +3,16 @@ package solutions.trsoftware.commons.server.util.reflect;
 import com.google.common.base.Throwables;
 import com.google.common.collect.ImmutableList;
 import junit.framework.TestCase;
+import solutions.trsoftware.commons.shared.testutil.MockException;
 import solutions.trsoftware.commons.shared.util.ListUtils;
 import solutions.trsoftware.commons.shared.util.RandomUtils;
 
 import java.io.IOException;
-import java.security.GeneralSecurityException;
 import java.util.List;
 import java.util.function.Function;
 
-import static solutions.trsoftware.commons.server.util.reflect.ExceptionUtils.getFirstByType;
+import static solutions.trsoftware.commons.server.util.reflect.ExceptionUtils.findCause;
+import static solutions.trsoftware.commons.shared.testutil.AssertUtils.assertThrows;
 
 /**
  * @author Alex
@@ -26,32 +27,51 @@ public class ExceptionUtilsTest extends TestCase {
       // some checked exceptions:
       Exception::new,
       IOException::new,
-      GeneralSecurityException::new,
+      MockException::new,
       // and some unchecked exceptions:
       RuntimeException::new,
       IllegalArgumentException::new,
       IllegalStateException::new
   );
 
-  public void testGetFirstByType() throws Exception {
-
+  public void testFindCause() throws Exception {
     DummyException dummyException = new DummyException(getName() + "_" + 1);
-    DummyException dummyException2 = new DummyException(getName() + "_" + 2);
+    // 1) should throw NPE if arg is null
+    assertThrows(NullPointerException.class, () -> findCause(null, DummyException.class));
+    // 2) search target is at the top
+    assertSame(dummyException, findCause(dummyException, DummyException.class));
+    // must be en exact match for class (subclasses don't count)
+    assertNull(findCause(new DummyException(){}, DummyException.class));
+    // 3) search target is buried somewhere in the cause chain
     for (int i = 0; i < 5; i++) {
-      // 1) should return null if arg is null (rather than throwing NPE)
-      assertNull(getFirstByType(null, DummyException.class, i));
-      // 2) search target is at the top
-      assertSame(dummyException, getFirstByType(dummyException, DummyException.class, i));
-      // 3) search target is buried somewhere in the cause chain
-      for (int j = 0; j < i; j++) {
-        assertSame(dummyException, getFirstByType(buryException(dummyException, j), DummyException.class, i));
+      assertSame(dummyException, findCause(buryException(dummyException, i), DummyException.class));
+    }
+    // 4) cycle in causal chain
+    for (int n = 2; n <= 8; n++) {
+//      TestUtils.printSectionHeader("Cyclic exception(" + n + "):");
+      DummyException ex = createCyclicException(n);
+//      ex.printStackTrace(System.out);
+      // should return null if target not found before re-entering a cycle
+      assertNull(findCause(ex, IllegalArgumentException.class));
+      // otherwise should succeed if target found before re-entering the cycle
+      assertSame(ex, findCause(ex, DummyException.class));
+      // test the Predicate version of findCause, for every element in the causal chain
+      for (Throwable cause = ex.getCause(); cause != ex; cause = cause.getCause()) {
+//        System.out.println("cause = " + cause);
+        Throwable expected = cause;
+        assertSame(cause, findCause(ex, t -> t == expected));
       }
     }
+  }
 
-
-    // TODO: test the following cases:
-    // - multiple instances of the target class in chain
-    // - instances of subclasses of the target class in chain
+  private DummyException createCyclicException(int depth) {
+    DummyException ex1 = new DummyException("ex1");
+    DummyException cause = ex1;
+    for (int i = 1; i < depth; i++) {
+      cause = new DummyException("ex" + (i+1), cause);
+    }
+    ex1.initCause(cause);  // create the cycle
+    return cause;
   }
 
   public void testBuryException() throws Exception {

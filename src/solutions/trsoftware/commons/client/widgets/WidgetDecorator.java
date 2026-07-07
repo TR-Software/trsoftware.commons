@@ -21,6 +21,7 @@ import com.google.gwt.dom.client.Style;
 import com.google.gwt.user.client.ui.IsWidget;
 import com.google.gwt.user.client.ui.TextBoxBase;
 import com.google.gwt.user.client.ui.Widget;
+import solutions.trsoftware.commons.client.event.animation.CssAnimationHelper;
 import solutions.trsoftware.commons.shared.util.StringUtils;
 
 import java.util.function.Consumer;
@@ -205,6 +206,8 @@ public class WidgetDecorator {
    * <p>
    * This is achieved by first removing the given CSS class from the element, triggering reflow, and then adding it again,
    * thereby re-starting the animation.
+   *
+   * @see CssAnimationHelper#applyAnimatedStyle(Element, String, boolean)
    */
   public static void reapplyStyleName(Element element, String styleName) {
     // see: https://stackoverflow.com/a/45036752

@@ -17,14 +17,19 @@
 package solutions.trsoftware.commons.client.event.animation;
 
 import com.google.gwt.dom.client.NativeEvent;
+import com.google.gwt.user.client.Event;
+import com.google.gwt.user.client.EventListener;
 
 /**
  * Overlay for the native <a href="https://developer.mozilla.org/en-US/docs/Web/API/AnimationEvent">
  *   {@code AnimationEvent}</a> interface.
+ * <p>
+ * Can also be used to wrap a <a href="https://developer.apple.com/documentation/webkitjs/webkitanimationevent">
+ *   {@code WebKitAnimationEvent}</a> for legacy webkit-based browsers.
  */
-public class NativeAnimationEvent extends NativeEvent {
+public class AnimationEvent extends NativeEvent {
 
-  protected NativeAnimationEvent() {
+  protected AnimationEvent() {
   }
 
   /**
@@ -41,7 +46,8 @@ public class NativeAnimationEvent extends NativeEvent {
    * For an {@code animationstart} event, {@code elapsedTime} is {@code 0.0} unless there was a negative
    * value for {@code animation-delay}, in which case the event will be fired with {@code elapsedTime}
    * containing {@code (-1 * delay)}.
-   * @return
+   *
+   * @return seconds elapsed since the animation started
    */
   public final native double getElapsedTime() /*-{
     return this.elapsedTime;
@@ -50,9 +56,24 @@ public class NativeAnimationEvent extends NativeEvent {
   /**
    * A string, starting with {@code "::"}, containing the name of the pseudo-element the animation runs on.
    * If the animation doesn't run on a pseudo-element but on the element, an empty string.
+   * <p>
+   * <b>Note:</b> not supported by {@code WebKitAnimationEvent}
    */
   public final native String getPseudoElement() /*-{
     return this.pseudoElement;
   }-*/;
+
+  /**
+   * Extends {@link EventListener} to cast the received event as an {@link AnimationEvent}
+   */
+  public interface Listener extends EventListener {
+
+    @Override
+    default void onBrowserEvent(Event event) {
+      onAnimationEvent(event.cast());
+    }
+
+    void onAnimationEvent(AnimationEvent event);
+  }
   
 }

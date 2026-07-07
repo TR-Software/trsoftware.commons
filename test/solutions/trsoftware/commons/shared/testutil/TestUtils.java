@@ -35,7 +35,10 @@ import java.util.stream.Stream;
  * @author Alex, 10/23/2017
  * @see solutions.trsoftware.commons.shared.testutil.TestData
  */
-public class TestUtils {
+public abstract class TestUtils {
+
+  protected TestUtils() {
+  }
 
   /**
    * Busy waits until the condition evaluates to true or the timeout has
@@ -111,11 +114,17 @@ public class TestUtils {
   }
 
   /**
-   * Prints the elements of the given collection on separate lines, each indented by the given number of spaces.
-   * @param collection
+   * Prints the elements of the given collection on separate lines, each indented by 2 spaces.
    */
   public static void printIndented(Collection<?> collection) {
     printIndented(collection, 2);
+  }
+
+  /**
+   * Prints the given message followed by the elements of the given collection on separate lines, each indented by 2 spaces.
+   */
+  public static void printIndented(String message, Collection<?> collection) {
+    printIndented(message, collection.stream());
   }
 
   /**
@@ -134,11 +143,25 @@ public class TestUtils {
   }
 
   /**
+   * Prints the elements of the given stream on separate lines, each indented by 2 spaces.
+   */
+  public static void printIndented(Stream<?> stream) {
+    printIndented(stream, 2);
+  }
+
+  /**
+   * Prints the given message followed by the elements of the given stream on separate lines, each indented by 2 spaces.
+   */
+  public static void printIndented(String message, Stream<?> stream) {
+    System.out.println(message);
+    printIndented(stream, 2);
+  }
+
+  /**
    * Prints the elements of the given stream on separate lines, each indented by the given number of spaces.
    */
   public static void printIndented(Stream<?> stream, int nSpaces) {
-    PrintStream out = System.out;
-    printIndented(stream, nSpaces, out);
+    printIndented(stream, nSpaces, System.out);
   }
 
   /**

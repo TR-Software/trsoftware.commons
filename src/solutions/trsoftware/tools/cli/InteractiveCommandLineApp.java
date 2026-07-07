@@ -22,10 +22,13 @@ import solutions.trsoftware.commons.shared.io.TablePrinter;
 import solutions.trsoftware.commons.shared.util.NumberRange;
 import solutions.trsoftware.commons.shared.util.StringUtils;
 
+import javax.annotation.Nonnull;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintStream;
+import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Modifier;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -77,13 +80,13 @@ public abstract class InteractiveCommandLineApp implements Runnable {
     }
   }
 
-  private List<CommandLineAction> actions = new ArrayList<CommandLineAction>();
+  private final List<CommandLineAction> actions;
 
   /** Lowercase letter shortcuts for each command */
-  private BiMap<CommandLineAction, Character> shortcutChars = HashBiMap.create();
+  private final BiMap<CommandLineAction, Character> shortcutChars = HashBiMap.create();
 
   /** Integer selectors for each command */
-  private BiMap<CommandLineAction, Integer> selectorInts = HashBiMap.create();
+  private final BiMap<CommandLineAction, Integer> selectorInts = HashBiMap.create();
 
   private char getShortcutForAction(CommandLineAction action) {
     if (shortcutChars.containsKey(action))
@@ -91,7 +94,7 @@ public abstract class InteractiveCommandLineApp implements Runnable {
     // get the first available letter to use for the shortcut
     String label = action.getLabel().toLowerCase();
     for (int i = 0; i < label.length(); i++) {
-      Character shortcut = label.charAt(i);
+      char shortcut = label.charAt(i);
       if (!shortcutChars.containsValue(shortcut)) {
         // this is it
         return shortcut;
@@ -101,27 +104,56 @@ public abstract class InteractiveCommandLineApp implements Runnable {
   }
 
   protected InteractiveCommandLineApp() {
-    // search the inner classes for implementors of CommandLineAction
-    Class<? extends InteractiveCommandLineApp> myClass = getClass();
-    List<Class<?>> innerClasses = new ArrayList<Class<?>>(Arrays.asList(myClass.getClasses()));
-    innerClasses.add(QuitAction.class);  // the quit action must be added manually
+    actions = new ArrayList<>(createActions());
+    if (actions.stream().noneMatch(action -> action instanceof QuitAction))
+      actions.add(new QuitAction());
+    // assign the selector int and shorcut char for each action
     int i = 1;
-    for (Class<?> c : innerClasses) {
-      if (!c.equals(CommandLineAction.class) && CommandLineAction.class.isAssignableFrom(c) && !Modifier.isAbstract(c.getModifiers())) {
-        // this is an action class
-        CommandLineAction action = null;
-        try {
-          action = (CommandLineAction)c.newInstance();
-        }
-        catch (InstantiationException | IllegalAccessException e) {
-          e.printStackTrace();
-          throw new RuntimeException(e);
-        }
-        actions.add(action);
-        selectorInts.put(action, i++);
-        shortcutChars.put(action, getShortcutForAction(action));
-      }
+    for (CommandLineAction action : actions) {
+      selectorInts.put(action, i++);
+      shortcutChars.put(action, getShortcutForAction(action));
     }
+  }
+
+  /**
+   * Creates the executable actions that can be run from the main menu.
+   * By default, this methods creates a new instance of each inner class that implements {@link CommandLineAction},
+   * but subclasses may override in order to control the order in which they are displayed in the main menu
+   * (b/c {@link Class#getClasses()} is unordered).
+   */
+  @Nonnull
+  protected List<CommandLineAction> createActions() {
+    // search the inner classes for implementors of CommandLineAction
+    List<CommandLineAction> actions = new ArrayList<>();
+    Class<? extends InteractiveCommandLineApp> appClass = getClass();
+    List<Class<?>> innerClasses = new ArrayList<>(Arrays.asList(appClass.getClasses()));
+    innerClasses.add(QuitAction.class);  // the quit action must be added manually
+    for (Class<?> innerClass : innerClasses) {
+      int mod = innerClass.getModifiers();
+      if (innerClass.isInterface() || Modifier.isAbstract(mod) || !CommandLineAction.class.isAssignableFrom(innerClass)) {
+        // skip interfaces, abstract classes, and classes that don't implement CommandLineAction
+        continue;
+      }
+      // instantiate the class
+      CommandLineAction action;
+      try {
+        if (Modifier.isStatic(mod)) {
+          action = (CommandLineAction)innerClass.newInstance();
+        }
+        else {
+          // non-static inner classes have an implicit constructor that takes the outer class instance as argument
+          Constructor<?> constructor = innerClass.getConstructor(appClass);
+          action = (CommandLineAction)constructor.newInstance(this);
+        }
+      }
+      catch (InstantiationException | IllegalAccessException | NoSuchMethodException | InvocationTargetException e) {
+        System.err.println("Unable to instantiate " + innerClass);
+        e.printStackTrace();
+        continue;
+      }
+      actions.add(action);
+    }
+    return actions;
   }
 
   protected void onBeforeRun(BufferedReader in, PrintStream out) throws Exception {
@@ -274,16 +306,30 @@ public abstract class InteractiveCommandLineApp implements Runnable {
   }
 
   /**
-   * Prints the given message followed by a prompt for a yes/no response.
+   * Prompts for a Yes / No string.
+   *
+   * @param in the input reader
+   * @param prompt the question
+   * @return {@code true} if entered "y" or "yes" (case-insensitive)
+   */
+  public static boolean promptForConfirmation(BufferedReader in, String prompt) throws IOException {
+    String answer = promptForInput(in, prompt + " ([Y]es/[N]o): ");
+    return answer.equalsIgnoreCase("y") || answer.equalsIgnoreCase("yes");
+  }
+
+  /**
+   * Prints the given message followed by a prompt for a yes/no response, throwing {@link ActionAborted}
+   * if the response is not {@code "yes"} or {@code "y"} (case-insensitive).
+   *
    * @param br the input reader
    * @param message will be printed above the prompt
-   * @throws ActionAborted if the user enters anything except {@code "yes"} in response to this prompt
+   * @throws ActionAborted if the user enters anything except {@code "yes"} or {@code "y"} (case-insensitive)
+   *   in response to this prompt
    */
   protected static void confirm(BufferedReader br, String message) throws IOException, ActionAborted {
     System.out.println(message);
-    System.out.print("Are you sure you want to continue? (yes/no): ");
-
-    if (!"yes".equals(br.readLine())) {
+    boolean yes = promptForConfirmation(br, "Are you sure you want to continue?");
+    if (!yes) {
       throw new ActionAborted(message);
     }
   }

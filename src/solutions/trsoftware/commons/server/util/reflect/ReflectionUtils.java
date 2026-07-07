@@ -82,16 +82,41 @@ public abstract class ReflectionUtils {
   }
 
   /**
-   * @return if the arg is a wrapper type, returns the corresponding primitive type; otherwise returns the arg as-is.
+   * If the arg is a wrapper type, returns the corresponding primitive type; otherwise returns the arg as-is.
+   * <pre>
+   *   unwrap(Integer.class) == int.class
+   *   unwrap(int.class) == int.class
+   *   unwrap(String.class) == String.class
+   * </pre>
+   *
+   * @return the corresponding primitive type, or the given arg if it's not a primitive type
+   * @see #wrap(Class)
    * @see #isPrimitiveWrapper(Class)
    * @see #primitiveTypeFor(Class)
    * @see #wrapperTypeFor(Class)
    * @see com.google.common.primitives.Primitives#unwrap
    */
   public static Class<?> unwrap(Class<?> type) {
-    if (isPrimitiveWrapper(type))
-      return primitiveTypeFor(type);
-    return type;
+    return WRAPPER_TYPES.getOrDefault(type, type);
+  }
+
+  /**
+   * If the arg is a primitive type, returns the corresponding wrapper type, otherwise returns the arg as-is.
+   * <pre>
+   *   wrap(int.class) == Integer.class
+   *   wrap(Integer.class) == Integer.class
+   *   wrap(String.class) == String.class
+   * </pre>
+   *
+   * @return the corresponding wrapper type, or the given arg if it's not a primitive type
+   * @see #unwrap(Class)
+   * @see #wrapperTypeFor(Class)
+   * @see #isPrimitiveWrapper(Class)
+   * @see #primitiveTypeFor(Class)
+   * @see com.google.common.primitives.Primitives#unwrap
+   */
+  public static Class<?> wrap(Class<?> type) {
+    return WRAPPER_TYPES.inverse().getOrDefault(type, type);
   }
 
   /**
@@ -739,5 +764,15 @@ public abstract class ReflectionUtils {
   public static boolean hasDeclaredAnnotation(Class<? extends Annotation> annotationClass, AnnotatedElement annotatedElement) {
     // NOTE: don't change the order of parameters; this method is designed to be used as a method reference similar to Class::isAssignableFrom
     return annotatedElement.getDeclaredAnnotation(annotationClass) != null;
+  }
+
+  /**
+   * Simplified version of {@link Method#toString()}, using the simple class names of the declaring class and parameter types.
+   */
+  public static String methodToPrettyString(Method method) {
+    StringBuilder sb = new StringBuilder(method.getDeclaringClass().getSimpleName());
+    sb.append('.').append(method.getName());
+    sb.append(Arrays.stream(method.getParameterTypes()).map(Class::getSimpleName).collect(Collectors.joining(", ", "(", ")")));
+    return sb.toString();
   }
 }

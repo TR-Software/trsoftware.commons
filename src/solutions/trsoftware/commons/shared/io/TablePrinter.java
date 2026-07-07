@@ -40,7 +40,7 @@ import static solutions.trsoftware.commons.shared.util.StringUtils.*;
  *   TablePrinter printer = new TablePrinter();
  *   for (int i = 0; i < 5; i++) {
  *     printer.newRow()
- *         .addCol("x", "%d", i)
+ *         .addCol("x", i)
  *         .addCol("sin(x)", "%f", Math.sin(i))
  *         .addCol("cos(x)", "%.2f", Math.cos(i));
  *   }
@@ -66,7 +66,7 @@ public class TablePrinter {
   public static final TextAlignment DEFAULT_TEXT_ALIGNMENT = TextAlignment.RIGHT;
 
   /*
-   * TODO: extract the table-printing functionality from the MemQuery package (e.g {@link FixedWidthPrinter} and {@link HtmlTablePrinter})
+   * TODO: extract the table-printing functionality from the MemQuery package (e.g FixedWidthPrinter and HtmlTablePrinter)
    *   to create a general-purpose, GWT-compatible, rich table printing facility.
    *   Also see the limited implementation in {@link StringUtils#matrixToPrettyString(String[][], String)}
    */
@@ -80,6 +80,11 @@ public class TablePrinter {
    * @see #colTextAlignments
    */
   private TextAlignment defaultTextAlignment = DEFAULT_TEXT_ALIGNMENT;
+  /**
+   * Default text to display in a cell where a {@code null} value was passed to {@link #addCol(String, String)}
+   * ({@link HashBasedTable} doesn't allow {@code null} values)
+   */
+  private String defaultStringForNull = "";
 
   // data builder fields:
   private final Table<Integer, String, String> table = HashBasedTable.create();
@@ -116,7 +121,9 @@ public class TablePrinter {
     String priorValue = table.get(rowIdx, name);
     checkArgument(priorValue == null, "Current row already contains a \"%s\" column (with value \"%s\")", name, priorValue);
     table.put(0, name, name);  // insert colName into top row (for col headings)
-    table.put(rowIdx, name, value);
+    table.put(rowIdx, name,
+        /* HashBasedTable.put doesn't allow null values */
+        firstNonNull(value, defaultStringForNull));
     return this;
   }
 
@@ -140,7 +147,7 @@ public class TablePrinter {
    * @param value the cell value (will be converted with {@link String#format(String, Object...)})
    * @throws IllegalStateException if the {@link #newRow()} hasn't been invoked yet
    */
-  @GwtIncompatible("String.format")
+  @GwtIncompatible("String.format") @SuppressWarnings("NonJREEmulationClassesInClientCode")
   public TablePrinter addCol(String name, String format, Object value) {
     return addCol(name, String.format(format, value));
     /* TODO: maybe create a GWT-compatible version that uses a Function<Object, String> or a Renderer instead of String.format
@@ -201,6 +208,10 @@ public class TablePrinter {
    */
   public boolean isEmpty() {
     return table.isEmpty();
+  }
+
+  public int getRowCount() {
+    return rowIdx;
   }
 
   /**

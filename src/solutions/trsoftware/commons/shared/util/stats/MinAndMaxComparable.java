@@ -30,7 +30,7 @@ import java.util.stream.Stream;
  *
  * @author Alex, Oct 11, 2012
  */
-public class MinAndMaxComparable<T extends Comparable<T>> implements Serializable, CollectableStats<T, MinAndMaxComparable<T>> {
+public class MinAndMaxComparable<T extends Comparable<? super T>> implements Serializable, CollectableStats<T, MinAndMaxComparable<T>> {
   private MinComparable<T> min;
   private MaxComparable<T> max;
 
@@ -98,7 +98,7 @@ public class MinAndMaxComparable<T extends Comparable<T>> implements Serializabl
    * @param <T> the input element type
    * @see #getInstance()
    */
-  public static class Collector<T extends Comparable<T>> extends CollectableStats.Collector<T, MinAndMaxComparable<T>> {
+  public static class Collector<T extends Comparable<? super T>> extends CollectableStats.Collector<T, MinAndMaxComparable<T>> {
 
     /**
      * NOTE: static fields are automatically lazy-init for singletons and safer to use than double-checked locking.
@@ -112,7 +112,7 @@ public class MinAndMaxComparable<T extends Comparable<T>> implements Serializabl
      * @return the cached instance of this {@link Collector}
      */
     @SuppressWarnings("unchecked")
-    public static <T extends Comparable<T>> Collector<T> getInstance() {
+    public static <T extends Comparable<? super T>> Collector<T> getInstance() {
       return INSTANCE;
     }
 

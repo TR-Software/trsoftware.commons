@@ -67,7 +67,7 @@ public class BoundedNumberSampleOfIntTest extends BaseTestCase {
   }
 
   private void verifySample(BoundedNumberSampleOfInt sample, List<Integer> values) {
-    FluentList<Integer> expected = FluentList.from(values);
+    FluentList<Integer> expected = FluentList.wrap(values);
     int size = expected.size();
     assertEquals(size, sample.size());
     assertEquals(expected, sample.asList());

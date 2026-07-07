@@ -381,10 +381,11 @@ public class MapUtils {
    * @see #retainAll(Map, Set)
    */
   public static <K,V> Map<K,V> filterMap(Map<K,V> map, Set<K> keysToRetain) {
+    // TODO(2/27/2026): maybe rename this method to reflect that it does the same thing as retainAll (but without modifying the OG map)
     HashMap<K,V> ret = new HashMap<>(keysToRetain.size() * 2);
     for (K k : keysToRetain) {
       if (map.containsKey(k))
-        ret.put(k, map.get(k));    
+        ret.put(k, map.get(k));
     }
     return ret;
   }
@@ -690,13 +691,49 @@ public class MapUtils {
    *
    * @return a {@link Collector} which collects elements into a {@code Map} using the given key/value mappers
    *         and map supplier.
+   * @see #enumMapCollector
    */
   public static <T, K, V, M extends Map<K, V>> Collector<T, ?, M> mapCollector(
       Function<? super T, ? extends K> keyMapper,
       Function<? super T, ? extends V> valueMapper,
       Supplier<M> mapSupplier) {
     return Collectors.toMap(keyMapper, valueMapper, throwingMerger(), mapSupplier);
-    // TODO(4/30/2025): why does this use a separate type var M? (why is mapSupplier a Supplier<M> instead of just Supplier<Map<T, V>>)
+  }
+
+  /**
+   * Shortcut for {@link Collectors#toMap(Function, Function, BinaryOperator, Supplier)}
+   * using {@link #throwingMerger()} as the {@code mergeFunction} and
+   * <nobr>{@code () -> new EnumMap<>(enumClass)}</nobr> as the {@code mapSupplier}.
+   * <p>
+   * This allows collecting a stream to an {@link EnumMap} implementation without having to specify an
+   * unnecessary merge function when keys are expected to be unique.
+   * <p>
+   * If the mapped keys actually do contain duplicates (according to {@link Object#equals(Object)}),
+   * an {@code IllegalStateException} is thrown when the collection operation is performed.
+   *
+   * @param <K> the enum type
+   * @param enumClass the enum class
+   * @return a {@link Collector} which collects elements into an {@code EnumMap<K, V>} using the given key/value mappers
+   *         and map supplier.
+   * @see Maps#toImmutableEnumMap(Function, Function)
+   * @see #mapCollector(Function, Function, Supplier)
+   * @see #enumMapSupplier(Class)
+   */
+  public static <T, K extends Enum<K>, V> Collector<T, ?, EnumMap<K, V>> enumMapCollector(
+      Class<K> enumClass, Function<? super T, ? extends K> keyMapper,
+      Function<? super T, ? extends V> valueMapper) {
+    return mapCollector(keyMapper, valueMapper, enumMapSupplier(enumClass));
+    // TODO: maybe could avoid having to pass enumClass: see the com.google.common.collect.Maps.toImmutableEnumMap Collector
+  }
+
+  /**
+   * @return supplier of a new {@link EnumMap} with the given key type
+   * @param <K> the enum type
+   * @param enumClass the enum class
+   * @see #enumMapCollector(Class, Function, Function)
+   */
+  public static <K extends Enum<K>, V> Supplier<EnumMap<K, V>> enumMapSupplier(Class<K> enumClass) {
+    return () -> new EnumMap<>(enumClass);
   }
 
   /**
@@ -725,15 +762,23 @@ public class MapUtils {
   }
 
   /**
-   * Applies the given {@link BiConsumer} to an iterable of {@linkplain Map.Entry map entries},
+   * Applies the given key-value {@link BiConsumer} to each {@link Map.Entry} from the given iterable,
    * similar to {@link Map#forEach(BiConsumer)}.
    * @param <K> entry key type
    * @param <V> entry value type
    */
   public static <K, V> void forEach(Iterable<? extends Map.Entry<K, V>> entries, BiConsumer<? super K, ? super V> action) {
-    entries.forEach(entry -> {
-      action.accept(entry.getKey(), entry.getValue());
-    });
+    entries.forEach(entry -> action.accept(entry.getKey(), entry.getValue()));
+  }
+
+  /**
+   * Returns a function that applies the given key-value {@link BiConsumer} to a {@link Map.Entry} instance.
+   *
+   * @param <K> entry key type
+   * @param <V> entry value type
+   */
+  public static <T extends Map.Entry<K, V>, K, V, R> Function<T, R> entryMapper(BiFunction<? super K, ? super V, R> biFunction) {
+    return entry -> biFunction.apply(entry.getKey(), entry.getValue());
   }
 
   /**
@@ -755,7 +800,9 @@ public class MapUtils {
    * Creates a copy of the given map with the values transformed by the given function.
    * The returned map's entries will have the same keys as the original map, with the corresponding values computed
    * by applying the given function to the original values.
+   *
    * @see Maps#transformValues(Map, com.google.common.base.Function)
+   * @see Map#replaceAll(BiFunction)
    */
   public static <K, V, V2> LinkedHashMap<K, V2> transformValues(Map<K, V> map, Function<V, V2> valueTransformer) {
     // TODO: maybe add overload that takes a merge function; maybe add a symmetric transformEntries method (similar to Maps.transformEntries)

@@ -29,8 +29,8 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Predicate;
 
-import static solutions.trsoftware.commons.server.util.reflect.ReflectionPredicates.mustBeSubclassOf;
-import static solutions.trsoftware.commons.server.util.reflect.ReflectionPredicates.mustHaveDeclaredAnnotation;
+import static solutions.trsoftware.commons.server.util.reflect.ReflectionPredicates.hasDeclaredAnnotation;
+import static solutions.trsoftware.commons.server.util.reflect.ReflectionPredicates.isSubclassOf;
 
 /**
  * @author Alex
@@ -38,8 +38,8 @@ import static solutions.trsoftware.commons.server.util.reflect.ReflectionPredica
  */
 public class ReflectionPredicatesTest extends TestCase {
 
-  public void testMustHaveDeclaredAnnotation() throws Exception {
-    Predicate<AnnotatedElement> mustHaveAnn1 = mustHaveDeclaredAnnotation(Ann1.class);
+  public void testHasDeclaredAnnotation() throws Exception {
+    Predicate<AnnotatedElement> mustHaveAnn1 = hasDeclaredAnnotation(Ann1.class);
     assertTrue(mustHaveAnn1.test(ClassWithAnnotatedMethods.class.getMethod("hasAnn1")));
     assertTrue(mustHaveAnn1.test(ClassWithAnnotatedMethods.class.getMethod("hasAnn1Ann2")));
     assertTrue(mustHaveAnn1.test(ClassHasAnn1.class));
@@ -53,12 +53,12 @@ public class ReflectionPredicatesTest extends TestCase {
     }
   }
 
-  public void testMustBeSubclassOf() throws Exception {
-    assertTrue(mustBeSubclassOf(Map.class).test(Map.class));
-    assertTrue(mustBeSubclassOf(HashMap.class).test(HashMap.class));
-    assertTrue(mustBeSubclassOf(Map.class).test(HashMap.class));
+  public void testIsSubclassOf() throws Exception {
+    assertTrue(isSubclassOf(Map.class).test(Map.class));
+    assertTrue(isSubclassOf(HashMap.class).test(HashMap.class));
+    assertTrue(isSubclassOf(Map.class).test(HashMap.class));
 
-    assertFalse(mustBeSubclassOf(HashMap.class).test(Map.class));
+    assertFalse(isSubclassOf(HashMap.class).test(Map.class));
   }
 
 

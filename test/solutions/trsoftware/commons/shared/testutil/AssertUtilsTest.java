@@ -19,7 +19,12 @@ package solutions.trsoftware.commons.shared.testutil;
 
 import junit.framework.AssertionFailedError;
 import junit.framework.TestCase;
+import solutions.trsoftware.commons.shared.util.StringUtils;
 
+import java.util.Collection;
+
+import static java.util.Arrays.asList;
+import static java.util.Collections.*;
 import static solutions.trsoftware.commons.shared.testutil.AssertUtils.*;
 import static solutions.trsoftware.commons.shared.util.StringUtils.ordinal;
 
@@ -279,5 +284,47 @@ public class AssertUtilsTest extends TestCase {
     assertWithRetries(2, new FailingAssertion(1));
     assertWithRetries(2, new FailingAssertion(2));
     assertThrows(AssertionFailedError.class, (Runnable)() -> assertWithRetries(1, new FailingAssertion(3)));
+  }
+
+  public void testAssertSameSequence() {
+    // equivalent sequences:
+    assertSameSequence(true, emptyList(), emptyList());
+    assertSameSequence(true, singletonList(1), singletonList(1));
+    assertSameSequence(true, asList(1, 2, 3), asList(1, 2, 3));
+
+    // different lengths
+    assertSameSequence(false, emptyList(), singletonList(1));
+    assertSameSequence(false, singletonList(1), emptyList());
+    assertSameSequence(false, asList(1, 2), asList(1, 2, 3));
+    assertSameSequence(false, asList(1, 2, 3), asList(1, 2));
+
+    // different element(s)
+    assertSameSequence(false, singletonList(0), singletonList(1));
+    assertSameSequence(false, singletonList(1), singletonList(0));
+    assertSameSequence(false, singletonList(1), asList(2, 3));
+    assertSameSequence(false, asList(1, 2), asList(1, 3));
+    assertSameSequence(false, asList(1, 2, 3), asList(1, 2));
+
+  }
+
+  /**
+   * Tests all the overloads of {@link AssertUtils#assertSameSequence}
+   * @param expected {@code true} iff the sequences are equivalent
+   * @param s1 source for {@code expected} sequence
+   * @param s2 source for {@code actual} sequence
+   */
+  private void assertSameSequence(boolean expected, Collection<?> s1, Collection<?> s2) {
+    System.out.println(StringUtils.methodCallToString("assertSameSequence", s1, s2));
+    testAssertion(expected, () -> AssertUtils.assertSameSequence(s1, s2));
+    testAssertion(expected, () -> AssertUtils.assertSameSequence(s1.iterator(), s2.iterator()));
+    testAssertion(expected, () -> AssertUtils.assertSameSequence(s1.stream(), s2.stream()));
+    testAssertion(expected, () -> AssertUtils.assertSameSequence(enumeration(s1), enumeration(s2)));
+  }
+
+  private static void testAssertion(boolean expectSuccess, Runnable assertion) {
+    if (expectSuccess)
+      assertion.run();
+    else
+      assertThrows(AssertionFailedError.class, assertion);
   }
 }

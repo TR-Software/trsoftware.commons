@@ -18,49 +18,41 @@ package solutions.trsoftware.commons.shared.util.iterators;
 
 import solutions.trsoftware.commons.shared.util.ArrayUtils;
 
-import java.util.PrimitiveIterator;
-
 /**
- * Same as {@link ArrayIterator}, but optimized for primitive {@code int} arrays:
- * provides the {@link #nextInt()} method to avoid auto-boxing.
+ * Iterator over the elements of a primitive {@code int[]} array,
+ * providing a {@link #nextInt()} method to avoid auto-boxing.
  *
  * @author Alex
  * @since 1/11/2019
  */
-public class IntArrayIterator extends IndexedIterator<Integer> implements PrimitiveIterator.OfInt {
+public class IntArrayIterator extends IntRangeIterator {
 
-  private final int[] arr;
+  private final int[] array;
 
-  public IntArrayIterator(int[] arr) {
-    super(arr.length);
-    this.arr = arr;
+  public IntArrayIterator(int... array) {
+    this(array, array.length);
   }
 
-  public IntArrayIterator(int[] arr, int limit) {
-    super(limit);
-    this.arr = arr;
+  public IntArrayIterator(int[] array, int limit) {
+    this(array, 0, limit);
   }
 
-  public IntArrayIterator(int[] arr, int start, int limit) {
+  public IntArrayIterator(int[] array, int start, int limit) {
     super(start, limit);
-    this.arr = arr;
+    this.array = array;
     checkBounds();
   }
 
+  // TODO(6/3/2026): write doc for constructors + unit test similar to IntRangeIterator
+
   private void checkBounds() throws ArrayIndexOutOfBoundsException {
     // force an ArrayIndexOutOfBoundsException if the starting index isn't valid (in client-side GWT code might throw a generic JavaScriptException otherwise)
-    ArrayUtils.checkBounds(arr.length, start);
-    ArrayUtils.checkBounds(arr.length, limit);
+    ArrayUtils.checkBounds(array.length, start);
+    ArrayUtils.checkBounds(array.length, limit);
   }
 
   @Override
   public int nextInt() {
-    maybeThrowNoSuchElement();
-    return arr[i++];
-  }
-
-  @Override
-  protected Integer get(int idx) {
-    return arr[idx];
+    return array[super.nextInt()];
   }
 }

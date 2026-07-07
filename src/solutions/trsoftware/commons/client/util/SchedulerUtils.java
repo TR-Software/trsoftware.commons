@@ -26,7 +26,7 @@ import com.google.gwt.user.client.Command;
 import solutions.trsoftware.commons.server.util.ThreadUtils;
 import solutions.trsoftware.commons.shared.util.callables.Condition;
 
-import javax.annotation.Nullable;
+import javax.annotation.Nonnull;
 
 import static solutions.trsoftware.commons.shared.util.LogicUtils.nonNullOrElse;
 
@@ -41,28 +41,28 @@ public final class SchedulerUtils {
   /**
    * The global scheduler instance to be used everywhere.
    * Can be replaced with a {@link StubScheduler} for unit testing (via {@link #setScheduler(Scheduler)}).
-   * Defaults to {@link Scheduler#get()} if {@link GWT#isClient()}, otherwise {@code null}.
+   * Defaults to {@link Scheduler#get()} if {@link GWT#isClient()}, otherwise a new instance of {@link StubScheduler}.
    */
-  @Nullable
+  @Nonnull
   private static Scheduler scheduler = defaultScheduler();
 
   /**
-   * Returns {@link Scheduler#get()} if {@link GWT#isClient()}, otherwise {@code null}.
-   * <p>
-   * Returning {@code null} when not in GWT allows using {@link #setScheduler(Scheduler)} in non-GWT unit tests
-   * (otherwise {@link Scheduler#get()}, which uses {@link GWT#create(Class)}, would throw {@link UnsupportedOperationException}
-   * @return
+   * Returns {@link Scheduler#get()} if {@link GWT#isClient()}, otherwise a new instance of {@link StubScheduler}
+   * (to avoid {@link UnsupportedOperationException} from {@link GWT#create(Class)} if {@link Scheduler#get()}
+   * invoked from non-GWT code).
    */
+  // TODO(7/3/2026): add a note that this isn't needed if testing with GwtMockito
   private static Scheduler defaultScheduler() {
-    return GWT.isClient() ? Scheduler.get() : null;
+    return GWT.isClient() ? Scheduler.get() : new StubScheduler();
   }
+
   // TODO: maybe move all mockable instances to a single class (e.g. com.typeracer.main.server.services.ServicesSnapshot)
 
   /**
    * @return the current value {@link #scheduler}, which could be {@code null} if not {@link GWT#isClient()}
    * @see #setScheduler(Scheduler)
    */
-  @Nullable
+  @Nonnull
   public static Scheduler getScheduler() {
     return scheduler;
   }
@@ -70,7 +70,6 @@ public final class SchedulerUtils {
   /**
    * Allows overriding the {@linkplain #defaultScheduler() default scheduler} for unit testing.
    * Notably, this allows a plain Java test case to test scheduling behavior without extending {@link GWTTestCase}.
-   * @param scheduler
    */
   public static void setScheduler(Scheduler scheduler) {
     SchedulerUtils.scheduler = nonNullOrElse(scheduler, SchedulerUtils::defaultScheduler);

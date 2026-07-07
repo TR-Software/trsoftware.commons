@@ -151,7 +151,7 @@ public class FieldValueReplacement<V> extends Injections.Replacement<V> implemen
   }
 
   private synchronized void replaceWithImpl(V newValue) throws ReflectiveOperationException {
-    // TODO: maybe don't AtomicBoolean since method is now synchronized?
+    // TODO: maybe don't need AtomicBoolean since method is now synchronized?
     if (replaced.compareAndSet(false, true)) {
       ensureModifiable(field);
       originalValue = getValue();  // set the backup only the first time it's replaced

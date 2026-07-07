@@ -37,7 +37,7 @@ public abstract class IndexedIterator<T> implements Iterator<T> {
   /** Upper limit for the index value (iteration will stop when {@link #i} is greater than or equal to this value) */
   protected final int limit;
   /** The next index value to be returned */
-  protected int i;
+  protected volatile int i;
 
   /**
    * Creates a new instance to iterate indices in the range {@code [0, limit[}.

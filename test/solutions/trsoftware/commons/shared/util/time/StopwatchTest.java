@@ -120,7 +120,9 @@ public class StopwatchTest extends BaseTestCase {
       long t1 = System.nanoTime();
       sw.start();
       assertTrue(sw.isRunning());
+      TestUtils.busyWaitNanos(2);
       long swNanos = sw.elapsedNanos();
+      TestUtils.busyWaitNanos(2);
       long t2 = System.nanoTime();
       assertThat(swNanos).isGreaterThan(0L).isLessThan(t2 - t1);
       sw.stop();

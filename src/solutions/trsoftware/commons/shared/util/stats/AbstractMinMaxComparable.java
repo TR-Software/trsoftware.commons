@@ -46,6 +46,8 @@ public abstract class AbstractMinMaxComparable<T extends Comparable<? super T>, 
   }
 
   public void update(T candidate) {
+    if (candidate == null)
+      return;
     if (best == null)
       best = candidate;
     else if ((getMultiplier() * best.compareTo(candidate)) < 0)

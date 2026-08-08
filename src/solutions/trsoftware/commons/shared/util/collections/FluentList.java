@@ -45,10 +45,18 @@ public class FluentList<E> extends ForwardingList<E> {
   private final List<E> delegate;
 
   /**
-   * Creates an empty {@link FluentList} backed by an {@link ArrayList}
+   * Constructs an empty {@link FluentList} backed by an {@link ArrayList}
    */
   public FluentList() {
     this(new ArrayList<>());
+  }
+
+  /**
+   * Constructs a {@link FluentList} backed by an {@link ArrayList} containing the elements of the specified
+   * collection, in the order they are returned by the collection's iterator.
+   */
+  public FluentList(Collection<? extends E> elements) {
+    this(new ArrayList<>(elements));
   }
 
   /**

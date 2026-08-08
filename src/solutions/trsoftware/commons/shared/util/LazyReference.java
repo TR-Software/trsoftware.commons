@@ -17,7 +17,11 @@
 package solutions.trsoftware.commons.shared.util;
 
 import javax.annotation.Nullable;
+import java.util.Objects;
+import java.util.Optional;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.function.Consumer;
+import java.util.function.Function;
 import java.util.function.Supplier;
 
 import static java.util.Objects.requireNonNull;
@@ -85,6 +89,79 @@ public abstract class LazyReference<V> implements Supplier<V> {
   }
 
   protected abstract V create();
+
+  /**
+   * If a value {@linkplain #hasValue() is present}, invoke the specified consumer with the value and return {@code true},
+   * otherwise do nothing and return {@code false}.
+   *
+   * @param consumer block to be executed if a value is present
+   * @return {@code true} if consumer was invoked; {@code false} if no value is present
+   *
+   * @throws NullPointerException if value is present but {@code consumer} is null
+   * @see #hasValue()
+   * @see java.util.Optional#ifPresent(Consumer)
+   * @see #map(Function)
+   */
+  public boolean ifPresent(Consumer<? super V> consumer) {
+    // TODO(7/29/2026): experimental
+    V value = ref.get();
+    if (value != EMPTY) {
+      requireNonNull(consumer, "consumer").accept(value);
+      return true;
+    }
+    return false;
+  }
+
+  /**
+   * If a value is present, apply the provided mapping function to it,
+   * and if the result is non-null, return an {@link Optional} describing the
+   * result.  Otherwise return an empty {@link Optional}.
+   *
+   * @param <U> The type of the result of the mapping function
+   * @param mapper a mapping function to apply to the value, if present
+   * @return an {@link Optional} describing the result of applying the mapping
+   * function to the value of this {@link LazyReference}, if a value is present,
+   * otherwise an empty {@link Optional}
+   * @throws NullPointerException if value is present but {@code mapper} is null
+   * @see #ifPresent(Consumer)
+   * @see #flatMap(Function)
+   */
+  public <U> Optional<U> map(Function<? super V, ? extends U> mapper) {
+    // TODO(7/29/2026): experimental
+    V value = ref.get();
+    if (value != EMPTY) {
+      requireNonNull(mapper, "mapper");
+      return Optional.ofNullable(mapper.apply(value));
+    }
+    return Optional.empty();
+  }
+
+  /**
+   * If a value is present, apply the provided {@code Optional}-bearing
+   * mapping function to it, return that result, otherwise return an empty
+   * {@code Optional}.  This method is similar to {@link #map(Function)},
+   * but the provided mapper is one whose result is already an {@code Optional},
+   * and if invoked, {@code flatMap} does not wrap it with an additional
+   * {@code Optional}.
+   *
+   * @param <U> The type parameter to the {@code Optional} returned by
+   * @param mapper a mapping function to apply to the value, if present
+   * @return the result of applying the {@code Optional}-bearing mapping
+   * function to the value of this {@link LazyReference}, if a value is present,
+   * otherwise an empty {@code Optional}
+   * @throws NullPointerException if value is present but {@code mapper} is null
+   * @see #ifPresent(Consumer)
+   * @see #map(Function)
+   */
+  public <U> Optional<U> flatMap(Function<? super V, Optional<U>> mapper) {
+    // TODO(7/29/2026): experimental
+    V value = ref.get();
+    if (value != EMPTY) {
+      requireNonNull(mapper, "mapper");
+      return mapper.apply(value);
+    }
+    return Optional.empty();
+  }
 
   /**
    * Creates a {@link LazyReference} using the given function to implement the {@link #create()} method

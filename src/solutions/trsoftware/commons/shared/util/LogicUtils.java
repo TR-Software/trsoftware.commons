@@ -54,6 +54,7 @@ public class LogicUtils {
    *   <li>
    *   This method provides a workaround for a <a href="https://github.com/gwtproject/gwt/issues/9522">GWT bug</a>
    *   that makes it impossible to use {@link Objects#equals(Object, Object)} with {@link String} arguments in classic DevMode.
+   *   TODO(7/13/2026): see if that's still the case in the latest GWT 2.x release
    *   <li>
    *   The performance of this method (as well as of {@link java.util.Objects#equals(Object, Object)})
    *   could be worse than writing the equivalent logical expression inline where the argument types can be determined

@@ -21,8 +21,7 @@ import java.util.function.Consumer;
 import static java.util.Objects.requireNonNull;
 
 /**
- * A container for a value, useful for inside closures, where all references
- * must be final.
+ * A simple container for a value, useful for inside closures, where all references must be final.
  *
  * @author Alex
  */
@@ -78,7 +77,7 @@ public class Box<V> implements TakesValue<V> {
    */
   public boolean ifPresent(Consumer<? super V> consumer) {
     // TODO(7/1/2026): experimental
-    if (value != null) {
+    if (hasValue()) {
       requireNonNull(consumer, "consumer").accept(value);
       return true;
     }

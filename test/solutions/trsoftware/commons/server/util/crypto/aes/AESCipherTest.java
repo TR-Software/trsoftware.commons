@@ -1,7 +1,12 @@
 package solutions.trsoftware.commons.server.util.crypto.aes;
 
 import solutions.trsoftware.commons.server.testutil.TestUtils;
-import solutions.trsoftware.commons.server.util.crypto.AESCipherTestCase;
+import solutions.trsoftware.commons.server.util.crypto.CryptoCipher;
+import solutions.trsoftware.commons.server.util.crypto.CryptoCipherTestCase;
+import solutions.trsoftware.commons.server.util.crypto.aes.benchmark.LocalAESCipher2;
+import solutions.trsoftware.commons.server.util.crypto.aes.benchmark.SynchronizedAESCipher;
+import solutions.trsoftware.commons.server.util.reflect.ReflectionPredicates.Modifiers;
+import solutions.trsoftware.commons.shared.annotations.NotThreadSafe;
 import solutions.trsoftware.commons.shared.annotations.Slow;
 import solutions.trsoftware.commons.shared.io.TablePrinter;
 import solutions.trsoftware.commons.shared.util.RandomUtils;
@@ -9,8 +14,9 @@ import solutions.trsoftware.commons.shared.util.RandomUtils;
 import javax.crypto.Cipher;
 import java.lang.reflect.Constructor;
 import java.util.ArrayList;
-import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import static solutions.trsoftware.commons.server.util.crypto.aes.AESConstants.*;
 import static solutions.trsoftware.commons.server.util.crypto.aes.AESConstants.Mode.values;
@@ -21,24 +27,46 @@ import static solutions.trsoftware.commons.shared.testutil.AssertUtils.assertTha
  * @since 12/4/2025
  */
 @Slow
-public class AESCipherTest extends AESCipherTestCase {
+public class AESCipherTest extends CryptoCipherTestCase {
 
-  public void testEncrypt() throws Exception {
-    byte[] input = RandomUtils.randBytes(17);  // Note: using array size different from AES block size (16), to test padding logic (if any)
+  private List<AESCipher> ciphers;
+
+  public void setUp() throws Exception {
+    super.setUp();
+    ciphers = new ArrayList<>();
     byte[] key = secretKeyBytes;
-    List<AESCipher> ciphers = new ArrayList<>();
     for (Mode mode : values()) {
-      ciphers.addAll(Arrays.asList(
+      Collections.addAll(ciphers,
           new LocalAESCipher(key, mode),
+          new LocalAESCipher2(key, mode),
           new SynchronizedAESCipher(key, mode),
-          new ConcurrentAESCipher(key, mode),
-          new ConcurrentAESCipher(key, mode, new ConcurrentAESCipher.ThreadLocalIvSupplier()),
-          new ConcurrentAESCipher(key, mode, new ConcurrentAESCipher.PooledIvSupplier())
-      ));
+          new ConcurrentAESCipher(key, mode)
+      );
     }
+  }
 
-    for (AESCipher cipher : ciphers) {
-      testEncryption(cipher, input);
+  @Override
+  protected void tearDown() throws Exception {
+    ciphers = null;
+    super.tearDown();
+  }
+
+  public void testEncryption() throws Exception {
+    testEncryption(ciphers);
+  }
+
+  public void testConcurrency() throws Exception {
+    // TODO: code dup in AESCipherPoolTest.testEncryption
+    List<AESCipher> threadSafeCiphers = ciphers.stream()
+        .filter(cipher -> !cipher.getClass().isAnnotationPresent(NotThreadSafe.class))
+        .collect(Collectors.toList());
+
+    byte[] input = RandomUtils.randBytes(17);  // Note: using array size different from AES block size (16), to test padding logic (if any)
+    int nThreads = 5;
+    int iterationsPerThread = 1000;
+    verbose = false;
+    for (CryptoCipher cipher : threadSafeCiphers) {
+      testMultithreaded(cipher, input, nThreads, iterationsPerThread);
     }
   }
 
@@ -49,11 +77,13 @@ public class AESCipherTest extends AESCipherTestCase {
     List<Class<AESCipher>> implClasses = TestUtils.findSubClassesOf(AESCipher.class);
     byte[] input = RandomUtils.randBytes(17);  // Note: using array size different from AES block size (16), to test padding logic (if any)
     for (Class<AESCipher> cls : implClasses) {
+      if (Modifiers.isAbstract(cls))
+        continue;  // can't instantiate an abstract class
       Constructor<AESCipher> constructor = cls.getConstructor(byte[].class, Mode.class);
       for (Mode mode : values()) {
         TestUtils.printSectionHeader(String.format("Testing %s(%s)", cls.getSimpleName(), mode));
         AESCipher cipher = constructor.newInstance(secretKeyBytes, mode);
-        testEncryption(cipher, input);
+        testEncryption(cipher);
       }
     }
   }

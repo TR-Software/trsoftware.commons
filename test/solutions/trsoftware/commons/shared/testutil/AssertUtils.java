@@ -154,7 +154,7 @@ public abstract class AssertUtils {
       throw new IllegalArgumentException(expectedThrowableClass + " must be a class (not an interface)");
     Throwable caught = null;
     try {
-      code.run();
+      code.doRun();
     }
     catch (Throwable ex) {
       caught = ex;

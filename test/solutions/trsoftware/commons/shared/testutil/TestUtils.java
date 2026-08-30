@@ -28,8 +28,11 @@ import java.io.PrintStream;
 import java.lang.reflect.Field;
 import java.util.Collection;
 import java.util.Objects;
+import java.util.StringJoiner;
 import java.util.function.BooleanSupplier;
 import java.util.stream.Stream;
+
+import static solutions.trsoftware.commons.server.io.ServerIOUtils.LINE_SEPARATOR;
 
 /**
  * @author Alex, 10/23/2017
@@ -111,6 +114,41 @@ public abstract class TestUtils {
       System.out.println(msg);
       System.out.println(hr);
     }
+    // TODO(8/18/2026): refactor using the new String-returning sectionHeader methods
+  }
+
+  /**
+   * Returns the given message surrounded by dashed lines of {@code '-'} chars of equal length
+   *
+   * @param msg the header text
+   */
+  public static String sectionHeader(String msg) {
+    return sectionHeader(msg, '-');
+  }
+
+  /**
+   * Returns the given message surrounded by 2 lines filled with {@code width} repetitions of the given char.
+   * 
+   * @param msg the header text
+   * @param lineChar the filler character for the surrounding lines
+   * @see #sectionHeader(String)
+   */
+  public static String sectionHeader(String msg, char lineChar) {
+    int width = msg != null ? msg.length() : 0;
+    return sectionHeader(msg, lineChar, width);
+  }
+
+  /**
+   * Returns the given message surrounded by 2 lines filled with {@code width} repetitions of the given char.
+   * 
+   * @param msg the header text
+   * @param lineChar the filler character for the surrounding lines
+   * @param width the length of the surrounding lines
+   * @see #sectionHeader(String)
+   */
+  public static String sectionHeader(String msg, char lineChar, int width) {
+    String hr = StringUtils.repeat(lineChar, width);
+    return new StringJoiner(LINE_SEPARATOR).add(hr).add(msg).add(hr).toString();
   }
 
   /**

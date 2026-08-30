@@ -16,10 +16,18 @@
 
 package solutions.trsoftware.commons.server.util.crypto;
 
+import solutions.trsoftware.commons.server.util.ServerStringUtils;
 import solutions.trsoftware.commons.server.util.crypto.aes.*;
+import solutions.trsoftware.commons.shared.annotations.ThreadSafe;
 
 import javax.crypto.Cipher;
+import javax.crypto.KeyGenerator;
+import javax.crypto.SecretKey;
 
+import java.security.GeneralSecurityException;
+import java.util.Arrays;
+
+import static solutions.trsoftware.commons.server.util.crypto.aes.AESConstants.AES_ALGORITHM;
 import static solutions.trsoftware.commons.server.util.crypto.aes.AESConstants.Mode;
 
 /**
@@ -29,21 +37,19 @@ import static solutions.trsoftware.commons.server.util.crypto.aes.AESConstants.M
  * <i>Note:</i> this class is immutable and thread-safe, which is achieved by creating a new {@link Cipher} instance for every
  * operation, making it suboptimal for reuse, since {@link Cipher#getInstance(String)} is a costly operation.
  * <p>
- * The recommended alternatives are the new {@link SynchronizedAESCipher} and {@link ConcurrentAESCipher} classes,
- * which can be used as a global singletons shared by multiple threads, and allow different AES {@linkplain AESCipherMode modes},
+ * The recommended alternative is the new {@link ConcurrentAESCipher} class, which can be shared by multiple threads
+ * without sacrificing performance, and supports additional AES {@linkplain AESCipherMode modes},
  * such as {@link AESCipherMode_GCM GCM}.
  *
- * @see solutions.trsoftware.commons.server.util.crypto.aes.AESCipher
+ * @see AESCipherImpl
  * @see ConcurrentAESCipher
- * @see SynchronizedAESCipher
+ *
  * @author Alex, 5/1/2015
- * @deprecated Use one of the newer {@link solutions.trsoftware.commons.server.util.crypto.aes.AESCipher AESCipher}
- *   implementations instead, all of which provide better performance than this original class.
- *   The recommended replacement is {@link ConcurrentAESCipher}.
+ * @deprecated the recommended replacement is {@link ConcurrentAESCipher}
  */
-public class AESCipher extends solutions.trsoftware.commons.server.util.crypto.aes.AESCipher  {
-
-  // TODO(12/15/2025): maybe extend SynchronizedAESCipher, to make this deprecated class at least somewhat useful (without changing the OG functionality)
+@Deprecated
+@ThreadSafe
+public class AESCipher extends AESCipherImpl {
 
   /**
    * @param key a 16, 24, or 32-byte secret key;
@@ -59,5 +65,29 @@ public class AESCipher extends solutions.trsoftware.commons.server.util.crypto.a
   public AESCipher(byte[] key) {
     super(key, Mode.CBC);
   }
+
+  /**
+   * Generates a key that can be used with the {@value AESConstants#AES_ALGORITHM} algorithm
+   * @return a 16-byte key
+   * @see KeyGenerator
+   * @deprecated use {@link AESConstants#generateKey()} instead
+   */
+  public static byte[] randomKey() throws GeneralSecurityException {
+    KeyGenerator keyGen = KeyGenerator.getInstance(AES_ALGORITHM);
+    SecretKey secretKey = keyGen.generateKey();
+    return secretKey.getEncoded();
+  }
+
+  /**
+   * Generates a random key and prints it.
+   * @deprecated run {@link AESCipherImpl} instead
+   */
+  public static void main(String[] args) throws GeneralSecurityException {
+    byte[] key = randomKey();
+    System.out.println("Random key:");
+    System.out.println("Bytes: " + Arrays.toString(key));
+    System.out.println("urlSafeBase64 encoding: " + ServerStringUtils.urlSafeBase64Encode(key));
+  }
+
 
 }

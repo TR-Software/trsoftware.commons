@@ -108,6 +108,10 @@ public class ServerStringUtils extends StringUtils {
 
   /**
    * Encodes the given bytes with {@link UrlSafeBase64}.
+   *
+   * @deprecated With Java 8+ can just use
+   *   {@link java.util.Base64#getUrlEncoder() Base64.getUrlEncoder().withoutPadding()}
+   *   (padding isn't needed for decoding, and omitting it makes the output fully url-safe)
    */
   public static String urlSafeBase64Encode(byte[] bytes) {
     return bytesToStringUtf8(UrlSafeBase64.encodeBase64(bytes));
@@ -116,6 +120,10 @@ public class ServerStringUtils extends StringUtils {
   /**
    * @param str binary data encoded with {@link UrlSafeBase64}.
    * @return the original binary data.
+   *
+   * @deprecated With Java 8+ can just use
+   *   {@link java.util.Base64#getUrlEncoder() Base64.getUrlEncoder().withoutPadding()}
+   *   (padding isn't needed for decoding, and omitting it makes the output fully url-safe)
    */
   public static byte[] urlSafeBase64Decode(String str) {
     return UrlSafeBase64.decodeBase64(stringToBytesUtf8(str));

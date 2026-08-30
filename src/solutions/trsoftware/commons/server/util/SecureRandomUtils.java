@@ -17,6 +17,7 @@
 package solutions.trsoftware.commons.server.util;
 
 import solutions.trsoftware.commons.shared.io.codec.UrlSafeBase64Alphabet;
+import solutions.trsoftware.commons.shared.util.RandomUtils;
 
 import java.security.SecureRandom;
 import java.util.Base64;
@@ -64,9 +65,7 @@ public abstract class SecureRandomUtils {
   }
 
   public static byte[] getBytes(int n) {
-    byte[] bytes = new byte[n];
-    rnd.nextBytes(bytes);
-    return bytes;
+    return RandomUtils.randBytes(rnd, n);
   }
 
   /**

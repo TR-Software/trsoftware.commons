@@ -24,6 +24,7 @@ import solutions.trsoftware.commons.shared.util.text.Alphabet;
 import solutions.trsoftware.commons.shared.util.text.CharRange;
 
 import java.io.IOException;
+import java.security.SecureRandom;
 import java.util.*;
 
 /**
@@ -85,7 +86,7 @@ public class RandomUtils {
     catch (IOException e) {
       throw new RuntimeException("Unable to serialize Random", e);  // should never happen
     }
-    // TODO: unit test (can reuse the code from ObjectUtilsTest)z
+    // TODO: unit test (can reuse the code from ObjectUtilsTest)
   }
 
   /**
@@ -107,7 +108,7 @@ public class RandomUtils {
     catch (Exception e) {
       return false;
     }
-    // TODO: unit test (can reuse the code from ObjectUtilsTest)z
+    // TODO: unit test (can reuse the code from ObjectUtilsTest)
   }
 
   private RandomUtils() {  // uninstantiable class
@@ -341,8 +342,19 @@ public class RandomUtils {
   /**
    * @param n the number of bytes to generate
    * @return {@code n} random bytes
+   * @return {@link #randBytes(Random, int)}
    */
   public static byte[] randBytes(int n) {
+    return randBytes(rnd, n);
+  }
+
+  /**
+   * @param rnd the source of randomness (e.g. an instance of {@link Random} or {@link SecureRandom})
+   * @param n the number of bytes to generate
+   * @return {@code n} random bytes from the given source
+   * @see Random#nextBytes(byte[])
+   */
+  public static byte[] randBytes(Random rnd, int n) {
     byte[] bytes = new byte[n];
     rnd.nextBytes(bytes);
     return bytes;

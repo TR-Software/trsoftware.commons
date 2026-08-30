@@ -17,11 +17,30 @@
 package solutions.trsoftware.commons.shared.util.function;
 
 /**
- * This interface facilitates the use of method references for {@code void} methods that declare checked exceptions.
+ * This interface facilitates the use of method references for {@code void} methods that declare checked exceptions,
+ * or creating a {@link Runnable} from a lambda whose code could throw a checked exception.
+ * <p>
+ * The {@code default} {@link #run()} method is implemented using a {@code try}/{@code catch}
+ * block that rethrows any checked exception as a {@link WrappedException} (a subclass of {@link RuntimeException}),
+ * which can be caught to obtain the original checked exception.
  *
  * @see ThrowingFunction
+ * @see ThrowingSupplier
  */
 @FunctionalInterface
-public interface ThrowingRunnable {
-  void run() throws Throwable;
+public interface ThrowingRunnable extends Runnable {
+
+  @Override
+  default void run() {
+    try {
+      doRun();
+    }
+    catch (Throwable e) {
+      throw (e instanceof RuntimeException)
+          ? (RuntimeException)e
+          : new WrappedException(e);
+    }
+  }
+
+  void doRun() throws Throwable;
 }

@@ -32,7 +32,7 @@ public interface Function0_t<E extends Throwable> extends ThrowingRunnable {
   void call() throws E;
 
   @Override
-  default void run() throws Throwable {
+  default void doRun() throws Throwable {
     call();
   }
 }

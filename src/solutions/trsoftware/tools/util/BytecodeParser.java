@@ -26,7 +26,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.stream.Stream;
 
-import static solutions.trsoftware.commons.shared.util.function.ThrowingFunction.WrappedException;
+import solutions.trsoftware.commons.shared.util.function.WrappedException;
 import static solutions.trsoftware.commons.shared.util.function.ThrowingFunction.unchecked;
 
 /**
@@ -72,14 +72,15 @@ public class BytecodeParser {
   }
 
   /**
-   * Uses BCEL to parse all classes in the given directory the given {@code .class} file.
+   * Uses BCEL to parse all classes in the given directory.
    *
-   * @param packageDir compiler output directory in which the class files are located
+   * @param packageDir compiler output directory in which the {@code .class} files are located
    * @return a stream of the parsed classes
-   *   (Note: iterating over this stream could throw a {@link WrappedException} if the next element can't be parsed as {@link JavaClass})
+   *   (Note: iterating over this stream could throw a {@link WrappedException} if an element can't be parsed as {@link JavaClass})
    *
    * @see ClassParser#parse()
    * @throws IOException any exception encountered while reading the data
+   * @throws WrappedException if {@link #parseClassFile(String)} throws an exception (e.g. {@link ClassFormatException}
    */
   public static Stream<JavaClass> parseClassFiles(Path packageDir) throws IOException {
     return Files.list(packageDir).map(Path::toString)

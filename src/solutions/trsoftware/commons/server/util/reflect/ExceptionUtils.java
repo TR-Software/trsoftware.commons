@@ -30,6 +30,7 @@ import static java.util.Objects.requireNonNull;
  *
  * @author Alex
  * @since 7/30/2019
+ * @see Throwables
  */
 public class ExceptionUtils {
   // TODO(7/5/2026): can move this class to shared, since all methods are GWT-compatible
@@ -50,6 +51,7 @@ public class ExceptionUtils {
    *   or {@code null} if not found.
    * @see #findCause(Throwable, Predicate)
    * @see Throwables#getCausalChain(Throwable)
+   * @see Throwables#getRootCause(Throwable)
    */
   @SuppressWarnings("unchecked")
   @Nullable
@@ -68,6 +70,7 @@ public class ExceptionUtils {
    *   or {@code null} if not found
    * @see #findCause(Throwable, Class)
    * @see Throwables#getCausalChain(Throwable)
+   * @see Throwables#getRootCause(Throwable)
    */
   @Nullable
   public static Throwable findCause(Throwable throwable, Predicate<Throwable> predicate) {

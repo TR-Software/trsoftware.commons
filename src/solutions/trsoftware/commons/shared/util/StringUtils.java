@@ -404,8 +404,11 @@ public class StringUtils {
   }
 
   /**
-   * @return A string displaying the given quantity, with the unit name
-   * pluralized if needed.  Example: {@code pluralize(2, "second")} returns {@code "2 seconds"}.
+   * Returns a string displaying the given quantity with the given unit name, which is pluralized if needed.
+   * <p>
+   * For example:
+   * <code style="white-space: nowrap;">{@link #quantity}(2, "second")</code> &rarr; {@code "2 seconds"}.
+   * @see #pluralize(String, int)
    */
   public static String quantity(int value, String unit) {
     return String.valueOf(value) + ' ' + pluralize(unit, value);
@@ -740,6 +743,8 @@ public class StringUtils {
    * @return the plural form of the given word if it needs to be pluralized (number > 1).  If the given word is in
    * {@link #pluralDict}, its mapped counterpart will be used for the plural form, otherwise will simply append
    * the letter "s" to make the plural form.
+   * @see #pluralize(int, String, String)
+   * @see #quantity(int, String)
    */
   public static String pluralize(String singular, int number) {
     if (number == 1)
@@ -755,6 +760,8 @@ public class StringUtils {
 
   /**
    * @return {@code number == 1 ? singular : plural}
+   * @see #pluralize(String, int)
+   * @see #quantity(int, String)
    */
   public static String pluralize(int number, String singular, String plural) {
     return number == 1 ? singular : plural;

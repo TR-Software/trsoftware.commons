@@ -30,6 +30,10 @@ import java.util.function.Function;
  * block that rethrows any checked exception as a {@link WrappedException} (a subclass of {@link RuntimeException}),
  * which can be caught to obtain the original checked exception.
  *
+ * @param <T> the type of the input to the function
+ * @param <R> the type of the result of the function
+ * @param <E> the type of exception that could be thrown by {@link #applyThrowing(Object)}
+ *
  * @see MapUtils#computeIfAbsent(Map, Object, ThrowingFunction)
  * @see ThrowingRunnable
  * @see ThrowingSupplier
@@ -66,16 +70,4 @@ public interface ThrowingFunction<T, R, E extends Exception> extends Function<T,
     return function;
   }
 
-  class WrappedException extends RuntimeException {
-    private WrappedException() {  // default private constructor for serialization
-    }
-
-    public WrappedException(String message, Throwable cause) {
-      super(message, cause);
-    }
-
-    public WrappedException(Throwable cause) {
-      super(cause);
-    }
-  }
 }

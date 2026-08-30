@@ -16,8 +16,12 @@
 
 package solutions.trsoftware.commons.server.util.reflect;
 
+import com.google.common.base.MoreObjects;
+
 import java.lang.annotation.Annotation;
 import java.lang.reflect.AnnotatedElement;
+import java.lang.reflect.Member;
+import java.lang.reflect.Modifier;
 import java.util.function.Predicate;
 
 /**
@@ -49,4 +53,123 @@ public class ReflectionPredicates {
   public static Predicate<Class<?>> isSubclassOf(Class<?> superClass) {
     return superClass::isAssignableFrom;
   }
+
+  /**
+   * Predicates testing the modifiers of a {@link Class} or {@link Member}.
+   *
+   * @see Class#getModifiers()
+   * @see Member#getModifiers()
+   */
+  public abstract static class Modifiers {
+
+    /*
+    ================================================================================
+    Class modifiers (see java.lang.reflect.Modifier.CLASS_MODIFIERS):
+    ================================================================================
+    */
+
+    /**
+     * @return {@code true} if {@code arg} has the {@code public} modifier.
+     */
+    public static boolean isPublic(Class<?> arg) { return Modifier.isPublic(arg.getModifiers()); }
+
+    /**
+     * @return {@code true} if {@code arg} has the {@code private} modifier.
+     */
+    public static boolean isPrivate(Class<?> arg) { return Modifier.isPrivate(arg.getModifiers()); }
+
+    /**
+     * @return {@code true} if {@code arg} has the {@code protected} modifier.
+     */
+    public static boolean isProtected(Class<?> arg) { return Modifier.isProtected(arg.getModifiers()); }
+
+    /**
+     * @return {@code true} if {@code arg} has the {@code static} modifier.
+     */
+    public static boolean isStatic(Class<?> arg) { return Modifier.isStatic(arg.getModifiers()); }
+
+    /**
+     * @return {@code true} if {@code arg} has the {@code final} modifier.
+     */
+    public static boolean isFinal(Class<?> arg) { return Modifier.isFinal(arg.getModifiers()); }
+
+    /**
+     * @return {@code true} if {@code arg} has the {@code interface} modifier.
+     */
+    public static boolean isInterface(Class<?> arg) { return Modifier.isInterface(arg.getModifiers()); }
+
+    /**
+     * @return {@code true} if {@code arg} has the {@code abstract} modifier.
+     */
+    public static boolean isAbstract(Class<?> arg) { return Modifier.isAbstract(arg.getModifiers()); }
+
+    /**
+     * @return {@code true} if {@code arg} has the {@code strictfp} modifier.
+     */
+    public static boolean isStrict(Class<?> arg) { return Modifier.isStrict(arg.getModifiers()); }
+
+
+    /*
+    =======================================================================================
+    Member modifiers (see java.lang.reflect.Modifier.[FIELD|METHOD|CONSTRUCTOR]_MODIFIERS):
+    =======================================================================================
+    */
+
+    /**
+     * @return {@code true} if {@code arg} has the {@code public} modifier.
+     */
+    public static boolean isPublic(Member arg) { return Modifier.isPublic(arg.getModifiers()); }
+
+    /**
+     * @return {@code true} if {@code arg} has the {@code private} modifier.
+     */
+    public static boolean isPrivate(Member arg) { return Modifier.isPrivate(arg.getModifiers()); }
+
+    /**
+     * @return {@code true} if {@code arg} has the {@code protected} modifier.
+     */
+    public static boolean isProtected(Member arg) { return Modifier.isProtected(arg.getModifiers()); }
+
+    /**
+     * @return {@code true} if {@code arg} has the {@code static} modifier.
+     */
+    public static boolean isStatic(Member arg) { return Modifier.isStatic(arg.getModifiers()); }
+
+    /**
+     * @return {@code true} if {@code arg} has the {@code final} modifier.
+     */
+    public static boolean isFinal(Member arg) { return Modifier.isFinal(arg.getModifiers()); }
+
+    /**
+     * @return {@code true} if {@code arg} has the {@code synchronized} modifier.
+     */
+    public static boolean isSynchronized(Member arg) { return Modifier.isSynchronized(arg.getModifiers()); }
+
+    /**
+     * @return {@code true} if {@code arg} has the {@code volatile} modifier.
+     */
+    public static boolean isVolatile(Member arg) { return Modifier.isVolatile(arg.getModifiers()); }
+
+    /**
+     * @return {@code true} if {@code arg} has the {@code transient} modifier.
+     */
+    public static boolean isTransient(Member arg) { return Modifier.isTransient(arg.getModifiers()); }
+
+    /**
+     * @return {@code true} if {@code arg} has the {@code native} modifier.
+     */
+    public static boolean isNative(Member arg) { return Modifier.isNative(arg.getModifiers()); }
+
+    /**
+     * @return {@code true} if {@code arg} has the {@code abstract} modifier.
+     */
+    public static boolean isAbstract(Member arg) { return Modifier.isAbstract(arg.getModifiers()); }
+
+    /**
+     * @return {@code true} if {@code arg} has the {@code strictfp} modifier.
+     */
+    public static boolean isStrict(Member arg) { return Modifier.isStrict(arg.getModifiers()); }
+
+  }
+
 }

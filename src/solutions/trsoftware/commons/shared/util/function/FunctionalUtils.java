@@ -206,7 +206,7 @@ public class FunctionalUtils {
   }
 
   /**
-   * Backport of {@code Predicate.not()} from Java 11.
+   * Backport of {@code Predicate.not()} from Java 11, to facilitate negation of a method reference.
    *
    * @return negation of the given predicate
    */

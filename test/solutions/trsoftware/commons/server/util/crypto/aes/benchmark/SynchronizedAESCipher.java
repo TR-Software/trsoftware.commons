@@ -1,18 +1,28 @@
-package solutions.trsoftware.commons.server.util.crypto.aes;
+package solutions.trsoftware.commons.server.util.crypto.aes.benchmark;
+
+import solutions.trsoftware.commons.server.util.crypto.aes.ConcurrentAESCipher;
+import solutions.trsoftware.commons.server.util.crypto.aes.LocalAESCipher;
+import solutions.trsoftware.commons.shared.annotations.ThreadSafe;
 
 import javax.crypto.Cipher;
 import java.security.GeneralSecurityException;
 import java.security.spec.AlgorithmParameterSpec;
 
+import static solutions.trsoftware.commons.server.util.crypto.aes.AESConstants.AESParameterSpec;
 import static solutions.trsoftware.commons.server.util.crypto.aes.AESConstants.Mode;
 
 /**
  * Synchronized thread-safe version of {@link LocalAESCipher}.
  *
+ * @see ConcurrentAESCipher
+ *
  * @author Alex
  * @since 12/5/2025
  */
-public class SynchronizedAESCipher extends LocalAESCipher {
+@ThreadSafe
+public class SynchronizedAESCipher extends LocalAESCipher1 {
+
+  // TODO(8/25/2026): maybe delete this class? it's inferior to ConcurrentAESCipher in every way (see benchmark results)
 
   /**
    * @param key a 16, 24, or 32-byte array (representing a 128, 192, or 256-bit AES key)
@@ -34,4 +44,10 @@ public class SynchronizedAESCipher extends LocalAESCipher {
   protected synchronized int initAndDoFinal(int mode, AlgorithmParameterSpec params, byte[] input, int inputOffset, int inputLen, byte[] output, int outputOffset) throws GeneralSecurityException {
     return super.initAndDoFinal(cipher, mode, params, input, inputOffset, inputLen, output, outputOffset);
   }
+
+  @Override // overriding to make synchronized
+  protected synchronized AESParameterSpec getParametersToEncrypt() {
+    return super.getParametersToEncrypt();
+  }
+
 }

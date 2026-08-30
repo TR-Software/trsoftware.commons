@@ -1,36 +1,35 @@
-package solutions.trsoftware.commons.server.util.crypto.aes;
+package solutions.trsoftware.commons.server.util.crypto.aes.benchmark;
 
+import solutions.trsoftware.commons.server.util.crypto.aes.AESCipherImpl;
+import solutions.trsoftware.commons.server.util.crypto.aes.AESCipherMode;
+import solutions.trsoftware.commons.server.util.crypto.aes.ConcurrentAESCipher;
 import solutions.trsoftware.commons.shared.annotations.NotThreadSafe;
 
 import javax.crypto.Cipher;
 import javax.crypto.NoSuchPaddingException;
 import java.security.NoSuchAlgorithmException;
 
-import static solutions.trsoftware.commons.server.util.crypto.aes.AESConstants.*;
+import static solutions.trsoftware.commons.server.util.crypto.aes.AESConstants.AESParameterSpec;
 import static solutions.trsoftware.commons.server.util.crypto.aes.AESConstants.Mode;
 
 /**
- * Reuses a single cached {@link Cipher} instance for all encryption and decryption operations.
+ * Contains a cached {@link Cipher} instance of a particular {@linkplain AESCipherMode#getTransformationSpec() AES mode}.
  * <p>
- * <b>Note:</b> this class is not thread-safe and must be synchronized externally or used with a {@link ThreadLocal}.
+ * <b>Note:</b> this class is not thread-safe and must be synchronized externally or used with a {@link ThreadLocal}
  *
+ * @see SynchronizedAESCipher
  * @see ConcurrentAESCipher
  * @author Alex
  * @since 12/5/2025
  */
 @NotThreadSafe
-public class LocalAESCipher extends AESCipherImpl {
+public class LocalAESCipher3B extends AESCipherImpl {
+
+  // TODO(8/22/2026): experimental copy of LocalAESCipher3, using fields instead of array for ivCache
 
   protected final Cipher cipher;
 
-  /* Perf. optimization:
-    In addition to the Cipher, we're also caching 2 instances of AESParameterSpec,
-    s.t. each getParametersToEncrypt invocation will return one of these after directly overwriting its iv array.
-    We need 2 of them b/c CipherCore.init (CipherCore.java:577) requires a different IV array each time
-    (it remembers the one that was used for the last init).  To overcome this restriction,
-    we alternate these 2 instances on successive getParametersToEncrypt invocations.
-   */
-
+  // reusing the same 2 instances of FastGCMParameterSpec, directly overwriting their iv fields
   private final AESParameterSpec iv1 = getParametersToEncrypt(new byte[ivLength]);
   private final AESParameterSpec iv2 = getParametersToEncrypt(new byte[ivLength]);
   private boolean ivToggle;
@@ -42,7 +41,7 @@ public class LocalAESCipher extends AESCipherImpl {
    * @throws RuntimeException         if {@link Cipher#getInstance(String)} threw an exception
    *                                  (i.e. if the current platform doesn't support the given AES mode)
    */
-  public LocalAESCipher(byte[] key, Mode mode) {
+  public LocalAESCipher3B(byte[] key, Mode mode) {
     super(key, mode);
     try {
       cipher = createCipher();

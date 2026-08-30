@@ -21,6 +21,7 @@ import com.google.common.collect.Iterables;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Multimap;
 import solutions.trsoftware.commons.shared.util.function.ThrowingFunction;
+import solutions.trsoftware.commons.shared.util.function.WrappedException;
 import solutions.trsoftware.commons.shared.util.stats.Mergeable;
 
 import javax.annotation.Nullable;
@@ -30,8 +31,7 @@ import java.util.stream.Collector;
 import java.util.stream.Collectors;
 
 /**
- * Date: Jun 6, 2008 Time: 2:15:43 PM
- *
+ * @since Jun 6, 2008
  * @author Alex
  */
 public class MapUtils {
@@ -608,7 +608,7 @@ public class MapUtils {
    * <p>
    * If an exception is thrown, it will be propagated to the caller,
    * while {@link Map#computeIfAbsent(Object, Function)} gets a
-   * {@link RuntimeException} (specifically, {@link ThrowingFunction.WrappedException}),
+   * {@link RuntimeException} (specifically, {@link WrappedException}),
    * which is caught in this method.
    *
    * @param <K> the key type
@@ -624,7 +624,7 @@ public class MapUtils {
     try {
       return map.computeIfAbsent(key, mappingFunction);
     }
-    catch (ThrowingFunction.WrappedException e) {
+    catch (WrappedException e) {
       throw (E)e.getCause();
     }
   }

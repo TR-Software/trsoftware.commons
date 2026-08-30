@@ -20,12 +20,12 @@ package solutions.trsoftware.commons.server.stats;
 import solutions.trsoftware.commons.server.TestCaseCanStopClock;
 import solutions.trsoftware.commons.server.testutil.MultithreadedTestHarness;
 import solutions.trsoftware.commons.server.util.Clock;
+//import solutions.trsoftware.commons.shared.util.time.Clock;  // TODO(8/18/2026):  use the new Clock impl to avoid deprecation warnings
 import solutions.trsoftware.commons.shared.annotations.Slow;
 import solutions.trsoftware.commons.shared.testutil.AssertUtils;
 import solutions.trsoftware.commons.shared.util.callables.Function0_t;
 
 import java.util.Collection;
-import java.util.concurrent.BrokenBarrierException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -182,7 +182,7 @@ public class TimeWindowCounterTest extends TestCaseCanStopClock {
     doMultithreadedTest(TimeUnit.MINUTES.toMillis(2));
   }
 
-  private void doMultithreadedTest(long granularity) throws BrokenBarrierException, InterruptedException {
+  private void doMultithreadedTest(long granularity) throws Exception {
     int nThreads = 100;
     final TimeWindowCounter counter = new TimeWindowCounter("Test", maxAgeMillis, granularity);
     final AtomicInteger ourCounter = new AtomicInteger();

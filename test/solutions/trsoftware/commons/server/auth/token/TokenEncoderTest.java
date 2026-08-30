@@ -4,6 +4,7 @@ import com.google.common.io.BaseEncoding;
 import solutions.trsoftware.commons.server.util.crypto.CryptoCipher;
 import solutions.trsoftware.commons.server.util.crypto.MacFunction;
 import solutions.trsoftware.commons.server.util.crypto.aes.AESCipher;
+import solutions.trsoftware.commons.server.util.crypto.aes.AESConstants;
 import solutions.trsoftware.commons.server.util.crypto.aes.AESConstants.Mode;
 import solutions.trsoftware.commons.server.util.crypto.aes.LocalAESCipher;
 import solutions.trsoftware.commons.server.util.crypto.mac.MacFunctionPrototype;
@@ -30,7 +31,7 @@ public class TokenEncoderTest extends BaseTestCase {
 
   static {
     try {
-      byte[] key = AESCipher.randomKey();
+      byte[] key = AESConstants.generateKey();
       AES_CIPHER = new LocalAESCipher(key, Mode.CBC);
     }
     catch (GeneralSecurityException e) {

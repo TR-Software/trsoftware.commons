@@ -16,10 +16,12 @@
 
 package solutions.trsoftware.commons.shared.util;
 
+import java.util.AbstractMap;
+
 /**
- * Date: Nov 3, 2008 Time: 12:10:57 PM
- *
+ * @since Nov 3, 2008
  * @author Alex
+ * @see AbstractMap.SimpleImmutableEntry
  */
 public class ImmutablePair<K, V> extends Pair<K, V> {
   public ImmutablePair(K first, V second) {

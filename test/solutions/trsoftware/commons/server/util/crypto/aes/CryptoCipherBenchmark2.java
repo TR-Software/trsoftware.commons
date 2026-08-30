@@ -3,48 +3,86 @@ package solutions.trsoftware.commons.server.util.crypto.aes;
 import org.openjdk.jmh.annotations.*;
 import org.openjdk.jmh.infra.BenchmarkParams;
 import solutions.trsoftware.commons.server.util.crypto.CryptoCipher;
+import solutions.trsoftware.commons.server.util.crypto.aes.benchmark.*;
+import solutions.trsoftware.commons.shared.util.RandomUtils;
 
 import java.util.Base64;
-import java.util.Random;
 import java.util.function.Function;
+
+import static solutions.trsoftware.commons.server.util.crypto.aes.AESCipherPoolTest.*;
 
 
 /**
- * Compares different {@link AESCipher} implementations
+ * Compares different {@link AESCipherImpl} implementations
  *
  * @author Alex
  * @since 11/5/2025
  */
 @BenchmarkMode({Mode.Throughput/*, Mode.AverageTime*/})
-//@Warmup(iterations = 2)
-@Warmup(iterations = 3)
-//@Fork(value = 1, warmups = 1)
-@Fork(value = 1, warmups = 0)  // TODO: experimental disabling warmup forks
-//@Measurement(time = 2)
-//@Measurement(time = 5, iterations = 20)
-@Measurement(time = 5, iterations = 10)
-//@Measurement(time = 2, iterations = 10)
-//@Measurement(time = 4, iterations = 10)
-//@Measurement(time = 4, iterations = 5)
-//@Measurement(time = 4, iterations = 20)
-//@Measurement(time = 2, iterations = 2)  // low value for quick testing
-@State(Scope.Thread)
-//@Threads(10)
+
+/*
+// slow prod settings (thorough run)
+@Fork(3)
+@Warmup(iterations = 5, time = 5)
+@Measurement(iterations = 10, time = 5)
+*/
+
+/*
+// medium duration settings (less thorough run)
+@Fork(2)
+@Warmup(iterations = 4, time = 5)
+@Measurement(iterations = 6, time = 4)
+*/
+
+// quick test settings
+@Fork(1)
+@Warmup(iterations = 4, time = 2)
+@Measurement(iterations = 4, time = 2)
+
+/*
+// very quick test settings
+@Fork(1)
+@Warmup(iterations = 0)
+@Measurement(time = 1, iterations = 1)
+*/
 public class CryptoCipherBenchmark2 {
 
   public enum CipherType {
-    // ****** New implementations: ******
-//    CBC_Local1(LocalAESCipherCBC::new, false),
-//    CBC_Local2(key -> new LocalAESCipher(key, AESConstants.Mode.CBC), false),
-    
-//    GCM_Local1(LocalAESCipherGCM::new, false),
-//    GCM_Local2(key -> new LocalAESCipher(key, AESConstants.Mode.GCM), false),
 
-    GCM_Local(key -> new LocalAESCipher(key, AESConstants.Mode.GCM), false),
-    GCM_Sync(key -> new SynchronizedAESCipher(key, AESConstants.Mode.GCM)),
-    GCM_Conc2(key -> new ConcurrentAESCipher(key, AESConstants.Mode.GCM)),
-    GCM_Conc2_TLR(key -> new ConcurrentAESCipher(key, AESConstants.Mode.GCM, new ConcurrentAESCipher.ThreadLocalIvSupplier())),
-    GCM_Conc2_PR(key -> new ConcurrentAESCipher(key, AESConstants.Mode.GCM, new ConcurrentAESCipher.PooledIvSupplier())),
+    Local_1(key -> new LocalAESCipher(key, AESConstants.Mode.GCM), false),
+    Local_2(key -> new LocalAESCipher2(key, AESConstants.Mode.GCM), false),
+    Local_2B(key -> new LocalAESCipher2B(key, AESConstants.Mode.GCM), false),
+    Local_3(key -> new LocalAESCipher3(key, AESConstants.Mode.GCM), false),
+    Local_3A(key -> new LocalAESCipher3A(key, AESConstants.Mode.GCM), false),
+    Local_3B(key -> new LocalAESCipher3B(key, AESConstants.Mode.GCM), false),
+
+    /*
+    Sync(key -> new SynchronizedAESCipher(key, AESConstants.Mode.GCM)),
+    Conc(key -> new ConcurrentAESCipher(key, AESConstants.Mode.GCM)),
+    Conc_TLR(key -> new ConcurrentAESCipher(key, AESConstants.Mode.GCM, new ConcurrentAESCipher.ThreadLocalIvSupplier())),
+    Conc_PR(key -> new ConcurrentAESCipher(key, AESConstants.Mode.GCM, new ConcurrentAESCipher.PooledIvSupplier())),
+    */
+
+    /*Pool_1(key -> new AESCipherPool_LocalAESCipher(key, AESConstants.Mode.GCM)),
+    Pool_2(key -> new AESCipherPool_LocalAESCipher2(key, AESConstants.Mode.GCM)),
+    Pool_2B(key -> new AESCipherPool_LocalAESCipher2B(key, AESConstants.Mode.GCM)),
+    Pool_3(key -> new AESCipherPool_LocalAESCipher3(key, AESConstants.Mode.GCM)),
+    Pool_3A(key -> new AESCipherPool_LocalAESCipher3A(key, AESConstants.Mode.GCM)),*/
+    Pool_3B(key -> new AESCipherPool_LocalAESCipher3B(key, AESConstants.Mode.GCM)),
+    
+    /*Pool2_1(key -> new AESCipherPool2_LocalAESCipher(key, AESConstants.Mode.GCM)),
+    Pool2_2(key -> new AESCipherPool2_LocalAESCipher2(key, AESConstants.Mode.GCM)),
+    Pool2_2B(key -> new AESCipherPool2_LocalAESCipher2B(key, AESConstants.Mode.GCM)),
+    Pool2_3(key -> new AESCipherPool2_LocalAESCipher3(key, AESConstants.Mode.GCM)),
+    Pool2_3A(key -> new AESCipherPool2_LocalAESCipher3A(key, AESConstants.Mode.GCM)),*/
+    Pool2_3B(key -> new AESCipherPool2_LocalAESCipher3B(key, AESConstants.Mode.GCM)),
+    
+    /*Pool3_1(key -> new AESCipherPool3_LocalAESCipher(key, AESConstants.Mode.GCM)),
+    Pool3_2(key -> new AESCipherPool3_LocalAESCipher2(key, AESConstants.Mode.GCM)),
+    Pool3_2B(key -> new AESCipherPool3_LocalAESCipher2B(key, AESConstants.Mode.GCM)),
+    Pool3_3(key -> new AESCipherPool3_LocalAESCipher3(key, AESConstants.Mode.GCM)),
+    Pool3_3A(key -> new AESCipherPool3_LocalAESCipher3A(key, AESConstants.Mode.GCM)),*/
+    Pool3_3B(key -> new AESCipherPool3_LocalAESCipher3B(key, AESConstants.Mode.GCM)),
 
     ;
 
@@ -59,36 +97,40 @@ public class CryptoCipherBenchmark2 {
       this.constructor = constructor;
       this.threadSafe = threadSafe;
     }
+
+    public CryptoCipher newInstance(byte[] secretKey) {
+      return constructor.apply(secretKey);
+    }
   }
 
   @State(Scope.Benchmark)
+  // Not using Scope.Thread b/c want all threads to contend for the same CryptoCipher instance; same reason for keeping default @Setup(Level.Trial)
   public static class BenchmarkState {
-    private static final Random rnd = new Random();
 
     @Param
     CipherType cipherType;
 
-    byte[] secretKeyBytes;
+    byte[] secretKey;
     CryptoCipher cipher;
 
-//    int nBytes = 23;
+    //    int nBytes = 23;
     int nBytes = 49;
     byte[] inputBytes;
     byte[] encryptedBytes;  // used for testing decrypt
 
     @Setup
     public void setUp(BenchmarkParams params) throws Exception {
-      AESConstants.Mode mode;
+      // TODO(8/19/2026): fail if working dir not empty? (to avoid overwriting prior results)
+
       int nThreads = params.getThreads();
       // exclude unsynchronized impl if threads > 1
       if (nThreads > 1 && !cipherType.threadSafe) {
         throw new RuntimeException(cipherType + " not supported in multithreaded runs");
       }
 
-      secretKeyBytes = AESCipher.randomKey();
-      cipher = cipherType.constructor.apply(secretKeyBytes);
-      inputBytes = new byte[nBytes];
-      rnd.nextBytes(inputBytes);
+      secretKey = AESConstants.generateKey();
+      cipher = cipherType.newInstance(secretKey);
+      inputBytes = RandomUtils.randBytes(nBytes);
       encryptedBytes = cipher.encrypt(inputBytes);
     }
   }
@@ -98,7 +140,7 @@ public class CryptoCipherBenchmark2 {
    CryptoCipher.encrypt(byte[])
    ================================================================================
    */
-  public byte[] encrypt(BenchmarkState state) throws Exception {
+  private byte[] encrypt(BenchmarkState state) throws Exception {
     return state.cipher.encrypt(state.inputBytes);
   }
 
@@ -158,8 +200,8 @@ public class CryptoCipherBenchmark2 {
   public byte[] decrypt_Threads_10(BenchmarkState state) throws Exception {  // 10 threads
     return decrypt(state);
   }
-  
-  
+
+
   /*
    ================================================================================
    CryptoCipher.encrypt(byte[], Base64.Encoder)
@@ -192,7 +234,5 @@ public class CryptoCipherBenchmark2 {
   public String encryptToString_Threads_10(BenchmarkState state) throws Exception {  // 10 threads
     return encryptToString(state);
   }
-
-
 
 }

@@ -17,6 +17,7 @@
 
 package solutions.trsoftware.commons.server.util.crypto;
 
+import solutions.trsoftware.commons.server.util.crypto.aes.AESConstants;
 import solutions.trsoftware.commons.shared.BaseTestCase;
 import solutions.trsoftware.commons.shared.util.RandomUtils;
 
@@ -35,7 +36,7 @@ public class AESCipherTest extends BaseTestCase {
 
   public void setUp() throws Exception {
     super.setUp();
-    byte[] key = AESCipher.randomKey();
+    byte[] key = AESConstants.generateKey();
     System.out.println("urlSafeBase64Encode(key) = " + urlSafeBase64Encode(key));
     cipher = new AESCipher(key);
   }

@@ -34,10 +34,10 @@ public class MultithreadedTestHarness {
 
   /**
    * Executes the task the given number of times in the given number of threads
-   * @return All the unchecked exceptions thrown by the task during execution, or
-   * an empty collection; never null.
+   * @return all the unchecked exceptions thrown by the task during execution,
+   *   or an empty collection if no exceptions were thrown
    */
-  public Collection<Throwable> run(int nThreads, final int iterationsPerThread) throws BrokenBarrierException, InterruptedException {
+  public Collection<Throwable> run(int nThreads, final int iterationsPerThread) throws Exception {
     // each thread will await upon the start barrier, then run the task, then await at the finish barrier (where the main thread will be waiting)
     final CyclicBarrier startBarrier = new CyclicBarrier(nThreads);
     final CyclicBarrier finishBarrier = new CyclicBarrier(nThreads + 1);  // +1 for the main thread

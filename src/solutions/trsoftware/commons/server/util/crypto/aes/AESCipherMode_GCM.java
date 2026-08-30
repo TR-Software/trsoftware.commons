@@ -1,17 +1,17 @@
 package solutions.trsoftware.commons.server.util.crypto.aes;
 
+import solutions.trsoftware.commons.server.util.crypto.aes.AESConstants.Mode;
+
 import javax.crypto.Cipher;
-import javax.crypto.spec.GCMParameterSpec;
 import java.security.AlgorithmParameters;
 import java.security.Key;
-import java.security.spec.AlgorithmParameterSpec;
-import java.util.Arrays;
 
+import static solutions.trsoftware.commons.server.util.crypto.aes.AESConstants.*;
 import static solutions.trsoftware.commons.server.util.crypto.aes.AESConstants.AES_ALGORITHM;
 import static solutions.trsoftware.commons.server.util.crypto.aes.AESConstants.BLOCK_SIZE;
 
 /**
- * Parameters for the AES encryption algorithm in {@link AESConstants.Mode#GCM GCM} (Galois/counter) mode
+ * Parameters for the AES encryption algorithm in {@link Mode#GCM GCM} (Galois/counter) mode
  * without padding ({@value #TRANSFORMATION_SPEC}).
  * <p>
  * <b>Note:</b> In contrast to {@link AESCipherMode_CBC CBC}, the GCM mode <i>ensures authentication</i>
@@ -50,17 +50,22 @@ public class AESCipherMode_GCM extends AESCipherMode {
   protected static final int TAG_LENGTH_BITS = TAG_LENGTH * Byte.SIZE;
 
   @Override
-  protected String getTransformationSpec() {
+  public Mode getMode() {
+    return Mode.GCM;
+  }
+
+  @Override
+  public String getTransformationSpec() {
     return TRANSFORMATION_SPEC;
   }
 
   @Override
-  protected int getIvLength() {
+  public int getIvLength() {
     return IV_LENGTH;
   }
 
   @Override
-  protected boolean isPaddingUsed() {
+  public boolean isPaddingUsed() {
     return false;
   }
 
@@ -80,49 +85,20 @@ public class AESCipherMode_GCM extends AESCipherMode {
    * @param iv the buffer with the IV
    */
   @Override
-  protected AlgorithmParameterSpec createAlgorithmParameterSpec(byte[] iv) {
+  public AESParameterSpec createAlgorithmParameterSpec(byte[] iv) {
     return new FastGCMParameterSpec(iv);
   }
 
   /**
    * Creates the appropriate parameter object for {@link Cipher#init(int, Key, AlgorithmParameters)} from
    * the given IV bytes.
-   *
-   * @param iv the buffer with the IV.
+   *  @param iv the buffer with the IV.
    * @param offset the offset in {@code iv} where the IV starts.
    * @param len the number of IV bytes.
    */
   @Override
-  protected AlgorithmParameterSpec createAlgorithmParameterSpec(byte[] iv, int offset, int len) {
+  public AESParameterSpec createAlgorithmParameterSpec(byte[] iv, int offset, int len) {
     return new FastGCMParameterSpec(iv, offset, len);
   }
 
-  /**
-   * Extends {@link GCMParameterSpec} to avoid unnecessarily copying the IV array in constructor and {@link #getIV()}
-   */
-  public static class FastGCMParameterSpec extends GCMParameterSpec {
-    private static final byte[] EMPTY_ARRAY = new byte[0];
-    private final byte[] iv;
-
-    // TODO: can do the same opt for AES-CBC IvParameterSpec
-
-    public FastGCMParameterSpec(byte[] iv) {
-      // Note: passing empty array to super constructor, to minimize copying
-      super(TAG_LENGTH_BITS, EMPTY_ARRAY);
-      this.iv = iv;
-    }
-
-    public FastGCMParameterSpec(byte[] src, int offset, int len) {
-      /* Note: although we can't really avoid array copy here, since getIV() needs to return a complete array (not a sub-range),
-       *  we're still avoiding an additional array copy in getIV()
-       */
-      this(Arrays.copyOfRange(src, offset, len));
-    }
-
-    @Override
-    public byte[] getIV() {
-      // overriding to avoid extra array clone performed by super
-      return iv;
-    }
-  }
 }

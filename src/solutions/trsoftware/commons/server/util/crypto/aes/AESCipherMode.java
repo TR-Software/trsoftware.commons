@@ -1,12 +1,14 @@
 package solutions.trsoftware.commons.server.util.crypto.aes;
 
+import solutions.trsoftware.commons.server.util.crypto.aes.AESConstants.Mode;
+
 import javax.crypto.Cipher;
 import javax.crypto.NoSuchPaddingException;
 import java.security.AlgorithmParameters;
 import java.security.Key;
 import java.security.NoSuchAlgorithmException;
-import java.security.spec.AlgorithmParameterSpec;
 
+import static solutions.trsoftware.commons.server.util.crypto.aes.AESConstants.*;
 import static solutions.trsoftware.commons.server.util.crypto.aes.AESConstants.BLOCK_SIZE;
 
 /**
@@ -14,6 +16,11 @@ import static solutions.trsoftware.commons.server.util.crypto.aes.AESConstants.B
  * @since 12/5/2025
  */
 public abstract class AESCipherMode {
+
+  /**
+   * @return the {@link Mode} enum constant corresponding to this implementation.
+   */
+  public abstract Mode getMode();
 
   /**
    * Returns the "transformation" value for {@link Cipher#getInstance(String)}.
@@ -29,16 +36,16 @@ public abstract class AESCipherMode {
    *   For example, the following is a valid transformation: "<i>AES/CBC/PKCS5Padding</i>"
    * @return
    */
-  protected abstract String getTransformationSpec();
+  public abstract String getTransformationSpec();
 
   /**
    * @return {@code true} iff this cipher uses padding for encryption.
    */
-  protected boolean isPaddingUsed() {
+  public boolean isPaddingUsed() {
     return !getTransformationSpec().endsWith("NoPadding");
   }
 
-  protected int getIvLength() {
+  public int getIvLength() {
     // this is the default for all AES variants except GCM, which uses 12 (instead of 16) bytes for the IV
     // see com.sun.crypto.provider.CipherCore.init(int, Key, AlgorithmParameterSpec, SecureRandom) line 557
     // TODO: extract this inline comment to method doc
@@ -48,7 +55,7 @@ public abstract class AESCipherMode {
   /**
    * @return a new {@link Cipher} instance created via {@link Cipher#getInstance(String)}
    */
-  protected Cipher createCipher() throws NoSuchAlgorithmException, NoSuchPaddingException {
+  public Cipher createCipher() throws NoSuchAlgorithmException, NoSuchPaddingException {
     return Cipher.getInstance(getTransformationSpec());
   }
 
@@ -83,17 +90,16 @@ public abstract class AESCipherMode {
    * Creates the appropriate parameter object for {@link Cipher#init(int, Key, AlgorithmParameters)} from
    * the given IV bytes.
    *
-   * @param iv the buffer with the IV
+   * @param iv the IV bytes
    */
-  protected abstract AlgorithmParameterSpec createAlgorithmParameterSpec(byte[] iv);
+  public abstract AESParameterSpec createAlgorithmParameterSpec(byte[] iv);
 
   /**
    * Creates the appropriate parameter object for {@link Cipher#init(int, Key, AlgorithmParameters)} from
    * the IV bytes in a sub-range of the given buffer.
-   *
-   * @param iv the buffer with the IV.
-   * @param offset the offset in {@code iv} where the IV starts.
-   * @param len the number of IV bytes.
+   * @param iv buffer containing the IV bytes
+   * @param offset the starting position of the IV within the given buffer
+   * @param len the number of IV bytes
    */
-  protected abstract AlgorithmParameterSpec createAlgorithmParameterSpec(byte[] iv, int offset, int len);
+  public abstract AESParameterSpec createAlgorithmParameterSpec(byte[] iv, int offset, int len);
 }

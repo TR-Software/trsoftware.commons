@@ -61,19 +61,5 @@ public interface ThrowingSupplier<T, E extends Exception> extends Supplier<T> {
   }
   // TODO(10/21/2025): maybe extract the static "unchecked" methods from this class and ThrowingFunction to FunctionalUtils?
 
-  // TODO(10/21/2025): WrappedException class duplicated in ThrowingFunction - extract to upper level?
-
-  class WrappedException extends RuntimeException {
-    private WrappedException() {  // default private constructor for serialization
-    }
-
-    public WrappedException(String message, Throwable cause) {
-      super(message, cause);
-    }
-
-    public WrappedException(Throwable cause) {
-      super(cause);
-    }
-  }
 
 }

@@ -16,8 +16,6 @@
 
 package solutions.trsoftware.commons.shared.util.function;
 
-import solutions.trsoftware.commons.shared.util.MapUtils;
-
 import java.util.Map;
 import java.util.function.Function;
 import java.util.function.ToIntFunction;
@@ -31,7 +29,7 @@ import java.util.function.ToIntFunction;
  * block that rethrows any checked exception as a {@link WrappedException} (a subclass of {@link RuntimeException}),
  * which can be caught to obtain the original checked exception.
  *
- * @see MapUtils#computeIfAbsent(Map, Object, ThrowingToIntFunction)
+ * @see ThrowingFunction
  * @see ThrowingRunnable
  * @author Alex
  * @since 1/12/2023
@@ -66,18 +64,4 @@ public interface ThrowingToIntFunction<T, E extends Exception> extends ToIntFunc
     return function;
   }
 
-  // TODO: maybe extract WrappedException class to upper level (shared with all Throwing functions)
-
-  class WrappedException extends RuntimeException {
-    private WrappedException() {  // default private constructor for serialization
-    }
-
-    public WrappedException(String message, Throwable cause) {
-      super(message, cause);
-    }
-
-    public WrappedException(Throwable cause) {
-      super(cause);
-    }
-  }
 }

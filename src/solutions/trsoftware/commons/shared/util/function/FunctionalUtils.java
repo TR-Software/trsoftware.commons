@@ -40,7 +40,8 @@ public class FunctionalUtils {
    * <pre>
    *   predicate1.test(arg) && predicate2.test(arg) && ... && predicateN.test(arg)
    * </pre>
-   * @return {@code true} iff all the predicates match the given arg.
+   * @return {@code true} iff all the predicates match the given arg
+   * @see #noneMatch(Predicate[])
    * @see Stream#allMatch(Predicate)
    */
   public static <T> boolean testAll(Iterable<? extends Predicate<T>> predicates, T arg) {
@@ -206,12 +207,38 @@ public class FunctionalUtils {
   }
 
   /**
-   * Backport of {@code Predicate.not()} from Java 11, to facilitate negation of a method reference.
+   * Backport of static {@code Predicate.not()} from Java 11, to facilitate negation of a method reference.
    *
    * @return negation of the given predicate
+   * @see #noneMatch(Predicate[])
    */
   public static <T> Predicate<T> not(Predicate<T> predicate) {
     return predicate.negate();
+  }
+
+  /**
+   * Constructs a predicate that ensures that <em>none</em> of the given predicates match the argument.
+   * <p>
+   * This is a short-circuiting operation equivalent to:
+   * <pre>
+   *   !predicate<sub>1</sub>.test(arg) && !predicate<sub>2</sub>.test(arg) && ... && !predicate<sub>N</sub>.test(arg)
+   * </pre>
+   * <p>
+   * <em>Note:</em> unlike {@link Stream#noneMatch(Predicate)}, which applies a <i>fixed predicate</i> to a sequence of arguments,
+   * this method constructs a single predicate that applies a sequence of predicates to a <i>fixed argument</i>.
+   *
+   * @return a predicate that returns {@code true} iff <em>all</em> of the given predicates return {@code false}
+   * @see #testAll(Iterable, Object)
+   */
+  @SafeVarargs
+  public static <T> Predicate<T> noneMatch(Predicate<T>... predicates) {
+    return t -> {
+      for (Predicate<T> predicate : predicates) {
+        if (predicate.test(t))
+          return false;
+      }
+      return true;
+    };
   }
 
   /**

@@ -50,6 +50,8 @@ public class TimeDisplay extends Composite implements CountdownTimer.TickEvent.H
 
   private boolean displayLeadingZero = false;
 
+  // TODO(9/21/2026): maybe use DurationFormat instead of the above fields
+
   public TimeDisplay() {
     initWidget(
         pnlMain = flowPanel(
@@ -71,6 +73,9 @@ public class TimeDisplay extends Composite implements CountdownTimer.TickEvent.H
    * @return self, for chaining.
    */
   public TimeDisplay setCountdownTimer(CountdownTimer countdownTimer) {
+    /* TODO(9/21/2026): maybe remove handlers on onLoad or when timer instance is changed
+        Note: probably not needed, since CountdownTimer uses a local EventBus, which
+        would get GC'd when the timer goes out of scope */
     countdownTimer.addStartedHandler(this);
     countdownTimer.addTickHandler(this);
     return this;
@@ -137,6 +142,7 @@ public class TimeDisplay extends Composite implements CountdownTimer.TickEvent.H
     // TODO(10/9/2024): can simplify by using solutions.trsoftware.commons.shared.util.text.DurationFormat
     if (newMinutes != minutes || newSeconds != seconds || StringUtils.isBlank(lblTime.getText())) {
       // update the display text only if it's changed or was never displayed before
+      // TODO(9/21/2026): maybe use DurationFormat
       String timeString = ":";
       if (newSeconds < 10)
         timeString += "0";

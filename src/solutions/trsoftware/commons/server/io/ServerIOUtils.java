@@ -16,11 +16,15 @@
 
 package solutions.trsoftware.commons.server.io;
 
+import solutions.trsoftware.commons.server.io.file.FileUtils;
+
 import java.io.*;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.zip.Deflater;
+import java.util.zip.DeflaterOutputStream;
 import java.util.zip.GZIPOutputStream;
 
 /**
@@ -34,7 +38,7 @@ public final class ServerIOUtils {
    * The size of the buffer used by the stream reading and copying methods in this class.
    * (Same as the default size used by {@link BufferedReader})
    */
-  public static final int DEFAULT_BUFFER_SIZE = 8192;
+  public static final int DEFAULT_BUFFER_SIZE = 1024;
 
   /** Value of the {@code line.separator} system property */
   public static final String LINE_SEPARATOR = System.getProperty("line.separator");
@@ -267,8 +271,13 @@ public final class ServerIOUtils {
    * Wraps the given output stream with a {@link GZIPOutputStream} initialized to use the given compression level (0-9)
    * and buffer size.
    * <p>
-   * We provide this method because {@link GZIPOutputStream} doesn't expose any way to change the compression level
+   * This method is provided because {@link GZIPOutputStream} doesn't expose any way to change the compression level
    * from its {@linkplain Deflater#DEFAULT_COMPRESSION default value}.
+   * <p>
+   * <b>Note</b>: the returned stream is initialized with {@link Deflater#SYNC_FLUSH syncFlush = true}, which makes its
+   * {@link DeflaterOutputStream#flush() flush()} method flush the compressor in addition to the output stream.
+   * Without this feature enabled, the gzip output would be in an inconsistent state until the stream is closed,
+   * but the downside is that this option could degrade the compression (i.e. reduce the compression ratio).
    *
    * <h3>Performance considerations:</h3>
    * Our past experiments (using JSON data) showed no significant correlation between buffer size and compression ratio
@@ -291,14 +300,16 @@ public final class ServerIOUtils {
    * @throws IllegalArgumentException if the given compression level is invalid (acceptable values:
    *     [{@value Deflater#NO_COMPRESSION} - {@value Deflater#BEST_COMPRESSION}], {@value Deflater#DEFAULT_COMPRESSION})
    *
+   * @see GZIPOutputStream#GZIPOutputStream(OutputStream, boolean)
    * @see Deflater#setLevel(int)
+   * @see FileUtils#newBufferedGzipReader(Path)
    * @see <a href="https://stackoverflow.com/q/1082320/">StackOverflow question about buffer sizes</a>
    *
    */
   public static GZIPOutputStream newGZIPOutputStream(OutputStream outputStream, int compressionLevel, int bufferSize) throws IOException {
     // NOTE: passing a larger buffer size value to the GZIPOutputStream constructor doesn't yield any significant improvements in output file size (e.g. using 65,536 instead of 512 only reduced the file size from 646KB to 645KB)
     // however, setting a custom compression level (best instead of default) reduces the file size to 613KB
-    return new GZIPOutputStream(outputStream, bufferSize) {
+    return new GZIPOutputStream(outputStream, bufferSize, true) {
       {
         def.setLevel(compressionLevel);
       }

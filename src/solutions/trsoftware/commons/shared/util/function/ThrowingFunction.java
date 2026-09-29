@@ -37,13 +37,14 @@ import java.util.function.Function;
  * @see MapUtils#computeIfAbsent(Map, Object, ThrowingFunction)
  * @see ThrowingRunnable
  * @see ThrowingSupplier
+ * @see ThrowingConsumer
  * @author Alex
  * @since 1/12/2023
  */
 @FunctionalInterface
 public interface ThrowingFunction<T, R, E extends Exception> extends Function<T, R> {
 
-  // TODO(11/13/2025): maybe rename to "applyOrThrow", "doApply", or "applyImpl"
+  // TODO(11/13/2025): maybe rename to "applyOrThrow" (to use the same naming convention for all "Throwing" interfaces in this package)
   R applyThrowing(T t) throws E;
 
   @Override

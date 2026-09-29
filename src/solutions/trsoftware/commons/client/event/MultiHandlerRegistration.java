@@ -18,6 +18,7 @@ package solutions.trsoftware.commons.client.event;
 
 
 import com.google.common.annotations.VisibleForTesting;
+import com.google.common.base.MoreObjects;
 import com.google.web.bindery.event.shared.HandlerRegistration;
 import solutions.trsoftware.commons.shared.util.CollectionUtils;
 
@@ -88,5 +89,19 @@ public class MultiHandlerRegistration implements HandlerRegistration,
    */
   public com.google.gwt.event.shared.HandlerRegistration asLegacyGwtRegistration() {
     return MultiHandlerRegistration.this;
+  }
+
+  /**
+   * @return the number of handler registrations managed by this instance
+   */
+  public int size() {
+    return handlerRegistrations.size();
+  }
+
+  @Override
+  public String toString() {
+    return MoreObjects.toStringHelper(this)
+        .add("size", size())
+        .toString();
   }
 }

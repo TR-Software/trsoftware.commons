@@ -21,6 +21,7 @@ import com.google.gwt.dom.client.Style;
 import com.google.gwt.user.client.ui.IsWidget;
 import com.google.gwt.user.client.ui.TextBoxBase;
 import com.google.gwt.user.client.ui.Widget;
+import solutions.trsoftware.commons.client.css.CSSStyleDeclaration;
 import solutions.trsoftware.commons.client.event.animation.CssAnimationHelper;
 import solutions.trsoftware.commons.shared.util.StringUtils;
 
@@ -169,16 +170,33 @@ public class WidgetDecorator {
   }
 
   /**
-   * Sets the "autocomplete" attribute on the widget's underlying element.
+   * Sets the {@code autocomplete} attribute on the widget's underlying element.
    * <p>
    * See the <a href="https://developer.mozilla.org/en-US/docs/Web/HTML/Reference/Attributes/autocomplete">MDN Reference</a>
-   * for a full list of supported values.
+   * for the full list of supported values.
+   *
    * @param widget a widget wrapping an {@code <input>}, {@code <textarea>}, {@code <select>}, or {@code <form>} element
    */
   public static <W extends Widget> W setAutocomplete(W widget, String value) {
     // see https://developer.mozilla.org/en-US/docs/Web/HTML/Reference/Attributes/autocomplete
     // TODO: assert that the element type is input, textarea, select, or form?
     return setAttribute(widget, "autocomplete", value);
+  }
+
+  /**
+   * Sets the {@code placeholder} attribute on the widget's underlying element.
+   * <p>
+   * The {@code placeholder} attribute is supported by the following {@code <input>} types:
+   * "text" "search" "url" "tel" "email" and "password".
+   * It is also supported by the {@code <textarea>} element.
+   *
+   * @param widget a widget wrapping a form input element ({@code <input>} or {@code <textarea>}})
+   * @param text to be displayed when the input element has no value
+   * @see <a href="https://developer.mozilla.org/en-US/docs/Web/HTML/Reference/Attributes/placeholder">MDN Reference</a>
+   */
+  public static <W extends TextBoxBase> W setPlaceholder(W widget, String text) {
+    // see https://developer.mozilla.org/en-US/docs/Web/HTML/Reference/Attributes/placeholder
+    return setAttribute(widget, "placeholder", text);
   }
 
   /**
@@ -195,8 +213,8 @@ public class WidgetDecorator {
    * Applies the given function to the inline {@link Style} object of the widget's element.
    * @since 10/7/2024
    */
-  public static <W extends Widget> W applyInlineStyles(W widget, Consumer<Style> styleMutator) {
-    styleMutator.accept(widget.getElement().getStyle());
+  public static <W extends Widget> W applyInlineStyles(W widget, Consumer<CSSStyleDeclaration> styleMutator) {
+    styleMutator.accept(widget.getElement().getStyle().cast());
     return widget;
   }
 

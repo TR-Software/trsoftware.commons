@@ -18,15 +18,19 @@
 package solutions.trsoftware.commons.shared.util;
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.primitives.Ints;
 import junit.framework.TestCase;
 import solutions.trsoftware.commons.shared.testutil.AssertUtils;
 import solutions.trsoftware.commons.shared.testutil.ComparableInt;
 
+import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
+import java.util.stream.Stream;
 
 import static com.google.common.base.Strings.lenientFormat;
 import static java.util.Arrays.asList;
@@ -283,5 +287,72 @@ public class ListUtilsTest extends TestCase {
         assertEquals(size - i, normalizePositionIndex(-i, size));
       assertThrows(IndexOutOfBoundsException.class, () -> normalizePositionIndex(-(finalSize + 1), finalSize));
     }
+  }
+
+  /**
+   * Tests {@link ListUtils#isValidIndex(int, int)} and {@link ListUtils#isValidIndex(int, List)}
+   */
+  public void testIsValidIndex() {
+    // 1) always false if size is 0 or negative
+    for (int size = -5; size <= 0; size++) {
+      // false for any i if size <= 0
+      for (int i = -5; i < 5; i++) {
+        assertFalse(isValidIndex(i, size));
+        assertFalse(isValidIndex(i, intList(size)));
+      }
+    }
+    // 2) positive size: true iff i >= 0 && i < size
+    for (int size = 1; size < 5; size++) {
+      for (int i = -4; i < size + 5; i++) {
+        if (i < 0 || i >= size) {
+          // false for any i < 0 or >= size
+          assertFalse(isValidIndex(i, size));
+          assertFalse(isValidIndex(i, intList(size)));
+        } else {
+          // true for any i >= 0 and < size
+          assertTrue(isValidIndex(i, size));
+          assertTrue(isValidIndex(i, intList(size)));
+        }
+      }
+    }
+  }
+  
+  /**
+   * Tests {@link ListUtils#isValidPosition(int, int)} and {@link ListUtils#isValidPosition(int, List)}
+   */
+  public void testIsValidPosition() {
+    // 1) always false if size is negative
+    for (int size = -5; size < 0; size++) {
+      // false for any i if size < 0 (or null list)
+      for (int i = -5; i < 5; i++) {
+        assertFalse(isValidPosition(i, size));
+        assertFalse(isValidPosition(i, null));
+      }
+    }
+    // 2) non-negative size: true iff i >= 0 && i <= size
+    for (int size = 1; size < 5; size++) {
+      for (int i = -4; i < size + 5; i++) {
+        if (i < 0 || i > size) {
+          // false for any i < 0 or > size
+          assertFalse(isValidPosition(i, size));
+          assertFalse(isValidPosition(i, intList(size)));
+        } else {
+          // true for any i >= 0 and <= size
+          assertTrue(isValidPosition(i, size));
+          assertTrue(isValidPosition(i, intList(size)));
+        }
+      }
+    }
+  }
+
+  /**
+   * Creates a list of consecutive integers between 0 and {@code size} (exclusive)
+   * @return a list of the specified size, or {@code null} if size is negative
+   */
+  @Nullable
+  public static List<Integer> intList(int size) {
+    if (size < 0)
+      return null;
+    return Ints.asList(IntStream.range(0, size).toArray());
   }
 }

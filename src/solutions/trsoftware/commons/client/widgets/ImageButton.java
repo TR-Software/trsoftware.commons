@@ -16,6 +16,7 @@
 
 package solutions.trsoftware.commons.client.widgets;
 
+import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.dom.client.HasClickHandlers;
 import com.google.gwt.event.shared.HandlerRegistration;
@@ -25,6 +26,9 @@ import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.Image;
 import solutions.trsoftware.commons.client.bundle.CommonsClientBundleFactory;
 import solutions.trsoftware.commons.client.bundle.CommonsCss;
+import solutions.trsoftware.commons.client.bundle.SvgImageResource;
+
+import static solutions.trsoftware.commons.client.bundle.ClientBundleUtils.toImagePrototype;
 
 /**
  * Encapsulates an {@link Image} with a {@link ClickHandler}.  Uses the style defined by {@link CommonsCss#ImageButton()}
@@ -41,7 +45,11 @@ public class ImageButton extends Composite implements HasClickHandlers {
   }
 
   public ImageButton(ImageResource img) {
-    this(AbstractImagePrototype.create(img));
+    this(toImagePrototype(img));
+  }
+
+  public ImageButton(SvgImageResource img) {
+    this(toImagePrototype(img));
   }
 
   public ImageButton(AbstractImagePrototype img, ClickHandler clickHandler) {
@@ -49,7 +57,10 @@ public class ImageButton extends Composite implements HasClickHandlers {
   }
 
   public ImageButton(ImageResource img, ClickHandler clickHandler) {
-    this(AbstractImagePrototype.create(img), clickHandler);
+    this(toImagePrototype(img), clickHandler);
+  }
+  public ImageButton(SvgImageResource img, ClickHandler clickHandler) {
+    this(toImagePrototype(img), clickHandler);
   }
 
   public ImageButton(AbstractImagePrototype img, String title, ClickHandler clickHandler) {
@@ -58,7 +69,11 @@ public class ImageButton extends Composite implements HasClickHandlers {
   }
 
   public ImageButton(ImageResource img, String title, ClickHandler clickHandler) {
-    this(AbstractImagePrototype.create(img), title, clickHandler);
+    this(toImagePrototype(img), title, clickHandler);
+  }
+
+  public ImageButton(SvgImageResource img, String title, ClickHandler clickHandler) {
+    this(toImagePrototype(img), title, clickHandler);
   }
 
   public ImageButton(AbstractImagePrototype img, String title) {
@@ -66,7 +81,11 @@ public class ImageButton extends Composite implements HasClickHandlers {
   }
 
   public ImageButton(ImageResource img, String title) {
-    this(AbstractImagePrototype.create(img), title);
+    this(toImagePrototype(img), title);
+  }
+
+  public ImageButton(SvgImageResource img, String title) {
+    this(toImagePrototype(img), title);
   }
 
   public ImageButton(Image img, ClickHandler clickHandler) {
@@ -97,4 +116,24 @@ public class ImageButton extends Composite implements HasClickHandlers {
   public HandlerRegistration addClickHandler(ClickHandler handler) {
     return img.addClickHandler(handler);
   }
+
+  /**
+   * Same as {@link #addClickHandler(ClickHandler)}, but returns self instead of {@link HandlerRegistration},
+   * to facilitate call chaining.
+   * @return this instance, for call chaining
+   */
+  public ImageButton onClick(ClickHandler handler) {
+    addClickHandler(handler);
+    return this;
+  }
+
+  /**
+   * Shortcut for {@link #onClick(ClickHandler)}, to simplify usage when the {@link ClickEvent} isn't needed
+   * @return this instance, for call chaining
+   */
+  public ImageButton onClick(Runnable action) {
+    addClickHandler(event -> action.run());
+    return this;
+  }
+
 }

@@ -74,7 +74,7 @@ public class AESCipherTest extends CryptoCipherTestCase {
    * Tests all classes derived from {@link AESCipher}
    */
   public void testAllImplementations() throws Exception {
-    List<Class<AESCipher>> implClasses = TestUtils.findSubClassesOf(AESCipher.class);
+    List<Class<AESCipher>> implClasses = TestUtils.findAllSubTypesOf(AESCipher.class);
     byte[] input = RandomUtils.randBytes(17);  // Note: using array size different from AES block size (16), to test padding logic (if any)
     for (Class<AESCipher> cls : implClasses) {
       if (Modifiers.isAbstract(cls))
@@ -92,7 +92,7 @@ public class AESCipherTest extends CryptoCipherTestCase {
    * Tests that {@link AESCipherMode#getOutputSize(int, int)} never under-estimates the required size of output array
    */
   public void testGetOutputSize() throws Exception {
-    List<Class<AESCipherMode>> modes = TestUtils.findSubClassesOf(AESCipherMode.class);
+    List<Class<AESCipherMode>> modes = TestUtils.findAllSubTypesOf(AESCipherMode.class);
     AESKeySpec keySpec = new AESKeySpec(secretKeyBytes);
     int blockSize = BLOCK_SIZE;
     int opmode = Cipher.ENCRYPT_MODE;

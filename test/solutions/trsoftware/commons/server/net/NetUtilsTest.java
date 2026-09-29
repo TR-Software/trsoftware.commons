@@ -19,16 +19,20 @@ package solutions.trsoftware.commons.server.net;
 
 import junit.framework.TestCase;
 import solutions.trsoftware.commons.shared.annotations.Slow;
+import solutions.trsoftware.commons.shared.util.CollectionUtils;
+import solutions.trsoftware.commons.shared.util.NumberRange;
+import solutions.trsoftware.commons.shared.util.function.ThrowingRunnable;
 
-import java.net.InetAddress;
-import java.net.InterfaceAddress;
-import java.net.NetworkInterface;
-import java.net.ServerSocket;
+import java.io.IOException;
+import java.net.*;
+import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.List;
 
 import static solutions.trsoftware.commons.server.net.NetUtils.*;
 import static solutions.trsoftware.commons.shared.testutil.AssertUtils.assertThat;
+import static solutions.trsoftware.commons.shared.testutil.AssertUtils.assertThrows;
+import static solutions.trsoftware.commons.shared.util.function.ThrowingConsumer.unchecked;
 
 /**
  * @author Alex
@@ -41,32 +45,88 @@ public class NetUtilsTest extends TestCase {
     System.out.println("--------------------------------------------------------------------------------");
   }
 
-  @Slow
   public void testIsLocalPortAvailable() throws Exception {
     int port = findFirstAvailablePort();
+    assertTrue(isLocalPortAvailable(port));
     // make this port unavailable
-    try (ServerSocket ss = new ServerSocket(port)) {
+    try (ServerSocket socket = new ServerSocket(port)) {
+      socket.setReuseAddress(true); // Allow immediate reuse
       System.out.printf("Started a server socket on port %d%n", port);
       assertFalse(isLocalPortAvailable(port));
       System.out.printf("Port %d no longer available%n", port);
     }
+    assertTrue(isLocalPortAvailable(port));  // port should be released by the above try-with-resources
+    // also check unavailable UDP port
+    try (DatagramSocket socket = new DatagramSocket(port)) {
+      socket.setReuseAddress(true); // Allow immediate reuse
+      assertFalse(isLocalPortAvailable(port));
+    }
+    assertTrue(isLocalPortAvailable(port));  // port should be released by the above try-with-resources
   }
 
-  protected static int findFirstAvailablePort() {
-    Integer port = findAvailableLocalPort(MIN_USER_PORT, MAX_VALID_PORT);
+  private static int findFirstAvailablePort() {
+    int port = findAvailableLocalPort(MIN_USER_PORT, MAX_VALID_PORT);
     System.out.printf("First available port in range [%d, %d] is %s%n", MIN_USER_PORT, MAX_VALID_PORT, port);
-    assertNotNull(port);  // should be able to find at least 1 available port
     assertTrue(isLocalPortAvailable(port));
     return port;
   }
 
-  @Slow
   public void testFindAvailableLocalPort() throws Exception {
     int port = findFirstAvailablePort();
+    assertTrue(isLocalPortAvailable(port));
     // make this port unavailable
-    try (ServerSocket ss = new ServerSocket(port)) {
+    try (ServerSocket socket = new ServerSocket(port)) {
+      socket.setReuseAddress(true); // Allow immediate reuse
       System.out.printf("Started a server socket on port %d%n", port);
-      assertThat(findFirstAvailablePort()).isGreaterThan(port);
+      assertFalse(isLocalPortAvailable(port));
+      int nextPort = findFirstAvailablePort();
+      assertTrue(isLocalPortAvailable(nextPort));
+      assertThat(nextPort).isGreaterThan(port);
+    }
+    /* test findAvailableLocalPort(int, int) without any available ports in a given range (should throw NoAvailablePortException)
+       TODO(9/28/2026): consider refactoring findAvailableLocalPort to returni an OptionalInt instead of throwing
+     */
+    int minPort = port;
+    int maxPort = port + 10;
+    NumberRange<Integer> occupiedPorts = NumberRange.of(minPort, maxPort);
+    System.out.printf("Ensuring that ports %s are unavailable%n", occupiedPorts);
+    withOccupiedPorts(occupiedPorts, (ThrowingRunnable)() -> {
+      assertThrows(NoAvailablePortException.class, () -> findAvailableLocalPort(minPort, maxPort));
+    });
+  }
+
+  /**
+   * Executes the given action after ensuring that the specified ports are not available.
+   * The ports that were occupied by this method will be released upon return.
+   *
+   * @param occupiedPorts the ports for which to ensure unavailability
+   */
+  private void withOccupiedPorts(Iterable<Integer> occupiedPorts, Runnable action) throws Exception {
+    List<ServerSocket> openedSockets = new ArrayList<>();  // keep track of opened sockets to close them on finally
+    try {
+      for (Integer port : occupiedPorts) {
+        try {
+          ServerSocket socket = new ServerSocket(port);  // Note: intentionally not using try-with-resources for this
+          socket.setReuseAddress(true); // Allow immediate reuse
+          System.out.printf("Started a server socket on port %d%n", port);
+          assertTrue(socket.isBound());
+          assertFalse(isLocalPortAvailable(port));
+          openedSockets.add(socket);
+        }
+        catch (IOException | SecurityException | IllegalArgumentException e) {
+          // ignoring exception: port must be already occupied
+        }
+      }
+      // verify that all the specified ports are now unavailable
+      occupiedPorts.forEach(port -> assertFalse("port " + port, isLocalPortAvailable(port)));
+      // all the desired ports are now occupied: execute the action
+      action.run();
+    }
+    finally {
+      CollectionUtils.tryForEach(openedSockets, unchecked(ServerSocket::close));
+      // make sure all the sockets created by this method have been released
+      openedSockets.forEach(socket ->
+          assertTrue(socket.toString(), socket.isClosed()));
     }
   }
 

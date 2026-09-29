@@ -22,8 +22,12 @@ import com.google.gwt.json.client.JSONValue;
 import solutions.trsoftware.commons.client.bridge.json.JSONArray;
 import solutions.trsoftware.commons.client.bridge.json.JSONObject;
 
+import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.Set;
+import java.util.function.UnaryOperator;
+
+import static java.util.Objects.requireNonNull;
 
 /**
  * Date: May 30, 2008 Time: 4:42:24 PM
@@ -32,22 +36,20 @@ import java.util.Set;
  */
 public class GwtJSONObject implements JSONObject {
 
-  com.google.gwt.json.client.JSONObject delegate;
+  private final com.google.gwt.json.client.JSONObject object;
 
-  public GwtJSONObject(com.google.gwt.json.client.JSONObject object) {
-    if (object == null) // the whole object should be null, if the delegate is null
-      throw new NullPointerException();
-    this.delegate = object;
+  public GwtJSONObject(@Nonnull com.google.gwt.json.client.JSONObject object) {
+    this.object = requireNonNull(object, "object");
   }
 
   public int getInteger(String key) {
-    return (int)delegate.get(key).isNumber().doubleValue();
+    return (int)get(key).isNumber().doubleValue();
   }
 
   @Nullable
   @Override
   public Integer getNullableInteger(String key) {
-    JSONValue jsonValue = delegate.get(key);
+    JSONValue jsonValue = get(key);
     if (jsonValue != null) {
       JSONNumber number = jsonValue.isNumber();
       if (number != null) {
@@ -64,20 +66,28 @@ public class GwtJSONObject implements JSONObject {
     */
   }
 
+  /**
+   * @return the value of the specified property, or {@code null} if the property does not exist
+   */
+  @Nullable
+  private JSONValue get(String key) {
+    return object.get(key);
+  }
+
   public long getLong(String key) {
-    return (long)delegate.get(key).isNumber().doubleValue();
+    return (long)get(key).isNumber().doubleValue();
   }
 
   public boolean getBoolean(String key) {
-    return delegate.get(key).isBoolean().booleanValue();
+    return get(key).isBoolean().booleanValue();
   }
 
   public double getDouble(String key) {
-    return delegate.get(key).isNumber().doubleValue();
+    return get(key).isNumber().doubleValue();
   }
 
   public String getString(String key) {
-    JSONValue value = delegate.get(key);
+    JSONValue value = get(key);
     if (value != null) {
       JSONString jsonString = value.isString();
       if (jsonString != null)
@@ -87,29 +97,79 @@ public class GwtJSONObject implements JSONObject {
   }
 
   public JSONObject getObject(String key) {
-    com.google.gwt.json.client.JSONObject obj = delegate.get(key).isObject();
+    com.google.gwt.json.client.JSONObject obj = get(key).isObject();
     if (obj != null)
       return new GwtJSONObject(obj);
     return null;
   }
 
   public JSONArray getArray(String key) {
-    com.google.gwt.json.client.JSONArray arr = delegate.get(key).isArray();
+    com.google.gwt.json.client.JSONArray arr = get(key).isArray();
     if (arr != null)
       return new GwtJSONArray(arr);
     return null;
   }
 
   public boolean hasKey(String key) {
-    return delegate.containsKey(key);
+    return object.containsKey(key);
   }
 
   @Override
   public String toString() {
-    return delegate.toString();
+    return object.toString();
   }
 
   public Set<String> keys() {
-    return delegate.keySet();
+    return object.keySet();
+  }
+
+  @Override
+  public boolean isNumber(String key) {
+    return test(key, JSONValue::isNumber);
+  }
+
+  @Override
+  public boolean isBoolean(String key) {
+    return test(key, JSONValue::isBoolean);
+  }
+
+  @Override
+  public boolean isString(String key) {
+    return test(key, JSONValue::isString);
+  }
+
+  @Override
+  public boolean isObject(String key) {
+    return test(key, JSONValue::isObject);
+  }
+
+  @Override
+  public boolean isArray(String key) {
+    return test(key, JSONValue::isArray);
+  }
+
+  @Override
+  public boolean isNull(String key) {
+    return test(key, JSONValue::isNull);
+  }
+  
+  /**
+   * Tests that the specified mapper returns a non-null result for the specified key if the key exists.
+   *
+   * @param mapper a typed value getter (e.g. {@link JSONValue#isNumber()})
+   * @return {@code true} iff the key exists and the mapper returns a non-null result
+   */
+  private boolean test(String key, @Nonnull UnaryOperator<JSONValue> mapper) {
+    return testValue(get(key), mapper);
+  }
+
+  /**
+   * Tests that the mapper getter returns a non-null result for the specified value.
+   *
+   * @param mapper a typed value getter (e.g. {@link JSONValue#isNumber()})
+   * @return {@code true} iff the value is non-null and the mapper returns a non-null result
+   */
+  static boolean testValue(@Nullable JSONValue value, @Nonnull UnaryOperator<JSONValue> mapper) {
+    return value != null && mapper.apply(value) != null;
   }
 }

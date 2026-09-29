@@ -46,6 +46,8 @@ public class ClientBundleUtils {
    * @see SvgImageResourcePrototype
    */
   public static AbstractImagePrototype toImagePrototype(DataResource dataResource) {
+    if (dataResource instanceof AbstractImagePrototype)
+      return (AbstractImagePrototype)dataResource;  // SvgImageResource already extends AbstractImagePrototype (see SvgImageResourceGenerator)
     return new DataResourceImagePrototype(dataResource);
   }
 

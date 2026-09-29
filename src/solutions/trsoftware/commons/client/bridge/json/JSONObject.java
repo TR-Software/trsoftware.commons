@@ -21,19 +21,25 @@ import java.util.Set;
 
 
 /**
- * Supports cross platform (GWT-json.org) json parsing.
+ * Supports cross platform parsing of a JSON object,
+ * using {@link com.google.gwt.json} client-side and {@link com.google.gson} server-side.
  *
  * @author Alex
  */
 public interface JSONObject {
 
-  int getInteger(String key);
+
+  boolean hasKey(String key);
+  /** Returns a properly formatted JSON string representation of this object. */
+  String toString();
+  Set<String> keys();
 
   @Nullable
   Integer getNullableInteger(String key);
   /* TODO(10/12/2024): create method getNumber, returning a nullable Number
        (wrapped with new Double(JSONNumber.doubleValue()) in GWT, and jsonElement.getAsNumber() in GSON) */
 
+  int getInteger(String key);
   long getLong(String key);
   boolean getBoolean(String key);
   double getDouble(String key);
@@ -50,8 +56,11 @@ public interface JSONObject {
    */
   JSONObject getObject(String key);
   JSONArray getArray(String key);
-  boolean hasKey(String key);
-  /** Returns a properly formatted JSON string representation of this object. */
-  String toString();
-  Set<String> keys();
+
+  boolean isNumber(String key);
+  boolean isBoolean(String key);
+  boolean isString(String key);
+  boolean isObject(String key);
+  boolean isArray(String key);
+  boolean isNull(String key);
 }

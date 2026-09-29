@@ -298,7 +298,7 @@ public class Widgets {
    */
   public static <W extends Widget> W applyStyleName(W w, String styleName) {
     /* Update(11/18/2024): now allows null/empty styleName to facilitate removal of default GWT styles (e.g. gwt-Label)
-       Originally had: `if (StringUtils.notEmpty(styleName))`
+       Originally this code had `if (StringUtils.notEmpty(styleName))`
      */
     w.setStyleName(styleName);
     return w;

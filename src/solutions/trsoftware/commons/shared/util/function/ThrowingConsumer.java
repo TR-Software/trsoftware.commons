@@ -16,31 +16,32 @@
 
 package solutions.trsoftware.commons.shared.util.function;
 
-import java.util.function.Supplier;
+import java.util.function.Consumer;
 
 /**
- * This interface facilitates the use of method references for supplier-like methods that declare checked exceptions.
+ * This interface facilitates the use of method references for consumer-like methods that declare checked exceptions.
  * <p>
- * The {@link #get()} method of this supplier is implemented using a {@code try}/{@code catch}
+ * The {@link #accept(Object)} method of this consumer is implemented using a {@code try}/{@code catch}
  * block that rethrows any checked exception as a {@link WrappedException} (a subclass of {@link RuntimeException}),
  * which can be caught to obtain the original checked exception.
  *
  * @see ThrowingFunction
+ * @see ThrowingSupplier
  * @see ThrowingRunnable
- * @see ThrowingConsumer
+ *
  * @author Alex
- * @since 10/21/2025
+ * @since 9/15/2026
  */
 @FunctionalInterface
-public interface ThrowingSupplier<T, E extends Exception> extends Supplier<T> {
+public interface ThrowingConsumer<T, E extends Exception> extends Consumer<T> {
 
-  // TODO(11/13/2025): maybe rename to getThrowing (to match naming in ThrowingFunction)
-  T getOrThrow() throws E;
+  // TODO(11/13/2025): maybe rename to acceptThrowing (to match naming in ThrowingFunction, ThrowingSupplier, etc.)
+  void acceptOrThrow(T t) throws E;
 
   @Override
-  default T get() {
+  default void accept(T t) {
     try {
-      return getOrThrow();
+      acceptOrThrow(t);
     }
     catch (Exception e) {
       throw (e instanceof RuntimeException)
@@ -51,16 +52,15 @@ public interface ThrowingSupplier<T, E extends Exception> extends Supplier<T> {
 
   /**
    * Facilitates passing a method reference for a method that declares a checked exception to an API that expects a normal
-   * {@link Supplier}.
+   * {@link Consumer}.
    *
-   * @param supplier a lambda or method reference that throws a checked exception
-   * @return the throwing supplier cast to a normal supplier, such that any checked exceptions thrown by the given supplier
+   * @param consumer a lambda or method reference that throws a checked exception
+   * @return the throwing consumer cast to a normal consumer, such that any checked exceptions thrown by the given consumer
    *   will be rethrown as unchecked {@link WrappedException} exceptions
    */
-  static <T, E extends Exception> Supplier<T> unchecked(ThrowingSupplier<T, E> supplier) {
-    return supplier;
+  static <T, E extends Exception> Consumer<T> unchecked(ThrowingConsumer<T, E> consumer) {
+    return consumer;
   }
   // TODO(10/21/2025): maybe extract the static "unchecked" methods from this class and ThrowingFunction to FunctionalUtils?
-
 
 }

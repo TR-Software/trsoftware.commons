@@ -140,7 +140,7 @@ public abstract class CryptoCipherTestCase extends BaseTestCase {
    * TODO(8/19/2026): remove this unused method? dup in AESCipherTest.testAllImplementations
    */
   protected <T extends CryptoCipher> List<T> testAllImplementationsOf(Class<T> baseClass) throws Exception {
-    List<Class<T>> implClasses = TestUtils.findSubClassesOf(baseClass);
+    List<Class<T>> implClasses = TestUtils.findAllSubTypesOf(baseClass);
     byte[] input = randomInput();  // Note: using array size different from AES block size (16), to test padding logic (if any)
     List<T> ciphers = new ArrayList<>();
     for (Class<T> cls : implClasses) {

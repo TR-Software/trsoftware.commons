@@ -32,10 +32,10 @@ public interface IntBiFunction<R>  {
   /**
    * Applies this function to the given arguments.
    *
-   * @param t the first function argument
-   * @param u the second function argument
+   * @param i the first function argument
+   * @param j the second function argument
    * @return the function result
    */
-  R apply(int t, int u);
+  R apply(int i, int j);
 
 }

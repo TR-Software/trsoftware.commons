@@ -356,13 +356,7 @@ public class ListUtils {
    * @see Iterables#get(Iterable, int, Object)
    */
   public static <T> T get(@Nonnull List<T> list, int index, T defaultValue) {
-    try {
-      return list.get(index);
-    }
-    catch (IndexOutOfBoundsException e) {
-      // TODO: might have better perf if try/catch replaced with explicit index check
-      return defaultValue;
-    }
+    return isValidIndex(index, list) ? list.get(index) : defaultValue;
     // TODO: unit test
   }
 
@@ -549,13 +543,81 @@ public class ListUtils {
    */
 
   /**
-   * Throws an {@link IndexOutOfBoundsException} if the given index is not in range for the given list size.
-   * This method is useful for client-side GWT code, which might throw a generic {@link JavaScriptException}
-   * instead.
-   * @param size the size of the list
-   * @param index the index to check for being within the list's bounds
+   * Checks whether {@code index} specifies a valid <i>element</i> in an array, list, or string of the given {@code size}.
+   * An element index may range from zero, inclusive, to {@code size}, exclusive.
+   *
+   * @param index a user-supplied index identifying an element of an array, list, or string
+   * @param size the size of that array, list or string
+   * @return {@code true} iff <code>index &isin; [0, size)</code>
+   * @see #isValidPosition(int, int)
+   * @see #checkBounds(int, int)
+   */
+  public static boolean isValidIndex(int index, int size) {
+    return index >= 0 && index < size;
+  }
+
+  /**
+   * Checks whether {@code index} specifies a valid <i>element</i> in the given list,
+   * to ensure that {@link List#get(int)} would not throw an {@link IndexOutOfBoundsException}
+   * with this argument.
+   * An element index may range from zero, inclusive, to {@code list.size()}, exclusive.
+   *
+   * @param index a user-supplied index identifying an element of an array, list or string
+   * @param list the list whose index is being checked
+   * @return {@code true} iff the list is non-null and <code>index &isin; [0, list.size())</code>
+   * @see #isValidIndex(int, int)
+   * @see #checkBounds(List, int)
+   * @see #isValidPosition(int, List)
+   * @see Preconditions#checkElementIndex(int, int)
+   */
+  public static boolean isValidIndex(int index, @Nullable List<?> list) {
+    return list != null && isValidIndex(index, list.size());
+  }
+
+  /**
+   * Checks whether {@code index} specifies a valid <i>position</i> in an array, list, or string of the given {@code size}.
+   * A position index may range from zero to {@code size}, inclusive.
+   *
+   * @param index a user-supplied index identifying a position in an array, list or string
+   * @param size the size of that array, list or string
+   * @return {@code true} iff <code>index &isin; [0, size]</code>
+   * @see #isValidPosition(int, List)
+   * @see #isValidIndex(int, int)
+   * @see Preconditions#checkPositionIndex(int, int)
+   */
+  public static boolean isValidPosition(int index, int size) {
+    return index >= 0 && index <= size;
+  }
+
+  /**
+   * Checks whether {@code index} specifies a valid <i>position</i> in the given list,
+   * to ensure that operations like {@link List#subList(int, int)} would not throw an {@link IndexOutOfBoundsException}
+   * with this argument.
+   * A position index may range from zero to {@code list.size()}, inclusive.
+   *
+   * @param index a user-supplied index identifying a position in the given list
+   * @param list the list for which the position is being checked
+   * @return {@code true} iff the list is non-null and <code>index &isin; [0, list.size()]</code>
+   * @see #isValidPosition(int, int)
+   * @see #isValidIndex(int, List)
+   * @see Preconditions#checkPositionIndex(int, int)
+   */
+  public static boolean isValidPosition(int index, @Nullable List<?> list) {
+    return list != null && isValidPosition(index, list.size());
+  }
+
+
+  /**
+   * Throws an {@link IndexOutOfBoundsException} if the given index is not a valid <i>element</i> index
+   * in an array, list, or string of the given {@code size}.
+   * This method is useful for client-side GWT code, which might throw a generic {@link JavaScriptException} instead.
+   *
+   * @param size the size of the array, list or string
+   * @param index an array, list, or string index
    * @return the given index if it's valid
-   * @throws IndexOutOfBoundsException if the given index is not in the range {@code [0, size[}
+   * @throws IndexOutOfBoundsException if the given index is not in the range {@code [0, size)}
+   * @see Preconditions#checkElementIndex(int, int)
+   * @see #isValidIndex(int, int)
    */
   public static int checkBounds(int size, int index) {
     if (index < 0 || index >= size)
@@ -563,16 +625,23 @@ public class ListUtils {
     return index;
   }
 
+  // TODO(9/29/2026): maybe rename the checkBounds methods to checkIndex, to equate them with isValidIndex
+
   /**
-   * Throws an {@link IndexOutOfBoundsException} if the given index is not in range for the given list size.
-   * This method is useful for client-side GWT code, which might throw a generic {@link JavaScriptException}
-   * instead.
-   * @param size the size of the list
+   * Throws an {@link IndexOutOfBoundsException} if the given index is not a valid <i>element</i> index in the given list.
+   * This method is useful for client-side GWT code, which might throw a generic {@link JavaScriptException} instead.
+   *
+   * @param list the list whose index is being checked
    * @param index the index to check for being within the list's bounds
    * @return the given index if it's valid
-   * @throws IndexOutOfBoundsException if the given index is not in the range {@code [0, size[}
+   * @throws IndexOutOfBoundsException if the given index is not in the range {@code [0, size)}
+   * @throws NullPointerException if the list is null
+   *
+   * @see Preconditions#checkElementIndex(int, int)
+   * @see #isValidIndex(int, List)
    */
   public static int checkBounds(List<?> list, int index) {
+    requireNonNull(list, "list");  // force NPE instead of a generic JavaScriptException
     return checkBounds(list.size(), index);
   }
 

@@ -195,9 +195,13 @@ public abstract class TestUtils extends solutions.trsoftware.commons.shared.test
   }
 
   /**
-   * Finds all subclasses of {@code baseClass} that are in the same package as {@code baseClass}
+   * Finds all sub-types of {@code baseClass} that are in the same package as {@code baseClass}.
+   *
+   * @param baseClass a class or interface
+   * @return a list of all discovered subclasses of base
+   *   or all implementation class and sub-interfaces if the arg is an interface
    */
-  public static <T, C extends T> List<Class<C>> findSubClassesOf(Class<T> baseClass) throws IOException, ClassNotFoundException {
+  public static <T, C extends T> List<Class<C>> findAllSubTypesOf(Class<T> baseClass) throws IOException, ClassNotFoundException {
     String baseClassName = baseClass.getName();
     ResourceLocator baseClassResource = ReflectionUtils.getClassFile(baseClass);
     assert baseClassResource != null;
@@ -206,20 +210,20 @@ public abstract class TestUtils extends solutions.trsoftware.commons.shared.test
     // parse all the classes in package dir
     List<JavaClass> javaClasses = BytecodeParser.parseClassFiles(packageDir).collect(Collectors.toList());
     List<Class<C>> classesDerivedFromBase = new ArrayList<>();
-//    printSectionHeader(String.format("Classes in %s:", packageDir));
+    //printSectionHeader(String.format("Classes in %s:", packageDir));
     for (JavaClass javaClass : javaClasses) {
       String className = javaClass.getClassName();
-      JavaClass[] superClasses = javaClass.getSuperClasses();
-      Set<String> superClassNames = Arrays.stream(superClasses).map(JavaClass::getClassName).collect(Collectors.toSet());
-//      System.out.printf("%s:%n  extends:%s%n", className, superClassNames);
-      if (superClassNames.contains(baseClassName)) {
+      JavaClass[] superTypes = baseClass.isInterface() ? javaClass.getAllInterfaces() : javaClass.getSuperClasses();
+      Set<String> superTypeNames = Arrays.stream(superTypes).map(JavaClass::getClassName).collect(Collectors.toSet());
+      //System.out.printf("%s:%n  extends:%s%n", className, superClassNames);
+      if (superTypeNames.contains(baseClassName)) {
         //noinspection unchecked
         classesDerivedFromBase.add((Class<C>)Class.forName(className));
       }
     }
-    printSectionHeader(String.format("Classes derived from %s:", baseClassName));
+    /*printSectionHeader(String.format("Classes derived from %s:", baseClassName));
     classesDerivedFromBase.stream().map(Class::getSimpleName).map(StringUtils.indenting(2))
-        .forEach(System.out::println);
+        .forEach(System.out::println);*/
     return classesDerivedFromBase;
   }
 }

@@ -16,13 +16,13 @@
 
 package solutions.trsoftware.commons.server.io.file;
 
+import solutions.trsoftware.commons.server.io.ServerIOUtils;
 import solutions.trsoftware.commons.server.servlet.UrlUtils;
 import solutions.trsoftware.commons.shared.util.StringUtils;
 
-import java.io.File;
-import java.io.IOException;
-import java.io.PrintStream;
+import java.io.*;
 import java.net.URL;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.*;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.nio.file.attribute.FileAttribute;
@@ -32,6 +32,7 @@ import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
+import java.util.zip.GZIPInputStream;
 
 import static java.nio.file.FileVisitResult.CONTINUE;
 
@@ -336,6 +337,17 @@ public class FileUtils {
    */
   public static List<Path> listFiles(Path dir) throws IOException {
     return Files.list(dir).collect(Collectors.toList());
+  }
+
+  /**
+   * Returns a buffered reader wrapping a {@link GZIPInputStream} obtained from the specified file.
+   * @param path a file to be read with {@link Files#newInputStream}
+   *
+   * @see ServerIOUtils#newGZIPOutputStream(OutputStream, int)
+   */
+  public static BufferedReader newBufferedGzipReader(Path path) throws IOException {
+    // code based on java.nio.file.Files.newBufferedReader
+    return new BufferedReader(new InputStreamReader(new GZIPInputStream(Files.newInputStream(path)), StandardCharsets.UTF_8));
   }
 
   /**

@@ -69,7 +69,7 @@ public class Area2d implements Serializable, Comparable<Area2d> {
 
   @Override
   public String toString() {
-    return "" + width + "x" + height;
+    return width + "x" + height;
   }
 
   public static Area2d parse(String str) {

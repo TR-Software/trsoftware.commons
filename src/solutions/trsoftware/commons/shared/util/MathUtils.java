@@ -380,6 +380,15 @@ public class MathUtils {
   }
 
   /**
+   * Returns the value nearest to {@code value} which is within the closed range {@code [min..max]}.
+   * <p>If {@code value} is within the range {@code [min..max]}, {@code value} is returned
+   * unchanged. If {@code value} is less than {@code min}, {@code min} is returned, and if {@code
+   * value} is greater than {@code max}, {@code max} is returned.
+   *
+   * @param value the {@code double} value to constrain
+   * @param min the lower bound (inclusive) of the range to constrain {@code value} to
+   * @param max the upper bound (inclusive) of the range to constrain {@code value} to
+   *
    * @return the number closest to {@code value} in the range {@code [a, b]}
    * @see NumberRange#coerce(Number)
    * @see Doubles#constrainToRange(double, double, double)
@@ -389,6 +398,15 @@ public class MathUtils {
   }
 
   /**
+   * Returns the value nearest to {@code value} which is within the closed range {@code [min..max]}.
+   * <p>If {@code value} is within the range {@code [min..max]}, {@code value} is returned
+   * unchanged. If {@code value} is less than {@code min}, {@code min} is returned, and if {@code
+   * value} is greater than {@code max}, {@code max} is returned.
+   *
+   * @param value the {@code float} value to constrain
+   * @param min the lower bound (inclusive) of the range to constrain {@code value} to
+   * @param max the upper bound (inclusive) of the range to constrain {@code value} to
+   *
    * @return the number closest to {@code value} in the range {@code [a, b]}
    * @see NumberRange#coerce(Number)
    * @see Floats#constrainToRange
@@ -398,22 +416,40 @@ public class MathUtils {
   }
 
   /**
-   * @return the number closest to {@code value} in the range {@code [a, b]}
+   * Returns the value nearest to {@code value} which is within the closed range {@code [min..max]}.
+   * <p>If {@code value} is within the range {@code [min..max]}, {@code value} is returned
+   * unchanged. If {@code value} is less than {@code min}, {@code min} is returned, and if {@code
+   * value} is greater than {@code max}, {@code max} is returned.
+   *
+   * @param value the {@code int} value to constrain
+   * @param min the lower bound (inclusive) of the range to constrain {@code value} to
+   * @param max the upper bound (inclusive) of the range to constrain {@code value} to
+   * @return the number closest to {@code value} in the range {@code [min, max]}
    * @see NumberRange#coerce(Number)
    * @see Ints#constrainToRange
    */
-  public static int restrict(int value, int a, int b) {
-    return min(max(value, a), b);
+  public static int restrict(int value, int min, int max) {
+    return min(max(value, min), max);
   }
 
   /**
-   * @return the number closest to {@code value} in the range {@code [a, b]}
+   * Returns the value nearest to {@code value} which is within the closed range {@code [min..max]}.
+   * <p>If {@code value} is within the range {@code [min..max]}, {@code value} is returned
+   * unchanged. If {@code value} is less than {@code min}, {@code min} is returned, and if {@code
+   * value} is greater than {@code max}, {@code max} is returned.
+   *
+   * @param value the {@code long} value to constrain
+   * @param min the lower bound (inclusive) of the range to constrain {@code value} to
+   * @param max the upper bound (inclusive) of the range to constrain {@code value} to
+   * @return the number closest to {@code value} in the range {@code [min, max]}
    * @see NumberRange#coerce(Number)
    * @see Longs#constrainToRange
    */
-  public static long restrict(long value, long a, long b) {
-    return min(max(value, a), b);
+  public static long restrict(long value, long min, long max) {
+    return min(max(value, min), max);
   }
+
+  // TODO(9/29/2026): the above "restrict" methods should probably throw IAE if min > max (which is what their Guava equivalents do)
 
   /**
    * Computes the mathematical signum function, which is defined to return one of {@code -1},

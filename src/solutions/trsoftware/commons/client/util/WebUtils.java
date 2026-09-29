@@ -16,9 +16,11 @@
 
 package solutions.trsoftware.commons.client.util;
 
+import com.google.gwt.core.client.JavaScriptObject;
 import com.google.gwt.http.client.UrlBuilder;
 import com.google.gwt.user.client.Window;
 import solutions.trsoftware.commons.client.bridge.util.URIComponentEncoder;
+import solutions.trsoftware.commons.client.jso.history.History;
 import solutions.trsoftware.commons.shared.util.ArrayUtils;
 import solutions.trsoftware.commons.shared.util.MapUtils;
 
@@ -106,24 +108,78 @@ public abstract class WebUtils {
    * Returns a URL based on the current page URL, but with the given parameter
    * added (or replaced if was already present).
    *
-   * @param newValue the new value of the URL parameter; pass null if the
-   * parameter is to be removed from the URL.
+   * @param newValue the new value of the URL parameter,
+   *   or {@code null} to remove the parameter from the URL
    */
   public static String replaceUrlParameter(String paramName, String newValue) {
     UrlBuilder urlBuilder = Window.Location.createUrlBuilder();
-    if (newValue == null)
-      urlBuilder.removeParameter(paramName);
-    else
-      urlBuilder.setParameter(paramName, newValue);
+    setOrRemoveParameter(urlBuilder, paramName, newValue);
     return urlBuilder.buildString();
   }
 
   /**
-   * Similar to Window.Location.getParameterMap(), but returns only the parameters
+   * Invokes <code>{@link UrlBuilder#setParameter}(name, value)</code> if the specified value is non-null,
+   * otherwise <code>{@link UrlBuilder#removeParameter}(name)</code> if the value is null.
+   */
+  private static void setOrRemoveParameter(UrlBuilder urlBuilder, String name, String value) {
+    if (value == null)
+      urlBuilder.removeParameter(name);
+    else
+      urlBuilder.setParameter(name, value);
+  }
+
+  /**
+   * Uses the native {@link History} API to append the specified parameter to the URL of the current page,
+   * without triggering a page reload (in contrast to {@link Window.Location#assign(String)}).
+   * This operation is implemented using {@link History#pushState}.
+   *
+   * @param values values for the specified parameter; each will be added as its own key/value pair
+   * @return {@code true} for success, or {@code false} if the History API is not supported by the current browser
+   *
+   * @see UrlBuilder#setParameter(String, String...)
+   * @see #pushQueryParameters(Map)
+   */
+  public static boolean pushQueryParameter(String name, String... values) {
+    History history = History.get();
+    if (history == null)
+      return false;  // History.pushState not supported
+    UrlBuilder urlBuilder = Window.Location.createUrlBuilder();
+    urlBuilder.setParameter(name, values);
+    String url = urlBuilder.buildString();
+    history.pushState(null, url);
+    return true;
+  }
+
+  /**
+   * Uses the native {@link History} API to append the specified single-valued parameters to the URL of the current page,
+   * without triggering a page reload (in contrast to {@link Window.Location#assign(String)}).
+   *
+   * @param nameValuePairs key-value pairs to be added;
+   *   if any value is {@code null} the corresponding parameter will be removed from the URL instead of added
+   * @return {@code true} for success, or {@code false} if the History API is not supported by the current browser
+   *
+   * @see #pushQueryParameter(String, String...)
+   */
+  public static boolean pushQueryParameters(Map<String, String> nameValuePairs) {
+    History history = History.get();
+    if (history == null)
+      return false;  // History.pushState not supported
+    UrlBuilder urlBuilder = Window.Location.createUrlBuilder();
+    nameValuePairs.forEach((key, values) -> setOrRemoveParameter(urlBuilder, key, values));
+    String url = urlBuilder.buildString();
+    history.pushState(null, url);
+    return true;
+  }
+
+  /**
+   * Similar to {@link Window.Location#getParameterMap()}, but returns only the parameters
    * with the given keys and returns string values for each parameter instead
    * of lists of values.
-   * @return the values of the given parameters which are not null and not empty
-   * strings.
+   * <p>
+   * <b>Note:</b> if multiple parameters have been specified with the same name, the last one will be returned for each key.
+   *
+   * @return the values of the given parameters which are not null and not empty strings.
+   * @see Window.Location#getParameter(String)
    */
   public static Map<String, String> getUrlParameterMap(Iterable<String> keys) {
     LinkedHashMap<String, String> ret = new LinkedHashMap<String, String>();

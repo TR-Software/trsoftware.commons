@@ -46,12 +46,27 @@ public interface MediaControlIcons extends ClientBundle {
   ImageResource rew();
   ImageResource rew_full();
 
-  // SVG images taken from the Google Icons font (https://fonts.google.com/icons):
+  // SVG images taken from the Google Icons font (https://fonts.google.com/icons?icon.category=Audio%26amp;Video&icon.size=24&icon.color=%231f1f1f):
   
-  @Source("play.svg")
+  @Source("play_nofill.svg")
   SvgImageResource play_svg();
-  @Source("pause.svg")
+  @Source("play.svg")
+  SvgImageResource play_solid_svg();
+
+  @Source("pause_nofill.svg")
   SvgImageResource pause_svg();
+  @Source("pause.svg")
+  SvgImageResource pause_solid_svg();
+  
+  @Source("ff.svg")
+  SvgImageResource ff_svg();
+  @Source("rew.svg")
+  SvgImageResource rew_svg();
+  
+  @Source("skip_next.svg")
+  SvgImageResource skip_next_svg();
+  @Source("skip_prev.svg")
+  SvgImageResource skip_prev_svg();
 
   @Source("play_circle.svg")
   SvgImageResource play_circle_svg();

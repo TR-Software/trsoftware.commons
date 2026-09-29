@@ -19,6 +19,8 @@ package solutions.trsoftware.commons.client.widgets;
 import com.google.gwt.user.client.ui.LabelBase;
 import com.google.gwt.user.client.ui.Widget;
 
+import static solutions.trsoftware.commons.client.widgets.Widgets.*;
+
 /**
  * An {@link InlineFlowPanel} containing a label and a widget.
  *
@@ -27,16 +29,41 @@ import com.google.gwt.user.client.ui.Widget;
  * @since 12/23/2017
  */
 public class LabeledWidget<T extends Widget> extends InlineFlowPanel {
+  /* TODO(9/28/2026): maybe replace inheritance w/delegation (i.e. make this a Composite with a nested InlineFlowPanel)
+       - this would allow passing a different panel type to use as a container (e.g. constructor param Supplier<? extends Panel>
+   */
+
   private final LabelBase<?> label;
   private final T widget;
 
+  /**
+   * Places the label before widget
+   */
   public LabeledWidget(LabelBase<?> label, T widget) {
     add(this.label = label);
     add(this.widget = widget);
   }
 
+  /**
+   * Places the label before widget
+   */
   public LabeledWidget(String label, T widget) {
-    this(Widgets.inlineLabel(label), widget);
+    this(inlineLabel(label), widget);
+  }
+
+  /**
+   * Places the label after widget
+   */
+  public LabeledWidget(T widget, LabelBase<?> label) {
+    add(this.widget = widget);
+    add(this.label = label);
+  }
+
+  /**
+   * Places the label after widget
+   */
+  public LabeledWidget(T widget, String label) {
+    this(widget, inlineLabel(label));
   }
 
   public LabelBase<?> getLabel() {

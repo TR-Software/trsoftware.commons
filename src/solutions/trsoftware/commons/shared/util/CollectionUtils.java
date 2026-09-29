@@ -509,6 +509,33 @@ public class CollectionUtils {
     }
     if (caught != null)
       throw new UmbrellaException(caught);
+    // TODO(9/15/2026): if caught is a singleton, maybe throw just that solitary cause instead of UmbrellaException
+  }
+
+  /**
+   * Applies the given function to all elements of the given array,
+   * regardless of any exceptions thrown by the function on any particular element.
+   * <p>
+   * Any individual exceptions will be collected into a single single {@link UmbrellaException},
+   * which will be thrown at the end, after all the elements have been processed.
+   *
+   * @throws UmbrellaException if the function throws an exception for any of the elements.
+   * @see #tryForEach(Iterable, Consumer)
+   */
+  public static <T> void tryForEach(T[] items, Consumer<? super T> action) {
+    Set<Throwable> caught = null;
+    for (T item : items) {
+      try {
+        action.accept(item);
+      } catch (Throwable e) {
+        if (caught == null)
+          caught = new LinkedHashSet<>();
+        caught.add(e);
+      }
+    }
+    if (caught != null)
+      throw new UmbrellaException(caught);
+    // TODO(9/15/2026): if caught is a singleton, maybe throw just that solitary cause instead of UmbrellaException
   }
 
   /**

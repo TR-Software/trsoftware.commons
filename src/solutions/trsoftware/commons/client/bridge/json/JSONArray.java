@@ -17,7 +17,8 @@
 package solutions.trsoftware.commons.client.bridge.json;
 
 /**
- * Supports cross platform (GWT-json.org) json parsing.
+ * Supports cross platform parsing of a JSON array,
+ * using {@link com.google.gwt.json} client-side and {@link com.google.gson} server-side.
  *
  * @author Alex
  */
@@ -34,4 +35,11 @@ public interface JSONArray {
   JSONArray getArray(int index);
   /** Returns a properly formatted JSON string representation of this array. */
   String toString();
+
+  boolean isNumber(int index);
+  boolean isBoolean(int index);
+  boolean isString(int index);
+  boolean isObject(int index);
+  boolean isArray(int index);
+  boolean isNull(int index);
 }

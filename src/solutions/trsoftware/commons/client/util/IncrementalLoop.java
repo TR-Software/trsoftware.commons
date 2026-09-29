@@ -47,6 +47,9 @@ import solutions.trsoftware.commons.shared.util.stats.NumberSample;
  * @see IncrementalJob
  */
 public abstract class IncrementalLoop implements Scheduler.RepeatingCommand {
+  /* TODO(9/17/2026): Scheduler already takes care that no incremental iteration takes longer than 16ms (see SchedulerImpl.runRepeatingTasks),
+      so can simplify execute() to perform just one iteration at a time
+   */
   /**
    * The currently-executing loop increment will be preempted after this
    * number of milliseconds have elapsed.

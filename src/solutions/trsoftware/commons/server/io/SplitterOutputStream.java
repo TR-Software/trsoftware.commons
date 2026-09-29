@@ -16,8 +16,12 @@
 
 package solutions.trsoftware.commons.server.io;
 
+import solutions.trsoftware.commons.shared.util.CollectionUtils;
+
 import javax.annotation.Nonnull;
 import java.io.*;
+
+import static solutions.trsoftware.commons.shared.util.function.ThrowingConsumer.unchecked;
 
 /**
  * Sends the same output to a number of underlying output streams.
@@ -32,7 +36,7 @@ import java.io.*;
 public class SplitterOutputStream extends OutputStream {
   private final OutputStream[] destinationStreams;
 
-  public SplitterOutputStream(OutputStream ... destinationStreams) {
+  public SplitterOutputStream(OutputStream... destinationStreams) {
     this.destinationStreams = destinationStreams;
   }
 
@@ -42,9 +46,8 @@ public class SplitterOutputStream extends OutputStream {
    */
 
   public void write(int b) throws IOException {
-    for (OutputStream destinationStream : destinationStreams) {
-      destinationStream.write(b);
-    }
+    CollectionUtils.tryForEach(destinationStreams, unchecked(dest -> dest.write(b)));
+    // TODO: maybe catch UmbrellaException/WrappedException to rethrow as IOException
   }
 
   /**
@@ -52,19 +55,19 @@ public class SplitterOutputStream extends OutputStream {
    */
   @Override
   public void close() throws IOException {
-    for (OutputStream dest : destinationStreams) {
+    CollectionUtils.tryForEach(destinationStreams, unchecked(dest -> {
       if (dest != System.out && dest != System.err)
         dest.close();
       else
         dest.flush();  // for stdout/stderr: just flush them without closing (which would be dangerous)
-    }
+    }));
+    // TODO: maybe catch UmbrellaException/WrappedException to rethrow as IOException
   }
 
   @Override
   public void flush() throws IOException {
-    for (OutputStream destinationStream : destinationStreams) {
-      destinationStream.flush();
-    }
+    CollectionUtils.tryForEach(destinationStreams, unchecked(OutputStream::flush));
+    // TODO: maybe catch UmbrellaException/WrappedException to rethrow as IOException
   }
 
   /**

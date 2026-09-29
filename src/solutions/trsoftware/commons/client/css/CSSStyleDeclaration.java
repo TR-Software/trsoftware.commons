@@ -1,5 +1,6 @@
 package solutions.trsoftware.commons.client.css;
 
+import com.google.gwt.core.client.JavaScriptObject;
 import com.google.gwt.dom.client.Element;
 import com.google.gwt.dom.client.Style;
 
@@ -19,6 +20,13 @@ import static java.util.Objects.requireNonNull;
 public class CSSStyleDeclaration extends Style {
 
   protected CSSStyleDeclaration() {
+  }
+
+  /**
+   * Casts an existing {@link JavaScriptObject} to this class.
+   */
+  public static CSSStyleDeclaration as(JavaScriptObject obj) {
+    return obj.cast();
   }
 
   // property accessors:

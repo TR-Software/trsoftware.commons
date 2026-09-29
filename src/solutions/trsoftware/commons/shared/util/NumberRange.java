@@ -150,6 +150,17 @@ public class NumberRange<N extends Number & Comparable<N>> implements Iterable<N
    *
    * @param min lower bound (inclusive)
    * @param max upper bound (inclusive)
+   * @return a new (immutable) instance representing the closed range {@code [min, max]}
+   */
+  public static <N extends Number & Comparable<N>> NumberRange<N> of(N min, N max) {
+    return new NumberRange<>(min, max);
+  }
+
+  /**
+   * Factory method for integer range.
+   *
+   * @param min lower bound (inclusive)
+   * @param max upper bound (inclusive)
    * @return a new (immutable) instance representing the closed integer range {@code [min, max]}
    */
   public static NumberRange<Integer> of(int min, int max) {
